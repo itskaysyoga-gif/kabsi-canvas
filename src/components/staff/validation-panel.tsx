@@ -139,8 +139,10 @@ export function ValidationPanel() {
       <h2 className={STAFF_H2}>Validation figures</h2>
       <p className="mt-1 text-small text-text-2">
         A is hours from sign-up, B and C hours from Google access. A free check finished before
-        sign-up is counted apart and never ends A. Money comes from the Creem events Kabsi stored;
-        what cannot be reconciled reads No data.
+        sign-up is counted apart and never ends A.
+      </p>
+      <p className="mt-1 text-small text-text-2">
+        Money comes from the Creem events Kabsi stored; what cannot be reconciled reads No data.
       </p>
       {q.isLoading ? <p className="mt-3 text-small text-text-2">Loading</p> : null}
       {q.isError ? (

@@ -98,8 +98,10 @@ export function EvidencePanel({ businesses }: { businesses: { id: string; name: 
       </div>
       <p className="mt-1 text-small text-text-2">
         One row for each thing an owner asks for that Kabsi does not do, a repeated problem, time
-        saved, a missed enquiry or sale, or support given. Write the owner&apos;s own words when
-        there are some. Kept 24 months.
+        saved, a missed enquiry or sale, or support given.
+      </p>
+      <p className="mt-1 text-small text-text-2">
+        Write the owner&apos;s own words when there are some. Kept 24 months.
       </p>
       <form
         onSubmit={(e) => void add(e)}

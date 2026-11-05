@@ -314,3 +314,41 @@ export function ChoiceChips({
     </fieldset>
   );
 }
+
+/** Sentences of a text, split after a full stop or question mark that is followed by a capital or a digit. */
+export function sentences(text: string): string[] {
+  return text
+    .trim()
+    .split(/(?<=[.?])\s+(?=[A-Z0-9"'])/)
+    .filter(Boolean);
+}
+
+/**
+ * App 5 (master plan 30.33 item 2): a long line shown as paragraphs of at most 25 words, cut only between sentences, so
+ * not one word changes. A single sentence longer than 25 words stays whole.
+ */
+export function shortParas(text: string, max = 25): string[] {
+  const out: string[] = [];
+  let cur = "";
+  for (const s of sentences(text)) {
+    const next = cur ? `${cur} ${s}` : s;
+    if (cur && next.split(/\s+/).length > max) {
+      out.push(cur);
+      cur = s;
+    } else cur = next;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+export function ShortParas({ text, className }: { text: string; className?: string }) {
+  return (
+    <>
+      {shortParas(text).map((p, i) => (
+        <p key={i} className={cn(className, i > 0 && "mt-2")}>
+          {p}
+        </p>
+      ))}
+    </>
+  );
+}

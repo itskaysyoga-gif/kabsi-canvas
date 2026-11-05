@@ -174,10 +174,14 @@ function AiPanel({ a }: { a: AiAnswerView }) {
                     <ChevronDown className="size-4" aria-hidden />
                   </span>
                 </summary>
-                <p className="whitespace-pre-line break-words text-body">{a.answer}</p>
+                <p data-long-ok className="whitespace-pre-line break-words text-body">
+                  {a.answer}
+                </p>
               </details>
             ) : (
-              <p className="mt-1 whitespace-pre-line break-words text-body">{a.answer}</p>
+              <p data-long-ok className="mt-1 whitespace-pre-line break-words text-body">
+                {a.answer}
+              </p>
             )}
           </>
         ) : null}

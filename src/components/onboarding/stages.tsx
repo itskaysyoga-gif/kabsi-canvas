@@ -442,7 +442,9 @@ function WhatsAppConnect({
         <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-text-1 underline underline-offset-4">
           What Kabsi sends on WhatsApp
         </summary>
-        <p className="mt-1">{WHATSAPP_CONSENT_TEXT}</p>
+        <p data-long-ok className="mt-1">
+          {WHATSAPP_CONSENT_TEXT}
+        </p>
       </details>
     </>
   );
@@ -644,8 +646,9 @@ export function ManagerStage({
         </div>
       )}
 
-      <p className="mt-8 text-small text-text-2">
-        Your trial starts only when access is checked. {FREE_FROM_GOOGLE}{" "}
+      <p className="mt-8 text-small text-text-2">Your trial starts only when access is checked.</p>
+      <p className="mt-1 text-small text-text-2">
+        {FREE_FROM_GOOGLE}{" "}
         <a
           href={THIRD_PARTY_HELP_URL}
           target="_blank"

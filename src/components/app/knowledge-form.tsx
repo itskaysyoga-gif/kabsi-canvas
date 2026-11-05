@@ -3,6 +3,7 @@
 // every reply and post until the owner says which is right. Every change is a membership-checked RPC (src/lib/
 // knowledge.ts): a change is a new version, Confirm re-dates a fact, Delete removes the fact and every version.
 // Onboarding shows only the basics, saved the same way.
+import { ShortParas } from "@/components/kabsi/d3-account";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAutosize } from "@/lib/use-autosize";
@@ -733,7 +734,11 @@ function SingleFact({
         {def.label}{" "}
         {def.required ? null : <span className="font-normal text-text-2">(optional)</span>}
       </p>
-      {def.hint ? <p className="mt-0.5 text-small text-text-2">{def.hint}</p> : null}
+      {def.hint ? (
+        <div className="mt-0.5">
+          <ShortParas className="text-small text-text-2" text={def.hint} />
+        </div>
+      ) : null}
       {ctx.editing === editId ? (
         <Editor
           def={def}
@@ -765,7 +770,11 @@ function ListFacts({ def, facts, ctx }: { def: ListDef; facts: Fact[]; ctx: RowC
   return (
     <div>
       {def.label ? <p className="font-bold">{def.label}</p> : null}
-      {def.hint ? <p className="mt-0.5 text-small text-text-2">{def.hint}</p> : null}
+      {def.hint ? (
+        <div className="mt-0.5">
+          <ShortParas className="text-small text-text-2" text={def.hint} />
+        </div>
+      ) : null}
       <div className="mt-2 space-y-3">
         {facts.map((f) =>
           ctx.editing === f.id ? (
@@ -1007,7 +1016,11 @@ function TextInput({
             {f.label}{" "}
             {f.required ? null : <span className="font-normal text-text-2">(optional)</span>}
           </Label>
-          {f.hint ? <p className="mt-0.5 text-small text-text-2">{f.hint}</p> : null}
+          {f.hint ? (
+        <div className="mt-0.5">
+          <ShortParas className="text-small text-text-2" text={f.hint} />
+        </div>
+      ) : null}
         </>
       ) : null}
       {f.long ? (

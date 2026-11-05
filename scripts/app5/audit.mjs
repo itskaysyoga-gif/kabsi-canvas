@@ -228,6 +228,12 @@ for (const r of routes) {
         if (cs.display !== "grid") continue;
         const cols = cs.gridTemplateColumns.split(" ").filter(Boolean).length;
         const kids = [...g.children].filter(vis);
+        // Only grids of cards: every child has its own border or ground (not a list's number beside its words).
+        const card = (k) => {
+          const ks = getComputedStyle(k);
+          return parseFloat(ks.borderTopWidth) > 0 || !/rgba\(0, 0, 0, 0\)|transparent/.test(ks.backgroundColor) || k.tagName === "IMG" || !!k.querySelector(":scope > img, :scope > picture");
+        };
+        if (!kids.every(card)) continue;
         if (cols >= 2 && kids.length > 1 && kids.length % cols === 1)
           out.lone.push(`${kids.length} cards in ${cols} columns: ${(kids[0].textContent || "").trim().slice(0, 40)}`);
       }
