@@ -112,6 +112,8 @@ Lower case, digits and underscores only.
 
 ## Meta Pixel and Conversions API (20.4)
 
+*Changed by 30.29: Lead moves from a finished free check to a contact given (the report sent, or a Founding 25 application); a finished check becomes the custom event FreeScanCompleted.*
+
 Pixel (`src/lib/meta-pixel.ts`): public pages only, never /app, /start, /staff, /login, /partner, /billing, the review page a business's customers see, or any token page. Loads only when the choice allows advertising and `VITE_META_PIXEL_ID` is set. Every event carries an event_id.
 
 | Meta event               | From                     | Kabsi event         |
