@@ -17,9 +17,9 @@ import {
   nearbyCount,
   nearbyLead,
   ord,
+  reportHolds,
   wouldDo,
 } from "@/lib/scan-words";
-import { reportHolds } from "@/components/kabsi/scan-live";
 
 type Flag = { tone: "danger" | "warning" | "neutral"; fact: string; action: string };
 const neutral: Flag[] = [

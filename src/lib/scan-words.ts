@@ -191,3 +191,11 @@ export const ACCESS_LINES = [
   "You stay the owner of your Google profile.",
   "Nothing is published without your yes.",
 ] as const;
+
+/** Scan 3 (30.34 item 2): what the report holds, said before it is asked for. */
+export function reportHolds(parts: { nearby: boolean; ai: boolean }): string {
+  const extra = [parts.nearby ? "the nearby check" : null, parts.ai ? "the ChatGPT answer" : null]
+    .filter(Boolean)
+    .join(" and ");
+  return `You get the summary of what Google shows${extra ? `, ${extra}` : ""}, and the link to this result.`;
+}
