@@ -1418,3 +1418,7 @@ Every guide's words are in its own content file, src/content/guides/<slug>.tsx; 
 ### Part A: every guide public (branch claude/guides4-a)
 
 - No new line. The 20 guides of section 53 are all public from 5 Nov 2026 (one value, PUBLISH_ALL_AT in src/content/guides/schedule.ts). The guides list shows them in the Guides 3 order, guide 1 first. Each guide's byline reads "Published 5 Nov 2026" (guide 1: 5 Nov 2026, the earlier ones their own dates). New guides from 16 Nov 2026, one a week, are listed first, newest first.
+
+### Part B: Nora knows the guides and industry pages (branch claude/guides4-b)
+
+- Nora answers first. Then, only when one page in her list answers the visitor's question, she may add one short line with one Markdown link to it, in her own words, for example "There is a plain guide on this: [Someone changed my hours on Google. How do I fix it?](/guides/someone-changed-my-hours-on-google)." The link's words are the page's own title. At most one link, never instead of an answer, never a page that is not public, and none when she hands the visitor to a person. No other line changes; the guides and industry pages are named in the facts.

@@ -120,13 +120,16 @@ jobs:
       - name: Did Nora's facts or rules change?
         id: changed
         run: |
-          if git diff --name-only "origin/${{ github.base_ref }}...HEAD" | grep -E '^(knowledge/(kabsi-facts\.md|facts/)|scripts/kb-lib\.mjs|supabase/functions/_shared/nora-rules\.ts|supabase/functions/assistant/|scripts/nora-eval/)'; then
+          if git diff --name-only "origin/${{ github.base_ref }}...HEAD" | grep -E '^(knowledge/(kabsi-facts\.md|facts/)|scripts/kb-lib\.mjs|supabase/functions/_shared/nora-(rules|pages)\.ts|supabase/functions/assistant/|scripts/nora-eval/)'; then
             echo "nora=true" >> "$GITHUB_OUTPUT"
           else
             echo "Nora's facts and rules did not change."
           fi
       - name: The stub run
         run: node scripts/nora-eval/run-nora-eval.ts --stub pass
+      # Guides 4 part B (master plan 30.32 item 6): the five page-link questions, stub models only, no network.
+      - name: The page link questions, stub run
+        run: node scripts/nora-eval/run-nora-eval.ts --stub pass --pages
       - name: The live run is off
         if: steps.changed.outputs.nora == 'true' && vars.EVAL_LIVE != 'true'
         run: echo "::notice::Nora's facts or rules changed. The live run waits for ANTHROPIC_API_KEY and EVAL_LIVE, which R-45 keeps false; only the stub run was made. Nothing was sent to Anthropic."
