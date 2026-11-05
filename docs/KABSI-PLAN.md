@@ -7,7 +7,7 @@ Version 1 was written on 4 Oct 2026 from the six source documents in `docs/sourc
 1. Guardrails (digest here; full text in the archive)
 2. Rules for every build chat (here, in full)
 3. Sources and precedence (here, in full)
-4. Review decisions R-01 to R-112 (table with status here; full text in the archive)
+4. Review decisions R-01 to R-113 (table with status here; full text in the archive)
 7. Order of work (here, short; the full section and the task cards are in the archive)
 8. Where everything went
 
@@ -186,9 +186,9 @@ Not a source of truth any more: `docs/KABSI-SPEC.md`, `docs/KABSI-STATE.md`, `do
 
 Added on 24 Oct 2026: the master plan (`docs/KABSI-MASTERPLAN.md`) sits above items 2 to 5 for everything it covers, with its later sections winning over its earlier ones.
 
-## 4. Review decisions (R-01 to R-112)
+## 4. Review decisions (R-01 to R-113)
 
-One line per decision. The full text, with what each one changes and why, is `docs/plan/archive/sec-04-review-decisions.md`. **Status (master plan 25.6, from R-55):** Approved, Building, Merged, Verified live or Retired. A row moves only with evidence (a pull request number, a check, a live response); a merged pull request or a passing mock test is never called live. Rows before R-55 were settled before the column existed. Later decisions override earlier ones where they differ: R-112 over R-111 over R-110 over R-109 over R-108 over R-107 over R-106 over R-105 over R-104 over R-103 over R-102 over R-101 over R-100 over R-99 over R-98 over R-97 over R-96 over R-95 over R-94 over R-93 over R-92 over R-91 over R-90 over R-89 over R-88 over R-75 to R-87 over everything older. A new decision is added to the full table first, then to this index, in the same pull request.
+One line per decision. The full text, with what each one changes and why, is `docs/plan/archive/sec-04-review-decisions.md`. **Status (master plan 25.6, from R-55):** Approved, Building, Merged, Verified live or Retired. A row moves only with evidence (a pull request number, a check, a live response); a merged pull request or a passing mock test is never called live. Rows before R-55 were settled before the column existed. Later decisions override earlier ones where they differ: R-113 over R-112 over R-111 over R-110 over R-109 over R-108 over R-107 over R-106 over R-105 over R-104 over R-103 over R-102 over R-101 over R-100 over R-99 over R-98 over R-97 over R-96 over R-95 over R-94 over R-93 over R-92 over R-91 over R-90 over R-89 over R-88 over R-75 to R-87 over everything older. A new decision is added to the full table first, then to this index, in the same pull request.
 
 | # | Decision | Status |
 |---|---|---|
@@ -306,6 +306,7 @@ One line per decision. The full text, with what each one changes and why, is `do
 | R-110 | Lane R review of Scan 2: Scan 2 approved; the nearby part says where the business usually comes up; the Latin rule covers the visitor's own text (a name not in Latin letters reads 'Your business', a typed search falls back to the Google category); addressComponents in the profile check's field mask; the speed gate measures Pricing and /scan as well as Home; the calibration row stays (master plan 30.30) | Merged (PRs 374 to 376) |
 | R-111 | Lane R, 5 Nov afternoon: the dashboard logo goes to the website's Home and the website header shows Dashboard while signed in; an owner stays signed in 30 days after the last visit and staff 12 hours, enforced in the app until Supabase Pro, with Sign out on every device in Settings; the log in page covers every case, the email code first in in-app browsers; new pages open at the top; App 4 audits the signed-in site; then Industries 2 and Guides 3 (master plan 30.31) | Building (items 1 to 5 merged, PRs 378, 380, 382, 384, 386, 388; item 6 to come) |
 | R-112 | **Lane R decisions of 5 Nov 2026, evening (master plan 30.32).** App 4 and Guides 3 approved; all 20 new guides public now, new ones weekly from 16 Nov; the yellow highlight bar on one key phrase of every light-background headline (Industries 2 builds it, Style 1 applies it); one main query per page, real lastmod, Bing and IndexNow, kabsi-canvas.vercel.app redirects to kabsi.co; Search Console set up by Rashid, a read-only weekly job in Search 1; Nora knows every public guide and industry page and may suggest one after answering; a guide may quote Google's help page on local results; the free printable counter card is free, the branded card and table tent PDFs come with the plans (full text in the archive) | Building (items 1, 2, 4, 6, 7, 8 merged, PRs 390, 391, 393, 394; item 3 waits for Industries 2 and Style 1, item 5 for Rashid and Search 1) |
+| R-113 | **Lane R decisions of 5 Nov 2026, night (master plan 30.33).** Fix 3, Guides 4 and Industries 2 approved; no reading block on a public page (a paragraph at most 25 words, a list item at most 15; B-014's exemption ends); six related businesses and three guides on every industry page; no lone card in a grid's last row; a library photo for every guide in its hero, card and social image; the 30.32 look on every public page, the signed-in site and the staff area; the staff area becomes a small workspace with a Today page; Sentry: a 5 US dollar pay-as-you-go cap (Rashid), no events from automated tests, a repeated server error at most once per 10 minutes (full text in the archive) | Approved |
 
 ## 7. Order of work (R-84; master plan 27.11, 28.4, 29.8)
 

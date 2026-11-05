@@ -12,6 +12,7 @@
 //   GET  /visibility/terms    public: the search an industry page prefills (?industry=&market=). POST: staff op, DataForSEO keyword data.
 // Ranks and competitors come only from DataForSEO public results (30.10.2); mock mode unless app_settings
 // dataforseo_mode is 'live', and the demo business always on the mock (R-17). The logic is in _shared/visibility/.
+import { serve } from "../_shared/kabsi.ts";
 import { clientIp } from "../_shared/client-ip.ts";
 import { readJsonCapped } from "../_shared/email-links.ts";
 import { admin, captureError, CORS, currentUser, isInternal, json, log, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
@@ -575,7 +576,7 @@ async function terms(): Promise<Response> {
   return json({ ok: true, ...out });
 }
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   // Sec 2: the body is capped before anything reads it (413 past BODY_LIMITS.form).
   const capped = await capBody(req, BODY_LIMITS.form, CORS);

@@ -1,11 +1,12 @@
 // places-search: onboarding step "Find your business". Signed-in users only.
 // POST { query } → { places: [{ place_id, name, address, country }] }  (max 5)
 // The Places API key never reaches the browser.
+import { serve } from "../_shared/kabsi.ts";
 import { searchText } from "../_shared/google/index.ts";
 import { captureError, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";
 import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   // Sec 2: the body is capped before anything reads it (413 past BODY_LIMITS.small).
   const capped = await capBody(req, BODY_LIMITS.small, CORS);

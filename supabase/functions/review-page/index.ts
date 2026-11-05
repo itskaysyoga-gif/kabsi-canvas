@@ -3,6 +3,7 @@
 // Public (browser calls send the anon JWT). The same answer goes to every visitor: no rating, no answer, no routing.
 // The business's WhatsApp number is a Business Knowledge fact the owner saved for exactly this line; it is returned
 // as digits for wa.me and is not used anywhere else. No visitor data is stored or read.
+import { serve } from "../_shared/kabsi.ts";
 import { clientIp } from "../_shared/client-ip.ts";
 import { admin, captureError, CORS, fail, json, rateLimit, sha256Hex } from "../_shared/kabsi.ts";
 import { pageData } from "../_shared/review-page.ts";
@@ -10,7 +11,7 @@ import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
 
 const CODE_RE = /^[2-9A-HJKMNP-Z]{6}$/;
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   // Sec 2: the body is capped before anything reads it (413 past BODY_LIMITS.small).
   const capped = await capBody(req, BODY_LIMITS.small, CORS);

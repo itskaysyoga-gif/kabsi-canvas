@@ -285,7 +285,7 @@ export type ShareImage =
   | "partner"
   | "about"
   | "founding"
-  /** Guides 3: each guide's own cover, public/og/guides/<slug>.png. */
+  /** Guides 3 and Style 1: each guide's own photo cover, public/og/guides/<slug>.jpg. */
   | `guides/${string}`;
 
 export function pageHead(o: {
@@ -302,7 +302,9 @@ export function pageHead(o: {
 }) {
   // Share image: a designed 1200x630 PNG per page type, because some link previews (LinkedIn, older WhatsApp) skip
   // WebP. Page photos are WebP and reach search through the image sitemap and Article JSON-LD instead.
-  const og = `${SITE_URL}/og/${o.image ?? "home"}.png`;
+  // Style 1: a guide's cover is its photo, so it is a JPEG (a photo as PNG is too heavy for link previews).
+  const ext = o.image?.startsWith("guides/") ? "jpg" : "png";
+  const og = `${SITE_URL}/og/${o.image ?? "home"}.${ext}`;
   const url = `${SITE_URL}${o.path === "/" ? "" : o.path}`;
   const meta: Meta[] = [
     { title: o.title },
@@ -313,7 +315,7 @@ export function pageHead(o: {
     { property: "og:url", content: url },
     { property: "og:site_name", content: "Kabsi" },
     { property: "og:image", content: og },
-    { property: "og:image:type", content: "image/png" },
+    { property: "og:image:type", content: ext === "jpg" ? "image/jpeg" : "image/png" },
     { property: "og:image:width", content: "1200" },
     { property: "og:image:height", content: "630" },
     {

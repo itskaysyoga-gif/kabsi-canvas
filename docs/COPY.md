@@ -1530,6 +1530,46 @@ Every guide's words are in its own content file, src/content/guides/<slug>.tsx; 
 - **Facts (02, 07, 13)**: "The printable counter card from the free review link tool is free for everyone. The branded counter card and table tent PDFs (made for a business by Get reviews) come with the plans." The FAQ's "Is there a free part?" answer names the printable counter card, not the table card. No screen's wording changes: the Get reviews buttons "Print a counter card" and "Print a table card" stay.
 - **Guides**: a guide may quote Google's help page on how local results are chosen, word for word in quotation marks, when it cites that page with its link and the date read (tests/claims-k144.test.ts). Promises of rankings and the word "prominence" outside such a quote stay banned.
 
+
+## 55. Style 1: the 30.32 look on every public page, guides with photos (5 Nov 2026, master plan 30.33, R-113)
+
+### Part A: guides with photos (branch claude/style1-a)
+
+- **Guides list**: the H1 "Plain guides for your Google profile." with "your Google profile." on the highlight bar. The newest guide is a large card with its photo. The others are photo cards: the group pill, the title, the description and the read time. Topic chips above the grid: All guides, Reviews, Hours and details, Photos and posts, Setting up, Problems and fixes, Checklists, AI answers (only groups with a public guide show). The headline over the grid reads "More guides" ("guides" on the bar), or "Guides on <group>" while a chip is on.
+- **Guide page**: the group pill, then the title with one phrase on the bar, then the answer, the byline and the photo at 3:2 beside it (under it on a phone). "Read next" ("next" on the bar) shows three photo cards.
+- **Social image**: each guide's 1200 by 630 image is its photo under a charcoal overlay, the Kabsi mark, "Kabsi guide", the group pill, the title, "kabsi.co/guides" and "Checked against Google's help pages". A JPEG at public/og/guides/<slug>.jpg.
+- **Photos** (docs/PHOTOS.md, alt text as listed there; no photo for more than two guides; src/content/guides/look.ts):
+
+| Guide | Photo | Group | Phrase on the bar |
+|---|---|---|---|
+| why-is-my-business-not-on-google-maps | bakery-window | Problems and fixes | Google Maps |
+| how-to-verify-google-business-profile | salon-tablet | Setting up | verify |
+| google-business-profile-suspended | phone-shop | Problems and fixes | What do I do? |
+| someone-changed-my-hours-on-google | cafe-counter | Hours and details | How do I fix it? |
+| how-to-set-holiday-hours-on-google | bakery-counter | Hours and details | holiday hours |
+| choose-google-business-profile-categories | florist-wide | Hours and details | categories |
+| google-business-description-examples | spa-facial | Hours and details | business description |
+| google-posts-for-local-businesses | restaurant-cooks | Photos and posts | what and how often? |
+| photos-for-google-business-profile | restaurant-dining | Photos and posts | Which photos |
+| how-to-ask-for-google-reviews | cafe-barista | Reviews | the right way? |
+| report-fake-google-reviews | phone-reading | Reviews | fake or spam reviews |
+| review-gating-google | phone-typing | Reviews | review gating |
+| should-you-reply-to-every-google-review | phone-reading | Reviews | every Google review? |
+| add-services-and-prices-to-google | barber-shave | Hours and details | services and prices |
+| google-profile-checklist-hair-salons-barbers | barber-cut | Checklists | salons and barbers |
+| google-profile-checklist-restaurants-cafes | restaurant-kitchen | Checklists | restaurants and cafes |
+| transfer-google-business-profile-ownership | auto-garage | Setting up | transfer ownership |
+| remove-old-employee-or-agency-from-google-profile | salon-wash | Setting up | old employee or agency |
+| duplicate-google-listings | pet-grooming-wide | Problems and fixes | find and fix them |
+| how-google-chooses-local-results | restaurant-dining | Problems and fixes | show nearby? |
+| how-to-reply-to-google-reviews | phone-typing | Reviews | reply to Google reviews |
+| how-to-respond-to-negative-google-reviews | phone-shop | Reviews | negative Google review |
+| can-you-remove-a-google-review | dental-clinic-wide | Reviews | remove a Google review? |
+| add-manager-google-business-profile | salon-tablet | Setting up | add a manager |
+| google-review-link-and-qr-code | cafe-counter | Reviews | review link and QR code |
+| why-chatgpt-describes-your-business-wrongly | florist-wide | AI answers | wrongly? |
+| keep-your-hours-and-details-the-same-everywhere | bakery-counter | Hours and details | the same everywhere? |
+
 ## 57. App 5: a clear staff workspace, and the 30.32 look on the signed-in site (5 Nov 2026, master plan 30.33)
 
 Staff pages are for the Kabsi team only and are never public. Owners never see them.
