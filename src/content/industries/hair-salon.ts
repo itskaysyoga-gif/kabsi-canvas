@@ -22,26 +22,24 @@ export const hairSalon: Industry = {
   photos: [PHOTOS.salonWash, PHOTOS.salonStudio],
   focus: "50% 30%",
   searches: ["hair salon near me", "hairdressers", "balayage", "hair colour near me", "blow dry"],
-  tasks: [
+  // Industries 3 (master plan 30.33 item 2): the two old guide sections as short cards. Each line keeps a fact of
+  // docs/claims/hair-salon.md, whose "Industries 3" section maps it to its row.
+  profile: [
     {
-      title: "Services missing from your profile, listed",
-      text: "Balayage, a gloss, a keratin treatment. Google can show each service with a price and a short description. Kabsi's Profile Coach lists the services your profile is missing, so you know what to add on Google.",
+      title: "Services with a price",
+      text: "Each service can carry a price. Google rejects a custom name that has one.",
     },
     {
-      title: "A new stylist, announced",
-      text: "When someone joins, add the name to your team list so replies can thank them. A post that says who joined can go up once you approve it.",
+      title: "A new stylist on the team",
+      text: "Add them to your team list. Reviews that name them get a reply thanking them.",
     },
     {
-      title: "Replies that thank the stylist by name",
-      text: "A review that names Amber gets a reply that passes the thanks on. Kabsi uses only the names on your team list, so a stylist who left is never thanked once you take their name off the list.",
+      title: "The booking link",
+      text: "Google lets you add your own link. Check it each time you change tools.",
     },
     {
-      title: "Your colour work, as posts",
-      text: "A colour you are proud of becomes a post with your photo, checked first, ready for your yes.",
-    },
-    {
-      title: "Christmas and bank holiday hours",
-      text: "Five days before each bank holiday Kabsi asks what you will do, so nobody arrives on Boxing Day to a closed door.",
+      title: "Photos true to the chair",
+      text: "Google asks for photos in focus and well lit. Kabsi checks each one first.",
     },
   ],
   page: {
@@ -54,7 +52,7 @@ export const hairSalon: Industry = {
     line: "Kabsi looks after your hair salon Google Business Profile: replies, colour posts, holiday hours and stylists, each for your yes.",
     card: "Stylists thanked by name, colour work as posts.",
     answer:
-      "Kabsi does the weekly work of a hair salon Google Business Profile for you. It drafts a reply to every new review and passes the thanks to the stylist the client named, turns a photo of your colour work into a post, asks about bank holiday hours five days ahead, and checks your details every day. Nothing goes on Google until you say yes.",
+      "For a hair salon Google Business Profile, Kabsi drafts every reply, turns colour work into posts and asks about holiday hours, all for your yes.",
     watch: {
       business: "Hollis Hair, Bristol",
       line: "Clients check your hours and booking link before they come. Kabsi compares them with what you told it, every day.",
@@ -78,7 +76,7 @@ export const hairSalon: Industry = {
     jobs: [
       {
         title: "A reply for every review",
-        text: "A review that names Amber gets a reply that thanks Amber, using only the names on your team list.",
+        text: "Thanks Amber when a review names her, using only names on your team list.",
       },
       {
         title: "Colour work, as posts",
@@ -86,7 +84,7 @@ export const hairSalon: Industry = {
       },
       {
         title: "Bank holiday hours",
-        text: "Five days before each bank holiday, Kabsi asks what you will do and sets it once you say yes.",
+        text: "Kabsi asks five days before each bank holiday and sets your answer after your yes.",
       },
     ],
     nearby: { kind: "salon", term: "hair salon" },
@@ -95,7 +93,14 @@ export const hairSalon: Industry = {
       answer: "Hollis Hair on Gloucester Road does balayage and is open on Saturdays from 9 am.",
       sources: ["Hollis Hair's Google profile", "Hollis Hair's website"],
     },
-    related: ["barbershop", "nail-salon"],
+    related: [
+      "barbershop",
+      "nail-salon",
+      "lash-and-brow-studio",
+      "spa-and-massage",
+      "tattoo-studio",
+      "medical-and-aesthetic-clinic",
+    ],
   },
   faqs: [
     {
@@ -119,7 +124,11 @@ export const hairSalon: Industry = {
       a: "You tell it once, in About your business: services, team, hours and anything it should never say. Every draft uses those facts.",
     },
   ],
-  guides: ["how-to-reply-to-google-reviews", "how-to-set-holiday-hours-on-google"],
+  guides: [
+    "google-profile-checklist-hair-salons-barbers",
+    "how-to-reply-to-google-reviews",
+    "how-to-set-holiday-hours-on-google",
+  ],
   d8: {
     seo: {
       title: "Kabsi for hair salons: Google posts, hours and review replies",
@@ -135,8 +144,6 @@ export const hairSalon: Industry = {
       time: "09:20",
     },
     jobsTitle: "Google jobs that come back.",
-    searchText:
-      "People choose a salon by the work they see and the stylist they read about. They search for a salon nearby or for the service itself, then look at photos, services and replies.",
     check: [
       {
         label: "Opening hours",
@@ -150,21 +157,5 @@ export const hairSalon: Industry = {
     ],
     checkText:
       "For a hair salon the free check starts with your hours, because a client checks you are open before booking, then your reviews, photos and website. Example result for an invented salon in Bristol.",
-    guide: [
-      {
-        title: "Services and stylists clients can see",
-        paras: [
-          "A client picking a new salon wants to know two things: do you do what they want, and who will do it. Google can show each service with a price and a description, and you can add services of your own. Keep the price out of a custom service name, because Google rejects a name that has a price in it. Google's name for a category can differ by country (Google's own example shows 'Hairdresser'), so read the category name in the box on your own profile.",
-          "When a stylist joins, two things change on Google: what you offer and who clients will ask for. Add the name to your team list in Kabsi, and a post that says who joined and what they do can go up once you approve it. From then on, a review that names them gets a reply that passes the thanks on. Kabsi uses only the names on your list, so a stylist who left is never thanked once you take their name off the list.",
-        ],
-      },
-      {
-        title: "The booking link, the photos and the holidays",
-        paras: [
-          "Google lets you add your own link to your Business Profile, so clients can book straight from it. A link that points at an old booking tool sends a ready client to an error page, so check it each time you change tools.",
-          "Photos of your work are what people look at. Google asks for photos in focus and well lit, without significant alterations or excessive filters, so the colour on Google is the colour in the chair. Kabsi checks each photo before it goes to Google and tells you when one is dark, blurry or too small. Before every bank holiday, Christmas included, Kabsi asks what you will do and sets special hours once you say yes.",
-        ],
-      },
-    ],
   },
 };

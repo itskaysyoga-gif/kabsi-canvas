@@ -42,23 +42,26 @@ export type Industry = {
   photos: [Photo, Photo];
   /** object-position for the hero crop. */
   focus?: string;
-  /** What customers type. Content 1 replaces these with DataForSEO keyword data before a page is indexed. */
+  /** What customers type: the chips under "What people search for". */
   searches: string[];
-  /** The five recurring Google tasks of the trade (Content 1; the reading block of the pages that have them). */
-  tasks?: Task[];
+  /** Industries 3 (master plan 30.33 item 2): "Your Google profile, as a <trade> owner", two to four cards. */
+  profile: Card[];
   /** Industries 2: the page on Design 9. Every finished page has it. */
   page: D9Trade;
 
-  /* The rest is written for the finished pages; template pages leave them out and the section hides. */
-  categories?: { primary: string; more: string[]; note: string };
-  reviewThemes?: { theme: string; text: string }[];
+  /* Industries 3: the rest are short cards; a page shows only the groups it has, in this order. */
+  /** "What customers write about": two or three cards; a health or injury card keeps its no-draft rule. */
+  reviews?: Card[];
+  /** "Google categories that fit": the names as chips, then one line. */
+  categories?: { primary: string; more: string[]; line: string };
+  /** "Holidays and busy dates": two or three cards. */
+  holidays?: Card[];
+  /** "Photos and posts": two or three cards. */
+  photoCards?: Card[];
   story?: { title: string; lead: string; lines: ChatLine[] };
-  posts?: string[];
-  photoTips?: { title: string; text: string }[];
-  holidays?: { when: string; text: string }[];
   faqs?: { q: string; a: string }[];
-  /** Two guide slugs (GUIDE_TITLES); the page links the ones that are public. */
-  guides?: [string, string];
+  /** Three guide slugs (GUIDE_TITLES), chosen by the page's jobs; the page links the ones that are public. */
+  guides: [string, string, string];
   /** Design 8 (Web 4c): the four trades written for their own page. The other pages take the template's defaults. */
   d8?: TradePage;
 };
@@ -73,21 +76,21 @@ export type TradeCard = {
 };
 
 export type TradePage = {
-  /** docs/SEO-PLAN.md: a title under 90 characters and a description under 170, written for the trade. */
+  /** docs/SEO-PLAN.md: a title under 90 characters and a description under 170, written for the trade. Not on the page. */
   seo: { title: string; description: string };
   /** The invented business of the hero message and the free check example: "Fade and Co, Leeds". */
   business: string;
   card: TradeCard;
   jobsTitle: string;
-  searchText: string;
   /** The free check's Example rows: only what the check reads from Google's public data (K-82). */
   /** Polish 2 (lane R, 3 Nov 2026): a "warn" row carries the next step Kabsi can do today. */
   check: { label: string; value: string; tone: "ok" | "warn"; next?: string }[];
   checkText: string;
-  guide: { title: string; paras: string[] }[];
 };
 
 export type Task = { title: string; text: string };
+/** Industries 3: a card with a short title (at most 6 words) and one line (at most 15 words). */
+export type Card = Task;
 
 /**
  * Industries 2 (master plan 30.32): the Design 9 page of one trade. Every line is the trade's own and is checked against
@@ -107,7 +110,7 @@ export type D9Trade = {
   line: string;
   /** One short line for the /for card. */
   card: string;
-  /** The first answer paragraph (search and AI answers read it): what Kabsi does for this trade, with the query once. */
+  /** The first answer (search and AI answers read it): what Kabsi does for this trade, with the query once. At most 25 words. */
   answer: string;
   /** The profile watch Example: one detail Google shows differently from what the owner confirmed. */
   watch: {
@@ -131,9 +134,6 @@ export type D9Trade = {
   nearby: { kind: string; term: string };
   /** The AI answer Example with its question. */
   ai: { question: string; answer: string; sources: [string, string] };
-  /** Two related trades, by slug. */
-  related: [string, string];
-  /** Industries 2's new trades: the long reading blocks (pages written for Design 8 keep them in `d8`). */
-  searchText?: string;
-  guide?: { title: string; paras: string[] }[];
+  /** Six related trades, by slug, closest first: the same kind of work, then the nearest. Never the page itself. */
+  related: [string, string, string, string, string, string];
 };

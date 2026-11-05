@@ -23,26 +23,24 @@ export const barbershop: Industry = {
   photos: [PHOTOS.barberCut, MORE_PHOTOS.barberShaveTall],
   focus: "50% 40%",
   searches: ["barber near me", "walk in barber", "skin fade", "beard trim", "barber open now"],
-  tasks: [
+  // Industries 3 (master plan 30.33 item 2): the two old guide sections as short cards. Each line keeps a fact of
+  // docs/claims/barbershop.md, whose "Industries 3" section maps it to its row.
+  profile: [
     {
-      title: "Walk-in times, posted when they change",
-      text: "A quiet Tuesday afternoon or a late Thursday is a post with the times, and a button to your own website. You say yes, it goes up.",
+      title: "Hours a walk-in can trust",
+      text: "Google keeps weekly hours apart from special hours, so a bank holiday can differ.",
     },
     {
-      title: "Bank holiday hours, asked five days ahead",
-      text: "Before Easter Monday or Boxing Day, Kabsi asks: normal hours, closed, or custom. Google keeps those as special hours and your normal week stays as it is.",
+      title: "Bank holidays in 2027",
+      text: "England and Wales: Good Friday 26 March, Easter Monday 29 March, 27 and 28 December.",
     },
     {
-      title: "New cuts on your price list",
-      text: "Started doing hot towel shaves or a kids' cut? Google can show each service with a price and a short description. Kabsi's Profile Coach lists what your profile is missing, services included.",
+      title: "Cuts with a price",
+      text: "Each cut can carry a price. Google rejects a custom name that has one.",
     },
     {
-      title: "Thank the barber the review names",
-      text: "A review that says 'ask for Jay' gets a reply that passes the thanks on. Kabsi only uses the names on your team list, so a barber who left is never named once you take their name off the list.",
-    },
-    {
-      title: "A calm reply after the Saturday queue",
-      text: "Walk-in shops make people wait. The reply says sorry for the wait once, gives no excuse it cannot back up, and never argues.",
+      title: "The barber, by name",
+      text: "A reply passes the thanks on, and never offers a free cut for a review.",
     },
   ],
   page: {
@@ -55,7 +53,7 @@ export const barbershop: Industry = {
     line: "Kabsi looks after your barber shop Google Business Profile: walk-in hours, fresh cuts as posts, a reply to every review.",
     card: "Walk-in hours right, fresh cuts as posts.",
     answer:
-      "For a barber shop Google Business Profile, the work is small and constant: hours that match the door, a reply to every review, and photos of fresh cuts. Kabsi drafts each reply and names the barber only when the review does, turns your photos into posts, asks about bank holidays in time and checks your hours every day. You approve each one.",
+      "For a barber shop Google Business Profile, Kabsi drafts every reply, turns fresh cuts into posts and checks your hours daily, all for your yes.",
     watch: {
       business: "Fade and Co, Leeds",
       line: "Walk-in customers trust the hours Google shows. Kabsi compares them with yours every day and asks before anything changes.",
@@ -89,7 +87,14 @@ export const barbershop: Industry = {
       answer: "Fade and Co on Call Lane takes walk-ins on Saturdays from 8 am to 6 pm.",
       sources: ["Fade and Co's Google profile", "Fade and Co's website"],
     },
-    related: ["hair-salon", "tattoo-studio"],
+    related: [
+      "hair-salon",
+      "tattoo-studio",
+      "nail-salon",
+      "lash-and-brow-studio",
+      "spa-and-massage",
+      "gym-and-fitness",
+    ],
   },
   faqs: [
     {
@@ -102,7 +107,7 @@ export const barbershop: Industry = {
     },
     {
       q: "What does a reply to an unhappy customer say?",
-      a: "It thanks them for telling you, names the problem in one sentence and asks them to get in touch through the details on your profile. It never argues and never offers a free cut to change a review.",
+      a: "It thanks them, names the problem and points to your contact details. It never argues or offers a free cut to change a review.",
     },
     {
       q: "Does Kabsi message my customers?",
@@ -113,7 +118,11 @@ export const barbershop: Industry = {
       a: "Only prices you give it, in a post you approve. Kabsi never invents a price or an offer.",
     },
   ],
-  guides: ["google-review-link-and-qr-code", "how-to-set-holiday-hours-on-google"],
+  guides: [
+    "google-profile-checklist-hair-salons-barbers",
+    "how-to-set-holiday-hours-on-google",
+    "how-to-reply-to-google-reviews",
+  ],
   d8: {
     seo: {
       title: "Kabsi for barbershops: Google posts, hours and review replies",
@@ -129,8 +138,6 @@ export const barbershop: Industry = {
       time: "11:40",
     },
     jobsTitle: "Google jobs that come back.",
-    searchText:
-      "People look for a barber when they want a cut today, so they search for what is near and open. Your hours, your services and your latest replies are what they read before they walk in.",
     check: [
       { label: "Opening hours", value: "Shown", tone: "ok" },
       {
@@ -144,21 +151,5 @@ export const barbershop: Industry = {
     ],
     checkText:
       "For a barbershop the free check starts with what a walk-in customer relies on: your hours, your reviews and your photos. Example result for an invented shop in Leeds.",
-    guide: [
-      {
-        title: "Hours a walk-in customer can trust",
-        paras: [
-          "A barbershop lives on people who decide in the moment. If Google says you are open until 7 and the door is locked at 6, that customer goes next door and remembers it. Google keeps your weekly hours apart from special hours, so a bank holiday or a staff training afternoon can differ without touching the normal week. It is a good idea, in Google's own words, to confirm your hours for official holidays.",
-          "In 2027 Good Friday is 26 March and Easter Monday is 29 March in England and Wales. Christmas Day and Boxing Day fall on a weekend, so the bank holidays move to Monday 27 and Tuesday 28 December. Kabsi asks you five days before each one what the shop will do, and sets the hours on Google once you say yes. If you also want to say when the last walk-in is taken, that goes in a post.",
-        ],
-      },
-      {
-        title: "Services, prices and the barber by name",
-        paras: [
-          "Google can show each service with a price and a description. Keep the price out of the service name itself: Google rejects a custom service name that has a price in it. A clear list (skin fade, beard line up, hot towel shave, the under 12 cut) answers the question people would otherwise phone to ask.",
-          "When a review names the barber, a reply that passes the thanks on tells the next reader who to ask for. Kabsi drafts it in your voice, using only what the review says and only the names on your team list. A reply never includes a phone number or a link, and it never offers a free cut to change a review: Google does not allow anything in exchange for a review.",
-        ],
-      },
-    ],
   },
 };

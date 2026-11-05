@@ -32,49 +32,71 @@ export const medicalAestheticClinic: Industry = {
     "acne treatment",
     "general practitioner",
   ],
-  tasks: [
+  // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
+  // docs/claims/medical-and-aesthetic-clinic.md, whose "Industries 3" section maps it to its row.
+  profile: [
     {
-      title: "List the treatments your doctors really offer",
-      text: "Laser hair removal, a photo facial, a skin consultation. Google can show a service with a description, and real clinic profiles list them by name.",
+      title: "Treatments your doctors really offer",
+      text: "Google can show a service with a description, and clinic profiles list them by name.",
     },
     {
-      title: "Reply without saying who is a patient",
-      text: "A public reply never says the writer visited, what was done or when. Kabsi drafts a thank you and an invitation to get in touch through the profile details, and nothing more.",
+      title: "The Book button",
+      text: "Your own consultation page. When it changes, tell Kabsi; the link follows after your yes.",
     },
     {
-      title: "Make the Book button open the consultation page",
-      text: "Google lets you add your own link, and clinic profiles show a Book button to a booking page. When the page changes, tell Kabsi and the link follows after your Yes.",
+      title: "What a post can name",
+      text: "UK rules: a post may promote a consultation, never name Botox or a prescription medicine.",
     },
     {
-      title: "Check what a post names before it goes out",
-      text: "UK advertising rules say Botox is a prescription-only medicine and cannot be advertised to the public, while a consultation can be promoted if the post does not name Botox or another prescription medicine. Kabsi writes a post from your words and you approve it.",
+      title: "Each doctor's day, honest",
+      text: "Weekly hours say when you open; a post says which doctor is in when.",
+    },
+  ],
+  reviews: [
+    {
+      title: "The welcome at the front desk",
+      text: "The reply passes thanks to the team and names no patient or treatment.",
     },
     {
-      title: "Keep the hours of each doctor's day honest",
-      text: "Weekly hours say when the clinic is open and a post says which doctor is in on which day.",
+      title: "How a treatment turned out",
+      text: "Health review: no draft, a short checklist, a holding reply only if you ask.",
+    },
+    {
+      title: "A cancelled or moved appointment",
+      text: "No word that they were booked: thanks, and an invitation to get in touch.",
     },
   ],
   categories: {
     primary: "Skin care clinic",
     more: ["Medical clinic", "Dermatologist", "Laser hair removal service"],
-    note: "All four names are shown by Google under real clinic profiles. Use 'Medical clinic' only when a licensed doctor on your team practises it, and 'Dermatologist' only when a doctor registered as a dermatologist does. Google says to use as few categories as possible and to keep them specific.",
+    line: "'Medical clinic' only with a licensed doctor, 'Dermatologist' only with a registered dermatologist. Use few categories, kept specific.",
   },
-  reviewThemes: [
+  holidays: [
     {
-      theme: "The welcome at the front desk",
-      text: "A client thanks reception for how she was greeted. The reply passes the thanks to the team and names no patient and no treatment.",
+      title: "Eid al-Adha, UAE",
+      text: "Three days, 10 to 12 Dhu al-Hijjah. Point urgent problems to the Call button.",
     },
     {
-      theme: "How a treatment turned out",
-      text: "This is a health review. It comes to you with no draft and a route to a person at Kabsi. The reply is yours to write.",
+      title: "Ramadan, UAE",
+      text: "Private sector hours drop by two a day. Check doctors' hours against the shorter day.",
     },
     {
-      theme: "A cancelled or moved appointment",
-      text: "A reply cannot say the writer was booked, because that would confirm a patient. It thanks them and asks them to get in touch through the profile details.",
+      title: "A closure of a week or more",
+      text: "Special hours suit up to 6 days closed. From 7 days, mark temporarily closed.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "Consultation room, screen off",
+      text: "Bright, clean and calm. No details on a monitor, no one on the couch.",
     },
     {
-      theme: "The price after the consultation",
-      text: "The reply states no price it was not given. It invites the writer to contact the clinic and leaves the amount out of public view.",
+      title: "The sign at the door",
+      text: "In a tower, photos of the sign and lift button save a missed appointment.",
+    },
+    {
+      title: "Post ideas",
+      text: "A new consultation day, a new doctor, closed for Eid, how to book.",
     },
   ],
   story: {
@@ -97,44 +119,6 @@ export const medicalAestheticClinic: Industry = {
       },
     ],
   },
-  posts: [
-    "Consultations now open on a new day, with the booking link.",
-    "A new doctor joins: their qualifications and the days they see patients.",
-    "Closed for Eid, with the Call button on the profile for an urgent problem.",
-    "How to book a first consultation, in three steps.",
-  ],
-  photoTips: [
-    {
-      title: "The consultation room, with the screen off",
-      text: "Bright, clean and calm. No monitor showing anyone's details, and no one on the couch.",
-    },
-    {
-      title: "The sign at the door and by the lift",
-      text: "Clinics sit in towers and healthcare zones. One photo of the sign and one of the lift button save a missed appointment.",
-    },
-    {
-      title: "The waiting area, tidy and bright",
-      text: "Where a first visit starts. Google asks for photos in focus and well lit, and Kabsi flags one that is dark, blurry or too small. It does not check faces, so keep patients out of it.",
-    },
-  ],
-  holidays: [
-    {
-      when: "Eid al-Adha, UAE",
-      text: "Eid al-Adha is three days, 10 to 12 Dhu al-Hijjah. A clinic closed for those days can point to the profile's Call button for an urgent problem. Google may remove a post that carries a phone number.",
-    },
-    {
-      when: "Ramadan, UAE",
-      text: "Private sector working hours drop by two hours a day for the month, so check the doctors' consultation hours against the shorter day.",
-    },
-    {
-      when: "New Year's Day, UAE and UK",
-      text: "A public holiday on 1 January in the UAE, and Friday 1 January 2027 in England and Wales. Hours go on Google in the week before Christmas.",
-    },
-    {
-      when: "A closure of a week or more",
-      text: "Google's special hours suit a clinic closed up to 6 days in a row. For 7 days or more, mark the profile as temporarily closed instead.",
-    },
-  ],
   page: {
     query: "aesthetic clinic Google Business Profile",
     title: "Aesthetic clinic Google Business Profile help | Kabsi",
@@ -145,7 +129,7 @@ export const medicalAestheticClinic: Industry = {
     line: "Kabsi looks after your aesthetic clinic Google Business Profile: doctors' days, the consultation link, and discreet replies you approve.",
     card: "Doctors' days exact, replies that confirm no patient.",
     answer:
-      "An aesthetic clinic is judged on its reviews, its hours and how it answers. Kabsi looks after your aesthetic clinic Google Business Profile: replies that never confirm someone is a patient or name a treatment, your hours and consultation link checked every day, and clinic news as posts ready for your yes. You approve every one.",
+      "Kabsi looks after your aesthetic clinic Google Business Profile: replies that confirm no patient, hours checked daily, doctors' days as posts for your yes.",
     watch: {
       business: "Clearview Skin Clinic, London",
       line: "Late evening clinics are easy to miss on Google. Kabsi checks your hours against yours every day.",
@@ -180,7 +164,14 @@ export const medicalAestheticClinic: Industry = {
         "Clearview Skin Clinic in Marylebone offers consultations until 8 pm on Wednesdays and Thursdays.",
       sources: ["Clearview Skin Clinic's Google profile", "Clearview Skin Clinic's website"],
     },
-    related: ["dental-clinic", "spa-and-massage"],
+    related: [
+      "dental-clinic",
+      "physiotherapy",
+      "optician",
+      "spa-and-massage",
+      "lash-and-brow-studio",
+      "nail-salon",
+    ],
   },
   faqs: [
     {
@@ -189,20 +180,24 @@ export const medicalAestheticClinic: Industry = {
     },
     {
       q: "Can a clinic's post name Botox?",
-      a: "Rules differ by country. In the UK, the advertising regulator says Botox is a prescription-only medicine that cannot be advertised to the public. A consultation can be promoted if the post does not name Botox or another prescription medicine. This is not legal advice.",
+      a: "Rules differ by country. In the UK, no: Botox is a prescription-only medicine. A consultation may be promoted, naming no prescription medicine. Not legal advice.",
     },
     {
       q: "What does the reply to a five star review say?",
-      a: "It thanks the writer and says the words will be shared with the team. It says nothing about a visit, a treatment or a date, and it does not name anyone.",
+      a: "It thanks the writer and says the team will hear the words. Nothing about a visit, a treatment or a date, and no names.",
     },
     {
       q: "Does Kabsi follow the privacy law of my country?",
-      a: "Kabsi's drafts follow a careful habit: a public reply never confirms someone is a patient or mentions their care. That is a habit, not legal advice. Questions about privacy law go to a person.",
+      a: "Drafts follow a careful habit: a public reply never confirms a patient or mentions their care. Not legal advice; privacy law questions go to a person.",
     },
     {
       q: "Can Kabsi post before and after photos?",
-      a: "Kabsi posts only photos you send and approve, and it never writes about results. Check your own country's rules on medical advertising before you send one.",
+      a: "Kabsi posts only photos you send and approve, and it never writes about results. Check your country's rules on medical advertising before you send one.",
     },
   ],
-  guides: ["how-to-reply-to-google-reviews", "how-to-choose-your-primary-category"],
+  guides: [
+    "how-to-reply-to-google-reviews",
+    "google-posts-for-local-businesses",
+    "add-services-and-prices-to-google",
+  ],
 };

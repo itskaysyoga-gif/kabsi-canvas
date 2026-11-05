@@ -31,49 +31,71 @@ export const cafe: Industry = {
     "quiet cafe to work",
     "oat milk latte",
   ],
-  tasks: [
+  // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of docs/claims/cafe.md,
+  // whose "Industries 3" section maps it to its row.
+  profile: [
     {
-      title: "Put the opening time on Google to the minute",
-      text: "The weekly hours on Google say when the doors open, and special hours cover the days that differ. Kabsi asks before each public holiday and sets your answer once you say Yes.",
+      title: "Opening time to the minute",
+      text: "Weekly hours say when the doors open; special hours cover days that differ.",
     },
     {
-      title: "Show the drinks people ask for, with prices",
-      text: "Google can show menu items, and a real coffee shop profile on Google lists its drinks with a price and a line of description. Photos of the menu and the best dishes help people choose before they come.",
+      title: "Drinks, with prices",
+      text: "Google can show menu items with a price and a line of description.",
     },
     {
-      title: "Say what the room offers",
-      text: "A coffee shop profile on Google can show 'Free Wi-Fi' under amenities and 'Good for working on laptop' under popular for. If your laptop rule differs at lunch, a post says so before the first complaint does.",
+      title: "What the room offers",
+      text: "A coffee shop profile can show Free Wi-Fi and Good for working on laptop.",
     },
     {
-      title: "Post after the morning rush, not during it",
-      text: "The week's post suits what is fresh: a seasonal drink, a new blend, a pastry that is back. Kabsi writes the drafts once the rush is over, so you read them with a free hand.",
+      title: "The order link",
+      text: "When your order page changes, tell Kabsi. The link follows once you say yes.",
+    },
+  ],
+  reviews: [
+    {
+      title: "The coffee itself",
+      text: "The reply names the drink back and adds nothing you did not say.",
     },
     {
-      title: "Point the order link at the right page",
-      text: "Real bakery and breakfast profiles on Google show an Order online link. Whether Google shows ordering options depends on your country and your ordering provider. When your order page changes, tell Kabsi and the link follows once you say Yes.",
+      title: "The queue at eight",
+      text: "Sorry for the wait, once, with no promise of a shorter one.",
+    },
+    {
+      title: "Feeling unwell after a meal",
+      text: "A health review gets no draft, a short checklist, and a holding reply only if asked.",
     },
   ],
   categories: {
     primary: "Cafe",
     more: ["Coffee shop", "Breakfast restaurant"],
-    note: "All three names are shown by Google under real profiles of cafes, coffee shops and breakfast places. Choose the first by what most of your sales are, a cafe or a coffee counter, and add the others only for something you really run.",
+    line: "Google shows all three on real profiles. Choose the first by what most of your sales are.",
   },
-  reviewThemes: [
+  holidays: [
     {
-      theme: "The coffee itself",
-      text: "A customer names the flat white or the cortado. The reply names it back in one line and adds nothing the owner did not say.",
+      title: "Ramadan, UAE",
+      text: "Private sector hours drop by two a day. Kabsi sets yours once you say yes.",
     },
     {
-      theme: "The queue at eight",
-      text: "People write about the wait before work. The reply says sorry for the wait once and does not promise a shorter one.",
+      title: "UK bank holiday Mondays",
+      text: "Early May bank holiday is 3 May 2027, the spring one 31 May.",
     },
     {
-      theme: "Laptops and the last free table",
-      text: "A guest says there was no seat, or that someone camped. The reply states the rule you gave Kabsi and invites a chat in person.",
+      title: "Eid al-Adha, UAE",
+      text: "Set by the moon, from 10 Dhu al-Hijjah. Kabsi asks five days ahead.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "A drink by the window",
+      text: "One cup in daylight, no filter. Google asks for photos in focus and well lit.",
     },
     {
-      theme: "Feeling unwell after a meal",
-      text: "This is a health review. It comes to you with no draft and a route to a person at Kabsi, and you write the reply.",
+      title: "The counter and the cabinet",
+      text: "What is on show at ten answers 'is there food' before anyone asks.",
+    },
+    {
+      title: "Post ideas",
+      text: "A seasonal drink, a new blend, wifi hours, bank holiday opening.",
     },
   ],
   story: {
@@ -96,44 +118,6 @@ export const cafe: Industry = {
       },
     ],
   },
-  posts: [
-    "A seasonal drink, with its price and the week it ends.",
-    "A new blend on the bar, in one line.",
-    "Wifi and laptop hours, in plain words.",
-    "Opening hours for the bank holiday Monday.",
-  ],
-  photoTips: [
-    {
-      title: "A drink by the window, in daylight",
-      text: "One cup, one surface, no filter. Google asks for photos in focus and well lit.",
-    },
-    {
-      title: "The counter and the cabinet",
-      text: "What is on show at ten in the morning. It answers 'is there food' before anyone asks.",
-    },
-    {
-      title: "The seats and the sockets",
-      text: "Show the tables and the sockets, and write the laptop rule in a post.",
-    },
-  ],
-  holidays: [
-    {
-      when: "Ramadan, UAE",
-      text: "The UAE cuts private sector working hours by two hours a day for the month. A cafe sets its own hours for Ramadan, and Kabsi sets the new time on Google once you say Yes, so the old opening time never shows.",
-    },
-    {
-      when: "UK: bank holiday Mondays",
-      text: "In England and Wales the early May holiday is Monday 3 May 2027 and the spring holiday Monday 31 May. Tell Google if the doors open at the usual time.",
-    },
-    {
-      when: "UAE New Year's Day and UK Christmas",
-      text: "1 January is a public holiday in the UAE. In England and Wales Christmas Day 2026 is Friday 25 December, and Boxing Day moves to Monday 28 December.",
-    },
-    {
-      when: "Eid al-Adha, UAE",
-      text: "Arafah Day on 9 Dhu al-Hijjah and Eid al-Adha on 10 to 12 Dhu al-Hijjah, set by the moon. Kabsi asks five days ahead.",
-    },
-  ],
   page: {
     query: "cafe Google Business Profile",
     title: "Cafe Google Business Profile help | Kabsi",
@@ -144,7 +128,7 @@ export const cafe: Industry = {
     line: "Kabsi looks after your cafe Google Business Profile: an exact opening time, fresh bakes as posts, replies after the rush.",
     card: "Opening time exact, fresh bakes as posts.",
     answer:
-      "On a cafe Google Business Profile, the opening time comes first. Kabsi checks your opening time every day, turns a photo of what is fresh into a post, writes the posts once the morning rush is over, drafts a reply to every review, and asks about holiday hours in time. You approve each one.",
+      "On a cafe Google Business Profile, the opening time comes first. Kabsi checks it daily, turns fresh bakes into posts and drafts every reply.",
     watch: {
       business: "Brew Lane Cafe, London",
       line: "The first customer of the day reads your opening time on Google. Kabsi checks it every day.",
@@ -179,12 +163,12 @@ export const cafe: Industry = {
         "Brew Lane Cafe near Brick Lane opens at 7 am on weekdays, with pastries baked that morning.",
       sources: ["Brew Lane Cafe's Google profile", "Brew Lane Cafe's website"],
     },
-    related: ["bakery", "restaurant"],
+    related: ["bakery", "restaurant", "florist", "optician", "nail-salon", "hair-salon"],
   },
   faqs: [
     {
       q: "Where should the review QR code go in a cafe?",
-      a: "Google lets you ask customers to scan a QR code or open a link. Cafes put it by the coffee machine, at the till or on a cup sleeve. Ask everyone the same way.",
+      a: "By the coffee machine, at the till or on a cup sleeve, as a QR code or a link. Ask everyone the same way.",
     },
     {
       q: "Will Kabsi change my menu prices on Google?",
@@ -196,12 +180,16 @@ export const cafe: Industry = {
     },
     {
       q: "A customer says they were ill after eating here. What does Kabsi do?",
-      a: "It sends the review to you with no draft and a way to reach a person at Kabsi. Nothing is published until you write and approve a reply.",
+      a: "It comes to you with no draft and a short checklist. Kabsi writes a neutral holding reply only if you ask.",
     },
     {
       q: "Can Kabsi reply to reviews in other languages?",
       a: "Yes. Each draft is written in the language of the review, and you approve it like any other.",
     },
   ],
-  guides: ["google-review-link-and-qr-code", "how-to-set-holiday-hours-on-google"],
+  guides: [
+    "google-profile-checklist-restaurants-cafes",
+    "how-to-set-holiday-hours-on-google",
+    "google-posts-for-local-businesses",
+  ],
 };

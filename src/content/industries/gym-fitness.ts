@@ -33,49 +33,71 @@ export const gymFitness: Industry = {
     "24 hour gym",
     "pilates classes",
   ],
-  tasks: [
+  // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
+  // docs/claims/gym-and-fitness.md, whose "Industries 3" section maps it to its row.
+  profile: [
     {
-      title: "Post each new class with its day, time and coach",
-      text: "A post can carry a class: HIIT on Tuesdays and Thursdays at 6.30 pm with Karim. An event post is for something at your business, and Google archives posts after six months unless dates are set.",
+      title: "Each class, with day and coach",
+      text: "A post can carry the day, time and coach. Undated posts archive after six months.",
     },
     {
-      title: "Run the trial or day pass as an offer with an end date",
-      text: "A free first class until a set date is an offer post, and Google puts a View Offer button on it. The end date stops it from outliving the deal.",
+      title: "The trial, with an end date",
+      text: "A free first class fits an offer post, which gets a View Offer button.",
     },
     {
-      title: "Show the hours people really get in",
-      text: "A gym open round the clock can say so, as a real 24 hour gym profile on Google does. If different things run at different hours, Google's more hours setting holds each apart.",
+      title: "The hours people really get in",
+      text: "Open round the clock? Say so. Different hours for different things go in more hours.",
     },
     {
-      title: "List what you teach as services",
-      text: "Google can show a service with a description, and a real gym profile lists services such as aerobics and nutrition consulting. Personal training and group classes each get a line.",
+      title: "What you teach, as services",
+      text: "Personal training and group classes each get a line, with a description.",
+    },
+  ],
+  reviews: [
+    {
+      title: "The coach, by name",
+      text: "Thanks passed on to the coach from your team list. Nothing about body or weight.",
     },
     {
-      title: "Reply to coach reviews by the coach's name",
-      text: "A member writes that Karim changed her training. The reply thanks her and passes it on to Karim. Kabsi uses the coach names on your team list and no others.",
+      title: "Membership fees and cancelling",
+      text: "No account detail in public. It asks them to get in touch through the profile.",
+    },
+    {
+      title: "An injury in the gym",
+      text: "No draft: a short checklist, and a neutral holding reply only if you ask.",
     },
   ],
   categories: {
     primary: "Gym",
     more: [],
-    note: "'Gym' is the name Google shows under a real 24 hour gym profile in the UK. No Google page or live profile read for this page showed a category for a boutique studio, so read the names in the box on your own profile before you add a second. A business cannot create a category.",
+    line: "'Gym' shows on a real 24 hour UK gym profile. Before adding a second, read the names in your own profile; you cannot create one.",
   },
-  reviewThemes: [
+  holidays: [
     {
-      theme: "The coach, by name",
-      text: "A member credits Karim or Lina for her progress. The reply thanks her and passes it on to the coach, with nothing about her body or her weight.",
+      title: "Ramadan, UAE",
+      text: "Private sector hours drop by two a day. Settle gym hours and class times beforehand.",
     },
     {
-      theme: "Equipment and the changing rooms",
-      text: "A broken machine, a queue for the rack, a shower that ran cold. The reply says sorry once and says nothing about repairs unless you gave Kabsi the fact.",
+      title: "UAE National Day",
+      text: "2 and 3 December. Say if classes run, and give any offer an end date.",
     },
     {
-      theme: "Membership fees and cancelling",
-      text: "A dispute about a fee or a freeze. The reply shows no account detail in public and asks the writer to get in touch through the profile details.",
+      title: "UK: Christmas and New Year 2026",
+      text: "25 December, 28 December and 1 January 2027. Add the last class of each day.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "The floor, with no member shown",
+      text: "Wide and well lit. Kabsi checks light, focus and size, not faces, so ask first.",
     },
     {
-      theme: "An injury in the gym",
-      text: "This is a health review and may be a legal one. It comes to you with no draft and a route to a person at Kabsi, and you write the reply.",
+      title: "Reception and the way up",
+      text: "In a tower or upstairs? Photograph the entrance and lift sign for new members.",
+    },
+    {
+      title: "Post ideas",
+      text: "A new class and coach, a free first session with its end date, holiday hours.",
     },
   ],
   story: {
@@ -98,44 +120,6 @@ export const gymFitness: Industry = {
       },
     ],
   },
-  posts: [
-    "A new class with its days, its time and the coach.",
-    "A free first session with the date it ends and your booking link.",
-    "The day pass price, in one line.",
-    "Opening hours for the long weekend and the last class.",
-  ],
-  photoTips: [
-    {
-      title: "The floor and the racks, with no member in the frame",
-      text: "Wide, level and well lit. Kabsi checks light, focus and size, not faces, so ask before anyone is shown.",
-    },
-    {
-      title: "The changing rooms and showers, clean and empty",
-      text: "Taken at opening time, with the lockers and the showers in view.",
-    },
-    {
-      title: "Reception and the way up",
-      text: "A gym on a first floor or inside a tower is hard to find. A photo of the entrance and the lift sign helps a new member arrive.",
-    },
-  ],
-  holidays: [
-    {
-      when: "Ramadan, UAE",
-      text: "The UAE cuts private sector working hours by two hours a day for the month, which changes coach rotas. Settle the month's gym hours and class times before it starts.",
-    },
-    {
-      when: "UAE National Day, 2 and 3 December",
-      text: "Two public holidays. Say on Google whether the gym opens and whether classes run, and give any holiday offer an end date.",
-    },
-    {
-      when: "UK: Christmas and New Year 2026",
-      text: "Christmas Day is Friday 25 December, Boxing Day moves to Monday 28 December and New Year's Day is Friday 1 January 2027. Put the hours of all three on Google, with the last class of each day.",
-    },
-    {
-      when: "UK: the Easter weekend 2027",
-      text: "Good Friday is 26 March and Easter Monday 29 March in England and Wales. A post says which classes run.",
-    },
-  ],
   page: {
     query: "gym Google Business Profile",
     title: "Gym Google Business Profile help | Kabsi",
@@ -146,7 +130,7 @@ export const gymFitness: Industry = {
     line: "Kabsi looks after your gym Google Business Profile: classes as posts, holiday hours asked, and replies ready for your yes.",
     card: "Classes as posts, holiday hours asked ahead.",
     answer:
-      "A gym Google Business Profile is where people check your hours, photos, classes and reviews. Kabsi turns a new class or trial week into a post with real dates, asks about public holiday hours in time, drafts a reply to every review, and checks your category and hours every day. You approve every change before it reaches Google.",
+      "On a gym Google Business Profile, people check hours and classes. Kabsi drafts dated class posts and every reply, and asks about holiday hours ahead.",
     watch: {
       business: "Harbour Strength Studio, Dubai",
       line: "Your main category tells people what you are. Kabsi checks it, and your hours, every day.",
@@ -177,20 +161,27 @@ export const gymFitness: Industry = {
       answer: "Harbour Strength Studio in Dubai Marina runs a 6 am strength class every weekday.",
       sources: ["Harbour Strength Studio's Google profile", "Harbour Strength Studio's website"],
     },
-    related: ["yoga-and-pilates-studio", "physiotherapy"],
+    related: [
+      "yoga-and-pilates-studio",
+      "physiotherapy",
+      "spa-and-massage",
+      "barbershop",
+      "tattoo-studio",
+      "cafe",
+    ],
   },
   faqs: [
     {
       q: "Can Kabsi post my class timetable?",
-      a: "A post can carry the days and times of a class. Kabsi writes it from the times you give it, and prepares a new post when they change.",
+      a: "A post can carry a class's days and times. Kabsi writes it from your times and prepares a new post when they change.",
     },
     {
       q: "Is a free first week allowed on Google?",
-      a: "Google has an offer post for it. What Google does not allow is an incentive in return for a review, such as a free month for a five star one.",
+      a: "Google has an offer post for it. It does not allow a reward for a review, like a free month for five stars.",
     },
     {
       q: "A member says she hurt herself here. What does Kabsi do?",
-      a: "It sends the review to you with no draft and a route to a person at Kabsi. Nothing is published until you write a reply and approve it.",
+      a: "No draft: a short checklist comes to you. Kabsi writes a neutral holding reply only if you ask. Nothing is published until you approve.",
     },
     {
       q: "Does Kabsi see my members?",
@@ -201,5 +192,9 @@ export const gymFitness: Industry = {
       a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything.",
     },
   ],
-  guides: ["how-to-reply-to-google-reviews", "how-to-set-holiday-hours-on-google"],
+  guides: [
+    "google-posts-for-local-businesses",
+    "how-to-set-holiday-hours-on-google",
+    "how-to-reply-to-google-reviews",
+  ],
 };

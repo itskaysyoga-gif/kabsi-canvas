@@ -28,10 +28,30 @@ export const lashAndBrowStudio: Industry = {
     "lash salon",
     "brow tint near me",
   ],
+  // Industries 3 (master plan 30.33 item 2): the two old guide sections as short cards. Each line keeps a fact of
+  // docs/claims/lash-and-brow-studio.md, whose "Industries 3" section maps it to its row.
+  profile: [
+    {
+      title: "Close photos clients trust",
+      text: "In focus, well lit, no heavy filters. Kabsi checks each photo first.",
+    },
+    {
+      title: "The work, not the client",
+      text: "A close crop of the lashes is enough; ask the client first if you like.",
+    },
+    {
+      title: "Hours checked every day",
+      text: "Kabsi compares Google's hours with yours daily and asks before each bank holiday.",
+    },
+    {
+      title: "A review about a reaction",
+      text: "No draft, a short checklist, and a neutral holding reply only if you ask.",
+    },
+  ],
   categories: {
     primary: "Eyelash salon",
     more: ["Beauty salon"],
-    note: "Google's category names can differ by country, so read the list in your own profile. Add a second category only for work you really do.",
+    line: "Google's category names can differ by country, so read the list in your own profile. Add a second category only for work you really do.",
   },
   page: {
     query: "eyelash salon Google Business Profile",
@@ -43,7 +63,7 @@ export const lashAndBrowStudio: Industry = {
     line: "Kabsi looks after your eyelash salon Google Business Profile: new sets as posts, exact hours, replies for your yes.",
     card: "Fresh sets as posts, hours kept exact.",
     answer:
-      "A lash and brow studio is judged on close photos and reviews. Kabsi looks after your eyelash salon Google Business Profile: it turns a photo of a fresh set into a post, checks your hours every day, asks about holiday hours five days ahead and drafts a reply to every review, thanking the artist the client named. Nothing goes on Google until you say yes.",
+      "For an eyelash salon Google Business Profile, Kabsi turns fresh sets into posts, checks your hours daily and drafts every reply, all for your yes.",
     watch: {
       business: "Flutter Lash Studio, London",
       line: "Late hours matter to clients who work. Kabsi checks the hours Google shows against yours every day.",
@@ -60,7 +80,7 @@ export const lashAndBrowStudio: Industry = {
     jobs: [
       {
         title: "Fresh sets, as posts",
-        text: "A close photo and a line become a post. Kabsi checks the photo is sharp first.",
+        text: "A close photo and a line become a post. Kabsi checks it is sharp.",
       },
       {
         title: "Replies that thank the artist",
@@ -78,24 +98,13 @@ export const lashAndBrowStudio: Industry = {
         "Flutter Lash Studio on Upper Street does lash lifts and is open on Saturdays until 7 pm.",
       sources: ["Flutter Lash Studio's Google profile", "Flutter Lash Studio's website"],
     },
-    related: ["nail-salon", "hair-salon"],
-    searchText:
-      "People look for the treatment by name, a lash lift or brow lamination, then judge you on close photos and on what clients say about the artist and how long the set lasted.",
-    guide: [
-      {
-        title: "Close photos clients trust",
-        paras: [
-          "A lash set is judged from a few centimetres away, so close photos on your profile matter. Google asks for photos that are in focus and well lit, without heavy filters, so the lashes on Google look like the lashes in the chair. Kabsi checks each photo before it goes to Google and tells you when one is dark, blurry or too small.",
-          "Show the work, not the client: a close crop of the eye and lashes is enough, and ask the client first if you like. A photo you send on WhatsApp with one line becomes a post that names the set and the artist, ready for your yes.",
-        ],
-      },
-      {
-        title: "Hours, artists and the reviews that name them",
-        paras: [
-          "Evening and weekend hours matter to clients who work. Kabsi compares the hours Google shows with the hours you confirmed every day, and asks before each bank holiday what you will do.",
-          "A review can name the artist. Add your team to Kabsi, and a review that names Mia gets a reply that passes the thanks to Mia. A review about irritation or a reaction gets no draft: it comes to you marked as needing a little more care, with a short checklist and no draft. Kabsi writes a short, neutral holding reply only if you ask.",
-        ],
-      },
+    related: [
+      "nail-salon",
+      "hair-salon",
+      "spa-and-massage",
+      "medical-and-aesthetic-clinic",
+      "barbershop",
+      "tattoo-studio",
     ],
   },
   faqs: [
@@ -105,14 +114,14 @@ export const lashAndBrowStudio: Industry = {
     },
     {
       q: "What does Kabsi do with a review about irritation?",
-      a: "A reaction is a safety matter, so it comes to you marked as needing a little more care, with a short checklist and no draft. Kabsi writes a short, neutral holding reply only if you ask.",
+      a: "It comes to you with no draft and a short checklist. Kabsi writes a short, neutral holding reply only if you ask.",
     },
     {
       q: "Can Kabsi thank the artist by name?",
       a: "Yes, when the review names her and her name is on your team list. Kabsi never guesses a name.",
     },
     {
-      q: "Does Kabsi work with my booking app?",
+      q: "Does Kabsi work with my booking system?",
       a: "No. Kabsi works only with your Google profile. Your booking link stays the one you set.",
     },
     {
@@ -120,5 +129,9 @@ export const lashAndBrowStudio: Industry = {
       a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything.",
     },
   ],
-  guides: ["how-to-reply-to-google-reviews", "google-review-link-and-qr-code"],
+  guides: [
+    "photos-for-google-business-profile",
+    "how-to-reply-to-google-reviews",
+    "how-to-set-holiday-hours-on-google",
+  ],
 };

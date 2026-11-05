@@ -1529,3 +1529,22 @@ Every guide's words are in its own content file, src/content/guides/<slug>.tsx; 
 - **404 and error screens**: one <title> each, "Kabsi: This page is not here." and "Kabsi: Something went wrong on our side." (the root's default "Kabsi" no longer sits beside them). No other wording changes.
 - **Facts (02, 07, 13)**: "The printable counter card from the free review link tool is free for everyone. The branded counter card and table tent PDFs (made for a business by Get reviews) come with the plans." The FAQ's "Is there a free part?" answer names the printable counter card, not the table card. No screen's wording changes: the Get reviews buttons "Print a counter card" and "Print a table card" stay.
 - **Guides**: a guide may quote Google's help page on how local results are chosen, word for word in quotation marks, when it cites that page with its link and the date read (tests/claims-k144.test.ts). Promises of rankings and the word "prominence" outside such a quote stay banned.
+
+## 56. Industries 3: the industry pages short and scannable (5 Nov 2026, master plan 30.33 item 2)
+
+*Changes section 52 for /for and the twenty industry pages. No reading block: each section is a headline, at most one line of up to 25 words, then a picture, chips or cards (a short title and one line of at most 15 words). Every trade's lines are in its own content file (src/content/industries/<slug>.ts) and each has its row in the "Industries 3" section of its claim sheet (docs/claims/<slug>.md). Every business, person and number on these pages is an invented Example.*
+
+### The template (d9-industry.tsx)
+
+- "What people search for" (bar: "search for"): the trade's answer line (at most 25 words, the page's main query once), the searches as chips, "Searches like these. On Pro, Kabsi shows the words people searched on Google to find you." and the free check link. The trade's second reading paragraph is gone.
+- "Your Google profile, as a [trade] owner" (bar: "Your Google profile"): two to four cards. Then, on the pages that have them, in this order: "What customers write about" (two or three cards; the illness, injury or safety card says the review gets no draft), "Google categories that fit" (the names as chips, the first marked "First category" for screen readers, then one line), "Holidays and busy dates" (two or three cards) and "Photos and posts" (two or three cards). "See how it works" and "See the plans" stay.
+- "Read next." (bar: "next."): "Guides for you", three guides as cards with the guide's cover and its title; "Businesses like yours" with "See every business" (to /for), six related businesses as photo cards (photo, name, one line).
+- Removed: "The Google work of a [trade]" with its five long tasks, the review themes' long paragraphs, "Post ideas" as a bullet list, the holidays' long paragraphs, the two long guide sections of the Design 8 and Industries 2 pages, and the second paragraph under "What people search for".
+- The share image of each industry page (public/og/industries/<slug>.jpg): "Kabsi", the page's H1 with its marked phrase in yellow, "kabsi.co/for/[slug]". Its alt text: "Kabsi. [H1]".
+
+### /for
+
+- No line changes. The cards are 2 to a row below 1024 px and 4 from 1024 px; a filtered list that does not fill its last row centres it.
+
+### Each page's answer line (the first answer, with its query)
+

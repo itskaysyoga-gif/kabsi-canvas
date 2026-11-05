@@ -28,10 +28,30 @@ export const optician: Industry = {
     "kids eye test",
     "opticians open saturday",
   ],
+  // Industries 3 (master plan 30.33 item 2): the two guide sections are now short cards. Each line keeps a fact of
+  // docs/claims/optician.md, whose "Industries 3" section maps it to its row.
+  profile: [
+    {
+      title: "The link patients book with",
+      text: "Website, phone and hours checked against yours daily. Kabsi asks when they differ.",
+    },
+    {
+      title: "New frames on the shelf",
+      text: "A shelf photo and a line become a post for your yes, checked for sharpness.",
+    },
+    {
+      title: "Eye health stays private",
+      text: "Eye tests are health care. Drafts thank the patient and ask them to get in touch.",
+    },
+    {
+      title: "What Kabsi never says",
+      text: "Add it in About your business; every draft follows it. Hard reviews come to you.",
+    },
+  ],
   categories: {
     primary: "Optician",
     more: ["Optometrist", "Eye care center"],
-    note: "Choose the first by what most visits are for, glasses or eye tests, and read the names in your own profile, because they can differ by country.",
+    line: "Choose the first by what most visits are for, glasses or eye tests. Check the names in your own profile; they differ by country.",
   },
   page: {
     query: "optician Google Business Profile",
@@ -43,7 +63,7 @@ export const optician: Industry = {
     line: "Kabsi looks after your optician Google Business Profile: the eye test link and hours right, new frames as posts.",
     card: "Eye test link right, new frames as posts.",
     answer:
-      "An optician Google Business Profile is where people find the link to book an eye test and your hours. Kabsi checks your website, phone and hours every day, turns a photo of new frames into a post, drafts careful replies that never mention an eye test result, and asks about holiday hours in time. You approve every change.",
+      "Kabsi looks after your optician Google Business Profile: the eye test link and hours checked daily, new frames as posts, careful replies for your yes.",
     watch: {
       business: "Clearsight Opticians, Leeds",
       line: "Your website link is where patients go to book. Kabsi checks it, and your hours, every day.",
@@ -78,24 +98,13 @@ export const optician: Industry = {
         "Clearsight Opticians in the Victoria Quarter does children's eye tests on Saturdays.",
       sources: ["Clearsight Opticians' Google profile", "Clearsight Opticians' website"],
     },
-    related: ["dental-clinic", "pet-grooming"],
-    searchText:
-      "People search for an eye test, contact lenses or new frames, often with a day in mind. They check the hours, whether the booking link works, and what reviews say about the staff.",
-    guide: [
-      {
-        title: "Booking, hours and the frames on the shelf",
-        paras: [
-          "The website link on your profile should be the one you want patients to use. Kabsi compares the website, phone and hours on Google with what you confirmed, every day, and asks when they differ.",
-          "Frames sell on looks. A photo of the new shelf with one line becomes a post for your yes, and Kabsi checks each photo is sharp and well lit before it reaches Google.",
-        ],
-      },
-      {
-        title: "Replies that keep eye health private",
-        paras: [
-          "An eye test is health care, so a public reply should not mention a result, a prescription or a condition. Kabsi drafts replies that thank the patient and invite them to get in touch through the details on your profile.",
-          "You can add anything Kabsi should never say in About your business, and every draft follows it. A hard review comes to you as one that needs more care, so you decide.",
-        ],
-      },
+    related: [
+      "dental-clinic",
+      "medical-and-aesthetic-clinic",
+      "physiotherapy",
+      "veterinary-clinic",
+      "florist",
+      "hair-salon",
     ],
   },
   faqs: [
@@ -120,5 +129,9 @@ export const optician: Industry = {
       a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything.",
     },
   ],
-  guides: ["keep-your-hours-and-details-the-same-everywhere", "how-to-reply-to-google-reviews"],
+  guides: [
+    "keep-your-hours-and-details-the-same-everywhere",
+    "google-posts-for-local-businesses",
+    "how-to-reply-to-google-reviews",
+  ],
 };

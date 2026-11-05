@@ -32,49 +32,71 @@ export const dentalClinic: Industry = {
     "teeth cleaning",
     "orthodontist",
   ],
-  tasks: [
+  // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
+  // docs/claims/dental-clinic.md, whose "Industries 3" section maps it to its row.
+  profile: [
     {
-      title: "Reply without confirming anyone is a patient",
-      text: "A dental reply thanks the writer and never repeats a treatment, a name or a visit date. Kabsi drafts within that rule, every time.",
+      title: "Replies that confirm no patient",
+      text: "The reply thanks the writer and never repeats a treatment, name or visit.",
     },
     {
-      title: "Keep the emergency number and hours exact",
-      text: "Someone with toothache at 9 at night calls the number on Google. It has to ring someone, and the hours have to say when.",
+      title: "Emergency number and hours exact",
+      text: "Toothache at 9 at night: the number on Google has to ring someone.",
     },
     {
-      title: "List the treatments you really offer",
-      text: "Whitening, implants, braces, children's care. Keep the services on Google to what your dentists do now; Profile Coach lists what is missing.",
+      title: "Only treatments you really offer",
+      text: "Keep services to what your dentists do now. Profile Coach lists what is missing.",
     },
     {
-      title: "Keep the appointment link current",
-      text: "A patient who books from your profile should land on your booking page, not the clinic's home page.",
+      title: "The appointment link",
+      text: "It should land on your booking page, not the clinic's home page.",
+    },
+  ],
+  reviews: [
+    {
+      title: "A gentle dentist",
+      text: "The reply thanks nervous patients without mentioning the visit.",
     },
     {
-      title: "Set hours for public holidays",
-      text: "Closed for Eid or National Day, open on the Saturday after. Kabsi asks five days ahead and sets special hours once you say yes.",
+      title: "Cost explained, or not",
+      text: "A reply about a bill never argues and invites the writer to get in touch.",
+    },
+    {
+      title: "An injury or a safety problem",
+      text: "No draft: a short checklist, and a neutral holding reply only if you ask.",
     },
   ],
   categories: {
     primary: "Dentist",
     more: ["Dental clinic", "Cosmetic dentist", "Pediatric dentist", "Emergency dental service"],
-    note: "Use a specialist category only when a dentist on your team practises it. 'Orthodontist' belongs to a clinic with an orthodontist.",
+    line: "Use a specialist category only when a dentist on your team practises it, like Orthodontist.",
   },
-  reviewThemes: [
+  holidays: [
     {
-      theme: "A gentle dentist",
-      text: "Nervous patients write about how they were treated. The reply thanks them without mentioning the visit.",
+      title: "Eid al-Fitr and Eid al-Adha",
+      text: "If you close, special hours, and a post on what to do in an emergency.",
     },
     {
-      theme: "Cost explained before treatment",
-      text: "Or not explained. A reply about a bill never argues in public and invites the patient to get in touch.",
+      title: "UAE National Day",
+      text: "2 and 3 December. Kabsi asks five days before, with the Saturday after if you open.",
     },
     {
-      theme: "The front desk and waiting time",
-      text: "Some reviews thank reception. A reply passes the thanks on to the team.",
+      title: "UK bank holidays",
+      text: "Closed days on Google, and the urgent care line for patients in pain.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "The treatment room, empty",
+      text: "Clean, bright and calm. Never a patient's face or mouth, even with permission.",
     },
     {
-      theme: "Children who were not scared",
-      text: "Parents write these. The reply speaks to the parent and says nothing about the child.",
+      title: "The team",
+      text: "Dentists and reception in clinic clothes, so patients know who they will meet.",
+    },
+    {
+      title: "Post ideas",
+      text: "Saturday check-ups, what to do in an emergency, a new dentist joining.",
     },
   ],
   story: {
@@ -98,44 +120,6 @@ export const dentalClinic: Industry = {
       },
     ],
   },
-  posts: [
-    "Saturday morning appointments for check-ups and cleaning.",
-    "What to do in a dental emergency after hours.",
-    "A new dentist joins: their training and the days they see patients.",
-    "School holiday check-ups for children, with the booking link.",
-  ],
-  photoTips: [
-    {
-      title: "The treatment room, empty",
-      text: "Clean, bright and calm. Never a patient's face or mouth, even with permission.",
-    },
-    {
-      title: "The team",
-      text: "Dentists and reception in clinic clothes. Patients like to know who they will meet.",
-    },
-    {
-      title: "The entrance and parking",
-      text: "How to find the clinic in the building, and where to leave the car.",
-    },
-  ],
-  holidays: [
-    {
-      when: "Eid al-Fitr and Eid al-Adha",
-      text: "If you close, special hours on Google, and a post that says what to do in an emergency while closed.",
-    },
-    {
-      when: "UAE National Day, 2 and 3 December",
-      text: "A public holiday. Kabsi asks five days before, with the Saturday after if you open.",
-    },
-    {
-      when: "School holidays",
-      text: "Parents book children's check-ups. A post when the holiday dates are near.",
-    },
-    {
-      when: "UK: bank holidays",
-      text: "Closed days on Google, and the urgent care line for patients in pain.",
-    },
-  ],
   page: {
     query: "dental clinic Google Business Profile",
     title: "Dental clinic Google Business Profile help | Kabsi",
@@ -146,7 +130,7 @@ export const dentalClinic: Industry = {
     line: "Kabsi looks after your dental clinic Google Business Profile: exact hours, the right phone, and careful replies you approve.",
     card: "Exact hours, careful replies that name no patient.",
     answer:
-      "A dental clinic Google Business Profile has to be exact and careful. Kabsi checks your hours, phone and website every day, drafts careful replies that never confirm someone is a patient or mention treatment, gives a review about an injury no draft so you decide, and asks about holiday hours in time. You approve every word before it reaches Google.",
+      "Kabsi keeps your dental clinic Google Business Profile exact: hours and phone checked daily, careful replies that never confirm a patient, holiday hours asked ahead.",
     watch: {
       business: "Parkside Dental, Dubai",
       line: "A patient with toothache calls the number and trusts the hours. Kabsi checks both every day.",
@@ -180,7 +164,14 @@ export const dentalClinic: Industry = {
       answer: "Parkside Dental in Al Barsha is open on Sundays from 9 am to 5 pm.",
       sources: ["Parkside Dental's Google profile", "Parkside Dental's website"],
     },
-    related: ["medical-and-aesthetic-clinic", "physiotherapy"],
+    related: [
+      "medical-and-aesthetic-clinic",
+      "physiotherapy",
+      "optician",
+      "veterinary-clinic",
+      "spa-and-massage",
+      "gym-and-fitness",
+    ],
   },
   faqs: [
     {
@@ -189,20 +180,24 @@ export const dentalClinic: Industry = {
     },
     {
       q: "Why are some reviews sent without a reply?",
-      a: "A review about an injury, a safety problem or a named member of your team needs more care: it comes to you marked as needing a little more care, with a short checklist and no draft. Kabsi writes a short, neutral holding reply only if you ask.",
+      a: "An injury, a safety problem or a named team member gets no draft, a short checklist, and a neutral holding reply only if you ask.",
     },
     {
       q: "Can Kabsi ask patients for reviews?",
-      a: "Kabsi never receives a patient's number. It gives your team a ready message with the review link to forward after a visit, if you choose to.",
+      a: "Kabsi never receives a patient's number. Your team gets a ready message with the review link to forward after a visit, if you choose.",
     },
     {
       q: "Should a clinic reply to reviews at all?",
-      a: "Yes, a short reply shows the next patient that someone reads them. What matters is what it says. Kabsi's drafts never confirm someone is a patient, and you approve every one.",
+      a: "Yes, a short reply shows the next patient that someone reads them. Kabsi's drafts never confirm someone is a patient, and you approve every one.",
     },
     {
       q: "Can my practice manager approve instead of me?",
       a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything.",
     },
   ],
-  guides: ["how-to-reply-to-google-reviews", "how-to-choose-your-primary-category"],
+  guides: [
+    "how-to-reply-to-google-reviews",
+    "someone-changed-my-hours-on-google",
+    "how-to-set-holiday-hours-on-google",
+  ],
 };

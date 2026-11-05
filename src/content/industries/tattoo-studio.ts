@@ -28,10 +28,30 @@ export const tattooStudio: Industry = {
     "walk in tattoo",
     "tattoo studio",
   ],
+  // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
+  // docs/claims/tattoo-studio.md, whose "Industries 3" section maps it to its row.
+  profile: [
+    {
+      title: "Photos are your portfolio",
+      text: "Fresh and healed shots both help. Kabsi tells you when one is blurry or dark.",
+    },
+    {
+      title: "Say how people book",
+      text: "By appointment only? Say so in your description. Kabsi checks it every day.",
+    },
+    {
+      title: "Thanks passed to the artist",
+      text: "A review that names Leo thanks Leo, if he is on your team list.",
+    },
+    {
+      title: "A review about an infection",
+      text: "No draft, a short checklist, and a neutral holding reply only if you ask.",
+    },
+  ],
   categories: {
     primary: "Tattoo shop",
     more: ["Tattoo artist", "Body piercing shop"],
-    note: "Choose the first by what most of your work is, and add body piercing only if you do it. Read the names in your own profile, because they can differ by country.",
+    line: "Choose the first by most of your work; add body piercing only if you do it. Names can differ by country.",
   },
   page: {
     query: "tattoo shop Google Business Profile",
@@ -43,7 +63,7 @@ export const tattooStudio: Industry = {
     line: "Kabsi looks after your tattoo shop Google Business Profile: booking rules right, healed work as posts, calm replies.",
     card: "Booking rules right, healed work as posts.",
     answer:
-      "A tattoo shop Google Business Profile should show the work and say how to book. Kabsi turns a photo of healed work into a post that names the artist, checks your description and hours every day, drafts a reply to every review, and asks about holiday hours in time. You approve each one.",
+      "A tattoo shop Google Business Profile should say how to book. Kabsi checks your description daily and prepares healed work posts and replies.",
     watch: {
       business: "Black Lantern Tattoo, Manchester",
       line: "Walk-in or by appointment: your description says which. Kabsi watches it, and your hours, every day.",
@@ -78,34 +98,23 @@ export const tattooStudio: Industry = {
         "Black Lantern Tattoo in the Northern Quarter does fine line work, by appointment only.",
       sources: ["Black Lantern Tattoo's Google profile", "Black Lantern Tattoo's website"],
     },
-    related: ["barbershop", "lash-and-brow-studio"],
-    searchText:
-      "People search for a style first, fine line, cover up or a walk in, then look through the photos and read how the artist handled the client and the healing.",
-    guide: [
-      {
-        title: "The portfolio and the booking rules",
-        paras: [
-          "Your photos are your portfolio on Google. Fresh and healed shots both help, and a post can say which artist did the piece and when their books open. Kabsi checks each photo before it goes to Google and tells you when one is dark, blurry or too small.",
-          "Say how people book. If you work by appointment only, your description and your posts should say so, so nobody turns up at the door for a walk in. Kabsi compares the description and hours Google shows with what you confirmed, every day, and asks you when they differ.",
-        ],
-      },
-      {
-        title: "Reviews about the artist and the healing",
-        paras: [
-          "A review can name the artist. Add your team to Kabsi, and a review that names Leo gets a reply that passes the thanks to Leo; a name not on your list is never used.",
-          "A review about an infection or another safety problem gets no draft: it comes to you marked as needing a little more care, with a short checklist and no draft. Kabsi writes a short, neutral holding reply only if you ask. Kabsi never gives medical advice.",
-        ],
-      },
+    related: [
+      "barbershop",
+      "lash-and-brow-studio",
+      "nail-salon",
+      "hair-salon",
+      "medical-and-aesthetic-clinic",
+      "spa-and-massage",
     ],
   },
   faqs: [
     {
       q: "Can Kabsi say we only work by appointment?",
-      a: "Yes. Write it in your description on Google and in your posts; Kabsi checks the description every day and tells you when Google shows something else.",
+      a: "Yes. Write it in your description and posts. Kabsi checks the description every day and tells you when Google shows something else.",
     },
     {
       q: "What happens with a review about an infection?",
-      a: "An infection is a safety matter, so it comes to you marked as needing a little more care, with a short checklist and no draft. Kabsi writes a short, neutral holding reply only if you ask.",
+      a: "An infection is a safety matter: no draft and a short checklist. Kabsi writes a neutral holding reply only if you ask.",
     },
     {
       q: "Will a reply name the right artist?",
@@ -120,5 +129,9 @@ export const tattooStudio: Industry = {
       a: "No. Kabsi works only with your Google profile.",
     },
   ],
-  guides: ["how-to-reply-to-google-reviews", "how-to-respond-to-negative-google-reviews"],
+  guides: [
+    "photos-for-google-business-profile",
+    "google-business-description-examples",
+    "how-to-respond-to-negative-google-reviews",
+  ],
 };

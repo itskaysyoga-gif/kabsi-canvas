@@ -60,7 +60,7 @@ describe("every industry page on Design 9 (Industries 2)", () => {
     }
   });
 
-  it("has five trade questions, three jobs, an Example watch, post and AI answer, and two related trades", () => {
+  it("has five trade questions, three jobs, an Example watch, post and AI answer, and six related trades (Industries 3)", () => {
     for (const i of pages) {
       expect(i.faqs, i.slug).toHaveLength(5);
       expect(i.page.jobs, i.slug).toHaveLength(3);
@@ -94,7 +94,17 @@ describe("every industry page on Design 9 (Industries 2)", () => {
 
   it("never uses a dash, an exclamation mark or a never-say word in the page's own lines", () => {
     for (const i of pages) {
-      const text = JSON.stringify({ page: i.page, faqs: i.faqs, lead: i.lead });
+      const text = JSON.stringify({
+        page: i.page,
+        faqs: i.faqs,
+        lead: i.lead,
+        // Industries 3: the cards are checked the same way.
+        profile: i.profile,
+        reviews: i.reviews,
+        categories: i.categories,
+        holidays: i.holidays,
+        photoCards: i.photoCards,
+      });
       expect(DASH_OR_BANG.test(text), i.slug).toBe(false);
       for (const n of NEVER) expect(text, `${i.slug}: ${n}`).not.toMatch(n);
     }
