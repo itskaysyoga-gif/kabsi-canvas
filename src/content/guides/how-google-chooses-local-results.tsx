@@ -20,7 +20,7 @@ export const guide: GuideDoc = {
   inShort: [
     "Relevance: how well your Business Profile matches what someone is searching for.",
     "Distance: how far each business is from the customer who is searching.",
-    "Popularity: in Google's words, \"how well-known a business is\", including links to it and its reviews.",
+    'Popularity: in Google\'s words, "how well-known a business is", including links to it and its reviews.',
     "Nobody outside Google can tell you exactly how these are weighed, or promise a position.",
   ],
   sections: [
@@ -39,9 +39,9 @@ export const guide: GuideDoc = {
           </p>
           <Callout kind="warn" title="No one can sell you a position">
             Google says: "There's no way to request or pay for a better local ranking on Google." It
-            also says it keeps the search algorithm details confidential to make the ranking system as
-            fair as possible for everyone. Anyone who promises you first place is promising something
-            Google says is not for sale.
+            also says it keeps the search algorithm details confidential to make the ranking system
+            as fair as possible for everyone. Anyone who promises you first place is promising
+            something Google says is not for sale.
           </Callout>
         </>
       ),
@@ -98,7 +98,7 @@ export const guide: GuideDoc = {
       id: "popularity",
       heading: "What makes a business popular, in Google's words?",
       answer:
-        "For popularity, Google speaks of \"how well-known a business is\", and says prominent places are more likely to show up in search results. Google says this is also based on information like how many websites link to your business and how many reviews you have, and that more reviews and positive ratings can help your business's local ranking.",
+        'For popularity, Google speaks of "how well-known a business is", and says prominent places are more likely to show up in search results. Google says this is also based on information like how many websites link to your business and how many reviews you have, and that more reviews and positive ratings can help your business\'s local ranking.',
       body: (
         <>
           <p>
@@ -108,8 +108,8 @@ export const guide: GuideDoc = {
             suggests reminding customers with a Google link or a QR code.
           </p>
           <p>
-            Ask every customer the same way, after a real visit: no reward, no asking only the people
-            you expect to be happy, no targets per member of staff. How to do that well is in{" "}
+            Ask every customer the same way, after a real visit: no reward, no asking only the
+            people you expect to be happy, no targets per member of staff. How to do that well is in{" "}
             <GuideLink slug="how-to-ask-for-google-reviews">
               how to ask customers for Google reviews the right way
             </GuideLink>
@@ -147,10 +147,10 @@ export const guide: GuideDoc = {
         "No. Google says the information in profiles is compiled from several sources: publicly available information such as a business's official website, licensed data from third parties, people who contribute facts, photos and reviews (including owners who claim profiles), and Google's own interactions with a local place or business.",
       body: (
         <p>
-          That is why a detail you never typed, such as a menu link or a customer's photo, can appear
-          on your profile, and why your hours and address should match on your website and elsewhere.
-          Google says that if you think a profile is wrong you can suggest an edit. Keeping your
-          details the same everywhere is covered in{" "}
+          That is why a detail you never typed, such as a menu link or a customer's photo, can
+          appear on your profile, and why your hours and address should match on your website and
+          elsewhere. Google says that if you think a profile is wrong you can suggest an edit.
+          Keeping your details the same everywhere is covered in{" "}
           <GuideLink slug="keep-your-hours-and-details-the-same-everywhere">
             keep your hours and details the same everywhere
           </GuideLink>
@@ -162,12 +162,12 @@ export const guide: GuideDoc = {
       id: "uk-uae",
       heading: "Is it different in the UK or the UAE?",
       answer:
-        "No. Google's page on local ranking gives the same factors and the same advice for every country, and does not describe anything specific to the UK or the UAE. The one exception on the page is in-store products, which Google says are only for retail businesses in eligible countries or regions.",
+        "Google's pages here name no separate rule for the UK or the UAE: its page on local ranking gives one set of factors and advice. The one exception on the page is in-store products, which Google says are only for retail businesses in eligible countries or regions.",
       body: (
         <p>
-          What can differ is how customers word a search: in the UK some add a town or a postcode, and in
-          the UAE some add an area such as Jumeirah or Al Barsha. Make sure the address or area on your
-          profile is written the way your customers know it.
+          What can differ is how customers word a search: in the UK some add a town or a postcode,
+          and in the UAE some add an area such as Jumeirah or Al Barsha. Make sure the address or
+          area on your profile is written the way your customers know it.
         </p>
       ),
     },
@@ -177,16 +177,17 @@ export const guide: GuideDoc = {
     body: (
       <>
         <p>
-          Kabsi promises no rankings, and does not claim to know what Google's ranking rewards beyond
-          what Google's own page says. It takes care of the parts you control: a reply ready for every
-          review, complete and accurate details, opening hours kept right, photos and posts you
-          approve, and an easy way for every customer to leave a review. Nothing goes to Google
-          without your yes.
+          Kabsi promises no rankings, and does not claim to know what Google's ranking rewards
+          beyond what Google's own page says. It takes care of the parts you control: a reply ready
+          for every review, complete and accurate details, opening hours kept right, photos and
+          posts you approve, and an easy way for every customer to leave a review. Nothing goes to
+          Google without your yes.
         </p>
         <p>
           The free check needs no Google access. Its nearby part searches Google Maps from places
-          around your business, like a customer standing there, and shows where you came up, labelled
-          "Sample Google Maps results, not customer counts." <SiteRef to="/scan">Run the free check</SiteRef>.
+          around your business, like a customer standing there, and shows where you came up,
+          labelled "Sample Google Maps results, not customer counts."{" "}
+          <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>
     ),

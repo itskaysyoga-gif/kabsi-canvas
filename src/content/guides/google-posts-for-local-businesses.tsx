@@ -33,9 +33,9 @@ export const guide: GuideDoc = {
         <>
           <p>
             Google describes posts as a way to share announcements, offers, updates and event
-            details directly with customers, and says they help customers decide to visit. Posts
-            do not replace the facts on your profile: your hours, address and services still live
-            in their own fields, and a post is the place for what is new.
+            details directly with customers, and says they help customers decide to visit. Posts do
+            not replace the facts on your profile: your hours, address and services still live in
+            their own fields, and a post is the place for what is new.
           </p>
           <p>
             Google also shows featured posts on some profiles on a phone: posts about events, deals
@@ -185,14 +185,16 @@ export const guide: GuideDoc = {
       id: "uk-uae",
       heading: "Is anything different in the UK or the UAE?",
       answer:
-        "The kinds of post, the steps and the content policy on Google's pages are the same in both countries. The one difference Google names is featured posts, which today are for single-location food and drink businesses in a list of countries that includes the UK and does not include the UAE.",
+        "Google's pages here name no separate rule for the UK or the UAE on the kinds of post, the steps or the content policy. The one difference Google names is featured posts, which today are for single-location food and drink businesses in a list of countries that includes the UK and does not include the UAE.",
       body: (
         <p>
           Your country's own rules on advertising still apply: Google's content policy says you are
           responsible for making sure your posts follow all applicable laws. That matters most for
           offers, prices and anything to do with alcohol. Holiday notices belong in special hours
           rather than only in a post, which is covered in{" "}
-          <GuideLink slug="how-to-set-holiday-hours-on-google">how to set holiday hours on Google</GuideLink>
+          <GuideLink slug="how-to-set-holiday-hours-on-google">
+            how to set holiday hours on Google
+          </GuideLink>
           .
         </p>
       ),
@@ -205,12 +207,13 @@ export const guide: GuideDoc = {
         <p>
           Kabsi prepares Google posts for you to approve: 2 a month on Essentials and one every week
           on Pro. Each is an Update, an Offer or an Event that can have one of your own checked
-          photos and one button, and Kabsi writes it only from facts you confirmed and photos you approved. An
-          offer or an event is only one you typed in: Kabsi never invents a price, an offer or a
-          date. When it has nothing true to say, it asks you one question instead, "Anything new
-          this month? A dish, a service, an event?", and until Kabsi's own AI writing is switched
-          on you write the post in your words on Posts. You can also send a photo with a line about
-          it on WhatsApp, and Kabsi turns it into a post and shows you the exact words first.
+          photos and one button, and Kabsi writes it only from facts you confirmed and photos you
+          approved. An offer or an event is only one you typed in: Kabsi never invents a price, an
+          offer or a date. When it has nothing true to say, it asks you one question instead,
+          "Anything new this month? A dish, a service, an event?", and until Kabsi's own AI writing
+          is switched on you write the post in your words on Posts. You can also send a photo with a
+          line about it on WhatsApp, and Kabsi turns it into a post and shows you the exact words
+          first.
         </p>
         <p>
           Before you see a post, and again when you approve it, Kabsi checks it: no phone numbers,

@@ -42,8 +42,8 @@ export const guide: GuideDoc = {
               user owns, and reinstates them if the account is reinstated.
             </li>
             <li>
-              <b>A manager's Google Account is removed:</b> the manager is suspended on the
-              profiles they manage, and the profiles themselves are not affected.
+              <b>A manager's Google Account is removed:</b> the manager is suspended on the profiles
+              they manage, and the profiles themselves are not affected.
             </li>
           </ul>
         </>
@@ -92,15 +92,15 @@ export const guide: GuideDoc = {
       body: (
         <>
           <p>
-            Before you add anything, make the profile itself follow the guidelines: Google says to do
-            this before you submit. If the name on your profile has extra words, correct it to the
-            name on your sign. If your address is a P.O. Box or a virtual office, the profile cannot
-            stay at that address.
+            Before you add anything, make the profile itself follow the guidelines: Google says to
+            do this before you submit. If the name on your profile has extra words, correct it to
+            the name on your sign. If your address is a P.O. Box or a virtual office, the profile
+            cannot stay at that address.
           </p>
           <p>
-            Google's list is the same for the UK and the UAE and does not name documents for either
-            country, so choose official papers that clearly show the same business name and address
-            as the profile.
+            Google's pages here name no separate rule for the UK or the UAE and do not name
+            documents for either country, so choose official papers that clearly show the same
+            business name and address as the profile.
           </p>
         </>
       ),
@@ -124,12 +124,12 @@ export const guide: GuideDoc = {
               </>,
               "Read the details: the date of the decision, the reason, the link to the policy, whether it can be appealed, and its status.",
               <>
-                To add documents, select <b>Choose file</b>; you can attach several. In the text box,
-                explain in plain words why the profile should be reinstated and what you fixed.
+                To add documents, select <b>Choose file</b>; you can attach several. In the text
+                box, explain in plain words why the profile should be reinstated and what you fixed.
               </>,
               <>
-                Tick the box confirming you are ready and that your evidence is attached, then select{" "}
-                <b>Submit appeal</b>.
+                Tick the box confirming you are ready and that your evidence is attached, then
+                select <b>Submit appeal</b>.
               </>,
             ]}
           />
@@ -150,8 +150,8 @@ export const guide: GuideDoc = {
         <>
           <p>
             To check progress, open the appeals tool, select the profile, and read the status on the
-            right: <b>Submitted</b>, <b>Approved</b>, <b>Not Approved</b>,{" "}
-            <b>Can't be appealed</b> or <b>Eligible for appeal</b>.
+            right: <b>Submitted</b>, <b>Approved</b>, <b>Not Approved</b>, <b>Can't be appealed</b>{" "}
+            or <b>Eligible for appeal</b>.
           </p>
           <p>
             If the profile comes back but something is still wrong with it, Google says to contact

@@ -39,8 +39,7 @@ export const guide: GuideDoc = {
           </p>
           <p>
             Categories are one part of how Google picks local results, not the whole of it, and
-            nobody outside Google can promise a position. More on
-            that in{" "}
+            nobody outside Google can promise a position. More on that in{" "}
             <GuideLink slug="how-google-chooses-local-results">
               how Google chooses which businesses to show nearby
             </GuideLink>
@@ -150,8 +149,8 @@ export const guide: GuideDoc = {
               </>,
               "In the Primary category box, type a category and select it from the list.",
               <>
-                For an additional category, select <b>Add another category</b>, type it and select it
-                from the list. To take one off, select <b>Remove</b> next to it.
+                For an additional category, select <b>Add another category</b>, type it and select
+                it from the list. To take one off, select <b>Remove</b> next to it.
               </>,
               <>
                 Select <b>Save</b>.
@@ -159,9 +158,9 @@ export const guide: GuideDoc = {
             ]}
           />
           <Callout kind="warn" title="Make one careful change">
-            Google says it reviews your changes before they go live, and that a category change might
-            lead to a new verification. Decide on the right category first, change it once, and do
-            not change your business name or address at the same time.
+            Google says it reviews your changes before they go live, and that a category change
+            might lead to a new verification. Decide on the right category first, change it once,
+            and do not change your business name or address at the same time.
           </Callout>
           <p>
             If you run several locations of the same business, Google says all of them must share a
@@ -188,13 +187,12 @@ export const guide: GuideDoc = {
       id: "uk-uae",
       heading: "Are the category rules different in the UK and the UAE?",
       answer:
-        "No. Google's category guidelines and the steps to change a category are the same in both countries on these pages. You pick from Google's own list in either country and cannot add a category of your own.",
+        "Google's pages here name no separate rule for the UK or the UAE on categories or the steps to change one. You pick from Google's own list in either country and cannot add a category of your own.",
       body: (
         <p>
           What can differ is the words customers use for the same kind of business, such as
-          hairdresser, salon or barber. Pick the
-          category on Google's list that matches what you are, and use your business description for
-          the words customers use. See{" "}
+          hairdresser, salon or barber. Pick the category on Google's list that matches what you
+          are, and use your business description for the words customers use. See{" "}
           <GuideLink slug="google-business-description-examples">
             what to write in your Google business description
           </GuideLink>
@@ -216,9 +214,9 @@ export const guide: GuideDoc = {
         </p>
         <p>
           Google Protection watches your main category and tells you if Google shows something
-          different from what you confirmed, and Kabsi warns that changing it can make Google ask you
-          to verify again. A check that compares your categories with nearby businesses is coming,
-          not live yet. <SiteRef to="/scan">Run the free check</SiteRef>.
+          different from what you confirmed, and Kabsi warns that changing it can make Google ask
+          you to verify again. A check that compares your categories with nearby businesses is
+          coming, not live yet. <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>
     ),

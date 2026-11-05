@@ -92,8 +92,8 @@ export const guide: GuideDoc = {
             tables of guests who seemed pleased.
           </li>
           <li>
-            A garage: the link at the bottom of the invoice email or the message that says the car is
-            ready.
+            A garage: the link at the bottom of the invoice email or the message that says the car
+            is ready.
           </li>
           <li>
             Every customer gets the same chance: the same card, the same message, at the same point
@@ -162,9 +162,9 @@ export const guide: GuideDoc = {
       body: (
         <p>
           Give the team the same card and the same words, and make asking part of every visit rather
-          than a competition. Google also lists reviews from people with a conflict of interest, such
-          as current or former employees and family, as not allowed, so staff and relatives should
-          not review the business themselves.
+          than a competition. Google also lists reviews from people with a conflict of interest,
+          such as current or former employees and family, as not allowed, so staff and relatives
+          should not review the business themselves.
         </p>
       ),
     },
@@ -175,9 +175,10 @@ export const guide: GuideDoc = {
         "Google checks reviews against its policies, and its help page says this can take a few days. Other reasons it gives: customers on older phones or software can have trouble posting and should update the Maps app, and reviews removed for policy violations are not restored.",
       body: (
         <p>
-          A burst of reviews in a short time after a campaign can look unusual: Google's policy names
-          unusual volumes or patterns of reviews as a sign of rating manipulation. Asking steadily,
-          visit by visit, is both the honest way and the one that matches how genuine reviews arrive.
+          A burst of reviews in a short time after a campaign can look unusual: Google's policy
+          names unusual volumes or patterns of reviews as a sign of rating manipulation. Asking
+          steadily, visit by visit, is both the honest way and the one that matches how genuine
+          reviews arrive.
         </p>
       ),
     },
@@ -185,14 +186,14 @@ export const guide: GuideDoc = {
       id: "uk-uae",
       heading: "Is anything different in the UK or the UAE?",
       answer:
-        "Google's rules and steps are the same in both countries. In the UK there is also the law: the Competition and Markets Authority's fake reviews guidance, published on 4 April 2025 under the Digital Markets, Competition and Consumers Act 2024, says that simply emailing customers to ask if they wish to leave a review, without deciding what they say, is not prohibited.",
+        "Google's pages here name no separate rule for the UK or the UAE. In the UK there is also the law: the Competition and Markets Authority's fake reviews guidance, published on 4 April 2025 under the Digital Markets, Competition and Consumers Act 2024, says that simply emailing customers to ask if they wish to leave a review, without deciding what they say, is not prohibited.",
       body: (
         <p>
-          The same UK guidance bans fake reviews and incentivised reviews that hide the incentive, and
-          treats a refund or gift card offered for changing a negative review as commissioning a
+          The same UK guidance bans fake reviews and incentivised reviews that hide the incentive,
+          and treats a refund or gift card offered for changing a negative review as commissioning a
           banned review. On Google the rule is simpler and stricter: no incentive at all. This guide
-          does not cover UAE consumer law; Google's own rules above apply to a business in the UAE in
-          the same way.
+          does not cover UAE consumer law; Google's own rules above apply to a business in the UAE
+          in the same way.
         </p>
       ),
     },
@@ -205,9 +206,9 @@ export const guide: GuideDoc = {
           Get reviews is free for every business, with or without a plan: a short review link and a
           QR code that open your own Google review page, and a Send review link button so staff can
           send one ready message from their own WhatsApp after a visit. On both plans you also get a
-          counter card and a table card ready to print. Every customer sees the same page: no rating question, no
-          filtering of unhappy customers, no reward, and Kabsi records nothing about who sent a link
-          to whom, so there are no targets or league tables.
+          counter card and a table card ready to print. Every customer sees the same page: no rating
+          question, no filtering of unhappy customers, no reward, and Kabsi records nothing about
+          who sent a link to whom, so there are no targets or league tables.
         </p>
         <p>
           Kabsi counts how often your link was opened, never who opened it, and an open is not a
@@ -262,7 +263,11 @@ export const guide: GuideDoc = {
     },
   ],
   industries: ["hair-salon", "barbershop", "restaurant", "auto-repair"],
-  related: ["google-review-link-and-qr-code", "review-gating-google", "how-to-reply-to-google-reviews"],
+  related: [
+    "google-review-link-and-qr-code",
+    "review-gating-google",
+    "how-to-reply-to-google-reviews",
+  ],
   summary:
     "How to ask customers for Google reviews within Google's rules: the review link and QR code, when and what to say, and why rewards, staff quotas and asking only happy customers are not allowed.",
 };

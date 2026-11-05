@@ -31,8 +31,8 @@ export const guide: GuideDoc = {
         "Google says you can report any review, but only those that violate its policies are eligible for removal. It also says not to report a review just because you disagree with it or dislike it, and that it does not get involved in conflicts between businesses and customers.",
       body: (
         <p>
-          So a harsh one-star review from a real customer usually stays, however unfair it feels. The
-          honest answer to that is a calm public reply, covered in{" "}
+          So a harsh one-star review from a real customer usually stays, however unfair it feels.
+          The honest answer to that is a calm public reply, covered in{" "}
           <GuideLink slug="how-to-respond-to-negative-google-reviews">
             how to respond to negative Google reviews
           </GuideLink>
@@ -58,14 +58,14 @@ export const guide: GuideDoc = {
               Unusual volumes or patterns of reviews that suggest an effort to manipulate a rating.
             </li>
             <li>
-              Harassment, hate speech, personal information posted without consent, profanity used to
-              offend, and off-topic content such as general political or social commentary.
+              Harassment, hate speech, personal information posted without consent, profanity used
+              to offend, and off-topic content such as general political or social commentary.
             </li>
             <li>The same content posted several times, from one account or many.</li>
           </ul>
           <p>
-            When you report, pick the reason that matches what the review breaks, for example
-            "Spam" or "Profanity", the examples Google gives.
+            When you report, pick the reason that matches what the review breaks, for example "Spam"
+            or "Profanity", the examples Google gives.
           </p>
         </>
       ),
@@ -85,7 +85,7 @@ export const guide: GuideDoc = {
             <>
               Next to the review you want to flag, select <b>Report</b>.
             </>,
-            "Select the reason, for example \"Spam\" or \"Profanity\".",
+            'Select the reason, for example "Spam" or "Profanity".',
             <>
               Select <b>Send report</b>.
             </>,
@@ -110,8 +110,8 @@ export const guide: GuideDoc = {
                 Select your business, then <b>Continue</b>.
               </>,
               <>
-                To report, choose <b>Report a new review for removal</b>, then <b>Continue</b>, select{" "}
-                <b>Report</b> next to the review, choose the reason in the new tab and select{" "}
+                To report, choose <b>Report a new review for removal</b>, then <b>Continue</b>,
+                select <b>Report</b> next to the review, choose the reason in the new tab and select{" "}
                 <b>Submit</b>.
               </>,
               "To check a report, come back to the tool and look at its status.",
@@ -123,11 +123,12 @@ export const guide: GuideDoc = {
               <b>Decision pending</b>: flagged, not evaluated yet.
             </li>
             <li>
-              <b>Report reviewed - no policy violation</b>: evaluated, and Google found no violation.
+              <b>Report reviewed - no policy violation</b>: evaluated, and Google found no
+              violation.
             </li>
             <li>
-              <b>Escalated - check your email for updates</b>: your appeal is being looked at and the
-              final decision comes by email.
+              <b>Escalated - check your email for updates</b>: your appeal is being looked at and
+              the final decision comes by email.
             </li>
           </ul>
         </>
@@ -143,9 +144,9 @@ export const guide: GuideDoc = {
           <Steps
             items={[
               <>
-                In the Reviews Management Tool, confirm your account, select your business and choose{" "}
-                <b>Check the status of a review I reported previously and appeal options</b>, then{" "}
-                <b>Continue</b>.
+                In the Reviews Management Tool, confirm your account, select your business and
+                choose <b>Check the status of a review I reported previously and appeal options</b>,
+                then <b>Continue</b>.
               </>,
               <>
                 At the bottom, select <b>Appeal eligible reviews</b>.
@@ -195,9 +196,8 @@ export const guide: GuideDoc = {
         <p>
           A reply like "We cannot find a visit matching this, and we would like to understand what
           happened. Please contact us so we can look into it." says what matters without accusing
-          anyone. Google also uses automated
-          spam detection, and it says this can occasionally remove a genuine review by mistake; if
-          that happens, Google asks you to contact support.
+          anyone. Google also uses automated spam detection, and it says this can occasionally
+          remove a genuine review by mistake; if that happens, Google asks you to contact support.
         </p>
       ),
     },
@@ -205,13 +205,14 @@ export const guide: GuideDoc = {
       id: "uk-uae",
       heading: "Is anything different in the UK or the UAE?",
       answer:
-        "Google's report, appeal and extortion steps are the same in both countries. In the UK, the Competition and Markets Authority's fake reviews guidance says the ban on fake reviews covers negative ones too, and that a review is not fake just because the business does not like or agree with it.",
+        "Google's pages here name no separate rule for the UK or the UAE on reporting, appeals or extortion. In the UK, the Competition and Markets Authority's fake reviews guidance says the ban on fake reviews covers negative ones too, and that a review is not fake just because the business does not like or agree with it.",
       body: (
         <p>
           That UK guidance, published on 4 April 2025 under the Digital Markets, Competition and
-          Consumers Act 2024, mainly sets duties for whoever writes, commissions or publishes reviews;
-          asking Google to remove a review still goes through Google's own report. This guide does not
-          cover UAE law, and Google's steps above work the same for a business in the UAE.
+          Consumers Act 2024, mainly sets duties for whoever writes, commissions or publishes
+          reviews; asking Google to remove a review still goes through Google's own report. This
+          guide does not cover UAE law, and Google's steps above work the same for a business in the
+          UAE.
         </p>
       ),
     },
@@ -224,10 +225,10 @@ export const guide: GuideDoc = {
           On Pro, Report this review on a review in Kabsi opens a guide for a review you believe
           breaks Google's rules: Google's content categories in plain words, an evidence checklist
           (you keep the evidence; Kabsi remembers only which boxes you ticked), the steps and a link
-          to the Reviews Management Tool, and a place to record what happened, with a reminder a week
-          later. Every new review also reaches you with a reply drafted, and a review with a threat,
-          harassment or an accusation of a crime gets no draft, only a short checklist, so you decide what to
-          say.
+          to the Reviews Management Tool, and a place to record what happened, with a reminder a
+          week later. Every new review also reaches you with a reply drafted, and a review with a
+          threat, harassment or an accusation of a crime gets no draft, only a short checklist, so
+          you decide what to say.
         </p>
         <p>
           Kabsi cannot remove a review, does not report it for you, never promises a removal and

@@ -37,13 +37,13 @@ export const guide: GuideDoc = {
               owners, including editing main business info like hours and address.
             </li>
             <li>
-              <b>Google.</b> Google says it gathers info from different sources, like user reports and
-              licensed content, and may update your profile if those sources report that your info is
-              incorrect or outdated.
+              <b>Google.</b> Google says it gathers info from different sources, like user reports
+              and licensed content, and may update your profile if those sources report that your
+              info is incorrect or outdated.
             </li>
             <li>
-              <b>The public.</b> Anyone signed in to Google Maps can choose Suggest an edit on a place
-              and add, edit or report when it is open each day of the week.
+              <b>The public.</b> Anyone signed in to Google Maps can choose Suggest an edit on a
+              place and add, edit or report when it is open each day of the week.
             </li>
             <li>
               <b>Google's automated calls and texts.</b> Google says it may call, text or send a
@@ -65,12 +65,13 @@ export const guide: GuideDoc = {
             items={[
               "Sign in to the Google Account linked to your profile and go to your Business Profile. In the Google Maps app, tap Business at the bottom right.",
               <>
-                Select <b>Edit profile</b> and look at <b>Hours</b>. Blue text means Google changed it.
+                Select <b>Edit profile</b> and look at <b>Hours</b>. Blue text means Google changed
+                it.
               </>,
               "Check the email address of the Google Account that manages the profile, including spam, for a message about a suggested edit.",
               <>
-                Where Google offers it, select <b>Edit profile</b>, then <b>Collected info</b>. Google
-                says this shows information collected from automated calls, texts or WhatsApp
+                Where Google offers it, select <b>Edit profile</b>, then <b>Collected info</b>.
+                Google says this shows information collected from automated calls, texts or WhatsApp
                 messages, with its source and the date it was collected.
               </>,
             ]}
@@ -217,14 +218,14 @@ export const guide: GuideDoc = {
       id: "uk-uae",
       heading: "Is anything different in the UK or the UAE?",
       answer:
-        "The rules on these Google pages are the same in both countries: the blue text, the 4 days to answer a suggested edit and the way to edit your hours do not change. What may differ is that Google says Collected info is available only in select regions.",
+        "Google's pages here name no separate rule for the UK or the UAE: the blue text, the 4 days to answer a suggested edit and the way to edit your hours are described once for everyone. What may differ is that Google says Collected info is available only in select regions.",
       body: (
         <p>
           In the UAE, Ramadan hours and public holidays whose dates follow the moon sighting are
-          days when your door and your profile can easily disagree. In the UK, bank holidays differ between
-          England and Wales, Scotland and Northern Ireland. In both, setting special hours for those
-          days before they come is the simplest way to keep Google and your door saying the same
-          thing.
+          days when your door and your profile can easily disagree. In the UK, bank holidays differ
+          between England and Wales, Scotland and Northern Ireland. In both, setting special hours
+          for those days before they come is the simplest way to keep Google and your door saying
+          the same thing.
         </p>
       ),
     },
@@ -234,12 +235,12 @@ export const guide: GuideDoc = {
     body: (
       <>
         <p>
-          With Google Protection, Kabsi compares your Google profile with the details you
-          confirmed, including your opening hours, and emails you when they differ, for example
-          "Google shows Sunday closing at 18:00. You approved 22:00." The email says whether Google
-          made the change itself or Kabsi does not know who did. You choose "Google is right" or
-          "Keep my information". Nothing changes on Google unless you say so, and Kabsi never puts
-          anything back by itself.
+          With Google Protection, Kabsi compares your Google profile with the details you confirmed,
+          including your opening hours, and emails you when they differ, for example "Google shows
+          Sunday closing at 18:00. You approved 22:00." The email says whether Google made the
+          change itself or Kabsi does not know who did. You choose "Google is right" or "Keep my
+          information". Nothing changes on Google unless you say so, and Kabsi never puts anything
+          back by itself.
         </p>
         <p>
           Kabsi is a Manager on your profile that you invite with its group ID, never asks for your

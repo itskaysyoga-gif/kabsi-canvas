@@ -47,8 +47,8 @@ export const guide: GuideDoc = {
           </ul>
           <p>
             If you do not see the option you expect, check your main category first. Google's help
-            links the services editor to your business category, and the right category is
-            explained in{" "}
+            links the services editor to your business category, and the right category is explained
+            in{" "}
             <GuideLink slug="choose-google-business-profile-categories">
               how to choose your Google Business Profile categories
             </GuideLink>
@@ -82,8 +82,8 @@ export const guide: GuideDoc = {
       body: (
         <>
           <p>
-            Group services into categories when you offer different kinds, for example cuts,
-            colour and treatments in a salon. Google lets you add a service category with{" "}
+            Group services into categories when you offer different kinds, for example cuts, colour
+            and treatments in a salon. Google lets you add a service category with{" "}
             <b>Edit services</b> and then <b>Add a new business category</b>, and add the services
             you offer under it.
           </p>
@@ -94,9 +94,9 @@ export const guide: GuideDoc = {
           </Callout>
           <p>
             Write a service the way customers ask for it: "Skin fade" or "Gel manicure", not a
-            slogan. Google's help says that when local customers search for an offering you
-            provide, that service may be highlighted on your profile, and that in the Google Maps
-            app customers can see your full list under "Services".
+            slogan. Google's help says that when local customers search for an offering you provide,
+            that service may be highlighted on your profile, and that in the Google Maps app
+            customers can see your full list under "Services".
           </p>
         </>
       ),
@@ -120,8 +120,8 @@ export const guide: GuideDoc = {
             Google lists other ways to keep a menu right. You can upload a photo or PDF of your menu
             under Photos of menu, and Google offers an experimental tool that turns a one-page menu
             photo into menu items with AI, which you review before you publish. You can add a link
-            to your menu under Menu link. Google may also copy menu data from your website, and
-            when it finds several menu sources you choose your preferred one in the Full menu tab.
+            to your menu under Menu link. Google may also copy menu data from your website, and when
+            it finds several menu sources you choose your preferred one in the Full menu tab.
           </p>
           <p>
             Google says that if your menu comes through the Business Profile API you may not have
@@ -149,14 +149,14 @@ export const guide: GuideDoc = {
       id: "uk-uae",
       heading: "Is anything different in the UK or the UAE?",
       answer:
-        "The services and menu editors on Google's pages name no country rules, so the steps are the same in both. The difference is products: Google lists showing in-store products through the Local Inventory app for retailers in the US, Canada, the UK and Ireland, which leaves out the UAE.",
+        "Google's pages here name no separate rule for the UK or the UAE for the services and menu editors. The difference is products: Google lists showing in-store products through the Local Inventory app for retailers in the US, Canada, the UK and Ireland, which leaves out the UAE.",
       body: (
         <>
           <p>
             A shop in the UAE can still try the product editor, whose page names no country list,
             though its scene generation tool is for merchants in the US only. Write prices in the
-            currency customers pay in, pounds in the UK and dirhams in the UAE, and keep the
-            service names in the language your customers search in.
+            currency customers pay in, pounds in the UK and dirhams in the UAE, and keep the service
+            names in the language your customers search in.
           </p>
           <p>
             Your description can say what you offer in a sentence, but Google asks it to focus on

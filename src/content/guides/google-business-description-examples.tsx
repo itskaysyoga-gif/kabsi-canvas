@@ -46,8 +46,9 @@ export const guide: GuideDoc = {
         <p>
           The description is the one place on your profile where you describe the business in your
           own words. Your name, address, hours, phone number, website and categories all have their
-          own fields, so the description does not need to repeat them. Google's guidelines say to add
-          details like your address, hours and category in those other sections, not in your name.
+          own fields, so the description does not need to repeat them. Google's guidelines say to
+          add details like your address, hours and category in those other sections, not in your
+          name.
         </p>
       ),
     },
@@ -74,13 +75,13 @@ export const guide: GuideDoc = {
               children welcome, seating, languages spoken.
             </li>
             <li>
-              <b>Seasonal opening</b>, if it applies: Google's guidelines say a seasonal business can
-              say in its description that it is open only for a specific season.
+              <b>Seasonal opening</b>, if it applies: Google's guidelines say a seasonal business
+              can say in its description that it is open only for a specific season.
             </li>
           </ul>
           <p>
-            Google says to be upfront and honest and to focus on content that is relevant and
-            useful to customers. Write only what is true today.
+            Google says to be upfront and honest and to focus on content that is relevant and useful
+            to customers. Write only what is true today.
           </p>
         </>
       ),
@@ -150,9 +151,8 @@ export const guide: GuideDoc = {
             {CAFE}
           </Callout>
           <p>
-            For a restaurant, Google says the menu editor keeps your menu items and prices
-            accurate, so the dishes and prices belong there and the description can stay about the
-            place.
+            For a restaurant, Google says the menu editor keeps your menu items and prices accurate,
+            so the dishes and prices belong there and the description can stay about the place.
           </p>
         </>
       ),
@@ -171,8 +171,8 @@ export const guide: GuideDoc = {
             {PHYSIO}
           </Callout>
           <p>
-            A clinic should describe its treatments plainly and avoid promising results. Google
-            says content must be honest and relevant to your business.
+            A clinic should describe its treatments plainly and avoid promising results. Google says
+            content must be honest and relevant to your business.
           </p>
         </>
       ),
@@ -184,8 +184,8 @@ export const guide: GuideDoc = {
         "No. Google says the description should be relevant and useful to customers, and does not allow gimmicky or distracting content. Name your area once, naturally, and use the words your customers use for what you do.",
       body: (
         <p>
-          Write it for the person reading it, not for a search engine. Your categories are what tell Google what kind of
-          business you are; see{" "}
+          Write it for the person reading it, not for a search engine. Your categories are what tell
+          Google what kind of business you are; see{" "}
           <GuideLink slug="choose-google-business-profile-categories">
             how to choose your Google Business Profile categories
           </GuideLink>
@@ -214,13 +214,13 @@ export const guide: GuideDoc = {
           />
           <p>
             Google says AI can help you write a description, but that this is available only in
-            select regions and languages. Whoever writes it, read it before you save it: every
-            fact in it should be true.
+            select regions and languages. Whoever writes it, read it before you save it: every fact
+            in it should be true.
           </p>
           <p>
-            The rules are the same in the UK and the UAE. Google's page does not set a language for
-            the description, so write it in the language most of your customers use when they
-            search.
+            Google's pages here name no separate rule for the UK or the UAE. Google's page does not
+            set a language for the description, so write it in the language most of your customers
+            use when they search.
           </p>
         </>
       ),
@@ -232,10 +232,10 @@ export const guide: GuideDoc = {
       <>
         <p>
           Profile Coach, on Essentials and Pro, lists the description among the things a complete
-          Google profile has, and shows what yours is missing. On Pro, Kabsi will write
-          a draft description of up to 750 characters from the facts you confirmed, with no links,
-          offers or contact details, once its AI credit is switched on. Until then the screen says so
-          and nothing is written.
+          Google profile has, and shows what yours is missing. On Pro, Kabsi will write a draft
+          description of up to 750 characters from the facts you confirmed, with no links, offers or
+          contact details, once its AI credit is switched on. Until then the screen says so and
+          nothing is written.
         </p>
         <p>
           Nothing reaches Google without your approval, and Kabsi never suggests keywords for your

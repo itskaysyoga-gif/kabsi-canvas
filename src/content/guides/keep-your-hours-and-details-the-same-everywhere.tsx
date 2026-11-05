@@ -31,15 +31,15 @@ export const guide: GuideDoc = {
       body: (
         <>
           <p>
-            Google also says that when a suggested edit needs your review you have 4 days to accept or
-            reject it, and that if you do not respond, Google may publish the update when it is supported
-            by other public information, such as your business website. An old opening time on your own
-            website can therefore end up on your Google profile.
+            Google also says that when a suggested edit needs your review you have 4 days to accept
+            or reject it, and that if you do not respond, Google may publish the update when it is
+            supported by other public information, such as your business website. An old opening
+            time on your own website can therefore end up on your Google profile.
           </p>
           <p>
-            Google's ranking help adds that if your business information is not accurate, your profile
-            might not show up for relevant searches in your area. The same old details can also reach
-            answers from AI assistants, as explained in{" "}
+            Google's ranking help adds that if your business information is not accurate, your
+            profile might not show up for relevant searches in your area. The same old details can
+            also reach answers from AI assistants, as explained in{" "}
             <GuideLink slug="why-chatgpt-describes-your-business-wrongly">
               why ChatGPT describes your business wrongly
             </GuideLink>
@@ -60,12 +60,13 @@ export const guide: GuideDoc = {
             taglines, opening hours or phone numbers in the business name.
           </li>
           <li>
-            <b>Address:</b> Google asks for a precise, accurate address. Write it the same way each time,
-            including the unit or floor.
+            <b>Address:</b> Google asks for a precise, accurate address. Write it the same way each
+            time, including the unit or floor.
           </li>
           <li>
-            <b>Phone:</b> Google asks for a number that connects to your own location, a local number
-            rather than a central call centre where possible, and under your business's direct control.
+            <b>Phone:</b> Google asks for a number that connects to your own location, a local
+            number rather than a central call centre where possible, and under your business's
+            direct control.
           </li>
           <li>
             <b>Website:</b> one address for your business, used everywhere.
@@ -86,8 +87,8 @@ export const guide: GuideDoc = {
           <Steps
             items={[
               <>
-                On your Google profile: open your Business Profile, select <b>Edit profile</b>, change
-                the detail, for example under <b>Hours</b>, and select <b>Save</b>.
+                On your Google profile: open your Business Profile, select <b>Edit profile</b>,
+                change the detail, for example under <b>Hours</b>, and select <b>Save</b>.
               </>,
               "On your website: the contact page, the footer, the booking page and any old page that mentions hours or prices.",
               "On your social pages, booking sites and directories, starting with the ones customers use most.",
@@ -95,10 +96,10 @@ export const guide: GuideDoc = {
             ]}
           />
           <p>
-            Google says it reviews changes before they go live on your profile. In the Google Maps app
-            you can do the same from the <b>Business</b> tab, then <b>Edit profile</b>. Google also notes
-            that changing your business name or moving to a new address after verification may mean
-            verifying again.
+            Google says it reviews changes before they go live on your profile. In the Google Maps
+            app you can do the same from the <b>Business</b> tab, then <b>Edit profile</b>. Google
+            also notes that changing your business name or moving to a new address after
+            verification may mean verifying again.
           </p>
         </>
       ),
@@ -112,8 +113,8 @@ export const guide: GuideDoc = {
         <p>
           For a lunch break, Google says to create two entries for the same day, for example 9:00 to
           14:00 and 17:00 to 22:00, using Add hours. Google's guidelines say businesses with varied
-          schedules, or that work only by appointment, should not give hours. Seasonal hours can be used
-          as your regular hours during the season.
+          schedules, or that work only by appointment, should not give hours. Seasonal hours can be
+          used as your regular hours during the season.
         </p>
       ),
     },
@@ -142,11 +143,10 @@ export const guide: GuideDoc = {
             ]}
           />
           <p>
-            Google says it is a good idea to confirm your hours for official holidays even when they are
-            the same as usual, so customers know the hours are right. Special hours only show if your
-            profile is set to Open with main hours. The holidays themselves differ between the UK and
-            the UAE. The full walk-through
-            is in{" "}
+            Google says it is a good idea to confirm your hours for official holidays even when they
+            are the same as usual, so customers know the hours are right. Special hours only show if
+            your profile is set to Open with main hours. The holidays themselves differ between the
+            UK and the UAE. The full walk-through is in{" "}
             <GuideLink slug="how-to-set-holiday-hours-on-google">
               how to set holiday hours on Google
             </GuideLink>
@@ -163,15 +163,15 @@ export const guide: GuideDoc = {
       body: (
         <>
           <p>
-            To do it: open your Business Profile, select <b>Edit profile</b>, then <b>Hours</b>, select{" "}
-            <b>Edit</b> next to Hours, choose <b>Temporarily closed</b> and select <b>Save</b>. Your
-            profile then shows "Temporarily closed" on Google Maps and Search. When you reopen, mark the
-            business as reopened and set your regular hours again.
+            To do it: open your Business Profile, select <b>Edit profile</b>, then <b>Hours</b>,
+            select <b>Edit</b> next to Hours, choose <b>Temporarily closed</b> and select{" "}
+            <b>Save</b>. Your profile then shows "Temporarily closed" on Google Maps and Search.
+            When you reopen, mark the business as reopened and set your regular hours again.
           </p>
           <Callout kind="warn" title="Do not use Permanently closed for a break">
-            Permanently closed is for a business that has closed for good. For a holiday, a refit or the
-            off-season, use special hours or Temporarily closed, and update your website with the same
-            dates.
+            Permanently closed is for a business that has closed for good. For a holiday, a refit or
+            the off-season, use special hours or Temporarily closed, and update your website with
+            the same dates.
           </Callout>
         </>
       ),
@@ -183,11 +183,12 @@ export const guide: GuideDoc = {
         "Check your Google profile whenever you get a notice from Google about an update, and look over your details once a month. Google says text shown in blue in the profile editor is information Google changed, and that a notification shows at the top when there are Google updates.",
       body: (
         <p>
-          If someone else's edit changed your hours, the fix and how to stop it happening again are in{" "}
+          If someone else's edit changed your hours, the fix and how to stop it happening again are
+          in{" "}
           <GuideLink slug="someone-changed-my-hours-on-google">
             someone changed my hours on Google
           </GuideLink>
-          . Nothing on these Google pages differs between the UK and the UAE.
+          . Google's pages here name no separate rule for the UK or the UAE.
         </p>
       ),
     },
@@ -197,16 +198,17 @@ export const guide: GuideDoc = {
     body: (
       <>
         <p>
-          Once Kabsi is connected to Google, it checks your Google profile every day and tells you when it
-          shows something different from what you confirmed, with Google is right or Keep my information
-          for you to choose. It never puts anything back by itself. Five days before a public holiday it
-          asks what you will do: normal hours, closed or custom hours, and it sends special hours to Google
-          only after you confirm.
+          Once Kabsi is connected to Google, it checks your Google profile every day and tells you
+          when it shows something different from what you confirmed, with Google is right or Keep my
+          information for you to choose. It never puts anything back by itself. Five days before a
+          public holiday it asks what you will do: normal hours, closed or custom hours, and it
+          sends special hours to Google only after you confirm.
         </p>
         <p>
-          On Pro, Kabsi can read your public website and compare its name, phone, address and opening
-          times with your Google profile, and each difference becomes a task. Your website and the other
-          sites stay yours to change. <SiteRef to="/scan">Run the free check</SiteRef>.
+          On Pro, Kabsi can read your public website and compare its name, phone, address and
+          opening times with your Google profile, and each difference becomes a task. Your website
+          and the other sites stay yours to change. <SiteRef to="/scan">Run the free check</SiteRef>
+          .
         </p>
       </>
     ),

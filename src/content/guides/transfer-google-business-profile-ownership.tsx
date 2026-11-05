@@ -111,16 +111,16 @@ export const guide: GuideDoc = {
               "Wait until they have accepted. If Google shows an error at the next step, wait until 7 days have passed since they joined.",
               "Make the buyer the primary owner.",
               <>
-                Remove yourself: in People and access, select yourself, then <b>Stop managing</b> and{" "}
-                <b>Confirm</b>. Google says the primary owner cannot leave until they have handed over
-                primary ownership.
+                Remove yourself: in People and access, select yourself, then <b>Stop managing</b>{" "}
+                and <b>Confirm</b>. Google says the primary owner cannot leave until they have
+                handed over primary ownership.
               </>,
             ]}
           />
           <p>
             Google says your past replies to reviews and your posts stay on the profile after you
-            leave. Check who else is listed in People and access, such as former staff or an
-            agency, and let the new owner decide who stays.
+            leave. Check who else is listed in People and access, such as former staff or an agency,
+            and let the new owner decide who stays.
           </p>
           <p>
             One exception: if the business is not continuing, and a different business now uses the
@@ -150,9 +150,9 @@ export const guide: GuideDoc = {
               </>,
               "If they approve, you can manage the profile. If they deny it, you get an email and can appeal, or suggest an edit to the profile.",
               <>
-                If there is no answer after 3 days, Google says you may be able to claim the profile:
-                open the confirmation email, select <b>View request</b>, then <b>Verify</b>. Google
-                notes this option is not always available.
+                If there is no answer after 3 days, Google says you may be able to claim the
+                profile: open the confirmation email, select <b>View request</b>, then <b>Verify</b>
+                . Google notes this option is not always available.
               </>,
             ]}
           />
@@ -187,12 +187,12 @@ export const guide: GuideDoc = {
       id: "uk-uae",
       heading: "Is any of this different in the UK or the UAE?",
       answer:
-        "No. Google's pages on owners, primary ownership and ownership requests give the same steps and the same 3-day and 7-day rules wherever the business is, so a salon in Manchester and a cafe in Dubai follow the same process.",
+        "Google's pages here name no separate rule for the UK or the UAE: its pages on owners, primary ownership and ownership requests give one set of steps and the same 3-day and 7-day rules, so a salon in Manchester and a cafe in Dubai follow the same process.",
       body: (
         <p>
-          What may differ is what your sale agreement says. If you are buying a business, ask for the
-          profile handover to be part of it, with the seller adding you as owner before completion
-          so the 7 days have passed by the time you take over.
+          What may differ is what your sale agreement says. If you are buying a business, ask for
+          the profile handover to be part of it, with the seller adding you as owner before
+          completion so the 7 days have passed by the time you take over.
         </p>
       ),
     },
@@ -204,15 +204,15 @@ export const guide: GuideDoc = {
         <p>
           Kabsi is added to your profile as a Manager, not an owner, so it cannot add or remove
           people, transfer ownership or delete a profile: only owners can. It never asks for your
-          password. If someone else holds your profile when you set up, Kabsi shows what to do in each
-          case, with a ready message asking an old employee or agency to make you an owner, and
+          password. If someone else holds your profile when you set up, Kabsi shows what to do in
+          each case, with a ready message asking an old employee or agency to make you an owner, and
           reminds you on day 3 and day 7 when you have asked Google for ownership.
         </p>
         <p>
           If Google sees someone else claiming your profile, Kabsi stops sending anything to Google
-          and tells you what Google is asking. When a business changes hands, write to the Kabsi team at
-          hello@kabsi.co about the Kabsi account, and the new owner can remove Kabsi at any time from People
-          and access. <SiteRef to="/scan">Run the free check</SiteRef>.
+          and tells you what Google is asking. When a business changes hands, write to the Kabsi
+          team at hello@kabsi.co about the Kabsi account, and the new owner can remove Kabsi at any
+          time from People and access. <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>
     ),
