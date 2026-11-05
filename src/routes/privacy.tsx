@@ -65,8 +65,8 @@ function Page() {
       <section>
         <h2>Who is responsible</h2>
         <p>
-          The operator, {OPERATOR_NAME}, is also the data controller for the personal data
-          described here.
+          The operator, {OPERATOR_NAME}, is also the data controller for the personal data described
+          here.
         </p>
       </section>
 
