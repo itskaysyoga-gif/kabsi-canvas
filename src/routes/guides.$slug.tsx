@@ -2,28 +2,18 @@ import { Suspense, use } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { GuideArticle } from "@/components/marketing/guide-article";
-import { loadGuideDoc } from "@/content/guides/load";
-import type { GuideDoc } from "@/content/guides/types";
-import { getGuidePage } from "@/lib/guides-server";
+import { guideDocPromise } from "@/content/guides/load";
 import { ORG_LD, SITE_URL, pageHead } from "@/lib/site";
 
 // One guide (Guides 3). The server decides on each request whether the guide is public (getGuidePage, the server's own
 // clock): a guide whose day has not come answers 404 like any unknown address. Only this guide's content file loads.
-const docs = new Map<string, Promise<GuideDoc | undefined>>();
-function guideDocPromise(slug: string) {
-  let p = docs.get(slug);
-  if (!p) {
-    p = loadGuideDoc(slug);
-    docs.set(slug, p);
-  }
-  return p;
-}
 
 export const Route = createFileRoute("/guides/$slug")({
   loader: async ({ params }) => {
+    // Speed: the server function's client code loads with the guide pages only, never in the shared bundle.
+    const { getGuidePage } = await import("@/lib/guides-server");
     const data = await getGuidePage({ data: params.slug });
     if (!data) throw notFound();
-    await guideDocPromise(params.slug);
     return data;
   },
   head: ({ loaderData: d, params }) => {

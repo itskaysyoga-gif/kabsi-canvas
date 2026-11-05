@@ -4,14 +4,14 @@ import { PublicLayout } from "@/components/layouts/public-layout";
 import { GuideClosing } from "@/components/marketing/guide-kit";
 import { GuideCover, longDate } from "@/components/marketing/guide-article";
 import type { GuideMeta } from "@/content/guides/types";
-import { getGuideList } from "@/lib/guides-server";
 import { SectionHead } from "@/components/kabsi/ui";
 import { SITE_URL, pageHead } from "@/lib/site";
 
 // Guides index (Guides 3): only the guides that are public on this request, decided on the server, newest first. The
 // newest is large with its cover, the rest as cards, then the closing band with the free check.
 export const Route = createFileRoute("/guides/")({
-  loader: () => getGuideList(),
+  // Speed: the server function's client code loads with this page only.
+  loader: async () => (await import("@/lib/guides-server")).getGuideList(),
   head: ({ loaderData }) =>
     pageHead({
       title: "Guides for Google Business Profile owners | Kabsi",

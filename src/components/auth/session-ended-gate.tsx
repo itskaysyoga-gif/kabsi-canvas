@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/auth-provider";
+import { setSignedOutReason } from "@/lib/signed-out";
 import { SESSION_ENDED, SESSION_ENDED_EVENT, sessionHasEnded } from "@/lib/session-ended";
 
 // Covers the signed-in app the moment a call finds the session no longer accepted (session-ended.ts): one message and
@@ -19,7 +20,9 @@ export function SessionEndedGate() {
   if (!ended) return null;
   async function again() {
     const next = `${location.pathname}${location.searchStr}`;
-    await signOut().catch(() => undefined);
+    // Quiet: the log in page follows, not Home's "You are signed out." (App 4 review).
+    await signOut({ quiet: true }).catch(() => undefined);
+    setSignedOutReason("ended");
     void navigate({ to: "/login", search: { next }, replace: true });
   }
   return (
