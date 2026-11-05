@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
-import { hasStoredSession } from "@/lib/stored-session";
+import { hasSessionKey } from "@/lib/stored-session";
 
 export type AccountState = "unknown" | "in" | "out";
 
@@ -15,7 +15,7 @@ export function useAccountLink(): { state: AccountState; to: "/app" | "/staff" }
   const [mounted, setMounted] = useState(false);
   const [stored, setStored] = useState(false);
   useEffect(() => {
-    setStored(hasStoredSession());
+    setStored(hasSessionKey());
     setMounted(true);
   }, []);
   const state: AccountState = !mounted

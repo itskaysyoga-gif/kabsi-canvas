@@ -4,6 +4,8 @@
 export type SignedOutReason = "you" | "away-owner" | "away-staff";
 
 const KEY = "kabsi:signed-out";
+/** A reason left unread (a tab that never showed a page with the line) is forgotten after 10 minutes. */
+const FRESH_MS = 10 * 60_000;
 const REASONS: readonly SignedOutReason[] = ["you", "away-owner", "away-staff"];
 
 export const SIGNED_OUT_LINE = "You are signed out.";
@@ -14,7 +16,7 @@ export const SIGNED_OUT_EVENT = "kabsi:signed-out";
 
 export function setSignedOutReason(reason: SignedOutReason) {
   try {
-    window.sessionStorage.setItem(KEY, reason);
+    window.sessionStorage.setItem(KEY, `${reason}|${Date.now()}`);
   } catch {
     /* storage blocked: the line is not shown, the sign-out still happens */
   }
@@ -27,8 +29,10 @@ export function setSignedOutReason(reason: SignedOutReason) {
 
 export function peekSignedOutReason(): SignedOutReason | null {
   try {
-    const v = window.sessionStorage.getItem(KEY);
-    return REASONS.includes(v as SignedOutReason) ? (v as SignedOutReason) : null;
+    const [v, at] = (window.sessionStorage.getItem(KEY) ?? "").split("|");
+    const age = Date.now() - Number(at);
+    if (!REASONS.includes(v as SignedOutReason) || !(age >= 0 && age < FRESH_MS)) return null;
+    return v as SignedOutReason;
   } catch {
     return null;
   }

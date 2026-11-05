@@ -118,4 +118,35 @@ test.describe("website and dashboard", () => {
       other.getByRole("status").filter({ hasText: "You are signed out." }),
     ).toBeVisible();
   });
+
+  test("the session-ended screen still leads to the log in page, with no Log out line", async ({
+    page,
+  }) => {
+    await noBanner(page);
+    await signInFake(page);
+    await page.route("**/rest/v1/locations*", (route) =>
+      route.fulfill({ status: 401, json: { message: "JWT expired" } }),
+    );
+    await page.goto("/app");
+    await expect(page.getByRole("alertdialog")).toContainText("Your session ended. Sign in again.");
+    await page.getByRole("button", { name: "Sign in again" }).click();
+    await expect(page).toHaveURL(/\/login\?next=%2Fapp/);
+    await expect(page.getByText("You are signed out.")).toHaveCount(0);
+  });
+
+  test("an unfinished Google sign-in does not show Dashboard", async ({ page }) => {
+    await noBanner(page);
+    await page.addInitScript(() => {
+      try {
+        localStorage.setItem("sb-ynjdqjlmdwjgbfezevxy-auth-token-code-verifier", '"qa"');
+      } catch {
+        /* blocked */
+      }
+    });
+    await page.goto("/");
+    if (page.viewportSize()!.width < 1024)
+      await page.getByRole("button", { name: "Open menu" }).click();
+    await expect(page.getByRole("link", { name: "Log in", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Dashboard", exact: true })).toHaveCount(0);
+  });
 });

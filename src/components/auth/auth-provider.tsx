@@ -27,7 +27,8 @@ type AuthContextValue = {
   loading: boolean;
   /** Whether the signed-in person is Kabsi staff (is_staff), null until known. The website's Dashboard link uses it. */
   isStaff: boolean | null;
-  signOut: () => Promise<void>;
+  /** Signs out on this device. Home then says "You are signed out."; `quiet` leaves no line (the session-ended gate). */
+  signOut: (opts?: { quiet?: boolean }) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -202,12 +203,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user: session?.user ?? null,
       loading,
       isStaff,
-      signOut: async () => {
+      signOut: async (opts?: { quiet?: boolean }) => {
         // Local scope: signing out here doesn't sign you out on your other devices. Home then says "You are signed out."
         const { supabase } = await import("@/lib/supabase");
         const { error } = await supabase.auth.signOut({ scope: "local" });
         if (error) throw error;
-        setSignedOutReason("you");
+        if (!opts?.quiet) setSignedOutReason("you");
       },
     }),
     [isStaff, loading, session],
