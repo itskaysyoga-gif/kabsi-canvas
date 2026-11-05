@@ -1,9 +1,10 @@
 // review-cards: the print-ready counter card and table tent PDFs (V3, master plan 27.3 item 5). The logic and its checks are in
 // _shared/review-growth/cards-handler.ts; this file wires it to the database. Nothing is stored.
+import { serve } from "../_shared/kabsi.ts";
 import { admin, captureError, CORS, currentUser, log, rateLimit } from "../_shared/kabsi.ts";
 import { makeHandler } from "../_shared/review-growth/cards-handler.ts";
 
-Deno.serve(makeHandler({
+serve(makeHandler({
   getUser: async (req) => {
     const user = await currentUser(req);
     return user ? { id: user.id } : null;

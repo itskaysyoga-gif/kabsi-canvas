@@ -4,6 +4,7 @@
 //                                                                 a large photo has this function's time to itself)
 //   POST { do: "link", token }                                  → the business name for the staff upload page, or 410
 //   POST multipart/form-data: token, file                       → one upload through the staff link (no account)
+import { serve } from "../_shared/kabsi.ts";
 import { clientIp } from "../_shared/client-ip.ts";
 import { admin, captureError, CORS, fail, isInternal, json, rateLimit, sha256Hex } from "../_shared/kabsi.ts";
 import { type EngineDeps, processUpload, type Result } from "../_shared/photos/engine.ts";
@@ -56,7 +57,7 @@ async function linkFor(token: unknown) {
 
 const GONE = "This upload link was turned off. Ask the owner for a new one.";
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return fail("method_not_allowed", "Use POST.", 405);
   try {

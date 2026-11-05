@@ -11,6 +11,7 @@
 // Staff alerts (9.9, R-64): the tick takes each new ops_events row once and sends the urgent ones to the staff phone.
 // Nothing is sent live unless WHATSAPP_LIVE is true; until whatsapp_owners_on is true only to Kabsi's own test phones and
 // the staff phone. Fictional 555-01xx test numbers are never sent live (phone.ts, isFictionalPhone).
+import { serve } from "../_shared/kabsi.ts";
 import { admin, captureError, fail, isInternal, json, rateLimit, timingSafeEqual } from "../_shared/kabsi.ts";
 import { notify as notifyEmail } from "../_shared/notify.ts";
 import { kapsoWebhook } from "../_shared/whatsapp/webhook-route.ts";
@@ -57,7 +58,7 @@ const background = (p: Promise<unknown>) => {
   if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) EdgeRuntime.waitUntil(safe);
 };
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method !== "POST") return fail("method_not_allowed", "Use POST.", 405);
   const path = new URL(req.url).pathname.replace(/\/+$/, "");
   if (path.endsWith("/tick")) return (await isInternal(req)) ? json(await tick()) : fail("forbidden", "Forbidden.", 403);

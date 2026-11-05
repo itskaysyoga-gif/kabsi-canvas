@@ -19,6 +19,7 @@
 //   POST { do: "photo_remove", photo_id } · { do: "photo_undo", photo_id, publication_id } (Photos 2: a photo Kabsi put on Google)
 //   (P0.5-01: uploads are checked by the process_photo job and the `photos` function, never here)
 //   POST { do: "shield_decide", change_id, decision: "revert" | "keep" }                  → Google Protection (D218)
+import { serve } from "../_shared/kabsi.ts";
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
 import { parseWeek, regularHoursDisplay, validateWeek, weekToRaw } from "../_shared/hours.ts";
 import { admin, captureError, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";
@@ -63,7 +64,7 @@ async function member(req: Request, locationId: string) {
   return { user, loc: await withFacts(db, loc as unknown as Loc) };
 }
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return fail("method_not_allowed", "Use POST.", 405);
   const b = await req.json().catch(() => ({})) as Record<string, unknown>;

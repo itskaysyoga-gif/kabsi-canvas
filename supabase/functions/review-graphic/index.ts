@@ -1,10 +1,11 @@
 // review-graphic: a square or story image for one 4 or 5 star review (P0.8-07, K-134), Pro only. The logic and its
 // checks are in _shared/review-graphic/handler.ts; this file wires it to the database. Nothing is stored.
+import { serve } from "../_shared/kabsi.ts";
 import { admin, captureError, CORS, currentUser, log, rateLimit } from "../_shared/kabsi.ts";
 import { makeHandler } from "../_shared/review-graphic/handler.ts";
 import { renderGraphic } from "../_shared/review-graphic/render.ts";
 
-Deno.serve(makeHandler({
+serve(makeHandler({
   getUser: async (req) => {
     const user = await currentUser(req);
     return user ? { id: user.id } : null;

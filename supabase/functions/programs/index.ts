@@ -6,6 +6,7 @@
 //   GET  /programs/partners   the Founding Partner places left (the first 20 approved)
 //   POST /programs/partners   a Kabsi Partners application ("Apply by email" on /partners; WhatsApp is PA2)
 // Staff alerts on WhatsApp (R-64) tell Rashid a new application is waiting; the staff page decides.
+import { serve } from "../_shared/kabsi.ts";
 import { clientIp } from "../_shared/client-ip.ts";
 import { admin, captureError, CORS, fail, json, log, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { staffAlert } from "../_shared/billing.ts";
@@ -71,7 +72,7 @@ async function applyPartner(req: Request): Promise<Response> {
   return json({ ok: true });
 }
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   // Sec 2: the body is capped before anything reads it (413 past BODY_LIMITS.form).
   const capped = await capBody(req, BODY_LIMITS.form, CORS);
