@@ -13,7 +13,7 @@ import { Button, STAFF_CARD, STAFF_H2, STAFF_ITEM } from "./staff-ui";
 // request; the due date says when. Closing one marks access removed and emails the owner (staff_complete_followup).
 // google_support (K-19, P0.2-04): Google changed a detail again after Kabsi put the owner's approved value back twice
 // in 30 days; a person contacts Google Business Profile support. The detail says what to tell Google.
-type Followup = {
+export type Followup = {
   id: string;
   kind: string;
   location_name: string;
@@ -22,7 +22,7 @@ type Followup = {
   created_at: string;
 };
 
-async function openFollowups(): Promise<Followup[]> {
+export async function openFollowups(): Promise<Followup[]> {
   const { data, error } = await supabase
     .from("staff_followups")
     .select("id, kind, location_name, detail, due_at, created_at")

@@ -184,7 +184,7 @@ export function ValidationPanel() {
               />
             </dl>
             <div className="mt-3 overflow-x-auto">
-              <table className="w-full min-w-[28rem] text-left text-small">
+              <table className="stack-table w-full text-left text-small sm:min-w-[28rem]">
                 <caption className="sr-only">Cash by month</caption>
                 <thead>
                   <tr className="text-text-2">
@@ -204,19 +204,25 @@ export function ValidationPanel() {
                   ) : null}
                   {q.data.v.money.cash_by_month.map((m) => (
                     <tr key={m.month} className="border-t border-line">
-                      <td className="py-1 pe-3">{fmtDate(m.month)}</td>
-                      <td className="py-1 pe-3">
+                      <th scope="row" className="py-1 pe-3 text-start font-semibold">
+                        {fmtDate(m.month)}
+                      </th>
+                      <td data-label="Payments" className="py-1 pe-3">
                         {m.status === "ok" ? usd(m.payments_usd ?? 0) : NO}
                       </td>
-                      <td className="py-1 pe-3">{m.status === "ok" ? usd(m.refunds_usd) : NO}</td>
-                      <td className="py-1">{m.status === "ok" ? usd(m.chargebacks_usd) : NO}</td>
+                      <td data-label="Refunds" className="py-1 pe-3">
+                        {m.status === "ok" ? usd(m.refunds_usd) : NO}
+                      </td>
+                      <td data-label="Chargebacks" className="py-1">
+                        {m.status === "ok" ? usd(m.chargebacks_usd) : NO}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
             <div className="mt-3 overflow-x-auto">
-              <table className="w-full min-w-[28rem] text-left text-small">
+              <table className="stack-table w-full text-left text-small sm:min-w-[28rem]">
                 <caption className="sr-only">Contribution margin per account</caption>
                 <thead>
                   <tr className="text-text-2">
@@ -237,11 +243,21 @@ export function ValidationPanel() {
                   ) : null}
                   {q.data.v.money.margin_per_account.map((m) => (
                     <tr key={m.business} className="border-t border-line">
-                      <td className="py-1 pe-3">{m.business}</td>
-                      <td className="py-1 pe-3">{usd(m.cash_usd)}</td>
-                      <td className="py-1 pe-3">{usd(m.refunds_and_chargebacks_usd)}</td>
-                      <td className="py-1 pe-3">{usd(m.cost_usd)}</td>
-                      <td className="py-1">{usd(m.margin_usd)}</td>
+                      <th scope="row" className="py-1 pe-3 text-start font-semibold">
+                        {m.business}
+                      </th>
+                      <td data-label="Cash" className="py-1 pe-3">
+                        {usd(m.cash_usd)}
+                      </td>
+                      <td data-label="Refunds and chargebacks" className="py-1 pe-3">
+                        {usd(m.refunds_and_chargebacks_usd)}
+                      </td>
+                      <td data-label="Cost" className="py-1 pe-3">
+                        {usd(m.cost_usd)}
+                      </td>
+                      <td data-label="Margin" className="py-1">
+                        {usd(m.margin_usd)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -251,7 +267,7 @@ export function ValidationPanel() {
           <div className={STAFF_ITEM}>
             <p className="font-bold">Activation, business by business</p>
             <div className="mt-2 overflow-x-auto">
-              <table className="w-full min-w-[34rem] text-left text-small">
+              <table className="stack-table w-full text-left text-small sm:min-w-[34rem]">
                 <caption className="sr-only">A, B and C for each business</caption>
                 <thead>
                   <tr className="text-text-2">
@@ -273,18 +289,26 @@ export function ValidationPanel() {
                   ) : null}
                   {q.data.rows.map((r) => (
                     <tr key={r.location_id} className="border-t border-line">
-                      <td className="py-1 pe-3 font-semibold">{r.business}</td>
-                      <td className="py-1 pe-3">
+                      <th scope="row" className="py-1 pe-3 text-start font-semibold">
+                        {r.business}
+                      </th>
+                      <td data-label="Cohort" className="py-1 pe-3">
                         {r.cohort === "founding" ? "Founding 25" : "Paying"}
                       </td>
-                      <td className="py-1 pe-3">
+                      <td data-label="Free check before sign-up" className="py-1 pe-3">
                         {r.free_check_before_signup_at
                           ? fmtDate(r.free_check_before_signup_at)
                           : "None"}
                       </td>
-                      <td className="py-1 pe-3">{hours(r.a_hours)}</td>
-                      <td className="py-1 pe-3">{hours(r.b_hours)}</td>
-                      <td className="py-1">{hours(r.c_hours)}</td>
+                      <td data-label="A" className="py-1 pe-3">
+                        {hours(r.a_hours)}
+                      </td>
+                      <td data-label="B" className="py-1 pe-3">
+                        {hours(r.b_hours)}
+                      </td>
+                      <td data-label="C" className="py-1">
+                        {hours(r.c_hours)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

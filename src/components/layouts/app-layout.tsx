@@ -1,10 +1,14 @@
 // The signed-in website's shell (Design 3, light; App 2, master plan 30.22 item 5): a side bar from 1024 px, and below it
 // a top bar (the business, and one account menu with the trial, help and Log out) and a bottom bar with the same five places. The places, the roles and the old addresses are in src/lib/app-nav.ts; this file only
-// draws them. The staff area (/staff) uses the same shell with its own single link.
+// draws them. The staff workspace (/staff, App 5) uses the same shell with its own menu from src/lib/staff-nav.ts: the
+// seven pages in the side bar, five in the phone bar, and Costs and Settings in the phone's staff menu.
 import { AssistantWidget } from "@/components/assistant/assistant-widget";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
+  Activity,
+  Award,
   BookOpen,
+  CalendarCheck,
   Camera,
   Check,
   ChevronDown,
@@ -20,9 +24,19 @@ import {
   QrCode,
   Settings,
   ShieldCheck,
+  Store,
   Users,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
+import {
+  STAFF_BAR,
+  STAFF_MENU,
+  STAFF_MORE,
+  STAFF_PAGES,
+  staffPageFor,
+  type StaffPageId,
+} from "@/lib/staff-nav";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -414,6 +428,111 @@ function BarLink({
   );
 }
 
+// ─── The staff workspace's menu (App 5, master plan 30.33 item 3), from src/lib/staff-nav.ts ───────────────────────
+const STAFF_ICON: Record<StaffPageId, LucideIcon> = {
+  today: CalendarCheck,
+  businesses: Store,
+  conversations: MessageCircle,
+  programs: Award,
+  system: Activity,
+  costs: Wallet,
+  settings: Settings,
+};
+
+function StaffSideLink({ id, on }: { id: StaffPageId; on: boolean }) {
+  const p = STAFF_PAGES[id];
+  const I = STAFF_ICON[id];
+  return (
+    <Link
+      to={p.to as "/staff"}
+      aria-current={on ? "page" : undefined}
+      className={cn(
+        "press relative flex min-h-12 items-center gap-3 rounded-inner px-3 text-body font-semibold",
+        on ? "bg-surface-2 text-text-1" : "text-text-2 hover:bg-surface-2 hover:text-text-1",
+      )}
+    >
+      {on && (
+        <span aria-hidden className="absolute inset-y-2.5 start-0 w-1 rounded-full bg-text-1" />
+      )}
+      <I className="size-5 shrink-0" strokeWidth={on ? 2.25 : 1.75} aria-hidden />
+      <span className="flex-1">{p.label}</span>
+    </Link>
+  );
+}
+
+function StaffBarLink({ id, on }: { id: StaffPageId; on: boolean }) {
+  const p = STAFF_PAGES[id];
+  const I = STAFF_ICON[id];
+  return (
+    <Link
+      to={p.to as "/staff"}
+      aria-current={on ? "page" : undefined}
+      className={cn(
+        "press relative flex min-h-16 flex-col items-center justify-center gap-1 text-label font-bold",
+        on ? "text-text-1" : "text-text-2",
+      )}
+    >
+      <span
+        className={cn(
+          "relative grid h-8 w-14 max-w-full place-items-center rounded-full",
+          on && "bg-surface-2",
+        )}
+      >
+        <I className="size-6" strokeWidth={on ? 2.25 : 1.75} aria-hidden />
+      </span>
+      <span className="max-w-full truncate px-0.5">{p.short}</span>
+    </Link>
+  );
+}
+
+/** The phone's staff menu: Costs and Settings (the bar holds five), the business account, help and Log out. */
+function StaffMenu({ email, onSignOut }: { email: string | undefined; onSignOut: () => void }) {
+  const item = "min-h-11 cursor-pointer gap-3 rounded-inner text-small font-semibold";
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label="Staff menu"
+          className="press grid size-11 shrink-0 place-items-center rounded-full text-text-2 hover:bg-surface-2"
+        >
+          <CircleUser className="size-6" aria-hidden />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="w-72 rounded-card border-line bg-surface-1 p-2 shadow-float"
+      >
+        {STAFF_MORE.map((id) => {
+          const I = STAFF_ICON[id];
+          return (
+            <DropdownMenuItem key={id} asChild className={item}>
+              <Link to={STAFF_PAGES[id].to as "/staff"}>
+                <I className="size-4" aria-hidden /> {STAFF_PAGES[id].label}
+              </Link>
+            </DropdownMenuItem>
+          );
+        })}
+        <DropdownMenuItem asChild className={item}>
+          <Link to="/app">
+            <Users className="size-4" aria-hidden /> Business account
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className={item}>
+          <Link to="/guides">
+            <BookOpen className="size-4" aria-hidden /> Guides
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator className="bg-line" />
+        <DropdownMenuItem className={item} onSelect={onSignOut}>
+          <LogOut className="size-4" aria-hidden /> Log out
+        </DropdownMenuItem>
+        {email ? <p className="truncate px-2 pt-1 text-label text-text-2">{email}</p> : null}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 /** The phone's account menu (App 2: the bottom bar has no More): the trial, help and Log out. */
 function AccountMenu({
   loc,
@@ -524,6 +643,7 @@ export function AppLayout({
   const isDemo = area === "app" && myLoc.data?.is_demo === true;
   useEffect(() => setAnalyticsPaused(isDemo), [isDemo]);
   const current = area === "app" ? sectionFor(location.pathname, role) : undefined;
+  const staffPage = area === "staff" ? staffPageFor(location.pathname) : undefined;
   const badgeFor = (sec: Section) =>
     sec.id === "reviews" && waiting.data ? waiting.data : undefined;
   // K-16: a page that is not part of the person's role says so, instead of showing a screen the database would refuse.
@@ -570,13 +690,19 @@ export function AppLayout({
               ))}
             </ul>
           ) : (
-            <Link
-              to="/staff"
-              aria-current="page"
-              className="flex min-h-11 items-center gap-3 rounded-inner bg-surface-2 px-3 text-small font-semibold"
-            >
-              <Users className="size-5" aria-hidden /> Staff
-            </Link>
+            <>
+              <p className="px-3 pb-2 text-small font-bold text-text-2">Staff</p>
+              <ul className="space-y-0.5">
+                {STAFF_MENU.map((id) => (
+                  <li
+                    key={id}
+                    className={id === "settings" ? "mt-3 border-t border-line pt-3" : ""}
+                  >
+                    <StaffSideLink id={id} on={staffPage?.id === id} />
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </nav>
         <div className="space-y-2 border-t border-line p-3">
@@ -616,14 +742,19 @@ export function AppLayout({
         {area === "app" ? (
           <BusinessMenu compact />
         ) : (
-          <p className="min-w-0 flex-1 truncate font-display text-title font-bold">Staff</p>
+          <p className="min-w-0 flex-1 truncate font-display text-title font-bold">
+            Staff
+            {staffPage ? (
+              <span className="font-normal text-text-2"> · {staffPage.label}</span>
+            ) : null}
+          </p>
         )}
-        {isStaff.data ? (
+        {isStaff.data && area === "app" ? (
           <Link
-            to={area === "staff" ? "/app" : "/staff"}
+            to="/staff"
             className="press inline-flex min-h-11 items-center rounded-full px-3 text-small font-bold text-text-2 hover:bg-surface-2"
           >
-            {area === "staff" ? "Business" : "Staff"}
+            Staff
           </Link>
         ) : null}
         {area === "app" ? (
@@ -635,14 +766,7 @@ export function AppLayout({
           />
         ) : null}
         {area === "staff" ? (
-          <button
-            type="button"
-            onClick={() => void handleSignOut()}
-            className="press grid size-11 place-items-center rounded-full text-text-2 hover:bg-surface-2"
-            aria-label="Log out"
-          >
-            <LogOut className="size-5" aria-hidden />
-          </button>
+          <StaffMenu email={user?.email} onSignOut={() => void handleSignOut()} />
         ) : null}
       </header>
 
@@ -701,6 +825,20 @@ export function AppLayout({
         </footer>
       </main>
 
+      {area === "staff" ? (
+        <nav
+          aria-label="Staff"
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface-1/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+        >
+          <ul className="grid grid-cols-5">
+            {STAFF_BAR.map((id) => (
+              <li key={id}>
+                <StaffBarLink id={id} on={staffPage?.id === id} />
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ) : null}
       {area === "app" ? <AssistantWidget surface="app" /> : null}
       {area === "app" ? (
         <nav

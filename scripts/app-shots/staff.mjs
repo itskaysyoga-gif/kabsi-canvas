@@ -173,6 +173,21 @@ export const rpc = {
       below: true,
     },
   },
+  // App 5: the Today page's caps and the provider refusals of the last 24 hours.
+  staff_today: (c) =>
+    c.state === "staff-clear"
+      ? { checked_at: ago(0), caps: { dataforseo_usd: 10, ai_visibility_usd: 5 }, refusals_24h: [] }
+      : {
+          checked_at: ago(0),
+          caps: { dataforseo_usd: 10, ai_visibility_usd: 5 },
+          refusals_24h: [
+            {
+              title:
+                "DataForSEO refused the nearby check: no balance left. Kabsi tries again later on its own",
+              at: ago(0.2),
+            },
+          ],
+        },
   staff_founding_checklist: (c) => {
     const loc = c.body?.p_location;
     const food = loc === LOC_B;

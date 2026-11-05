@@ -18,7 +18,7 @@ import { Button, STAFF_CARD, STAFF_H2 } from "./staff-ui";
 
 const when = (iso: string | null | undefined) => (iso ? fmtDateTime(iso) : "-");
 
-async function loadHealth(): Promise<Health> {
+export async function loadSystemHealth(): Promise<Health> {
   const { data, error } = await supabase.rpc("staff_system_health");
   if (error) throw new Error(error.message);
   return data as unknown as Health;
@@ -36,7 +36,7 @@ export function SystemHealthPanel() {
   const queryClient = useQueryClient();
   const q = useQuery({
     queryKey: ["staff-system-health"],
-    queryFn: loadHealth,
+    queryFn: loadSystemHealth,
     refetchInterval: 60_000,
   });
   const [msg, setMsg] = useState("");
