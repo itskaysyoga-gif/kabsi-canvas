@@ -53,11 +53,7 @@ Key facts:
 
 ## Guides
 
-- [How to reply to Google reviews](https://kabsi.co/guides/how-to-reply-to-google-reviews)
-- [How to respond to a negative Google review](https://kabsi.co/guides/how-to-respond-to-negative-google-reviews)
-- [Can you remove a Google review?](https://kabsi.co/guides/can-you-remove-a-google-review)
-- [How to add a manager to your Google Business Profile](https://kabsi.co/guides/add-manager-google-business-profile)
-- [How to get your Google review link and QR code](https://kabsi.co/guides/google-review-link-and-qr-code)
+<!-- GUIDES: the public guides, one line each, added on each request by src/routes/llms[.]txt.ts -->
 
 ## Full facts
 

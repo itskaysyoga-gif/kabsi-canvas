@@ -276,7 +276,17 @@ export function breadcrumbLd(crumbs: Crumb[]) {
 
 /** The share images in public/og (1200 by 630, made by scripts/og.mjs), one per page type. */
 export type ShareImage =
-  "home" | "scan" | "pricing" | "tool" | "guide" | "industry" | "partner" | "about" | "founding";
+  | "home"
+  | "scan"
+  | "pricing"
+  | "tool"
+  | "guide"
+  | "industry"
+  | "partner"
+  | "about"
+  | "founding"
+  /** Guides 3: each guide's own cover, public/og/guides/<slug>.png. */
+  | `guides/${string}`;
 
 export function pageHead(o: {
   title: string;
