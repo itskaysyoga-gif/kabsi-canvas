@@ -70,6 +70,13 @@ async function stub(page: Page) {
   return calls;
 }
 
+/** Typing before the page has hydrated is lost (a slower production page): wait for the scripts to settle first. */
+async function open(page: Page) {
+  await page.goto("/google-review-link");
+  await page.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => {});
+  await page.waitForTimeout(800);
+}
+
 /** Decodes a PNG (as bytes) in the page with jsQR. */
 async function decodePng(page: Page, png: Buffer): Promise<string | null> {
   await page.addScriptTag({ content: JSQR });
@@ -105,7 +112,7 @@ test.describe("Scan 3: the review link tool", () => {
     page,
   }, info) => {
     const calls = await stub(page);
-    await page.goto("/google-review-link");
+    await open(page);
     await expect(page.locator("h1 .d9-mark")).toHaveText("review link and QR code.");
     await expect(page.getByAltText("A cafe owner at the counter")).toBeVisible();
     const box = page.getByRole("combobox").first();
@@ -177,7 +184,7 @@ test.describe("Scan 3: the review link tool", () => {
     page,
   }) => {
     const calls = await stub(page);
-    await page.goto("/google-review-link");
+    await open(page);
     const box = page.getByRole("combobox").first();
     await box.click();
     await box.fill("Pearl Beauty Dubai");
