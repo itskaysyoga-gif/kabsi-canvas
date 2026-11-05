@@ -14,6 +14,18 @@ export function hasStoredSession(): boolean {
   return false;
 }
 
+/** Whether this browser holds a session itself (not only the code verifier of a Google sign-in that never finished). */
+export function hasSessionKey(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const s = window.localStorage;
+    for (let i = 0; i < s.length; i++) if (/^sb-.+-auth-token$/.test(s.key(i) ?? "")) return true;
+  } catch {
+    /* storage blocked: treat as no session */
+  }
+  return false;
+}
+
 /** A sign-in coming back to this page: a Google code in the query, or tokens in the hash. */
 export function signInInUrl(search: string, hash: string): boolean {
   return /[?&](code|error_code)=/.test(search) || /[#&](access_token|error_code|type)=/.test(hash);
