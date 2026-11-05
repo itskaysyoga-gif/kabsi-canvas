@@ -1,0 +1,355 @@
+{
+ "code": "TESTSCN3",
+ "business": "Harbour Burgers",
+ "term": "fast food restaurant",
+ "created_at": "2026-11-05T07:35:25.967354+00:00",
+ "check_line": "Free check. No Google access needed.",
+ "trial_line": "The 14-day free trial is separate from this check. It starts only when Kabsi's access to your Google profile works.",
+ "fast": {
+  "line": "At your address you rank 2 for 'fast food restaurant'.",
+  "rank": 2,
+  "competitors": [
+   {
+    "name": "North Diner",
+    "rating": 4.8,
+    "reviews": 25
+   },
+   {
+    "name": "Quay Eats",
+    "rating": 4.9,
+    "reviews": 19
+   },
+   {
+    "name": "Corner Grill",
+    "rating": 5,
+    "reviews": 1
+   }
+  ]
+ },
+ "ai": {
+  "provider": "chatgpt",
+  "assistant": "ChatGPT",
+  "model": "gpt-4.1-mini-2025-04-14",
+  "question": "best fast food restaurant in Example Town, United Kingdom",
+  "asked_at": "2026-11-05T07:35:22.133Z",
+  "named": false,
+  "line": "ChatGPT did not name you. It named North Diner, Quay Eats and Corner Grill, which Google Maps shows near you.",
+  "question_line": "We asked ChatGPT: 'best fast food restaurant in Example Town, United Kingdom'",
+  "asked_line": "Asked on 5 November 2026 through OpenAI's API, with web search. The ChatGPT app can answer differently, and answers change from run to run.",
+  "sources": [],
+  "sources_line": "No sources cited.",
+  "named_other": 2,
+  "accuracy": null,
+  "label": "One sample. AI answers change from run to run."
+ },
+ "map": {
+  "state": "done",
+  "nearby": {
+   "note": "Sample Google Maps results, not customer counts.",
+   "top3": 5,
+   "cards": [
+    {
+     "col": 3,
+     "row": 3,
+     "kind": "home",
+     "name": null,
+     "rank": 2,
+     "first": "North Diner",
+     "place": "Near your fast food restaurant",
+     "position": "2nd",
+     "firstIsYou": false
+    },
+    {
+     "col": 2,
+     "row": 2,
+     "kind": "away",
+     "name": null,
+     "rank": 7,
+     "first": null,
+     "place": "About 500 m north west of your fast food restaurant",
+     "position": "7th",
+     "firstIsYou": false,
+     "first_hidden": true
+    },
+    {
+     "col": 3,
+     "row": 6,
+     "kind": "away",
+     "name": null,
+     "rank": 6,
+     "first": "The Lantern",
+     "place": "About 1 km south of your fast food restaurant",
+     "position": "6th",
+     "firstIsYou": false
+    }
+   ],
+   "points": 49,
+   "keyword": "fast food restaurant",
+   "count_line": "In the first 3 at 5 of 49 places Kabsi checked. Most places put you 4th."
+  },
+  "top3": 5,
+  "points": 49,
+  "average": 4.4,
+  "rivals": [
+   {
+    "name": "North Diner",
+    "places": 48
+   },
+   {
+    "name": "Quay Eats",
+    "places": 34
+   },
+   {
+    "name": "Corner Grill",
+    "places": 13
+   }
+  ],
+  "dots": [
+   {
+    "row": 0,
+    "col": 0,
+    "rank": 6
+   },
+   {
+    "row": 0,
+    "col": 1,
+    "rank": 4
+   },
+   {
+    "row": 0,
+    "col": 2,
+    "rank": 4
+   },
+   {
+    "row": 0,
+    "col": 3,
+    "rank": 4
+   },
+   {
+    "row": 0,
+    "col": 4,
+    "rank": 4
+   },
+   {
+    "row": 0,
+    "col": 5,
+    "rank": 4
+   },
+   {
+    "row": 0,
+    "col": 6,
+    "rank": 4
+   },
+   {
+    "row": 1,
+    "col": 0,
+    "rank": 4
+   },
+   {
+    "row": 1,
+    "col": 1,
+    "rank": 4
+   },
+   {
+    "row": 1,
+    "col": 2,
+    "rank": 4
+   },
+   {
+    "row": 1,
+    "col": 3,
+    "rank": 3
+   },
+   {
+    "row": 1,
+    "col": 4,
+    "rank": 4
+   },
+   {
+    "row": 1,
+    "col": 5,
+    "rank": 4
+   },
+   {
+    "row": 1,
+    "col": 6,
+    "rank": 4
+   },
+   {
+    "row": 2,
+    "col": 0,
+    "rank": 4
+   },
+   {
+    "row": 2,
+    "col": 1,
+    "rank": 4
+   },
+   {
+    "row": 2,
+    "col": 2,
+    "rank": 7
+   },
+   {
+    "row": 2,
+    "col": 3,
+    "rank": 4
+   },
+   {
+    "row": 2,
+    "col": 4,
+    "rank": 3
+   },
+   {
+    "row": 2,
+    "col": 5,
+    "rank": 4
+   },
+   {
+    "row": 2,
+    "col": 6,
+    "rank": 4
+   },
+   {
+    "row": 3,
+    "col": 0,
+    "rank": 4
+   },
+   {
+    "row": 3,
+    "col": 1,
+    "rank": 4
+   },
+   {
+    "row": 3,
+    "col": 2,
+    "rank": 4
+   },
+   {
+    "row": 3,
+    "col": 3,
+    "rank": 2
+   },
+   {
+    "row": 3,
+    "col": 4,
+    "rank": 3
+   },
+   {
+    "row": 3,
+    "col": 5,
+    "rank": 4
+   },
+   {
+    "row": 3,
+    "col": 6,
+    "rank": 4
+   },
+   {
+    "row": 4,
+    "col": 0,
+    "rank": 5
+   },
+   {
+    "row": 4,
+    "col": 1,
+    "rank": 5
+   },
+   {
+    "row": 4,
+    "col": 2,
+    "rank": 5
+   },
+   {
+    "row": 4,
+    "col": 3,
+    "rank": 4
+   },
+   {
+    "row": 4,
+    "col": 4,
+    "rank": 3
+   },
+   {
+    "row": 4,
+    "col": 5,
+    "rank": 4
+   },
+   {
+    "row": 4,
+    "col": 6,
+    "rank": 4
+   },
+   {
+    "row": 5,
+    "col": 0,
+    "rank": 5
+   },
+   {
+    "row": 5,
+    "col": 1,
+    "rank": 5
+   },
+   {
+    "row": 5,
+    "col": 2,
+    "rank": 5
+   },
+   {
+    "row": 5,
+    "col": 3,
+    "rank": 6
+   },
+   {
+    "row": 5,
+    "col": 4,
+    "rank": 5
+   },
+   {
+    "row": 5,
+    "col": 5,
+    "rank": 5
+   },
+   {
+    "row": 5,
+    "col": 6,
+    "rank": 5
+   },
+   {
+    "row": 6,
+    "col": 0,
+    "rank": 5
+   },
+   {
+    "row": 6,
+    "col": 1,
+    "rank": 5
+   },
+   {
+    "row": 6,
+    "col": 2,
+    "rank": 6
+   },
+   {
+    "row": 6,
+    "col": 3,
+    "rank": 6
+   },
+   {
+    "row": 6,
+    "col": 4,
+    "rank": 5
+   },
+   {
+    "row": 6,
+    "col": 5,
+    "rank": 5
+   },
+   {
+    "row": 6,
+    "col": 6,
+    "rank": 5
+   }
+  ]
+ }
+}

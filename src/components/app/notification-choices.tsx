@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ChoiceChips } from "@/components/kabsi/d3-account";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Switch } from "@/components/kabsi/ui";
@@ -10,7 +10,9 @@ import {
   savePref,
   type Channel,
   type Frequency,
+  type Pref,
 } from "@/lib/notifications";
+import { choiceFailedLine, withPref } from "@/lib/routine-delivery";
 
 // What Kabsi tells you, and how (K-46, P0.4-09). Design 3's four switches on top (each one is the email choice of one stored
 // category: on is the category's default, off is off), and behind "Choose how each one reaches you" every kind of notice
@@ -34,24 +36,43 @@ const SHOWN_LABEL: Record<string, string> = { weekly_report: "Your weekly report
 
 function usePrefs(locationId: string) {
   const qc = useQueryClient();
+  const key = ["notification-prefs", locationId];
   const prefs = useQuery({
-    queryKey: ["notification-prefs", locationId],
+    queryKey: key,
     queryFn: () => loadPrefs(locationId),
   });
   const [err, setErr] = useState("");
   const [saved, setSaved] = useState("");
+  // The list as it was before the first change of a burst (see onMutate).
+  const burst = useRef<Pref[] | undefined>(undefined);
+  // App 6: a change shows at once and is saved in the background; if the save fails the page goes back with one plain
+  // line. Saves go one after another, and the truth is read back once the last one is done.
   const save = useMutation({
+    mutationKey: ["notification-prefs-save", locationId],
+    scope: { id: `notification-prefs-${locationId}` },
     mutationFn: (v: { category: string; channel: Channel; frequency: Frequency }) =>
       savePref(locationId, v.category, v.channel, v.frequency),
-    onMutate: () => {
+    onMutate: async (v) => {
       setErr("");
       setSaved("");
+      await qc.cancelQueries({ queryKey: key });
+      // One snapshot per burst of changes: a failure goes back to what the server still holds.
+      if (qc.isMutating({ mutationKey: ["notification-prefs-save", locationId] }) <= 1)
+        burst.current = qc.getQueryData<Pref[]>(key);
+      qc.setQueryData<Pref[]>(key, withPref(qc.getQueryData<Pref[]>(key) ?? [], v));
     },
-    onSuccess: () => {
-      setSaved("Saved.");
-      void qc.invalidateQueries({ queryKey: ["notification-prefs", locationId] });
+    onSuccess: () => setSaved("Saved."),
+    onError: () => {
+      // Another save is still on its way: it decides, and the last read-back corrects the page.
+      if (qc.isMutating({ mutationKey: ["notification-prefs-save", locationId] }) > 1) return;
+      qc.setQueryData(key, burst.current);
+      setSaved("");
+      setErr(choiceFailedLine());
     },
-    onError: () => setErr("Couldn't save. Please try again."),
+    onSettled: () => {
+      if (qc.isMutating({ mutationKey: ["notification-prefs-save", locationId] }) > 1) return;
+      void qc.invalidateQueries({ queryKey: key });
+    },
   });
   return { prefs, save, err, saved };
 }
@@ -83,7 +104,6 @@ export function MessageSwitches({ locationId }: { locationId: string }) {
             label={s.label}
             description={s.description}
             checked={choice(prefs.data, s.id, "email") !== "off"}
-            disabled={save.isPending}
             onChange={(on) =>
               save.mutate({ category: s.id, channel: "email", frequency: on ? "default" : "off" })
             }

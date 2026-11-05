@@ -10,6 +10,9 @@ import { Img, PHOTOS, type Photo } from "./photos";
 import { ScanBox } from "./scan-box";
 import { SiteLink } from "./site-link";
 import { D9Title } from "./d9-title";
+import { YellowLabel, YellowNumber } from "./highlight";
+
+export { YellowLabel, YellowNumber };
 import {
   D9_BUSINESS,
   D9_HERO_LINE,
@@ -191,35 +194,6 @@ export function PictureButtons({ labels }: { labels: readonly string[] }) {
 }
 
 /* ---------- Yellow, used well (Polish 4, master plan 30.25 item 3) ---------- */
-
-/** A short label, charcoal on yellow. */
-export function YellowLabel({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <p
-      className={cn(
-        "inline-flex rounded-full bg-kb-yellow px-3 py-1 text-label font-bold text-kb-black",
-        className,
-      )}
-    >
-      {children}
-    </p>
-  );
-}
-
-/** A numbered marker, charcoal on yellow. */
-export function YellowNumber({ n, className }: { n: number; className?: string }) {
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        "inline-grid size-7 shrink-0 place-items-center rounded-full bg-kb-yellow text-label font-bold text-kb-black",
-        className,
-      )}
-    >
-      {n}
-    </span>
-  );
-}
 
 /** At most three short points, each with its yellow number. */
 export function NumberedPoints({

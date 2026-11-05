@@ -1,23 +1,19 @@
 // The free review link and QR code tool (/google-review-link), with the real search and Google's own review link.
-import { Download, MapPin, Printer, QrCode as QrIcon, SearchX } from "lucide-react";
-import { useRef, useState, type FormEvent } from "react";
+import { Download, MapPin, Printer, QrCode as QrIcon, Search, SearchX, Share2 } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
 import { cn } from "@/lib/utils";
 import { CTA_TRIAL, FREE_TOOL_BUSY, FREE_TOOL_BUSY_CODES } from "@/lib/site";
 import { anonHeaders, supabaseUrl } from "@/lib/supabase-config";
 import { useLazyTurnstile } from "@/components/turnstile";
 import { track } from "@/lib/telemetry";
-import {
-  CopyField,
-  PageTop,
-  QrCode,
-  SearchForm,
-  SearchingSteps,
-  ToolTabs,
-  downloadQrPng,
-} from "./d2-parts";
+import { CopyField, SearchingSteps, ToolTabs } from "./d2-parts";
+import { BusinessCombobox } from "./business-combobox";
+import type { FoundBusiness } from "@/lib/profile-check";
+import cafeCounter1600 from "@/assets/photos/cafe-counter-1600.webp";
+import cafeCounter800 from "@/assets/photos/cafe-counter-800.webp";
 import { ScanBox } from "./scan-box";
 import { Banner, Button, ButtonLink, Card, EmptyState } from "./ui";
-import { Marked } from "@/components/kabsi/highlight";
+import { Marked, YellowNumber } from "@/components/kabsi/highlight";
 
 /* ---------- Shared pieces ---------- */
 
@@ -52,78 +48,70 @@ const RULES_TITLE = "Send it to every customer, the same way.";
 const RULES_TEXT =
   "Do not offer anything in return, and do not ask only happy customers. Those are Google's rules.";
 
-/** The card a business keeps by the till. Before a business is found it shows an empty code space, never a made-up code. */
-export function CounterCard({
-  business,
-  link,
-  cardRef,
-}: {
-  business: string;
-  link: string | null;
-  cardRef?: React.Ref<HTMLDivElement>;
-}) {
+/** Google's own review link for a place (the same format the review-link function returns). */
+export const reviewUrl = (placeId: string) =>
+  `https://search.google.com/local/writereview?placeid=${encodeURIComponent(placeId)}`;
+
+/**
+ * Scan 3 (master plan 30.34 item 3): the branded card, drawn from src/lib/qr-card.ts (loaded with it). Before a business
+ * is chosen it shows an empty code space, never a made-up code.
+ */
+export function BrandedCard({ business, link }: { business: string; link: string | null }) {
+  const [svg, setSvg] = useState<string | null>(null);
+  useEffect(() => {
+    if (!link) return setSvg(null);
+    let live = true;
+    void import("@/lib/qr-card").then((q) => {
+      if (live)
+        setSvg(
+          q.cardSvg(
+            q.cardShapes(business, link, q.canvasMeasure()),
+            `Review card for ${business}: ${q.CARD_LINE}, with a QR code`,
+          ),
+        );
+    });
+    return () => {
+      live = false;
+    };
+  }, [business, link]);
   return (
-    <div
-      ref={cardRef}
-      className={cn(
-        "relative mx-auto w-full max-w-[22rem] rounded-panel bg-kb-white p-6 text-center text-kb-ink shadow-lift transition-opacity duration-200 ease-kb sm:p-7",
-      )}
-    >
-      <p className="font-display text-h3 font-bold">Scan to leave a review</p>
-      <p className="mt-1 text-small text-kb-stone">It takes a minute.</p>
-      <div className="mx-auto mt-5 w-full max-w-[14rem]">
-        {link ? (
-          <QrCode
-            value={link}
-            label={`QR code that opens the review box for ${business}`}
-            className="ring-1 ring-kb-ink/10"
-          />
-        ) : (
-          <div
-            aria-hidden
-            className="grid aspect-square w-full place-items-center rounded-card border-2 border-dashed border-kb-ink/15 text-kb-stone"
-          >
-            <QrIcon className="size-12" strokeWidth={1.25} />
+    <figure className="mx-auto w-full max-w-[22rem]">
+      {svg ? (
+        <div
+          data-testid="review-card"
+          className="overflow-hidden rounded-panel bg-kb-white shadow-lift [&>svg]:block [&>svg]:h-auto [&>svg]:w-full"
+          // The SVG is built by qr-card.ts from shapes; the business name in it is escaped there.
+          dangerouslySetInnerHTML={{ __html: svg }}
+        />
+      ) : (
+        <div className="grid aspect-[297/420] w-full place-items-center rounded-panel bg-kb-white p-8 text-center text-kb-ink shadow-lift">
+          <div>
+            <p className="font-display text-title font-bold">{business}</p>
+            <p className="mt-1 text-body text-kb-stone">Scan to review us on Google</p>
+            <div
+              aria-hidden
+              className="mx-auto mt-6 grid aspect-square w-40 place-items-center rounded-card border-[10px] border-kb-yellow text-kb-stone"
+            >
+              <QrIcon className="size-12" strokeWidth={1.25} />
+            </div>
+            <p className="mt-6 text-small text-kb-stone">kabsi.co</p>
           </div>
-        )}
-      </div>
-      <p className="mt-5 font-display text-title font-bold">{business}</p>
-    </div>
+        </div>
+      )}
+      <figcaption className="mt-3 text-center text-small text-text-2">
+        A6 card, 105 by 148 mm. Print it for your counter.
+      </figcaption>
+    </figure>
   );
-}
-
-const PRINT_SCRIPT =
-  "<script>window.onload = function () { window.focus(); window.print(); };</" + "script>";
-
-const esc = (t: string) =>
-  t.replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]!);
-
-function printCounterCard(name: string, svg: string) {
-  // The name comes from Google: escaped before it goes into the print page.
-  const business = esc(name);
-  const w = window.open("", "_blank", "width=640,height=860");
-  if (!w) return;
-  w.document
-    .write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Counter card, ${business}</title>
-<style>
-  @page { size: A5; margin: 12mm }
-  body { margin: 0; font-family: system-ui, sans-serif; color: #111; display: grid; place-items: center; min-height: 100vh }
-  .card { text-align: center; width: 100%; max-width: 380px }
-  h1 { font-size: 34px; margin: 0 0 6px }
-  p { margin: 0; font-size: 18px; color: #5e5b55 }
-  svg { width: 300px; height: 300px; margin: 28px 0 }
-  strong { display: block; font-size: 26px; color: #111 }
-</style></head><body><div class="card"><h1>Scan to leave a review</h1><p>It takes a minute.</p>${svg}<strong>${business}</strong></div>
-${PRINT_SCRIPT}</body></html>`);
-  w.document.close();
 }
 
 type Place = { place_id: string; name: string; address: string; review_url: string };
 type Phase = "empty" | "searching" | "pick" | "result" | "none" | "busy";
 
 /**
- * The free review link tool (D252): the visitor's own business, Google's own review link for it and a real QR code.
- * The search runs through the review-link Edge Function (the Places key stays on the server), behind Turnstile.
+ * The free review link tool (D252; Scan 3, 30.34 item 3): the same suggestions as the free check, a confirm card with
+ * "Change business", Google's own review link, the branded card as PNG and A6 PDF, copy and share. A typed search without
+ * a suggestion still goes through the review-link Edge Function (the Places key stays on the server), behind Turnstile.
  */
 export function ReviewLinkTool() {
   const [query, setQuery] = useState("");
@@ -131,10 +119,11 @@ export function ReviewLinkTool() {
   const [phase, setPhase] = useState<Phase>("empty");
   const [places, setPlaces] = useState<Place[]>([]);
   const [place, setPlace] = useState<Place | null>(null);
+  const [canShare, setCanShare] = useState(false);
   // The bot check loads on the form's first touch, not at page start (Fix 1); the search waits for its token.
   const check = useLazyTurnstile();
-  const cardRef = useRef<HTMLDivElement>(null);
   const searching = phase === "searching";
+  useEffect(() => setCanShare(typeof navigator !== "undefined" && !!navigator.share), []);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -169,8 +158,8 @@ export function ReviewLinkTool() {
         const found = j.places ?? [];
         track("free_tool_used", { source: "review_link_search" });
         setPlaces(found);
-        if (found.length === 1) choose(found[0]!);
-        else setPhase(found.length ? "pick" : "none");
+        // Scan 3: never chosen for the owner, not even the only match; the list asks and the confirm card follows.
+        setPhase(found.length ? "pick" : "none");
       }
     } catch {
       setError("Search didn't work. Try again.");
@@ -182,28 +171,79 @@ export function ReviewLinkTool() {
     setPhase("result");
     track("review_link_created", { source: "review_link_tool" });
   };
-  const print = () => {
-    const svg = cardRef.current?.querySelector("svg")?.outerHTML;
-    if (svg && place) printCounterCard(place.name, svg);
-    track("free_tool_used", { source: "review_link_print" });
+  // A suggestion from the box: the Place ID gives Google's own review link, with no search on the server.
+  const pickSuggestion = (p: FoundBusiness) =>
+    choose({
+      place_id: p.place_id,
+      name: p.name,
+      address: p.address,
+      review_url: reviewUrl(p.place_id),
+    });
+  const change = () => {
+    setPlace(null);
+    setPlaces([]);
+    setPhase("empty");
+    window.setTimeout(() => document.getElementById("review-search")?.focus(), 0);
   };
   const file =
     (place?.name ?? "")
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "") || "business";
+  const download = async (kind: "png" | "pdf") => {
+    if (!place) return;
+    const q = await import("@/lib/qr-card");
+    const shapes = q.cardShapes(place.name, place.review_url, q.canvasMeasure());
+    if (kind === "png") {
+      const blob = await q.cardPng(shapes);
+      if (blob) q.saveBlob(blob, `review-card-${file}.png`);
+      track("free_tool_used", { source: "review_link_png" });
+    } else {
+      const bytes = q.cardPdf(shapes);
+      q.saveBlob(new Blob([bytes], { type: "application/pdf" }), `review-card-${file}-a6.pdf`);
+      track("free_tool_used", { source: "review_link_print" });
+    }
+  };
+  const share = () => {
+    if (!place) return;
+    void navigator
+      .share({
+        title: place.name,
+        text: `Leave a review for ${place.name} on Google`,
+        url: place.review_url,
+      })
+      .catch(() => undefined);
+  };
 
   return (
     <>
-      <PageTop
-        title={
-          <Marked text="Get your Google review link and QR code." mark="review link and QR code." />
-        }
-        lead="One link that opens the review box on your Google profile. Free, no sign-up."
-      >
-        <div className="mt-8" />
-      </PageTop>
-      <section className="container-kb -mt-6">
+      <section className="container-kb pt-10 lg:pt-16">
+        <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-14">
+          <div>
+            <h1 className="text-display text-balance">
+              <Marked
+                text="Get your Google review link and QR code."
+                mark="review link and QR code."
+              />
+            </h1>
+            <p className="mt-4 max-w-[34rem] text-lead text-text-2">
+              One link that opens the review box on your Google profile. Free, no sign-up.
+            </p>
+          </div>
+          {/* A library photo (docs/PHOTOS.md, cafe-counter), loaded first: it is the hero's picture. */}
+          <img
+            src={cafeCounter800}
+            srcSet={`${cafeCounter800} 800w, ${cafeCounter1600} 1600w`}
+            sizes="(min-width: 1024px) 34rem, calc(100vw - 40px)"
+            width={1600}
+            height={1067}
+            alt="A cafe owner at the counter"
+            fetchPriority="high"
+            className="aspect-[3/2] w-full rounded-panel bg-surface-2 object-cover"
+          />
+        </div>
+      </section>
+      <section className="container-kb mt-10">
         <ToolTabs current="/google-review-link" />
         <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
           <div>
@@ -215,17 +255,57 @@ export function ReviewLinkTool() {
                   {CTA_TRIAL}
                 </ButtonLink>
               </div>
+            ) : phase === "result" && place ? (
+              <section
+                aria-labelledby="confirm-h"
+                className="rounded-panel border border-line bg-surface-1 p-5 sm:p-6"
+              >
+                <p id="confirm-h" className="text-small font-bold text-text-2">
+                  Your business on Google
+                </p>
+                <p className="mt-1 text-h3 break-words">{place.name}</p>
+                {place.address && <p className="mt-1 text-body text-text-2">{place.address}</p>}
+                <p className="mt-1 text-label font-semibold text-text-3">
+                  <span translate="no">Google Maps</span>
+                </p>
+                <button
+                  type="button"
+                  onClick={change}
+                  className="press mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4"
+                >
+                  Change business
+                </button>
+              </section>
             ) : (
               <div ref={check.area}>
-                <SearchForm
-                  button="Get my link"
-                  query={query}
-                  setQuery={setQuery}
-                  error={error}
-                  setError={setError}
+                <form
                   onSubmit={(e) => void submit(e)}
-                  loading={searching}
-                />
+                  noValidate
+                  className="flex flex-col gap-3 sm:flex-row sm:items-start"
+                >
+                  <BusinessCombobox
+                    id="review-search"
+                    className="min-w-0 flex-1"
+                    label="Find your business on Google"
+                    placeholder="Business name and city"
+                    value={query}
+                    onChange={(v) => {
+                      setQuery(v);
+                      if (error) setError(null);
+                    }}
+                    onPick={(p) => pickSuggestion(p)}
+                    error={error}
+                    leading={<Search className="size-5 shrink-0 text-text-3" aria-hidden />}
+                  />
+                  <Button
+                    type="submit"
+                    variant="secondary"
+                    loading={searching}
+                    className="sm:mt-[1.875rem]"
+                  >
+                    Get my link
+                  </Button>
+                </form>
                 <p className="mt-3 text-small text-text-2">Free, no sign-up.</p>
                 <div className="mt-3">{check.widget}</div>
               </div>
@@ -261,22 +341,21 @@ export function ReviewLinkTool() {
                         <MapPin className="mt-0.5 size-5 shrink-0 text-text-2" aria-hidden />
                         <span className="min-w-0 flex-1">
                           <span className="block text-title">{p.name}</span>
-                          <span className="mt-1 block text-small text-text-2">{p.address}</span>
+                          <span className="mt-1 block text-body text-text-2">{p.address}</span>
                         </span>
-                        <span className="shrink-0 self-center text-small font-bold">This one</span>
+                        <span className="shrink-0 self-center text-body font-bold">This one</span>
                       </button>
                     </li>
                   ))}
                 </ul>
+                <p className="mt-2 text-label font-semibold text-text-3">
+                  <span translate="no">Google Maps</span>
+                </p>
               </div>
             )}
 
             {phase === "result" && place && (
-              <div className="mt-8 space-y-6">
-                <div className="rounded-card border border-line bg-surface-1 p-4">
-                  <p className="text-title">{place.name}</p>
-                  <p className="mt-0.5 text-small text-text-2">{place.address}</p>
-                </div>
+              <div className="mt-6 space-y-6">
                 <CopyField label="Your review link" value={place.review_url} />
                 {/* Neutral wording, the same for every customer (master plan 30.16 section 4). */}
                 <CopyField
@@ -284,49 +363,52 @@ export function ReviewLinkTool() {
                   copyLabel="Copy message"
                   value={`Thank you for visiting ${place.name}. If you have a minute, you can leave a review on Google here: ${place.review_url}`}
                 />
-                <div className="flex flex-col gap-3 sm:flex-row">
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   <Button
                     variant="secondary"
                     icon={<Download className="size-5" aria-hidden />}
-                    onClick={() => {
-                      void downloadQrPng(place.review_url, `google-review-qr-${file}.png`);
-                      track("free_tool_used", { source: "review_link_png" });
-                    }}
+                    onClick={() => void download("png")}
                   >
-                    Download QR code
+                    Download the card (PNG)
                   </Button>
                   <Button
                     variant="secondary"
                     icon={<Printer className="size-5" aria-hidden />}
-                    onClick={print}
+                    onClick={() => void download("pdf")}
                   >
-                    Print a counter card
+                    Download to print (A6 PDF)
                   </Button>
+                  {canShare && (
+                    <Button
+                      variant="secondary"
+                      icon={<Share2 className="size-5" aria-hidden />}
+                      onClick={share}
+                    >
+                      Share the link
+                    </Button>
+                  )}
                 </div>
               </div>
             )}
 
             {phase !== "result" && phase !== "pick" && (
-              <ul className="mt-8 space-y-3 text-body text-text-2">
+              <ol className="mt-8 space-y-3 text-body">
                 {[
-                  "Type your business name and city.",
-                  "Kabsi finds your business on Google and builds the link.",
-                  "Put the code by the till, and send the link to every customer.",
+                  "Type your business name and city, then choose it.",
+                  "Check it is your business, or change it.",
+                  "Put the card by the till, and send the link to every customer.",
                 ].map((t, i) => (
                   <li key={t} className="flex gap-3">
-                    <span className="grid size-7 shrink-0 place-items-center rounded-full border border-line-strong text-small font-bold text-text-1">
-                      {i + 1}
-                    </span>
+                    <YellowNumber n={i + 1} />
                     <span className="pt-0.5">{t}</span>
                   </li>
                 ))}
-              </ul>
+              </ol>
             )}
           </div>
 
-          <div className="lg:pt-[1.875rem]">
-            <CounterCard
-              cardRef={cardRef}
+          <div className="lg:pt-2">
+            <BrandedCard
               business={place?.name ?? "Your business"}
               link={place?.review_url ?? null}
             />

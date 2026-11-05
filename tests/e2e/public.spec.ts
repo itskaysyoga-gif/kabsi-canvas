@@ -155,38 +155,39 @@ test.describe("public pages", () => {
     });
   });
 
-  // Scan 2 (master plan 30.29): the town goes to the check, the question and date show, at your address is in the open
-  // before the card, "How to read it" is under the card, no Arabic, and the report carries the check's code.
-  test("the free check result shows the question, at your address and the card with How to read it under it (Scan 2)", async ({
+  // Scan 2 (master plan 30.29): the town goes to the check, the question and date show, no Arabic, and the report carries
+  // the check's code. Scan 3 (30.34 item 2): the nearby and AI parts open on request; at your address comes before the
+  // card, the card's drawing is labelled a diagram, and why results vary comes after it.
+  test("the free check result shows the question, at your address and the card with why it varies under it (Scan 2, Scan 3)", async ({
     page,
   }) => {
     await noBanner(page);
     const sent = await mockFreeCheck(page);
     await page.goto("/scan?q=SEVEN%20Burgers");
     await page.getByRole("button", { name: "This is my business" }).click({ timeout: 30_000 });
+    await page.locator('details[data-detail="ai"] > summary').click({ timeout: 30_000 });
     await expect(
-      page.getByText("We asked ChatGPT: 'best fast food restaurant in Boqaata, Lebanon'"),
+      page.getByText("Question: 'best fast food restaurant in Boqaata, Lebanon'"),
     ).toBeVisible({ timeout: 30_000 });
     expect(sent.check?.["city"]).toBe("Boqaata");
     await expect(page.getByText("No sources cited.")).toBeVisible();
-    await expect(
-      page.getByText(/^Asked on 5 November 2026 through OpenAI's API, with web search\./),
-    ).toBeVisible();
+    await expect(page.getByText("Asked on 5 November 2026", { exact: true })).toBeVisible();
     await expect(page.getByText("1 to look at, 5 shown on Google")).toBeVisible();
-    const at = page.getByRole("heading", { name: "At your address on Google Maps" });
+    await page.locator('details[data-detail="nearby"] > summary').click();
+    const at = page.getByRole("heading", { name: "Who came first at your address" });
     await expect(at).toBeVisible();
     await expect(page.getByText("West Diner").first()).toBeVisible();
     // Copy 3 (master plan 30.30 item 2): the count line says where the business usually comes up.
     await expect(page.getByText(/Most places put you \d+(st|nd|rd|th)\./)).toBeVisible();
-    const how = page.getByRole("heading", { name: "How to read it" });
     const card = page.getByText("Another business came first.");
-    const [a, c, h] = await Promise.all([at.boundingBox(), card.boundingBox(), how.boundingBox()]);
+    const why = page.getByText(/different results depending on where someone searches/);
+    const [a, c, h] = await Promise.all([at.boundingBox(), card.boundingBox(), why.boundingBox()]);
     expect(a!.y).toBeLessThan(c!.y);
     expect(c!.y).toBeLessThan(h!.y);
     expect(await page.locator("main").innerText()).not.toMatch(
       /[\u0600-\u06FF]|already right|McDonald/,
     );
-    await page.getByLabel("Email").last().fill("qa-report@test.local");
+    await page.getByRole("textbox", { name: "Email" }).last().fill("qa-report@test.local");
     await page.getByRole("button", { name: "Send me this report" }).click();
     await expect(page.getByText("Sent.")).toBeVisible();
     expect(sent.report[0]?.["code"]).toBe("SEVEN234");

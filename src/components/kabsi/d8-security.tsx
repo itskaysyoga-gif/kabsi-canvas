@@ -12,6 +12,7 @@ import { PageHero, popCls, stagger } from "./page-hero";
 import { Closing } from "./closing";
 import { SECURITY_HERO } from "./hero-lines";
 import { Marked } from "@/components/kabsi/highlight";
+import { Img, PHOTOS } from "./photos";
 
 const MAIL = (
   <a className="font-semibold underline underline-offset-4" href={`mailto:${CONTACT_EMAIL}`}>
@@ -101,13 +102,37 @@ function Block({ title, children }: { title: string; children: ReactNode }) {
 export function D8Security() {
   return (
     <>
-      <PageHero mark="stays yours." hero={SECURITY_HERO} visual={<CanCannotVisual />} />
+      {/* Site 2 (master plan 30.34 item 4): a hero photo above what Kabsi can and never can do. */}
+      <PageHero
+        mark="stays yours."
+        hero={SECURITY_HERO}
+        visual={
+          <div className="grid gap-4">
+            <Img
+              photo={PHOTOS.phoneShop}
+              sizes="(min-width: 1024px) 34rem, calc(100vw - 40px)"
+              priority
+              className="aspect-[2/1] w-full rounded-panel bg-surface-2 object-cover shadow-float"
+            />
+            <CanCannotVisual />
+          </div>
+        }
+      />
 
       <section aria-labelledby="sum-h" className="border-t border-line bg-surface-1">
         <div className="container-kb section-y grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-          <h2 id="sum-h" className="text-h2">
-            <Marked text="In plain words" mark="plain words" />
-          </h2>
+          <div>
+            <h2 id="sum-h" className="text-h2">
+              <Marked text="In plain words" mark="plain words" />
+            </h2>
+            {/* Site 2: a phone approval beside the summary. */}
+            <Img
+              photo={PHOTOS.phoneReading}
+              sizes="(min-width: 1024px) 24rem, calc(100vw - 40px)"
+              className="mt-8 aspect-[3/2] w-full rounded-panel bg-surface-2 object-cover lg:aspect-[4/5] lg:max-w-[24rem]"
+              style={{ objectPosition: "50% 30%" }}
+            />
+          </div>
           <ul className="divide-y divide-line border-y border-line">
             {SUMMARY.map((s) => (
               <li key={s} className="flex gap-3 py-4 text-body">
@@ -228,9 +253,17 @@ export function D8Security() {
 
       <section aria-labelledby="never-h" className="theme-dark bg-band">
         <div className="container-kb section-y grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-          <h2 id="never-h" className="text-h2">
-            What Kabsi never does
-          </h2>
+          <div>
+            <h2 id="never-h" className="text-h2">
+              What Kabsi never does
+            </h2>
+            {/* Site 2: an owner at work beside the five promises. */}
+            <Img
+              photo={PHOTOS.cafeCounter}
+              sizes="(min-width: 1024px) 28rem, calc(100vw - 40px)"
+              className="mt-8 aspect-[3/2] w-full rounded-panel bg-surface-2 object-cover"
+            />
+          </div>
           {/* Style 1 (30.33 item 2): five cards never leave one alone in the last row; it is centred. */}
           <ul className="flex flex-wrap justify-center gap-3">
             {NEVER.map((n) => (

@@ -77,7 +77,10 @@ describe("the free check result on Design 8", () => {
     );
     expect(result).not.toMatch(/At launch/);
     // Both parts show only with a check, or the mock mode's waiting list; "unavailable" shows neither.
-    expect(result).toContain("{check || waitlist ? (");
+    // Scan 3: the nearby detail shows with a check, the waiting list in mock mode, else nothing; the AI detail only with an answer.
+    expect(result).toContain("{check ? (");
+    expect(result).toContain(") : waitlist ? (");
+    expect(result).toContain("{ai ? (");
     expect(result).toContain('started.state === "waitlist"');
     expect(result).toContain("Kabsi will search Google Maps from places around you");
   });
