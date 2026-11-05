@@ -70,4 +70,34 @@ test.describe("how long a sign-in lasts", () => {
     expect(scope).toBe("global");
     await expect(page.getByRole("status").filter({ hasText: "You are signed out." })).toBeVisible();
   });
+
+  test("staff away 13 hours who open Home first are still signed out of the staff page", async ({
+    page,
+  }) => {
+    await noBanner(page);
+    await signInFake(page, {
+      staff: true,
+      storage: {
+        "kabsi:last-seen": String(Date.now() - 1000),
+        "kabsi:last-seen-staff": String(Date.now() - 13 * HOUR),
+      },
+    });
+    await page.goto("/");
+    await page.waitForTimeout(1000);
+    await page.goto("/staff");
+    await expect(page).toHaveURL(/\/login/);
+    await expect(
+      page.getByText("You were signed out after 12 hours away. Log in again."),
+    ).toBeVisible();
+  });
+
+  test("time away found on a website page opens the log in page", async ({ page }) => {
+    await noBanner(page);
+    await signInFake(page, { storage: seenAgo(31 * DAY) });
+    await page.goto("/pricing");
+    await expect(page).toHaveURL(/\/login/);
+    await expect(
+      page.getByText("You were signed out after 30 days away. Log in again."),
+    ).toBeVisible();
+  });
 });

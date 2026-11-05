@@ -6,14 +6,16 @@
 import type { SignedOutReason } from "@/lib/signed-out";
 
 const KEY = "kabsi:last-seen";
+/** The last visit to a staff page, apart, so a visit to the website or the dashboard does not restart the 12 hours. */
+const STAFF_KEY = "kabsi:last-seen-staff";
 export const OWNER_IDLE_MS = 30 * 86_400_000;
 export const STAFF_IDLE_MS = 12 * 3_600_000;
 /** At most one write a minute. */
 export const WRITE_EVERY_MS = 60_000;
 
-export function lastSeen(): number | null {
+export function lastSeen(staff = false): number | null {
   try {
-    const v = Number(window.localStorage.getItem(KEY));
+    const v = Number(window.localStorage.getItem(staff ? STAFF_KEY : KEY));
     return Number.isFinite(v) && v > 0 ? v : null;
   } catch {
     return null;
@@ -24,11 +26,11 @@ export function lastSeen(): number | null {
  * Records a visit, unless one was recorded in the last minute. A stamp in the future (the clock was moved back) is
  * replaced. Returns whether it wrote.
  */
-export function touch(now = Date.now()): boolean {
-  const seen = lastSeen();
+export function touch(now = Date.now(), staff = false): boolean {
+  const seen = lastSeen(staff);
   if (seen !== null && seen <= now && now - seen < WRITE_EVERY_MS) return false;
   try {
-    window.localStorage.setItem(KEY, String(now));
+    window.localStorage.setItem(staff ? STAFF_KEY : KEY, String(now));
     return true;
   } catch {
     /* storage blocked: no time-away sign-out on this device; the session still ends in Supabase's own time */
@@ -39,6 +41,7 @@ export function touch(now = Date.now()): boolean {
 export function clearSeen() {
   try {
     window.localStorage.removeItem(KEY);
+    window.localStorage.removeItem(STAFF_KEY);
   } catch {
     /* nothing to clear */
   }
@@ -50,16 +53,20 @@ export const isStaffPath = (pathname: string) =>
 
 /**
  * The rule itself. `seen` is the last visit before this one (null when none is recorded: the first visit on this
- * device, or storage blocked, signs nobody out). A staff session on a staff page has 12 hours, every other page 30 days.
+ * device, or storage blocked, signs nobody out). A staff session on a staff page has 12 hours from its last staff
+ * page visit (`staffSeen`; the last visit of any kind when no staff page was visited yet on this device); every other
+ * page, 30 days from the last visit.
  */
 export function awayVerdict(
   seen: number | null,
   now: number,
-  opts: { staff: boolean; pathname: string },
+  opts: { staff: boolean; pathname: string; staffSeen?: number | null },
 ): Extract<SignedOutReason, "away-owner" | "away-staff"> | null {
+  if (opts.staff && isStaffPath(opts.pathname)) {
+    const s = opts.staffSeen ?? seen;
+    if (s !== null && s <= now && now - s > STAFF_IDLE_MS) return "away-staff";
+  }
   if (seen === null || seen > now) return null;
-  const gap = now - seen;
-  if (opts.staff && isStaffPath(opts.pathname) && gap > STAFF_IDLE_MS) return "away-staff";
-  if (gap > OWNER_IDLE_MS) return "away-owner";
+  if (now - seen > OWNER_IDLE_MS) return "away-owner";
   return null;
 }

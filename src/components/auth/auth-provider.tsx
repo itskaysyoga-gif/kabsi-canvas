@@ -8,18 +8,20 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useLocation } from "@tanstack/react-router";
+import { useLocation, useRouter } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { clearAssistantChat } from "@/lib/assistant-storage";
 import { identify, isPrivatePath } from "@/lib/telemetry";
 import { saveSignupAttribution } from "@/lib/attribution";
-import { awayVerdict, clearSeen, lastSeen, touch } from "@/lib/idle";
+import { awayVerdict, clearSeen, isStaffPath, lastSeen, touch } from "@/lib/idle";
 import { hasStoredSession, signInInUrl, SUPABASE_READY_EVENT } from "@/lib/stored-session";
 import { resetSessionEnded } from "@/lib/session-ended";
 import { setSignedOutReason, takeSignedOutReason } from "@/lib/signed-out";
 
 /** The key supabase-js keeps the session under (not the code verifier of a Google sign-in in flight). */
 const SESSION_KEY = /^sb-.+-auth-token$/;
+/** Pages behind RequireAuth, which sends a signed-out visitor to the log in page itself. */
+const GUARDED = /^\/(app|staff|start)(\/|$)/;
 
 type AuthContextValue = {
   session: Session | null;
@@ -79,6 +81,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let active = true;
     void client.auth.getSession().then(({ data }) => {
       if (!active) return;
+      // No session on this device: an old last-visit time must not judge the next person who signs in.
+      if (!data.session) clearSeen();
       setSession(data.session);
       setLoading(false);
     });
@@ -130,11 +134,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     let active = true;
-    void client.rpc("is_staff").then(({ data }) => {
-      if (active) setIsStaff(data === true);
-    });
+    let timer = 0;
+    // No answer is not "not staff": it stays unknown and is asked again, so a later answer still applies the 12 hours (App 4 review).
+    const ask = (tries: number) => {
+      void client.rpc("is_staff").then(({ data, error }) => {
+        if (!active) return;
+        if (error) {
+          if (tries < 3) timer = window.setTimeout(() => ask(tries + 1), 3000);
+          return;
+        }
+        setIsStaff(data === true);
+      });
+    };
+    ask(1);
     return () => {
       active = false;
+      window.clearTimeout(timer);
     };
   }, [userId, client]);
   useEffect(() => {
@@ -143,58 +158,67 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!loading && userId) void saveSignupAttribution(userId);
   }, [loading, userId]);
 
-  // How long a sign-in lasts (App 4, 30.31 item 2): 30 days after the last visit for an owner, 12 hours on staff pages
-  // for staff (idle.ts). Judged when the session is read and the staff answer is in, before this visit is recorded, then
-  // on every page change, when the tab comes back and every 5 minutes. A sign-out for time away is local to this device
-  // and leaves the reason, so the log in page says why.
+  // How long a sign-in lasts (App 4, 30.31 item 2): 30 days after the last visit for an owner, 12 hours after the last
+  // staff page visit on staff pages for staff (idle.ts). Judged as soon as the session is read, before this visit is
+  // recorded, again when the staff answer comes in, on every page change, when the tab comes back and every 5 minutes.
+  // A sign-out for time away is local to this device and leaves the reason, so the log in page says why; on a website
+  // page the log in page opens (the dashboard's own guard does that for its pages, keeping the page to come back to).
   const pathRef = useRef(pathname);
   pathRef.current = pathname;
-  const awayOut = useRef<(() => boolean) | null>(null);
+  const awayOut = useRef<(() => void) | null>(null);
+  const router = useRouter();
   useEffect(() => {
-    if (!userId || !client || isStaff === null) {
+    if (!userId || !client) {
       awayOut.current = null;
       return;
     }
     let stopped = false;
+    const staffPage = () => isStaff === true && isStaffPath(pathRef.current);
     const judge = () => {
       if (stopped) return true;
       const verdict = awayVerdict(lastSeen(), Date.now(), {
-        staff: isStaff,
+        staff: isStaff === true,
         pathname: pathRef.current,
+        staffSeen: lastSeen(true),
       });
       if (!verdict) return false;
       stopped = true;
       setSignedOutReason(verdict);
       clearSeen();
-      void client.auth.signOut({ scope: "local" });
+      void client.auth.signOut({ scope: "local" }).then(() => {
+        if (!GUARDED.test(pathRef.current)) void router.navigate({ to: "/login" });
+      });
       return true;
     };
-    awayOut.current = judge;
-    if (judge()) return;
-    touch();
-    const mark = () => {
-      if (!judge()) touch();
+    const visit = () => {
+      if (judge()) return;
+      // On a staff page nothing is recorded until the staff answer is in, so the 12 hours are judged first.
+      if (isStaff === null && isStaffPath(pathRef.current)) return;
+      const now = Date.now();
+      touch(now);
+      if (staffPage()) touch(now, true);
     };
+    awayOut.current = visit;
+    visit();
     const onVisible = () => {
-      if (document.visibilityState === "visible") mark();
+      if (document.visibilityState === "visible") visit();
     };
-    window.addEventListener("click", mark, true);
-    window.addEventListener("keydown", mark, true);
+    window.addEventListener("click", visit, true);
+    window.addEventListener("keydown", visit, true);
     document.addEventListener("visibilitychange", onVisible);
     const timer = window.setInterval(judge, 300_000);
     return () => {
       stopped = true;
       awayOut.current = null;
-      window.removeEventListener("click", mark, true);
-      window.removeEventListener("keydown", mark, true);
+      window.removeEventListener("click", visit, true);
+      window.removeEventListener("keydown", visit, true);
       document.removeEventListener("visibilitychange", onVisible);
       window.clearInterval(timer);
     };
-  }, [userId, client, isStaff]);
+  }, [userId, client, isStaff, router]);
   // A page change is a visit too, judged first (a staff page has the shorter time).
   useEffect(() => {
-    const judge = awayOut.current;
-    if (judge && !judge()) touch();
+    awayOut.current?.();
   }, [pathname]);
 
   const value = useMemo<AuthContextValue>(

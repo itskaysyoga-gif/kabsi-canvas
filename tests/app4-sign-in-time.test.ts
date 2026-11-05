@@ -81,6 +81,16 @@ describe("the rule (awayVerdict)", () => {
   it("a stamp in the future (the clock moved back) signs nobody out", () => {
     expect(awayVerdict(T0 + DAY, T0, owner)).toBeNull();
   });
+  it("staff are judged on staff pages by their last staff page visit, not a visit to the website first", () => {
+    const staffPage = { staff: true, pathname: "/staff" };
+    // Home was loaded a second ago (the general stamp is fresh), the staff page 13 hours ago.
+    expect(awayVerdict(T0 - 1000, T0, { ...staffPage, staffSeen: T0 - 13 * HOUR })).toBe(
+      "away-staff",
+    );
+    expect(awayVerdict(T0 - 1000, T0, { ...staffPage, staffSeen: T0 - 11 * HOUR })).toBeNull();
+    // No staff page visit on this device yet: the last visit of any kind counts.
+    expect(awayVerdict(T0 - 13 * HOUR, T0, { ...staffPage, staffSeen: null })).toBe("away-staff");
+  });
   it("staff paths are /staff and below only", () => {
     expect(isStaffPath("/staff")).toBe(true);
     expect(isStaffPath("/staff/x")).toBe(true);
@@ -118,10 +128,18 @@ describe("the last visit (touch)", () => {
     expect(touch()).toBe(true);
     expect(lastSeen()).toBe(T0);
   });
-  it("a sign-out forgets the last visit", () => {
+  it("a sign-out forgets the last visit, the staff one too", () => {
     touch();
+    touch(Date.now(), true);
     clearSeen();
     expect(lastSeen()).toBeNull();
+    expect(lastSeen(true)).toBeNull();
+  });
+  it("the staff stamp is written apart", () => {
+    touch();
+    expect(lastSeen(true)).toBeNull();
+    touch(Date.now(), true);
+    expect(lastSeen(true)).toBe(T0);
   });
   it("blocked storage never throws and signs nobody out", () => {
     vi.stubGlobal("window", {
