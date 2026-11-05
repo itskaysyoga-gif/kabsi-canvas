@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { fmtDate } from "@/lib/format";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -258,6 +258,12 @@ function RoutineChannel({ locationId }: { locationId: string }) {
     enabled: WHATSAPP_ON,
   });
   const [err, setErr] = useState("");
+  const burst = useRef<{
+    shown: DeliveryChannel;
+    stored: DeliveryChannel | null | undefined;
+    prefs: Pref[] | undefined;
+    status: WhatsappStatus | undefined;
+  } | null>(null);
   const prefsKey = ["notification-prefs", locationId];
   const inputs = () => ({
     whatsappOn: WHATSAPP_ON,
@@ -278,12 +284,16 @@ function RoutineChannel({ locationId }: { locationId: string }) {
           qc.cancelQueries({ queryKey }),
         ),
       );
-      const before = {
-        shown: chosenChannel(inputs()),
-        stored: qc.getQueryData<DeliveryChannel | null>(["routine-channel"]),
-        prefs: qc.getQueryData<Pref[]>(prefsKey),
-        status: qc.getQueryData<WhatsappStatus>(["whatsapp-status"]),
-      };
+      // One snapshot per burst of taps: the page as it was before the first tap, so a failure goes back to what the server
+      // still holds, never to a tap that was never saved.
+      if (qc.isMutating({ mutationKey: ["routine-delivery", locationId] }) <= 1 || !burst.current)
+        burst.current = {
+          shown: chosenChannel(inputs()),
+          stored: qc.getQueryData<DeliveryChannel | null>(["routine-channel"]),
+          prefs: qc.getQueryData<Pref[]>(prefsKey),
+          status: qc.getQueryData<WhatsappStatus>(["whatsapp-status"]),
+        };
+      const before = burst.current;
       // The choice shows now; the server's answer only confirms it.
       const wa = to === "whatsapp";
       qc.setQueryData(["routine-channel"], to);
@@ -294,9 +304,11 @@ function RoutineChannel({ locationId }: { locationId: string }) {
           digest_optin: wa,
         });
       if (!wa && before.prefs) qc.setQueryData(prefsKey, backOnEmail(before.prefs));
-      return before;
     },
-    onError: (_e, _to, before) => {
+    onError: () => {
+      // A save failed while another is still on its way: that one decides, and the last read-back corrects the page.
+      if (qc.isMutating({ mutationKey: ["routine-delivery", locationId] }) > 1) return;
+      const before = burst.current;
       if (before) {
         qc.setQueryData(["routine-channel"], before.stored);
         qc.setQueryData(prefsKey, before.prefs);

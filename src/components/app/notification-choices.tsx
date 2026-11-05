@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ChoiceChips } from "@/components/kabsi/d3-account";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Switch } from "@/components/kabsi/ui";
@@ -43,6 +43,8 @@ function usePrefs(locationId: string) {
   });
   const [err, setErr] = useState("");
   const [saved, setSaved] = useState("");
+  // The list as it was before the first change of a burst (see onMutate).
+  const burst = useRef<Pref[] | undefined>(undefined);
   // App 6: a change shows at once and is saved in the background; if the save fails the page goes back with one plain
   // line. Saves go one after another, and the truth is read back once the last one is done.
   const save = useMutation({
@@ -54,13 +56,16 @@ function usePrefs(locationId: string) {
       setErr("");
       setSaved("");
       await qc.cancelQueries({ queryKey: key });
-      const before = qc.getQueryData<Pref[]>(key);
-      qc.setQueryData<Pref[]>(key, withPref(before ?? [], v));
-      return { before };
+      // One snapshot per burst of changes: a failure goes back to what the server still holds.
+      if (qc.isMutating({ mutationKey: ["notification-prefs-save", locationId] }) <= 1)
+        burst.current = qc.getQueryData<Pref[]>(key);
+      qc.setQueryData<Pref[]>(key, withPref(qc.getQueryData<Pref[]>(key) ?? [], v));
     },
     onSuccess: () => setSaved("Saved."),
-    onError: (_e, _v, ctx) => {
-      if (ctx) qc.setQueryData(key, ctx.before);
+    onError: () => {
+      // Another save is still on its way: it decides, and the last read-back corrects the page.
+      if (qc.isMutating({ mutationKey: ["notification-prefs-save", locationId] }) > 1) return;
+      qc.setQueryData(key, burst.current);
       setSaved("");
       setErr(choiceFailedLine());
     },

@@ -183,6 +183,22 @@ test.describe("Settings: where routine messages go", () => {
     await expect(checked(page)).toHaveText("Email");
   });
 
+  test("two quick taps that both fail go back to what was saved, with one true line", async ({
+    page,
+  }) => {
+    const srv = newServer({ failSaves: true, delayMs: 500 });
+    await open(page, srv);
+    await group(page).getByRole("radio", { name: "WhatsApp" }).click();
+    await group(page).getByRole("radio", { name: "Email" }).click();
+    await expect(
+      page.getByText("Couldn't save that. Your messages still go by email. Try again."),
+    ).toBeVisible({ timeout: 8000 });
+    await page.waitForTimeout(1200);
+    await expect(checked(page)).toHaveText("Email");
+    await expect(page.getByText("still go by WhatsApp")).toHaveCount(0);
+    expect(srv.stored).toBe("email");
+  });
+
   for (const [state, line] of [
     ["none", "WhatsApp is not connected yet. Connect it below, then choose it here."],
     ["pending", "WhatsApp is not connected yet. Connect it below, then choose it here."],
