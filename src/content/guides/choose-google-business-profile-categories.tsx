@@ -1,6 +1,6 @@
 import { Callout, DoDont, Steps } from "@/components/marketing/guide-kit";
 import { GuideLink, SiteRef } from "@/components/marketing/guide-links";
-import { scheduledAt } from "./schedule";
+import { PUBLISH_ALL_AT } from "./schedule";
 import type { GuideDoc } from "./types";
 
 // Guides 3, guide 6. Every claim about Google is from the sources below, read on 5 Nov 2026.
@@ -11,7 +11,7 @@ export const guide: GuideDoc = {
   title: "How do I choose my Google Business Profile categories?",
   description:
     "How to pick the primary category and the additional ones on your Google profile, what Google's rules say not to do, and how to change them safely.",
-  publishAt: scheduledAt(5),
+  publishAt: PUBLISH_ALL_AT,
   updated: READ,
   checked: READ,
   topic: "Categories",

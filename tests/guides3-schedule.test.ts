@@ -2,13 +2,15 @@
 // the sitemap or llms.txt, and its address answers 404. All decided from the clock the server passes; tested here with a
 // fake one.
 import { describe, expect, it } from "vitest";
-import { ALL_GUIDES, ORDER } from "../src/content/guides";
+import { ALL_GUIDES, EARLIER, ORDER } from "../src/content/guides";
 import {
-  EVERY_MS,
+  FIRST_PUBLISH,
+  PUBLISH_ALL_AT,
+  WEEK_MS,
   cacheSeconds,
   isPublic,
   publicGuides,
-  scheduledAt,
+  weeklyAt,
 } from "../src/content/guides/schedule";
 import { sitemapXml } from "../src/lib/sitemap";
 import { llmsText } from "../src/lib/llms";
@@ -19,13 +21,19 @@ const FIRST = ORDER[0];
 const SECOND = ORDER[1];
 
 describe("the schedule", () => {
-  it("the first new guide is public on the merge day, then one every 2 days at 06:00 UTC", () => {
-    expect(scheduledAt(0)).toBe("2026-11-05T00:00:00Z");
-    expect(scheduledAt(1)).toBe("2026-11-07T06:00:00Z");
-    expect(scheduledAt(2)).toBe("2026-11-09T06:00:00Z");
-    expect(scheduledAt(19)).toBe("2026-12-13T06:00:00Z");
-    for (let i = 2; i < 20; i++)
-      expect(Date.parse(scheduledAt(i)) - Date.parse(scheduledAt(i - 1))).toBe(EVERY_MS);
+  it("guide 1 was public on its merge day, and guides 2 to 20 share the one publishing moment (Guides 4 part A)", () => {
+    expect(FIRST_PUBLISH).toBe("2026-11-05T00:00:00Z");
+    expect(Date.parse(PUBLISH_ALL_AT)).toBeGreaterThan(Date.parse(FIRST_PUBLISH));
+    for (const s of ORDER.slice(1)) {
+      const g = ALL_GUIDES.find((x) => x.slug === s);
+      expect(g?.publishAt, s).toBe(PUBLISH_ALL_AT);
+    }
+  });
+
+  it("new guides from 16 Nov 2026 are one a week at 06:00 UTC", () => {
+    expect(weeklyAt(0)).toBe("2026-11-16T06:00:00Z");
+    expect(weeklyAt(1)).toBe("2026-11-23T06:00:00Z");
+    expect(Date.parse(weeklyAt(5)) - Date.parse(weeklyAt(4))).toBe(WEEK_MS);
   });
 
   it("a guide is public from its exact moment, not a second before", () => {
@@ -34,17 +42,27 @@ describe("the schedule", () => {
     expect(isPublic(g, at("2026-11-07T06:00:00Z"))).toBe(true);
   });
 
-  it("the list, the sitemap and llms.txt hold guide 1 and not guide 2 on 5 Nov, and both on 7 Nov from 06:00", () => {
-    const nov5 = publicGuides(ALL_GUIDES, at("2026-11-05T12:00:00Z"));
-    expect(nov5.map((g) => g.slug)).toContain(FIRST);
-    expect(nov5.map((g) => g.slug)).not.toContain(SECOND);
-    expect(sitemapXml(nov5)).toContain(`/guides/${FIRST}<`);
-    expect(sitemapXml(nov5)).not.toContain(`/guides/${SECOND}<`);
-    expect(llmsText(nov5)).toContain(`/guides/${FIRST})`);
-    expect(llmsText(nov5)).not.toContain(`/guides/${SECOND})`);
-    const nov7 = publicGuides(ALL_GUIDES, at("2026-11-07T06:00:00Z"));
-    const has2 = ALL_GUIDES.some((g) => g.slug === SECOND);
-    expect(nov7.map((g) => g.slug).includes(SECOND)).toBe(has2);
+  it("before the moment only guide 1 and the earlier guides are public; from it all 27 are, in the Guides 3 order", () => {
+    const before = publicGuides(ALL_GUIDES, at("2026-11-05T12:00:00Z")).map((g) => g.slug);
+    expect(before).toContain(FIRST);
+    expect(before).not.toContain(SECOND);
+    expect(before).toHaveLength(8);
+    const all = publicGuides(ALL_GUIDES, new Date(PUBLISH_ALL_AT));
+    expect(all).toHaveLength(27);
+    expect(all.map((g) => g.slug)).toEqual([...ORDER, ...EARLIER]);
+    expect(sitemapXml(all)).toContain(`/guides/${SECOND}<`);
+    expect(llmsText(all)).toContain(`/guides/${SECOND})`);
+  });
+
+  it("a guide scheduled after the moment stays out until its day, then is listed first", () => {
+    const base = ALL_GUIDES.map((g) => ({ slug: g.slug, publishAt: g.publishAt }));
+    const future = [...base, { slug: "later", publishAt: weeklyAt(0) }];
+    const during = publicGuides(future, at("2026-11-10T00:00:00Z")).map((g) => g.slug);
+    expect(during).not.toContain("later");
+    const after = publicGuides(future, at("2026-11-16T06:00:00Z")).map((g) => g.slug);
+    expect(after[0]).toBe("later");
+    expect(after).toHaveLength(28);
+    expect(isPublic({ publishAt: weeklyAt(0) }, at("2026-11-16T05:59:59Z"))).toBe(false);
   });
 
   it("before part A merged nothing new was public, and the earlier guides always are", () => {
@@ -54,9 +72,9 @@ describe("the schedule", () => {
   });
 
   it("caches the sitemap and llms.txt for at most an hour, and never past the next guide's moment", () => {
-    expect(cacheSeconds(ALL_GUIDES, at("2026-11-05T12:00:00Z"))).toBeLessThanOrEqual(3600);
-    if (ALL_GUIDES.some((g) => g.slug === SECOND))
-      expect(cacheSeconds(ALL_GUIDES, at("2026-11-07T05:50:00Z"))).toBe(600);
+    const later = [...ALL_GUIDES, { publishAt: weeklyAt(0) }];
+    expect(cacheSeconds(later, at("2026-11-16T05:50:00Z"))).toBe(600);
+    expect(cacheSeconds(ALL_GUIDES, at("2026-11-16T05:50:00Z"))).toBe(3600);
     expect(cacheSeconds([], at("2026-11-05T12:00:00Z"))).toBe(3600);
   });
 

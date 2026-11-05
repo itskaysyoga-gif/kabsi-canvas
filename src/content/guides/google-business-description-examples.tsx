@@ -1,6 +1,6 @@
 import { Callout, DoDont, Steps } from "@/components/marketing/guide-kit";
 import { GuideLink, SiteRef } from "@/components/marketing/guide-links";
-import { scheduledAt } from "./schedule";
+import { PUBLISH_ALL_AT } from "./schedule";
 import type { GuideDoc } from "./types";
 
 // Guides 3, guide 7. Every claim about Google is from the sources below, read on 5 Nov 2026. The four example
@@ -24,7 +24,7 @@ export const guide: GuideDoc = {
   title: "What should I write in my Google business description?",
   description:
     "What Google allows in your Business Profile description, what to leave out, and four example descriptions for a salon, a cafe, a garage and a clinic.",
-  publishAt: scheduledAt(6),
+  publishAt: PUBLISH_ALL_AT,
   updated: READ,
   checked: READ,
   topic: "Business description",

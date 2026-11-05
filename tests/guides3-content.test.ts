@@ -1,15 +1,15 @@
 // Guides 3 (C): the house rules for every guide's content file. A guide that breaks one does not merge.
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { ALL_GUIDES, EARLIER, ORDER } from "../src/content/guides";
-import { scheduledAt } from "../src/content/guides/schedule";
+import { ALL_GUIDES, EARLIER, ORDER, WEEKLY } from "../src/content/guides";
+import { FIRST_PUBLISH, PUBLISH_ALL_AT } from "../src/content/guides/schedule";
 import { guideText, textOf, wordCount } from "../src/content/guides/text";
 import { INDUSTRIES } from "../src/content/industries";
 
 const FILES = readdirSync("src/content/guides").filter((f) => f.endsWith(".tsx"));
 const NEW = ALL_GUIDES.filter((g) => (ORDER as readonly string[]).includes(g.slug));
 const ON_TEMPLATE = ALL_GUIDES.filter((g) => FILES.includes(`${g.slug}.tsx`));
-const SLUGS = new Set<string>([...ORDER, ...EARLIER]);
+const SLUGS = new Set<string>([...WEEKLY, ...ORDER, ...EARLIER]);
 
 // Master plan 30.15 section 1, 30.20 section 3 and COPY 0.1: never in a line a reader sees.
 const NEVER = [
@@ -43,10 +43,10 @@ describe("Guides 3 content files", () => {
     for (const s of [...ORDER, ...EARLIER]) expect(FILES, s).toContain(`${s}.tsx`);
   });
 
-  it("the new guides publish one every 2 days at 06:00 UTC, the first on the merge day", () => {
+  it("guide 1 published on its merge day, and guides 2 to 20 publish together from the one value (Guides 4 part A)", () => {
     ORDER.forEach((s, i) => {
       const g = NEW.find((x) => x.slug === s);
-      if (g) expect(g.publishAt, s).toBe(scheduledAt(i));
+      if (g) expect(g.publishAt, s).toBe(i === 0 ? FIRST_PUBLISH : PUBLISH_ALL_AT);
     });
   });
 

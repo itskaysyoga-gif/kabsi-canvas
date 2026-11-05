@@ -143,14 +143,15 @@ async function firstMap(locationId: string): Promise<{ state: "started" | "waiti
     await runMaps();
     return { state: "started", keyword: k.keyword as string };
   }
-  const { data: loc } = await db.from("locations").select("name, category_label, concierge").eq("id", locationId).maybeSingle();
+  const { data: loc } = await db.from("locations").select("name, category_label, concierge, google_location_id").eq("id", locationId).maybeSingle();
   if (!loc) return { state: "none" };
   // The search terms report (Google's own, read only, never stored) when Google has one; the mock has none.
+  // Fix 3: asked with the business's Google location name, never Kabsi's own id; no name, no Google call.
   let terms: { keyword: string; count: number }[] = [];
-  if (!loc.concierge) {
+  if (!loc.concierge && loc.google_location_id) {
     try {
       const { searchKeywords } = await import("../google/index.ts");
-      terms = await searchKeywords(locationId);
+      terms = await searchKeywords(loc.google_location_id as string);
     } catch (e) {
       log("whatsapp", { step: "search_terms", ok: false, error: String((e as Error)?.message ?? e).slice(0, 120) });
     }
