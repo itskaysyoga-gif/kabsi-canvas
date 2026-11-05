@@ -481,7 +481,11 @@ function reused(c: CheckRow): Response {
 /** A live check of this place and search from the last 7 days, still mapping or done, asked with the Scan 2 question. */
 async function recentCheck(placeId: string, term: string): Promise<CheckRow | null> {
   const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
-  const { data } = await db().from("free_checks").select(CHECK_COLS).eq("self->>place_id", placeId).eq("term", term)
+  // Copy 3 (30.30 item 3): a term typed in another script is stored as the Google category or the industry term, so the
+  // lookup cannot key on it; the place alone finds the check (the page says what was searched).
+  let q = db().from("free_checks").select(CHECK_COLS).eq("self->>place_id", placeId);
+  if (latinName(term)) q = q.eq("term", term);
+  const { data } = await q
     .eq("source", "live").in("state", ["mapping", "done"]).gte("created_at", since).not("ai->>question", "is", null)
     .order("created_at", { ascending: false }).limit(1).maybeSingle();
   return (data as CheckRow | null) ?? null;
