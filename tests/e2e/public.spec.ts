@@ -151,6 +151,8 @@ test.describe("public pages", () => {
     const at = page.getByRole("heading", { name: "At your address on Google Maps" });
     await expect(at).toBeVisible();
     await expect(page.getByText("West Diner").first()).toBeVisible();
+    // Copy 3 (master plan 30.30 item 2): the count line says where the business usually comes up.
+    await expect(page.getByText(/Most places put you \d+(st|nd|rd|th)\./)).toBeVisible();
     const how = page.getByRole("heading", { name: "How to read it" });
     const card = page.getByText("Another business came first.");
     const [a, c, h] = await Promise.all([at.boundingBox(), card.boundingBox(), how.boundingBox()]);
