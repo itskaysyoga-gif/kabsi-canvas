@@ -29,61 +29,29 @@ export const guard = {
   },
 };
 
-const backSoon = <T>(): PlacesResult<T> => ({
-  ok: false,
-  status: 503,
-  data: {} as T,
-  backSoon: true,
-});
+const backSoon = <T>(): PlacesResult<T> => ({ ok: false, status: 503, data: {} as T, backSoon: true });
 async function read<T>(res: Response): Promise<PlacesResult<T>> {
-  return { ok: res.ok, status: res.status, data: (await res.json().catch(() => ({}))) as T };
+  return { ok: res.ok, status: res.status, data: await res.json().catch(() => ({})) as T };
 }
 
 // languageCode (Access 2): the language of the names and addresses in the answer; left out, they come in English where they can.
-export async function searchText(
-  key: string,
-  textQuery: string,
-  maxResultCount: number,
-  fieldMask: string,
-  languageCode?: string,
-): Promise<PlacesResult<SearchTextResponse>> {
+export async function searchText(key: string, textQuery: string, maxResultCount: number, fieldMask: string, languageCode?: string): Promise<PlacesResult<SearchTextResponse>> {
   if (!(await guard.take("search"))) return backSoon();
   const body = { textQuery, maxResultCount, ...(languageCode ? { languageCode } : {}) };
-  return read(
-    await places("/places:searchText", key, fieldMask, {
-      method: "POST",
-      body: JSON.stringify(body),
-    }),
-  );
+  return read(await places("/places:searchText", key, fieldMask, { method: "POST", body: JSON.stringify(body) }));
 }
 
 // Suggestions for a business name as the owner types. One session token for the whole typing session, passed again to
 // getPlace for the chosen place. Autocomplete accepts no field mask.
-export async function autocomplete(
-  key: string,
-  input: string,
-  sessionToken: string,
-): Promise<PlacesResult<AutocompleteResponse>> {
+export async function autocomplete(key: string, input: string, sessionToken: string): Promise<PlacesResult<AutocompleteResponse>> {
   if (!(await guard.take("autocomplete"))) return backSoon();
-  return read(
-    await places("/places:autocomplete", key, null, {
-      method: "POST",
-      body: JSON.stringify({ input, sessionToken }),
-    }),
-  );
+  return read(await places("/places:autocomplete", key, null, { method: "POST", body: JSON.stringify({ input, sessionToken }) }));
 }
 
-export async function getPlace(
-  key: string,
-  placeId: string,
-  fieldMask: string,
-  sessionToken?: string,
-): Promise<PlacesResult<Place>> {
+export async function getPlace(key: string, placeId: string, fieldMask: string, sessionToken?: string): Promise<PlacesResult<Place>> {
   if (!(await guard.take("details"))) return backSoon();
   const query = sessionToken ? `?sessionToken=${encodeURIComponent(sessionToken)}` : "";
-  return read<Place>(
-    await places(`/places/${encodeURIComponent(placeId)}${query}`, key, fieldMask),
-  );
+  return read<Place>(await places(`/places/${encodeURIComponent(placeId)}${query}`, key, fieldMask));
 }
 
 // The free Profile Check (P0.4-01, K-100): the one field mask the snapshot ever sends. Rating, review count, hours,
@@ -98,8 +66,6 @@ export const SNAPSHOT_FIELD_MASK =
   "id,displayName,formattedAddress,addressComponents,primaryTypeDisplayName,businessStatus,rating,userRatingCount,regularOpeningHours,currentOpeningHours,nationalPhoneNumber,websiteUri,photos";
 
 // Check 2: with the session token of the suggestions the call ends the Autocomplete session.
-export const getSnapshotPlace = (
-  key: string,
-  placeId: string,
-  sessionToken?: string,
-): Promise<PlacesResult<Place>> => getPlace(key, placeId, SNAPSHOT_FIELD_MASK, sessionToken);
+export const getSnapshotPlace = (key: string, placeId: string, sessionToken?: string): Promise<PlacesResult<Place>> =>
+  getPlace(key, placeId, SNAPSHOT_FIELD_MASK, sessionToken);
+

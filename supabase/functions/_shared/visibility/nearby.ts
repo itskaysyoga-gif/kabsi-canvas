@@ -36,28 +36,16 @@ export type NearbyCard = {
   /** 30.29: the business that came first has a name not in Latin letters, so it reads "another business". */
   first_hidden?: boolean;
 };
-export type Nearby = {
-  cards: NearbyCard[];
-  top3: number;
-  points: number;
-  count_line: string;
-  keyword: string;
-  note: string;
-};
+export type Nearby = { cards: NearbyCard[]; top3: number; points: number; count_line: string; keyword: string; note: string };
 
 export function ordinal(n: number): string {
-  const s =
-    n % 100 >= 11 && n % 100 <= 13
-      ? "th"
-      : (({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ?? "th");
+  const s = n % 100 >= 11 && n % 100 <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ?? "th";
   return `${n}${s}`;
 }
-export const positionWords = (rank: number | null) =>
-  rank == null || rank > DEPTH ? `not in the first ${DEPTH}` : ordinal(rank);
+export const positionWords = (rank: number | null) => (rank == null || rank > DEPTH ? `not in the first ${DEPTH}` : ordinal(rank));
 
 /** "In the first 3 at 18 of 49 places Kabsi checked." */
-export const countLine = (top3: number, points: number) =>
-  `In the first 3 at ${top3} of ${points} places Kabsi checked.`;
+export const countLine = (top3: number, points: number) => `In the first 3 at ${top3} of ${points} places Kabsi checked.`;
 
 const ord = (r: number | null) => (r == null ? DEPTH + 1 : r);
 const firstOf = (c: CellResult) => c.items.find((i) => i.rank === 1) ?? c.items[0] ?? null;
@@ -73,16 +61,10 @@ export function pickAway(cells: CellResult[]): CellResult[] {
   const centreFirst = firstOf(centre);
   const score = (c: CellResult) => {
     const f = firstOf(c);
-    const otherFirst =
-      f &&
-      centreFirst &&
-      !isSame(f, { cid: centreFirst.cid, place_id: centreFirst.place_id, title: centreFirst.title })
-        ? 5
-        : 0;
+    const otherFirst = f && centreFirst && !isSame(f, { cid: centreFirst.cid, place_id: centreFirst.place_id, title: centreFirst.title }) ? 5 : 0;
     return Math.abs(ord(c.rank) - ord(centre.rank)) + otherFirst;
   };
-  const dist = (a: { row: number; col: number }, b: { row: number; col: number }) =>
-    Math.max(Math.abs(a.row - b.row), Math.abs(a.col - b.col));
+  const dist = (a: { row: number; col: number }, b: { row: number; col: number }) => Math.max(Math.abs(a.row - b.row), Math.abs(a.col - b.col));
   const ranked = cells
     .filter((c) => c !== centre)
     .map((c) => ({ c, s: score(c), d: dist(c, centre) }))
@@ -97,12 +79,7 @@ export function pickAway(cells: CellResult[]): CellResult[] {
 }
 
 /** How far and which way a checked point is from the business, from the grid's own spacing. */
-export function offsetWords(
-  row: number,
-  col: number,
-  radiusKm: number,
-  businessType: string,
-): string {
+export function offsetWords(row: number, col: number, radiusKm: number, businessType: string): string {
   const half = (GRID_SIZE - 1) / 2;
   const step = radiusKm / half;
   const km = Math.hypot((row - half) * step, (col - half) * step);
@@ -134,38 +111,16 @@ export async function nearbyPlaces(o: {
     const f = firstOf(c);
     const firstIsYou = !!f && isSame(f, o.who);
     return {
-      kind,
-      row: c.row,
-      col: c.col,
-      name,
-      rank: c.rank,
-      position: positionWords(c.rank),
-      place:
-        kind === "home"
-          ? `Near your ${o.businessType}`
-          : name
-            ? `Near ${name}`
-            : offsetWords(c.row, c.col, o.radiusKm, o.businessType),
-      first: f && !firstIsYou ? f.title : null,
-      firstIsYou,
+      kind, row: c.row, col: c.col, name, rank: c.rank, position: positionWords(c.rank),
+      place: kind === "home" ? `Near your ${o.businessType}` : name ? `Near ${name}` : offsetWords(c.row, c.col, o.radiusKm, o.businessType),
+      first: f && !firstIsYou ? f.title : null, firstIsYou,
     };
   };
   const cards: NearbyCard[] = [];
   if (centre) cards.push(await card(centre, "home"));
   for (const c of pickAway(o.cells)) cards.push(await card(c as CellResult & LatLng, "away"));
   const top3 = o.cells.filter((c) => c.rank != null && c.rank <= 3).length;
-  return {
-    cards,
-    top3,
-    points: o.cells.length,
-    count_line: countWithUsual(
-      top3,
-      o.cells.length,
-      o.cells.map((c) => c.rank),
-    ),
-    keyword: o.keyword,
-    note: SAMPLE_NOTE,
-  };
+  return { cards, top3, points: o.cells.length, count_line: countWithUsual(top3, o.cells.length, o.cells.map((c) => c.rank)), keyword: o.keyword, note: SAMPLE_NOTE };
 }
 
 /** One card in words: "Near your salon you came up 2nd for 'hair salon'." / "Near the metro station, Juniper Hair Studio came first." */
@@ -176,18 +131,11 @@ export function cardLine(c: NearbyCard, keyword: string): string {
       : `${c.place} you were ${c.position} for '${keyword}'.`;
   }
   if (c.firstIsYou) return `${c.place}, you came first.`;
-  if (c.first_hidden || (c.first && !latinName(c.first)))
-    return `${c.place}, another business came first. You were ${c.position}.`;
-  return c.first
-    ? `${c.place}, ${c.first} came first. You were ${c.position}.`
-    : `${c.place}, you were ${c.position}.`;
+  if (c.first_hidden || (c.first && !latinName(c.first))) return `${c.place}, another business came first. You were ${c.position}.`;
+  return c.first ? `${c.place}, ${c.first} came first. You were ${c.position}.` : `${c.place}, you were ${c.position}.`;
 }
 
 /** The WhatsApp text that goes with the image (docs/COPY.md 0.1). */
 export function nearbyText(n: Nearby, date: string): string {
-  return [
-    ...n.cards.map((c) => cardLine(c, n.keyword)),
-    n.count_line,
-    `'${n.keyword}', ${date}. ${n.note}`,
-  ].join(" ");
+  return [...n.cards.map((c) => cardLine(c, n.keyword)), n.count_line, `'${n.keyword}', ${date}. ${n.note}`].join(" ");
 }
