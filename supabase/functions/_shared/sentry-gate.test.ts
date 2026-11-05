@@ -40,8 +40,9 @@ Deno.test("style1 sentry: the request's facts reach code deep inside its handler
 
 Deno.test("style1 sentry: the same error is sent once per 10 minutes, a different one is not held back", () => {
   const w = repeatWindow();
-  const a = fingerprint("coach", "Error", "fetch failed for 1234 after 3 tries");
-  const a2 = fingerprint("coach", "Error", "fetch failed for 98 after 4 tries");
+  const a = fingerprint("coach", "Error", "google 404 for 123456 after 3 tries");
+  const a2 = fingerprint("coach", "Error", "google 404 for 987654 after 3 tries");
+  assertNotEquals(a, fingerprint("coach", "Error", "google 500 for 123456 after 3 tries"));
   const b = fingerprint("coach", "TypeError", "x is undefined");
   assertEquals(a, a2);
   assertEquals(w.allow(a, 0), true);
@@ -54,7 +55,7 @@ Deno.test("style1 sentry: the same error is sent once per 10 minutes, a differen
 Deno.test("style1 sentry: ids and quoted values fold into one fingerprint; the limiter key is short and stable", async () => {
   assertEquals(
     fingerprint("f", "Error", 'no row "abc" for 0b1f6b0e-1d2c-4c3a-9f00-123456789abc'),
-    fingerprint("f", "Error", 'no row "xyz" for 7c9e6679-7425-40de-944b-e07fc1f90ae7'),
+    fingerprint("f", "Error", 'no row "abc" for 7c9e6679-7425-40de-944b-e07fc1f90ae7'),
   );
   assertNotEquals(fingerprint("f", "Error", "a"), fingerprint("g", "Error", "a"));
   const k = await limiterKey("f|Error|a");

@@ -1,7 +1,6 @@
 // health: internal (cron secret), except GET /health/queue, which is public and answers only a status (P0.6-08). Reports which secrets are set (true/false only, never values)
 // and whether each external service answers. Used by Claude to verify setup without seeing secrets.
 // Self-contained apart from the Google layer (K-34), so it stays tiny.
-import { serve } from "../_shared/kabsi.ts";
 import { googleMode, invitationSearch, listAccountsOnce, refreshToken, searchText } from "../_shared/google/index.ts";
 import { languageOf, placeFromResults, streetPart } from "../_shared/invitations.ts";
 import { queueResponse, type QueueHealthRow } from "../_shared/queue-health.ts";
@@ -97,7 +96,7 @@ async function turnstileCheck(): Promise<string | null> {
   return codes.includes("invalid-input-secret") ? "secret rejected by Cloudflare" : `secret valid (${codes.join(",")})`;
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "GET" && new URL(req.url).pathname.replace(/\/+$/, "").endsWith("/queue")) return await queueCheck();
   if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
   const body = await req.json().catch(() => ({})) as { only?: string };

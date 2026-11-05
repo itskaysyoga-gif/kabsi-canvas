@@ -101,8 +101,10 @@ export async function sentryShouldSend(fn: string, type: string, message: string
   if (inAutomatedRequest()) return false;
   const fp = fingerprint(fn, type, message);
   if (!repeats.allow(fp)) return false;
+  // The shared limiter answers in time or the error is sent: a slow database never holds the caller's response back.
   try {
-    return await rateLimit(await limiterKey(fp), 1, REPEAT_WINDOW_MS / 1000);
+    const timeout = new Promise<boolean>((r) => setTimeout(() => r(true), 1500));
+    return await Promise.race([rateLimit(await limiterKey(fp), 1, REPEAT_WINDOW_MS / 1000), timeout]);
   } catch {
     return true;
   }

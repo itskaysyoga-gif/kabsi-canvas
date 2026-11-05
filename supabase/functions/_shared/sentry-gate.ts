@@ -7,16 +7,17 @@
 //      10 minutes. An in-memory window per isolate first, then the shared limiter (hit_rate_limit) across isolates.
 // Pure apart from AsyncLocalStorage, so the Deno tests run it without a database.
 import { AsyncLocalStorage } from "node:async_hooks";
+import { isSmoke, SMOKE_HEADER } from "./webhook-smoke.ts";
 
 export const QA_HEADER = "x-kabsi-qa";
-export const SMOKE_HEADER = "x-kabsi-smoke";
+export { SMOKE_HEADER };
 export const REPEAT_WINDOW_MS = 10 * 60 * 1000;
 
 const AUTOMATED_UA = /HeadlessChrome|Playwright|Chrome-Lighthouse|Lighthouse|kabsi-nightly|kabsi-qa/i;
 
 /** True when the request comes from one of Kabsi's own automated runs. A label for reporting only: it never lets a call in. */
 export function isAutomated(headers: Headers): boolean {
-  if (headers.get(SMOKE_HEADER)?.trim() === "1") return true;
+  if (isSmoke(headers)) return true;
   if (headers.get(QA_HEADER)?.trim() === "1") return true;
   return AUTOMATED_UA.test(headers.get("user-agent") ?? "");
 }
@@ -34,12 +35,13 @@ export function inAutomatedRequest(): boolean {
   return store.getStore()?.automated ?? false;
 }
 
-/** The fingerprint of an error: function, type and message with numbers, ids and quoted values folded. */
+/** The fingerprint of an error: function, type and message with ids, long numbers and quoted values folded. Short numbers
+ *  (an HTTP status such as 404 or 500) stay, so a different failure is never hidden behind an earlier one. */
 export function fingerprint(fn: string, type: string, message: string): string {
   const m = message
     .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, "<id>")
-    .replace(/"[^"]*"|'[^']*'/g, "<v>")
-    .replace(/\d+/g, "<n>")
+    .replace(/"([^"]{0,20})[^"]*"|'([^']{0,20})[^']*'/g, (_m, a?: string, b?: string) => `<${a ?? b ?? ""}>`)
+    .replace(/\d{4,}/g, "<n>")
     .slice(0, 160);
   return `${fn}|${type}|${m}`;
 }
