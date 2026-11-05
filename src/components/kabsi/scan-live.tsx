@@ -274,15 +274,23 @@ function PickBusiness({
   );
 }
 
-function Failed({ message }: { message: string }) {
+/** Go live 1 (B-018): a 4xx is about what the visitor sent, so only the server's own message shows; a 5xx or no
+ * answer keeps "Something went wrong on our side." above it. */
+function Failed({ message, theirs = false }: { message: string; theirs?: boolean }) {
   return (
     <div className={cardCls} role="alert">
       <p className="flex items-center gap-2 text-label font-bold text-bad">
         <CircleAlert className="size-4" aria-hidden />
         The check did not run
       </p>
-      <h2 className="mt-2 text-h3">Something went wrong on our side.</h2>
-      <p className="mt-2 text-body text-text-2">{message}</p>
+      {theirs ? (
+        <p className="mt-2 text-body text-text-1">{message}</p>
+      ) : (
+        <>
+          <h2 className="mt-2 text-h3">Something went wrong on our side.</h2>
+          <p className="mt-2 text-body text-text-2">{message}</p>
+        </>
+      )}
       <Button
         type="button"
         className="mt-5"
@@ -306,7 +314,14 @@ type Phase =
   | { kind: "none" }
   | { kind: "checking"; place: FoundBusiness }
   | { kind: "result"; snapshot: Snapshot; check: StartedCheck | null }
-  | { kind: "error"; message: string };
+  | { kind: "error"; message: string; theirs?: boolean };
+
+/** The error phase: a 4xx from profile-snapshot is the visitor's to fix (B-018). */
+const errorPhase = (e: unknown): Phase => ({
+  kind: "error",
+  message: plainError(e),
+  theirs: e instanceof CheckError && e.status !== undefined && e.status >= 400 && e.status < 500,
+});
 
 const plainError = (e: unknown) =>
   e instanceof CheckError || e instanceof ApiError
@@ -347,7 +362,7 @@ export function LiveFreeCheck({
         if (!places.length) setPhase({ kind: "none" });
         else setPhase({ kind: "pick", places });
       } catch (e) {
-        setPhase({ kind: "error", message: plainError(e) });
+        setPhase(errorPhase(e));
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -383,7 +398,7 @@ export function LiveFreeCheck({
       pixelEvent("Lead", { content_name: "free_scan" });
       setPhase({ kind: "result", snapshot, check });
     } catch (e) {
-      setPhase({ kind: "error", message: plainError(e) });
+      setPhase(errorPhase(e));
     }
   }
 
@@ -406,7 +421,9 @@ export function LiveFreeCheck({
           {phase.kind === "none" && (
             <NotFound query={query} keyword={keyword} industry={industry} />
           )}
-          {phase.kind === "error" && <Failed message={phase.message} />}
+          {phase.kind === "error" && (
+            <Failed message={phase.message} theirs={phase.theirs ?? false} />
+          )}
           {phase.kind === "pick" && (
             <PickBusiness
               places={phase.places}

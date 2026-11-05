@@ -19,7 +19,7 @@ import { hasStoredSession } from "@/lib/stored-session";
 import { ASSISTANT_CONVERSATION_KEY, ASSISTANT_VISITOR_KEY } from "@/lib/assistant-storage";
 import { cn } from "@/lib/utils";
 import { WhatsappLink } from "@/components/shared/whatsapp-link";
-import { WHATSAPP_NUMBER, WHATSAPP_ON } from "@/lib/site";
+import { CONTACT_EMAIL, WHATSAPP_NUMBER, WHATSAPP_ON } from "@/lib/site";
 import { Turnstile } from "@/components/turnstile";
 import { useAuth } from "@/components/auth/auth-provider";
 import { setChrome, useChrome, useConsentOpen } from "@/components/kabsi/page-signals";
@@ -294,7 +294,11 @@ export function AssistantWidget({
         store(CONV_KEY, null);
         setHasConversation(false);
       }
-      if (!res.ok || !body.reply) throw new Error(body.message || "Something went wrong.");
+      if (!res.ok || !body.reply)
+        throw new Error(
+          // Go live 1 (B-036): a failure without the server's message still gives a next step.
+          body.message || `Nora could not answer. Try again, or write to ${CONTACT_EMAIL}.`,
+        );
       if (body.conversation_id) {
         conversation.current = body.conversation_id;
         store(CONV_KEY, body.conversation_id);

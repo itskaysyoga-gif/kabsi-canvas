@@ -72,9 +72,9 @@ export const restaurant: Industry = {
   guides: ["how-to-reply-to-google-reviews", "someone-changed-my-business-info-on-google"],
   d8: {
     seo: {
-      title: "Kabsi for restaurants: menu photos, hours, bank holidays and replies on Google",
+      title: "Kabsi for restaurants: Google photos, hours and review replies",
       description:
-        "Kabsi keeps a restaurant's Google profile right: menu and dish photos, bank holiday hours asked in time, your details checked every day, and a reply for every review.",
+        "Kabsi keeps a restaurant's Google profile right: menu and dish photos, bank holiday hours asked in time, your details checked daily, and a reply for every review.",
     },
     business: "Cedar Lane Kitchen, Manchester",
     card: {

@@ -9,6 +9,7 @@
 - No commission when the business is the partner's own: the owner's email, WhatsApp number or Google business matches the partner's.
 - A business that comes through a partner gets a 30-day Pro trial instead of 14 days. No discount codes and no cash to customers.
 - Do not quote earnings for a person and do not promise dates.
+- The partner link is kabsi.co/?via=CODE (the partners page shows the Example kabsi.co/?via=SAM). There is no partner page at kabsi.co/p yet (Go live 1, 5 Nov 2026).
 
 - Removed on 21 Oct 2026: the partner reselling model, with its wholesale prices, partner invoices, partner-covered plans, partner-set-up businesses, partner workspaces, partner approval modes, partner cards and partner emails. Never offer any of them.
 - An agency or consultant that looks after a client's Google profile is invited by the owner as a Manager in Team (section 8). They see and do only what that role and the owner's approval rules allow. Kabsi has no partner who can see a business's reviews, drafts, replies, photos or reports.

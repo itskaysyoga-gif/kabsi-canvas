@@ -38,8 +38,9 @@ export type Industry = {
   /** Finished pages are indexed and linked; the rest stay noindex and unlinked until Content 1 finishes them. */
   finished: boolean;
   /**
-   * false keeps a finished page linked but noindex and out of the sitemap until docs/claims holds its claim sheet
-   * (Fix 1, lane R 2 Nov 2026: the dental clinic page). Leave it out once the sheet exists.
+   * false keeps a finished page noindex, out of the sitemap and unlinked from the hubs and related links until
+   * docs/claims holds its claim sheet (Fix 1, lane R 2 Nov 2026: the dental clinic page; Go live 1, B-013, unlinked
+   * it). The address still answers. Leave it out once the sheet exists.
    */
   indexed?: false;
   lead: string;

@@ -33,6 +33,8 @@ import type { PhotoId } from "@/lib/site-photos";
 export type Guide = {
   slug: string;
   title: string;
+  /** Go live 1 (B-017): a shorter title for search results when the page title would pass 65 characters. */
+  seoTitle?: string;
   description: string;
   updated: string; // ISO date
   /** Fix 2: a guide first published after the first set (26 Sep 2026) carries its own date. */
@@ -540,6 +542,7 @@ export const GUIDES: Guide[] = [
   {
     slug: "why-chatgpt-describes-your-business-wrongly",
     title: "Why ChatGPT might describe your business wrongly, and what to check",
+    seoTitle: "Why ChatGPT describes your business wrongly",
     description:
       "Where AI assistants like ChatGPT and Perplexity get the details they give about a local business, why one can be out of date, and what to check, in order.",
     updated: "2026-11-04",

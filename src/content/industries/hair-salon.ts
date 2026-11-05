@@ -25,8 +25,8 @@ export const hairSalon: Industry = {
   searches: ["hair salon near me", "hairdressers", "balayage", "hair colour near me", "blow dry"],
   tasks: [
     {
-      title: "New services, with a price and a line each",
-      text: "Balayage, a gloss, a keratin treatment. Google can show each service with a price and a short description, and Kabsi's Profile Coach lists what your profile is missing, services included.",
+      title: "Services missing from your profile, listed",
+      text: "Balayage, a gloss, a keratin treatment. Google can show each service with a price and a short description. Kabsi's Profile Coach lists the services your profile is missing, so you know what to add on Google.",
     },
     {
       title: "A new stylist, announced",
@@ -66,8 +66,7 @@ export const hairSalon: Industry = {
   guides: ["how-to-reply-to-google-reviews", "how-to-set-holiday-hours-on-google"],
   d8: {
     seo: {
-      title:
-        "Kabsi for hair salons: new stylists, colour posts, holiday hours and replies on Google",
+      title: "Kabsi for hair salons: Google posts, hours and review replies",
       description:
         "Kabsi keeps a hair salon's Google profile right: new stylists announced, colour work as posts, bank holiday hours asked in time, and a reply ready for every review.",
     },
