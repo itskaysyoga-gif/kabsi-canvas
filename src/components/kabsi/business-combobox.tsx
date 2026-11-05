@@ -77,6 +77,11 @@ export function BusinessCombobox({
   const pass = useRef<string | undefined>(undefined);
   // Scan 3 (30.34 item 2): the pass is asked once per search session, when the visitor first touches the box.
   const warming = useRef<Promise<void> | null>(null);
+  // One warm-up per box: after it, the suggestion calls ask for their own bot check if they still need one.
+  const warmed = useRef(false);
+  // A suggestion call is waiting for a bot check token: a warm-up then would only queue a second waiter.
+  const asking = useRef(false);
+  const cancelAsk = useRef<(() => void) | undefined>(undefined);
   const token = useRef("");
   const waiters = useRef<((t: string) => void)[]>([]);
 
@@ -120,9 +125,10 @@ export function BusinessCombobox({
   // first suggestion call carries it and the function is awake before the third character. A pass this tab already holds
   // (another box, an earlier page) is used as it is. If the pass cannot be had, the first suggestion asks as before.
   const warm = useCallback(() => {
-    if (!available || warming.current) return;
+    if (!available || warming.current || warmed.current || asking.current) return;
     pass.current ??= readSuggestPass();
     if (pass.current) return;
+    warmed.current = true;
     setNeedToken(true);
     const w = takeToken();
     warming.current = (async () => {
@@ -132,6 +138,8 @@ export function BusinessCombobox({
         pass.current = p;
         saveSuggestPass(p);
         setNeedToken(false);
+        // A suggestion call still waiting for a token goes on with the pass instead.
+        cancelAsk.current?.();
       }
     })().finally(() => {
       warming.current = null;
@@ -154,7 +162,9 @@ export function BusinessCombobox({
       void (async () => {
         // Twice at most: the second time only when the pass had run out and a fresh bot check is needed.
         // The pass being asked on the first touch is waited for, not raced with a second bot check.
-        if (warming.current) await warming.current;
+        // At most 3 seconds: a slow warm-up never holds the box (the call below then asks with its own token).
+        if (warming.current)
+          await Promise.race([warming.current, new Promise((r) => window.setTimeout(r, 3_000))]);
         if (dead) return;
         pass.current ??= readSuggestPass();
         for (let attempt = 0; attempt < 2 && !dead; attempt++) {
@@ -163,10 +173,16 @@ export function BusinessCombobox({
             setNeedToken(true);
             const w = takeToken();
             cancelWait = w.cancel;
+            cancelAsk.current = w.cancel;
+            asking.current = true;
             turnstile = await w.promise;
+            asking.current = false;
+            cancelAsk.current = undefined;
             cancelWait = undefined;
             if (dead) return;
-            if (!turnstile) {
+            // No token, but the warm-up got the pass meanwhile (it took the token first): carry on with the pass.
+            if (!turnstile) pass.current ??= readSuggestPass();
+            if (!turnstile && !pass.current) {
               setAvailable(false);
               setNeedToken(false);
               return;
@@ -336,7 +352,6 @@ export function BusinessCombobox({
             if (items.length) setOpen(true);
           }}
           onPointerDown={warm}
-          onPointerEnter={warm}
           onBlur={() => setOpen(false)}
           onKeyDown={onKeyDown}
           className="h-full w-full min-w-0 bg-transparent text-body text-text-1 outline-none placeholder:text-text-3 focus-visible:outline-none"

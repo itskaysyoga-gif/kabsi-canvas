@@ -449,14 +449,18 @@ async function suggestHandler(
   const sessionToken = str(b.session_token);
   if (q.length < 3 || q.length > 120 || !SESSION_RE.test(sessionToken)) return fail("bad_query", "Type your business name and city.");
   // Scan 3 (30.34 item 2): the three limits are asked together, one database round trip instead of three in a row. The
-  // limits are the same; a refused call still counts on all three, as before only the first refusal stopped counting.
-  const allowed = await Promise.all([
-    d.rateLimit(`snapshot:suggest-min:${visitor}`, LIMITS.suggestPerMinute, 60, { failClosed: true }),
-    d.rateLimit(`snapshot:suggest-hour:${visitor}`, LIMITS.suggestPerHour, 3600, { failClosed: true }),
+  // limits and their counting are the same as when they were asked in order: on a refusal, the limits after the first one
+  // that refused give their hit back, so a burst refused by the minute limit does not use up the hour or the day.
+  const keys = [
+    [`snapshot:suggest-min:${visitor}`, LIMITS.suggestPerMinute, 60],
+    [`snapshot:suggest-hour:${visitor}`, LIMITS.suggestPerHour, 3600],
     // One visitor cannot use up the day's shared Autocomplete cap and switch suggestions off for everyone else.
-    d.rateLimit(`snapshot:suggest-day:${visitor}`, LIMITS.suggestPerDay, 86400, { failClosed: true }),
-  ]);
-  if (allowed.includes(false)) {
+    [`snapshot:suggest-day:${visitor}`, LIMITS.suggestPerDay, 86400],
+  ] as const;
+  const allowed = await Promise.all(keys.map(([k, max, s]) => d.rateLimit(k, max, s, { failClosed: true })));
+  const refused = allowed.indexOf(false);
+  if (refused >= 0) {
+    await Promise.all(keys.slice(refused + 1).map(([k]) => d.giveBack(k).catch(() => {})));
     return fail("rate_limited", "That is a lot of searches. Try again in a minute.", 429);
   }
   let pass: string | null = null;

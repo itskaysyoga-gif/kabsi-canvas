@@ -172,6 +172,8 @@ export async function getSuggestPass(turnstile: string): Promise<string | undefi
       method: "POST",
       headers: { "content-type": "application/json", ...anonHeaders },
       body: JSON.stringify({ action: "pass", turnstile }),
+      // A pass that does not come within 5 seconds is given up: the first suggestion then asks as before.
+      signal: AbortSignal.timeout(5_000),
     });
     if (!res.ok) return undefined;
     const j = (await res.json()) as { pass?: unknown };

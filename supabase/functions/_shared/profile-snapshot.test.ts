@@ -615,6 +615,13 @@ Deno.test("pass: one Turnstile token buys the pass, never reaches Places, and th
     const over = await w.call({ action: "pass", turnstile: "ok" });
     assert.equal(over.status, 429);
     assert.equal(over.body.pass, undefined);
+    // A suggestion refused by the minute limit does not count on the hour or the day, as when the limits ran in order.
+    const hourKey = () => [...w.hits.keys()].find((k) => k.startsWith("snapshot:suggest-hour:"))!;
+    const dayKey = () => [...w.hits.keys()].find((k) => k.startsWith("snapshot:suggest-day:"))!;
+    const [h, dd] = [w.hits.get(hourKey()), w.hits.get(dayKey())];
+    const refused = await w.call({ action: "suggest", query: "harbour more", session_token: SESSION, pass: p.body.pass, turnstile: "" });
+    assert.equal(refused.status, 429);
+    assert.deepEqual([w.hits.get(hourKey()), w.hits.get(dayKey())], [h, dd]);
     // It does not use the free check's own 10 a minute.
     assert.equal([...w.hits.keys()].some((k) => k.startsWith("snapshot:min:")), false);
   } finally {
