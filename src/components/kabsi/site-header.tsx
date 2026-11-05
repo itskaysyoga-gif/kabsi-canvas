@@ -9,10 +9,11 @@ import { setChrome, useScrolledPast, useSearchFlag } from "./page-signals";
 import { useAccountLink, type AccountState } from "@/components/auth/use-account-link";
 
 /**
- * The public header (Design 9, Web 5 part A, master plan 30.24): sticky, so the slim Founding 25 line can sit above it
- * in the flow. How it works, Businesses (one link to /for), Pricing, Log in and "Free check", filled charcoal with
- * ivory text so it leads the header without competing with the page's one yellow action. Under 1024 px the links
- * move into the phone menu; from 640 px "Free check" stays in the header.
+ * The public header (Design 9; Site 2, master plan 30.34 item 4): sticky, so the slim Founding 25 line can sit above it
+ * in the flow. How it works, Businesses (one link to /for), Pricing, Guides and About, then Log in or Dashboard, then
+ * "Free check", filled charcoal with ivory text so it leads the header without competing with the page's one yellow
+ * action. No dropdowns; the active page is marked. Under 1024 px the links move into the phone menu (the same rows, no
+ * nested rows); from 640 px "Free check" stays in the header.
  */
 const navLinkCls =
   "press relative inline-flex min-h-11 items-center rounded-full px-3.5 text-small font-semibold text-text-2 hover:text-text-1 after:absolute after:inset-x-3.5 after:bottom-1.5 after:h-0.5 after:rounded-full after:bg-transparent";
@@ -177,7 +178,7 @@ export function SiteHeader() {
 }
 
 /**
- * The phone menu (Design 9): four rows near 48 px, no nested rows, then "Check my business free" with the trial line,
+ * The phone menu (Design 9, Site 2): the five header rows near 48 px and Log in or Dashboard, no nested rows, then "Check my business free" with the trial line,
  * then one quiet row: Ask Nora, and WhatsApp only while WHATSAPP_ON. Focus is trapped, Escape closes and returns
  * focus, a tap on a row closes it, the page behind does not scroll, and the safe area is kept at the bottom.
  */

@@ -6,6 +6,7 @@ import {
   KABSI_GROUP_NAME,
   OPERATOR_NAME,
   OPERATOR_LINE,
+  MERCHANT_LINE,
   FOUNDING_SENTENCE,
   HELP_LINES,
   PLAN_PRICES,
@@ -44,7 +45,9 @@ function Page() {
       ]}
     >
       <section>
-        <p>{OPERATOR_LINE}</p>
+        <p>
+          {OPERATOR_LINE} {MERCHANT_LINE}
+        </p>
       </section>
 
       <section>
