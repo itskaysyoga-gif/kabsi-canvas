@@ -1,6 +1,6 @@
 // QA 2 (2 Nov 2026): the public pages and the free check's states on a live deployment, at five widths, in one browser.
 // Reads only: every Places, visibility and Turnstile call of the free check is answered here, so nothing is spent or kept.
-// Run: node scripts/qa2/crawl.mjs --browser chromium|webkit [--base https://kabsi.co] [--out qa2-out] [--widths 320,390]
+// Run: node scripts/qa2/crawl.mjs --browser chromium|webkit [--base https://kabsi.co] [--out qa2-out] [--widths 320,390] [--visit-timeout 120]
 // Writes <out>/<browser>/shots/*.png (first screen and full page) and <out>/<browser>/findings.json. The crawl never fails on a
 // finding; it lists them. docs/qa/2026-11-02-qa2.md is the report made from it.
 import { chromium, webkit } from "playwright";
@@ -23,6 +23,9 @@ const FULL = arg("full-widths", "").split(",").filter(Boolean).map(Number);
 const CONC = Number(arg("concurrency", "4"));
 // --geo GB answers /api/geo with that country, so the cookie bar (opt_in countries) shows as it does for a visitor there.
 const GEO = arg("geo", "");
+// Go live 1 (B-038): one visit may take this long (seconds); a stuck visit (axe or a full-page shot) is recorded as a
+// timeout finding and the crawl goes on, so findings.json is always written.
+const VISIT_LIMIT_MS = Number(arg("visit-timeout", "120")) * 1000;
 mkdirSync(join(OUT, "shots"), { recursive: true });
 
 // The pages: the sitemap, the pages that are public but not indexed, and the 404.
@@ -149,16 +152,16 @@ async function stubScan(page, s) {
   );
 }
 
-async function visit(browser, item, width) {
+async function visit(browser, item, width, hold = {}) {
   const isPhone = width <= 768;
-  const ctx = await browser.newContext({
+  const ctx = (hold.ctx = await browser.newContext({
     viewport: { width, height: width <= 390 ? 844 : width <= 768 ? 1024 : 900 },
     deviceScaleFactor: isPhone ? 2 : 1,
     hasTouch: isPhone && BROWSER !== "firefox",
     isMobile: isPhone && BROWSER === "chromium",
     locale: "en-US",
     reducedMotion: "reduce",
-  });
+  }));
   const page = await ctx.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e.message).slice(0, 160)));
@@ -254,6 +257,37 @@ async function visit(browser, item, width) {
   return rec;
 }
 
+/** One visit with a time limit: past VISIT_LIMIT_MS its browser context is closed and a timeout finding is returned. */
+async function visitWithLimit(browser, item, width) {
+  const hold = {};
+  let timer;
+  const limit = new Promise((resolve) => {
+    timer = setTimeout(() => {
+      hold.ctx?.close().catch(() => {});
+      resolve({
+        id: item.id,
+        path: item.path,
+        width,
+        browser: BROWSER,
+        timeout: true,
+        error: `timeout: the visit took longer than ${VISIT_LIMIT_MS / 1000} s`,
+      });
+    }, VISIT_LIMIT_MS);
+  });
+  const run = visit(browser, item, width, hold).catch((e) => ({
+    id: item.id,
+    path: item.path,
+    width,
+    browser: BROWSER,
+    error: String(e?.message ?? e).slice(0, 200),
+  }));
+  try {
+    return await Promise.race([run, limit]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 const browser = await (BROWSER === "webkit" ? webkit : chromium).launch();
 const jobs = [];
 for (const item of ALL) for (const w of WIDTHS) jobs.push([item, w]);
@@ -263,9 +297,9 @@ await Promise.all(
   Array.from({ length: CONC }, async () => {
     while (next < jobs.length) {
       const [item, w] = jobs[next++];
-      const r = await visit(browser, item, w);
+      const r = await visitWithLimit(browser, item, w);
       results.push(r);
-      process.stdout.write(`${r.error ? "E" : r.sideways ? "S" : "."}`);
+      process.stdout.write(`${r.timeout ? "T" : r.error ? "E" : r.sideways ? "S" : "."}`);
     }
   }),
 );
@@ -273,5 +307,5 @@ await browser.close();
 results.sort((a, b) => a.id.localeCompare(b.id) || a.width - b.width);
 writeFileSync(join(OUT, "findings.json"), JSON.stringify(results, null, 1));
 console.log(
-  `\n${results.length} visits, ${results.filter((r) => r.error).length} errors, ${results.filter((r) => r.sideways).length} sideways`,
+  `\n${results.length} visits, ${results.filter((r) => r.error).length} errors (${results.filter((r) => r.timeout).length} timeouts), ${results.filter((r) => r.sideways).length} sideways`,
 );

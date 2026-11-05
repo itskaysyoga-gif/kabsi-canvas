@@ -66,7 +66,7 @@ export const barbershop: Industry = {
   guides: ["google-review-link-and-qr-code", "how-to-set-holiday-hours-on-google"],
   d8: {
     seo: {
-      title: "Kabsi for barbershops: walk-in times, bank holiday hours and replies on Google",
+      title: "Kabsi for barbershops: Google posts, hours and review replies",
       description:
         "Kabsi keeps a barbershop's Google profile right: walk-in times as posts, bank holiday hours, the barber thanked by name, and a reply ready for every review.",
     },

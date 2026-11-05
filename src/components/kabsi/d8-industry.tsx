@@ -12,6 +12,7 @@ import {
   INDUSTRIES,
   hubIndexed,
   industriesIn,
+  industryIndexed,
   industry as industryBySlug,
   type ChatLine,
   type Hub,
@@ -62,9 +63,9 @@ function cardOf(i: Industry): TradeCard | null {
 /** Two related finished trades: the page's own pick, else others from the same group, else the Design 8 four. */
 function relatedOf(i: Industry): Industry[] {
   const own = (i.d8?.related ?? []).map((s) => industryBySlug(s)).filter(Boolean) as Industry[];
-  if (own.length) return own.filter((r) => r.finished).slice(0, 2);
+  if (own.length) return own.filter(industryIndexed).slice(0, 2);
   const pool = [...industriesIn(i.hub), ...d8Trades()].filter(
-    (r) => r.finished && r.slug !== i.slug,
+    (r) => industryIndexed(r) && r.slug !== i.slug,
   );
   return [...new Map(pool.map((r) => [r.slug, r])).values()].slice(0, 2);
 }
@@ -533,8 +534,9 @@ function PhotoCard({
 
 export function AllBusinesses() {
   const four = d8Trades();
+  // Go live 1 (B-013): a page that is noindex and out of the sitemap (no claim sheet yet) is not linked either.
   const more = INDUSTRIES.filter(
-    (i) => i.finished && !(D8_TRADE_ORDER as readonly string[]).includes(i.slug),
+    (i) => industryIndexed(i) && !(D8_TRADE_ORDER as readonly string[]).includes(i.slug),
   );
   const groups = HUBS.filter((h) => hubIndexed(h.id));
   return (
@@ -646,7 +648,7 @@ export function AllBusinesses() {
 /* ---------- /for/<group> ---------- */
 
 export function HubPage({ hub: h }: { hub: Hub }) {
-  const list = industriesIn(h.id).filter((i) => i.finished);
+  const list = industriesIn(h.id).filter(industryIndexed);
   return (
     <>
       <PageHero

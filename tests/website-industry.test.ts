@@ -130,8 +130,9 @@ describe("industry pages (Design 5, Web 2)", () => {
           i.d8.related.every((r) => industry(r)?.finished),
           i.slug,
         ).toBe(true);
-        expect(i.d8.seo.title.length, i.slug).toBeLessThan(90);
-        expect(i.d8.seo.description.length, i.slug).toBeLessThan(170);
+        // Go live 1 (B-017): titles of 65 characters or fewer and descriptions of 165 or fewer.
+        expect(i.d8.seo.title.length, i.slug).toBeLessThanOrEqual(65);
+        expect(i.d8.seo.description.length, i.slug).toBeLessThanOrEqual(165);
         continue;
       }
       expect(i.categories, i.slug).toBeDefined();
@@ -196,5 +197,25 @@ describe("the guide titles the industry pages link", () => {
       expect(guides, slug).toContain(`slug: "${slug}"`);
       expect(guides, slug).toContain(`title: "${title}"`);
     }
+  });
+});
+
+describe("the guides' search titles (Go live 1, B-017)", () => {
+  it("are 65 characters or fewer with the brand", async () => {
+    const { GUIDES } = await import("../src/lib/guides");
+    for (const g of GUIDES)
+      expect(`${g.seoTitle ?? g.title} | Kabsi`.length, g.slug).toBeLessThanOrEqual(65);
+  });
+});
+
+describe("a page that is noindex is not linked (Go live 1, B-013)", () => {
+  it("the /for hub, the group hubs, related links and the guides' links use industryIndexed", () => {
+    const hub = readFileSync("src/components/kabsi/d8-industry.tsx", "utf8");
+    expect(hub).toContain("(i) => industryIndexed(i) && !");
+    expect(hub).toContain("industriesIn(h.id).filter(industryIndexed)");
+    expect(hub).toContain("own.filter(industryIndexed)");
+    expect(readFileSync("src/components/marketing/business-grid.tsx", "utf8")).toContain(
+      "INDUSTRIES.filter(industryIndexed)",
+    );
   });
 });
