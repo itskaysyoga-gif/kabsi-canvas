@@ -42,6 +42,11 @@
       "statusCode": 301
     },
     {
+      "source": "/google-profile-check",
+      "destination": "/scan",
+      "statusCode": 301
+    },
+    {
       "source": "/partner",
       "destination": "/partners",
       "statusCode": 301
