@@ -8,12 +8,12 @@ import { readFileSync } from "node:fs";
 import { axeClean, keep, MASKS, noBanner, settle } from "./helpers/page";
 import { mockFreeCheck } from "./helpers/scan2-mock";
 
-// Guides 3: the sitemap is a server route; its fixed pages are the list in src/lib/sitemap.ts, and the guides it holds on
-// the day are visited by "every guide in the sitemap" below.
-const sitemapSource = readFileSync("src/lib/sitemap.ts", "utf8");
-const fromSitemap = [...sitemapSource.matchAll(/^\s*\["(\/[^"]*)", "\d{4}-\d\d-\d\d"/gm)].map(
-  (m) => m[1] ?? "",
-);
+// Guides 3: the sitemap is a server route, and the guides it holds on the day are visited by "every guide in the sitemap"
+// below. Its fixed pages are in src/content/sitemap-pages.json since Guides 4 part C (Industries 2: this suite read the old
+// list in src/lib/sitemap.ts, which became empty, so it had visited only the four pages below).
+const fromSitemap = (
+  JSON.parse(readFileSync("src/content/sitemap-pages.json", "utf8")) as { path: string }[]
+).map((p) => p.path);
 // The sitemap holds what search engines may index; the app's own public doors are listed here.
 const OTHERS = ["/", "/login", "/get-started", "/billing/done"];
 const ROUTES = [...new Set([...OTHERS, ...fromSitemap])].filter(Boolean);

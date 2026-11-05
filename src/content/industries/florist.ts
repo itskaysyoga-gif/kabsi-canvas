@@ -40,7 +40,7 @@ export const florist: Industry = {
       "Kabsi looks after your florist Google Business Profile: the phone and busy season hours right, arrangements as posts, and warm replies for your yes.",
     h1: "Your flower shop on Google, in full bloom.",
     mark: "in full bloom.",
-    line: "Kabsi looks after your florist Google Business Profile: the right phone, busy season hours, arrangements as posts.",
+    line: "Kabsi looks after your florist Google Business Profile: the right phone, holiday hours, arrangements as posts.",
     card: "The right phone, arrangements as posts.",
     answer:
       "Orders come by phone, so a florist Google Business Profile has to show the right number. Kabsi checks your phone and hours every day, asks about public holiday hours in time, sets busy day hours you give it, turns a photo of an arrangement into a post, and drafts a warm reply for a celebration and a gentle one for a sympathy order. You approve each one.",
