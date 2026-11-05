@@ -94,8 +94,8 @@ function SetupCallPage() {
               you send the Manager invitation yourself.
             </p>
             <p>
-              Calls run Monday to Friday, 8am to 6pm Beirut time. The call is about:{" "}
-              {Object.values(BOOKING_ANSWERS).join(", ")}.
+              Calls run Monday to Friday, 8am to 6pm Beirut time. In your email, say what the call
+              is about.
             </p>
             {WHATSAPP_ON ? (
               <p>
