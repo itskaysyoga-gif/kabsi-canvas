@@ -1,5 +1,5 @@
 // App 6 (master plan 30.34 item 5): what Settings shows for "Where your routine messages go", as plain functions so the
-// rules are tested without a screen. The words are COPY.md 58. No Supabase call is made here.
+// rules are tested without a screen. The words are COPY.md 60. No Supabase call is made here.
 import type { Pref, RoutineChannel } from "@/lib/notifications";
 import type { WhatsappStatus } from "@/lib/whatsapp-owner";
 
