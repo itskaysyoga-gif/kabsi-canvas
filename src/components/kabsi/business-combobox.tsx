@@ -1,6 +1,6 @@
 // Check 2 (1 Nov 2026): the business box of the free check, with suggestions while the visitor types.
 // Google's Places Autocomplete (New) through Kabsi's own function (profile-snapshot, action "suggest"): the key never
-// reaches the browser. After 3 characters and a 300 ms pause, at most 5 suggestions with the name and a short address.
+// reaches the browser. After 3 characters and a 200 ms pause (Scan 3; was 300), at most 5 suggestions with the name and a short address.
 // Choosing one hands the place and the session token to the parent, which ends the session with Place Details.
 // If suggestions are not available (the daily cap, a limit, a Google error, no bot check) the box is a plain text box
 // and the visitor searches then picks, as before. Nothing from Places is kept here: the list lives in memory only.
@@ -16,11 +16,17 @@ import {
   type ReactNode,
 } from "react";
 import { Turnstile } from "@/components/turnstile";
-import { newSessionToken, suggestBusinesses, type FoundBusiness } from "@/lib/profile-check";
+import {
+  getSuggestPass,
+  newSessionToken,
+  suggestBusinesses,
+  type FoundBusiness,
+} from "@/lib/profile-check";
+import { readSuggestPass, saveSuggestPass } from "@/lib/suggest-pass";
 import { cn } from "@/lib/utils";
 
 const MIN_CHARS = 3;
-const PAUSE_MS = 300;
+const PAUSE_MS = 200;
 const TOKEN_WAIT_MS = 8_000;
 
 export function BusinessCombobox({
@@ -69,6 +75,8 @@ export function BusinessCombobox({
 
   const session = useRef(newSessionToken());
   const pass = useRef<string | undefined>(undefined);
+  // Scan 3 (30.34 item 2): the pass is asked once per search session, when the visitor first touches the box.
+  const warming = useRef<Promise<void> | null>(null);
   const token = useRef("");
   const waiters = useRef<((t: string) => void)[]>([]);
 
@@ -108,6 +116,28 @@ export function BusinessCombobox({
     return { promise, cancel };
   }, []);
 
+  // Scan 3 (30.34 item 2): on the first touch of the box, one bot check buys the pass for the whole search session, so the
+  // first suggestion call carries it and the function is awake before the third character. A pass this tab already holds
+  // (another box, an earlier page) is used as it is. If the pass cannot be had, the first suggestion asks as before.
+  const warm = useCallback(() => {
+    if (!available || warming.current) return;
+    pass.current ??= readSuggestPass();
+    if (pass.current) return;
+    setNeedToken(true);
+    const w = takeToken();
+    warming.current = (async () => {
+      const t = await w.promise;
+      const p = t ? await getSuggestPass(t) : undefined;
+      if (p) {
+        pass.current = p;
+        saveSuggestPass(p);
+        setNeedToken(false);
+      }
+    })().finally(() => {
+      warming.current = null;
+    });
+  }, [available, takeToken]);
+
   useEffect(() => {
     const q = typed.trim();
     if (!available || q.length < MIN_CHARS) {
@@ -123,6 +153,10 @@ export function BusinessCombobox({
     const timer = window.setTimeout(() => {
       void (async () => {
         // Twice at most: the second time only when the pass had run out and a fresh bot check is needed.
+        // The pass being asked on the first touch is waited for, not raced with a second bot check.
+        if (warming.current) await warming.current;
+        if (dead) return;
+        pass.current ??= readSuggestPass();
         for (let attempt = 0; attempt < 2 && !dead; attempt++) {
           let turnstile: string | undefined;
           if (!pass.current) {
@@ -152,11 +186,13 @@ export function BusinessCombobox({
           }
           if (r.pass) {
             pass.current = r.pass;
+            saveSuggestPass(r.pass);
             setNeedToken(false);
           }
           if (dead) return;
           if (r.challengeFailed && sentPass) {
             pass.current = undefined;
+            saveSuggestPass(undefined);
             continue;
           }
           if (!r.available) {
@@ -296,8 +332,11 @@ export function BusinessCombobox({
             onChange(e.target.value);
           }}
           onFocus={() => {
+            warm();
             if (items.length) setOpen(true);
           }}
+          onPointerDown={warm}
+          onPointerEnter={warm}
           onBlur={() => setOpen(false)}
           onKeyDown={onKeyDown}
           className="h-full w-full min-w-0 bg-transparent text-body text-text-1 outline-none placeholder:text-text-3 focus-visible:outline-none"

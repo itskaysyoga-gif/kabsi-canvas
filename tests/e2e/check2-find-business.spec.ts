@@ -43,6 +43,8 @@ type Opts = {
   /** What the search action returns. */
   /** Turnstile takes this long to give a token (ms). */
   turnstileMs?: number;
+  /** The pass action is refused (an older function): the first suggestion carries the bot check itself. */
+  noPass?: boolean;
   /** The first call that carries a pass is told the pass ran out (400 challenge_failed). */
   expirePass?: boolean;
   found?: { place_id: string; name: string; address: string; category: string | null }[];
@@ -71,6 +73,11 @@ async function stub(page: Page, opts: Opts = {}): Promise<Calls> {
         headers: { "access-control-allow-origin": "*" },
         body: JSON.stringify(o),
       });
+    // Scan 3 (30.34 item 2): the pass is asked with the one bot check when the box is first touched.
+    if (body["action"] === "pass") {
+      if (opts.noPass) return json({ error: "bad", message: "no" }, 400);
+      return json({ pass: body["turnstile"] === "stub-token" ? STUB_PASS : null });
+    }
     if (body["action"] === "suggest") {
       if (opts.expirePass && body["pass"] && !body["turnstile"]) {
         opts.expirePass = false;
@@ -85,7 +92,7 @@ async function stub(page: Page, opts: Opts = {}): Promise<Calls> {
       return json({
         suggestions: hits,
         available: true,
-        ...(body["pass"] ? {} : { pass: "stub-pass" }),
+        ...(body["pass"] ? {} : { pass: STUB_PASS }),
       });
     }
     if (body["action"] === "search") return json({ places: opts.found ?? [] });
@@ -106,6 +113,8 @@ async function open(page: Page, path: string) {
   await page.waitForTimeout(800);
 }
 
+// A pass as the server makes it: "<expiry seconds>.<signature>" (the page keeps it only while it has time left).
+const STUB_PASS = `${Math.floor(Date.now() / 1000) + 900}.stubsignature`;
 const suggestCalls = (c: Calls) => c.filter((x) => x.action === "suggest");
 
 test.describe("Check 2: suggestions while typing", () => {
@@ -121,7 +130,7 @@ test.describe("Check 2: suggestions while typing", () => {
     await page.waitForTimeout(600);
     expect(suggestCalls(calls), "2 characters ask nothing").toHaveLength(0);
     await box.pressSequentially("i", { delay: 40 });
-    // Typing on quickly: the 300 ms pause means one call for the whole word, not one per key.
+    // Typing on quickly: the 200 ms pause means one call for the whole word, not one per key.
     await box.pressSequentially("le d", { delay: 60 });
     await expect(page.getByRole("option").first()).toBeVisible();
     const asked = suggestCalls(calls);
@@ -132,12 +141,18 @@ test.describe("Check 2: suggestions while typing", () => {
     await expect(page.getByRole("option").first()).toContainText("12 Harbour Lane");
     // Google's Places policy: results without a Google map carry the words "Google Maps".
     await expect(page.getByTestId("places-attribution")).toHaveText("Google Maps");
-    // The first call carried the bot check, later ones the pass; every call the same session token.
-    expect(asked[0]!.body["turnstile"]).toBe("stub-token");
+    // Scan 3 (30.34 item 2): one bot check per search session, spent on the pass when the box was touched; every
+    // suggestion call carries the pass and no token, all with the same session token.
+    const passes = calls.filter((c) => c.action === "pass");
+    expect(passes, "one pass for the search session").toHaveLength(1);
+    expect(passes[0]!.body["turnstile"]).toBe("stub-token");
+    expect(calls.indexOf(passes[0]!), "the pass comes before the first suggestion").toBeLessThan(
+      calls.indexOf(asked[0]!),
+    );
     expect(typeof asked[0]!.body["session_token"]).toBe("string");
     expect(new Set(asked.map((c) => c.body["session_token"])).size).toBe(1);
-    for (const c of asked.slice(1)) {
-      expect(c.body["pass"]).toBe("stub-pass");
+    for (const c of asked) {
+      expect(c.body["pass"]).toBe(STUB_PASS);
       expect(c.body["turnstile"]).toBeUndefined();
     }
     await page.screenshot({ path: `${SHOTS}/home-suggestions-${info.project.name}.png` });
@@ -310,6 +325,35 @@ test.describe("Check 2: suggestions while typing", () => {
       calls.slice(refused + 1).some((c) => c.action === "suggest" && c.body["turnstile"]),
       "and a fresh bot check followed",
     ).toBe(true);
+  });
+
+  test("Scan 3: the pass is kept for the tab, so a second page asks no new bot check", async ({ page }) => {
+    const calls = await stub(page);
+    await open(page, "/scan");
+    const box = page.getByRole("combobox");
+    await box.click();
+    await box.pressSequentially("smile", { delay: 40 });
+    await expect(page.getByRole("option").first()).toBeVisible();
+    await open(page, "/");
+    const second = page.getByRole("combobox").first();
+    await second.scrollIntoViewIfNeeded();
+    await second.click();
+    await second.pressSequentially("smi", { delay: 40 });
+    await expect(page.getByRole("option").first()).toBeVisible();
+    expect(calls.filter((c) => c.action === "pass"), "one bot check for both pages").toHaveLength(1);
+    expect(suggestCalls(calls).every((c) => c.body["pass"] === STUB_PASS && !c.body["turnstile"])).toBe(true);
+  });
+
+  test("Scan 3: an older function without the pass action still suggests, with the bot check on the first call", async ({
+    page,
+  }) => {
+    const calls = await stub(page, { noPass: true });
+    await open(page, "/scan");
+    const box = page.getByRole("combobox");
+    await box.click();
+    await box.pressSequentially("smile", { delay: 40 });
+    await expect(page.getByRole("option").first()).toBeVisible();
+    expect(suggestCalls(calls)[0]!.body["turnstile"]).toBe("stub-token");
   });
 
   test("the list stays on screen with the phone keyboard open", async ({ page }, info) => {

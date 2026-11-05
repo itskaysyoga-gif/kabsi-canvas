@@ -8,6 +8,10 @@
 //     session carries a Turnstile token; the answer carries a short-lived signed pass (15 minutes, tied to the visitor)
 //     that the next calls send instead, because a Turnstile token works once and typing makes several calls. Past the
 //     suggestion limits, the Places cap or any Google error, "available" is false and the page falls back to search.
+//   POST { action: "pass", turnstile } -> { pass }
+//     Scan 3 (master plan 30.34 item 2): one Turnstile check per search session. The page asks for the pass as soon as the
+//     visitor touches the box, so the first suggestion call already carries it (and the function is warm). It counts as one
+//     suggestion against the per-minute limit and never reaches Places.
 //   POST { action: "check", place_id, session_token?, turnstile }     -> { snapshot }
 //     The session token of the suggestions, passed to Place Details, ends the Autocomplete session.
 //   POST { action: "email", place_id, email, tips, consent_text, page, turnstile, code? } -> { ok: true }
@@ -243,6 +247,7 @@ export function makeHandler(d: Deps) {
 
     // Check 2: suggestions while the visitor types have their own limits and their own bot check (suggestHandler below).
     if (str(b.action) === "suggest") return suggestHandler(d, b, visitor, ip, reply, fail);
+    if (str(b.action) === "pass") return passHandler(d, b, visitor, ip, reply, fail);
 
     // Paid lookups: if the limiter breaks, block instead of removing the limit (D266).
     if (!(await d.rateLimit(`snapshot:min:${visitor}`, LIMITS.perMinute, 60, { failClosed: true }))) {
@@ -414,6 +419,23 @@ async function passValid(d: Deps, visitor: string, pass: string): Promise<boolea
   return diff === 0;
 }
 
+// Scan 3 (30.34 item 2): the pass on its own, asked when the visitor first touches the box. One Turnstile token buys
+// 15 minutes of suggestions for this visitor. It counts against the suggestions' per-minute limit and never asks Places.
+async function passHandler(
+  d: Deps, b: Record<string, unknown>, visitor: string, ip: string,
+  reply: (body: unknown, status?: number) => Response, fail: (code: string, message: string, status?: number) => Response,
+): Promise<Response> {
+  const str = (v: unknown) => (typeof v === "string" ? v : "");
+  if (!(await d.rateLimit(`snapshot:suggest-min:${visitor}`, LIMITS.suggestPerMinute, 60, { failClosed: true }))) {
+    return fail("rate_limited", "That is a lot of searches. Try again in a minute.", 429);
+  }
+  if (!(await d.verifyTurnstile(str(b.turnstile) || undefined, ip))) {
+    return fail("challenge_failed", "Please complete the check and try again.", 400);
+  }
+  const pass = await makePass(d, visitor, nowSeconds(d) + PASS_SECONDS);
+  return reply(pass ? { pass } : { pass: null });
+}
+
 // Suggestions while typing. They have their own limits (a typing session makes several calls) and do not use up the
 // visitor's 10 requests a minute; the bot check is the same Turnstile, once, then the signed pass.
 async function suggestHandler(
@@ -426,10 +448,15 @@ async function suggestHandler(
   const q = str(b.query).trim();
   const sessionToken = str(b.session_token);
   if (q.length < 3 || q.length > 120 || !SESSION_RE.test(sessionToken)) return fail("bad_query", "Type your business name and city.");
-  if (!(await d.rateLimit(`snapshot:suggest-min:${visitor}`, LIMITS.suggestPerMinute, 60, { failClosed: true }))
-    || !(await d.rateLimit(`snapshot:suggest-hour:${visitor}`, LIMITS.suggestPerHour, 3600, { failClosed: true }))
+  // Scan 3 (30.34 item 2): the three limits are asked together, one database round trip instead of three in a row. The
+  // limits are the same; a refused call still counts on all three, as before only the first refusal stopped counting.
+  const allowed = await Promise.all([
+    d.rateLimit(`snapshot:suggest-min:${visitor}`, LIMITS.suggestPerMinute, 60, { failClosed: true }),
+    d.rateLimit(`snapshot:suggest-hour:${visitor}`, LIMITS.suggestPerHour, 3600, { failClosed: true }),
     // One visitor cannot use up the day's shared Autocomplete cap and switch suggestions off for everyone else.
-    || !(await d.rateLimit(`snapshot:suggest-day:${visitor}`, LIMITS.suggestPerDay, 86400, { failClosed: true }))) {
+    d.rateLimit(`snapshot:suggest-day:${visitor}`, LIMITS.suggestPerDay, 86400, { failClosed: true }),
+  ]);
+  if (allowed.includes(false)) {
     return fail("rate_limited", "That is a lot of searches. Try again in a minute.", 429);
   }
   let pass: string | null = null;
