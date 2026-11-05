@@ -15,13 +15,14 @@ export const QUESTIONS_28: Question[] = [
     lang: "en",
     topic: "the Visibility Map",
     ask: "Can Kabsi show me where my shop appears on Google Maps around my street?",
-    kb: [/\*\*\[COMING\] Visibility Map:\*\* a 7 by 7 grid around the business/],
+    kb: [
+      /\*\*Visibility Map \(built 25 Oct 2026, V1; live from 5 Nov 2026, Go live 1, master plan 30\.28\):\*\* a 7 by 7 grid around the business/,
+    ],
     // Eval 1: owners never read "grid" (30.15 section 1), so the 49 checked places say it as well.
     must: [/grid|49 (places|points)|7 by 7/i],
     forbid: [NOT_PROMISED],
-    coming: true,
     reference:
-      "That is the Visibility Map, and it is not available yet. It will show a 7 by 7 grid around your business with where you appear on Google Maps for a keyword you confirm, the average position, the share of the grid where you are in the top 3, and who appears above you. Kabsi shows what it measured and never promises a position.",
+      "Yes, that is the Visibility Map. Kabsi searches Google Maps from 49 places in a 7 by 7 grid around your business, like a customer standing there, for a keyword you confirm. It shows the average position, the share of the grid where you are in the top 3, and who appears above you. Kabsi shows what it measured and never promises a position.",
   },
   {
     id: "n62",
@@ -63,12 +64,11 @@ export const QUESTIONS_28: Question[] = [
     topic: "AI Visibility",
     ask: "Do you check whether ChatGPT recommends my restaurant?",
     kb: [
-      /\*\*\[COMING\] AI Visibility:\*\* questions written in customers' words are run on ChatGPT and Perplexity/,
+      /\*\*AI Visibility \(built 26 Oct 2026, V2; live from 5 Nov 2026, Go live 1\):\*\* questions written in customers' words are run on ChatGPT and Perplexity/,
     ],
     must: [/ChatGPT/],
-    coming: true,
     reference:
-      "That is AI Visibility, and it is not available yet. Kabsi will ask ChatGPT and Perplexity questions in your customers' words and record whether your business is named, where, which competitors are named and which sources are cited. It is shown as a sample, because AI answers change from one run to the next.",
+      "Yes, that is AI Visibility. Kabsi asks ChatGPT and Perplexity questions in your customers' words and records whether your business is named, where, which competitors are named and which sources are cited. It is shown as a sample, because AI answers change from one run to the next.",
   },
   {
     id: "n66",

@@ -8,6 +8,7 @@ import { type AiProvider, AiProviderError, type AiProviderName, ESTIMATE_MICROS,
 import {
   compare, EXTRACT_ESTIMATE_MICROS, type Extractor, type FactKey, type Finding, freeLine, kabsiHas, namesStrictly, type Record_, usable,
 } from "./accuracy.ts";
+import { refusalAlert, refusalOf } from "../refusal.ts";
 
 export type PromptRow = { id: string; location_id: string; text: string; cadence: Cadence };
 export type RunRow = {
@@ -98,6 +99,12 @@ export async function runOne(d: AiDeps, runId: string, o: { lastTry?: boolean } 
   } catch (e) {
     const retry = !(e instanceof AiProviderError) || e.retry;
     const message = String((e as Error)?.message ?? e).slice(0, 300);
+    // Go live 1 (30.28): one staff alert a day when the provider refuses; a refused balance is never retried.
+    const r = refusalOf(e);
+    if (r && r !== "provider_error") {
+      const a = refusalAlert(r, "AI answer", d.now());
+      await d.staffAlert(a.summary, a.key);
+    }
     if (!retry || o.lastTry) await d.db.failRun(runId, message);
     if (!retry) throw new AiPermanent(message);
     throw e;

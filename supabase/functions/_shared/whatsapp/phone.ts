@@ -6,6 +6,13 @@ import { type CountryCode, parsePhoneNumberFromString } from "npm:libphonenumber
 
 export const E164 = /^\+[1-9][0-9]{6,14}$/;
 
+/**
+ * Go live 1 (30.28): a North American number in the 555-0100 to 555-0199 range, which is reserved for fiction. The test
+ * personas and the QA business use them. Once owners are switched on (whatsapp_owners_on) every phone may get a live
+ * message, so these are always sent through the mock: never a live send to a number that cannot be anyone's.
+ */
+export const isFictionalPhone = (phone: string) => /^\+1[2-9][0-9]{2}55501[0-9]{2}$/.test(phone);
+
 /** The number in E.164, or null when it is not a valid phone number. `region` is an ISO country code for local numbers. */
 export function toE164(raw: string | null | undefined, region?: string | null): string | null {
   const s = String(raw ?? "").trim();

@@ -178,7 +178,8 @@ export type FreeCheck = {
   whatsapp_text?: string;
   created_at?: string;
 };
-export type StartedCheck = FreeCheck | { state: "waitlist" };
+/** Go live 1 (30.28): "unavailable" when the provider refused or a cap is reached; the page then leaves the nearby and AI parts out. */
+export type StartedCheck = FreeCheck | { state: "waitlist" } | { state: "unavailable" };
 
 export function startFreeCheck(o: {
   name: string;

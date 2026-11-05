@@ -355,3 +355,19 @@ Deno.test("calibration: Perplexity's first pick in prose and names with a locati
   assertEquals(x.competitors.map((c) => c.name), ["Kricket Shoreditch", "Gunpowder Spitalfields", "Hoppers Shoreditch", "Sheba"], "no street address, one name for 'Sheba or Preem'");
   assertEquals(x.sources.map((s) => s.domain), ["dishoom.com", "tripadvisor.com"]);
 });
+
+// Go live 1 (master plan 30.28): a refused AI answer (no balance) fails at once, is never retried, and alerts staff.
+Deno.test("golive1: a refused AI answer is permanent, not retried, and alerts staff once with the reason", async () => {
+  const w = world({ mode: "live", on: ["chatgpt"], ask: () => Promise.reject(new AiProviderError("dataforseo_40210", false)) });
+  await tickAi(w.d);
+  await assertRejects(() => runOne(w.d, "r1"), AiPermanent);
+  assertEquals(w.failed.get("r1"), "dataforseo_40210");
+  assertEquals(w.calls.alerts, ["DataForSEO refused the AI answer: no balance left. Kabsi tries again later on its own"]);
+  assertEquals(await runOne(w.d, "r1"), "skipped", "a failed run is never asked again");
+  assertEquals(w.calls.asked, 1);
+  // A rate limit is the provider being busy, not a refusal: retried by the queue, no refusal alert.
+  const busy = world({ mode: "live", on: ["chatgpt"], ask: () => Promise.reject(new AiProviderError("dataforseo_40202", true)) });
+  await tickAi(busy.d);
+  await assertRejects(() => runOne(busy.d, "r1"), AiProviderError);
+  assertEquals(busy.calls.alerts, []);
+});

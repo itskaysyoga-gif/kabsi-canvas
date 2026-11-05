@@ -153,7 +153,7 @@ describe("what Nora knows, against what is built on main", () => {
     const ledger = section("**Where each feature stands", "**[COMING] Plans and prices");
     expect(ledger).toMatch(/Card payments \(Creem\)/);
     expect(ledger).toMatch(
-      /Kabsi Partners; What customers say \(Pro\); the order and booking button \(Pro\); the Visibility Map/,
+      /Kabsi Partners; What customers say \(Pro\); the order and booking button \(Pro\); Competitor Watch/,
     );
     // no date or time frame next to a coming item in the ledger or the coming list
     for (const block of [ledger, coming]) {

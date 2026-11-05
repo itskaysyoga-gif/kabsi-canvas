@@ -48,7 +48,6 @@ import { NEARBY_SAMPLE, type NearbyCheck, type NearbyPlace } from "./map-data";
 import { NearbyPlaces } from "./nearby-places";
 import { ScanBox } from "./scan-box";
 import { FreeCheckFrame } from "./d4-free-check";
-import { Pill } from "./result-preview";
 import { SiteLink } from "./site-link";
 import { Banner, Button, Field, Skeleton, StatusPill, WhatsAppGlyph, buttonClass } from "./ui";
 
@@ -742,7 +741,8 @@ export function LiveResult({
   // Founding 25 shows only while places remain (the real count; nothing while it is unknown). Polish 2 review.
   const f25 = useFoundingPlaces();
   const check = useCheck(started);
-  const waitlist = !!started && "state" in started && !("code" in started);
+  // Only the mock mode's waiting list; "unavailable" (30.28) shows neither part.
+  const waitlist = !!started && "state" in started && started.state === "waitlist";
   const term = check?.term ?? keyword ?? s.category?.toLowerCase() ?? null;
   const first =
     s.flags.find((f) => f.tone === "danger") ?? s.flags.find((f) => f.tone === "warning");
@@ -785,7 +785,7 @@ export function LiveResult({
       <div className="container-kb mt-6 grid gap-4 pb-16 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-x-8 lg:pb-24">
         {/* Polish 3 (lane R decision 1 of 3 Nov 2026): the useful part first, at every width. The order in the page, and so
             the tab order, is: the most important thing; what Kabsi found; what Kabsi would do from day one with Start free and
-            the next steps; the two At launch cards; the links, the two open questions and the report. Nothing was removed. */}
+            the next steps; the AI answer and the nearby check; the links, the two open questions and the report. Nothing was removed. */}
         <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-1">
           {/* Design 8: the most important finding first, in plain words, on the dark band. */}
           {first && (
@@ -910,63 +910,42 @@ export function LiveResult({
           </section>
         </aside>
 
-        {/* The two At launch cards come after the action: the AI answer, then the nearby check with its email form. */}
-        <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-2">
-          {check?.ai ? (
-            <AiAnswer ai={check.ai} />
-          ) : waitlist ? (
-            // The AI answer runs only with the nearby check; while that is closed (the waiting list) it is marked At launch
-            // (decision 6). A failed or skipped nearby check shows neither card's At launch.
-            <section
-              aria-labelledby="ai-h"
-              className="rounded-panel border border-line bg-surface-1 p-5 sm:p-8"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 id="ai-h" className="text-h3">
-                  An answer customers might see
-                </h2>
-                <Pill>At launch</Pill>
-              </div>
-              <p className="mt-3 text-body text-text-2">
-                Whether its answer about you matches your Google profile.
-              </p>
-            </section>
-          ) : null}
+        {/* The AI answer, then the nearby check, after the action. Go live 1 (30.28): when the check is not available
+            today (the provider refused, a cap is reached, or it could not start) both parts are left out, with no error
+            and no promise; the Google part above stands on its own. The waiting list shows only in mock mode. */}
+        {check || waitlist ? (
+          <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-2">
+            {check?.ai ? <AiAnswer ai={check.ai} /> : null}
 
-          {check ? (
-            <NearbySection check={check} handoff={handoff} />
-          ) : (
-            <section
-              aria-labelledby="near-h"
-              className="rounded-panel border border-dashed border-line-strong p-5 sm:p-8"
-            >
-              <div className="flex gap-4">
-                <NearbyMark />
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
+            {check ? (
+              <NearbySection check={check} handoff={handoff} />
+            ) : (
+              <section
+                aria-labelledby="near-h"
+                className="rounded-panel border border-dashed border-line-strong p-5 sm:p-8"
+              >
+                <div className="flex gap-4">
+                  <NearbyMark />
+                  <div>
                     <h2 id="near-h" className="text-h3">
                       Where you come up nearby
                     </h2>
-                    {waitlist && <Pill>At launch</Pill>}
+                    <p className="mt-2 text-body text-text-2">
+                      Kabsi will search Google Maps from places around you, like a customer standing
+                      there.
+                    </p>
                   </div>
-                  <p className="mt-2 text-body text-text-2">
-                    {waitlist
-                      ? "Kabsi will search Google Maps from places around you, like a customer standing there."
-                      : SCAN_LINE}
-                  </p>
                 </div>
-              </div>
-              {waitlist && (
                 <Waitlist
                   business={s.name}
                   country={countryOfAddress(s.address)}
                   placeId={s.place_id}
                   term={term}
                 />
-              )}
-            </section>
-          )}
-        </div>
+              </section>
+            )}
+          </div>
+        ) : null}
 
         {/* Then the links, the two open questions and the report. */}
         <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-3">

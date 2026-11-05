@@ -41,6 +41,7 @@ import { PROVIDERS, type AiProviderName } from "../_shared/visibility/ai/provide
 import { sourceActions } from "../_shared/insights/ai-visibility.ts";
 import { type KeywordRow, type RunDb, type RunDeps, type ScanRow, tick } from "../_shared/visibility/run.ts";
 import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
+import { type Refusal, refusalAlert, refusalOf } from "../_shared/visibility/refusal.ts";
 
 const db = () => admin();
 const fn = "visibility";
@@ -58,6 +59,12 @@ function provider(mode: "mock" | "live", self: Identity & { title: string }): Ma
 }
 
 async function staffAlert(summary: string, key: string) {
+  // Go live 1 (30.28): a provider refusal is one alert a day for the maps, the free check and the AI answers together,
+  // so it goes through ops_events, whose dedupe key is unique (the WhatsApp tick sends it to the staff phone).
+  if (key.startsWith("dataforseo_refused:")) {
+    await db().rpc("ops_emit", { p_kind: "ai_visibility_cap", p_channel: "alerts", p_title: summary, p_body: null, p_dedupe: key });
+    return;
+  }
   const { data } = await db().from("phone_roles").select("phone").eq("role", "staff_admin").is("revoked_at", null);
   for (const r of (data ?? []) as { phone: string }[]) {
     await outDb.add({ phone: r.phone, userId: null, locationId: null, kind: "staff_alert", urgent: true, body: `${summary}.`,
@@ -403,14 +410,24 @@ async function startFreeCheck(req: Request): Promise<Response> {
     const who = await sha256Hex(`free_check:${ip}`);
     if (!(await rateLimit(`free_check:${who}`, 5, 3600, { failClosed: true }))) return json({ error: "rate_limited" }, 429);
   }
-  // Public results only, and only real ones: in mock mode or past the day's cap a visitor sees the waiting list (COPY 0).
+  // Public results only, and only real ones: in mock mode a visitor sees the waiting list (COPY 0). Go live 1 (30.28):
+  // past the day's cap, past the month's cap or when DataForSEO refuses, the check is "unavailable": the page shows the
+  // Google part in full and leaves the nearby and AI parts out, with no error and no promise.
   const mode = (await setting("dataforseo_mode")) === "live" ? "live" : "mock";
+  if (!internal && mode !== "live") return json({ state: "waitlist" }, 200);
   const cap = Number((await setting("free_check_daily_cap")) ?? 0);
-  if (!internal && (mode !== "live" || cap <= 0 || !(await rateLimit(`free_check_day:${new Date().toISOString().slice(0, 10)}`, cap, 86400, { failClosed: true })))) {
-    return json({ state: "waitlist" }, 200);
+  if (!internal && (cap <= 0 || !(await rateLimit(`free_check_day:${new Date().toISOString().slice(0, 10)}`, cap, 86400, { failClosed: true })))) {
+    return unavailable(null);
   }
   const aiLive = (await aiSetting("ai_visibility_mode")) === "live";
-  const started = await startCheck({
+  const aiRefused = async (e: unknown) => {
+    const r = refusalOf(e);
+    if (r && r !== "provider_error") await alertRefusal(r, "AI answer");
+    return null;
+  };
+  let started: Awaited<ReturnType<typeof startCheck>>;
+  try {
+    started = await startCheck({
     provider: provider(mode, { title: name, place_id: body.place_id ?? null }), source: mode, code: () => newCode(),
     room: deps.room, spend: async (calls, micros) => void (await deps.spend(calls, micros)),
     // The one AI answer: never a made-up answer for a visitor (mock answers only on staff calls).
@@ -419,9 +436,17 @@ async function startFreeCheck(req: Request): Promise<Response> {
       // AI Answers 1: the Google profile is read live through the Places guard (field mask, daily cap) and compared in
       // memory; only the fact that differs and ChatGPT's sentence are kept (30.10.3).
       accuracy: { extractor: accuracyDeps.extractor, profile: () => liveProfile(o.place_id) },
-    }, o) : Promise.resolve(null),
+    }, o).catch(aiRefused) : Promise.resolve(null),
   }, { name, address: body.address ? String(body.address).slice(0, 200) : null, country, city, place_id: body.place_id ?? null, term });
-  if (!started.ok) return json({ error: started.reason }, started.reason === "paused" ? 503 : 404);
+  } catch (e) {
+    // Any failure of the paid part leaves the nearby and AI parts out quietly; only a refusal alerts staff (once a day),
+    // anything else is reported as an error for the team, never shown to the visitor.
+    const r = refusalOf(e);
+    if (!r || r === "provider_error") await captureError(fn, e, { route: "/check" });
+    return unavailable(r && r !== "provider_error" ? r : null);
+  }
+  if (!started.ok && started.reason === "paused") return unavailable("cap");
+  if (!started.ok) return json({ error: started.reason }, 404);
   const r = started.row;
   const saved = must(await db().from("free_checks").insert({
     code: r.code, business: r.business, term: r.term, industry, country: r.country, city: r.city, self: r.self, center: r.center,
@@ -430,6 +455,19 @@ async function startFreeCheck(req: Request): Promise<Response> {
   }).select(CHECK_COLS).single()) as CheckRow;
   log(fn, { action: "free_check", source: r.source, state: r.state });
   return json({ ...publicView(saved), whatsapp_text: `Hi Kabsi, my scan code is KAB-${saved.code}` });
+}
+
+/** One staff alert a day when the provider refuses, whatever the reason (30.28). */
+async function alertRefusal(r: Refusal, what: "nearby check" | "AI answer" | "free check") {
+  const a = refusalAlert(r, what, new Date());
+  await staffAlert(a.summary, a.key).catch(() => undefined);
+}
+
+/** The free check's nearby and AI parts are left out today (30.28); `r` null is the day's own cap, which is no refusal. */
+async function unavailable(r: Refusal | null): Promise<Response> {
+  if (r) await alertRefusal(r, "free check");
+  log(fn, { action: "free_check", state: "unavailable", reason: r ?? "daily_cap" });
+  return json({ state: "unavailable" }, 200);
 }
 
 /** UX 1: "Save my place" while the free check is closed. Turnstile, 5 an hour per visitor; the same contact and business once. */
@@ -465,6 +503,19 @@ async function collectChecks(): Promise<number> {
   let n = 0;
   for (const c of rows) if (await refreshCheck(c).catch(() => null)) n++;
   return n;
+}
+
+/**
+ * Go live 1 (30.28), staff op: DataForSEO's balance from its user data endpoint (free to call). Only the money fields
+ * come back; the login and password stay in the function's secrets and are never returned or logged.
+ */
+async function balance(): Promise<Response> {
+  const login = Deno.env.get("DATAFORSEO_LOGIN"), password = Deno.env.get("DATAFORSEO_PASSWORD");
+  if (!login || !password) return json({ error: "dataforseo_not_configured" }, 503);
+  const res = await fetch("https://api.dataforseo.com/v3/appendix/user_data", { headers: { authorization: "Basic " + btoa(`${login}:${password}`) } });
+  const j = await res.json().catch(() => null) as { status_code?: number; cost?: number; tasks?: { result?: { money?: { balance?: number; total?: number } }[] }[] } | null;
+  const money = j?.tasks?.[0]?.result?.[0]?.money;
+  return json({ http: res.status, status_code: j?.status_code ?? null, cost_usd: j?.cost ?? null, balance_usd: money?.balance ?? null, total_usd: money?.total ?? null });
 }
 
 /** Staff op: the search each wave 1 industry page prefills, from DataForSEO keyword data (one call per market). */
@@ -530,6 +581,7 @@ Deno.serve(async (req) => {
       return data ? json(data) : json({ error: "not_found" }, 404);
     }
     if (req.method === "POST" && route === "/terms") return (await isInternal(req)) ? await terms() : json({ error: "forbidden" }, 403);
+    if (req.method === "POST" && route === "/balance") return (await isInternal(req)) ? await balance() : json({ error: "forbidden" }, 403);
     return json({ error: "not_found" }, 404);
   } catch (e) {
     await captureError(fn, e, { route });

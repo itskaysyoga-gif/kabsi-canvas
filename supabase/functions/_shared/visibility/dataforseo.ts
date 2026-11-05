@@ -106,6 +106,9 @@ export function dataForSeo(login: string, password: string, fetcher: typeof fetc
         const json = await call("task_post", tasks.slice(i, i + 100).map(taskBody));
         for (const t of json.tasks ?? []) {
           if (t.status_code === 20100 && t.data?.tag) out[t.data.tag] = t.id;
+          // Go live 1 (30.28): a task refused for the balance, the cost limit or a block says so, so the caller can tell
+          // the provider refused (one staff alert a day) instead of reading it as tasks that were simply not made.
+          else if ([40200, 40201, 40203, 40210].includes(t.status_code)) throw new ProviderError(`dataforseo_task_${t.status_code}`);
         }
       }
       return out;
