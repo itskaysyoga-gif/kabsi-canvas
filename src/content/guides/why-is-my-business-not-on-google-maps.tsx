@@ -1,6 +1,6 @@
 import { Callout, Steps } from "@/components/marketing/guide-kit";
 import { GuideLink, SiteRef } from "@/components/marketing/guide-links";
-import { scheduledAt } from "./schedule";
+import { FIRST_PUBLISH } from "./schedule";
 import type { GuideDoc } from "./types";
 
 // Guides 3, guide 1. Every claim about Google is from the sources below, read on 5 Nov 2026.
@@ -11,7 +11,7 @@ export const guide: GuideDoc = {
   title: "Why is my business not showing on Google Maps?",
   description:
     "The usual reasons a business does not show on Google Maps, how to tell which one is yours, and the steps to fix it in the UK and the UAE.",
-  publishAt: scheduledAt(0),
+  publishAt: FIRST_PUBLISH,
   updated: READ,
   checked: READ,
   topic: "Google Maps",

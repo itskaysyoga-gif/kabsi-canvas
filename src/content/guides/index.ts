@@ -1,8 +1,12 @@
-// Guides 3: every guide, one content file each in this folder. ORDER is the Guides 3 publishing order: the guide at
-// position i becomes public at scheduledAt(i) (schedule.ts). The earlier guides (EARLIER) were public before Guides 3.
+// Guides 3 and 4: every guide, one content file each in this folder. ORDER is the Guides 3 order, which is also the order
+// the guides list shows (guide 1 first); all of them are public from PUBLISH_ALL_AT (schedule.ts, Guides 4 part A). The
+// earlier guides (EARLIER) were public before Guides 3. A new guide (28 onwards) is added to WEEKLY with its publishAt
+// weeklyAt(n) (one a week from 16 Nov 2026); once public it is listed first, newest first.
 // Read on the server only (the server functions in src/lib/guides-server.ts, the sitemap and llms.txt routes): the
 // guide page itself loads its one content file on demand (load.ts).
 import type { GuideDoc } from "./types";
+
+export const WEEKLY = [] as const;
 
 export const ORDER = [
   "why-is-my-business-not-on-google-maps",
@@ -41,8 +45,8 @@ const files = import.meta.glob<{ guide: GuideDoc }>("./*.tsx", { eager: true });
 const bySlug = new Map<string, GuideDoc>();
 for (const mod of Object.values(files)) bySlug.set(mod.guide.slug, mod.guide);
 
-/** Every guide, public or not, in the order: the Guides 3 schedule, then the earlier guides. */
-export const ALL_GUIDES: GuideDoc[] = [...ORDER, ...EARLIER]
+/** Every guide, public or not, in list order: the weekly guides, the Guides 3 order, then the earlier guides. */
+export const ALL_GUIDES: GuideDoc[] = [...WEEKLY, ...ORDER, ...EARLIER]
   .map((s) => bySlug.get(s))
   .filter((g): g is GuideDoc => Boolean(g));
 

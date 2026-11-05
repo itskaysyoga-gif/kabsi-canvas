@@ -1,6 +1,6 @@
 import { Callout, DoDont, Steps } from "@/components/marketing/guide-kit";
 import { GuideLink, SiteRef } from "@/components/marketing/guide-links";
-import { scheduledAt } from "./schedule";
+import { PUBLISH_ALL_AT } from "./schedule";
 import type { GuideDoc } from "./types";
 
 // Guides 3, guide 8. Every claim about Google is from the sources below, read on 5 Nov 2026.
@@ -11,7 +11,7 @@ export const guide: GuideDoc = {
   title: "Google posts for a local business: what and how often?",
   description:
     "What to put in a Google post, which kind to use, how often to post, and why Google may not approve a post, for a local business in the UK or the UAE.",
-  publishAt: scheduledAt(7),
+  publishAt: PUBLISH_ALL_AT,
   updated: READ,
   checked: READ,
   topic: "Google posts",
