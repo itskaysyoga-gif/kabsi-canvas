@@ -29,7 +29,10 @@ describe("short paragraphs", () => {
   });
 
   it("does not cut inside a number or an initial", () => {
-    expect(sentences("It costs $2.47 a month. Next.")).toEqual(["It costs $2.47 a month.", "Next."]);
+    expect(sentences("It costs $2.47 a month. Next.")).toEqual([
+      "It costs $2.47 a month.",
+      "Next.",
+    ]);
   });
 });
 

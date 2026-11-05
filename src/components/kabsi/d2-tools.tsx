@@ -17,6 +17,7 @@ import {
 } from "./d2-parts";
 import { ScanBox } from "./scan-box";
 import { Banner, Button, ButtonLink, Card, EmptyState } from "./ui";
+import { Marked } from "@/components/kabsi/highlight";
 
 /* ---------- Shared pieces ---------- */
 
@@ -34,7 +35,7 @@ function CheckToo() {
     <section className="container-kb section-y" aria-labelledby="check-too">
       <div className="mx-auto max-w-[40rem]">
         <h2 id="check-too" className="text-h2">
-          See what Google shows about you.
+          <Marked text="See what Google shows about you." mark="Google shows" />
         </h2>
         <p className="mt-3 text-lead text-text-2">
           The free check reads your Google profile and names the one thing to do first.
@@ -195,7 +196,9 @@ export function ReviewLinkTool() {
   return (
     <>
       <PageTop
-        title="Get your Google review link and QR code."
+        title={
+          <Marked text="Get your Google review link and QR code." mark="review link and QR code." />
+        }
         lead="One link that opens the review box on your Google profile. Free, no sign-up."
       >
         <div className="mt-8" />
@@ -244,7 +247,9 @@ export function ReviewLinkTool() {
             )}
             {phase === "pick" && (
               <div className="mt-8">
-                <h2 className="text-h3">Pick your business</h2>
+                <h2 className="text-h3">
+                  <Marked text="Pick your business" mark="your business" />
+                </h2>
                 <ul className="mt-4 space-y-3">
                   {places.map((p) => (
                     <li key={p.place_id}>

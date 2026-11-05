@@ -60,7 +60,11 @@ export function AccountTop({
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
           <h1 className="font-display text-h2 font-bold text-balance text-text-1">
-            {typeof heading === "string" ? <Headline text={heading} mark={heading === title ? mark : undefined} /> : heading}
+            {typeof heading === "string" ? (
+              <Headline text={heading} mark={heading === title ? mark : undefined} />
+            ) : (
+              heading
+            )}
           </h1>
           {lead && <p className="mt-2 max-w-[42rem] text-body text-text-2">{lead}</p>}
         </div>

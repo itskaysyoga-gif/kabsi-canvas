@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { MAIN_CTA, SCAN_LINE } from "@/lib/site";
 import { ButtonLink } from "./ui";
 import { D9Title } from "./d9-title";
+import { Marked } from "./highlight";
 
 export type PageHeroLines = { title: string; line: string; action?: string };
 
@@ -24,10 +25,14 @@ export function PageHero({
   children,
   className,
   marked = true,
+  mark,
 }: {
   hero: PageHeroLines;
   /** Design 9 treatment B on every page (Web 5 part D): the title's last sentence on the yellow bar; a one-sentence title stays plain. */
   marked?: boolean;
+  /** Style 1 (30.33): the title's phrase on the bar when it is not the last sentence. Set by the page, so the shared
+   *  hero lines (in every page's bundle) stay small. */
+  mark?: string;
   eyebrow?: ReactNode;
   /** Replaces the default action (the free check). */
   action?: ReactNode;
@@ -49,7 +54,13 @@ export function PageHero({
           )}
           {/* The headline paints with no entrance animation, so it can be the page's LCP at once (Web 3). */}
           <h1 id="hero-title" className="text-display text-balance">
-            {marked ? <D9Title text={hero.title} /> : hero.title}
+            {!marked ? (
+              hero.title
+            ) : mark ? (
+              <Marked text={hero.title} mark={mark} />
+            ) : (
+              <D9Title text={hero.title} />
+            )}
           </h1>
           <p
             className="mt-5 animate-enter text-lead text-text-2"

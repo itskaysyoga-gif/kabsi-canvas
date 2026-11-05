@@ -224,7 +224,11 @@ for (const r of routes) {
         if (n > 25) out.long.push(`${n} words: ${p.innerText.trim().slice(0, 70)}`);
       }
       for (const li of document.querySelectorAll("main li, [role='dialog'] li")) {
-        if (!vis(li) || li.closest(".sr-only, [data-long-ok], nav") || li.querySelector("p, li, button, a, input"))
+        if (
+          !vis(li) ||
+          li.closest(".sr-only, [data-long-ok], nav") ||
+          li.querySelector("p, li, button, a, input")
+        )
           continue;
         const n = (li.innerText || "").trim().split(/\s+/).filter(Boolean).length;
         if (n > 15) out.long.push(`list item of ${n} words: ${li.innerText.trim().slice(0, 70)}`);
@@ -238,16 +242,30 @@ for (const r of routes) {
         // Only grids of cards: every child has its own border or ground (not a list's number beside its words).
         const card = (k) => {
           const ks = getComputedStyle(k);
-          return parseFloat(ks.borderTopWidth) > 0 || !/rgba\(0, 0, 0, 0\)|transparent/.test(ks.backgroundColor) || k.tagName === "IMG" || !!k.querySelector(":scope > img, :scope > picture");
+          return (
+            parseFloat(ks.borderTopWidth) > 0 ||
+            !/rgba\(0, 0, 0, 0\)|transparent/.test(ks.backgroundColor) ||
+            k.tagName === "IMG" ||
+            !!k.querySelector(":scope > img, :scope > picture")
+          );
         };
         if (!kids.every(card)) continue;
         // Lone: by the real layout, the last row holds one card, and it is narrower than 60 percent of the grid (a card that
         // spans the row, or a row centred on purpose, is not lone).
         const top = Math.max(...kids.map((k) => Math.round(k.getBoundingClientRect().top)));
-        const last = kids.filter((k) => Math.abs(Math.round(k.getBoundingClientRect().top) - top) < 4);
+        const last = kids.filter(
+          (k) => Math.abs(Math.round(k.getBoundingClientRect().top) - top) < 4,
+        );
         const gw = g.getBoundingClientRect().width;
-        if (cols >= 2 && kids.length > 1 && last.length === 1 && last[0].getBoundingClientRect().width < gw * 0.6)
-          out.lone.push(`${kids.length} cards in ${cols} columns: ${(kids[0].textContent || "").trim().slice(0, 40)}`);
+        if (
+          cols >= 2 &&
+          kids.length > 1 &&
+          last.length === 1 &&
+          last[0].getBoundingClientRect().width < gw * 0.6
+        )
+          out.lone.push(
+            `${kids.length} cards in ${cols} columns: ${(kids[0].textContent || "").trim().slice(0, 40)}`,
+          );
       }
       // Cut off: text clipped by its own box.
       for (const el of document.querySelectorAll(
@@ -412,8 +430,10 @@ for (const r of routes) {
       });
     for (const x of facts.words) add({ id, kind: "Words", what: x });
     if (r.synthetic !== "ended" && r.synthetic !== "loading")
-      for (const x of facts.unmarked) add({ id, kind: "Look", what: `H1 without its phrase: ${x}` });
-    for (const x of [...new Set(facts.long)]) add({ id, kind: "Look", what: `long paragraph, ${x}` });
+      for (const x of facts.unmarked)
+        add({ id, kind: "Look", what: `H1 without its phrase: ${x}` });
+    for (const x of [...new Set(facts.long)])
+      add({ id, kind: "Look", what: `long paragraph, ${x}` });
     for (const x of [...new Set(facts.lone)]) add({ id, kind: "Look", what: `lone card, ${x}` });
     if (r.synthetic === "ended" && !facts.gate)
       add({ id, kind: "Session", what: "the session-ended screen did not show after a 401" });

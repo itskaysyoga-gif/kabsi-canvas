@@ -63,12 +63,7 @@ import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAppShieldRouteImport } from './routes/_authenticated/app/shield'
 import { Route as AuthenticatedAppTeamRouteImport } from './routes/_authenticated/app/team'
 import { Route as AuthenticatedStaffIndexRouteImport } from './routes/_authenticated/staff/index'
-import { Route as AuthenticatedStaffBusinessesRouteImport } from './routes/_authenticated/staff/businesses'
-import { Route as AuthenticatedStaffConversationsRouteImport } from './routes/_authenticated/staff/conversations'
-import { Route as AuthenticatedStaffCostsRouteImport } from './routes/_authenticated/staff/costs'
-import { Route as AuthenticatedStaffProgramsRouteImport } from './routes/_authenticated/staff/programs'
-import { Route as AuthenticatedStaffSettingsRouteImport } from './routes/_authenticated/staff/settings'
-import { Route as AuthenticatedStaffSystemRouteImport } from './routes/_authenticated/staff/system'
+import { Route as AuthenticatedStaffPageRouteImport } from './routes/_authenticated/staff/$page'
 import { Route as AuthenticatedStartResumeCodeRouteImport } from './routes/_authenticated/start_.resume.$code'
 
 const IndexRoute = IndexRouteImport.update({
@@ -343,41 +338,11 @@ const AuthenticatedStaffIndexRoute = AuthenticatedStaffIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedStaffRouteRoute,
 } as any)
-const AuthenticatedStaffBusinessesRoute =
-  AuthenticatedStaffBusinessesRouteImport.update({
-    id: '/businesses',
-    path: '/businesses',
-    getParentRoute: () => AuthenticatedStaffRouteRoute,
-  } as any)
-const AuthenticatedStaffConversationsRoute =
-  AuthenticatedStaffConversationsRouteImport.update({
-    id: '/conversations',
-    path: '/conversations',
-    getParentRoute: () => AuthenticatedStaffRouteRoute,
-  } as any)
-const AuthenticatedStaffCostsRoute = AuthenticatedStaffCostsRouteImport.update({
-  id: '/costs',
-  path: '/costs',
+const AuthenticatedStaffPageRoute = AuthenticatedStaffPageRouteImport.update({
+  id: '/$page',
+  path: '/$page',
   getParentRoute: () => AuthenticatedStaffRouteRoute,
 } as any)
-const AuthenticatedStaffProgramsRoute =
-  AuthenticatedStaffProgramsRouteImport.update({
-    id: '/programs',
-    path: '/programs',
-    getParentRoute: () => AuthenticatedStaffRouteRoute,
-  } as any)
-const AuthenticatedStaffSettingsRoute =
-  AuthenticatedStaffSettingsRouteImport.update({
-    id: '/settings',
-    path: '/settings',
-    getParentRoute: () => AuthenticatedStaffRouteRoute,
-  } as any)
-const AuthenticatedStaffSystemRoute =
-  AuthenticatedStaffSystemRouteImport.update({
-    id: '/system',
-    path: '/system',
-    getParentRoute: () => AuthenticatedStaffRouteRoute,
-  } as any)
 const AuthenticatedStartResumeCodeRoute =
   AuthenticatedStartResumeCodeRouteImport.update({
     id: '/start_/resume/$code',
@@ -437,12 +402,7 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/app/shield': typeof AuthenticatedAppShieldRoute
   '/app/team': typeof AuthenticatedAppTeamRoute
-  '/staff/businesses': typeof AuthenticatedStaffBusinessesRoute
-  '/staff/conversations': typeof AuthenticatedStaffConversationsRoute
-  '/staff/costs': typeof AuthenticatedStaffCostsRoute
-  '/staff/programs': typeof AuthenticatedStaffProgramsRoute
-  '/staff/settings': typeof AuthenticatedStaffSettingsRoute
-  '/staff/system': typeof AuthenticatedStaffSystemRoute
+  '/staff/$page': typeof AuthenticatedStaffPageRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/staff/': typeof AuthenticatedStaffIndexRoute
   '/start/resume/$code': typeof AuthenticatedStartResumeCodeRoute
@@ -497,12 +457,7 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/app/shield': typeof AuthenticatedAppShieldRoute
   '/app/team': typeof AuthenticatedAppTeamRoute
-  '/staff/businesses': typeof AuthenticatedStaffBusinessesRoute
-  '/staff/conversations': typeof AuthenticatedStaffConversationsRoute
-  '/staff/costs': typeof AuthenticatedStaffCostsRoute
-  '/staff/programs': typeof AuthenticatedStaffProgramsRoute
-  '/staff/settings': typeof AuthenticatedStaffSettingsRoute
-  '/staff/system': typeof AuthenticatedStaffSystemRoute
+  '/staff/$page': typeof AuthenticatedStaffPageRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/staff': typeof AuthenticatedStaffIndexRoute
   '/start/resume/$code': typeof AuthenticatedStartResumeCodeRoute
@@ -561,12 +516,7 @@ export interface FileRoutesById {
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
   '/_authenticated/app/shield': typeof AuthenticatedAppShieldRoute
   '/_authenticated/app/team': typeof AuthenticatedAppTeamRoute
-  '/_authenticated/staff/businesses': typeof AuthenticatedStaffBusinessesRoute
-  '/_authenticated/staff/conversations': typeof AuthenticatedStaffConversationsRoute
-  '/_authenticated/staff/costs': typeof AuthenticatedStaffCostsRoute
-  '/_authenticated/staff/programs': typeof AuthenticatedStaffProgramsRoute
-  '/_authenticated/staff/settings': typeof AuthenticatedStaffSettingsRoute
-  '/_authenticated/staff/system': typeof AuthenticatedStaffSystemRoute
+  '/_authenticated/staff/$page': typeof AuthenticatedStaffPageRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/staff/': typeof AuthenticatedStaffIndexRoute
   '/_authenticated/start_/resume/$code': typeof AuthenticatedStartResumeCodeRoute
@@ -625,12 +575,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/shield'
     | '/app/team'
-    | '/staff/businesses'
-    | '/staff/conversations'
-    | '/staff/costs'
-    | '/staff/programs'
-    | '/staff/settings'
-    | '/staff/system'
+    | '/staff/$page'
     | '/app/'
     | '/staff/'
     | '/start/resume/$code'
@@ -685,12 +630,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/shield'
     | '/app/team'
-    | '/staff/businesses'
-    | '/staff/conversations'
-    | '/staff/costs'
-    | '/staff/programs'
-    | '/staff/settings'
-    | '/staff/system'
+    | '/staff/$page'
     | '/app'
     | '/staff'
     | '/start/resume/$code'
@@ -748,12 +688,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/settings'
     | '/_authenticated/app/shield'
     | '/_authenticated/app/team'
-    | '/_authenticated/staff/businesses'
-    | '/_authenticated/staff/conversations'
-    | '/_authenticated/staff/costs'
-    | '/_authenticated/staff/programs'
-    | '/_authenticated/staff/settings'
-    | '/_authenticated/staff/system'
+    | '/_authenticated/staff/$page'
     | '/_authenticated/app/'
     | '/_authenticated/staff/'
     | '/_authenticated/start_/resume/$code'
@@ -1177,46 +1112,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStaffIndexRouteImport
       parentRoute: typeof AuthenticatedStaffRouteRoute
     }
-    '/_authenticated/staff/businesses': {
-      id: '/_authenticated/staff/businesses'
-      path: '/businesses'
-      fullPath: '/staff/businesses'
-      preLoaderRoute: typeof AuthenticatedStaffBusinessesRouteImport
-      parentRoute: typeof AuthenticatedStaffRouteRoute
-    }
-    '/_authenticated/staff/conversations': {
-      id: '/_authenticated/staff/conversations'
-      path: '/conversations'
-      fullPath: '/staff/conversations'
-      preLoaderRoute: typeof AuthenticatedStaffConversationsRouteImport
-      parentRoute: typeof AuthenticatedStaffRouteRoute
-    }
-    '/_authenticated/staff/costs': {
-      id: '/_authenticated/staff/costs'
-      path: '/costs'
-      fullPath: '/staff/costs'
-      preLoaderRoute: typeof AuthenticatedStaffCostsRouteImport
-      parentRoute: typeof AuthenticatedStaffRouteRoute
-    }
-    '/_authenticated/staff/programs': {
-      id: '/_authenticated/staff/programs'
-      path: '/programs'
-      fullPath: '/staff/programs'
-      preLoaderRoute: typeof AuthenticatedStaffProgramsRouteImport
-      parentRoute: typeof AuthenticatedStaffRouteRoute
-    }
-    '/_authenticated/staff/settings': {
-      id: '/_authenticated/staff/settings'
-      path: '/settings'
-      fullPath: '/staff/settings'
-      preLoaderRoute: typeof AuthenticatedStaffSettingsRouteImport
-      parentRoute: typeof AuthenticatedStaffRouteRoute
-    }
-    '/_authenticated/staff/system': {
-      id: '/_authenticated/staff/system'
-      path: '/system'
-      fullPath: '/staff/system'
-      preLoaderRoute: typeof AuthenticatedStaffSystemRouteImport
+    '/_authenticated/staff/$page': {
+      id: '/_authenticated/staff/$page'
+      path: '/$page'
+      fullPath: '/staff/$page'
+      preLoaderRoute: typeof AuthenticatedStaffPageRouteImport
       parentRoute: typeof AuthenticatedStaffRouteRoute
     }
     '/_authenticated/start_/resume/$code': {
@@ -1271,23 +1171,13 @@ const AuthenticatedAppRouteRouteWithChildren =
   )
 
 interface AuthenticatedStaffRouteRouteChildren {
-  AuthenticatedStaffBusinessesRoute: typeof AuthenticatedStaffBusinessesRoute
-  AuthenticatedStaffConversationsRoute: typeof AuthenticatedStaffConversationsRoute
-  AuthenticatedStaffCostsRoute: typeof AuthenticatedStaffCostsRoute
-  AuthenticatedStaffProgramsRoute: typeof AuthenticatedStaffProgramsRoute
-  AuthenticatedStaffSettingsRoute: typeof AuthenticatedStaffSettingsRoute
-  AuthenticatedStaffSystemRoute: typeof AuthenticatedStaffSystemRoute
+  AuthenticatedStaffPageRoute: typeof AuthenticatedStaffPageRoute
   AuthenticatedStaffIndexRoute: typeof AuthenticatedStaffIndexRoute
 }
 
 const AuthenticatedStaffRouteRouteChildren: AuthenticatedStaffRouteRouteChildren =
   {
-    AuthenticatedStaffBusinessesRoute: AuthenticatedStaffBusinessesRoute,
-    AuthenticatedStaffConversationsRoute: AuthenticatedStaffConversationsRoute,
-    AuthenticatedStaffCostsRoute: AuthenticatedStaffCostsRoute,
-    AuthenticatedStaffProgramsRoute: AuthenticatedStaffProgramsRoute,
-    AuthenticatedStaffSettingsRoute: AuthenticatedStaffSettingsRoute,
-    AuthenticatedStaffSystemRoute: AuthenticatedStaffSystemRoute,
+    AuthenticatedStaffPageRoute: AuthenticatedStaffPageRoute,
     AuthenticatedStaffIndexRoute: AuthenticatedStaffIndexRoute,
   }
 

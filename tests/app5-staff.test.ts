@@ -54,12 +54,18 @@ describe("the staff menu", () => {
     }
   });
 
-  it("has a route file for every page, and no page outside the menu", () => {
-    const files = readdirSync(DIR).filter((f) => f.endsWith(".tsx") && f !== "route.tsx");
-    const want = STAFF_MENU.map((id) =>
-      id === "today" ? "index.tsx" : `${STAFF_PAGES[id].to.split("/").pop()}.tsx`,
-    );
-    expect(files.sort()).toEqual(want.sort());
+  it("has a route for every page: Today is /staff, the other six are /staff/$page", () => {
+    const files = readdirSync(DIR)
+      .filter((f) => f.endsWith(".tsx"))
+      .sort();
+    expect(files).toEqual(["$page.tsx", "index.tsx", "route.tsx"]);
+    const sub = readFileSync("src/components/staff/staff-pages.tsx", "utf8");
+    const route = readFileSync(`${DIR}/$page.tsx`, "utf8");
+    for (const id of STAFF_MENU.filter((x) => x !== "today")) {
+      expect(route, id).toContain(`${id}: "${STAFF_PAGES[id].tab}"`);
+      expect(STAFF_PAGES[id].to).toBe(`/staff/${id}`);
+      expect(sub, id).toMatch(new RegExp(`\\n  ${id}: \\w+,`));
+    }
   });
 });
 
@@ -73,7 +79,7 @@ describe("a staff page is refused to anyone who is not staff (App 4's rule)", ()
     for (const f of readdirSync(DIR).filter((x) => x !== "route.tsx")) {
       const src = readFileSync(`${DIR}/${f}`, "utf8");
       expect(src, f).toMatch(/createFileRoute\("\/_authenticated\/staff\//);
-      expect(src, f).not.toMatch(/amStaff|NotFoundPage/);
+      expect(src, f).not.toMatch(/amStaff/);
     }
   });
   it("every staff address is private and keeps the 12 hours of staff pages", () => {

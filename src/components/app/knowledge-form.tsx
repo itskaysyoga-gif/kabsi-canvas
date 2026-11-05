@@ -1017,10 +1017,10 @@ function TextInput({
             {f.required ? null : <span className="font-normal text-text-2">(optional)</span>}
           </Label>
           {f.hint ? (
-        <div className="mt-0.5">
-          <ShortParas className="text-small text-text-2" text={f.hint} />
-        </div>
-      ) : null}
+            <div className="mt-0.5">
+              <ShortParas className="text-small text-text-2" text={f.hint} />
+            </div>
+          ) : null}
         </>
       ) : null}
       {f.long ? (

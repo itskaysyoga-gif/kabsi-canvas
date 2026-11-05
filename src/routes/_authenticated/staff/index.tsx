@@ -157,7 +157,7 @@ function Today() {
             Spend against the caps
           </h2>
           <Link
-            to="/staff/costs"
+            to={"/staff/costs" as "/staff"}
             className="inline-flex min-h-11 items-center gap-1 text-small font-bold underline underline-offset-4"
           >
             All costs <ArrowRight className="size-4" aria-hidden />

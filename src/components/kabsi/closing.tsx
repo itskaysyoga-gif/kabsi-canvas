@@ -15,6 +15,7 @@ import { ScanBox } from "./scan-box";
 import { Highlight } from "./highlight";
 import { SiteLink } from "./site-link";
 import { CONTROL, CONTROL_SHORT } from "./d8-data";
+import { Marked } from "@/components/kabsi/highlight";
 
 const linkCls =
   "press inline-flex min-h-11 items-center gap-1.5 font-semibold text-text-1 underline decoration-text-3 decoration-1 underline-offset-4 hover:decoration-text-1";
@@ -26,11 +27,11 @@ function Arrow() {
 export function Closing({
   keyword,
   industry,
-  marked = false,
+  marked = true,
 }: {
   keyword?: string;
   industry?: string;
-  /** Industries 2: "free check" on the yellow bar (the industry pages and /for). */
+  /** "free check" on the yellow bar (Industries 2; every page from Style 1, 30.33). */
   marked?: boolean;
 }) {
   return (
@@ -73,7 +74,7 @@ export function Control({ short = false }: { short?: boolean }) {
       <div className="container-kb section-y grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
         <div>
           <h2 id="control-h" className="text-h2">
-            You stay in control.
+            <Marked text="You stay in control." mark="in control." />
           </h2>
           <SiteLink to="/security" className={cn(linkCls, "mt-3 text-body")}>
             See how to remove Kabsi on Security
