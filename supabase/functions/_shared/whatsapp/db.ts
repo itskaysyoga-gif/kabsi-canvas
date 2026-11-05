@@ -64,8 +64,8 @@ export const alertRecipients = (locationId: string) => rpc<string[] | null>("wha
 
 // Session 13b part 1: the agent runs once Kabsi's number is connected in Supabase secrets (KAPSO_PHONE_NUMBER_ID, set
 // 23 Oct 2026), while the public site keeps its own setting (whatsapp-setting.ts) until the live test passes and the
-// facts change. Live sends still need WHATSAPP_LIVE=true, and until launch go only to Kabsi's own test phones and the
-// staff phone (whatsapp_send_state); everything else uses the mock sender.
+// facts change. Live sends still need WHATSAPP_LIVE=true, and until whatsapp_owners_on go only to Kabsi's own test
+// phones and the staff phone (whatsapp_send_state); everything else uses the mock sender.
 export const AGENT_ON = WHATSAPP_ON || /^\d{6,}$/.test(Deno.env.get("KAPSO_PHONE_NUMBER_ID") ?? "");
 
 /** The Kapso sender for anything outside the one sender (the free check): live only to an allowed phone. */

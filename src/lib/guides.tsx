@@ -25,7 +25,6 @@ import {
   Steps,
 } from "@/components/marketing/guide-kit";
 import type { PhotoId } from "@/lib/site-photos";
-import { NEARBY_ON } from "@/lib/site";
 
 // Guides (D253): short, practical how-tos for business owners. Every step is checked against Google's own
 // help pages (listed as sources at the end of each guide). Facts only (§3): no promises of reviews, ratings
@@ -612,7 +611,6 @@ export const GUIDES: Guide[] = [
           from their apps, and shows when an answer gives a fact differently from what you
           confirmed. It opens a task: to fix the fact on your Google profile, after your yes, or to
           tell you what to check on your website or another site, which Kabsi cannot change.
-          {NEARBY_ON ? "" : " The AI answer opens at launch."}
         </Callout>
       </>
     ),

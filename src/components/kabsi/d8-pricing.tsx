@@ -7,7 +7,6 @@ import { ArrowRight, Check, Minus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
-  NEARBY_ON,
   FOUNDING_PRICES,
   PAY_TODAY_LINE,
   PLAN_PRICES,
@@ -114,7 +113,7 @@ function Cell({ v }: { v: string }) {
   return <td className="p-3 text-text-1 sm:p-4">{v}</td>;
 }
 
-export function D8Pricing({ nearbyOn = NEARBY_ON }: { nearbyOn?: boolean } = {}) {
+export function D8Pricing() {
   const periodFlag = useSearchFlag("period");
   const [period, setPeriod] = useState<"monthly" | "yearly">("monthly");
   useEffect(() => {
@@ -196,9 +195,7 @@ export function D8Pricing({ nearbyOn = NEARBY_ON }: { nearbyOn?: boolean } = {})
                   </ul>
                   {/* Fix 2: the nearby check and the AI answer, with this plan's allowance from plan_limits(). */}
                   <div className="mt-5 border-t border-line pt-4">
-                    <p className="flex flex-wrap items-center gap-2 text-small font-bold">
-                      Where you show up {!nearbyOn && <Pill className="py-0">At launch</Pill>}
-                    </p>
+                    <p className="text-small font-bold">Where you show up</p>
                     <ul className="mt-2 space-y-1.5">
                       {planChecks(p.id).map((c) => (
                         <li key={c.name} className="text-small text-text-2">
@@ -266,12 +263,6 @@ export function D8Pricing({ nearbyOn = NEARBY_ON }: { nearbyOn?: boolean } = {})
                   <tr key={c.name}>
                     <th scope="row" className="p-3 text-start font-semibold break-words sm:p-4">
                       {c.name}
-                      {!nearbyOn && (
-                        <>
-                          {" "}
-                          <Pill className="mt-1 py-0">At launch</Pill>
-                        </>
-                      )}
                     </th>
                     <Cell v={c.essentials} />
                     <Cell v={c.pro} />
@@ -281,9 +272,7 @@ export function D8Pricing({ nearbyOn = NEARBY_ON }: { nearbyOn?: boolean } = {})
             </table>
           </div>
           <p className="mt-3 text-small text-text-2">
-            {nearbyOn
-              ? "Only what Kabsi does today. More checks come later."
-              : "Only what Kabsi does today, and the two checks marked At launch. More checks come later."}
+            Only what Kabsi does today. More checks come later.
           </p>
         </div>
       </section>

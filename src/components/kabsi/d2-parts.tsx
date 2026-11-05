@@ -48,7 +48,7 @@ export function PageTop({
 
 /* ---------- Free tools ---------- */
 
-// Two free tools at launch (master plan 30.16 section 4): the review link and QR maker, and one free check
+// Two free tools (master plan 30.16 section 4): the review link and QR maker, and one free check
 // that shows the public profile facts and the nearby check together (/google-profile-check opens it too).
 const TOOLS = [
   { to: "/scan", label: "Free check" },

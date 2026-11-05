@@ -5,7 +5,6 @@
 import { ArrowRight } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { WHATSAPP_LAUNCH_LINE, WHATSAPP_ON } from "@/lib/site";
 import { ExampleBadge, KabsiMark } from "./ui";
 import { Img, PHOTOS, type Photo } from "./photos";
 import { ScanBox } from "./scan-box";
@@ -38,9 +37,6 @@ export function D9Hero() {
             <D9Title text="Your business on Google. Taken care of." />
           </h1>
           <p className="mt-4 max-w-[36rem] text-lead text-text-2 sm:mt-6">{D9_HERO_LINE}</p>
-          {!WHATSAPP_ON && (
-            <p className="mt-2 text-label text-text-2 sm:text-small">{WHATSAPP_LAUNCH_LINE}</p>
-          )}
           {/* relative z-10: the suggestion list opens above the hero phone that follows (Web 4 review). */}
           <div className="relative z-10 mt-5 max-w-[36rem] sm:mt-7">
             <ScanBox id="hero-scan" />

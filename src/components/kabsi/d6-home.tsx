@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { SCAN_LINE, TRIAL_LINE, WHATSAPP_LAUNCH_LINE, WHATSAPP_ON } from "@/lib/site";
+import { SCAN_LINE, TRIAL_LINE } from "@/lib/site";
 import { useFoundingPlaces } from "@/lib/public-api";
 import { ExampleBadge, Faq, SectionHead, StatusPill } from "./ui";
 import { Img, FOUNDER, PHOTOS, type Photo } from "./photos";
@@ -53,15 +53,6 @@ export function D6Hero() {
           >
             {HERO_LINE}
           </p>
-          {/* Every "on WhatsApp" line says "at launch" while Kabsi's WhatsApp number is not set (the one switch). */}
-          {!WHATSAPP_ON && (
-            <p
-              className="mt-3 animate-enter text-body text-text-2"
-              style={{ animationDelay: "60ms" }}
-            >
-              {WHATSAPP_LAUNCH_LINE}
-            </p>
-          )}
           <div className="mt-8 animate-enter" style={{ animationDelay: "120ms" }}>
             <ScanBox id="hero-scan" />
             <a href="#demo" className={cn(linkCls, "mt-4 text-body")}>
@@ -298,9 +289,9 @@ export function Control() {
 /* ---------- The nearby check, explained ---------- */
 
 export function Nearby() {
-  // On a phone: the heading, two lines, "Opens at launch" and the three places, without the drawn map.
+  // On a phone: the heading, two lines and the three places, without the drawn map.
   const lines: { text: string; phone: boolean }[] = [
-    { text: "It is part of the free check once it opens. No access needed.", phone: false },
+    { text: "It is part of the free check. No access needed.", phone: false },
     { text: "Each number is where you came up. 1 is first.", phone: true },
     { text: "It shows where you stand. It never promises a place.", phone: true },
   ];
@@ -314,9 +305,6 @@ export function Nearby() {
           <p className="mt-4 hidden max-w-[40rem] text-lead text-text-2 sm:block">
             Kabsi searches Google Maps from places around you, like a customer standing there. You
             see three places, who came first there, and one count from the 49 places Kabsi checked.
-          </p>
-          <p className="mt-4 inline-flex rounded-full border border-line-strong px-3 py-1 text-label font-semibold text-text-2">
-            Opens at launch
           </p>
           <ul className="mt-5 space-y-3 text-body sm:mt-6">
             {lines.map((l) => (

@@ -10,7 +10,8 @@
 //     shape wherever more than one thing is waiting.
 //   - Inside the window: a normal message with buttons. Outside it: only an approved utility template; without one the
 //     message is held until the person writes (which opens the window).
-//   - Until launch only Kabsi's own test phones and the staff phone get a live message; everyone else gets the mock.
+//   - Until whatsapp_owners_on only Kabsi's own test phones and the staff phone get a live message; everyone else gets
+//     the mock (from 5 Nov 2026 owners are on; fictional test numbers always get the mock).
 
 export const DAILY_CAP = 6;
 export const BATCH_MINUTES = 15;

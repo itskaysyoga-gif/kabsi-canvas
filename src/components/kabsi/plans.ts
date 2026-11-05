@@ -81,7 +81,7 @@ export { FOUNDING_TOTAL };
 /**
  * Fix 2 (master plan 30.27 item 2): the two checks each plan has, with the allowance exactly as plan_limits() in the
  * database gives it (map_keywords and map_every; ai_prompts and ai_every), held by supabase/tests/fix2_plan_checks.sql.
- * Shown on the cards and in the comparison, marked At launch while NEARBY_ON is false.
+ * Shown on the cards and in the comparison.
  */
 export const PLAN_CHECKS = {
   nearby: {

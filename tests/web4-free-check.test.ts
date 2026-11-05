@@ -6,14 +6,15 @@ import { describe, expect, it } from "vitest";
 const read = (p: string) => readFileSync(p, "utf8");
 
 describe("the free check on Design 8", () => {
-  it("names only what Google's public data holds (K-82) and marks the ChatGPT answer At launch", () => {
+  it("names only what Google's public data holds (K-82) and the ChatGPT answer, with no At launch label (Go live 1)", () => {
     const start = read("src/components/kabsi/d4-free-check.tsx");
     const rows = start.slice(
-      start.indexOf("const looksAt"),
+      start.indexOf("const LOOKS_AT"),
       start.indexOf("function CheckLooksAtVisual"),
     );
     expect(rows).not.toMatch(/reply|repl(y|ies) from you|special hours|bank holiday|post|booking/i);
-    expect(rows).toMatch(/What ChatGPT says[\s\S]*atLaunch: !nearbyOn/);
+    expect(rows).toContain("What ChatGPT says");
+    expect(start).not.toMatch(/atLaunch|At launch/);
   });
   it("shows the words Google Maps under the result's Places data, exactly and not translated", () => {
     const live = read("src/components/kabsi/scan-live.tsx");

@@ -44,8 +44,8 @@ function Page() {
         <p>
           These terms are the agreement between you and Kabsi, an independent business operated by{" "}
           {OPERATOR_NAME}, for the Kabsi Partners program. They apply from the day you accept them
-          when you apply. Kabsi Partners opens at launch; until then nothing here is paid. The{" "}
-          <Link to="/terms">terms of service</Link> and the{" "}
+          when you apply. Kabsi Partners opens when card payments open; until then nothing here is
+          paid. The <Link to="/terms">terms of service</Link> and the{" "}
           <Link to="/privacy">privacy policy</Link> apply to everyone who uses Kabsi, partners
           included.
         </p>

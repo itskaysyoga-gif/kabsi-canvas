@@ -1,9 +1,9 @@
 // Design 9 lines for kabsi.co (Web 5, master plan 30.24, lane R's approval of Design 9 from kabsi-design-studio
 // e90e40b). Every line is checked against knowledge/kabsi-facts.md; where Design 9 said more than the facts, the facts'
 // wording is used and the change is listed in COPY.md section 43. Every business and person here is an Example.
-// Lines that depend on Kabsi's WhatsApp number follow WHATSAPP_ON; the nearby check and the AI answer follow NEARBY_ON.
+// Lines that depend on Kabsi's WhatsApp number follow WHATSAPP_ON.
 
-import { NEARBY_ON, WHATSAPP_ON } from "@/lib/site";
+import { WHATSAPP_ON } from "@/lib/site";
 
 export const D9_BUSINESS = "Hollis Hair, Bristol";
 
@@ -141,12 +141,11 @@ export const D9_REPORT = {
   next: "Add 3 photos of the team at work.",
 } as const;
 
-/* ---------- Where you show up (one section; At launch until NEARBY_ON) ---------- */
+/* ---------- Where you show up (one section; open from 5 Nov 2026, Go live 1) ---------- */
 
 export const D9_SHOW_UP = {
   title: "Where you show up",
-  line: "Two checks Kabsi runs from launch, shown as they are. No score.",
-  atLaunch: !NEARBY_ON,
+  line: "Two checks Kabsi runs, shown as they are. No score.",
   map: {
     title: "Near you on Google Maps",
     line: "Kabsi searches Google Maps from places around your business, like a customer standing there. The number is where you came up. 1 is first.",

@@ -150,24 +150,24 @@ function Page() {
           The check uses public information only and never your Business Profile.
         </p>
         <p>
-          <b>From launch, if Kabsi checks where your business shows:</b> your business name,
-          category, address and the keywords you confirm are sent to DataForSEO, which looks up
-          Google Maps results around your business and what ChatGPT and Perplexity answer. Geoapify
-          receives map points (coordinates) to draw the map image. We keep the results: your rank at
-          each point on the map, the AI answers (shown as samples, because they change from run to
-          run) and the public details of the competitors you pick: name, rating, number of reviews,
-          category and new reviews a month. No review text and no personal details of your customers
-          are sent for this. These results are kept apart from the numbers Google gives us about
-          your own profile.
+          <b>If Kabsi checks where your business shows:</b> your business name, category, address
+          and the keywords you confirm are sent to DataForSEO, which looks up Google Maps results
+          around your business and what ChatGPT and Perplexity answer. Geoapify receives map points
+          (coordinates) to draw the map image. We keep the results: your rank at each point on the
+          map, the AI answers (shown as samples, because they change from run to run) and the public
+          details of the competitors you pick: name, rating, number of reviews, category and new
+          reviews a month. No review text and no personal details of your customers are sent for
+          this. These results are kept apart from the numbers Google gives us about your own
+          profile.
         </p>
         <p>
-          <b>From launch, if you apply to Kabsi Partners:</b> your name and email, country and city,
-          what you do, where you will share Kabsi and roughly how many local owners that reaches,
-          one line on how you will recommend it, your advertiser permit number if you give one, your
-          WhatsApp number, and the time you accepted the partner terms. When you choose how to be
-          paid, your payout details are kept encrypted in our database vault and shown only as the
-          last 4 characters. We also keep the visits, scans, trials and payments that came through
-          your partner link or code, so we can pay you correctly.
+          <b>If you apply to Kabsi Partners:</b> your name and email, country and city, what you do,
+          where you will share Kabsi and roughly how many local owners that reaches, one line on how
+          you will recommend it, your advertiser permit number if you give one, your WhatsApp
+          number, and the time you accepted the partner terms. When you choose how to be paid, your
+          payout details are kept encrypted in our database vault and shown only as the last 4
+          characters. We also keep the visits, scans, trials and payments that came through your
+          partner link or code, so we can pay you correctly.
         </p>
         <p>
           <b>If you ask Nora for a person, or tell us what you need:</b> our team may write a short
@@ -291,8 +291,8 @@ function Page() {
             train its models.
           </li>
           <li>
-            From launch, to see what AI assistants say about your business, Kabsi sends questions in
-            your customers' words that name your category and area (for example "best dentist in
+            To see what AI assistants say about your business, Kabsi sends questions in your
+            customers' words that name your category and area (for example "best dentist in
             Jumeirah") to DataForSEO, which asks ChatGPT and Perplexity for them. The answers change
             from run to run, so Kabsi shows them as a sample and never as a promise. When an answer
             names your business, Kabsi sends that answer and your business name to Anthropic to list
@@ -319,8 +319,8 @@ function Page() {
       <section>
         <h2>6. Who helps us (processors)</h2>
         <p>
-          "From launch" marks a company that starts handling data when the feature that uses it is
-          switched on. We list it now so this page is complete before that day.
+          "When switched on" marks a company that starts handling data only when the feature that
+          uses it is switched on. We list it now so this page is complete before that day.
         </p>
         <ul>
           <li>Supabase: database, sign-in and file storage, in Frankfurt, Germany.</li>
@@ -343,19 +343,19 @@ function Page() {
           <li>Resend: sending email, through Amazon's EU (Ireland) region.</li>
           <li>
             Anthropic: drafting replies and posts, understanding your WhatsApp messages, writing
-            Nora's answers and, from launch, checking the facts an AI answer states about your
-            business. Review text, your business facts, those messages and those answers reach
-            Anthropic only for this.
+            Nora's answers and checking the facts an AI answer states about your business. Review
+            text, your business facts, those messages and those answers reach Anthropic only for
+            this.
           </li>
           <li>Google: the Business Profile and Places APIs.</li>
           <li>
-            From launch, DataForSEO: Google Maps results and AI answers for the keywords you confirm
-            (sections 2 and 5).
+            DataForSEO: Google Maps results and AI answers for the keywords you confirm (sections 2
+            and 5).
           </li>
-          <li>From launch, Geoapify: the map pictures, from map points only.</li>
+          <li>Geoapify: the map pictures, from map points only.</li>
           <li>
-            From launch, Meta, for the Meta Pixel and the Conversions API: measuring which of our
-            ads bring owners (section 7).
+            When switched on, Meta, for the Meta Pixel and the Conversions API: measuring which of
+            our ads bring owners (section 7).
           </li>
           <li>
             PayPal: only if you are a Kabsi Partner and choose it to be paid. Partners paid in USDT
@@ -373,8 +373,8 @@ function Page() {
                 team reads and answers your WhatsApp messages (section 14).
               </li>
               <li>
-                From launch, a speech to text provider (ElevenLabs or OpenAI; this page names the
-                one in use) that turns a WhatsApp voice note into text (section 14).
+                When switched on, a speech to text provider (ElevenLabs or OpenAI; this page names
+                the one in use) that turns a WhatsApp voice note into text (section 14).
               </li>
               <li>
                 Meta: runs WhatsApp, which carries the messages between you and the Kabsi WhatsApp
@@ -434,9 +434,9 @@ function Page() {
           </li>
           <li>
             Advertising: we use no advertising cookies today and don't track you on other sites.
-            From launch, the Meta Pixel runs on our public pages only, never inside the app, the
-            sign-up screens, the staff pages or the links in our emails. It sees page views and a
-            few steps: the pricing page, a finished free check, a sign-up, a trial and a plan
+            When it is switched on, the Meta Pixel runs on our public pages only, never inside the
+            app, the sign-up screens, the staff pages or the links in our emails. It sees page views
+            and a few steps: the pricing page, a finished free check, a sign-up, a trial and a plan
             bought. For a trial or a plan, Kabsi also tells Meta from its own servers (the
             Conversions API), with your email and phone number scrambled by a one-way hash as Meta
             requires. If you came from a Click to WhatsApp ad, Kabsi sends Meta the click id of that
@@ -534,13 +534,13 @@ function Page() {
             is kept only as long as that record needs it, and as tax and accounting law requires.
           </li>
           <li>
-            Visibility Map and AI Visibility results, and the competitors you pick (from launch):
-            while you use Kabsi, and deleted with the business.
+            Visibility Map and AI Visibility results, and the competitors you pick: while you use
+            Kabsi, and deleted with the business.
           </li>
           <li>
-            WhatsApp voice notes (from launch): the audio is deleted as soon as it has been turned
-            into text. We keep only the text, like any other message. Notes over 10 MB or 3 minutes
-            are refused and never stored.
+            WhatsApp voice notes (when switched on): the audio is deleted as soon as it has been
+            turned into text. We keep only the text, like any other message. Notes over 10 MB or 3
+            minutes are refused and never stored.
           </li>
           <li>
             Backups: encrypted copies of the database, the photos and our code are kept for 21 days
@@ -650,12 +650,12 @@ function Page() {
               is, her answers are written by it too (section 5).
             </p>
             <p>
-              <b>Voice notes.</b> You can send Kabsi a voice note instead of typing. From launch,
-              the audio goes to a speech to text provider (section 6) only to be turned into text.
-              We delete the audio as soon as the text is ready and keep only the text, which Kabsi
-              then treats like any message you typed. Please keep a voice note under 3 minutes and
-              10 MB; longer ones are refused. Kabsi never uses a voice note to train AI models or to
-              copy your voice.
+              <b>Voice notes.</b> When voice notes are switched on, you can send Kabsi a voice note
+              instead of typing. The audio goes to a speech to text provider (section 6) only to be
+              turned into text. We delete the audio as soon as the text is ready and keep only the
+              text, which Kabsi then treats like any message you typed. Please keep a voice note
+              under 3 minutes and 10 MB; longer ones are refused. Kabsi never uses a voice note to
+              train AI models or to copy your voice.
             </p>
             <p>
               <b>Who handles it.</b> Kapso provides the messaging service and the inbox where our

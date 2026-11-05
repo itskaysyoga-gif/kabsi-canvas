@@ -1,109 +1,86 @@
-// Polish 3 (lane R's decisions of 3 Nov 2026): the free check result's order, and one switch for the At launch labels.
+// Polish 3 (lane R's decisions of 3 Nov 2026): the free check result's order. Go live 1 (5 Nov 2026, master plan 30.28)
+// removed the one switch for the At launch labels (NEARBY_ON) and the WhatsApp launch line: the nearby check and the AI
+// answer are open, and no public line says At launch or opens at launch.
 import { readFileSync } from "node:fs";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { CheckLooksAtVisual } from "@/components/kabsi/d4-free-check";
-import { jobs, JOBS } from "@/components/kabsi/d8-data";
+import { JOBS } from "@/components/kabsi/d8-data";
 import {
   buildFaq,
   buildFaqGroups,
   FAQ,
   FAQ_GROUPS,
-  nearbyFaqAnswer,
+  NEARBY_FAQ_A,
   WHATSAPP_APPROVE_Q,
   whatsappApproveAnswer,
 } from "@/components/kabsi/faq-data";
 import { ResultPreview } from "@/components/kabsi/result-preview";
-import { NEARBY_ON, WHATSAPP_ON } from "@/lib/site";
+import * as site from "@/lib/site";
 
-const NEARBY_SENTENCE = "Where you come up nearby opens at launch.";
-const WA_OFF = "Not yet. WhatsApp opens at launch. Until then you approve on kabsi.co.";
-const pills = (html: string) => (html.match(/At launch/g) ?? []).length;
-const allFaqText = (nearbyOn: boolean, whatsappOn: boolean) =>
-  JSON.stringify([buildFaq(nearbyOn), buildFaqGroups(whatsappOn, nearbyOn)]);
+const LAUNCH = /At launch|opens at launch|from launch/i;
+const WA_OFF = "You approve on kabsi.co or from the email.";
+const allFaqText = (whatsappOn: boolean) =>
+  JSON.stringify([buildFaq(), buildFaqGroups(whatsappOn)]);
 
-describe("Polish 3: NEARBY_ON, the one switch for the nearby check and the AI answer (decision 2)", () => {
-  it("is false today, beside WHATSAPP_ON, and the defaults follow it", () => {
-    expect(NEARBY_ON).toBe(true); // Go live 1 (5 Nov 2026, master plan 30.28)
-    expect(WHATSAPP_ON).toBe(true); // Go live 1 (5 Nov 2026)
-    expect(JOBS).toEqual(jobs(NEARBY_ON));
-    expect(FAQ).toEqual(buildFaq(NEARBY_ON));
-    expect(FAQ_GROUPS).toEqual(buildFaqGroups(WHATSAPP_ON, NEARBY_ON));
+describe("Go live 1: no At launch label and no launch line (master plan 30.28)", () => {
+  it("has no NEARBY_ON and no WHATSAPP_LAUNCH_LINE any more; WhatsApp is on and the defaults follow it", () => {
+    expect("NEARBY_ON" in site).toBe(false);
+    expect("WHATSAPP_LAUNCH_LINE" in site).toBe(false);
+    expect(site.WHATSAPP_ON).toBe(true);
+    expect(FAQ).toEqual(buildFaq());
+    expect(FAQ_GROUPS).toEqual(buildFaqGroups(site.WHATSAPP_ON));
   });
-  it("labels the two Home jobs At launch while it is false, and neither once it is true", () => {
-    const off = jobs(false).filter((j) => j.atLaunch);
-    expect(off.map((j) => j.title)).toEqual([
-      "See where you show up nearby",
-      "Know what AI assistants say",
-    ]);
-    expect(jobs(true).some((j) => j.atLaunch)).toBe(false);
-    // Nothing else about the jobs changes.
-    expect(jobs(true).map((j) => [j.title, j.text])).toEqual(
-      jobs(false).map((j) => [j.title, j.text]),
-    );
+  it("keeps the two Home jobs about the nearby check and AI answers, with no label", () => {
+    const titles = JOBS.map((j) => j.title);
+    expect(titles).toContain("See where you show up nearby");
+    expect(titles).toContain("Know what AI assistants say");
+    expect(JOBS.every((j) => Object.keys(j).sort().join() === "text,title")).toBe(true);
   });
-  it("shows the pill on the Example result while it is false, and not once it is true", () => {
-    const off = renderToStaticMarkup(createElement(ResultPreview, { nearbyOn: false }));
-    const on = renderToStaticMarkup(createElement(ResultPreview, { nearbyOn: true }));
-    expect(pills(off)).toBe(1);
-    expect(pills(on)).toBe(0);
-    expect(on).toContain("An answer customers might see");
-    expect(off.replace(/<span[^>]*>At launch<\/span>/, "")).toBe(on.replace(/ $/, ""));
+  it("shows the Example result and the free check page's list with no label", () => {
+    const ex = renderToStaticMarkup(createElement(ResultPreview, {}));
+    expect(ex).toContain("An answer customers might see");
+    expect(ex).not.toMatch(LAUNCH);
+    const list = renderToStaticMarkup(createElement(CheckLooksAtVisual));
+    expect(list).toContain("What ChatGPT says");
+    expect(list).not.toMatch(LAUNCH);
   });
-  it("shows the pill on the free check page's list while it is false, and not once it is true", () => {
-    const off = renderToStaticMarkup(createElement(CheckLooksAtVisual, { nearbyOn: false }));
-    const on = renderToStaticMarkup(createElement(CheckLooksAtVisual, { nearbyOn: true }));
-    expect(pills(off)).toBe(1);
-    expect(pills(on)).toBe(0);
-    expect(on).toContain("What ChatGPT says");
-  });
-  it("says 'Where you come up nearby opens at launch.' in the FAQ only while it is false", () => {
-    expect(nearbyFaqAnswer(false)).toBe(
-      `No one can promise that. Kabsi shows what changed on your profile and what you can do next. ${NEARBY_SENTENCE}`,
-    );
-    expect(nearbyFaqAnswer(true)).toBe(
+  it("ends the FAQ's nearby answer at what you can do next", () => {
+    expect(NEARBY_FAQ_A).toBe(
       "No one can promise that. Kabsi shows what changed on your profile and what you can do next.",
     );
-    for (const whatsappOn of [false, true]) {
-      expect(allFaqText(false, whatsappOn)).toContain(NEARBY_SENTENCE);
-      expect(allFaqText(true, whatsappOn)).not.toContain(NEARBY_SENTENCE);
-    }
+    for (const whatsappOn of [false, true]) expect(allFaqText(whatsappOn)).not.toMatch(LAUNCH);
   });
-  it("leaves the live free check's waiting list and Kabsi Partners to their own lines", () => {
+  it("leaves the free check without labels and says when Kabsi Partners opens", () => {
     const scan = readFileSync("src/components/kabsi/scan-live.tsx", "utf8");
     expect(scan).not.toContain("NEARBY_ON");
-    // Go live 1 (30.28): the free check has no At launch label; it leaves out what it cannot show today.
-    expect(scan).not.toContain("At launch</Pill>");
-    expect(readFileSync("src/components/kabsi/d2-partners.tsx", "utf8")).toContain(
-      "Kabsi Partners opens at launch.",
-    );
+    expect(scan).not.toMatch(LAUNCH);
+    const partners = readFileSync("src/components/kabsi/d2-partners.tsx", "utf8");
+    expect(partners).toContain("Kabsi Partners opens when card payments open.");
+    expect(partners).not.toMatch(LAUNCH);
   });
 });
 
 describe("Polish 3: the WhatsApp approval answer follows WHATSAPP_ON (decision 3)", () => {
   const find = (groups: ReturnType<typeof buildFaqGroups>) =>
     groups.flatMap((g) => g.items).find((i) => i.q === WHATSAPP_APPROVE_Q);
-  it("shows the old answer while it is false, and the one written from the facts once it is true", () => {
+  it("says approvals are on kabsi.co with no number, and the one written from the facts with it", () => {
     expect(whatsappApproveAnswer(false)).toBe(WA_OFF);
     const on = whatsappApproveAnswer(true);
     expect(on).toMatch(/on WhatsApp/);
     expect(on).toMatch(/nothing goes live on Google until you say yes/);
     expect(on).not.toMatch(/opens at launch|Not yet/);
-    for (const nearbyOn of [false, true]) {
-      expect(find(buildFaqGroups(false, nearbyOn))?.a).toBe(WA_OFF);
-      expect(find(buildFaqGroups(true, nearbyOn))?.a).toBe(on);
-    }
+    expect(find(buildFaqGroups(false))?.a).toBe(WA_OFF);
+    expect(find(buildFaqGroups(true))?.a).toBe(on);
   });
-  it("keeps the other WhatsApp answers switching with it, and the house rules in every answer", () => {
-    expect(allFaqText(false, false)).toContain("WhatsApp opens at launch");
-    expect(allFaqText(false, true)).not.toContain("WhatsApp opens at launch");
-    for (const nearbyOn of [false, true])
-      for (const whatsappOn of [false, true]) {
-        const text = allFaqText(nearbyOn, whatsappOn);
-        expect(text).not.toMatch(/[–—!]/);
-        expect(text).not.toMatch(/[؀-ۿ]/);
-      }
+  it("keeps the house rules in every answer, with the number set or not", () => {
+    for (const whatsappOn of [false, true]) {
+      const text = allFaqText(whatsappOn);
+      expect(text).not.toMatch(LAUNCH);
+      expect(text).not.toMatch(/[–—!]/);
+      expect(text).not.toMatch(/[؀-ۿ]/);
+    }
   });
 });
 
@@ -115,7 +92,7 @@ describe("Polish 3: the free check result's order (decision 1)", () => {
     expect(i, s).toBeGreaterThan(-1);
     return i;
   };
-  it("puts the useful part first at every width: most important, found, day one with Start free, then the At launch cards, then the rest", () => {
+  it("puts the useful part first at every width: most important, found, day one with Start free, then the AI answer and the nearby check, then the rest", () => {
     const order = [
       'aria-labelledby="first-h"',
       'aria-labelledby="found-h"',
@@ -130,7 +107,7 @@ describe("Polish 3: the free check result's order (decision 1)", () => {
       "<SendReport",
     ].map(at);
     expect(order).toEqual([...order].sort((a, b) => a - b));
-    // Start free is in the day one block, ahead of the At launch cards.
+    // Start free is in the day one block, ahead of the AI answer and the nearby check.
     expect(at(">\n                  Start free\n")).toBeLessThan(at("<AiAnswer"));
   });
   it("keeps every analytics and Meta event with the same name and trigger", () => {

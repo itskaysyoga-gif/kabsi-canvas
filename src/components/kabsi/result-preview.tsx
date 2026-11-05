@@ -1,7 +1,6 @@
-// The Example free check result card and the "At launch" pill (Design 8, Web 4). Shared by Home and the free check's
+// The Example free check result card and the small Pill label (Design 8, Web 4). Shared by Home and the free check's
 // start page, in their own small file so the free check page does not load Home's module.
 import { cn } from "@/lib/utils";
-import { NEARBY_ON } from "@/lib/site";
 import { ExampleBadge } from "./ui";
 import { EXAMPLE_RESULT } from "./d8-data";
 
@@ -18,14 +17,7 @@ export function Pill({ children, className }: { children: string; className?: st
   );
 }
 
-/** `nearbyOn` is the one switch for the nearby check and the AI answer (Polish 3); the pill shows while it is false. */
-export function ResultPreview({
-  className,
-  nearbyOn = NEARBY_ON,
-}: {
-  className?: string;
-  nearbyOn?: boolean;
-}) {
+export function ResultPreview({ className }: { className?: string }) {
   const r = EXAMPLE_RESULT;
   return (
     <figure
@@ -56,9 +48,7 @@ export function ResultPreview({
         ))}
       </ul>
       <div className="mt-2 border-t border-line pt-3">
-        <p className="flex flex-wrap items-center gap-2 text-label font-bold text-text-2">
-          An answer customers might see {!nearbyOn && <Pill className="py-0">At launch</Pill>}
-        </p>
+        <p className="text-label font-bold text-text-2">An answer customers might see</p>
         <p className="mt-1 text-small text-text-1">{r.ai.line}</p>
       </div>
       <figcaption className="sr-only">

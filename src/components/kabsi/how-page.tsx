@@ -5,13 +5,7 @@
 // replaced by the demonstration.
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  KABSI_GROUP_ID,
-  MAIN_CTA,
-  TRIAL_LINE,
-  WHATSAPP_LAUNCH_LINE,
-  WHATSAPP_ON,
-} from "@/lib/site";
+import { KABSI_GROUP_ID, MAIN_CTA, TRIAL_LINE } from "@/lib/site";
 import { SiteLink } from "./site-link";
 import { PageHero } from "./page-hero";
 import { VideoPlayer } from "./d5-access";
@@ -34,10 +28,7 @@ export function HowItWorksPage() {
         marked
         under={TRIAL_LINE}
         visual={<HowVisual />}
-      >
-        {/* Polish 4 (30.25 item 3): the WhatsApp launch line shows once, under the hero. */}
-        {!WHATSAPP_ON && <p className="mt-2 text-small text-text-2">{WHATSAPP_LAUNCH_LINE}</p>}
-      </PageHero>
+      ></PageHero>
       {/* The product video goes here once a real one exists (docs/VIDEO-PLAN.md, section 9). Hidden until then. */}
       <div data-slot="product-video" hidden />
       <StepsLine id="how-steps-h" />

@@ -82,8 +82,8 @@ function Page() {
             assistant.
           </li>
           <li>
-            From launch, shows where your business appears on Google Maps around it and in AI
-            answers, next to the competitors you pick, using data from other companies (section 6).
+            Shows where your business appears on Google Maps around it and in AI answers, next to
+            the competitors you pick, using data from other companies (section 6).
           </li>
         </ul>
       </section>

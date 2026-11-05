@@ -9,7 +9,8 @@
 //                           automations, digest (the morning staff digest, 08:00 Beirut). KAPSO_API_KEY is read here and
 //                           never leaves Supabase secrets.
 // Staff alerts (9.9, R-64): the tick takes each new ops_events row once and sends the urgent ones to the staff phone.
-// Nothing is sent live unless WHATSAPP_LIVE is true, and until launch only to Kabsi's own test phones and the staff phone.
+// Nothing is sent live unless WHATSAPP_LIVE is true; until whatsapp_owners_on is true only to Kabsi's own test phones and
+// the staff phone. Fictional 555-01xx test numbers are never sent live (phone.ts, isFictionalPhone).
 import { admin, captureError, fail, isInternal, json, rateLimit, timingSafeEqual } from "../_shared/kabsi.ts";
 import { notify as notifyEmail } from "../_shared/notify.ts";
 import { kapsoWebhook } from "../_shared/whatsapp/webhook-route.ts";

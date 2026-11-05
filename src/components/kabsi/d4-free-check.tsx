@@ -1,10 +1,10 @@
 import { Check, CircleCheck, Search } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { NEARBY_ON, TRIAL_LINE } from "@/lib/site";
+import { TRIAL_LINE } from "@/lib/site";
 import { ScanBox } from "./scan-box";
 import { PageHero, popCls, stagger } from "./page-hero";
-import { Pill, ResultPreview } from "./result-preview";
+import { ResultPreview } from "./result-preview";
 import { CHECK_HERO } from "./hero-lines";
 
 /**
@@ -14,8 +14,8 @@ import { CHECK_HERO } from "./hero-lines";
  * public data (lane R decision 1; K-82: no review replies, holiday hours or post dates).
  */
 
-/** "What ChatGPT says" is the AI answer: its pill shows while NEARBY_ON is false (Polish 3, lane R decision 2). */
-const looksAt = (nearbyOn: boolean): { title: string; text: string; atLaunch?: boolean }[] => [
+/** "What ChatGPT says" is the AI answer (open from 5 Nov 2026, Go live 1). */
+const LOOKS_AT: { title: string; text: string }[] = [
   { title: "Your hours", text: "The opening hours Google shows customers." },
   { title: "Your reviews", text: "How many there are, and your rating." },
   { title: "Photos and links", text: "Photos, your website and your phone." },
@@ -23,7 +23,6 @@ const looksAt = (nearbyOn: boolean): { title: string; text: string; atLaunch?: b
   {
     title: "What ChatGPT says",
     text: "Whether its answer about you matches your Google profile.",
-    atLaunch: !nearbyOn,
   },
 ];
 
@@ -33,7 +32,7 @@ const GET_BACK = [
   "Kabsi asks for nothing before you see the result.",
 ] as const;
 
-export function CheckLooksAtVisual({ nearbyOn = NEARBY_ON }: { nearbyOn?: boolean } = {}) {
+export function CheckLooksAtVisual() {
   return (
     <figure className="relative rounded-panel border border-line bg-surface-1 p-5 shadow-float sm:p-6">
       <div className="flex items-center gap-3">
@@ -46,7 +45,7 @@ export function CheckLooksAtVisual({ nearbyOn = NEARBY_ON }: { nearbyOn?: boolea
         </div>
       </div>
       <ul className="mt-5 space-y-2.5">
-        {looksAt(nearbyOn).map((r, i) => (
+        {LOOKS_AT.map((r, i) => (
           <li
             key={r.title}
             className={cn("flex gap-3 rounded-inner bg-surface-2 px-3.5 py-3", popCls)}
@@ -54,10 +53,7 @@ export function CheckLooksAtVisual({ nearbyOn = NEARBY_ON }: { nearbyOn?: boolea
           >
             <CircleCheck className="mt-0.5 size-5 shrink-0 text-ok" aria-hidden />
             <div>
-              <p className="flex flex-wrap items-center gap-2 text-small font-bold">
-                {r.title}
-                {r.atLaunch && <Pill className="py-0">At launch</Pill>}
-              </p>
+              <p className="text-small font-bold">{r.title}</p>
               <p className="text-label text-text-2">{r.text}</p>
             </div>
           </li>

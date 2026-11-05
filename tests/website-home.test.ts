@@ -136,7 +136,8 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     expect(read("src/components/kabsi/hero-lines.ts")).toContain(
       "Your details kept right, every review answered and your profile kept fresh, without doing it yourself. Kabsi prepares the work and asks for your yes before anything goes live.",
     );
-    expect(home).toContain("{!WHATSAPP_ON && (");
+    // Go live 1 (30.28): the WhatsApp launch line is gone from the hero.
+    expect(home).not.toMatch(/WHATSAPP_LAUNCH_LINE|opens at launch/);
   });
   it("puts the Design 9 links in the header, Businesses as one link, and three footer groups (30.24)", () => {
     expect(NAV_LINKS.map((n) => n.label)).toEqual(["How it works", "Businesses", "Pricing"]);
@@ -327,10 +328,9 @@ describe("Home on Design 9 (Web 5 part B, master plan 30.24)", () => {
     expect(home).toContain("left !== null && left > 0 &&");
     expect(home + data).not.toMatch(/\b\d+ (of 25 )?places left/);
   });
-  it("uses lane R's hours buttons and marks what is not live as At launch", () => {
+  it("uses lane R's hours buttons and marks nothing At launch (Go live 1)", () => {
     expect(data).toContain('buttons: ["Use my hours", "Keep Google\'s"]');
-    // Polish 3: the two labels follow NEARBY_ON (tests/polish3.test.ts renders both states).
-    expect(data.match(/atLaunch: !nearbyOn/g)).toHaveLength(2);
+    expect(data).not.toMatch(/atLaunch|At launch/);
   });
   it("shows in the Example free check only what the free check can read (facts, K-82)", () => {
     const example = data.slice(data.indexOf("EXAMPLE_RESULT"));

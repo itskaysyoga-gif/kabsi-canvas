@@ -52,7 +52,7 @@ export const FOUNDING_HERO = {
 /** Partners' hero (approved). */
 export const PARTNERS_HERO = {
   title: "Earn 25% of every payment.",
-  line: "Recommend Kabsi to local business owners you know. You earn while the referred subscription stays paid. Kabsi Partners opens at launch.",
+  line: "Recommend Kabsi to local business owners you know. You earn while the referred subscription stays paid. Kabsi Partners opens when card payments open.",
 } as const;
 
 /** The Businesses hub's hero (Design 8). */

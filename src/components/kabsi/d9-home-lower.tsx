@@ -1,7 +1,7 @@
 // Home on Design 9 (Web 5 part B, master plan 30.24), below the first screen (Polish 4 part D: the hero and the steps
 // line are in d9-home.tsx, which loads this file after the page paints): the profile watch; a
 // photo to a Google post; reviews, holiday hours and the weekly report as one compact row; Where you show up (the
-// nearby map and one AI answer, At launch until NEARBY_ON); you stay in control; pick your business; the pricing
+// nearby map and one AI answer); you stay in control; pick your business; the pricing
 // preview; the founder with Founding 25; four questions; the closing free check. Every business is an Example. CSS
 // only: nothing moves on load.
 import {
@@ -18,7 +18,6 @@ import { cn } from "@/lib/utils";
 import { CONTACT_EMAIL, TRIAL_LINE } from "@/lib/site";
 import { useFoundingPlaces } from "@/lib/public-api";
 import { ExampleBadge, Faq, KabsiMark } from "./ui";
-import { Pill } from "./result-preview";
 import { FOUNDER, Img, PHOTOS, type Photo } from "./photos";
 import { Closing } from "./closing";
 import { SiteLink } from "./site-link";
@@ -254,7 +253,7 @@ function SupportRow() {
   );
 }
 
-/* ---------- Where you show up (one section, At launch until NEARBY_ON) ---------- */
+/* ---------- Where you show up (one section) ---------- */
 
 const BANDS: RankBand[] = ["top", "mid", "low", "none"];
 const BAND_SAMPLE: Record<RankBand, number> = { top: 1, mid: 4, low: 14, none: 25 };
@@ -265,9 +264,8 @@ function WhereYouShowUp() {
     <section aria-labelledby="show-h">
       <div className={cn("container-kb", sectionY)}>
         <div className="max-w-[40rem]">
-          <h2 id="show-h" className="flex flex-wrap items-center gap-x-4 gap-y-2 text-h2">
+          <h2 id="show-h" className="text-h2">
             {s.title}
-            {s.atLaunch && <Pill className="font-sans">At launch</Pill>}
           </h2>
           <p className="mt-3 text-body text-text-2">{s.line}</p>
         </div>

@@ -3,7 +3,7 @@
 //   - notify(): a message Kabsi starts (an alert, a digest, a staff alert). Queued in whatsapp_outbox, then sent now or
 //     later under policy.ts (6 a day, quiet hours, 15-minute batching, digests, the window and its templates).
 //   - flush(): the tick sends what is due; several waiting messages for one phone go as one digest.
-// Live sends go only to phones the database allows (Kabsi's test phones and the staff phone until launch); every other
+// Live sends go only to phones the database allows (Kabsi's test phones and the staff phone until whatsapp_owners_on; then every phone but the fictional test numbers); every other
 // send uses the mock sender, which records and calls nobody. Database calls and senders are deps, so tests use fakes.
 import type { Button } from "./channel.ts";
 import type { Sender } from "./deliver.ts";
