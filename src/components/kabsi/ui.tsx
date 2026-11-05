@@ -493,17 +493,21 @@ export function Segmented<T extends string>({
   onChange,
   label,
   className,
+  describedBy,
 }: {
-  options: { value: T; label: ReactNode }[];
+  options: { value: T; label: ReactNode; unavailable?: boolean }[];
   value: T;
   onChange: (v: T) => void;
   label: string;
   className?: string | undefined;
+  /** The id of the line that says why an option is unavailable. */
+  describedBy?: string | undefined;
 }) {
   return (
     <div
       role="radiogroup"
       aria-label={label}
+      aria-describedby={describedBy}
       className={cn(
         "inline-flex rounded-full border border-line-strong bg-surface-1 p-1",
         className,
@@ -515,10 +519,18 @@ export function Segmented<T extends string>({
           type="button"
           role="radio"
           aria-checked={value === o.value}
-          onClick={() => onChange(o.value)}
+          aria-disabled={o.unavailable ? true : undefined}
+          onClick={() => {
+            // An unavailable option stays reachable by keyboard and screen reader (the line beside it says why) and does nothing.
+            if (!o.unavailable) onChange(o.value);
+          }}
           className={cn(
             "press min-h-11 rounded-full px-4 text-small font-bold sm:px-5",
-            value === o.value ? "bg-text-1 text-surface-0" : "text-text-2 hover:text-text-1",
+            value === o.value
+              ? "bg-text-1 text-surface-0"
+              : o.unavailable
+                ? "text-text-3"
+                : "text-text-2 hover:text-text-1",
           )}
         >
           {o.label}

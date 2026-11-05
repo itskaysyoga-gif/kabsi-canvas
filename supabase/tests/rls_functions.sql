@@ -47,7 +47,7 @@ insert into tested values
   ('staff_payouts_approve(date)'), ('staff_payout_sent(uuid,text)'), ('staff_payout_run(date)'),
   ('onboarding_status(uuid)'), ('confirm_business(uuid)'), ('staff_founding_checklist(uuid)'), ('staff_founding_check(uuid,text,boolean,text)'), ('claim_free_check(uuid,text)'),
   ('save_ai_prompt(uuid,text,uuid)'), ('remove_ai_prompt(uuid)'),
-  ('set_routine_channel(text)'), ('my_setup_link_emailed(uuid)'),
+  ('set_routine_channel(text)'), ('set_routine_delivery(uuid,text)'), ('my_setup_link_emailed(uuid)'),
   ('staff_set_google_writes(boolean,text)'), ('staff_founding_matches(uuid)'), ('staff_operations()'),
   ('staff_evidence_add(uuid,text,date,text,text,text)'), ('staff_evidence_delete(uuid)'), ('staff_activation()'), ('staff_validation()'),
   ('staff_today()');
@@ -177,6 +177,8 @@ select throws_ok($$ select public.staff_founding_check('00000000-0000-4000-8000-
 select lives_ok($$ select public.set_routine_channel('email') $$, 'set_routine_channel touches only the caller''s own choice');
 select is((select channel from public.routine_channels where user_id = '00000000-0000-4000-8000-0000000000a1'), null, 'the stranger cannot see the victim''s choice');
 select is(public.my_setup_link_emailed('00000000-0000-4000-8000-0000000000c1'), false, 'my_setup_link_emailed says nothing about a non-member''s business');
+-- App 6: the one-call routine delivery refuses a non-member of the business.
+select throws_ok($$ select public.set_routine_delivery('00000000-0000-4000-8000-0000000000c1', 'email') $$, '42501', null, 'set_routine_delivery refuses a non-member');
 select throws_ok($$ select public.staff_partner_decide('00000000-0000-4000-8000-0000000000c1', 'approved') $$, '42501', null, 'staff_partner_decide refuses a non-staff user');
 select throws_ok($$ select public.staff_partner_payout_details('00000000-0000-4000-8000-0000000000c1', 'usdt', 'TXYZ123456') $$, '42501', null, 'staff_partner_payout_details refuses a non-staff user');
 select throws_ok($$ select public.staff_partners_overview() $$, '42501', null, 'staff_partners_overview refuses a non-staff user');
