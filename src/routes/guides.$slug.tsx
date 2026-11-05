@@ -38,7 +38,7 @@ export const Route = createFileRoute("/guides/$slug")({
           "@type": "Article",
           headline: g.title,
           description: g.description,
-          image: [`${SITE_URL}/og/${image}.png`],
+          image: [`${SITE_URL}/og/${image}.jpg`],
           datePublished: g.publishAt.slice(0, 10),
           dateModified: g.updated,
           mainEntityOfPage: url,
