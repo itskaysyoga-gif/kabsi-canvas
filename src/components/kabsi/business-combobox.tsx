@@ -7,6 +7,8 @@
 // The pattern is the WAI-ARIA 1.2 combobox with a listbox popup (list autocomplete, focus stays in the input).
 import { AlertTriangle, MapPin } from "lucide-react";
 import {
+  Suspense,
+  lazy,
   useCallback,
   useEffect,
   useId,
@@ -15,14 +17,13 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
-import { Turnstile } from "@/components/turnstile";
-import {
-  getSuggestPass,
-  newSessionToken,
-  suggestBusinesses,
-  type FoundBusiness,
-} from "@/lib/profile-check";
-import { readSuggestPass, saveSuggestPass } from "@/lib/suggest-pass";
+import { newSessionToken, suggestBusinesses, type FoundBusiness } from "@/lib/profile-check";
+
+// Scan 3: the pass's code and the bot check's widget load on the box's first touch, not with the page.
+const passStore = () => import("@/lib/suggest-pass");
+const Turnstile = lazy(() =>
+  import("@/components/turnstile").then((m) => ({ default: m.Turnstile })),
+);
 import { cn } from "@/lib/utils";
 
 const MIN_CHARS = 3;
@@ -126,24 +127,27 @@ export function BusinessCombobox({
   // (another box, an earlier page) is used as it is. If the pass cannot be had, the first suggestion asks as before.
   const warm = useCallback(() => {
     if (!available || warming.current || warmed.current || asking.current) return;
-    pass.current ??= readSuggestPass();
-    if (pass.current) return;
     warmed.current = true;
-    setNeedToken(true);
-    const w = takeToken();
     warming.current = (async () => {
+      const s = await passStore();
+      pass.current ??= s.readSuggestPass();
+      if (pass.current) return;
+      setNeedToken(true);
+      const w = takeToken();
       const t = await w.promise;
-      const p = t ? await getSuggestPass(t) : undefined;
+      const p = t ? await s.getSuggestPass(t) : undefined;
       if (p) {
         pass.current = p;
-        saveSuggestPass(p);
+        s.saveSuggestPass(p);
         setNeedToken(false);
         // A suggestion call still waiting for a token goes on with the pass instead.
         cancelAsk.current?.();
       }
-    })().finally(() => {
-      warming.current = null;
-    });
+    })()
+      .catch(() => undefined)
+      .finally(() => {
+        warming.current = null;
+      });
   }, [available, takeToken]);
 
   useEffect(() => {
@@ -166,7 +170,9 @@ export function BusinessCombobox({
         if (warming.current)
           await Promise.race([warming.current, new Promise((r) => window.setTimeout(r, 3_000))]);
         if (dead) return;
-        pass.current ??= readSuggestPass();
+        const store = await passStore().catch(() => null);
+        if (dead) return;
+        pass.current ??= store?.readSuggestPass();
         for (let attempt = 0; attempt < 2 && !dead; attempt++) {
           let turnstile: string | undefined;
           if (!pass.current) {
@@ -181,7 +187,7 @@ export function BusinessCombobox({
             cancelWait = undefined;
             if (dead) return;
             // No token, but the warm-up got the pass meanwhile (it took the token first): carry on with the pass.
-            if (!turnstile) pass.current ??= readSuggestPass();
+            if (!turnstile) pass.current ??= store?.readSuggestPass();
             if (!turnstile && !pass.current) {
               setAvailable(false);
               setNeedToken(false);
@@ -202,13 +208,13 @@ export function BusinessCombobox({
           }
           if (r.pass) {
             pass.current = r.pass;
-            saveSuggestPass(r.pass);
+            store?.saveSuggestPass(r.pass);
             setNeedToken(false);
           }
           if (dead) return;
           if (r.challengeFailed && sentPass) {
             pass.current = undefined;
-            saveSuggestPass(undefined);
+            store?.saveSuggestPass(undefined);
             continue;
           }
           if (!r.available) {
@@ -411,7 +417,9 @@ export function BusinessCombobox({
 
       {needToken && (
         <div className="mt-2">
-          <Turnstile key={round} onToken={onToken} />
+          <Suspense fallback={null}>
+            <Turnstile key={round} onToken={onToken} />
+          </Suspense>
         </div>
       )}
 

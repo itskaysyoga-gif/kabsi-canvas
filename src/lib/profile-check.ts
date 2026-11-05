@@ -163,26 +163,6 @@ export async function suggestBusinesses(
   }
 }
 
-/* ---------- Scan 3 (master plan 30.34 item 2): one Turnstile pass per search session ---------- */
-
-/** One Turnstile token for the pass, before the first suggestion (and the function is warm by then). */
-export async function getSuggestPass(turnstile: string): Promise<string | undefined> {
-  try {
-    const res = await fetch(`${supabaseUrl}/functions/v1/profile-snapshot`, {
-      method: "POST",
-      headers: { "content-type": "application/json", ...anonHeaders },
-      body: JSON.stringify({ action: "pass", turnstile }),
-      // A pass that does not come within 5 seconds is given up: the first suggestion then asks as before.
-      signal: AbortSignal.timeout(5_000),
-    });
-    if (!res.ok) return undefined;
-    const j = (await res.json()) as { pass?: unknown };
-    return typeof j.pass === "string" ? j.pass : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
 export async function emailCheck(o: {
   placeId: string;
   email: string;
