@@ -68,3 +68,36 @@ its 201,000 searches need not be for a place to sit. That is a reading of the wo
 - UAE rules on serving food in Ramadan. Not read today.
 - "Coffee stand" and "Restaurant" as additional categories: shown by live profiles but they are not a fit for most cafes, so they are
   not offered.
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field | Line on the page | Row(s) above | Type |
+| --- | --- | --- | --- |
+| Answer | "On a cafe Google Business Profile, the opening time comes first. Kabsi checks it daily, turns fresh bakes into posts and drafts every reply." | 1, 8, 9; `knowledge/facts/04-product.md` (the daily profile check, a reply for every new review) | A, K |
+| Profile card "Opening time to the minute" | "Weekly hours say when the doors open; special hours cover days that differ." | 2 | G |
+| Profile card "Drinks, with prices" | "Google can show menu items; a real coffee shop lists drinks with prices." | 4 | G, P |
+| Profile card "What the room offers" | "A coffee shop profile can show Free Wi-Fi and Good for working on laptop." | 6 | P |
+| Profile card "The order link" | "When your order page changes, tell Kabsi. The link follows once you say yes." | 12 | K |
+| Review card "The coffee itself" | "The reply names the drink back and adds nothing you did not say." | 18 | K |
+| Review card "The queue at eight" | "Sorry for the wait, once, with no promise of a shorter one." | 19 | K |
+| Review card "Feeling unwell after a meal" | "A health review gets no draft, a short checklist, and a holding reply only if asked." | 21 (no draft); `knowledge/facts/13-faq.md` "What happens with hard reviews?" (checklist, holding reply only if asked) | K |
+| Categories line | "Google shows all three on real profiles. Choose the first by what most of your sales are." | 16, 17 | C, A |
+| Holiday card "Ramadan, UAE" | "Private sector hours drop by two a day. Kabsi sets yours once you say yes." | 27, 28 | T, K |
+| Holiday card "England and Wales bank holidays" | "Early May bank holiday is 3 May 2027, the spring one 31 May." | 29 | T |
+| Holiday card "Eid al-Adha, UAE" | "Set by the moon, from 10 Dhu al-Hijjah. Kabsi asks five days ahead." | 32 | T, K |
+| Photo card "A drink by the window" | "One cup in daylight, no filter. Google asks for photos in focus and well lit." | 25 (the rest is advice) | G, A |
+| Photo card "The counter and the cabinet" | "What is on show at ten answers 'is there food' before anyone asks." | 26 | A |
+| Photo card "Post ideas" | "A seasonal drink, a new blend, wifi hours, bank holiday opening." | 8, 24 | K, A |
+| FAQ "Where should the review QR code go in a cafe?" | "By the coffee machine, at the till or on a cup sleeve, as a QR code or a link. Ask everyone the same way." | 33, 34 | G, K |
+| FAQ "A customer says they were ill after eating here. What does Kabsi do?" | "It comes to you with no draft and a short checklist. Kabsi writes a neutral holding reply only if you ask." | 37 (no draft); `knowledge/facts/13-faq.md` "What happens with hard reviews?" | K |
+
+Jobs, the watch line and the AI answer are unchanged. Rows 21 and 37 still say "a route to a person at Kabsi"; the page now follows facts 13 (a short checklist, a holding reply only if asked), which replaced that route.
+
+Removed from the page: photos of the menu and the best dishes (row 5); the laptop rule post (row 7) and the review theme "Laptops and the last free table" (row 20); the task "Post after the morning rush" as a card (rows 8, 9; the story keeps it); the Order online link on real profiles and its country and provider rule (rows 10, 11); the photo tip "The seats and the sockets" (row 26); the posts list as four lines (the "Post ideas" card keeps them, without "its price and the week it ends"); "so the old opening time never shows" (row 28); "Tell Google if the doors open at the usual time" (row 29); UAE New Year's Day and UK Christmas and Boxing Day (rows 30, 31); Arafah Day and Eid's 11 and 12 Dhu al-Hijjah (row 32); "a cafe or a coffee counter, and add the others only for something you really run" (row 17); "Google lets you ask customers to scan a QR code or open a link" as its own sentence (row 33).
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- Profile card "The order link": "Google can show an order link. Check it each time you change providers." Rows 10 and 11 (G14); replaces "the link follows once you say yes", because Kabsi does not edit the booking or order link on Google yet (knowledge/facts 2.1).
+- Answer: "... and prepares review replies." (was "drafts every reply": a review about illness gets no draft, facts 13).

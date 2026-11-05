@@ -3,12 +3,13 @@
 // content file (src/content/industries), so no two pages read the same (tests/website-industry.test.ts). Every business,
 // person and number is an Example. Yellow: the key phrase of each light headline on the bar (Highlight), the label pills,
 // the numbered markers and the main action; on the charcoal band the headline's second sentence is yellow text.
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { ArrowRight, Check, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MAIN_CTA } from "@/lib/site";
-import { industriesAtoZ, type Industry } from "@/content/industries";
-import { GUIDE_TITLES } from "@/lib/guide-titles";
+import { industriesAtoZ, type Card, type Industry } from "@/content/industries";
+import { GuideImage, TopicPill } from "@/components/marketing/guide-photo";
+import { guideLook } from "@/content/guides/look";
 import { ExampleBadge, Faq, KabsiMark } from "./ui";
 import { Img } from "./photos";
 import { ScanBox } from "./scan-box";
@@ -56,24 +57,14 @@ function Headline({
 export function IndustryPage({
   industry: i,
   related,
-  guides: published = [],
+  guides = [],
 }: {
   industry: Industry;
   related: Industry[];
-  /** Guides 3: the public guides that name this page, decided on the server (links both ways). */
-  guides?: { slug: string; title: string }[];
+  /** Industries 3: three public guides chosen by the page's jobs, decided on the server (getIndustryGuides). */
+  guides?: ReadGuide[];
 }) {
   const p = i.page;
-  const guides = [
-    ...new Map(
-      [
-        ...(i.guides ?? [])
-          .filter((s) => GUIDE_TITLES[s])
-          .map((s) => ({ slug: s, title: GUIDE_TITLES[s]! })),
-        ...published,
-      ].map((g) => [g.slug, g]),
-    ).values(),
-  ].slice(0, 2);
   return (
     <>
       <TradeHero industry={i} />
@@ -284,30 +275,22 @@ function ShowUp({ industry: i }: { industry: Industry }) {
   );
 }
 
-/** The long reading blocks (30.29 item 2, B-014: exempt from the section rule): searches, then the owner's guide. */
+/**
+ * Industries 3 (master plan 30.33 item 2): no reading block on a public page. Each group is a headline, at most one line
+ * of up to 25 words, then chips or cards with a short title and one line of at most 15 words
+ * (tests/industries3.test.ts and the public e2e suite count them).
+ */
 function Reading({ industry: i }: { industry: Industry }) {
-  const searchText = i.page.searchText ?? i.d8?.searchText;
   return (
     <>
       <section aria-labelledby="search-h" className="border-t border-line bg-surface-1">
-        <div className={cn("container-kb grid gap-10 lg:grid-cols-2 lg:gap-16", sectionY)}>
+        <div className={cn("container-kb grid gap-8 lg:grid-cols-2 lg:gap-16", sectionY)}>
           <div>
             <Headline id="search-h" text="What people search for" mark="search for" />
-            <p className="measure mt-4 text-body sm:text-lead">{i.page.answer}</p>
-            {searchText && <p className="measure mt-4 text-body text-text-2">{searchText}</p>}
+            <p className="mt-4 max-w-[34rem] text-body sm:text-lead">{i.page.answer}</p>
           </div>
           <div>
-            <ul className="flex flex-wrap gap-2" aria-label="Searches like these">
-              {i.searches.map((s) => (
-                <li
-                  key={s}
-                  className="inline-flex items-center gap-2 rounded-full border border-line-strong bg-surface-0 px-4 py-2 text-small font-semibold"
-                >
-                  <Search className="size-4 text-text-3" aria-hidden />
-                  {s}
-                </li>
-              ))}
-            </ul>
+            <Chips items={i.searches} label="Searches like these" icon="search" />
             <p className="mt-4 text-small text-text-2">
               Searches like these. On Pro, Kabsi shows the words people searched on Google to find
               you.
@@ -320,21 +303,39 @@ function Reading({ industry: i }: { industry: Industry }) {
         </div>
       </section>
       <section aria-labelledby="guide-h" className="border-t border-line">
-        <div className={cn("container-kb", sectionY)}>
-          <Headline
-            id="guide-h"
-            text={`Your Google profile, as a ${i.name} owner`}
-            mark="Your Google profile"
-          />
-          <div className="mt-8 grid gap-10 lg:grid-cols-2 lg:gap-16">
-            {guideBlocks(i).map((b) => (
-              <article key={b.title}>
-                <h3 className="text-h3">{b.title}</h3>
-                <div className="measure mt-4 space-y-4 text-body text-text-2">{b.body}</div>
-              </article>
-            ))}
+        <div className={cn("container-kb space-y-12 sm:space-y-16", sectionY)}>
+          <div>
+            <Headline
+              id="guide-h"
+              text={`Your Google profile, as a ${i.name} owner`}
+              mark="Your Google profile"
+            />
+            <CardGrid items={i.profile} className="mt-8" />
           </div>
-          <p className="mt-8 flex flex-wrap gap-x-6 text-body">
+          {i.reviews && (
+            <CardGroup id="treviews-h" title="What customers write about" items={i.reviews} />
+          )}
+          {i.categories && (
+            <div>
+              <h3 id="tcats-h" className="text-h3">
+                Google categories that fit
+              </h3>
+              <Chips
+                items={[i.categories.primary, ...i.categories.more]}
+                label="Google categories"
+                first="First category"
+                className="mt-4"
+              />
+              <p className="mt-4 max-w-[40rem] text-body text-text-2">{i.categories.line}</p>
+            </div>
+          )}
+          {i.holidays && (
+            <CardGroup id="tdays-h" title="Holidays and busy dates" items={i.holidays} />
+          )}
+          {i.photoCards && (
+            <CardGroup id="tphotos-h" title="Photos and posts" items={i.photoCards} />
+          )}
+          <p className="flex flex-wrap gap-x-6 text-body">
             <SiteLink to="/how-it-works" className={linkCls}>
               See how it works
               <Arrow />
@@ -350,146 +351,142 @@ function Reading({ industry: i }: { industry: Industry }) {
   );
 }
 
-/** The owner's guide: the trade's two written sections, or its Content 1 sections (each line has its claim sheet row). */
-function guideBlocks(i: Industry): { title: string; body: ReactNode }[] {
-  const categories = i.categories && {
-    title: "Google categories that fit",
-    body: (
-      <>
-        <p>
-          <span className="font-bold text-text-1">First category:</span> {i.categories.primary}
-        </p>
-        {i.categories.more.length > 0 && (
-          <p>
-            <span className="font-bold text-text-1">Also:</span> {i.categories.more.join(", ")}
-          </p>
-        )}
-        <p>{i.categories.note}</p>
-      </>
-    ),
-  };
-  const guide = i.page.guide ?? i.d8?.guide;
-  if (guide)
-    return [
-      ...guide.map((g) => ({
-        title: g.title,
-        body: g.paras.map((p) => <p key={p.slice(0, 32)}>{p}</p>),
-      })),
-      // Industries 2's new trades also show their Google categories.
-      ...(i.page.guide && categories ? [categories] : []),
-    ];
-  const blocks: { title: string; body: ReactNode }[] = [];
-  if (i.tasks?.length)
-    blocks.push({
-      title: `The Google work of a ${i.name}`,
-      body: (
-        <ul className="space-y-4">
-          {i.tasks.map((t) => (
-            <li key={t.title}>
-              <h4 className="text-title text-text-1">{t.title}</h4>
-              <p className="mt-1">{t.text}</p>
-            </li>
-          ))}
-        </ul>
-      ),
-    });
-  if (i.reviewThemes)
-    blocks.push({
-      title: "What customers write about",
-      body: (
-        <ul className="space-y-4">
-          {i.reviewThemes.map((r) => (
-            <li key={r.theme}>
-              <h4 className="text-title text-text-1">{r.theme}</h4>
-              <p className="mt-1">{r.text}</p>
-            </li>
-          ))}
-        </ul>
-      ),
-    });
-  if (categories) blocks.push(categories);
-  if (i.holidays)
-    blocks.push({
-      title: "Holidays and busy dates",
-      body: (
-        <dl className="space-y-4">
-          {i.holidays.map((h) => (
-            <div key={h.when}>
-              <dt className="text-title text-text-1">{h.when}</dt>
-              <dd className="mt-1">{h.text}</dd>
-            </div>
-          ))}
-        </dl>
-      ),
-    });
-  if (i.photoTips || i.posts)
-    blocks.push({
-      title: "Photos and posts",
-      body: (
-        <>
-          {i.photoTips && (
-            <ul className="space-y-4">
-              {i.photoTips.map((p) => (
-                <li key={p.title}>
-                  <h4 className="text-title text-text-1">{p.title}</h4>
-                  <p className="mt-1">{p.text}</p>
-                </li>
-              ))}
-            </ul>
+/** Chips: the searches (with a search icon) or the categories (the first one marked). */
+function Chips({
+  items,
+  label,
+  icon,
+  first,
+  className,
+}: {
+  items: string[];
+  label: string;
+  icon?: "search";
+  first?: string;
+  className?: string;
+}) {
+  return (
+    <ul className={cn("flex flex-wrap gap-2", className)} aria-label={label}>
+      {items.map((s, n) => (
+        <li
+          key={s}
+          className={cn(
+            "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-small font-semibold",
+            first && n === 0 ? "border-text-1 bg-surface-0" : "border-line-strong bg-surface-0",
           )}
-          {i.posts && (
-            <>
-              <h4 className="text-title text-text-1">Post ideas</h4>
-              <ul className="list-disc space-y-1 ps-5">
-                {i.posts.map((p) => (
-                  <li key={p}>{p}</li>
-                ))}
-              </ul>
-            </>
-          )}
-        </>
-      ),
-    });
-  return blocks;
+        >
+          {icon === "search" ? (
+            <Search className="size-4 text-text-3" aria-hidden />
+          ) : first && n === 0 ? (
+            <Check className="size-4 text-ok" aria-hidden />
+          ) : null}
+          {s}
+          {first && n === 0 && <span className="sr-only">({first.toLowerCase()})</span>}
+        </li>
+      ))}
+    </ul>
+  );
 }
 
-/** Two related guides and two related trades. */
-function ReadNext({
-  guides,
-  related,
-}: {
-  guides: { slug: string; title: string }[];
-  related: Industry[];
-}) {
+/**
+ * The no-lone-card rule (30.33 item 2): a count that fills its rows gets the columns that divide it, and a count that
+ * does not (a filtered /for list) centres its last row, because the rows wrap and are centred.
+ */
+function gridCols(n: number): string {
+  if (n % 4 === 0) return "sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]";
+  if (n % 3 === 0) return "md:w-[calc((100%-2rem)/3)]";
+  return "sm:w-[calc((100%-1rem)/2)]";
+}
+
+function CardGrid({ items, className }: { items: Card[]; className?: string }) {
+  const w = gridCols(items.length);
+  return (
+    <ul className={cn("flex flex-wrap justify-center gap-4", className)} data-cards={items.length}>
+      {items.map((c) => (
+        <li
+          key={c.title}
+          className={cn(
+            "w-full rounded-card border border-line bg-surface-0 p-4 shadow-rest sm:p-5",
+            w,
+          )}
+        >
+          <h4 className="text-title">{c.title}</h4>
+          <p className="mt-1 text-body text-text-2" data-line>
+            {c.text}
+          </p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function CardGroup({ id, title, items }: { id: string; title: string; items: Card[] }) {
+  return (
+    <div>
+      <h3 id={id} className="text-h3">
+        {title}
+      </h3>
+      <CardGrid items={items} className="mt-4" />
+    </div>
+  );
+}
+
+export type ReadGuide = { slug: string; title: string; topic: string };
+
+/**
+ * Read next (30.33 item 2): three guides as photo cards (the guide's photo and group, Style 1), then six
+ * related businesses as photo cards, 3 by 2 (2 by 3 on a phone), and "See every business".
+ */
+function ReadNext({ guides, related }: { guides: ReadGuide[]; related: Industry[] }) {
   if (!guides.length && !related.length) return null;
   return (
     <section aria-labelledby="tnext-h" className="border-t border-line bg-surface-1">
-      <div className={cn("container-kb grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16", sectionY)}>
-        <div>
-          <Headline id="tnext-h" text="Read next." mark="next." />
-          {guides.length > 0 && (
-            <ul className="mt-6 divide-y divide-line border-y border-line">
+      <div className={cn("container-kb space-y-12 sm:space-y-16", sectionY)}>
+        <Headline id="tnext-h" text="Read next." mark="next." />
+        {guides.length > 0 && (
+          <div>
+            <h3 className="text-h3">Guides for you</h3>
+            <ul className="mt-4 flex flex-wrap justify-center gap-4" data-cards={guides.length}>
               {guides.map((g) => (
-                <li key={g.slug}>
+                <li key={g.slug} className={cn("w-full", gridCols(guides.length))}>
                   <SiteLink
                     to={`/guides/${g.slug}`}
-                    className="press flex min-h-14 items-center justify-between gap-3 py-3 text-body font-semibold hover:underline"
+                    className="press group flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface-0 shadow-rest"
                   >
-                    {g.title}
-                    <Arrow />
+                    <GuideImage
+                      slug={g.slug}
+                      ratio="3/2"
+                      sizes="(min-width: 768px) 24rem, calc(100vw - 2rem)"
+                    />
+                    <span className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
+                      <TopicPill>{guideLook(g.slug).group}</TopicPill>
+                      <span className="flex items-start justify-between gap-3 text-body font-bold">
+                        {g.title}
+                        <Arrow />
+                      </span>
+                    </span>
                   </SiteLink>
                 </li>
               ))}
             </ul>
-          )}
-        </div>
+          </div>
+        )}
         {related.length > 0 && (
           <div>
-            <h3 className="text-title">Businesses like yours</h3>
-            <ul className="mt-4 grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+              <h3 className="text-h3">Businesses like yours</h3>
+              <SiteLink to="/for" className={cn(linkCls, "text-body")}>
+                See every business
+                <Arrow />
+              </SiteLink>
+            </div>
+            <ul
+              className="mt-4 flex flex-wrap justify-center gap-3 sm:gap-4"
+              data-cards={related.length}
+            >
               {related.map((r) => (
-                <li key={r.slug}>
-                  <TradeCard industry={r} sizes="(min-width: 1024px) 18rem, 45vw" />
+                <li key={r.slug} className={relatedCols(related.length)}>
+                  <TradeCard industry={r} sizes="(min-width: 768px) 24rem, 45vw" />
                 </li>
               ))}
             </ul>
@@ -498,6 +495,13 @@ function ReadNext({
       </div>
     </section>
   );
+}
+
+/** Six related businesses: 2 by 3 on a phone, 3 by 2 from 768 px (a count that does not divide centres its last row). */
+function relatedCols(n: number) {
+  return n % 3 === 0
+    ? "w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1rem)/2)] md:w-[calc((100%-2rem)/3)]"
+    : "w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1rem)/2)]";
 }
 
 /** One trade as a photo card: the wide photo, its name and one line. */
@@ -606,17 +610,16 @@ export function ForIndex() {
           <p className="sr-only" aria-live="polite">
             {q ? `${shown.length} of ${all.length} kinds of business shown.` : ""}
           </p>
-          <ul
-            id="for-list"
-            className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4"
-          >
+          {/* Industries 3: 4 columns from 1024 px, 2 below (no 3 column step); a filtered count that does not fill
+              its last row centres it (the no-lone-card rule, 30.33 item 2). */}
+          <ul id="for-list" className="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4">
             {all.map((i, n) => (
-              <li key={i.slug} hidden={!shown.includes(i)}>
-                <TradeCard
-                  industry={i}
-                  sizes="(min-width: 1024px) 18rem, (min-width: 768px) 30vw, 45vw"
-                  priority={n < 2}
-                />
+              <li
+                key={i.slug}
+                hidden={!shown.includes(i)}
+                className="w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]"
+              >
+                <TradeCard industry={i} sizes="(min-width: 1024px) 18rem, 45vw" priority={n < 2} />
               </li>
             ))}
           </ul>

@@ -28,10 +28,30 @@ export const veterinaryClinic: Industry = {
     "puppy vaccinations",
     "veterinary clinic",
   ],
+  // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
+  // docs/claims/veterinary-clinic.md, whose "Industries 3" section maps it to its row.
+  profile: [
+    {
+      title: "Hours and the phone first",
+      text: "Exact hours. Kabsi asks before each public holiday and sets special hours on your yes.",
+    },
+    {
+      title: "Out of hours calls",
+      text: "Sent to another clinic? Say so in your description and posts, not the category.",
+    },
+    {
+      title: "No treatment in a reply",
+      text: "Drafts thank the owner and invite contact through your profile, never the pet's treatment.",
+    },
+    {
+      title: "A pet hurt, or a death",
+      text: "No draft, a short checklist, and a neutral holding reply only if you ask.",
+    },
+  ],
   categories: {
     primary: "Veterinarian",
     more: ["Animal hospital", "Emergency veterinarian service"],
-    note: "Add the emergency category only if you really take emergencies in those hours. Read the names in your own profile, because they can differ by country.",
+    line: "Add the emergency category only if you really take emergencies in those hours. Names can differ by country.",
   },
   page: {
     query: "veterinarian Google Business Profile",
@@ -43,7 +63,7 @@ export const veterinaryClinic: Industry = {
     line: "Kabsi looks after your veterinarian Google Business Profile: hours and phone checked daily, and careful replies you approve.",
     card: "Hours and phone checked daily, careful replies.",
     answer:
-      "A worried pet owner checks a veterinarian Google Business Profile for the phone number and whether you are open now. Kabsi checks your hours and phone every day, drafts careful replies that share nothing about a pet's care, shows you a hard review as one that needs more care, and asks about holiday hours in time. You approve every word.",
+      "A worried owner checks a veterinarian Google Business Profile for your phone and hours. Kabsi checks both daily and drafts careful replies for your yes.",
     watch: {
       business: "Greenway Vets, Bristol",
       line: "A worried owner trusts the hours Google shows. Kabsi checks them against yours every day.",
@@ -77,24 +97,13 @@ export const veterinaryClinic: Industry = {
       answer: "Greenway Vets in Bishopston is open on Saturdays from 9 am to 1 pm.",
       sources: ["Greenway Vets' Google profile", "Greenway Vets' website"],
     },
-    related: ["pet-grooming", "dental-clinic"],
-    searchText:
-      "Owners search when something is wrong, an emergency vet or a vet open now, and when something is due, vaccinations or a first check for a puppy. Hours and the phone number matter most.",
-    guide: [
-      {
-        title: "Hours, emergencies and the phone",
-        paras: [
-          "A pet owner in a hurry reads two things: are you open, and what number do they call. Keep your weekly hours exact and set special hours for holidays, so Google shows the right answer. Kabsi asks before each public holiday what you will do and sets special hours once you say yes.",
-          "If you send out of hours calls to another clinic, say so in your description and posts rather than in the category. Kabsi compares your phone, hours and description on Google with what you confirmed, every day.",
-        ],
-      },
-      {
-        title: "Replies that protect owners and pets",
-        paras: [
-          "A public reply should not discuss a pet's diagnosis or treatment. Kabsi drafts replies that thank the owner and invite them to get in touch through the details on your profile, and you can add anything it should never say in About your business.",
-          "A review about a pet that was hurt or died comes to you marked as needing a little more care, with a short checklist and no draft. Kabsi writes a short, neutral holding reply only if you ask, and nothing is published until you approve it.",
-        ],
-      },
+    related: [
+      "pet-grooming",
+      "dental-clinic",
+      "physiotherapy",
+      "medical-and-aesthetic-clinic",
+      "optician",
+      "florist",
     ],
   },
   faqs: [
@@ -112,7 +121,7 @@ export const veterinaryClinic: Industry = {
     },
     {
       q: "What happens with a very hard review?",
-      a: "It comes to you marked as needing a little more care, with a short checklist and no draft. You write the reply, ask Kabsi for a short, neutral holding reply, or skip it.",
+      a: "No draft, just a short checklist. You write the reply, ask Kabsi for a neutral holding reply, or skip it.",
     },
     {
       q: "Can our practice manager approve replies?",
@@ -120,7 +129,8 @@ export const veterinaryClinic: Industry = {
     },
   ],
   guides: [
-    "how-to-respond-to-negative-google-reviews",
     "keep-your-hours-and-details-the-same-everywhere",
+    "how-to-respond-to-negative-google-reviews",
+    "someone-changed-my-hours-on-google",
   ],
 };

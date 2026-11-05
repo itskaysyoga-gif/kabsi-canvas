@@ -52,3 +52,29 @@ Example), with Mia, Halo Lash Room and Arch Studio, all invented.
 ## Left out
 
 * None: both category names were shown by live profiles on 5 Nov 2026.
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field           | Line on the page                                                                                                                                                          | Row(s) above                                                      | Type |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ---- |
+| page.answer     | "For an eyelash salon Google Business Profile, Kabsi turns fresh sets into posts, checks your hours daily and drafts every reply, all for your yes."                      | 10                                                                | K    |
+| profile         | "Close photos clients trust": "In focus, well lit, no heavy filters. Kabsi checks each photo first."                                                                      | 20, 21                                                            | G, K |
+| profile         | "The work, not the client": "A close crop of the lashes is enough; ask the client first if you like."                                                                     | 22, 28                                                            | A, K |
+| profile         | "Hours checked every day": "Kabsi compares Google's hours with yours daily and asks before each bank holiday."                                                            | 25                                                                | K    |
+| profile         | "A review about a reaction": "No draft, a short checklist, and a neutral holding reply only if you ask."                                                                  | 27; `knowledge/facts/13-faq.md` "What happens with hard reviews?" | K    |
+| categories.line | "Google's category names can differ by country, so read the list in your own profile. Add a second category only for work you really do." (the old note, unchanged)       | 5                                                                 | G, A |
+| page.jobs       | "Fresh sets, as posts": "A close photo and a line become a post. Kabsi checks it is sharp."                                                                               | 14                                                                | K    |
+| faqs            | "What does Kabsi do with a review about irritation?": "It comes to you with no draft and a short checklist. Kabsi writes a short, neutral holding reply only if you ask." | 29; `knowledge/facts/13-faq.md` "What happens with hard reviews?" | K    |
+| faqs            | Question "Does Kabsi work with my booking system?" (was "booking app": "app" is on the never-say list); answer unchanged                                                  | 31                                                                | K    |
+
+Removed from the page: the search text (row 18), the two long guide sections (rows 19, 23, 24 and 26: close photos
+"judged from a few centimetres away", the post that names the set and the artist, evening hours for clients who work, the
+artist thanked by name, which the jobs still say), "judged on close photos and reviews" from the answer (row 9), and "a
+safety matter" and "marked as needing a little more care" from the irritation answer. Rows 19 and 24 in Problems are no
+longer on the page.
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- Answer: "prepares review replies" replaces "drafts every reply", because a high risk review gets no draft (facts 13, "What happens with hard reviews?").

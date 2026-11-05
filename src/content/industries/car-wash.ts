@@ -28,10 +28,30 @@ export const carWash: Industry = {
     "interior car cleaning",
     "mobile car wash",
   ],
+  // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of docs/claims/car-wash.md,
+  // whose "Industries 3" section maps it to its row.
+  profile: [
+    {
+      title: "Hours and open status, right",
+      text: "Kabsi compares them with what you confirmed every day, and asks before public holidays.",
+    },
+    {
+      title: "If you also come to customers",
+      text: "Google lets you set the areas you cover, alongside your address.",
+    },
+    {
+      title: "A finished car, as a post",
+      text: "Kabsi checks your photo is sharp, then prepares a post for your yes.",
+    },
+    {
+      title: "Reviews about a scratch or wait",
+      text: "A wait gets one apology. Damage gets a calm draft, no argument, no refund promised.",
+    },
+  ],
   categories: {
     primary: "Car wash",
     more: ["Car detailing service"],
-    note: "Add detailing as a second category only if you do it. Read the names in your own profile, because they can differ by country.",
+    line: "Add detailing as a second category only if you do it. Read the names in your own profile, because they can differ by country.",
   },
   page: {
     query: "car wash Google Business Profile",
@@ -43,7 +63,7 @@ export const carWash: Industry = {
     line: "Kabsi looks after your car wash Google Business Profile: open status and hours right, detailing work as posts.",
     card: "Open status right, detailing work as posts.",
     answer:
-      "A car wash Google Business Profile has to show the right hours and that you are open. Kabsi checks your open status and hours every day, turns a photo of a finished car into a post, drafts a calm reply to every review, including one about a scratch, and asks about holiday hours in time. You approve each one.",
+      "A car wash Google Business Profile must show you are open. Kabsi checks that daily, and drafts posts and calm replies for your yes.",
     watch: {
       business: "Shine Bay Car Wash, Dubai",
       line: "Your open status and hours tell drivers you are there. Kabsi checks them every day.",
@@ -79,30 +99,12 @@ export const carWash: Industry = {
         "Shine Bay Car Wash near Dubai Marina Mall does full interior detailing and is open on Fridays from 8 am.",
       sources: ["Shine Bay Car Wash's Google profile", "Shine Bay Car Wash's website"],
     },
-    related: ["auto-repair", "pet-grooming"],
-    searchText:
-      "Drivers search for a wash near them or for the job itself, detailing, a ceramic coat or an interior clean, then check the hours and the photos.",
-    guide: [
-      {
-        title: "Open now, and what you do",
-        paras: [
-          "Keep your hours and open status right. Kabsi compares them with what you confirmed every day, and asks before each public holiday what you will do. If you also come to customers, Google lets you set the areas you cover.",
-          "A photo of a finished car shows the work better than any words. Send it on WhatsApp with a line, and Kabsi prepares a post with it for your yes, after checking the photo is sharp and well lit.",
-        ],
-      },
-      {
-        title: "Reviews about a scratch or a wait",
-        paras: [
-          "A review may be about the shine or the wait. A thank you reply can be short; a review about a long wait gets an apology once, with no promise you cannot keep.",
-          "A review that says the car was damaged gets a calm draft that asks the customer to get in touch through the details on your profile. It never argues, admits fault or promises a refund, and it waits for your yes.",
-        ],
-      },
-    ],
+    related: ["auto-repair", "pet-grooming", "barbershop", "florist", "optician", "cafe"],
   },
   faqs: [
     {
       q: "What does Kabsi say to a review about a scratch?",
-      a: "It drafts a calm reply that asks the customer to get in touch. It never argues, admits fault or promises a refund, and it waits for you.",
+      a: "A calm draft asking the customer to get in touch. It never argues, admits fault or promises a refund, and waits for you.",
     },
     {
       q: "Will Kabsi post our prices?",
@@ -121,5 +123,9 @@ export const carWash: Industry = {
       a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything.",
     },
   ],
-  guides: ["keep-your-hours-and-details-the-same-everywhere", "how-to-reply-to-google-reviews"],
+  guides: [
+    "keep-your-hours-and-details-the-same-everywhere",
+    "photos-for-google-business-profile",
+    "how-to-respond-to-negative-google-reviews",
+  ],
 };

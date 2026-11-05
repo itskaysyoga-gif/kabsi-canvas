@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 5 Nov 2026, App 5. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 5 Nov 2026, App 5 and Industries 3. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -13,7 +13,8 @@ One page, under 10 KB. Updated 5 Nov 2026, App 5. The history (tasks, After merg
 - Fix 3 (5 Nov 2026, PRs 379, 381, 383): the Coach reads Google by location name; one reload after a deploy. Detail: `docs/progress/archive/2026-11-05-fix3.md`.
 - Industries 2 (5 Nov 2026, 30.32, PRs 392, 395, part C): /for is one list; 20 industry pages on Design 9; old group pages 301 to /for. Detail: `docs/progress/archive/2026-11-05-industries2.md`.
 - Style 1 (5 Nov 2026, 30.33, R-113, PRs 399, 400, 401, 404): every guide with a library photo (page, card, share image) and a filtered list; the yellow bar on every public headline, photos on Pricing, About, Founding 25 and Partners, Security in short lines; Sentry gets nothing from automated runs and a repeated Edge error once per 10 minutes. Detail: `docs/progress/archive/2026-11-05-style1.md`.
-- App 5 (5 Nov 2026, 30.33, R-113, PRs 402, 406, part C): a staff workspace (Today and six pages, same data and actions); the look on the signed-in site. Detail: `docs/progress/archive/2026-11-05-app5.md`, `docs/app5/audit.md`.
+- App 5 (5 Nov 2026, 30.33, PRs 402, 406, part C): a staff workspace with Today; the look on the signed-in site. Detail: `docs/progress/archive/2026-11-05-app5.md`.
+- Industries 3 (PR 403): short industry pages. Detail: `docs/progress/archive/2026-11-05-industries3.md`.
 - No customer is live yet. Before the first Meta ad: the DataForSEO top-up and a nearby check on a real business. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -52,7 +53,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 
 - Sentry (30.33 item 4): Settings, Subscription, set a pay-as-you-go budget of 5 US dollars for errors, so errors are not dropped before 30 Nov.
-- App 5: decide whether a QA account (qa-staff@test.local) may be staff, so sessions can run the staff pages signed in on kabsi.co (one row in public.staff; LATER row).
+- App 5: may qa-staff@test.local be staff, for live staff runs? (LATER row)
 
 ## Open After merge checks and findings
 
@@ -63,8 +64,8 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 5 Nov 2026, App 5 (30.33, R-113): PRs 402, 406 and part C, checked live. Detail: `docs/progress/archive/2026-11-05-app5.md`.
-- 5 Nov 2026, Industries 2 (30.32): PRs 392, 395 and part C.
+- 5 Nov 2026, App 5: PRs 402, 406 and part C. Detail: `docs/progress/archive/2026-11-05-app5.md`.
+- 5 Nov 2026, Industries 3: PR 403.
 
 ## How a session updates this page
 

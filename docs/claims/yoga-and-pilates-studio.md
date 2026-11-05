@@ -48,3 +48,23 @@ labelled Example), with Sara, Lotus Line Yoga and Core Room Pilates, all invente
 ## Left out
 
 * None: both category names were shown by live profiles on 5 Nov 2026.
+
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field | Line on the page | Row(s) above | Type |
+| --- | --- | --- | --- |
+| Answer | "A yoga studio Google Business Profile shows where and when you teach. Kabsi checks address and hours daily, and prepares posts and replies." | 8, 9 | A, K |
+| Profile card "Class times and the address" | "Keep both exact, with special hours for holidays. Kabsi checks them against yours daily." | 18, 19, 20 | A, G, K |
+| Profile card "A new class is news" | "A photo with the day and time becomes a post. Never a made up offer." | 21 | K |
+| Profile card "Thanks passed to the teacher" | "A review that names Sara thanks Sara, if she is on your team list." | 22, 29 | K, Example |
+| Profile card "An injury in class" | "No draft, a short checklist, and a neutral holding reply only if you ask." | 23, 26 | K |
+| Categories line | "Choose the first by what most of your classes are, and add the other only if you teach it every week." | 5 | A |
+| FAQ "What happens with a review about an injury?" | "An injury is a safety matter: no draft and a short checklist. Kabsi writes a neutral holding reply only if you ask." | 26 | K |
+| FAQ question | "Does Kabsi work with my booking system?" (was "my booking app"; "app" is on the never-say list), answer unchanged | 28 | K |
+
+Jobs, the watch line and the AI answer are unchanged. Related: gym and fitness, physiotherapy, spa and massage, nail salon, cafe, florist. Guides: posts, hours and details the same everywhere, replying to reviews.
+
+Removed from the page: the search text (row 17); the two guide blocks as paragraphs; "asks before each public holiday what you will do" (row 20); "a photo of the room" and "for your yes" in the class card (row 21; job row 13 keeps "for your yes"); "a name not on your list is never used" (row 22; the FAQ keeps "Kabsi never guesses"); "Kabsi never gives health advice" (row 23); from the answer, "what is new this week", "thanks the teacher the student named" and holiday hours (rows 8, 9); "marked as needing a little more care" in the injury FAQ.

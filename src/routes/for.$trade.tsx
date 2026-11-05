@@ -42,7 +42,9 @@ export const Route = createFileRoute("/for/$trade")({
       title: i.page.title,
       description: i.page.description,
       path: `/for/${i.slug}`,
-      image: "industry",
+      // Industries 3: the page's own share image (its photo, the mark and its H1).
+      image: `industries/${i.slug}`,
+      imageAlt: `Kabsi. ${i.page.h1}`,
       crumbs: d.crumbs,
       // Only finished pages with a claim sheet are indexed.
       noindex: !d.indexed,

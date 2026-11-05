@@ -22,26 +22,24 @@ export const nailSalon: Industry = {
   photos: [PHOTOS.nailTechnician, PHOTOS.nailDesk],
   focus: "50% 50%",
   searches: ["nail salon near me", "gel nails", "manicure", "acrylic nails", "nail art"],
-  tasks: [
+  // Industries 3 (master plan 30.33 item 2): the two old guide sections as short cards. Each line keeps a fact of
+  // docs/claims/nail-salon.md, whose "Industries 3" section maps it to its row.
+  profile: [
     {
-      title: "Seasonal designs, as posts",
-      text: "Autumn colours, Christmas sets, summer brights. Each season's designs become a post with your photo, ready for your yes.",
+      title: "Designs, season by season",
+      text: "Each new set is a post with a photo and a button to your website.",
     },
     {
-      title: "Photos that show the work",
-      text: "Send the photo you are proud of. Kabsi checks it first and tells you when one is dark, blurry or too small, before anything goes to Google.",
+      title: "Photos true to the nail",
+      text: "In focus, well lit, no heavy filters. Kabsi checks each photo first.",
     },
     {
-      title: "A price list people understand",
-      text: "Gel manicure, infill, soak off, pedicure. Google can show each service with a price and a description, so nobody has to phone to ask. Kabsi's Profile Coach lists what your profile is missing.",
+      title: "Prices and the right category",
+      text: "A price in a service name is rejected. Google's example: Nail salon, not Salon.",
     },
     {
-      title: "Thank the technician by name",
-      text: "A review that names Mia gets a reply that passes the thanks on. Kabsi uses only the names on your team list.",
-    },
-    {
-      title: "Holiday hours, asked in time",
-      text: "Five days before each bank holiday Kabsi asks: normal hours, closed, or custom. Google keeps them as special hours.",
+      title: "The technician, by name",
+      text: "When a review names them, the reply thanks them. Only team list names are used.",
     },
   ],
   page: {
@@ -54,7 +52,7 @@ export const nailSalon: Industry = {
     line: "Kabsi keeps your nail salon Google Business Profile fresh: new designs as posts, photos checked, replies for your yes.",
     card: "Seasonal designs as posts, photos checked.",
     answer:
-      "A nail salon Google Business Profile is mostly photos and reviews. Kabsi turns a photo of a new design into a post, checks each photo before it goes to Google, drafts a reply to every review, and asks about holiday hours five days ahead. It also checks your main category every day and tells you when Google shows a different one. You approve every change.",
+      "For a nail salon Google Business Profile, Kabsi turns new designs into posts, checks each photo and prepares review replies, all for your yes.",
     watch: {
       business: "Polish Room, Brighton",
       line: "Clients looking for nails expect a nail salon. Kabsi checks your main category against yours every day.",
@@ -75,7 +73,7 @@ export const nailSalon: Industry = {
       },
       {
         title: "Work photos, checked",
-        text: "Kabsi tells you when a photo is dark, blurry or too small before it reaches Google.",
+        text: "Kabsi flags a dark, blurry or too small photo before it reaches Google.",
       },
       {
         title: "Careful replies",
@@ -89,7 +87,14 @@ export const nailSalon: Industry = {
         "Polish Room on Kensington Gardens does gel extensions and opens on Sundays from 11 am.",
       sources: ["Polish Room's Google profile", "Polish Room's website"],
     },
-    related: ["lash-and-brow-studio", "hair-salon"],
+    related: [
+      "lash-and-brow-studio",
+      "hair-salon",
+      "spa-and-massage",
+      "barbershop",
+      "medical-and-aesthetic-clinic",
+      "tattoo-studio",
+    ],
   },
   faqs: [
     {
@@ -113,7 +118,11 @@ export const nailSalon: Industry = {
       a: "Only photos you send it, and only after you approve the post. Send photos of the work, and ask the client first if you like.",
     },
   ],
-  guides: ["how-to-choose-your-primary-category", "how-to-reply-to-google-reviews"],
+  guides: [
+    "photos-for-google-business-profile",
+    "google-posts-for-local-businesses",
+    "choose-google-business-profile-categories",
+  ],
   d8: {
     seo: {
       title: "Kabsi for nail salons: Google posts, photos and review replies",
@@ -130,8 +139,6 @@ export const nailSalon: Industry = {
       time: "10:05",
     },
     jobsTitle: "Google jobs that come back.",
-    searchText:
-      "People search for the service as well as the salon: gel nails, a manicure, nail art. Then they choose by the photos. Your services and your latest designs answer both.",
     check: [
       {
         label: "Photos",
@@ -145,21 +152,5 @@ export const nailSalon: Industry = {
     ],
     checkText:
       "For a nail salon the free check starts with your photos, because clients choose by the work they see, then your reviews, hours and links. Example result for an invented salon in Brighton.",
-    guide: [
-      {
-        title: "Designs and photos, season by season",
-        paras: [
-          "A nail salon's work changes with the calendar: darker colours in autumn, sparkle before Christmas, brights for summer. A post is the place for each new set, with a photo and a button to your own website. An offer or an event is a separate kind of post on Google. Google archives posts after six months unless a date range is set, so last winter's set does not linger into spring.",
-          "Google asks for photos without significant alterations or excessive filters. Take the hand from above in daylight, keep the colour in the photo the colour on the nail, and send it to Kabsi. Kabsi checks it before it goes to Google. Photos need to be JPG or PNG, in focus and well lit.",
-        ],
-      },
-      {
-        title: "Prices, names and the right category",
-        paras: [
-          "Google gives each service its own price and description. Keep the price out of the name, because Google rejects a custom name that has one. A list of your main services with prices answers the question people would otherwise phone to ask.",
-          "Google's own example of choosing a specific category is 'Nail salon' instead of 'Salon', and you cannot create a category of your own. Add a second category only for work you really do in the salon. When a review names the technician, a reply that passes the thanks on tells the next client who to book. Kabsi uses only the names on your team list, so a technician who has left is never thanked once you take their name off the list. When a review is unhappy about a nail that lifted, the reply asks the client to get in touch through the details on your profile, and never offers anything in return for changing the review.",
-        ],
-      },
-    ],
   },
 };

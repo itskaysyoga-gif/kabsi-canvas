@@ -45,3 +45,19 @@ business: Bloom and Twine, Bristol (invented, labelled Example), with Petal Post
 ## Left out
 
 * "Flower delivery" as a category: no Google page or live profile shows it as a category name; it is gone from the page's categories and stays only as a search chip.
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field | Line on the page | Row(s) above | Type |
+| --- | --- | --- | --- |
+| Answer | "Orders come by phone, so a florist Google Business Profile needs the right number. Kabsi checks it daily and drafts posts and replies you approve." | 7, 8 | K, A |
+| Profile | "The phone number, yours": "Orders come by phone. Kabsi compares phone, hours and website with yours every day." | 17, 18 | A, K |
+| Profile | "Busy days, their own hours": "Kabsi asks before each public holiday and sets special hours once you say yes." | 19 | K |
+| Profile | "An arrangement, as a post": "A photo of an arrangement with one line becomes a post for your yes." | 20 | K |
+| Profile | "Weddings and birthdays": "A warm reply thanks the customer for the occasion they named, adding nothing else." | 21 | K |
+| Categories line | "Pick the category for most of your work; names can differ by country. Say in your description and posts if you deliver." | 4 | A, G |
+| Job | "Gentle replies": "Warm for a wedding, gentle for a funeral, adding nothing the customer did not say." | 14 | K |
+
+Removed from the page: the search text paragraph (row 16), "asks when they differ" (row 18), the late night before a busy day (row 19), the funeral guide paragraph (row 22; the job and the FAQ keep it), and the long answer.

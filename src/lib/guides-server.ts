@@ -57,15 +57,32 @@ export const getGuidePage = createServerFn({ method: "GET" })
     return { guide, related, industries, publicSlugs: guides.map((g) => g.slug) };
   });
 
-/** The public guides that name an industry page, for that page's "Guides for you" links (links both ways). */
+/**
+ * Industries 3 (master plan 30.33 item 2): the three guides an industry page shows, decided on the server. First the page's
+ * own picks (chosen by its jobs) that are public, then public guides that name the page (links both ways), then the
+ * newest public guides, so every page ends with three.
+ */
 export const getIndustryGuides = createServerFn({ method: "GET" })
   .inputValidator((slug: string) => {
     if (typeof slug !== "string" || !/^[a-z0-9-]{1,80}$/.test(slug)) throw new Error("bad slug");
     return slug;
   })
   .handler(async ({ data: slug }) => {
-    const guides = await publicNow();
-    return guides
-      .filter((g) => g.industries.includes(slug))
-      .map((g) => ({ slug: g.slug, title: g.title }));
+    const [guides, { industry }] = await Promise.all([publicNow(), import("@/content/industries")]);
+    return pickIndustryGuides(guides, industry(slug)?.guides ?? [], slug);
   });
+
+/** The three guides for an industry page (pure, so tests/industries3.test.ts can check it). */
+export function pickIndustryGuides(
+  guides: Pick<GuideMeta, "slug" | "title" | "topic" | "industries">[],
+  picks: readonly string[],
+  slug: string,
+) {
+  const bySlug = new Map(guides.map((g) => [g.slug, g]));
+  const out = picks.map((s) => bySlug.get(s)).filter((g) => g !== undefined);
+  for (const g of [...guides.filter((x) => x.industries.includes(slug)), ...guides]) {
+    if (out.length >= 3) break;
+    if (!out.includes(g)) out.push(g);
+  }
+  return out.slice(0, 3).map((g) => ({ slug: g.slug, title: g.title, topic: g.topic }));
+}

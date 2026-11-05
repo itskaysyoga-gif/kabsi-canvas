@@ -33,49 +33,71 @@ export const bakery: Industry = {
     "custom cake",
     "gluten free bakery",
   ],
-  tasks: [
+  // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of docs/claims/bakery.md,
+  // whose "Industries 3" section maps it to its row.
+  profile: [
     {
-      title: "Keep the early opening hours right",
-      text: "Whatever time the doors open, the hours on Google carry it. Kabsi asks before a holiday and sets special hours for the days that differ, after your Yes.",
+      title: "Early opening hours, exact",
+      text: "Whatever time the doors open, Google carries it. Special hours cover days that differ.",
     },
     {
-      title: "List cakes and breads with a starting price",
-      text: "Birthday cake, sourdough loaf, a box of croissants. Google can show a service with a price and a description. Prices come from you, because Kabsi never invents one.",
+      title: "Cakes and breads, with prices",
+      text: "Google can show each with a price. Prices come from you; Kabsi never invents one.",
     },
     {
-      title: "Link the page where cakes are ordered",
-      text: "Google lets you add your own link, and yours can open the cake order page with the sizes. A post can say how many days ahead an order must be placed.",
+      title: "The cake order page",
+      text: "Google lets you add your own link, so it can open your cake order page.",
     },
     {
-      title: "Post what is fresh today",
-      text: "A seasonal pastry, a new loaf, the sourdough that is back. Kabsi writes the draft so it matches what you tell it, and you approve it first.",
+      title: "What is fresh today",
+      text: "A seasonal pastry or a loaf that is back. Kabsi drafts the post; you approve.",
+    },
+  ],
+  reviews: [
+    {
+      title: "The bread itself",
+      text: "The reply names the loaf back and adds nothing you did not say.",
     },
     {
-      title: "Photograph the shelf at its fullest",
-      text: "Early, before the first customer, with the whole shelf in view. Google asks for photos between 10 KB and 5 MB, at least 250 pixels on each side and best at 720 or more, in focus and well lit.",
+      title: "Sold out when they arrived",
+      text: "Sorry once, your hours and order page, and no promise to hold anything.",
+    },
+    {
+      title: "An allergy or a reaction",
+      text: "No draft: a short checklist, and a neutral holding reply only if you ask.",
     },
   ],
   categories: {
     primary: "Bakery",
     more: ["Cafe"],
-    note: "'Bakery' is the name Google itself uses when it explains extra categories: a grocery store might add 'Bakery' and 'Deli'. Add 'Cafe' only if people sit and drink at the bakery. Google says not to add a category for every product.",
+    line: "Google itself uses 'Bakery' in its example. Add 'Cafe' only if people sit and drink there. Google says not to add one per product.",
   },
-  reviewThemes: [
+  holidays: [
     {
-      theme: "The bread itself",
-      text: "A customer names the sourdough or the croissant. The reply names it back and adds no fact the owner did not give.",
+      title: "England and Wales: Easter 2027",
+      text: "Good Friday 26 March, Easter Monday 29 March. A post names the last order day.",
     },
     {
-      theme: "Sold out when they arrived",
-      text: "The reply says sorry once, points to the opening hours and the order page, and does not promise any item will be held.",
+      title: "Eid al-Fitr, UAE",
+      text: "1 to 3 Shawwal. Closed days go on Google; a post gives the order deadline.",
     },
     {
-      theme: "A cake that was not like the picture",
-      text: "The reply stays calm, asks the writer to get in touch through the details on the profile and offers no refund unless you said so.",
+      title: "UK: Christmas week 2027",
+      text: "Holidays fall on Monday 27 and Tuesday 28 December. Deadlines go on Google in November.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "The shelf at its fullest",
+      text: "Early, in daylight, every tray in view, in focus and well lit.",
     },
     {
-      theme: "An allergy or a reaction",
-      text: "This is a health review. It comes to you with no draft and a route to a person at Kabsi, and you write any reply yourself.",
+      title: "A cake beside its price card",
+      text: "One cake, straight on. A custom order starts from what customers can see.",
+    },
+    {
+      title: "Post ideas",
+      text: "The first loaf out, weekend cake order deadlines, a seasonal bake, bank holiday hours.",
     },
   ],
   story: {
@@ -102,44 +124,6 @@ export const bakery: Industry = {
       },
     ],
   },
-  posts: [
-    "The first loaf is out at 6.30, and what is on the shelf now.",
-    "Cake orders for the weekend close on Thursday, with the order link.",
-    "A new seasonal bake, in one line, with the price.",
-    "Hours for the bank holiday weekend.",
-  ],
-  photoTips: [
-    {
-      title: "The shelf at its fullest",
-      text: "Early, in daylight, with every tray in view. It answers 'is there anything left' better than words.",
-    },
-    {
-      title: "A cake with its size and price card",
-      text: "One cake, straight on, with the card beside it. A custom order starts from what the customer can see.",
-    },
-    {
-      title: "The door with the opening time",
-      text: "Take the front from across the street with the hours sign readable. Google says an outside photo helps people recognise the place when they come.",
-    },
-  ],
-  holidays: [
-    {
-      when: "UK: the Easter weekend",
-      text: "In England and Wales Good Friday is 26 March 2027 and Easter Monday 29 March. Hours go on Google, and a post names the day orders close.",
-    },
-    {
-      when: "Eid al-Fitr, UAE",
-      text: "1 to 3 Shawwal, with day 30 of Ramadan counted as a holiday in a 30 day month. A bakery that closes for the days says so on Google and posts the last day for orders.",
-    },
-    {
-      when: "UAE National Day, 2 and 3 December",
-      text: "Two public holidays. Put special hours on a few days ahead and use a post for any cake or box made for the day.",
-    },
-    {
-      when: "UK: Christmas week 2027",
-      text: "Christmas Day is a Saturday, so the holidays fall on Monday 27 and Tuesday 28 December. Order deadlines and closed days go on Google in November.",
-    },
-  ],
   page: {
     query: "bakery Google Business Profile",
     title: "Bakery Google Business Profile help | Kabsi",
@@ -150,7 +134,7 @@ export const bakery: Industry = {
     line: "Kabsi looks after your bakery Google Business Profile: early hours, holiday baking hours, and the day's bakes as posts.",
     card: "Early hours exact, holiday hours set ahead.",
     answer:
-      "A bakery Google Business Profile lives on early hours and holiday hours. Kabsi checks your opening time every day, asks about every bank holiday five days ahead, sets the Christmas Eve hours you give it, turns a photo of the day's bake into a post, and drafts a reply to every review. You approve each one before it reaches Google.",
+      "On a bakery Google Business Profile, early and holiday hours come first. Kabsi checks them, drafts posts and replies, and you approve each.",
     watch: {
       business: "Corner Bakery, London",
       line: "Holiday baking days have their own hours. Kabsi checks Google shows the hours you chose.",
@@ -184,29 +168,33 @@ export const bakery: Industry = {
       answer: "Corner Bakery in Hackney bakes seeded sourdough every Saturday and opens at 6 am.",
       sources: ["Corner Bakery's Google profile", "Corner Bakery's website"],
     },
-    related: ["cafe", "florist"],
+    related: ["cafe", "restaurant", "florist", "optician", "pet-grooming", "nail-salon"],
   },
   faqs: [
     {
       q: "Can Kabsi tell Google when we sell out?",
-      a: "Kabsi keeps your hours true and posts what you tell it. It cannot see your shelves, so a sold out message comes from you, and you approve it first.",
+      a: "Kabsi cannot see your shelves. A sold out post comes from what you tell it, and you approve it first.",
     },
     {
       q: "Can Kabsi write the allergens for a cake?",
-      a: "No. Kabsi writes only the facts you give it, and allergen information must come from your own recipes and your local rules. A review that mentions a reaction comes to you with no draft.",
+      a: "No. Kabsi writes only facts you give it; allergen information comes from your recipes and local rules. A review about a reaction gets no draft.",
     },
     {
       q: "Can customers order from my Google profile?",
-      a: "If you add an order link, yes. Whether Google shows ordering options depends on your country and the provider you use. Kabsi prepares the new link when the page changes, and it goes live after your Yes.",
+      a: "If you add an order link, yes. Ordering options depend on your country and provider. Check the link each time your provider changes.",
     },
     {
       q: "Can Kabsi take cake orders on WhatsApp?",
-      a: "No. The Kabsi chat is between Kabsi and you. It prepares your hours, posts and replies, and it does not talk to your customers.",
+      a: "No. The Kabsi chat is between Kabsi and you. It prepares your hours, posts and replies, and does not talk to your customers.",
     },
     {
       q: "Will Kabsi post prices for cakes?",
       a: "Only prices you give it, in a post you approve. Kabsi never invents a price or an offer.",
     },
   ],
-  guides: ["how-to-set-holiday-hours-on-google", "google-review-link-and-qr-code"],
+  guides: [
+    "how-to-set-holiday-hours-on-google",
+    "google-posts-for-local-businesses",
+    "how-to-reply-to-google-reviews",
+  ],
 };
