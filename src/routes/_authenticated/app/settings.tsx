@@ -22,6 +22,7 @@ import { WhatsappChannel } from "@/components/app/whatsapp-channel";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import { clearAssistantChat } from "@/lib/assistant-storage";
+import { setSignedOutReason } from "@/lib/signed-out";
 import { KABSI_GROUP_ID, WHATSAPP_ON } from "@/lib/site";
 import {
   aiPromptMessage,
@@ -105,9 +106,15 @@ function SettingsPage() {
         </p>
       ) : null}
       {!location.isLoading && !loc ? (
-        <Link to="/start" className={buttonClass()} data-main-cta>
-          Add your business
-        </Link>
+        <>
+          <Link to="/start" className={buttonClass()} data-main-cta>
+            Add your business
+          </Link>
+          {/* Signing out works before a business is added too (App 4). */}
+          <div className="mt-6">
+            <AccountCard />
+          </div>
+        </>
       ) : null}
       {settings.isError ? (
         <p className="text-body text-bad" role="alert">
@@ -453,15 +460,18 @@ function AccountCard() {
       setErr("Couldn't sign out. Check your connection and try again.");
     }
   }
+  // Sign out on every device (App 4, 30.31 item 2): Supabase ends every session of this account, then Home says so.
   async function outEverywhere() {
     setErr("");
     setAllBusy(true);
     try {
-      await supabase.auth.signOut({ scope: "global" });
+      const { error } = await supabase.auth.signOut({ scope: "global" });
+      if (error) throw error;
+      setSignedOutReason("you");
       clearAssistantChat();
       await queryClient.cancelQueries();
       queryClient.clear();
-      await navigate({ to: "/login", replace: true });
+      await navigate({ to: "/", replace: true });
     } catch {
       setAllBusy(false);
       setErr("Couldn't sign out. Check your connection and try again.");
@@ -471,6 +481,7 @@ function AccountCard() {
     <Panel title="Your account" id="account">
       <p className="text-small text-text-2">
         You sign in with a 6-digit code sent to your email. There&apos;s no password to remember.
+        You stay signed in on this device for 30 days after your last visit.
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         <Button
@@ -482,21 +493,22 @@ function AccountCard() {
           Sign out
         </Button>
         <Button variant="secondary" size="md" onClick={() => setAllOpen(true)}>
-          Sign out of all devices
+          Sign out on every device
         </Button>
       </div>
       <AlertDialog open={allOpen} onOpenChange={setAllOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Sign out of all devices?</AlertDialogTitle>
+            <AlertDialogTitle>Sign out on every device?</AlertDialogTitle>
             <AlertDialogDescription>
-              This signs you out everywhere. You can log in again with a code.
+              This signs you out on every phone and computer, this one too. You can log in again
+              with a code.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Stay signed in</AlertDialogCancel>
             <AlertDialogAction disabled={allBusy} onClick={() => void outEverywhere()}>
-              {allBusy ? "Signing out..." : "Sign out everywhere"}
+              {allBusy ? "Signing out" : "Sign out on every device"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
