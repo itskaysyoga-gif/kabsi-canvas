@@ -61,7 +61,8 @@ export { isPrivatePath } from "@/lib/private-paths";
 import { isPrivatePath } from "@/lib/private-paths";
 
 /** Style 1 part C: the user agents of Kabsi's own automated runs (the Edge Functions use the same list, sentry-gate.ts). */
-export const AUTOMATED_UA_PATTERN = "HeadlessChrome|Playwright|Chrome-Lighthouse|Lighthouse|kabsi-nightly|kabsi-qa";
+export const AUTOMATED_UA_PATTERN =
+  "HeadlessChrome|Playwright|Chrome-Lighthouse|Lighthouse|kabsi-nightly|kabsi-qa";
 
 // Inline boot script: sets environment, configures Sentry before its loader runs, and installs
 // the standard PostHog snippet with replay off until a public page turns it on.
