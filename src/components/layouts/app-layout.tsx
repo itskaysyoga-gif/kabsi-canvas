@@ -551,10 +551,8 @@ export function AppLayout({
       </a>
 
       <aside className="fixed inset-y-0 start-0 z-40 hidden w-64 flex-col border-e border-line bg-surface-1 lg:flex">
-        <Link
-          to={area === "staff" ? "/staff" : "/app"}
-          className="flex h-16 items-center gap-2.5 px-5"
-        >
+        {/* The logo goes to the website's Home on every width (App 4, 30.31 item 1); the menu's Home is the dashboard's. */}
+        <Link to="/" aria-label="Kabsi website" className="flex h-16 items-center gap-2.5 px-5">
           <KabsiMark className="size-8" />
           <span className="font-display text-[1.375rem] font-bold tracking-[-0.02em]">Kabsi</span>
         </Link>
@@ -608,7 +606,13 @@ export function AppLayout({
       </aside>
 
       <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-line bg-surface-1/95 px-4 backdrop-blur lg:hidden">
-        <KabsiMark className="size-7 shrink-0" />
+        <Link
+          to="/"
+          aria-label="Kabsi website"
+          className="press -ms-2 grid size-11 shrink-0 place-items-center rounded-full"
+        >
+          <KabsiMark className="size-7" />
+        </Link>
         {area === "app" ? (
           <BusinessMenu compact />
         ) : (
