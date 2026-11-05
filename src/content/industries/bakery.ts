@@ -1,4 +1,5 @@
 import { PHOTOS } from "@/components/kabsi/photos";
+import { MORE_PHOTOS } from "@/components/kabsi/photos-more";
 import type { Industry } from "./types";
 
 // Content 1: finished from docs/claims/bakery.md, approved by lane R on 27 Oct 2026 (brief section 18). Corner Bakery is invented
@@ -19,7 +20,7 @@ export const bakery: Industry = {
     rival2: "Rye and Crumb",
     near: ["East of the station", "By the school"],
   },
-  photos: [PHOTOS.bakeryCounter, PHOTOS.bakeryWindowTall],
+  photos: [PHOTOS.bakeryCounter, MORE_PHOTOS.bakeryWindowTall],
   focus: "50% 50%",
   searches: [
     "bakery",
@@ -183,7 +184,7 @@ export const bakery: Industry = {
       answer: "Corner Bakery in Hackney bakes seeded sourdough every Saturday and opens at 6 am.",
       sources: ["Corner Bakery's Google profile", "Corner Bakery's website"],
     },
-    related: ["cafe", "florist"],
+    related: ["cafe", "restaurant"],
   },
   faqs: [
     {

@@ -1,6 +1,6 @@
 // The sitemap (Guides 3: a server route, src/routes/sitemap[.]xml.ts, computed on each request). Only the pages that are
-// indexed (Web 2, master plan 30.16 section 4 and 30.17 section 2): template industry pages, the hubs without a finished
-// page, /manager-steps, free check results and the 404 stay out. The guides are added per request, public ones only.
+// indexed (Web 2, master plan 30.16 section 4 and 30.17 section 2): template industry pages, the old group pages (gone,
+// Industries 2), /manager-steps, free check results and the 404 stay out. The guides are added per request, public ones only.
 // tests/sitemap.test.ts keeps this list equal to the routes and the industry content.
 import type { GuideMeta } from "@/content/guides/types";
 import { SITE_URL } from "@/lib/site";
@@ -13,23 +13,18 @@ export const SITEMAP_PAGES: [string, string, string, string][] = [
   ["/scan", "2026-10-27", "monthly", "0.9"],
   ["/google-review-link", "2026-10-27", "monthly", "0.8"],
   ["/founding", "2026-11-02", "weekly", "0.7"],
-  ["/for", "2026-11-02", "monthly", "0.7"],
-  ["/for/beauty-and-wellness", "2026-10-27", "monthly", "0.5"],
-  ["/for/food-and-drink", "2026-10-27", "monthly", "0.5"],
-  ["/for/health", "2026-10-27", "monthly", "0.5"],
-  ["/for/auto", "2026-10-27", "monthly", "0.5"],
-  ["/for/fitness-and-sport", "2026-10-27", "monthly", "0.5"],
-  ["/for/hair-salon", "2026-11-02", "monthly", "0.7"],
-  ["/for/restaurant", "2026-11-02", "monthly", "0.7"],
-  ["/for/barbershop", "2026-11-02", "monthly", "0.7"],
-  ["/for/nail-salon", "2026-11-02", "monthly", "0.7"],
-  ["/for/spa-and-massage", "2026-11-02", "monthly", "0.7"],
-  ["/for/medical-and-aesthetic-clinic", "2026-11-02", "monthly", "0.7"],
-  ["/for/physiotherapy", "2026-11-02", "monthly", "0.7"],
-  ["/for/cafe", "2026-11-02", "monthly", "0.7"],
-  ["/for/bakery", "2026-11-02", "monthly", "0.7"],
-  ["/for/auto-repair", "2026-11-02", "monthly", "0.7"],
-  ["/for/gym-and-fitness", "2026-11-02", "monthly", "0.7"],
+  ["/for", "2026-11-05", "monthly", "0.7"],
+  ["/for/hair-salon", "2026-11-05", "monthly", "0.7"],
+  ["/for/restaurant", "2026-11-05", "monthly", "0.7"],
+  ["/for/barbershop", "2026-11-05", "monthly", "0.7"],
+  ["/for/nail-salon", "2026-11-05", "monthly", "0.7"],
+  ["/for/spa-and-massage", "2026-11-05", "monthly", "0.7"],
+  ["/for/medical-and-aesthetic-clinic", "2026-11-05", "monthly", "0.7"],
+  ["/for/physiotherapy", "2026-11-05", "monthly", "0.7"],
+  ["/for/cafe", "2026-11-05", "monthly", "0.7"],
+  ["/for/bakery", "2026-11-05", "monthly", "0.7"],
+  ["/for/auto-repair", "2026-11-05", "monthly", "0.7"],
+  ["/for/gym-and-fitness", "2026-11-05", "monthly", "0.7"],
   ["/about", "2026-11-02", "yearly", "0.5"],
   ["/security", "2026-11-02", "yearly", "0.5"],
   ["/faq", "2026-11-02", "monthly", "0.6"],

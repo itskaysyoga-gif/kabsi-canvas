@@ -1,4 +1,5 @@
 import { PHOTOS } from "@/components/kabsi/photos";
+import { MORE_PHOTOS } from "@/components/kabsi/photos-more";
 import type { Industry } from "./types";
 
 // Finished page (model 3 of 3). Parkside Dental is invented (Example). Health rules from master plan 30.15
@@ -21,7 +22,7 @@ export const dentalClinic: Industry = {
     rival2: "Northgate Dental Care",
     near: ["North of the mall", "By the school"],
   },
-  photos: [PHOTOS.dentalClinicWide, PHOTOS.dentistPatient],
+  photos: [MORE_PHOTOS.dentalClinicWide, PHOTOS.dentistPatient],
   focus: "50% 35%",
   searches: [
     "dentist near me",

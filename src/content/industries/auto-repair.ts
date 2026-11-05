@@ -1,4 +1,5 @@
 import { PHOTOS } from "@/components/kabsi/photos";
+import { MORE_PHOTOS } from "@/components/kabsi/photos-more";
 import type { Industry } from "./types";
 
 // Content 1: finished from docs/claims/auto-repair.md, approved by lane R on 27 Oct 2026 (brief section 18). Westgate Auto Repair is
@@ -18,7 +19,7 @@ export const autoRepair: Industry = {
     rival2: "Ring Road Motors",
     near: ["Past the ring road", "By the retail park"],
   },
-  photos: [PHOTOS.autoGarage, PHOTOS.autoMechanicTall],
+  photos: [PHOTOS.autoGarage, MORE_PHOTOS.autoMechanicTall],
   focus: "50% 55%",
   searches: [
     "car repair",
@@ -180,7 +181,7 @@ export const autoRepair: Industry = {
       answer: "Westgate Auto Repair in Salford offers same day MOTs when you book before 10 am.",
       sources: ["Westgate Auto Repair's Google profile", "Westgate Auto Repair's website"],
     },
-    related: ["car-wash", "gym-and-fitness"],
+    related: ["gym-and-fitness", "cafe"],
   },
   faqs: [
     {

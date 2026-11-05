@@ -19,6 +19,7 @@ import { CONTACT_EMAIL, TRIAL_LINE } from "@/lib/site";
 import { useFoundingPlaces } from "@/lib/public-api";
 import { ExampleBadge, Faq, KabsiMark } from "./ui";
 import { FOUNDER, Img, PHOTOS, type Photo } from "./photos";
+import { MORE_PHOTOS } from "./photos-more";
 import { Closing } from "./closing";
 import { Highlight } from "./highlight";
 import { SiteLink } from "./site-link";
@@ -467,12 +468,23 @@ function D9Control() {
 
 const TRADES: { to: string; label: string; photo: Photo; focus: string }[] = [
   { to: "/for/hair-salon", label: "Hair salons", photo: PHOTOS.salonStudio, focus: "50% 30%" },
-  { to: "/for/barbershop", label: "Barbershops", photo: PHOTOS.barberCut, focus: "50% 35%" },
-  { to: "/for/nail-salon", label: "Nail salons", photo: PHOTOS.nailTechnician, focus: "50% 50%" },
+  // Industries 2 (B-006): 4:5 crops, so a portrait card is never an upscaled landscape file.
+  {
+    to: "/for/barbershop",
+    label: "Barbershops",
+    photo: MORE_PHOTOS.barberCutPortrait,
+    focus: "50% 35%",
+  },
+  {
+    to: "/for/nail-salon",
+    label: "Nail salons",
+    photo: MORE_PHOTOS.nailTechnicianPortrait,
+    focus: "50% 50%",
+  },
   {
     to: "/for/restaurant",
     label: "Restaurants",
-    photo: PHOTOS.restaurantDining,
+    photo: MORE_PHOTOS.restaurantDiningPortrait,
     focus: "50% 55%",
   },
 ];

@@ -48,16 +48,16 @@ export const nailSalon: Industry = {
     query: "nail salon Google Business Profile",
     title: "Nail salon Google Business Profile help | Kabsi",
     description:
-      "Kabsi looks after your nail salon Google Business Profile: seasonal designs posted, work photos checked, holiday hours asked and a reply ready for every review.",
+      "Kabsi looks after your nail salon Google Business Profile: new designs posted, work photos checked, holiday hours asked and a reply for every review.",
     h1: "Your nail salon on Google, looking polished.",
     mark: "looking polished.",
-    line: "Kabsi keeps your nail salon Google Business Profile fresh: seasonal designs as posts, photos checked, replies ready for your yes.",
+    line: "Kabsi keeps your nail salon Google Business Profile fresh: new designs as posts, photos checked, replies for your yes.",
     card: "Seasonal designs as posts, photos checked.",
     answer:
-      "A nail salon Google Business Profile is mostly photos and reviews. Kabsi turns a photo of a new design into a post, checks each photo before it goes to Google, drafts a reply to every review, and asks about holiday hours five days ahead. It also checks your main category every day, so clients searching for nails find a nail salon. You approve every change.",
+      "A nail salon Google Business Profile is mostly photos and reviews. Kabsi turns a photo of a new design into a post, checks each photo before it goes to Google, drafts a reply to every review, and asks about holiday hours five days ahead. It also checks your main category every day and tells you when Google shows a different one. You approve every change.",
     watch: {
       business: "Polish Room, Brighton",
-      line: "A nail salon filed as a beauty salon can be harder to find for nails. Kabsi checks your category every day.",
+      line: "Clients looking for nails expect a nail salon. Kabsi checks your main category against yours every day.",
       fields: ["Main category", "Opening hours", "Special hours", "Website", "Phone"],
       what: "Main category",
       google: "Beauty salon",
@@ -89,7 +89,7 @@ export const nailSalon: Industry = {
         "Polish Room on Kensington Gardens does gel extensions and opens on Sundays from 11 am.",
       sources: ["Polish Room's Google profile", "Polish Room's website"],
     },
-    related: ["lash-and-brow-studio", "hair-salon"],
+    related: ["hair-salon", "spa-and-massage"],
   },
   faqs: [
     {

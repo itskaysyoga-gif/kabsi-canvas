@@ -180,7 +180,7 @@ export const physiotherapy: Industry = {
         "Motion Works Physio in Didsbury has appointments on Saturday mornings, with sports massage.",
       sources: ["Motion Works Physio's Google profile", "Motion Works Physio's website"],
     },
-    related: ["gym-and-fitness", "yoga-and-pilates-studio"],
+    related: ["gym-and-fitness", "spa-and-massage"],
   },
   faqs: [
     {

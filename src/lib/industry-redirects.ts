@@ -16,5 +16,5 @@ export const LEGACY_INDUSTRY_MOVES: Record<string, string> = {
   "garages-and-auto-repair": "auto-repair",
   "hotels-and-guesthouses": "",
   "shops-and-boutiques": "",
-  florists: "florist",
+  florists: "",
 };

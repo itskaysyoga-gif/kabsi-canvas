@@ -1,4 +1,5 @@
 import { PHOTOS } from "@/components/kabsi/photos";
+import { MORE_PHOTOS } from "@/components/kabsi/photos-more";
 import type { Industry } from "./types";
 
 // Content 1: finished from docs/claims/gym-and-fitness.md, approved by lane R on 27 Oct 2026 (brief section 18). Harbour Strength Studio
@@ -19,7 +20,7 @@ export const gymFitness: Industry = {
     rival2: "Core Box Studio",
     near: ["Near the metro station", "By the towers"],
   },
-  photos: [PHOTOS.gymTraining, PHOTOS.gymTrainingTall],
+  photos: [PHOTOS.gymTraining, MORE_PHOTOS.gymTrainingTall],
   focus: "50% 45%",
   searches: [
     "gym",
@@ -145,10 +146,10 @@ export const gymFitness: Industry = {
     line: "Kabsi looks after your gym Google Business Profile: classes as posts, holiday hours asked, and replies ready for your yes.",
     card: "Classes as posts, holiday hours asked ahead.",
     answer:
-      "People pick a gym from its Google Business Profile: hours, photos, classes and reviews. Kabsi turns a new class or trial week into a post with real dates, asks about public holiday hours in time, drafts a reply to every review, and checks your category and hours every day. You approve every change before it reaches Google.",
+      "A gym Google Business Profile is where people check your hours, photos, classes and reviews. Kabsi turns a new class or trial week into a post with real dates, asks about public holiday hours in time, drafts a reply to every review, and checks your category and hours every day. You approve every change before it reaches Google.",
     watch: {
       business: "Harbour Strength Studio, Dubai",
-      line: "People searching for a gym should find a gym. Kabsi checks your main category and hours every day.",
+      line: "Your main category tells people what you are. Kabsi checks it, and your hours, every day.",
       fields: ["Main category", "Opening hours", "Special hours", "Website", "Phone"],
       what: "Main category",
       google: "Sports club",
@@ -176,7 +177,7 @@ export const gymFitness: Industry = {
       answer: "Harbour Strength Studio in Dubai Marina runs a 6 am strength class every weekday.",
       sources: ["Harbour Strength Studio's Google profile", "Harbour Strength Studio's website"],
     },
-    related: ["yoga-and-pilates-studio", "physiotherapy"],
+    related: ["physiotherapy", "spa-and-massage"],
   },
   faqs: [
     {

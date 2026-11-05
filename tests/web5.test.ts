@@ -21,8 +21,12 @@ const read = (f: string) => readFileSync(f, "utf8");
 
 describe("Design 9 Home (Web 5 part B)", () => {
   it("marks only the H1's second sentence with the yellow bar, once", () => {
+    // Industries 2: the bar is the shared Highlight component; D9Title uses it once.
     const title = read("src/components/kabsi/d9-title.tsx");
-    expect(title.match(/className="d9-mark"/g)).toHaveLength(1);
+    expect(title.match(/<Highlight>/g)).toHaveLength(1);
+    expect(read("src/components/kabsi/highlight.tsx").match(/className="d9-mark"/g)).toHaveLength(
+      1,
+    );
     expect(read("src/components/kabsi/d9-hero.tsx")).not.toContain('className="d9-mark"');
     expect(read("src/components/kabsi/d9-home.tsx")).not.toContain("d9-mark");
   });
@@ -133,12 +137,10 @@ describe("every public page on Design 9 (Web 5 part D)", () => {
   it("gives every PageHero the yellow bar on its title's last sentence", () => {
     expect(read("src/components/kabsi/page-hero.tsx")).toContain("marked = true");
   });
-  it("puts the steps line under Pricing's hero and the photo story on the hair salon page only", () => {
+  it("puts the steps line under Pricing's hero, and the photo story on every industry page (Industries 2)", () => {
     expect(read("src/components/kabsi/d8-pricing.tsx")).toContain(
       '<StepsLine id="pricing-steps-h" />',
     );
-    expect(read("src/components/kabsi/d8-industry.tsx")).toContain(
-      '{i.slug === "hair-salon" && <PhotoToPost />}',
-    );
+    expect(read("src/components/kabsi/d9-industry.tsx")).toContain("<PhotoToPost example=");
   });
 });

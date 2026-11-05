@@ -1,4 +1,5 @@
 import { PHOTOS } from "@/components/kabsi/photos";
+import { MORE_PHOTOS } from "@/components/kabsi/photos-more";
 import type { Industry } from "./types";
 
 // Content 1: finished from docs/claims/spa-and-massage.md, approved by lane R on 27 Oct 2026 (brief section 18). Stillwater Spa is
@@ -18,7 +19,7 @@ export const spaMassage: Industry = {
     rival2: "Quiet Hands Massage",
     near: ["Near the beach road", "By the hotel district"],
   },
-  photos: [PHOTOS.massageTherapist, PHOTOS.spaFacialTall],
+  photos: [PHOTOS.massageTherapist, MORE_PHOTOS.spaFacialTall],
   focus: "50% 50%",
   searches: [
     "spa",
@@ -181,7 +182,7 @@ export const spaMassage: Industry = {
         "Stillwater Spa in Jumeirah is open until 1 am during Ramadan, with treatments from 60 minutes.",
       sources: ["Stillwater Spa's Google profile", "Stillwater Spa's website"],
     },
-    related: ["medical-and-aesthetic-clinic", "yoga-and-pilates-studio"],
+    related: ["medical-and-aesthetic-clinic", "nail-salon"],
   },
   faqs: [
     {

@@ -1,4 +1,5 @@
 import { PHOTOS } from "@/components/kabsi/photos";
+import { MORE_PHOTOS } from "@/components/kabsi/photos-more";
 import type { Industry } from "./types";
 
 // Design 8 (Web 4c, lane R's approval of 1 Nov 2026): the barbershop page written for its own trade. Every Google
@@ -19,7 +20,7 @@ export const barbershop: Industry = {
     rival2: "The Barber Room",
     near: ["Near the station", "By the market"],
   },
-  photos: [PHOTOS.barberCut, PHOTOS.barberShaveTall],
+  photos: [PHOTOS.barberCut, MORE_PHOTOS.barberShaveTall],
   focus: "50% 40%",
   searches: ["barber near me", "walk in barber", "skin fade", "beard trim", "barber open now"],
   tasks: [
@@ -88,7 +89,7 @@ export const barbershop: Industry = {
       answer: "Fade and Co on Call Lane takes walk-ins on Saturdays from 8 am to 6 pm.",
       sources: ["Fade and Co's Google profile", "Fade and Co's website"],
     },
-    related: ["hair-salon", "tattoo-studio"],
+    related: ["hair-salon", "nail-salon"],
   },
   faqs: [
     {
