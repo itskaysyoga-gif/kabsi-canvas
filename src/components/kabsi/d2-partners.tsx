@@ -19,6 +19,7 @@ import {
   Faq,
   Field,
   SectionHead,
+  WhatsAppGlyph,
   buttonClass,
 } from "./ui";
 import { Marked } from "@/components/kabsi/highlight";
@@ -258,6 +259,7 @@ export function PartnersPage() {
                 rel="noreferrer"
                 className={`${buttonClass("secondary")} mt-6`}
               >
+                <WhatsAppGlyph className="size-5" />
                 Apply on WhatsApp
               </a>
             )}
@@ -287,6 +289,7 @@ function ApplyButtons({ className }: { className?: string }) {
           rel="noreferrer"
           className={buttonClass("primary")}
         >
+          <WhatsAppGlyph className="size-5" />
           Apply on WhatsApp
         </a>
       )}
