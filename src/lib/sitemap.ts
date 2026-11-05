@@ -4,7 +4,10 @@
 // tests/sitemap.test.ts keeps this list equal to the routes and the industry content.
 import type { GuideMeta } from "@/content/guides/types";
 import { SITE_URL } from "@/lib/site";
+import pages from "@/content/sitemap-pages.json";
+import lastmods from "@/content/lastmod.json";
 
+<<<<<<< HEAD
 /** [path, lastmod, changefreq, priority] for every indexed page that is not a guide. */
 export const SITEMAP_PAGES: [string, string, string, string][] = [
   ["/", "2026-10-27", "weekly", "1.0"],
@@ -35,20 +38,35 @@ export const SITEMAP_PAGES: [string, string, string, string][] = [
   ["/terms", "2026-10-27", "yearly", "0.2"],
   ["/guides", "2026-10-27", "monthly", "0.5"],
 ];
+=======
+// Guides 4 part C (master plan 30.32 item 4): no date is typed here. The pages and the files each one is made of are in
+// src/content/sitemap-pages.json; each page's lastmod is the day of the last commit that touched those files, written to
+// src/content/lastmod.json by scripts/write-lastmod.mjs at build. A guide's lastmod is its content file's `updated` date.
+export type SitemapPage = { path: string; changefreq: string; priority: string; sources: string[] };
+export const SITEMAP_PAGES: SitemapPage[] = pages;
+export const LASTMOD: Record<string, string> = lastmods;
+>>>>>>> origin/main
 
 /** The XML for a list of public guides (newest first is fine; order does not matter to search engines). */
 export function sitemapXml(guides: Pick<GuideMeta, "slug" | "updated">[]): string {
   const url = (path: string, lastmod: string, freq: string, pri: string) =>
     `  <url><loc>${SITE_URL}${path === "/" ? "" : path}</loc><lastmod>${lastmod}</lastmod><changefreq>${freq}</changefreq><priority>${pri}</priority></url>`;
-  const newest =
-    guides
-      .map((g) => g.updated)
-      .sort()
-      .at(-1) ?? "2026-10-27";
+  const newest = guides
+    .map((g) => g.updated)
+    .sort()
+    .at(-1);
   const rows = [
-    ...SITEMAP_PAGES.map(([p, l, f, r]) =>
-      p === "/guides" ? url(p, newest > l ? newest : l, f, r) : url(p, l, f, r),
-    ),
+    ...SITEMAP_PAGES.map(({ path, changefreq, priority }) => {
+      const own = LASTMOD[path];
+      if (!own) throw new Error(`no lastmod for ${path}: run node scripts/write-lastmod.mjs`);
+      // The guides list changes when its newest guide does.
+      return url(
+        path,
+        path === "/guides" && newest && newest > own ? newest : own,
+        changefreq,
+        priority,
+      );
+    }),
     ...guides.map((g) => url(`/guides/${g.slug}`, g.updated, "monthly", "0.5")),
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${rows.join("\n")}\n</urlset>\n`;

@@ -12,6 +12,17 @@
   "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude,glob)docs/**' ':(exclude,glob)**/*.md'",
   "redirects": [
     {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "kabsi-canvas.vercel.app"
+        }
+      ],
+      "destination": "https://kabsi.co/$1",
+      "statusCode": 308
+    },
+    {
       "source": "/for/:group(beauty-and-wellness|food-and-drink|health|auto|home-services|hospitality|fitness-and-sport|retail|professional-services)",
       "destination": "/for",
       "statusCode": 301

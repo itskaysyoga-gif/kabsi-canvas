@@ -1422,3 +1422,9 @@ Every guide's words are in its own content file, src/content/guides/<slug>.tsx; 
 ### Part B: Nora knows the guides and industry pages (branch claude/guides4-b)
 
 - Nora answers first. Then, only when one page in her list answers the visitor's question, she may add one short line with one Markdown link to it, in her own words, for example "There is a plain guide on this: [Someone changed my hours on Google. How do I fix it?](/guides/someone-changed-my-hours-on-google)." The link's words are the page's own title. At most one link, never instead of an answer, never a page that is not public, and none when she hands the visitor to a person. No other line changes; the guides and industry pages are named in the facts.
+
+### Part C: search housekeeping (branch claude/guides4-c)
+
+- **404 and error screens**: one <title> each, "Kabsi: This page is not here." and "Kabsi: Something went wrong on our side." (the root's default "Kabsi" no longer sits beside them). No other wording changes.
+- **Facts (02, 07, 13)**: "The printable counter card from the free review link tool is free for everyone. The branded counter card and table tent PDFs (made for a business by Get reviews) come with the plans." The FAQ's "Is there a free part?" answer names the printable counter card, not the table card. No screen's wording changes: the Get reviews buttons "Print a counter card" and "Print a table card" stay.
+- **Guides**: a guide may quote Google's help page on how local results are chosen, word for word in quotation marks, when it cites that page with its link and the date read (tests/claims-k144.test.ts). Promises of rankings and the word "prominence" outside such a quote stay banned.
