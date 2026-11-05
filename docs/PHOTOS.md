@@ -83,3 +83,46 @@ muted, inline and looping, with preload="none" below the fold and a Play button;
 and the written steps only.
 
 Left out on 25 Oct: "a cafe owner at work 1" (out of focus) and "dental clinic at work 2" (the dentist has his back turned).
+
+## Added 5 Nov 2026 (Industries 2: nine new industries)
+
+Rashid uploaded 48 free Unsplash and Pexels photos (free for commercial use, no attribution needed) to main on 5 Nov 2026, in
+photos-2026-11-05/; lane R chose one per slot. Industries 2 cropped each to 3:2 (wide) or 2:3 (tall) and made 1600 and 800 px
+WebP copies at quality 72 in src/assets/photos. The folder was removed from main in the same pull request (git history keeps the
+originals). Source: Unsplash or Pexels, uploaded by Rashid 5 Nov 2026; page links not kept. Blurred before cropping (a Gaussian
+blur over the area, as the 26 Oct dentist photo was): a lit sign on the florist's counter; the posters, price tags and "Flower
+gift" banner at the florist's door; the maker's names on the optician's eye test machine; the maker's names on the dental chair
+and lamp; a museum badge on the vet's cap; the lettering in the tattoo on the client's wrist; a logo on a yoga shirt and the
+brand on a yoga mat. Rashid's yoga file names were swapped: "yoga-pilates-tall 3" is landscape (used as wide) and
+"yoga-pilates-wide 2" is portrait (used as tall).
+
+| File               | Upload chosen                | What it shows                                              | Best use                                    | Alt text                                             |
+| ------------------ | ---------------------------- | ---------------------------------------------------------- | ------------------------------------------- | ---------------------------------------------------- |
+| car-wash-wide      | car-wash-wide 1.jpg          | A hand soaping a dark car door with a sponge               | Car wash page hero, /for card               | A car washer soaping a car door with a sponge        |
+| car-wash-tall      | car-washt-tall 1.jpg         | A blue car covered in soap, a wash mitt                    | Car wash page, photo to post                | A blue car covered in soap at a car wash             |
+| dental-clinic-wide | dental-clinic-wide 2.jpg     | A dentist pointing at an X-ray on a screen, patient seated | Dental clinic page hero, /for card          | A dentist showing a patient her X-ray on a screen    |
+| florist-wide       | florist-wide 1.jpg           | A florist's shop inside, flowers and hanging lamps         | Florist page hero, /for card                | Inside a florist's shop full of flowers and hanging lamps |
+| florist-tall       | florist-tall 2.jpg           | Potted begonias and anthuriums at a shop door              | Florist page, photo to post                 | Potted flowers outside a florist's shop door         |
+| lash-brow-wide     | lash-brow-wide 1.jpg         | An eye with lash extensions and a shaped brow, close       | Lash and brow page hero, /for card          | An eye with lash extensions and shaped brows, close up |
+| lash-brow-tall     | lash-brow-tall 1.jpg         | Half a face, fresh lash extensions, warm light             | Lash and brow page, photo to post           | A client's eye with fresh lash extensions            |
+| optician-wide      | optician-wide 2.jpg          | A child at an eye test machine                             | Optician page hero, /for card               | A child having an eye test at an optician's          |
+| optician-tall      | optician-tall 3.jpg          | Frames on glass shelves against brick                      | Optician page, photo to post                | Glasses frames on glass shelves at an optician's     |
+| pet-grooming-wide  | pet-grooming-wide 1.jpg      | A groomer's scissors trimming a white poodle               | Pet grooming page hero, /for card           | A groomer trimming a small white dog's fur           |
+| pet-grooming-tall  | pet-grooming-tall 2.jpg      | A French bulldog in a bath, smiling                        | Pet grooming page, photo to post            | A happy dog being bathed by a groomer                |
+| tattoo-wide        | tattoo-wide 2.jpg            | Gloved hands inking a line work sleeve                     | Tattoo studio page hero, /for card          | A tattoo artist in black gloves inking an arm        |
+| tattoo-tall        | tattoo-tall 1.jpg            | An artist in a mask working on a forearm, dark             | Tattoo studio page, photo to post           | A tattoo artist working on a client's forearm        |
+| vet-wide           | vet-wide 1.jpg               | A vet in scrubs and gloves treating an animal              | Vet page hero, /for card                    | A vet in scrubs treating an animal in surgery        |
+| vet-tall           | vet-tall 3.jpg               | Gloved hands holding a white cat on the table              | Vet page, photo to post                     | A vet checking a white cat on the table              |
+| yoga-pilates-wide  | yoga-pilates-tall 3.jpg      | A class in a forward fold on mats, big windows             | Yoga and pilates page hero, /for card       | A yoga class stretching forward on mats              |
+| yoga-pilates-tall  | yoga-pilates-wide 2.jpg      | Three people in a low lunge, arms up, bright studio        | Yoga and pilates page, photo to post        | A yoga class in a bright studio, arms raised         |
+
+The dental clinic's tall slot is the existing dentist-patient photo.
+
+### Crops of earlier photos (B-006 and the tall slots)
+
+Go live 1's audit (B-006) found landscape photos cropped into portrait cards and upscaled 1.5 to 1.65 times. From the 1600 px
+copies, Industries 2 made 4:5 crops (853 by 1067 and 512 by 640, `-portrait-`) of barber-cut, nail-technician,
+restaurant-dining, auto-garage, bakery-window, gym-training, aesthetic-treatment, physio-stretch and massage-therapist, for
+portrait cards; and 2:3 crops (711 by 1067 and 400 by 600, `-tall-`) of barber-shave, spa-facial, bakery-window, auto-mechanic
+and gym-training, for the tall slot beside "Send a photo. Get a Google post." on trades with no portrait photo. The alt text is
+the source photo's. The industry page heroes now use the wide photos at 3:2, so no landscape file is cut into a portrait there.
