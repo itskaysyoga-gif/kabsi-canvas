@@ -51,10 +51,15 @@ test.describe("public pages", () => {
     });
   }
 
-  test("every guide in the sitemap: one h1, no sideways scroll, no serious axe issue", async ({ page, request }) => {
+  test("every guide in the sitemap: one h1, no sideways scroll, no serious axe issue", async ({
+    page,
+    request,
+  }) => {
     test.setTimeout(600_000);
     const xml = await (await request.get("/sitemap.xml")).text();
-    const guides = [...xml.matchAll(/<loc>https:\/\/kabsi\.co(\/guides\/[^<]+)<\/loc>/g)].map((m) => m[1]!);
+    const guides = [...xml.matchAll(/<loc>https:\/\/kabsi\.co(\/guides\/[^<]+)<\/loc>/g)].map(
+      (m) => m[1]!,
+    );
     expect(guides.length, "guides in the sitemap").toBeGreaterThan(0);
     for (const route of guides) {
       const res = await page.goto(route);

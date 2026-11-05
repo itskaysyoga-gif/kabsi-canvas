@@ -31,7 +31,11 @@ describe("no line says what Google's ranking uses or rewards (K-144)", () => {
     for (const re of RETIRED) expect(words).not.toMatch(re);
   });
   it("the facts file and the published full-facts file", () => {
-    for (const file of ["knowledge/kabsi-facts.md", "public/llms-full.txt", "src/content/llms-base.txt"]) {
+    for (const file of [
+      "knowledge/kabsi-facts.md",
+      "public/llms-full.txt",
+      "src/content/llms-base.txt",
+    ]) {
       const text = readText(file);
       for (const re of RETIRED) expect(text, `${file} ${re}`).not.toMatch(re);
     }

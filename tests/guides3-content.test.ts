@@ -72,9 +72,9 @@ describe("Guides 3 content files", () => {
       });
       it("no em dash, en dash, exclamation mark or Arabic", () => {
         const raw = readFileSync(`src/content/guides/${g.slug}.tsx`, "utf8");
-        expect(raw).not.toMatch(/[–—]/);
+        expect(raw).not.toMatch(/[\u2013\u2014]/);
         expect(all).not.toMatch(/!/);
-        expect(raw).not.toMatch(/[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/);
+        expect(raw).not.toMatch(/[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/);
       });
       it("none of the never-say words", () => {
         for (const re of NEVER) expect(all, `${g.slug} ${re}`).not.toMatch(re);
