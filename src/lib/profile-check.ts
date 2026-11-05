@@ -169,9 +169,12 @@ export async function emailCheck(o: {
   tips: boolean;
   page: "/google-profile-check" | "/get-started" | "/";
   turnstile: string;
+  /** Scan 2 (30.29 item B): the free check's code, so the report sent is the report shown. */
+  code?: string | null;
 }) {
   await call<{ ok: true }>({
     action: "email",
+    ...(o.code ? { code: o.code } : {}),
     place_id: o.placeId,
     email: o.email,
     tips: o.tips,
@@ -186,9 +189,11 @@ export async function whatsappCheck(o: {
   phone: string;
   page: "/google-profile-check" | "/get-started" | "/";
   turnstile: string;
+  code?: string | null;
 }) {
   await call<{ ok: true }>({
     action: "whatsapp",
+    ...(o.code ? { code: o.code } : {}),
     place_id: o.placeId,
     phone: o.phone,
     consent: true,

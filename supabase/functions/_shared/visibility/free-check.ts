@@ -12,7 +12,7 @@ import { COST_MICROS, DEPTH, type Identity, isSame, type MapsItem, type MapsProv
 import { gridPoints, radiusFor, type LatLng } from "./grid.ts";
 import { locate } from "./locate.ts";
 import { businessType, type CellResult, competitors, summarize } from "./scan.ts";
-import { nearbyPlaces, type Nearby, offsetWords, ordinal, type PlaceName } from "./nearby.ts";
+import { cardLine, nearbyPlaces, type Nearby, offsetWords, ordinal, type PlaceName } from "./nearby.ts";
 import type { FreeCheck as AiCheck } from "./ai/run.ts";
 import { core, norm } from "./ai/analyze.ts";
 import { countryName, latinName } from "./area.ts";
@@ -289,6 +289,27 @@ export function publicAi(a: StoredAi) {
     asked_at: a.asked_at ?? null, named: a.named, line: l.line, question_line: l.question, asked_line: l.asked,
     sources: l.sources, sources_line: l.sources_line, named_other: a.question ? a.named_other ?? 0 : null,
     accuracy: a.accuracy ?? null, label: AI_LABEL,
+  };
+}
+
+/** A free check's code: 8 letters and digits from newCode's alphabet. */
+export const CODE_RE = /^[ABCDEFGHJKMNPQRSTUVWXYZ2-9]{8}$/;
+export const NOT_PART = "The nearby search and the AI answer were not part of this check.";
+
+/**
+ * Scan 2 (30.29 item B): what "Send me this report" carries beyond the Google part, in the page's own words: the nearby
+ * count line and the three cards, the AI question with its line and date, and the link to the saved result. Null when the
+ * check never finished (the report then says NOT_PART).
+ */
+export function reportParts(c: CheckRow, appUrl: string): { nearby: string[]; ai: string[]; link: string } | null {
+  if (c.state !== "done") return null;
+  const v = publicView(c);
+  const n = v.map.state === "done" ? v.map.nearby : null;
+  const l = aiLines(c.ai);
+  return {
+    nearby: n ? [n.count_line, ...n.cards.map((x) => cardLine(x, n.keyword))] : [],
+    ai: l ? [l.question, l.line, l.asked].filter((x): x is string => !!x) : [],
+    link: `${appUrl.replace(/\/$/, "")}/scan/${c.code}`,
   };
 }
 

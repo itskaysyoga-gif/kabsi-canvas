@@ -1152,3 +1152,10 @@ Every new or changed line of Scan 2, for lane R. Each line names its file.
 - A nearby card whose first business has a name not in Latin letters: "[place], another business came first. You were [position]." (WhatsApp words) and "First: another business" (the WhatsApp image).
 - A Geoapify name that is a shop or another business is not used: "Near Contessa Fashion" becomes "About [distance] [direction] of your [business type]".
 
+### Send me this report (profile-snapshot.ts, scan-live.tsx; Scan 2 part B)
+
+- The email, after the Google part, when the check finished: the heading "Where you come up nearby", the count line ("In the first 3 at [n] of 49 places Kabsi checked.") and the three cards in words ("Near your [business type] you came up [position] for '[term]'.", "[place], [business] came first. You were [position].", "[place], you came first."); the heading "An answer customers might see", "We asked ChatGPT: '[question]'", the AI line and "Asked on [date] through OpenAI's API, with web search. ..."; then the link "kabsi.co/scan/[code]".
+- New, when there is no finished check: "The nearby search and the AI answer were not part of this check."
+- The WhatsApp report (the approved template, its second parameter): the profile line as today, then the count line, the AI line and "kabsi.co/scan/[code]", within 900 characters.
+- New error for a report asked with another business's code: "That report is for another business. Reload the page and try again."
+
