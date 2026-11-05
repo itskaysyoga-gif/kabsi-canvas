@@ -64,8 +64,8 @@ export const guide: GuideDoc = {
             would stop working.
           </p>
           <p>
-            The steps are the same for a business in the UK and in the UAE. The full walk-through is
-            in{" "}
+            Google says the options you are offered depend on your business type, public info,
+            region and business hours. The full walk-through is in{" "}
             <GuideLink slug="how-to-verify-google-business-profile">
               how to verify your Google Business Profile
             </GuideLink>
@@ -119,8 +119,9 @@ export const guide: GuideDoc = {
           </li>
           <li>
             Google says a virtual office is not an eligible location, and P.O. boxes or mailboxes at
-            remote locations are not acceptable addresses. A co-working space qualifies only with
-            clear signage and customers received there during business hours.
+            remote locations are not acceptable addresses. An office at a co-working space qualifies
+            only with clear signage, customers received there during business hours, and your own
+            staff there during business hours.
           </li>
           <li>
             Your business name should be your real-world name. Google does not allow unnecessary
@@ -136,10 +137,9 @@ export const guide: GuideDoc = {
         "Google says that when you edit your business info, changes can take up to 3 days to appear, and that rankings for new businesses can take up to a month to appear in search results. If you verified recently or changed your address, wait that long before you change anything else.",
       body: (
         <p>
-          Changing the name or address again while you wait can start the review over, so make one
-          correct change and leave it. If more than a month has passed and a search for your exact
-          name still finds nothing, go back to the verification and suspension checks above, then
-          ask Google for help from your profile.
+          Make one correct change and give it that time before you judge the result. If more than a
+          month has passed and a search for your exact name still finds nothing, go back to the
+          verification and suspension checks above, then ask Google for help from your profile.
         </p>
       ),
     },
@@ -172,14 +172,15 @@ export const guide: GuideDoc = {
       id: "uk-uae",
       heading: "Is anything different in the UK or the UAE?",
       answer:
-        "No. Google's verification, guidelines and suspension rules on these pages are the same in both countries. What differs is the detail you type: write your address the way your local post and customers use it, and check that the town Google shows is the one customers search for.",
+        "The help pages behind this guide set no separate rules for the UK or the UAE. The one difference Google names is in verification: the methods you are offered depend partly on your region, so what you see may not match a business in another country.",
       body: (
         <p>
-          In the UK that usually means the street, the town and the postcode. In the UAE, where many
-          addresses use a building, a street and an area, use the area name customers know, such as
-          Dubai Marina or Al Barsha, and place the map marker on your real entrance. If your town or
-          area looks wrong on the profile, correct it once from your profile and wait up to 3 days
-          for the change to appear.
+          In both countries Google asks for a precise, accurate address or service area, and for
+          businesses that show their address, permanent signage with the business name at that
+          address. If your address has no street number, or Google cannot find it, Google's
+          guidelines say you can place your business's location directly on the map. If the address
+          looks wrong on your profile, correct it from your profile and allow up to 3 days for the
+          change to appear.
         </p>
       ),
     },
@@ -208,11 +209,11 @@ export const guide: GuideDoc = {
   faqs: [
     {
       q: "Why can I see my business on Google but customers cannot?",
-      a: "You may be signed in to the account that manages the profile, which shows you the profile even when it is not public. Search your name and town in a private window, signed out. If it does not appear there, check verification and suspension first.",
+      a: "Google says you must be signed in to the account linked to the profile to find it as its manager, so what you see signed in is not a test of what customers see. Search your name and town in a private window, signed out. If it does not appear there, check verification and suspension first.",
     },
     {
       q: "Can I pay Google to show my business higher on Maps?",
-      a: "No. Google's help says there is no way to request or pay for a better local ranking. Ads are a separate, paid product and are marked as ads.",
+      a: "No. Google's help says there is no way to request or pay for a better local ranking.",
     },
     {
       q: "Should I delete my profile and start again?",

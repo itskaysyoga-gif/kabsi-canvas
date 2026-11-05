@@ -8,8 +8,10 @@ import { readFileSync } from "node:fs";
 import { axeClean, keep, MASKS, noBanner, settle } from "./helpers/page";
 import { mockFreeCheck } from "./helpers/scan2-mock";
 
-const sitemap = readFileSync("public/sitemap.xml", "utf8");
-const fromSitemap = [...sitemap.matchAll(/<loc>https:\/\/kabsi\.co([^<]*)<\/loc>/g)].map(
+// Guides 3: the sitemap is a server route; its fixed pages are the list in src/lib/sitemap.ts, and the guides it holds on
+// the day are visited by "every guide in the sitemap" below.
+const sitemapSource = readFileSync("src/lib/sitemap.ts", "utf8");
+const fromSitemap = [...sitemapSource.matchAll(/^\s*\["(\/[^"]*)", "\d{4}-\d\d-\d\d"/gm)].map(
   (m) => m[1] ?? "",
 );
 // The sitemap holds what search engines may index; the app's own public doors are listed here.
@@ -48,6 +50,24 @@ test.describe("public pages", () => {
       void info;
     });
   }
+
+  test("every guide in the sitemap: one h1, no sideways scroll, no serious axe issue", async ({ page, request }) => {
+    test.setTimeout(600_000);
+    const xml = await (await request.get("/sitemap.xml")).text();
+    const guides = [...xml.matchAll(/<loc>https:\/\/kabsi\.co(\/guides\/[^<]+)<\/loc>/g)].map((m) => m[1]!);
+    expect(guides.length, "guides in the sitemap").toBeGreaterThan(0);
+    for (const route of guides) {
+      const res = await page.goto(route);
+      expect(res?.status(), `${route} status`).toBe(200);
+      await settle(page);
+      await expect(page.locator("h1"), route).toHaveCount(1);
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      expect(overflow, `${route} horizontal scroll`).toBeLessThanOrEqual(0);
+      await axeClean(page, route, []);
+    }
+  });
 
   test("an unknown address shows the Kabsi 404 page, not a blank screen", async ({ page }) => {
     await noBanner(page);

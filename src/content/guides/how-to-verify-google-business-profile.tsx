@@ -105,8 +105,9 @@ export const guide: GuideDoc = {
             </li>
           </ul>
           <p>
-            The UK and the UAE use the same steps. Because Google says the methods depend partly on
-            region, the list you see may differ from a friend's business in another country.
+            Google's pages set no separate steps for the UK or the UAE, but Google says the methods
+            depend partly on region, so the list you see may differ from a business in another
+            country.
           </p>
         </>
       ),
@@ -124,7 +125,7 @@ export const guide: GuideDoc = {
             yes={[
               "Street signs, the building number, or the businesses next door.",
               "Your sign with the business name on a permanent fixture, matching the name on your profile.",
-              "Something only staff can open: the till, the kitchen, a storeroom, or your keys in the door.",
+              "Something only staff can open: the till, the kitchen, a storeroom or your point of sale system.",
               "For a business that travels to customers: landmarks near your address, your tools, a branded van you unlock.",
             ]}
             no={[
@@ -204,8 +205,9 @@ export const guide: GuideDoc = {
             </li>
           </ul>
           <p>
-            If someone else already verified a profile for your business, you cannot verify it again
-            yourself: you ask that owner for ownership, as explained in{" "}
+            If someone else already verified a profile for your business, Google's route is to
+            request ownership from that owner; if they do not reply within 3 days, Google may give
+            you the option to claim the profile. The steps are in{" "}
             <GuideLink slug="transfer-google-business-profile-ownership">
               how to transfer ownership of a Google Business Profile
             </GuideLink>
