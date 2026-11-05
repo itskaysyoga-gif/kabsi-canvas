@@ -3,6 +3,7 @@
 // headline, and never yellow text on ivory or white. On a charcoal band the headline's second sentence is yellow text
 // instead (`text-phrase`), not this bar. DESIGN.md, "The highlight bar".
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 export function Highlight({ children }: { children: ReactNode }) {
   return <span className="d9-mark">{children}</span>;
@@ -34,5 +35,35 @@ export function Marked({ text, mark }: { text: string; mark?: string | undefined
       <Highlight>{mark}</Highlight>
       {text.slice(at + mark.length)}
     </>
+  );
+}
+
+// Scan 3: the small yellow pieces live here (they were in d9-hero.tsx), so a page can use them without the hero.
+/** A short label, charcoal on yellow. */
+export function YellowLabel({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <p
+      className={cn(
+        "inline-flex rounded-full bg-kb-yellow px-3 py-1 text-label font-bold text-kb-black",
+        className,
+      )}
+    >
+      {children}
+    </p>
+  );
+}
+
+/** A numbered marker, charcoal on yellow. */
+export function YellowNumber({ n, className }: { n: number; className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "inline-grid size-7 shrink-0 place-items-center rounded-full bg-kb-yellow text-label font-bold text-kb-black",
+        className,
+      )}
+    >
+      {n}
+    </span>
   );
 }

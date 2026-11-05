@@ -164,6 +164,9 @@ export type FreeCheck = {
     line: string | null;
     label: string;
     provider?: string;
+    /** Scan 3: the model that answered and how many named businesses could not be matched to the area. */
+    model?: string | null;
+    named_other?: number | null;
     /** Scan 2 (30.29): what was asked and when. Null on a check from before Scan 2. */
     question?: string | null;
     question_line?: string | null;
@@ -181,6 +184,8 @@ export type FreeCheck = {
         top3: number;
         points: number;
         dots: { row: number; col: number; rank: number | null }[];
+        /** Scan 3: the businesses that came up at the most of the 49 points, with how many. */
+        rivals?: { name: string; places: number }[];
       }
     | { state: "mapping" | "failed"; line: string | null };
   whatsapp_text?: string;
