@@ -43,7 +43,7 @@ export function GuideCover({
     <div
       aria-hidden="true"
       className={cn(
-        "theme-dark relative flex aspect-[1200/630] w-full flex-col justify-between overflow-hidden rounded-panel bg-band p-5 sm:p-8",
+        "theme-dark relative flex aspect-[1200/630] w-full flex-col justify-between overflow-hidden rounded-panel bg-band p-5 [container-type:inline-size] sm:p-8",
         className,
       )}
     >
@@ -55,10 +55,10 @@ export function GuideCover({
         </span>
       </div>
       <div>
-        <p className="max-w-[22ch] font-display text-[clamp(1.25rem,4.6vw,2.4rem)] leading-[1.08] font-bold tracking-[-0.02em] text-balance text-text-1">
+        <p className="max-w-[16em] font-display text-[6.2cqw] leading-[1.06] font-bold tracking-[-0.02em] text-balance text-text-1">
           {title}
         </p>
-        <span className="mt-4 block h-2 w-16 rounded-full bg-kb-yellow sm:mt-6 sm:w-24" />
+        <span className="mt-[2.8cqw] block h-[1.2cqw] w-[10cqw] rounded-full bg-kb-yellow" />
       </div>
     </div>
   );
@@ -68,7 +68,8 @@ function Byline({ g }: { g: GuideMeta; sources: GuideDoc["sources"] }) {
   return (
     <p className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-small text-text-2">
       <span>
-        By Kabsi. Published {longDate(g.publishAt)}. Updated {longDate(g.updated)}.
+        By Kabsi. Published {longDate(g.publishAt)}.
+        {g.updated > g.publishAt.slice(0, 10) ? ` Updated ${longDate(g.updated)}.` : ""}
       </span>
       <span className="inline-flex items-center gap-1.5">
         <Clock3 className="size-4" aria-hidden="true" /> {g.minutes} min read
