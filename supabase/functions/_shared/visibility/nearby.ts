@@ -10,6 +10,7 @@
 import { DEPTH, isSame, type Identity } from "./dataforseo.ts";
 import { type Direction, directionOf, GRID_SIZE, type LatLng } from "./grid.ts";
 import type { CellResult } from "./scan.ts";
+import { latinName } from "./area.ts";
 
 export const SAMPLE_NOTE = "Sample Google Maps results, not customer counts.";
 
@@ -30,6 +31,8 @@ export type NearbyCard = {
   /** The business that came first there, or null when it was the owner's own. */
   first: string | null;
   firstIsYou: boolean;
+  /** 30.29: the business that came first has a name not in Latin letters, so it reads "another business". */
+  first_hidden?: boolean;
 };
 export type Nearby = { cards: NearbyCard[]; top3: number; points: number; count_line: string; keyword: string; note: string };
 
@@ -126,6 +129,7 @@ export function cardLine(c: NearbyCard, keyword: string): string {
       : `${c.place} you were ${c.position} for '${keyword}'.`;
   }
   if (c.firstIsYou) return `${c.place}, you came first.`;
+  if (c.first_hidden || (c.first && !latinName(c.first))) return `${c.place}, another business came first. You were ${c.position}.`;
   return c.first ? `${c.place}, ${c.first} came first. You were ${c.position}.` : `${c.place}, you were ${c.position}.`;
 }
 

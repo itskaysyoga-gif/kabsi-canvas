@@ -25,6 +25,7 @@ import type { PlacesResult } from "./google/places/live.ts";
 import type { EmailContent } from "./email/template.ts";
 import { type CoachRow, freeChecklist } from "./coach/catalog.ts";
 import { FREE_TOOL_BUSY } from "./free-tool-busy.ts";
+import { areaOfPlace } from "./visibility/area.ts";
 
 export const TIPS_CONSENT_TEXT = "Send me tips on managing my Google profile";
 /** The words next to the WhatsApp tick. Keep equal to WHATSAPP_CONSENT_TEXT in src/lib/profile-check.ts (a test checks it). */
@@ -54,6 +55,8 @@ export type Snapshot = {
   rating: number | null; review_count: number | null; business_status: string | null;
   open_now: boolean | null; hours: string[]; phone: string | null; website: string | null;
   has_photos: boolean; photo_count: number; flags: Flag[]; checklist: CoachRow[]; cached: boolean;
+  /** Scan 2 (30.29): the town, for the free check's AI question; from the address, inside the same field mask. */
+  area: string | null;
 };
 
 const ORDER: Record<Tone, number> = { danger: 0, warning: 1, neutral: 2 };
@@ -63,7 +66,7 @@ const ORDER: Record<Tone, number> = { danger: 0, warning: 1, neutral: 2 };
 // connects. Nothing here widens the Places field mask (tests hold the mask). Polish 2 (lane R, 3 Nov 2026): each finding's
 // next step is one Kabsi can do today; a phone, website, category or open status Kabsi cannot set for the owner names
 // the owner's own step and what Kabsi then does (the daily check, the Profile Coach).
-export function flags(s: Omit<Snapshot, "flags" | "checklist" | "cached">): Flag[] {
+export function flags(s: Omit<Snapshot, "flags" | "checklist" | "cached" | "area">): Flag[] {
   const out: Flag[] = [];
   if (s.business_status === "CLOSED_PERMANENTLY") {
     out.push({ tone: "danger", fact: "Google shows this business as permanently closed.", action: "If that is wrong, Kabsi shows you the steps to ask Google to correct it." });
@@ -108,7 +111,7 @@ export function buildSnapshot(placeId: string, p: Place, cached: boolean): Snaps
     photo_count: Math.min(p.photos?.length ?? 0, 10),
   };
   // The Profile Coach checklist (P0.8-09): the same rows the owner sees in the app; what public data cannot show says so.
-  return { ...base, flags: flags(base), checklist: freeChecklist(base), cached };
+  return { ...base, flags: flags(base), checklist: freeChecklist(base), cached, area: areaOfPlace(p) };
 }
 
 export type Deps = {

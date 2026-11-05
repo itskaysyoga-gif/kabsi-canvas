@@ -10,7 +10,13 @@ export type AiProviderName = "chatgpt" | "perplexity" | "gemini";
 export const PROVIDERS: readonly AiProviderName[] = ["chatgpt", "perplexity", "gemini"];
 
 export type AiSource = { domain: string; title: string };
-export type RawAnswer = { text: string; sources: AiSource[]; model: string; costMicros: number; sourceCount: number };
+export type RawAnswer = {
+  text: string; sources: AiSource[]; model: string; costMicros: number; sourceCount: number;
+  /** Scan 2: ChatGPT was asked with web search forced on. */
+  webSearchForced?: boolean;
+  /** Scan 2: DataForSEO did not know the town, so the same question was asked once more without it. */
+  cityDropped?: boolean;
+};
 export type AskContext = { country: string | null; city: string | null; lat?: number | null; lng?: number | null };
 
 export interface AiProvider {
@@ -104,18 +110,39 @@ export function dataForSeoAi(name: "chatgpt" | "perplexity", login: string, pass
     live: true,
     async ask(prompt, ctx) {
       const body: Record<string, unknown> = { user_prompt: prompt.slice(0, 500), model_name: model, max_output_tokens: 1024 };
-      if (name === "chatgpt") body.web_search = true;
+      // Scan 2 (30.29): ChatGPT always searches the web for these questions, from the business's country and town.
+      if (name === "chatgpt") {
+        body.web_search = true;
+        body.force_web_search = true;
+      }
       if (ctx.country) body.web_search_country_iso_code = ctx.country.toUpperCase();
       if (ctx.city && name === "chatgpt") body.web_search_city = ctx.city;
-      const res = await fetcher(`${DFS}/${PATH[name]}/llm_responses/live`, {
-        method: "POST", headers: { authorization: auth, "content-type": "application/json" }, body: JSON.stringify([body]),
-      });
-      if (!res.ok) throw new AiProviderError(`dataforseo_http_${res.status}`, res.status === 429 || res.status >= 500);
-      const json = (await res.json()) as DfsResponse;
+      const call = async (b: Record<string, unknown>) => {
+        const res = await fetcher(`${DFS}/${PATH[name]}/llm_responses/live`, {
+          method: "POST", headers: { authorization: auth, "content-type": "application/json" }, body: JSON.stringify([b]),
+        });
+        if (!res.ok) throw new AiProviderError(`dataforseo_http_${res.status}`, res.status === 429 || res.status >= 500);
+        return (await res.json()) as DfsResponse;
+      };
+      let json = await call(body);
+      let cityDropped = false;
+      // A town DataForSEO does not know is refused as a bad field: the same question once more without the town.
+      if ("web_search_city" in body && unknownCity(json)) {
+        const { web_search_city: _drop, ...rest } = body;
+        json = await call(rest);
+        cityDropped = true;
+      }
       if (json.status_code !== 20000) throw new AiProviderError(`dataforseo_${json.status_code}`, retryable(json.status_code));
-      return parseDfs(json, model);
+      return { ...parseDfs(json, model), webSearchForced: name === "chatgpt", cityDropped };
     },
   };
+}
+
+/** DataForSEO refused the town: a 4xxxx code (not the busy, rate or balance codes) whose message names the city. */
+export function unknownCity(json: DfsResponse): boolean {
+  const bad = (code: number | undefined, msg: string | undefined) =>
+    !!code && code >= 40000 && code < 50000 && ![40202, 40209, 40210].includes(code) && /city/i.test(msg ?? "");
+  return bad(json.status_code, json.status_message) || bad(json.tasks?.[0]?.status_code, json.tasks?.[0]?.status_message);
 }
 
 // ─── Gemini with Google Maps grounding ───────────────────────────────────────────────────────────────────────────

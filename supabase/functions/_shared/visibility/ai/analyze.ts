@@ -11,7 +11,7 @@ export const norm = (s: string | null | undefined) =>
 
 // Words that do not make a business name its own: "Harbor Bakes" and "Harbor Bakes Bakery" are the same business.
 const GENERIC = new Set(["the", "a", "bakery", "cafe", "coffee", "restaurant", "clinic", "dental", "dentist", "salon", "shop", "store", "co", "ltd", "llc", "inc", "and"]);
-const core = (s: string) => norm(s).split(" ").filter((w) => w && !GENERIC.has(w)).join(" ");
+export const core = (s: string) => norm(s).split(" ").filter((w) => w && !GENERIC.has(w)).join(" ");
 
 /** The whole name, or its distinctive part (at least 3 characters), as whole words in the text. */
 export function mentions(text: string, name: string): number {
@@ -72,13 +72,16 @@ export function listedNames(text: string, prompt?: string | null): { name: strin
   return out;
 }
 
+/** The same business by name: the same distinctive part, or the same whole name (the match analyze() uses). */
+export const sameName = (a: string, b: string) => core(a) === core(b) || norm(a) === norm(b);
+
 export function analyze(o: { text: string; sources?: AiSource[]; business: string; known?: KnownCompetitor[]; prompt?: string | null }): Analysis {
   const known = o.known ?? [];
   const self = mentions(o.text, o.business);
   const named = self >= 0;
   type Ent = { name: string; at: number; key: string | null; matched: boolean; me: boolean };
   const ents: Ent[] = [];
-  const same = (a: string, b: string) => core(a) === core(b) || norm(a) === norm(b);
+  const same = sameName;
   const add = (e: Ent) => {
     if (e.me) {
       if (!ents.some((x) => x.me)) ents.push(e);

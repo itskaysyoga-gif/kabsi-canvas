@@ -71,5 +71,5 @@ Deno.test("golive1: a refusal on each posted task is read as a refusal, not as t
   assertEquals(refusalOf(await assertRejects(() => startCheck(deps, input))), "no_balance");
   const flaky = { ...deps, provider: { ...refusingPost, post: () => Promise.reject(new ProviderError("dataforseo_50000")) } as MapsProvider };
   const kept = await startCheck(flaky, input);
-  assertEquals(kept.ok && kept.row.state, "failed");
+  assertEquals(kept.ok === true && kept.row.state, "failed");
 });

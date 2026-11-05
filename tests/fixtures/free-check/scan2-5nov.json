@@ -1,0 +1,17 @@
+{
+  "_note": "Scan 2 (master plan 30.29). The two live free checks of 5 Nov 2026. The businesses Google Maps showed are the real titles stored in free_checks (3954W376 and QFFNS9ED, read 5 Nov 2026). The raw answer text was not kept, so each answer is rebuilt in ChatGPT's bold list form from the names the rows recorded (McDonald's, Chick-fil-A, In-N-Out Burger; Al-Akhbar, L'Orient-Le Jour, Mindshare).",
+  "seven": {
+    "business": "SEVEN Burgers & Beyond",
+    "term": "fast food restaurant",
+    "address": ["West Diner", "Eatout", "Shawarma Albasha", "قطر الندى", "The Cozy Corner", "Shawarma kareem شاورما كريم", "JZ Grill"],
+    "points": ["Abolfouf restaurant", "Boneless Bakaata", "Eatout", "Falafel vs Koushari", "Food Monster", "JZ Grill", "Karma Village", "Shawarma kareem شاورما كريم", "The Cozy Corner", "West Diner", "قطر الندى"],
+    "answer": "Here are some popular fast food restaurants:\n\n1. **McDonald's** - burgers and fries, open late.\n2. **Chick-fil-A** - chicken sandwiches.\n3. **In-N-Out Burger** - a short menu of burgers."
+  },
+  "yawmiyati": {
+    "business": "Yawmiyati",
+    "term": "media company",
+    "address": ["Thirteencube", "CC Digital Co.", "BLU Creative Agency"],
+    "points": ["23WATT - Marketing & Communications", "Al Markazia - Central News Agency", "Alaraby TV", "Choueiri Group - Media Center", "Mediacom", "OMD", "Omnicom Media MENA", "Publicis Media Beirut", "Imagic", "المركز الكاثوليكي للإعلام"],
+    "answer": "Some well known media companies in Beirut:\n\n- **Al-Akhbar** - a daily newspaper.\n- **L'Orient-Le Jour** - a French language daily.\n- **Mindshare** - a media agency."
+  }
+}

@@ -9,6 +9,7 @@ import { TOKENS } from "../email/tokens.ts";
 import { encodePalettePng } from "./png.ts";
 import { CREDIT_KABSI, MAX_BYTES, pinStyle, title } from "./map-image.ts";
 import type { Nearby } from "./nearby.ts";
+import { latinName } from "./area.ts";
 
 export const WIDTH = 1080;
 export const HEIGHT = 1500;
@@ -35,7 +36,7 @@ export function nearbyTree(n: Nearby, o: { business: string; date: string; named
           fontFamily: "Readex Pro", fontWeight: 700, fontSize: 30,
         }, `You: ${c.position}`),
       ]),
-      text(c.firstIsYou ? "First: you" : c.first ? clip(`First: ${c.first}`, 46) : "First: not known", 30, 400, TOKENS.stone, { marginTop: 18 }),
+      text(c.firstIsYou ? "First: you" : c.first && latinName(c.first) ? clip(`First: ${c.first}`, 46) : c.first || c.first_hidden ? "First: another business" : "First: not known", 30, 400, TOKENS.stone, { marginTop: 18 }),
     ]);
   });
   return el("div", { display: "flex", flexDirection: "column", width: WIDTH, height: HEIGHT, background: TOKENS.sand, padding: "56px 56px 40px 56px" }, [

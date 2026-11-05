@@ -41,6 +41,8 @@ export type Snapshot = {
   /** The Profile Coach checklist (the same rows as the app); public data cannot show most of it, and says so. */
   checklist: CoachRow[];
   cached: boolean;
+  /** Scan 2 (master plan 30.29): the town, which the free check's AI question names. Missing from older answers. */
+  area?: string | null;
 };
 
 export const TONE_LABEL: Record<Tone, string> = {

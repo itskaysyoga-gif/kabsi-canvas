@@ -33,22 +33,25 @@ export async function baseMap(key: string | undefined, center: LatLng, zoom: num
   }
 }
 
-// ─── Place names for the nearby cards (30.15 section 2, V4) ──────────────────────────────────────────────────────────
-// Geoapify reverse geocoding (free plan, 3000 requests a day; three a map) turns one real checked point into the nearest
-// named landmark, station or street. A whole neighbourhood, district or city is never used as a place's name, a name more
-// than 250 m from the point is not "near" it, and a name in another script is dropped (no Arabic shown, R-61): the card then
-// says how far and which way the point is instead. Names are © OpenStreetMap contributors (the image carries the credit).
-type GeoResult = { name?: string; street?: string; result_type?: string; distance?: number; category?: string };
+// ─── Place names for the nearby cards (30.15 section 2, V4; Scan 2, 30.29) ───────────────────────────────────────────
+// Geoapify reverse geocoding (free plan, 3000 requests a day; three a map) turns one real checked point into a name an
+// owner would recognise. Since Scan 2 a name is used only for a street, a square, a station, a landmark or a neighbourhood:
+// a shop, a restaurant, an office or any other business is never a place's name ("Near Contessa Fashion" read as if the
+// shop were a place). A name more than 250 m from the point is not "near" it, and a name in another script is dropped (no
+// Arabic shown, R-61): the card then says how far and which way the point is instead. Names are © OpenStreetMap
+// contributors (the image carries the credit).
+type GeoResult = { name?: string; street?: string; result_type?: string; distance?: number; category?: string; suburb?: string; district?: string };
 
-const LANDMARK = new Set(["amenity", "building"]);
 const MAX_METRES = 250;
+/** Geoapify categories that are a place, not a business: stations, landmarks, squares, parks, places of worship. */
+const PLACE_CATEGORY = /^(public_transport|tourism\.(sights|attraction)|heritage|leisure\.park|natural|religion|building\.historic|man_made\.(tower|bridge|lighthouse)|highway\.pedestrian|place\.square)\b/;
 
 export function reverseUrl(key: string, p: LatLng): string {
   const q = new URLSearchParams({ lat: String(p.lat), lon: String(p.lng), format: "json", limit: "1", lang: "en", apiKey: key });
   return `https://api.geoapify.com/v1/geocode/reverse?${q}`;
 }
 
-/** The name an owner would recognise, or null: a named landmark or station close by, else the street. */
+/** The name an owner would recognise, or null: a station, landmark or square close by, else its street or neighbourhood. */
 export function nameFrom(r: GeoResult | null | undefined): string | null {
   if (!r) return null;
   if (typeof r.distance === "number" && r.distance > MAX_METRES) return null;
@@ -57,9 +60,17 @@ export function nameFrom(r: GeoResult | null | undefined): string | null {
     // Latin letters, digits and plain punctuation only; anything else (another script) is not shown.
     return t && t.length <= 60 && /^[\p{Script=Latin}\p{N}\s'&.,()/-]+$/u.test(t) && /\p{L}/u.test(t) ? t : null;
   };
-  const landmark = LANDMARK.has(r.result_type ?? "") ? clean(r.name) : null;
-  if (landmark && !/^\d/.test(landmark)) return landmark;
-  return r.result_type === "street" || r.result_type === "building" || r.result_type === "amenity" ? clean(r.street) : null;
+  const type = r.result_type ?? "";
+  if (type === "street") return clean(r.street ?? r.name);
+  if (type === "suburb") return clean(r.name ?? r.suburb);
+  if (type === "amenity" || type === "building") {
+    // A place (a station, a landmark, a square): its own name. A business at the point: not a place's name, and its
+    // street is not used either, so the card reads by distance.
+    if (!PLACE_CATEGORY.test(r.category ?? "")) return null;
+    const n = clean(r.name);
+    return n && !/^\d/.test(n) ? n : null;
+  }
+  return null;
 }
 
 /** One reverse lookup, or null without a key or on any failure (the card falls back to the distance words). */

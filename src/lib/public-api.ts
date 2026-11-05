@@ -147,6 +147,8 @@ export type NearbyCard = {
   position: string;
   first: string | null;
   firstIsYou: boolean;
+  /** Scan 2: the business that came first has a name not in Latin letters ("another business came first"). */
+  first_hidden?: boolean;
 };
 export type FreeCheck = {
   code: string;
@@ -162,7 +164,13 @@ export type FreeCheck = {
     line: string | null;
     label: string;
     provider?: string;
-    competitors?: string[];
+    /** Scan 2 (30.29): what was asked and when. Null on a check from before Scan 2. */
+    question?: string | null;
+    question_line?: string | null;
+    asked_line?: string | null;
+    asked_at?: string | null;
+    sources?: { domain: string; title: string }[];
+    sources_line?: string | null;
     /** AI Answers 1: which fact ChatGPT gave differently from the Google profile, and its own sentence. */
     accuracy?: { fact: string; sentence: string; line: string } | null;
   } | null;
@@ -186,6 +194,8 @@ export function startFreeCheck(o: {
   address: string | null;
   place_id: string;
   country: string;
+  /** Scan 2: the town from the profile check; the server reads it from the address when it is missing. */
+  city: string | null;
   term: string | null;
   industry: string | null;
   turnstile: string;

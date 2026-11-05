@@ -1130,3 +1130,25 @@ WhatsApp for owners, the nearby check and the AI answer are switched on (R-108),
 1. Kabsi Partners: is "Kabsi Partners opens when card payments open." the right wording (the partners page, the hero line, the partner terms and the facts)? Partner links earn nothing until payments open, so "at launch" was no longer true.
 2. /privacy, the Meta Pixel: written "When switched on" because the session cannot see whether VITE_META_PIXEL_ID is set in Vercel. If the Pixel already loads on kabsi.co, the words go.
 3. /privacy section 14 says the WhatsApp number is "answered by a person and not an automatic bot", while Nora answers visitors on WhatsApp from the facts (agent.ts). Which is the public line?
+
+## 49. Scan 2: the free check made accurate and convincing (5 Nov 2026, master plan 30.29, R-109)
+
+Every new or changed line of Scan 2, for lane R. Each line names its file.
+
+### The AI answer card (scan-live.tsx; the lines come from the server, free-check.ts, so the page, the email and WhatsApp say the same)
+
+- The question asked: "best [term] in [town], [country]" (for 3954W376 "best fast food restaurant in Boqaata, Lebanon"). The country is its English name.
+- New, above the line: "We asked ChatGPT: '[question]'"
+- Changed: "ChatGPT did not name you. It named A, B and C." becomes, by case:
+  - "ChatGPT named you." (unchanged)
+  - "ChatGPT did not name you. It named A, B and C, which Google Maps shows near you." (at most 3, in the answer's order, only businesses Google Maps shows near the business)
+  - "ChatGPT did not name you. The businesses it named are not near you on Google Maps, so this answer does not reflect your area."
+  - "ChatGPT did not name you." (no names)
+- New: "Sources cited" with up to 3 lines "[domain], [title]", or "No sources cited."
+- Changed: the label "One sample. AI answers change from run to run." becomes "Asked on [date] through OpenAI's API, with web search. The ChatGPT app can answer differently, and answers change from run to run." A check from before Scan 2 keeps its label and has no question line.
+
+### Names (free-check.ts, nearby.ts, nearby-image.ts)
+
+- A nearby card whose first business has a name not in Latin letters: "[place], another business came first. You were [position]." (WhatsApp words) and "First: another business" (the WhatsApp image).
+- A Geoapify name that is a shop or another business is not used: "Near Contessa Fashion" becomes "About [distance] [direction] of your [business type]".
+
