@@ -3,6 +3,7 @@
 // Write-through with no expiry: a tap never waits on, or fails with, the database.
 //   POST { code }        writes that card's value (deletes the key if the card row is gone)
 //   POST { backfill: true }  writes every card once (Cloudflare bulk endpoint, 1,000 keys per call)
+import { serve } from "../_shared/kabsi.ts";
 import { admin, captureError, isInternal, json, log } from "../_shared/kabsi.ts";
 
 const NAMESPACE = Deno.env.get("CF_KV_NAMESPACE_ID") ?? "d897cbaa4ff34c8bab5e6923b3c41542"; // STICKERS
@@ -28,7 +29,7 @@ function cardValue(c: Pick<CardRow, "status" | "destination" | "location_id" | "
   });
 }
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
   const body = await req.json().catch(() => ({})) as { code?: string; backfill?: boolean };
 
