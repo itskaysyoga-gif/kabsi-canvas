@@ -26,9 +26,11 @@ import { mapDate, renderMap } from "../_shared/visibility/map-image.ts";
 import { baseMap, placeNamer } from "../_shared/visibility/geoapify.ts";
 import { renderNearby } from "../_shared/visibility/nearby-image.ts";
 import type { Nearby } from "../_shared/visibility/nearby.ts";
-import { type CheckRow, cleanTerm, collectCheck, newCode, publicView, startCheck } from "../_shared/visibility/free-check.ts";
+import { type CheckRow, cleanTerm, collectCheck, newCode, publicView, safeNearby, startCheck } from "../_shared/visibility/free-check.ts";
+import { businessType } from "../_shared/visibility/scan.ts";
 import { freeScanCheck } from "../_shared/visibility/ai/run.ts";
 import { MARKETS, pickTerms, searchVolumes } from "../_shared/visibility/terms.ts";
+import { latinName, townOf } from "../_shared/visibility/area.ts";
 import { checkWaitlist } from "../_shared/visibility/waitlist.ts";
 import { WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
 import { accuracyDeps, aiDeps, doneRuns, enabledProviders, realProvider, setting as aiSetting, syncPrompts } from "../_shared/visibility/ai/deps.ts";
@@ -295,7 +297,7 @@ async function image(req: Request, url: URL): Promise<Response> {
     const c = await loadCheck(code);
     if (!c) return json({ error: "not_found" }, 404);
     if (c.state !== "done" || !c.nearby) return json({ error: "not_ready" }, 409);
-    return png(await renderNearby(c.nearby, { business: c.business, date: mapDate(new Date(c.created_at), "UTC") }));
+    return png(await renderNearby(safeNearby(c.nearby, c.radius_km, businessType(c.category))!, { business: c.business, date: mapDate(new Date(c.created_at), "UTC") }));
   }
   const scanId = url.searchParams.get("scan") ?? "";
   const { data: scan } = await db().from("visibility_scans")
@@ -376,7 +378,7 @@ async function refreshCheck(c: CheckRow): Promise<CheckRow | null> {
   const next = await collectCheck({ provider: provider(c.source, c.self), name: deps.placeName, now: () => new Date() }, c);
   if (!next) return null;
   must(await db().from("free_checks").update({
-    points: next.points, nearby: next.nearby, state: next.state, done_at: next.state === "mapping" ? null : new Date().toISOString(),
+    points: next.points, nearby: next.nearby, ai: next.ai, state: next.state, done_at: next.state === "mapping" ? null : new Date().toISOString(),
   }).eq("id", c.id));
   return next;
 }
@@ -397,7 +399,9 @@ async function startFreeCheck(req: Request): Promise<Response> {
   const ip = clientIp(req);
   const name = String(body.name ?? "").replace(/\s+/g, " ").trim().slice(0, 120);
   const country = String(body.country ?? "").toUpperCase();
-  const city = body.city ? String(body.city).replace(/\s+/g, " ").trim().slice(0, 80) : null;
+  // Scan 2 (30.29): the town the page sends (from the profile check), else from the address; the AI question needs one.
+  const sent = body.city ? String(body.city).replace(/[^\p{L}\p{N}\s'&.-]/gu, " ").replace(/\s+/g, " ").trim().slice(0, 80) : "";
+  const city = sent && latinName(sent) ? sent : townOf(body.address ? String(body.address).slice(0, 200) : null, String(body.country ?? ""));
   const industry = body.industry && /^[a-z0-9-]{2,40}$/.test(body.industry) ? body.industry : null;
   let term = cleanTerm(body.term);
   if (!term && industry) {
@@ -415,6 +419,10 @@ async function startFreeCheck(req: Request): Promise<Response> {
   // Google part in full and leaves the nearby and AI parts out, with no error and no promise.
   const mode = (await setting("dataforseo_mode")) === "live" ? "live" : "mock";
   if (!internal && mode !== "live") return json({ state: "waitlist" }, 200);
+  // Scan 2 (30.29): a reused check costs nothing, so it is looked up before the day's cap (and again inside startCheck).
+  const placeId = typeof body.place_id === "string" && /^[A-Za-z0-9_-]{10,200}$/.test(body.place_id) ? body.place_id : null;
+  const again = placeId ? await recentCheck(placeId, term).catch(() => null) : null;
+  if (again) return reused(again);
   const cap = Number((await setting("free_check_daily_cap")) ?? 0);
   if (!internal && (cap <= 0 || !(await rateLimit(`free_check_day:${new Date().toISOString().slice(0, 10)}`, cap, 86400, { failClosed: true })))) {
     return unavailable(null);
@@ -428,7 +436,9 @@ async function startFreeCheck(req: Request): Promise<Response> {
   let started: Awaited<ReturnType<typeof startCheck>>;
   try {
     started = await startCheck({
-    provider: provider(mode, { title: name, place_id: body.place_id ?? null }), source: mode, code: () => newCode(),
+    // Scan 2 (30.29): the same place and search checked in the last 7 days is shown again, and nothing is paid.
+    reuse: placeId ? () => recentCheck(placeId, term!) : undefined,
+    provider: provider(mode, { title: name, place_id: placeId }), source: mode, code: () => newCode(),
     room: deps.room, spend: async (calls, micros) => void (await deps.spend(calls, micros)),
     // The one AI answer: never a made-up answer for a visitor (mock answers only on staff calls).
     ai: (o) => (aiLive || internal) ? freeScanCheck({
@@ -437,7 +447,7 @@ async function startFreeCheck(req: Request): Promise<Response> {
       // memory; only the fact that differs and ChatGPT's sentence are kept (30.10.3).
       accuracy: { extractor: accuracyDeps.extractor, profile: () => liveProfile(o.place_id) },
     }, o).catch(aiRefused) : Promise.resolve(null),
-  }, { name, address: body.address ? String(body.address).slice(0, 200) : null, country, city, place_id: body.place_id ?? null, term });
+  }, { name, address: body.address ? String(body.address).slice(0, 200) : null, country, city, place_id: placeId, term });
   } catch (e) {
     // Any failure of the paid part leaves the nearby and AI parts out quietly; only a refusal alerts staff (once a day),
     // anything else is reported as an error for the team, never shown to the visitor.
@@ -445,6 +455,7 @@ async function startFreeCheck(req: Request): Promise<Response> {
     if (!r || r === "provider_error") await captureError(fn, e, { route: "/check" });
     return unavailable(r && r !== "provider_error" ? r : null);
   }
+  if (started.ok === "reused") return reused(started.check);
   if (!started.ok && started.reason === "paused") return unavailable("cap");
   if (!started.ok) return json({ error: started.reason }, 404);
   const r = started.row;
@@ -455,6 +466,20 @@ async function startFreeCheck(req: Request): Promise<Response> {
   }).select(CHECK_COLS).single()) as CheckRow;
   log(fn, { action: "free_check", source: r.source, state: r.state });
   return json({ ...publicView(saved), whatsapp_text: `Hi Kabsi, my scan code is KAB-${saved.code}` });
+}
+
+function reused(c: CheckRow): Response {
+  log(fn, { action: "free_check", state: c.state, reused: true });
+  return json({ ...publicView(c), reused: true, whatsapp_text: `Hi Kabsi, my scan code is KAB-${c.code}` });
+}
+
+/** A live check of this place and search from the last 7 days, still mapping or done, asked with the Scan 2 question. */
+async function recentCheck(placeId: string, term: string): Promise<CheckRow | null> {
+  const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
+  const { data } = await db().from("free_checks").select(CHECK_COLS).eq("self->>place_id", placeId).eq("term", term)
+    .eq("source", "live").in("state", ["mapping", "done"]).gte("created_at", since).not("ai->>question", "is", null)
+    .order("created_at", { ascending: false }).limit(1).maybeSingle();
+  return (data as CheckRow | null) ?? null;
 }
 
 /** One staff alert a day when the provider refuses, whatever the reason (30.28). */

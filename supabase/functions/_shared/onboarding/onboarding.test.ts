@@ -259,9 +259,14 @@ Deno.test("Competitor Watch speaks only when something changed that matters; the
 });
 
 // ─── the nearby places ─────────────────────────────────────────────────────────────────────────────────────────────
-Deno.test("place names only from a real nearby point: a landmark or street, never a district or another script", () => {
-  assert.equal(nameFrom({ name: "Dubai Marina Mall", result_type: "amenity", distance: 80 }), "Dubai Marina Mall");
-  assert.equal(nameFrom({ name: "Marina", street: "Al Marsa Street", result_type: "suburb", distance: 10 }), null);
+Deno.test("place names only from a real nearby point: a street, square, station, landmark or neighbourhood, never a business or another script (30.29)", () => {
+  // Scan 2: a shop or any other business is not a place's name, nor is its street; the card reads by distance.
+  assert.equal(nameFrom({ name: "Contessa Fashion", street: "Main Road", result_type: "amenity", category: "commercial.clothing", distance: 30 }), null);
+  assert.equal(nameFrom({ name: "Dubai Marina Mall", result_type: "amenity", distance: 80 }), null, "no category: not known to be a place");
+  assert.equal(nameFrom({ name: "Dubai Marina Metro Station", result_type: "amenity", category: "public_transport.subway", distance: 80 }), "Dubai Marina Metro Station");
+  assert.equal(nameFrom({ name: "Martyrs' Square", result_type: "amenity", category: "tourism.sights", distance: 60 }), "Martyrs' Square");
+  assert.equal(nameFrom({ name: "Marina", street: "Al Marsa Street", result_type: "suburb", distance: 10 }), "Marina", "a neighbourhood");
+  assert.equal(nameFrom({ name: "Dubai", result_type: "city", distance: 10 }), null, "never a whole city");
   assert.equal(nameFrom({ street: "Al Marsa Street", result_type: "street", distance: 40 }), "Al Marsa Street");
   assert.equal(nameFrom({ name: "Far Tower", result_type: "building", distance: 900 }), null);
   assert.equal(nameFrom({ name: "مول", street: "شارع", result_type: "amenity", distance: 5 }), null);
@@ -296,10 +301,12 @@ Deno.test("the free check: a fast result at once, the full search queued, the ne
   const p = mockProvider({ title: "Harbor Cafe" });
   const spent: number[] = [];
   const s = await startCheck({ provider: p, source: "mock", code: () => "ABCD2345", room: async () => true, spend: async (_c, m) => void spent.push(m),
-    ai: async () => ({ provider: "chatgpt", named: false, competitors: ["Juniper", "Oven Street"], sources: [], label: "x" }) },
+    // Scan 2 (30.29): the answer's names; only those Google Maps shows near the business are named.
+    ai: async () => ({ provider: "chatgpt", named: false, names: ["Juniper", "Oven Street"], sources: [], label: "x", question: "best bakery in Dubai, United Arab Emirates",
+      assistant: "ChatGPT", model: "m", asked_at: "2026-11-05T00:00:00.000Z", web_search_forced: true, city_dropped: false }) },
     { name: "Harbor Cafe", address: null, country: "AE", city: "Dubai", place_id: null, term: "bakery" });
-  assert.ok(s.ok);
-  if (!s.ok) return;
+  assert.ok(s.ok === true);
+  if (s.ok !== true) return;
   assert.equal(s.row.fast.line, "At your address you rank 1 for 'bakery'.");
   assert.equal(s.row.fast.competitors.length, 3);
   assert.equal(s.row.points.length, 49);
@@ -312,7 +319,9 @@ Deno.test("the free check: a fast result at once, the full search queued, the ne
   assert.equal(done?.state, "done");
   const v1 = publicView(done!);
   assert.equal(v1.map.state, "done");
-  assert.equal(v1.ai?.line, "ChatGPT did not name you. It named Juniper and Oven Street.");
+  assert.equal(v1.ai?.line, "ChatGPT did not name you. It named Oven Street, which Google Maps shows near you.", "Juniper is not on Google Maps near it: counted, never named");
+  assert.equal(v1.ai?.named_other, 1);
+  assert.ok(!JSON.stringify(v1).includes("Juniper"));
   assert.equal(v1.check_line, "Free check. No Google access needed.");
   assert.match(v1.trial_line, /starts only when Kabsi's access to your Google profile works/);
   assert.match(checkFact(done!), /^In the first 3 at \d+ of 49 places Kabsi checked\.$/);

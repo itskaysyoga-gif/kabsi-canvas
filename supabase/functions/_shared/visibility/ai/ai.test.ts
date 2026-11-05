@@ -312,7 +312,9 @@ Deno.test("free scan check: off until V4 turns it on; one answer, three competit
   assertEquals(await freeScanCheck({ ...deps, on: () => Promise.resolve(false) }, { business: ME, prompt: "best bakery in jumeirah", country: "AE", city: "Dubai" }), null);
   assertEquals(base.calls.asked, 0);
   const r = await freeScanCheck({ ...deps, on: () => Promise.resolve(true) }, { business: ME, prompt: "best bakery in jumeirah", country: "AE", city: "Dubai" });
-  assertEquals([r!.named, r!.competitors, r!.label], [true, ["Harbor Bakes", "Corner Crumb"], SAMPLE_LABEL]);
+  assertEquals([r!.named, r!.names, r!.label], [true, ["Harbor Bakes", "Corner Crumb"], SAMPLE_LABEL]);
+  // Scan 2 (30.29): the question, the assistant, the model and the date are kept with the answer.
+  assertEquals([r!.question, r!.assistant, r!.asked_at, r!.city_dropped], ["best bakery in jumeirah", "ChatGPT", base.d.now().toISOString(), false]);
   assertEquals(base.calls.spend, [1400]);
   const capped = world({ mode: "live", room: false });
   assertEquals(await freeScanCheck({ provider: capped.d.provider, mode: capped.d.mode, room: capped.d.room, spend: capped.d.spend, staffAlert: capped.d.staffAlert, now: capped.d.now, on: () => Promise.resolve(true) }, { business: ME, prompt: "p", country: null, city: null }), null);

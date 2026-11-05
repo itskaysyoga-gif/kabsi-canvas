@@ -388,6 +388,8 @@ export function LiveFreeCheck({
           address: snapshot.address,
           place_id: place.place_id,
           country,
+          // Scan 2 (30.29): the town, so the AI question names where the business is.
+          city: snapshot.area ?? null,
           term,
           industry,
           turnstile: await take(),
@@ -666,6 +668,7 @@ function NearbySection({ check, handoff }: { check: FreeCheck; handoff: string |
 }
 
 function AiAnswer({ ai }: { ai: NonNullable<FreeCheck["ai"]> }) {
+  const sources = ai.sources ?? [];
   return (
     <section
       aria-labelledby="ai-h"
@@ -674,7 +677,28 @@ function AiAnswer({ ai }: { ai: NonNullable<FreeCheck["ai"]> }) {
       <h2 id="ai-h" className="text-h3">
         An answer customers might see
       </h2>
+      {/* Scan 2 (master plan 30.29, docs/COPY.md 49): the question, the line, the sources, then when and how it was asked.
+          A check from before Scan 2 has no question and shows its line and label only. */}
+      {ai.question_line && (
+        <p className="mt-3 text-body break-words text-text-2">{ai.question_line}</p>
+      )}
       {ai.line && <p className="mt-3 text-body font-semibold">{ai.line}</p>}
+      {ai.question_line &&
+        (sources.length ? (
+          <div className="mt-3">
+            <p className="text-small font-bold">Sources cited</p>
+            <ul className="mt-1 space-y-1 text-small text-text-2">
+              {sources.map((x) => (
+                <li key={`${x.domain}|${x.title}`} className="break-words">
+                  <span className="font-semibold text-text-1">{x.domain}</span>
+                  {x.title ? `, ${x.title}` : ""}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : ai.sources_line ? (
+          <p className="mt-3 text-small text-text-2">{ai.sources_line}</p>
+        ) : null)}
       {ai.accuracy ? (
         <>
           <p className="mt-3 text-body font-semibold">{ai.accuracy.line}</p>
@@ -686,7 +710,7 @@ function AiAnswer({ ai }: { ai: NonNullable<FreeCheck["ai"]> }) {
           </p>
         </>
       ) : null}
-      <p className="mt-3 text-label text-text-2">{ai.label}</p>
+      <p className="mt-3 text-label text-text-2">{ai.asked_line ?? ai.label}</p>
     </section>
   );
 }

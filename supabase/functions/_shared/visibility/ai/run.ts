@@ -163,8 +163,12 @@ export async function checkAccuracy(d: AiDeps, acc: AccuracyDeps, run: RunRow, a
 /** The free check's accuracy result: which fact differs and ChatGPT's own sentence, never a value from Places (30.10.3). */
 export type FreeAccuracy = { fact: FactKey; sentence: string; line: string };
 export type FreeCheck = {
-  provider: "chatgpt"; named: boolean; competitors: string[]; sources: { domain: string; title: string }[]; label: string;
+  provider: "chatgpt"; named: boolean; sources: { domain: string; title: string }[]; label: string;
   accuracy?: FreeAccuracy | null;
+  /** Scan 2 (30.29): what was asked, of whom, with which model, when, and whether web search was forced. */
+  question: string; assistant: "ChatGPT"; model: string; asked_at: string; web_search_forced: boolean; city_dropped: boolean;
+  /** Every business the answer names, in its order. Held only until they are matched to Google Maps (free-check.ts). */
+  names: string[];
 };
 /** The free check's accuracy deps: the extractor and the Google profile read live during the check (in memory only). */
 export type FreeAccuracyDeps = { extractor: (mode: "mock" | "live") => Extractor; profile: () => Promise<Record_ | null> };
@@ -185,6 +189,7 @@ export async function freeScanCheck(
       return null;
     }
   }
+  const asked = d.now();
   const raw = await d.provider(mode, "chatgpt", o.business).ask(o.prompt, { country: o.country, city: o.city });
   if (mode === "live" && (await d.spend(1, raw.costMicros))) {
     await d.staffAlert("AI Visibility spend passed 80 percent of this month's cap", `ai_cap80:${month(d.now())}`);
@@ -192,8 +197,10 @@ export async function freeScanCheck(
   const a = analyze({ text: raw.text, sources: raw.sources, business: o.business, prompt: o.prompt });
   const accuracy = a.named && d.accuracy ? await freeAccuracy(d, d.accuracy, mode, raw.text, o).catch(() => null) : null;
   return {
-    provider: "chatgpt", named: a.named, competitors: a.competitors.slice(0, 3).map((c) => c.name), sources: a.sources.slice(0, 3),
+    provider: "chatgpt", named: a.named, names: a.competitors.map((c) => c.name), sources: a.sources.slice(0, 3),
     label: "One sample. AI answers change from run to run.", accuracy,
+    question: o.prompt, assistant: "ChatGPT", model: raw.model, asked_at: asked.toISOString(),
+    web_search_forced: raw.webSearchForced ?? false, city_dropped: !!raw.cityDropped,
   };
 }
 
