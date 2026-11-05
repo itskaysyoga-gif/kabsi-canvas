@@ -82,16 +82,31 @@ for (const r of routes) {
     await context.route(/supabase\.co\//, async (route) => {
       const req = route.request();
       const u = new URL(req.url());
-      const read = /^\/(rest|functions)\/v1\//.test(u.pathname) && !u.pathname.endsWith("/rpc/is_staff");
+      const read =
+        /^\/(rest|functions)\/v1\//.test(u.pathname) && !u.pathname.endsWith("/rpc/is_staff");
       if (r.synthetic === "loading" && read && req.method() !== "OPTIONS") return; // never answered
       if (r.synthetic === "error" && read && req.method() !== "OPTIONS")
-        return route.fulfill({ status: 500, contentType: "application/json", body: '{"message":"audit"}', headers: { "access-control-allow-origin": "*" } });
+        return route.fulfill({
+          status: 500,
+          contentType: "application/json",
+          body: '{"message":"audit"}',
+          headers: { "access-control-allow-origin": "*" },
+        });
       if (r.synthetic === "ended" && read && req.method() !== "OPTIONS")
-        return route.fulfill({ status: 401, contentType: "application/json", body: '{"message":"JWT expired"}', headers: { "access-control-allow-origin": "*" } });
+        return route.fulfill({
+          status: 401,
+          contentType: "application/json",
+          body: '{"message":"JWT expired"}',
+          headers: { "access-control-allow-origin": "*" },
+        });
       const res = answer(req.method(), req.url(), req.headers(), req.postData(), r.state);
       if (res.missing) missing.add(res.missing);
       if (res.file)
-        return route.fulfill({ status: 200, path: res.file, headers: { "access-control-allow-origin": "*" } });
+        return route.fulfill({
+          status: 200,
+          path: res.file,
+          headers: { "access-control-allow-origin": "*" },
+        });
       await route.fulfill({
         status: res.status ?? 200,
         contentType: "application/json",
@@ -133,10 +148,21 @@ for (const r of routes) {
     const id = `${r.path}${r.state ? ` [${r.state}]` : ""}${r.synthetic ? ` [${r.synthetic}]` : ""} @${w}`;
     try {
       await page.goto(BASE + r.path, { waitUntil: "load" });
-      await page.waitForSelector("main h1, h1", { timeout: r.synthetic ? 4000 : 15_000 }).catch(() => undefined);
+      await page
+        .waitForSelector("main h1, h1", { timeout: r.synthetic ? 4000 : 15_000 })
+        .catch(() => undefined);
       await page.waitForTimeout(r.wait ?? (r.synthetic === "error" ? 6000 : 1500));
       if (r.click) {
-        await page.getByRole("button", { name: r.click }).click().catch(() => add({ id, kind: "Links and buttons", what: `the route's button "${r.click}" was not found` }));
+        await page
+          .getByRole("button", { name: r.click })
+          .click()
+          .catch(() =>
+            add({
+              id,
+              kind: "Links and buttons",
+              what: `the route's button "${r.click}" was not found`,
+            }),
+          );
         await page.waitForTimeout(300);
       }
     } catch (e) {
@@ -144,47 +170,89 @@ for (const r of routes) {
       await context.close();
       continue;
     }
-    const name = (r.name ?? r.path.replace(/^\//, "").replace(/\//g, "_").replace(/[?=&]/g, "-") + (r.state ? `-${r.state}` : "")) + "";
+    const name =
+      (r.name ??
+        r.path.replace(/^\//, "").replace(/\//g, "_").replace(/[?=&]/g, "-") +
+          (r.state ? `-${r.state}` : "")) + "";
     if (SHOT_AT.has(w)) await page.screenshot({ path: `${OUT}/${name}-${w}.png`, fullPage: true });
 
     for (const e of errors) add({ id, kind: "Errors", what: `page error: ${e.slice(0, 200)}` });
     // A failed load is expected in the error and ended states (the mock answers 500 or 401 on purpose).
     for (const e of [...new Set(consoleErrors)])
-      if (!(r.synthetic && /Failed to load resource/.test(e))) add({ id, kind: "Console", what: e });
+      if (!(r.synthetic && /Failed to load resource/.test(e)))
+        add({ id, kind: "Console", what: e });
     for (const f of [...new Set(failed)]) add({ id, kind: "Requests", what: f });
     for (const m of missing) gaps.add(m);
 
     const deep = AXE_AT.has(w);
     const facts = await page.evaluate((deep) => {
-      const out = { sideways: false, cut: [], overlap: [], covered: [], links: [], noName: [], h1: 0, yellow: [], words: [], gate: false, otherTappable: 0 };
+      const out = {
+        sideways: false,
+        cut: [],
+        overlap: [],
+        covered: [],
+        links: [],
+        noName: [],
+        h1: 0,
+        yellow: [],
+        words: [],
+        gate: false,
+        otherTappable: 0,
+      };
       const vis = (el) => {
         const s = getComputedStyle(el);
-        if (s.visibility === "hidden" || s.display === "none" || Number(s.opacity) === 0) return false;
+        if (s.visibility === "hidden" || s.display === "none" || Number(s.opacity) === 0)
+          return false;
         const b = el.getBoundingClientRect();
         return b.width > 0 && b.height > 0;
       };
       out.sideways = document.documentElement.scrollWidth > window.innerWidth + 1;
       out.h1 = [...document.querySelectorAll("h1")].filter(vis).length;
       // Cut off: text clipped by its own box.
-      for (const el of document.querySelectorAll("button, a, label, h1, h2, h3, p, span, li, td, th, dt, dd")) {
+      for (const el of document.querySelectorAll(
+        "button, a, label, h1, h2, h3, p, span, li, td, th, dt, dd",
+      )) {
         if (!vis(el) || !el.textContent?.trim()) continue;
         const s = getComputedStyle(el);
         const r0 = el.getBoundingClientRect();
-        if (r0.width <= 2 || r0.height <= 2 || s.clip === "rect(0px, 0px, 0px, 0px)" || el.closest(".sr-only")) continue;
+        if (
+          r0.width <= 2 ||
+          r0.height <= 2 ||
+          s.clip === "rect(0px, 0px, 0px, 0px)" ||
+          el.closest(".sr-only")
+        )
+          continue;
         const clips = s.overflowX !== "visible" || s.textOverflow === "ellipsis";
-        if (clips && el.scrollWidth > el.clientWidth + 2 && el.clientWidth > 0 && !el.closest("[data-allow-truncate], .truncate, [class*='truncate'], [class*='line-clamp'], [class*='overflow-x-auto'], [role='tablist']"))
+        if (
+          clips &&
+          el.scrollWidth > el.clientWidth + 2 &&
+          el.clientWidth > 0 &&
+          !el.closest(
+            "[data-allow-truncate], .truncate, [class*='truncate'], [class*='line-clamp'], [class*='overflow-x-auto'], [role='tablist']",
+          )
+        )
           out.cut.push(el.textContent.trim().slice(0, 60));
       }
       // Text over text: two text leaves whose boxes overlap.
       const leaves = [...document.querySelectorAll("body *")].filter(
-        (el) => vis(el) && el.children.length === 0 && el.textContent?.trim() && !el.closest("[aria-hidden='true'], svg, [role='dialog'], [role='alertdialog'], [data-radix-popper-content-wrapper]"),
+        (el) =>
+          vis(el) &&
+          el.children.length === 0 &&
+          el.textContent?.trim() &&
+          !el.closest(
+            "[aria-hidden='true'], svg, [role='dialog'], [role='alertdialog'], [data-radix-popper-content-wrapper]",
+          ),
       );
-      const boxes = (deep ? leaves : []).slice(0, 400).map((el) => ({ el, b: el.getBoundingClientRect() }));
+      const boxes = (deep ? leaves : [])
+        .slice(0, 400)
+        .map((el) => ({ el, b: el.getBoundingClientRect() }));
       for (let i = 0; i < boxes.length; i++)
         for (let j = i + 1; j < boxes.length; j++) {
-          const a = boxes[i], c = boxes[j];
+          const a = boxes[i],
+            c = boxes[j];
           if (a.el.contains(c.el) || c.el.contains(a.el)) continue;
-          const blk = "p, li, dd, dt, h1, h2, h3, h4, button, a, label, td, th, figcaption, blockquote";
+          const blk =
+            "p, li, dd, dt, h1, h2, h3, h4, button, a, label, td, th, figcaption, blockquote";
           if (a.el.closest(blk) && a.el.closest(blk) === c.el.closest(blk)) continue;
           if (a.el.closest(".sr-only") || c.el.closest(".sr-only")) continue;
           const x = Math.min(a.b.right, c.b.right) - Math.max(a.b.left, c.b.left);
@@ -192,7 +260,9 @@ for (const r of routes) {
           if (x > 4 && y > 4) {
             const small = Math.min(a.b.width * a.b.height, c.b.width * c.b.height);
             if (x * y > small * 0.3)
-              out.overlap.push(`${a.el.textContent.trim().slice(0, 30)} / ${c.el.textContent.trim().slice(0, 30)}`);
+              out.overlap.push(
+                `${a.el.textContent.trim().slice(0, 30)} / ${c.el.textContent.trim().slice(0, 30)}`,
+              );
           }
         }
       // Links and names.
@@ -202,7 +272,12 @@ for (const r of routes) {
       }
       for (const b of document.querySelectorAll("button, a[href], [role='button']")) {
         if (!vis(b)) continue;
-        const n = (b.getAttribute("aria-label") || b.textContent || b.getAttribute("title") || "").trim();
+        const n = (
+          b.getAttribute("aria-label") ||
+          b.textContent ||
+          b.getAttribute("title") ||
+          ""
+        ).trim();
         if (!n && !b.getAttribute("aria-labelledby")) out.noName.push(b.outerHTML.slice(0, 80));
       }
       // Yellow on screen (kb-yellow, rgb 255 214 10).
@@ -211,41 +286,68 @@ for (const r of routes) {
         const yb = el.getBoundingClientRect();
         if (yb.bottom + window.scrollY <= 0 || yb.right <= 0) continue;
         if (getComputedStyle(el).backgroundColor === "rgb(255, 214, 10)")
-          out.yellow.push(`${el.tagName.toLowerCase()}:${(el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 30)}`);
+          out.yellow.push(
+            `${el.tagName.toLowerCase()}:${(el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 30)}`,
+          );
       }
       // Words.
       const t = document.body.innerText;
       if (/[–—]/.test(t)) out.words.push("an em or en dash");
-      if (/!/.test(t.replace(/<!--|!important/g, ""))) out.words.push(`an exclamation mark: ${(t.match(/.{0,30}!.{0,10}/) || [""])[0]}`);
+      if (/!/.test(t.replace(/<!--|!important/g, "")))
+        out.words.push(`an exclamation mark: ${(t.match(/.{0,30}!.{0,10}/) || [""])[0]}`);
       if (/[؀-ۿ]/.test(t)) out.words.push("Arabic script");
-      for (const n of ["Profile Score", "Do now", "Listing Shield", "Put mine back", "Results Report", "Monday receipt", "Weekly Care Report", "Monday Report"])
+      for (const n of [
+        "Profile Score",
+        "Do now",
+        "Listing Shield",
+        "Put mine back",
+        "Results Report",
+        "Monday receipt",
+        "Weekly Care Report",
+        "Monday Report",
+      ])
         if (t.includes(n)) out.words.push(`retired name: ${n}`);
       // The session-ended gate: shown, and nothing else can be tapped.
-      const gate = document.querySelector("[role='alertdialog'][aria-labelledby='session-ended-title']");
+      const gate = document.querySelector(
+        "[role='alertdialog'][aria-labelledby='session-ended-title']",
+      );
       out.gate = !!gate;
       return out;
     }, deep);
     // Covered controls: walk the page a screen at a time and hit-test each control in view.
     const covered = await page.evaluate(async () => {
       const found = new Set();
-      if ([...document.querySelectorAll("[role='dialog'], [role='alertdialog']")].some((d) => d.getBoundingClientRect().height > 0)) return [];
+      if (
+        [...document.querySelectorAll("[role='dialog'], [role='alertdialog']")].some(
+          (d) => d.getBoundingClientRect().height > 0,
+        )
+      )
+        return [];
       const H = window.innerHeight;
       const max = Math.max(0, document.documentElement.scrollHeight - H);
       // At the top: the upper 60 percent of the screen. At the very bottom: the lower 40 percent (nothing can scroll
       // further, so a control under the phone bar or Nora there can never be reached).
-      for (const [y, lo, hi] of [[0, 0, 0.6], [max, 0.6, 1]]) {
+      for (const [y, lo, hi] of [
+        [0, 0, 0.6],
+        [max, 0.6, 1],
+      ]) {
         window.scrollTo(0, y);
         await new Promise((r) => setTimeout(r, 60));
-        for (const el of document.querySelectorAll("main button, main a[href], main input, main select, main textarea")) {
+        for (const el of document.querySelectorAll(
+          "main button, main a[href], main input, main select, main textarea",
+        )) {
           const b = el.getBoundingClientRect();
           if (b.width < 2 || b.height < 2 || b.top < H * lo || b.bottom > H * hi + 1) continue;
           const s = getComputedStyle(el);
           if (s.visibility === "hidden" || el.closest(".sr-only")) continue;
-          const x = b.left + b.width / 2, yy = b.top + b.height / 2;
+          const x = b.left + b.width / 2,
+            yy = b.top + b.height / 2;
           const hit = document.elementFromPoint(x, yy);
           if (hit && hit !== el && !el.contains(hit) && !hit.contains(el)) {
             const fixed = hit.closest("nav, header, [role='dialog'], aside, footer") ?? hit;
-            found.add(`${(el.textContent || el.getAttribute("aria-label") || el.tagName).trim().slice(0, 30)} under ${fixed.tagName.toLowerCase()}${fixed.getAttribute("aria-label") ? `(${fixed.getAttribute("aria-label")})` : ""}`);
+            found.add(
+              `${(el.textContent || el.getAttribute("aria-label") || el.tagName).trim().slice(0, 30)} under ${fixed.tagName.toLowerCase()}${fixed.getAttribute("aria-label") ? `(${fixed.getAttribute("aria-label")})` : ""}`,
+            );
           }
         }
       }
@@ -254,14 +356,22 @@ for (const r of routes) {
     });
     if (facts.sideways) add({ id, kind: "Layout", what: "sideways scroll" });
     for (const c of [...new Set(facts.cut)]) add({ id, kind: "Cut off", what: c });
-    for (const o of [...new Set(facts.overlap)].slice(0, 5)) add({ id, kind: "Text over text", what: o });
+    for (const o of [...new Set(facts.overlap)].slice(0, 5))
+      add({ id, kind: "Text over text", what: o });
     if (r.synthetic !== "ended") for (const c of covered) add({ id, kind: "Covered", what: c });
     for (const n of facts.noName) add({ id, kind: "Links and buttons", what: `no name: ${n}` });
-    if (facts.h1 !== 1 && r.synthetic !== "ended" && r.synthetic !== "loading") add({ id, kind: "Design rules", what: `${facts.h1} H1 on screen` });
+    if (facts.h1 !== 1 && r.synthetic !== "ended" && r.synthetic !== "loading")
+      add({ id, kind: "Design rules", what: `${facts.h1} H1 on screen` });
     const yellowButtons = facts.yellow.filter((y) => /^(a|button):/.test(y));
-    if (yellowButtons.length > 1) add({ id, kind: "Design rules", what: `${yellowButtons.length} yellow buttons: ${yellowButtons.join(", ")}` });
+    if (yellowButtons.length > 1)
+      add({
+        id,
+        kind: "Design rules",
+        what: `${yellowButtons.length} yellow buttons: ${yellowButtons.join(", ")}`,
+      });
     for (const x of facts.words) add({ id, kind: "Words", what: x });
-    if (r.synthetic === "ended" && !facts.gate) add({ id, kind: "Session", what: "the session-ended screen did not show after a 401" });
+    if (r.synthetic === "ended" && !facts.gate)
+      add({ id, kind: "Session", what: "the session-ended screen did not show after a 401" });
     for (const l of facts.links) links.set(l, (links.get(l) ?? new Set()).add(id));
     if (AXE_AT.has(w)) {
       await page.addScriptTag({ path: axePath });
@@ -269,26 +379,34 @@ for (const r of routes) {
         const res = await window.axe.run(document, { resultTypes: ["violations"] });
         return res.violations
           .filter((v) => v.impact === "serious" || v.impact === "critical")
-          .map((v) => `${v.id} (${v.impact}): ${v.nodes.length} at ${v.nodes[0]?.target?.join(" ")}`);
+          .map(
+            (v) => `${v.id} (${v.impact}): ${v.nodes.length} at ${v.nodes[0]?.target?.join(" ")}`,
+          );
       });
       for (const f of found) add({ id, kind: "Accessibility", what: f });
     }
     await context.close();
   }
-  console.log(`done ${r.path}${r.state ? ` (${r.state})` : ""}${r.synthetic ? ` [${r.synthetic}]` : ""}`);
+  console.log(
+    `done ${r.path}${r.state ? ` (${r.state})` : ""}${r.synthetic ? ` [${r.synthetic}]` : ""}`,
+  );
 }
 
 // Links: every internal link found, asked once from the server.
 for (const [href, where] of links) {
   const res = await fetch(BASE + href, { redirect: "manual" }).catch(() => null);
-  const ok = res && (res.status < 400);
+  const ok = res && res.status < 400;
   let notFound = false;
   if (ok && res.status === 200) {
     const html = await res.text();
     notFound = html.includes("This page is not here.") && !href.startsWith("/staff");
   }
   if (!ok || notFound)
-    add({ id: [...where][0], kind: "Broken links", what: `${href} answers ${res ? res.status : "nothing"}${notFound ? " (not-found page)" : ""}` });
+    add({
+      id: [...where][0],
+      kind: "Broken links",
+      what: `${href} answers ${res ? res.status : "nothing"}${notFound ? " (not-found page)" : ""}`,
+    });
 }
 await browser.close();
 writeFileSync(`${OUT}/findings-${shard}.json`, JSON.stringify(findings, null, 1));
