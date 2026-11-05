@@ -8,6 +8,7 @@ import { GRID_SPAN } from "./map-image.ts";
 import { businessType, type CellResult, categoryCheck, competitors, mapMessage, selfRow, summarize } from "./scan.ts";
 import { nearbyPlaces, nearbyText, type PlaceName } from "./nearby.ts";
 import { mapDate } from "./map-image.ts";
+import { refusalAlert, refusalOf } from "./refusal.ts";
 
 export type KeywordRow = {
   id: string; location_id: string; keyword: string; radius_km: number; center_lat: number; center_lng: number;
@@ -90,6 +91,13 @@ export async function startDue(d: RunDeps, limit = 10): Promise<Record<string, n
       await d.db.failScan(scanId, String((e as Error)?.message ?? e).slice(0, 300));
       await d.db.bumpKeyword(k.id, new Date(d.now().getTime() + 86_400_000));
       out.failed++;
+      // Go live 1 (30.28): a refusal (no balance, the provider's cost limit, an account block) is one staff alert a day;
+      // the keyword waits a day like any failure, so nothing retries in a loop.
+      const r = refusalOf(e);
+      if (r) {
+        const a = refusalAlert(r, "nearby check", d.now());
+        await d.staffAlert(a.summary, a.key);
+      }
     }
   }
   return out;

@@ -184,7 +184,7 @@ export function heroSub(whatsappOn: boolean = WHATSAPP_ON): string {
  * with nothing else changing. The live free check keeps its own waiting-list logic (scan-live.tsx), and Kabsi Partners
  * keeps its own "opens at launch" lines.
  */
-export const NEARBY_ON = false;
+export const NEARBY_ON = true; // Go live 1 (master plan 30.28, 5 Nov 2026)
 /**
  * The line beside every "on WhatsApp" line while Kabsi's WhatsApp number is not set (Design 6 audit section 4, Price 1).
  * Shown only while WHATSAPP_ON is false; the plain line stands alone once the number is set.

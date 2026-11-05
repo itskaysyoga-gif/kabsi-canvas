@@ -25,7 +25,7 @@ const allFaqText = (nearbyOn: boolean, whatsappOn: boolean) =>
 
 describe("Polish 3: NEARBY_ON, the one switch for the nearby check and the AI answer (decision 2)", () => {
   it("is false today, beside WHATSAPP_ON, and the defaults follow it", () => {
-    expect(NEARBY_ON).toBe(false);
+    expect(NEARBY_ON).toBe(true); // Go live 1 (5 Nov 2026, master plan 30.28)
     expect(WHATSAPP_ON).toBe(false);
     expect(JOBS).toEqual(jobs(NEARBY_ON));
     expect(FAQ).toEqual(buildFaq(NEARBY_ON));
@@ -73,7 +73,8 @@ describe("Polish 3: NEARBY_ON, the one switch for the nearby check and the AI an
   it("leaves the live free check's waiting list and Kabsi Partners to their own lines", () => {
     const scan = readFileSync("src/components/kabsi/scan-live.tsx", "utf8");
     expect(scan).not.toContain("NEARBY_ON");
-    expect(scan).toContain("waitlist && <Pill>At launch</Pill>");
+    // Go live 1 (30.28): the free check has no At launch label; it leaves out what it cannot show today.
+    expect(scan).not.toContain("At launch</Pill>");
     expect(readFileSync("src/components/kabsi/d2-partners.tsx", "utf8")).toContain(
       "Kabsi Partners opens at launch.",
     );

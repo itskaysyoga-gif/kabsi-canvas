@@ -130,7 +130,8 @@ function MapsPanel({ n }: { n: NearbyState }) {
     );
   if (n.state === "failed")
     return (
-      <EmptyState icon={Sparkles} title="Your first check did not finish.">
+      // Go live 1 (30.28): a refused or failed check (the provider's balance, a cap) waits and runs again on its own.
+      <EmptyState icon={Sparkles} title="The check runs again later.">
         Kabsi tries again on its own. Nothing changed on Google.
       </EmptyState>
     );

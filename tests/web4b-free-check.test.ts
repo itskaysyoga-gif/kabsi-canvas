@@ -69,16 +69,16 @@ describe("the free check result on Design 8", () => {
     expect(l[1]).toMatch(/^Once you connect/);
     expect(l.length).toBeLessThanOrEqual(4);
   });
-  it("marks the AI answer and the nearby check At launch while the nearby check is closed (decision 6)", () => {
+  it("leaves the AI answer and the nearby check out when the check is unavailable (Go live 1, master plan 30.28)", () => {
     const live = readFileSync("src/components/kabsi/scan-live.tsx", "utf8");
     const result = live.slice(
       live.indexOf("export function LiveResult"),
       live.indexOf("function Competitors"),
     );
-    expect(result.match(/<Pill>At launch<\/Pill>/g)).toHaveLength(2);
-    // Keyed on the waiting list, not on a missing check: a failed nearby check is not "At launch".
-    expect(result).toContain(") : waitlist ? (");
-    expect(result).toContain("{waitlist && <Pill>At launch</Pill>}");
+    expect(result).not.toMatch(/At launch/);
+    // Both parts show only with a check, or the mock mode's waiting list; "unavailable" shows neither.
+    expect(result).toContain("{check || waitlist ? (");
+    expect(result).toContain('started.state === "waitlist"');
     expect(result).toContain("Kabsi will search Google Maps from places around you");
   });
 });

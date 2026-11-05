@@ -178,7 +178,7 @@ Deno.test("category check: a proposal only when 2 of the top 3 share a category 
 });
 
 // ─── runs on fakes ───────────────────────────────────────────────────────────────────────────────────────────────
-function world(o: { mode?: "mock" | "live"; demo?: boolean; room?: boolean; crossed80?: boolean } = {}) {
+function world(o: { mode?: "mock" | "live"; demo?: boolean; room?: boolean; crossed80?: boolean; refuse?: Error } = {}) {
   const now = new Date("2026-10-25T10:00:00Z");
   const kw: KeywordRow = { id: "kw1", location_id: "loc1", keyword: "bakery", radius_km: 1, center_lat: C.lat, center_lng: C.lng, self_title: "Yawmiyati", self_cid: "self-1", self_place_id: null, cadence: "monthly" };
   const scans: (ScanRow & { state: string; data?: Record<string, unknown>; error?: string; costMicros: number })[] = [];
@@ -188,7 +188,7 @@ function world(o: { mode?: "mock" | "live"; demo?: boolean; room?: boolean; cros
   const snaps: unknown[] = [];
   let next: Date | null = null;
   const live = { live: true, ready: () => Promise.resolve([] as string[]), get: () => Promise.resolve(null),
-    post: (t: { tag: string }[]) => Promise.resolve(Object.fromEntries(t.map((x) => [x.tag, `live|${x.tag}`]))), liveOne: () => Promise.resolve([] as MapsItem[]) };
+    post: (t: { tag: string }[]) => o.refuse ? Promise.reject(o.refuse) : Promise.resolve(Object.fromEntries(t.map((x) => [x.tag, `live|${x.tag}`]))), liveOne: () => Promise.resolve([] as MapsItem[]) };
   const d: RunDeps = {
     db: {
       dueKeywords: () => Promise.resolve(next ? [] : [kw]),
@@ -326,4 +326,24 @@ Deno.test("nearby places image (V4): portrait 1080 by 1500, three cards, under 2
   assert(png.length < MAX_BYTES, `size ${png.length}`);
   const img = await Image.decode(png);
   assertEquals([img.width, img.height], [1080, 1500]);
+});
+
+// Go live 1 (master plan 30.28): DataForSEO refuses (no balance, its cost limit, a provider error). Stubbed, no paid call.
+Deno.test("golive1: a refused nearby check fails quietly, waits a day, and sends one staff alert a day saying why", async () => {
+  for (const [code, why] of [["dataforseo_40200", "no balance left"], ["dataforseo_40210", "no balance left"], ["dataforseo_40203", "the spend cap is reached"], ["dataforseo_50000", "a provider error"]] as const) {
+    const w = world({ mode: "live", refuse: new Error(code) });
+    const out = await tick(w.d);
+    assertEquals([out.started, out.failed], [0, 1], code);
+    assertEquals(w.scans[0].state, "failed");
+    assertEquals(w.scans[0].error, code);
+    assertEquals(w.next()?.toISOString(), "2026-10-26T10:00:00.000Z", "the keyword waits a day: no loop");
+    assertEquals(w.alerts, [`DataForSEO refused the nearby check: ${why}. Kabsi tries again later on its own`]);
+    // A second tick the same day finds nothing due (the keyword waits), so nothing more is asked or sent.
+    const again = await tick(w.d);
+    assertEquals([again.started, again.failed], [0, 0]);
+  }
+  // A failure that is not the provider saying no (a bug on our side) fails the run without a refusal alert.
+  const bug = world({ mode: "live", refuse: new Error("tasks_not_created_3") });
+  await tick(bug.d);
+  assertEquals(bug.alerts, []);
 });
