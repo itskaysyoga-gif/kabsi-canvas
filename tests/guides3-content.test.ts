@@ -40,8 +40,7 @@ const NEVER = [
 describe("Guides 3 content files", () => {
   it("every content file is a guide in the order, and every guide in the order has its file", () => {
     for (const f of FILES) expect(SLUGS.has(f.replace(/\.tsx$/, "")), f).toBe(true);
-    // Each part adds its guides; part C holds the full set (Guides 3).
-    expect(FILES.length).toBeGreaterThan(0);
+    for (const s of [...ORDER, ...EARLIER]) expect(FILES, s).toContain(`${s}.tsx`);
   });
 
   it("the new guides publish one every 2 days at 06:00 UTC, the first on the merge day", () => {

@@ -335,57 +335,46 @@ export function GuideArticle({
                 <Contents doc={doc} />
               </div>
             ) : null}
-            {doc.legacyBody ? (
-              <article
-                className={cn(
-                  prose,
-                  "[&>h2]:!mt-14 [&>h2]:font-display [&>h2]:text-h3 [&>h2]:font-bold",
-                )}
-              >
-                {doc.legacyBody}
-              </article>
-            ) : (
-              <article className="space-y-14">
-                {doc.sections.map((s) => (
-                  <Section key={s.id} id={s.id} heading={s.heading}>
-                    <p>{s.answer}</p>
-                    {s.body}
-                  </Section>
-                ))}
-                {doc.kabsi.heading ? (
-                  <section
-                    aria-labelledby="kabsi"
-                    className="scroll-mt-24 rounded-panel border border-line bg-surface-1 p-5 sm:p-7"
-                  >
-                    <div className="flex items-center gap-3">
-                      <KabsiMark className="size-8" />
-                      <h2 id="kabsi" className="font-display text-h3 font-bold text-text-1">
-                        {doc.kabsi.heading}
-                      </h2>
-                    </div>
-                    <div className={cn("mt-4", prose, "sm:text-body")}>{doc.kabsi.body}</div>
-                  </section>
-                ) : null}
-                {doc.faqs?.length ? (
-                  <section aria-labelledby="questions" className="scroll-mt-24">
-                    <h2
-                      id="questions"
-                      className="font-display text-h3 font-bold text-text-1 sm:text-[1.75rem]"
-                    >
-                      Questions owners ask
+            <article className="space-y-14">
+              {doc.sections.map((s) => (
+                <Section key={s.id} id={s.id} heading={s.heading}>
+                  <p>{s.answer}</p>
+                  {s.body}
+                </Section>
+              ))}
+              {doc.kabsi.heading ? (
+                <section
+                  aria-labelledby="kabsi"
+                  className="scroll-mt-24 rounded-panel border border-line bg-surface-1 p-5 sm:p-7"
+                >
+                  <div className="flex items-center gap-3">
+                    <KabsiMark className="size-8" />
+                    <h2 id="kabsi" className="font-display text-h3 font-bold text-text-1">
+                      {doc.kabsi.heading}
                     </h2>
-                    <dl className="mt-4 divide-y divide-line border-y border-line">
-                      {doc.faqs.map((f) => (
-                        <div key={f.q} className="py-4">
-                          <dt className="text-title font-bold text-text-1">{f.q}</dt>
-                          <dd className="mt-1.5 text-body text-text-2">{f.a}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  </section>
-                ) : null}
-              </article>
-            )}
+                  </div>
+                  <div className={cn("mt-4", prose, "sm:text-body")}>{doc.kabsi.body}</div>
+                </section>
+              ) : null}
+              {doc.faqs?.length ? (
+                <section aria-labelledby="questions" className="scroll-mt-24">
+                  <h2
+                    id="questions"
+                    className="font-display text-h3 font-bold text-text-1 sm:text-[1.75rem]"
+                  >
+                    Questions owners ask
+                  </h2>
+                  <dl className="mt-4 divide-y divide-line border-y border-line">
+                    {doc.faqs.map((f) => (
+                      <div key={f.q} className="py-4">
+                        <dt className="text-title font-bold text-text-1">{f.q}</dt>
+                        <dd className="mt-1.5 text-body text-text-2">{f.a}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </section>
+              ) : null}
+            </article>
             <Sources doc={doc} />
           </div>
           {long ? (

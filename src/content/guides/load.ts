@@ -6,7 +6,5 @@ const files = import.meta.glob<{ guide: GuideDoc }>("./*.tsx");
 
 export async function loadGuideDoc(slug: string): Promise<GuideDoc | undefined> {
   const file = files[`./${slug}.tsx`];
-  if (file) return (await file()).guide;
-  const { LEGACY_GUIDES } = await import("@/lib/guides");
-  return LEGACY_GUIDES.find((g) => g.slug === slug);
+  return file ? (await file()).guide : undefined;
 }
