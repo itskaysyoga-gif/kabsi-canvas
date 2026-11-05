@@ -137,4 +137,6 @@ export function countLine(ranks: number[]) {
   return `In the first 3 at ${countBands(ranks).top} of ${ranks.length} places Kabsi checked.`;
 }
 
+/** Scan 3 (30.34 item 2): the drawing beside the free check's cards is ours, not Google's map. */
+export const DIAGRAM_LABEL = "Diagram, not a map";
 export const NEARBY_SAMPLE = "Sample Google Maps results, not customer counts.";
