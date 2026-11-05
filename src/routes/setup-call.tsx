@@ -15,6 +15,7 @@ import {
   pageHead,
 } from "@/lib/site";
 import { oneOf } from "@/lib/search-params";
+import { Marked } from "@/components/kabsi/highlight";
 
 const searchSchema = (
   s: Record<string, unknown>,
@@ -59,7 +60,7 @@ function SetupCallPage() {
       <section className="container-kb py-10 sm:py-16">
         <SectionHead
           as="h1"
-          title="Get help setting up."
+          title={<Marked text="Get help setting up." mark="help" />}
           lead="Rashid, who runs Kabsi, helps you set up by email. You add Kabsi as a Manager yourself, with each step explained."
         />
         <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
@@ -98,16 +99,22 @@ function SetupCallPage() {
               {WORKING_HOURS} Calls run in those hours. In your email, say what the call is about.
             </p>
             {WHATSAPP_ON ? (
-              <p>
-                Prefer to type? Message us on{" "}
-                <WhatsappLink
-                  kind={kind === "setup" ? "setup" : kind === "partner" ? "partner" : "general"}
-                >
-                  WhatsApp {WHATSAPP_NUMBER}
-                </WhatsappLink>
-                . Nora, Kabsi's assistant, answers at once. Ask for a person and Rashid replies in
-                working hours. We never ask for your Google password or codes there either.
-              </p>
+              <>
+                <p>
+                  Prefer to type? Message us on{" "}
+                  <WhatsappLink
+                    kind={kind === "setup" ? "setup" : kind === "partner" ? "partner" : "general"}
+                  >
+                    WhatsApp {WHATSAPP_NUMBER}
+                  </WhatsappLink>
+                  .
+                </p>
+                <p>
+                  Nora, Kabsi's assistant, answers at once. Ask for a person and Rashid replies in
+                  working hours.
+                </p>
+                <p>We never ask for your Google password or codes there either.</p>
+              </>
             ) : null}
           </aside>
         </div>

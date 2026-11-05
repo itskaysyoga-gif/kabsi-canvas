@@ -3,6 +3,7 @@ import { Check, ChevronDown } from "lucide-react";
 import { SiteShell } from "@/components/kabsi/site-chrome";
 import { Prose } from "@/components/kabsi/d2-parts";
 import { SectionHead } from "@/components/kabsi/ui";
+import { Marked } from "@/components/kabsi/highlight";
 
 function slugify(text: string): string {
   return text
@@ -54,13 +55,19 @@ export function LegalPage({
   return (
     <SiteShell>
       <section className="container-kb pt-12 lg:pt-20">
-        <SectionHead as="h1" title={title} lead="Plain words first. The full text follows." />
+        <SectionHead
+          as="h1"
+          title={<Marked text={title} mark={title.split(" ").pop()} />}
+          lead="Plain words first. The full text follows."
+        />
         <p className="mt-4 text-small text-text-3">Updated {updated}</p>
       </section>
       <section className="container-kb mt-10 pb-20 lg:pb-28">
         {summary?.length ? (
           <div className="max-w-[44rem] rounded-panel border border-line bg-surface-1 p-6 sm:p-8">
-            <h2 className="text-h3">In short</h2>
+            <h2 className="text-h3">
+              <Marked text="In short" mark="short" />
+            </h2>
             <ul className="mt-4 space-y-3">
               {summary.map((s) => (
                 <li key={s} className="flex gap-3 text-body text-text-1">
