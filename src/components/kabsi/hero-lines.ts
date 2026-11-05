@@ -1,3 +1,4 @@
+// Style 1 (master plan 30.33): `mark` is the title's phrase on the highlight bar when it is not the last sentence.
 // The hero lines a route's head needs (Design 8, Web 4). Their own tiny file: route heads stay in the shared bundle on
 // every page (Lean 1), so a head must never import a page component or a page's data.
 
@@ -8,6 +9,7 @@ export const HOME_LINE =
 /** The free check's hero. */
 export const CHECK_HERO = {
   title: "Check your business on Google, free.",
+  mark: "free.",
   line: "See what customers see on your Google profile and what to do first. About 10 seconds, and no access needed.",
 } as const;
 
@@ -27,24 +29,28 @@ export const HOW_HERO = {
 /** FAQ's hero (Design 8; the headline approved). */
 export const FAQ_HERO = {
   title: "Questions owners ask",
+  mark: "owners ask",
   line: "Short answers, in five groups. If yours is not here, write to hello@kabsi.co and a person answers.",
 } as const;
 
 /** About's hero (Design 8; the headline approved). */
 export const ABOUT_HERO = {
   title: "Kabsi is built for the owner at the counter.",
+  mark: "the owner at the counter.",
   line: "One founder, one job: the Google work a local business never has time for, done and brought to the owner for a yes.",
 } as const;
 
 /** Security's hero (Design 8). */
 export const SECURITY_HERO = {
   title: "Your Google profile stays yours.",
+  mark: "stays yours.",
   line: "Kabsi works as a Manager you add, never sees your password, publishes nothing without your yes, and is gone the moment you remove it.",
 } as const;
 
 /** Founding 25's hero (approved). */
 export const FOUNDING_HERO = {
   title: "Founding 25: three months of Kabsi Pro, free.",
+  mark: "three months of Kabsi Pro, free.",
   line: "For 25 businesses. Kabsi does the Google work; you tell Rashid what to make better.",
   action: "Apply for a place",
 } as const;
@@ -52,5 +58,6 @@ export const FOUNDING_HERO = {
 /** Partners' hero (approved). */
 export const PARTNERS_HERO = {
   title: "Earn 25% of every payment.",
+  mark: "25% of every payment.",
   line: "Recommend Kabsi to local business owners you know. You earn while the referred subscription stays paid. Kabsi Partners opens when card payments open.",
 } as const;

@@ -30,6 +30,10 @@ import { FOUNDING25_TOTAL } from "./founding-total";
 import { PRICING_HERO } from "./hero-lines";
 import { BILLING_FAQ } from "./faq-data";
 import { useAccountLink } from "@/components/auth/use-account-link";
+import { Marked } from "@/components/kabsi/highlight";
+import cafeCounter1600 from "@/assets/photos/cafe-counter-1600.webp";
+import cafeCounter800 from "@/assets/photos/cafe-counter-800.webp";
+import { SectionPhoto } from "./section-photo";
 
 const linkCls =
   "press inline-flex min-h-11 items-center gap-1.5 font-semibold text-text-1 underline decoration-text-3 decoration-1 underline-offset-4 hover:decoration-text-1";
@@ -139,7 +143,7 @@ export function D8Pricing() {
         <div className="container-kb section-y">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <h2 id="plans-h" className="text-h2">
-              Who each plan is for
+              <Marked text="Who each plan is for" mark="each plan" />
             </h2>
             <Segmented
               label="Billing period"
@@ -238,7 +242,7 @@ export function D8Pricing() {
       <section aria-labelledby="compare-h" className="border-t border-line">
         <div className="container-kb section-y">
           <h2 id="compare-h" className="text-h2">
-            Compare the plans
+            <Marked text="Compare the plans" mark="the plans" />
           </h2>
           <div className="mt-8 overflow-hidden rounded-panel border border-line bg-surface-1">
             <table className="w-full table-fixed text-start text-small sm:text-body">
@@ -287,13 +291,21 @@ export function D8Pricing() {
       <section aria-labelledby="trial-h" className="border-t border-line bg-surface-1">
         <div className="container-kb section-y">
           <h2 id="trial-h" className="text-h2">
-            The trial, what happens after it, and cancelling
+            <Marked text="The trial, what happens after it, and cancelling" mark="The trial" />
           </h2>
-          <ol className="mt-8 grid gap-6 md:grid-cols-4 md:gap-5">
+          <SectionPhoto
+            large={cafeCounter1600}
+            small={cafeCounter800}
+            alt="A cafe owner at the counter"
+            className="mt-8"
+          />
+          <ol className="mt-8 grid gap-6 md:grid-cols-2 md:gap-5 xl:grid-cols-4">
             {TRIAL_STEPS.map((s) => (
               <li key={s.when} className="border-t-2 border-text-1 pt-4">
-                <p className="text-label font-bold text-text-2">{s.when}</p>
-                <h3 className="mt-1 text-title">{s.title}</h3>
+                <p className="inline-flex rounded-full bg-kb-yellow px-3 py-1 text-label font-bold text-kb-black">
+                  {s.when}
+                </p>
+                <h3 className="mt-3 text-title">{s.title}</h3>
                 <p className="mt-1 text-body text-text-2">{s.text}</p>
               </li>
             ))}
@@ -310,27 +322,35 @@ export function D8Pricing() {
             {/* The founding price shows only while places remain (facts, Price 1). */}
             {left !== null && left > 0 && (
               <div className="rounded-panel border border-line bg-surface-1 p-6 sm:p-8">
-                <p className="text-label font-bold text-text-2">The founding price</p>
+                <p className="inline-flex rounded-full bg-kb-yellow px-3 py-1 text-label font-bold text-kb-black">
+                  The founding price
+                </p>
                 <p className="mt-2 font-display text-h3 font-bold">
                   The first {FOUNDING_TOTAL} paying businesses pay less.
                 </p>
                 <p className="mt-3 text-body text-text-2">
-                  The first {FOUNDING_TOTAL} paying businesses pay the founding price and keep it
-                  while they stay subscribed: Essentials ${FOUNDING_PRICES.essentialsMonthly} a
-                  month or ${FOUNDING_PRICES.essentialsYearly} a year, Pro $
-                  {FOUNDING_PRICES.proMonthly} a month or ${FOUNDING_PRICES.proYearly} a year.
+                  They pay the founding price and keep it while they stay subscribed.
+                </p>
+                <p className="mt-2 text-body text-text-2">
+                  Essentials ${FOUNDING_PRICES.essentialsMonthly} a month or $
+                  {FOUNDING_PRICES.essentialsYearly} a year. Pro ${FOUNDING_PRICES.proMonthly} a
+                  month or ${FOUNDING_PRICES.proYearly} a year.
                 </p>
                 <p className="mt-3 text-small font-bold">{foundingPlacesLine(left)}</p>
               </div>
             )}
             <div className="theme-dark rounded-panel bg-band p-6 text-text-1 sm:p-8">
-              <p className="text-label font-bold text-text-2">Founding 25</p>
+              <p className="inline-flex rounded-full bg-kb-yellow px-3 py-1 text-label font-bold text-kb-black">
+                Founding 25
+              </p>
               <p className="mt-2 font-display text-h3 font-bold">
                 Three months of Kabsi Pro, free, for {FOUNDING25_TOTAL} businesses.
               </p>
               <p className="mt-3 text-body text-text-2">
                 By application. Kabsi does the Google work; you tell Rashid what to make better.
-                After 90 days, choose a plan at the founding price or stop, nothing is charged by
+              </p>
+              <p className="mt-2 text-body text-text-2">
+                After 90 days, choose a plan at the founding price or stop. Nothing is charged by
                 itself.
               </p>
               {f25Left === 0 ? (
@@ -357,7 +377,7 @@ export function D8Pricing() {
       <section aria-labelledby="pfaq-h" className="border-t border-line bg-surface-1">
         <div className="container-kb section-y grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <h2 id="pfaq-h" className="text-h2">
-            Billing questions
+            <Marked text="Billing questions" mark="Billing" />
           </h2>
           <Faq items={BILLING_FAQ} />
         </div>

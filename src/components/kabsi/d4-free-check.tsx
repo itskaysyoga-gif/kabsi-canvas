@@ -6,6 +6,7 @@ import { ScanBox } from "./scan-box";
 import { PageHero, popCls, stagger } from "./page-hero";
 import { ResultPreview } from "./result-preview";
 import { CHECK_HERO } from "./hero-lines";
+import { Marked } from "@/components/kabsi/highlight";
 
 /**
  * The one free check's start page (master plan 30.16 section 4), on Design 8 (Web 4, lane R 1 Nov 2026): the hero with
@@ -73,11 +74,11 @@ export function WhatYouGetBack() {
       <div className="container-kb section-y grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
         <div>
           <h2 id="back-h" className="text-h2">
-            What you get back
+            <Marked text="What you get back" mark="get back" />
           </h2>
           <p className="mt-4 max-w-[34rem] text-lead text-text-2">
-            The most important thing to fix, in plain words and why it matters. Then what customers
-            see today, and what Kabsi would do from day one.
+            The most important thing to fix, and why it matters. Then what customers see today, and
+            what Kabsi would do from day one.
           </p>
           <ul className="mt-6 space-y-2.5">
             {GET_BACK.map((l) => (

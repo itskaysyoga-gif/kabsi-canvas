@@ -8,12 +8,22 @@ import { PageHero, popCls, stagger } from "./page-hero";
 import { Closing } from "./closing";
 import { FAQ_GROUPS } from "./faq-data";
 import { FAQ_HERO } from "./hero-lines";
+import { Marked } from "@/components/kabsi/highlight";
 
 const MAIL = (
   <a className="font-semibold underline underline-offset-4" href={`mailto:${CONTACT_EMAIL}`}>
     {CONTACT_EMAIL}
   </a>
 );
+
+/** Style 1: each group's headline phrase on the highlight bar (30.32 item 3). */
+const GROUP_MARKS: Record<string, string> = {
+  start: "started",
+  google: "control",
+  plans: "billing",
+  whatsapp: "WhatsApp",
+  privacy: "data",
+};
 
 export function D8Faq() {
   return (
@@ -54,7 +64,7 @@ export function D8Faq() {
                     href={`#${g.id}`}
                     className="press flex min-h-11 items-center rounded-inner px-3 text-small font-semibold text-text-2 hover:bg-surface-2 hover:text-text-1"
                   >
-                    {g.title}
+                    <Marked text={g.title} mark={GROUP_MARKS[g.id]} />
                   </a>
                 </li>
               ))}
@@ -64,13 +74,15 @@ export function D8Faq() {
             {FAQ_GROUPS.map((g) => (
               <section key={g.id} aria-labelledby={g.id} className="scroll-mt-24">
                 <h2 id={g.id} className="text-h2">
-                  {g.title}
+                  <Marked text={g.title} mark={GROUP_MARKS[g.id]} />
                 </h2>
                 <Faq className="mt-6" items={g.items} />
               </section>
             ))}
             <div className="rounded-panel border border-line bg-surface-0 p-6 sm:p-8">
-              <h2 className="text-h3">Talk to a person</h2>
+              <h2 className="text-h3">
+                <Marked text="Talk to a person" mark="a person" />
+              </h2>
               {WHATSAPP_ON ? (
                 <>
                   <p className="mt-2 text-body text-text-2">

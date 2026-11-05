@@ -13,6 +13,7 @@ import { signedOutLine, takeSignedOutReason } from "@/lib/signed-out";
 import { hasSessionKey } from "@/lib/stored-session";
 import { inAppBrowserNow } from "@/lib/in-app-browser";
 import { GOOGLE_STOPPED } from "@/lib/sign-in-errors";
+import { Marked } from "@/components/kabsi/highlight";
 
 const searchSchema = (
   s: Record<string, unknown>,
@@ -118,7 +119,9 @@ function LoginPage() {
               </p>
             ) : null}
             <div className="rounded-card border border-line bg-surface-1 p-5 shadow-rest sm:p-8">
-              <h1 className="font-display text-h2 font-bold text-text-1">Log in to Kabsi</h1>
+              <h1 className="font-display text-h2 font-bold text-text-1">
+                <Marked text="Log in to Kabsi" mark="Log in" />
+              </h1>
               <p className="mt-3 mb-7 text-body text-text-2">
                 New to Kabsi? The same steps create your account.
               </p>

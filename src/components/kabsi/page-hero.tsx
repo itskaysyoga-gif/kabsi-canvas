@@ -6,8 +6,9 @@ import { cn } from "@/lib/utils";
 import { MAIN_CTA, SCAN_LINE } from "@/lib/site";
 import { ButtonLink } from "./ui";
 import { D9Title } from "./d9-title";
+import { Marked } from "./highlight";
 
-export type PageHeroLines = { title: string; line: string; action?: string };
+export type PageHeroLines = { title: string; line: string; action?: string; mark?: string };
 
 /** A delay for one part of a hero visual; dropped under reduced motion. */
 export function stagger(i: number, base = 200, step = 140) {
@@ -49,7 +50,13 @@ export function PageHero({
           )}
           {/* The headline paints with no entrance animation, so it can be the page's LCP at once (Web 3). */}
           <h1 id="hero-title" className="text-display text-balance">
-            {marked ? <D9Title text={hero.title} /> : hero.title}
+            {!marked ? (
+              hero.title
+            ) : hero.mark ? (
+              <Marked text={hero.title} mark={hero.mark} />
+            ) : (
+              <D9Title text={hero.title} />
+            )}
           </h1>
           <p
             className="mt-5 animate-enter text-lead text-text-2"
