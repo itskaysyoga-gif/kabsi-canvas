@@ -6,7 +6,7 @@ import { autocomplete, getSnapshotPlace, searchText } from "../_shared/google/in
 import { admin, APP_URL, captureError, CORS, esc, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { notify } from "../_shared/notify.ts";
 import { makeHandler } from "../_shared/profile-snapshot.ts";
-import type { CheckRow } from "../_shared/visibility/free-check.ts";
+import { type CheckRow, reportParts } from "../_shared/visibility/free-check.ts";
 import { whatsappCtx } from "../_shared/whatsapp/db.ts";
 import { WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
 import { BODY_LIMITS, withBodyCap } from "../_shared/body-cap.ts";
@@ -60,13 +60,17 @@ Deno.serve(withBodyCap(makeHandler({
   captureError,
   // Scan 2 (30.29 item B): first only the place of the code, then the whole check when it is that place's.
   loadCheck: async (code, placeId) => {
-    const { data: head } = await admin().from("free_checks").select("place:self->>place_id").eq("code", code).maybeSingle();
+    const { data: head, error: e1 } = await admin().from("free_checks").select("place:self->>place_id").eq("code", code).maybeSingle();
+    if (e1) throw e1;
     if (!head) return null;
     if ((head as { place: string | null }).place !== placeId) return "other";
-    const { data } = await admin().from("free_checks")
+    const { data, error } = await admin().from("free_checks")
       .select("id, code, business, term, country, city, self, center, radius_km, category, source, state, fast, ai, points, nearby, created_at")
       .eq("code", code).eq("self->>place_id", placeId).maybeSingle();
-    return (data as CheckRow | null) ?? null;
+    if (error) throw error;
+    const c = data as CheckRow | null;
+    if (!c || c.self?.place_id !== placeId) return "other";
+    return { parts: reportParts(c, APP_URL) };
   },
   appUrl: APP_URL,
   cors: CORS,

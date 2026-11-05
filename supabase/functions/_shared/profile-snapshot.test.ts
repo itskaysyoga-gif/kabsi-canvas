@@ -10,7 +10,7 @@ import { buildSnapshot, CHECK_PAGES, checkEmail, type Deps, flags, LIMITS, makeH
 import { esc } from "./email-layout.ts";
 import { FREE_TOOL_BUSY } from "./free-tool-busy.ts";
 import { visibleText, type EmailContent, renderEmail } from "./email/template.ts";
-import type { CheckRow } from "./visibility/free-check.ts";
+import { type CheckRow, reportParts } from "./visibility/free-check.ts";
 
 const CTX = { appUrl: "https://kabsi.test", defaultWhy: "You asked for this email." };
 const real = { ...guard };
@@ -101,7 +101,7 @@ function world(opts: { checks?: Record<string, CheckRow>; cap?: number; place?: 
     captureError: (_fn, e) => (errors.push(e), Promise.resolve()),
     loadCheck: (code, placeId) => {
       const c = opts.checks?.[code];
-      return Promise.resolve(!c ? null : c.self.place_id === placeId ? c : "other");
+      return Promise.resolve(!c ? null : c.self.place_id === placeId ? { parts: reportParts(c, "https://kabsi.co") } : "other");
     },
     appUrl: "https://kabsi.co",
     cors: {},
@@ -715,6 +715,9 @@ Deno.test("scan2: no code keeps the email as it was; an unknown or unfinished ch
     assert.equal(other.status, 400);
     assert.equal(other.body.error, "bad_check");
     assert.equal(w.sent.length, 3, "nothing sent for another place's check");
+    // Review of Scan 2: asked again once the check has finished, the report goes out (a new dedupe key), not dropped.
+    const keys = new Set(w.sent.map((m) => m.dedupeKey));
+    assert.equal(keys.size, 3);
     assert.equal(w.saved.length, 3);
   } finally {
     restore();
@@ -732,6 +735,9 @@ Deno.test("scan2: WhatsApp carries the profile line, the count line, the AI line
     const other = await w.call({ ...WA, phone: "+1 201 555 0101", code: "XTHERPZ2" }, "203.0.113.9");
     assert.equal(other.status, 400);
     assert.equal(w.wa.sent.length, 1);
+    // A check that never finished says so on WhatsApp too.
+    assert.equal((await w.call({ ...WA, phone: "+1 201 555 0102", code: "MAPPYNG2" }, "203.0.113.10")).status, 200);
+    assert.ok(w.wa.sent[1].params[1].endsWith("The nearby search and the AI answer were not part of this check."));
   } finally {
     restore();
   }
