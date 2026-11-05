@@ -4,8 +4,9 @@
 //   node scripts/nora-eval/run-nora-eval.ts --stub pass    the checker and the facts file, no network (also "fail")
 //   node scripts/nora-eval/run-nora-eval.ts --live --sample 20   the real Nora on 20 questions spread over the set; needs
 //                                                          ANTHROPIC_API_KEY; by hand only, when Rashid says so (R-45, 2.12)
-//   node scripts/nora-eval/run-nora-eval.ts --live --with-28 --judge --budget 2.5   all 83 questions (the 60, the
-//                                                          20 of 28.7 and the 3 of Scope 1), each scored by the judge (26.1), stopped at the budget
+//   node scripts/nora-eval/run-nora-eval.ts --stub pass --pages   the 5 page-link questions of Guides 4 (no network)
+//   node scripts/nora-eval/run-nora-eval.ts --live --with-28 --judge --budget 2.5   all 88 questions (the 60, the
+//                                                          20 of 28.7, the 3 of Scope 1 and the 5 page-link questions), each scored by the judge (26.1), stopped at the budget
 //
 // Add --out <file> to keep the findings. Nothing is stored and no account is read.
 import { writeFileSync } from "node:fs";
@@ -14,6 +15,7 @@ import { gate, liveModel, runAll, sample, stubModel, type Answerer } from "./nor
 import { QUESTIONS } from "./questions.ts";
 import { QUESTIONS_28 } from "./questions-28.ts";
 import { QUESTIONS_SCOPE1 } from "./questions-scope1.ts";
+import { QUESTIONS_PAGES } from "./questions-pages.ts";
 import { addRun, JUDGE_MODEL, makeJudge, summarize, type JudgeScore } from "../eval/judge.ts";
 import { costMicros, type Usage } from "../../supabase/functions/_shared/ai/agents.ts";
 import { readFileSync } from "node:fs";
@@ -49,9 +51,12 @@ if (stub) {
   process.exit(2);
 }
 
-const all = args.includes("--with-28")
-  ? [...QUESTIONS, ...QUESTIONS_28, ...QUESTIONS_SCOPE1]
-  : QUESTIONS;
+// Guides 4 part B: --pages asks only the five page-link questions (the stub run of them is its own step in CI).
+const all = args.includes("--pages")
+  ? QUESTIONS_PAGES
+  : args.includes("--with-28")
+    ? [...QUESTIONS, ...QUESTIONS_28, ...QUESTIONS_SCOPE1, ...QUESTIONS_PAGES]
+    : QUESTIONS;
 const n = Number(flag("--sample") ?? all.length);
 // Fix 1: --ids en16,en26 asks only those questions (a cheap check of a fix before the full run); the gate expects that many.
 const ids = flag("--ids")

@@ -59,15 +59,23 @@ import restaurantCooks800 from "@/assets/photos/restaurant-cooks-800.webp";
 import founder800 from "@/assets/photos/founder-rashid-800.webp";
 import founder400 from "@/assets/photos/founder-rashid-400.webp";
 
-export type Photo = { large: string; small: string; w: number; h: number; alt: string };
-const land = (large: string, small: string, alt: string): Photo => ({
+/** `sw` is the small file's width when it is not the usual 800 (landscape) or 533 (portrait). */
+export type Photo = {
+  large: string;
+  small: string;
+  w: number;
+  h: number;
+  alt: string;
+  sw?: number;
+};
+export const land = (large: string, small: string, alt: string): Photo => ({
   large,
   small,
   w: 1600,
   h: 1067,
   alt,
 });
-const port = (large: string, small: string, alt: string): Photo => ({
+export const port = (large: string, small: string, alt: string): Photo => ({
   large,
   small,
   w: 1067,
@@ -179,7 +187,7 @@ export function Img({
   return (
     <img
       src={photo.small}
-      srcSet={`${photo.small} ${photo.w === 1600 ? 800 : 533}w, ${photo.large} ${photo.w}w`}
+      srcSet={`${photo.small} ${photo.sw ?? (photo.w === 1600 ? 800 : 533)}w, ${photo.large} ${photo.w}w`}
       sizes={sizes}
       width={photo.w}
       height={photo.h}
