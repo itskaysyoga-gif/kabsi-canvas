@@ -1,6 +1,7 @@
 import { useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { RotateCcw } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { isChunkLoadError, reloadOnceForChunk } from "@/lib/chunk-reload";
 import { reportError } from "@/lib/telemetry";
 import { cn } from "@/lib/utils";
 import { Button, ButtonLink, KabsiMark } from "./ui";
@@ -57,15 +58,27 @@ export function NotFoundPage() {
 
 export function ErrorPage({ error, reset }: ErrorComponentProps) {
   const router = useRouter();
+  // Fix 3 part B: a route file that failed to load after a deploy reloads the page once (src/lib/chunk-reload.ts).
+  const chunk = isChunkLoadError(error);
+  const [reloading, setReloading] = useState(false);
   useEffect(() => {
-    reportError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
+    if (chunk && reloadOnceForChunk()) {
+      setReloading(true);
+      return;
+    }
+    reportError(error, { boundary: "tanstack_root_error_component", chunk });
+  }, [error, chunk]);
+  if (reloading) return null;
   return (
     <ErrorView
-      onRetry={() => {
-        router.invalidate();
-        reset();
-      }}
+      onRetry={
+        chunk
+          ? () => window.location.reload()
+          : () => {
+              router.invalidate();
+              reset();
+            }
+      }
     />
   );
 }
