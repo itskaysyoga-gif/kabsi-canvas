@@ -61,7 +61,13 @@ Deno.serve((req) =>
       return error ? null : (data as { pro: boolean });
     },
     profile: loadProfile,
-    findCategory,
+    // Fix 3: the Google layer is asked with the business's Google location name (it picks the mock or live with it), never
+    // with Kabsi's own id, so a demo business stays on the mock (R-17).
+    findCategory: async (locationId, region, displayName) => {
+      const { data: l } = await admin().from("locations").select("google_location_id").eq("id", locationId).maybeSingle();
+      const name = (l?.google_location_id as string | null | undefined) ?? null;
+      return name ? await findCategory(name, region, displayName) : null;
+    },
     site: { resolve: resolveHost, fetch: (url, init) => fetch(url, init) },
     saveSite: async (locationId, website, pages, found) => {
       const { error } = await admin().rpc("coach_site_check_put", { p_location: locationId, p_website: website, p_pages: pages, p_found: found });

@@ -557,9 +557,14 @@ export async function placeCategory(placeId: string) {
 }
 
 // ─── The Profile Coach's weekly read (P0.8-09, read only): three numbers about the profile, never Google's text.
-export async function coachRead(locationId: string): Promise<CoachNumbers & { source: "live" | "mock" }> {
+// Fix 3: locationId is Google's location name ("locations/123", locations.google_location_id), the way readProtection and
+// profileIdentity are called, never Kabsi's own id. Anything else is refused before the mode is chosen, so a wrong id can
+// never fall through to a live call. A demo business (is_demo, R-17) always reads the mock.
+export const GOOGLE_LOCATION_NAME = /^locations\/[A-Za-z0-9_-]+$/;
+export async function coachRead(locationId: string, demo = false): Promise<CoachNumbers & { source: "live" | "mock" }> {
   assertNotConcierge(locationId);
-  if (modeFor(locationId) === "mock") return { ...MOCK_COACH, source: "mock" };
+  if (!GOOGLE_LOCATION_NAME.test(locationId)) throw new Error("coach_read_needs_google_location_name");
+  if (demo || modeFor(locationId) === "mock") return { ...MOCK_COACH, source: "mock" };
   const l = await locationsLive.getLocation(locationId, "profile,categories");
   const attrs = await attributesLive.getAttributes(locationId);
   return { ...coachNumbers(l, attrs), source: "live" };
