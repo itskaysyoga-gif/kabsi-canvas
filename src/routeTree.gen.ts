@@ -21,6 +21,7 @@ import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManagerStepsRouteImport } from './routes/manager-steps'
+import { Route as NoraPagesDotjsonRouteImport } from './routes/nora-pages[.]json'
 import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -120,6 +121,11 @@ const LoginRoute = LoginRouteImport.update({
 const ManagerStepsRoute = ManagerStepsRouteImport.update({
   id: '/manager-steps',
   path: '/manager-steps',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NoraPagesDotjsonRoute = NoraPagesDotjsonRouteImport.update({
+  id: '/nora-pages.json',
+  path: '/nora-pages.json',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PartnersRoute = PartnersRouteImport.update({
@@ -344,6 +350,7 @@ export interface FileRoutesByFullPath {
   '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
   '/manager-steps': typeof ManagerStepsRoute
+  '/nora-pages.json': typeof NoraPagesDotjsonRoute
   '/partners': typeof PartnersRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -398,6 +405,7 @@ export interface FileRoutesByTo {
   '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
   '/manager-steps': typeof ManagerStepsRoute
+  '/nora-pages.json': typeof NoraPagesDotjsonRoute
   '/partners': typeof PartnersRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -453,6 +461,7 @@ export interface FileRoutesById {
   '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
   '/manager-steps': typeof ManagerStepsRoute
+  '/nora-pages.json': typeof NoraPagesDotjsonRoute
   '/partners': typeof PartnersRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -509,6 +518,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/login'
     | '/manager-steps'
+    | '/nora-pages.json'
     | '/partners'
     | '/pricing'
     | '/privacy'
@@ -563,6 +573,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/login'
     | '/manager-steps'
+    | '/nora-pages.json'
     | '/partners'
     | '/pricing'
     | '/privacy'
@@ -617,6 +628,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/login'
     | '/manager-steps'
+    | '/nora-pages.json'
     | '/partners'
     | '/pricing'
     | '/privacy'
@@ -673,6 +685,7 @@ export interface RootRouteChildren {
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   LoginRoute: typeof LoginRoute
   ManagerStepsRoute: typeof ManagerStepsRoute
+  NoraPagesDotjsonRoute: typeof NoraPagesDotjsonRoute
   PartnersRoute: typeof PartnersRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -781,6 +794,13 @@ declare module '@tanstack/react-router' {
       path: '/manager-steps'
       fullPath: '/manager-steps'
       preLoaderRoute: typeof ManagerStepsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nora-pages.json': {
+      id: '/nora-pages.json'
+      path: '/nora-pages.json'
+      fullPath: '/nora-pages.json'
+      preLoaderRoute: typeof NoraPagesDotjsonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/partners': {
@@ -1144,6 +1164,7 @@ const rootRouteChildren: RootRouteChildren = {
   LlmsDottxtRoute: LlmsDottxtRoute,
   LoginRoute: LoginRoute,
   ManagerStepsRoute: ManagerStepsRoute,
+  NoraPagesDotjsonRoute: NoraPagesDotjsonRoute,
   PartnersRoute: PartnersRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
