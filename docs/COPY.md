@@ -1691,7 +1691,7 @@ Staff pages are for the Kabsi team only and are never public. Owners never see t
 
 *Every line is in src/content/industries/beauty-salon.ts with its row in docs/claims/beauty-salon.md. Amber Glow Beauty, Dubai, Noor and the nearby names are invented Examples.*
 
-- **Card on /for**: "Beauty salons" · "Makeup, facials and waxing, posted for you." /for now has 21 cards: 2 to a row below 1024 px (the last row centred) and 4 from 1024 px (its one last card centred, the 30.33 rule).
+- **Card on /for**: "Beauty salons" · "Makeup, facials and waxing, posted for you." /for now has 21 kinds of business and a 22nd card on charcoal, "Any other local business" · "Kabsi works for any business with a Google profile. Check yours free." (to /scan, hidden while filtering), so no card sits alone in a last row: 11 rows of 2 below 1024 px, 5 rows of 4 and a centred row of 2 from 1024 px.
 - **Query**: "beauty salon Google Business Profile". Title "Beauty salon Google Business Profile help | Kabsi". Description "Kabsi looks after your beauty salon Google Business Profile: treatments as posts, hours checked daily, review replies prepared, all for your yes."
 - **Hero**: H1 "Your beauty salon, ready for its close up." ("ready for its close up." on the bar). Line "Your beauty salon Google Business Profile, cared for: treatment posts, true opening times, and review answers you sign off."
 - **Answer**: "For a beauty salon Google Business Profile, Kabsi turns treatments into posts, checks your hours daily and prepares review replies, all for your yes."

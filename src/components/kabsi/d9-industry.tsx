@@ -656,6 +656,22 @@ export function ForIndex() {
                 <TradeCard industry={i} sizes="(min-width: 1024px) 18rem, 45vw" />
               </li>
             ))}
+            {/* Site 2 (30.34 item 4): with 21 kinds of business, this card keeps the last row from holding one card
+                alone on a phone (22 cards: 11 rows of 2; 5 rows of 4 and a centred row of 2). Hidden while filtering. */}
+            <li
+              hidden={!!q}
+              className="w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]"
+            >
+              <SiteLink
+                to="/scan"
+                className="press theme-dark flex h-full min-h-40 flex-col justify-end rounded-card bg-band p-3 text-text-1 shadow-rest sm:p-4"
+              >
+                <span className="text-body font-bold sm:text-title">Any other local business</span>
+                <span className="mt-1 text-small text-text-2">
+                  Kabsi works for any business with a Google profile. Check yours free.
+                </span>
+              </SiteLink>
+            </li>
           </ul>
           {shown.length === 0 && (
             <p className="mt-8 text-body text-text-2">
