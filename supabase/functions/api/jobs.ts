@@ -38,9 +38,7 @@ import { photoFileStore, removeDuePhotoFiles } from "../_shared/retention.ts";
 import { detectTasks } from "../_shared/tasks.ts";
 import { type Cadence, careMonth, type Planned } from "../_shared/posts/plan.ts";
 import { checkContext, postMaterial } from "../_shared/posts/context.ts";
-import { type CoachRefreshDeps, refreshCoach } from "../_shared/coach/refresh.ts";
-import { isConciergeLocationId } from "../_shared/concierge.ts";
-import { isDemoLocationId } from "../_shared/demo.ts";
+import { coachTarget, type CoachRefreshDeps, refreshCoach } from "../_shared/coach/refresh.ts";
 import { type HolidayAsk, type HolidayAskDeps, sendHolidayAsks } from "../_shared/holiday.ts";
 import { sendTeamInvite, type TeamInvite, teamInviteEmail } from "../_shared/team.ts";
 import { whatsappPostAlert } from "../_shared/whatsapp/db.ts";
@@ -383,9 +381,8 @@ const COACH_READ: CoachRefreshDeps = {
   async read(locationId) {
     const { data: l, error } = await admin().from("locations").select("google_location_id, concierge, is_demo").eq("id", locationId).maybeSingle();
     if (error) throw error;
-    const name = (l?.google_location_id as string | null | undefined) ?? null;
-    if (!l || !name || l.concierge || isConciergeLocationId(name)) return null;
-    return coachRead(name, l.is_demo === true || isDemoLocationId(name));
+    const t = coachTarget(l);
+    return t ? coachRead(t.name, t.demo) : null;
   },
   async failed(locationId, error) {
     await rpcJson("coach_read_failed", { p_location: locationId, p_error: error });

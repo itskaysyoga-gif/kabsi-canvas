@@ -4,7 +4,7 @@
 // retried, is reported at most once a day, and that every documented form the live modules use still goes through.
 // Run: deno test --no-check _shared/google/name-guard.test.ts (scripts/deno-check.sh runs all of _shared/).
 import assert from "node:assert/strict";
-import { gbp, GoogleNameRefused, googlePathOk, io } from "./client.ts";
+import { gbp, GoogleNameRefused, googlePathOk, io, refusalReportDue } from "./client.ts";
 import { PermanentJobError } from "../jobs.ts";
 import * as google from "./index.ts";
 import * as accounts from "./accounts/live.ts";
@@ -98,6 +98,8 @@ Deno.test("Fix 3: other wrong names are refused too (demo, concierge, empty, und
       `https://example.com/v1/${LOC}`,
       `${BI}/locations/${KABSI_ID}?readMask=title`,
       `${BI}/locations/${KABSI_ID}/attributes`,
+      `https://mybusiness.googleapis.com/v4/${ACC}/${LOC}/reviews/../../${KABSI_ID}`,
+      `https://mybusiness.googleapis.com/v4/${ACC}/${LOC}/reviews/%2e%2e/x`,
     ]) {
       assert.ok((await refused(() => gbp(url))) instanceof GoogleNameRefused, url);
     }
@@ -175,4 +177,45 @@ Deno.test("Fix 3: coachRead takes only Google's location name, and a demo busine
   } finally {
     restore();
   }
+});
+
+// A stand-in for app_settings with the two calls refusalReportDue makes (insert if missing, else move the day on).
+function settingsDb(start: string | null, fail = false) {
+  const row = { value: start };
+  const db = {
+    from: () => ({
+      upsert: (r: { value: string }) => ({
+        select: () => {
+          if (fail) return Promise.resolve({ data: null, error: { message: "down" } });
+          if (row.value !== null) return Promise.resolve({ data: [], error: null });
+          row.value = r.value;
+          return Promise.resolve({ data: [{ key: "k" }], error: null });
+        },
+      }),
+      update: (r: { value: string }) => ({
+        eq: () => ({
+          neq: (_c: string, today: string) => ({
+            select: () => {
+              if (fail) return Promise.resolve({ data: null, error: { message: "down" } });
+              if (row.value === null || row.value === today) return Promise.resolve({ data: [], error: null });
+              row.value = r.value;
+              return Promise.resolve({ data: [{ key: "k" }], error: null });
+            },
+          }),
+        }),
+      }),
+    }),
+  };
+  return { row, get: () => Promise.resolve(db) };
+}
+
+Deno.test("Fix 3: the Sentry report is due once a day: the first refusal of the day, then not again until tomorrow", async () => {
+  const fresh = settingsDb(null);
+  assert.equal(await refusalReportDue("2026-11-05", fresh.get), true);
+  assert.equal(await refusalReportDue("2026-11-05", fresh.get), false);
+  assert.equal(await refusalReportDue("2026-11-06", fresh.get), true);
+  assert.equal(fresh.row.value, "2026-11-06");
+  const old = settingsDb("2026-11-04");
+  assert.equal(await refusalReportDue("2026-11-05", old.get), true);
+  assert.equal(await refusalReportDue("2026-11-05", settingsDb(null, true).get), false, "a setting that cannot be written means no report");
 });

@@ -18,6 +18,15 @@ export type CoachRefreshDeps = {
   failed(locationId: string, error: string): Promise<void>;
 };
 
+/** Which Google location the Coach may read for a business row: null for no Google name or a concierge business (no
+ *  call at all); demo for a test persona (is_demo or a locations/demo- name), which reads the mock (R-17). */
+export function coachTarget(l: { google_location_id?: string | null; concierge?: boolean | null; is_demo?: boolean | null } | null):
+  { name: string; demo: boolean } | null {
+  const name = l?.google_location_id ?? null;
+  if (!l || !name || l.concierge || name.startsWith("locations/concierge-")) return null;
+  return { name, demo: l.is_demo === true || name.startsWith("locations/demo-") };
+}
+
 /** "read" when numbers were fetched and kept (the tasks should be looked at again), "skipped" otherwise. */
 export async function refreshCoach(locationId: string, deps: CoachRefreshDeps): Promise<"read" | "skipped"> {
   if (!(await deps.due(locationId))) return "skipped";
@@ -30,6 +39,12 @@ export async function refreshCoach(locationId: string, deps: CoachRefreshDeps): 
     throw e;
   }
   if (!n) return "skipped";
-  await deps.save(locationId, n);
+  try {
+    await deps.save(locationId, n);
+  } catch (e) {
+    // A read that cannot be kept counts as failed too, so it is not sent to Google again in 5 minutes.
+    await deps.failed(locationId, String(e).slice(0, 300)).catch(() => {});
+    throw e;
+  }
   return "read";
 }

@@ -120,16 +120,21 @@ export function googlePathOk(url: string): boolean {
   const base = BASES.find((b) => url.startsWith(`${b}/`));
   if (!base) return false;
   const path = url.slice(base.length + 1).split("?")[0];
+  // A dot segment ("..", or "%2e" spelled out) would let fetch fold the path into another resource: never allowed.
+  if (/(^|\/)\.{1,2}(\/|$)|%2e/i.test(path)) return false;
   return RESOURCE.test(path) || (COLLECTIONS[base]?.test(path) ?? false);
 }
-// The refused path for the report, without the query and with Kabsi's own ids kept out of the message's grouping.
+// The refused path for the report, without the query. A uuid in it is written as <uuid> in the message, so every
+// refusal of the same shape is one Sentry issue; the path as sent is kept in the event's extra data.
 const refusedPath = (url: string) => url.split("?")[0].slice(0, 200);
+const refusedShape = (url: string) => refusedPath(url).replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, "<uuid>");
 // Sentry is told at most once a day across every function: the day is kept in app_settings (google_name_refused_day);
 // the first isolate to move it to today reports. A setting that cannot be written means no report, never a throw.
 const REFUSED_KEY = "google_name_refused_day";
-export async function refusalReportDue(today = new Date().toISOString().slice(0, 10)): Promise<boolean> {
+// deno-lint-ignore no-explicit-any
+export async function refusalReportDue(today = new Date().toISOString().slice(0, 10), getDb: () => Promise<any> = mockDb): Promise<boolean> {
   try {
-    const db = await mockDb();
+    const db = await getDb();
     const ins = await db.from("app_settings").upsert({ key: REFUSED_KEY, value: today }, { onConflict: "key", ignoreDuplicates: true }).select("key");
     if (!ins.error && (ins.data ?? []).length > 0) return true;
     const up = await db.from("app_settings").update({ value: today, updated_at: new Date().toISOString() }).eq("key", REFUSED_KEY).neq("value", today).select("key");
@@ -140,7 +145,7 @@ export async function refusalReportDue(today = new Date().toISOString().slice(0,
 }
 async function reportRefusal(url: string) {
   const { captureError } = await import("../kabsi.ts");
-  await captureError("google", new GoogleNameRefused(`google call refused: not a Google resource name: ${refusedPath(url)}`), {
+  await captureError("google", new GoogleNameRefused(`google call refused: not a Google resource name: ${refusedShape(url)}`), {
     note: "Fix 3 name guard; reported once a day", path: refusedPath(url),
   });
 }
@@ -202,7 +207,7 @@ export async function gbp(url: string, init: RequestInit = {}): Promise<any> {
   // Fix 3: a path that is not a Google resource name never reaches Google, the limiter or the token.
   if (!googlePathOk(url)) {
     if (await io.refusalDue().catch(() => false)) await io.reportRefusal(url).catch(() => {});
-    throw new GoogleNameRefused(`google call refused: not a Google resource name: ${refusedPath(url)}`);
+    throw new GoogleNameRefused(`google call refused: not a Google resource name: ${refusedShape(url)}`);
   }
   const profile = profileOf(url, method);
   for (let attempt = 0; ; attempt++) {

@@ -2,7 +2,7 @@
 import { assertEquals } from "jsr:@std/assert@1";
 import { COACH_ITEMS, freeChecklist } from "./catalog.ts";
 import { coachNumbers, MOCK_COACH } from "./read.ts";
-import { type CoachRefreshDeps, refreshCoach } from "./refresh.ts";
+import { coachTarget, type CoachRefreshDeps, refreshCoach } from "./refresh.ts";
 
 Deno.test("the numbers are counts, never Google's text", () => {
   const n = coachNumbers(
@@ -77,4 +77,31 @@ Deno.test("Fix 3: the read's own error is reported even when recording the failu
     msg = String(e);
   }
   assertEquals(msg, "Error: google 404");
+});
+
+Deno.test("Fix 3: a read that cannot be kept is recorded as failed too", async () => {
+  const log: string[] = [];
+  const d = deps(true, log);
+  d.save = () => Promise.reject(new Error("db down"));
+  let failed = false;
+  try {
+    await refreshCoach("loc-1", d);
+  } catch {
+    failed = true;
+  }
+  assertEquals(failed, true);
+  assertEquals(log, ["due loc-1", "read loc-1", "failed loc-1 Error: db down"]);
+});
+
+Deno.test("Fix 3: the Coach reads Google's name, never Kabsi's id; no name or concierge reads nothing; a test persona reads the mock", () => {
+  assertEquals(coachTarget({ google_location_id: "locations/4825254240697973899", concierge: false, is_demo: false }),
+    { name: "locations/4825254240697973899", demo: false });
+  assertEquals(coachTarget({ google_location_id: "locations/demo-harbour-lane-coffee", concierge: false, is_demo: true }),
+    { name: "locations/demo-harbour-lane-coffee", demo: true });
+  assertEquals(coachTarget({ google_location_id: "locations/demo-juniper-hair-studio", concierge: false, is_demo: false })?.demo, true);
+  assertEquals(coachTarget({ google_location_id: "locations/123", concierge: false, is_demo: true })?.demo, true);
+  assertEquals(coachTarget({ google_location_id: null, concierge: false, is_demo: false }), null); // the QA business
+  assertEquals(coachTarget({ google_location_id: "locations/concierge-x", concierge: false, is_demo: false }), null);
+  assertEquals(coachTarget({ google_location_id: "locations/123", concierge: true, is_demo: false }), null);
+  assertEquals(coachTarget(null), null);
 });
