@@ -257,11 +257,18 @@ for (const r of routes) {
           (k) => Math.abs(Math.round(k.getBoundingClientRect().top) - top) < 4,
         );
         const gw = g.getBoundingClientRect().width;
+        // A card centred on purpose (balance-2, balance-tiles) is not lone.
+        const centred = (k, gr) => {
+          const kb = k.getBoundingClientRect();
+          const gb = gr.getBoundingClientRect();
+          return Math.abs(kb.left + kb.width / 2 - (gb.left + gb.width / 2)) < 4;
+        };
         if (
           cols >= 2 &&
           kids.length > 1 &&
           last.length === 1 &&
-          last[0].getBoundingClientRect().width < gw * 0.6
+          last[0].getBoundingClientRect().width < gw * 0.6 &&
+          !centred(last[0], g)
         )
           out.lone.push(
             `${kids.length} cards in ${cols} columns: ${(kids[0].textContent || "").trim().slice(0, 40)}`,

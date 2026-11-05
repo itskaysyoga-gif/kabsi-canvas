@@ -109,6 +109,23 @@ test.describe("the staff workspace", () => {
     await expect(page.getByRole("heading", { name: "Chats with Nora" })).toBeVisible();
   });
 
+  test("a failed staff check says the page did not load, never that it does not exist", async ({
+    page,
+  }) => {
+    await noBanner(page);
+    await signInFake(page, { staff: true });
+    // Registered after the session's mock, so it answers first: the is_staff read fails.
+    await page.route("**/rest/v1/rpc/is_staff", (route) =>
+      route.fulfill({ status: 500, json: { message: "down" } }),
+    );
+    await page.goto("/staff/system");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("This page did not load.", {
+      timeout: 20_000,
+    });
+    await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
+    await expect(page.getByText("This page is not here.")).toHaveCount(0);
+  });
+
   test("a session that is not staff gets the not-found page on every staff page, and no staff read", async ({
     page,
   }) => {

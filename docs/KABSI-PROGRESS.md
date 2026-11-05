@@ -1,18 +1,19 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 5 Nov 2026, Style 1. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 5 Nov 2026, App 5. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
 - Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati; the first real reply was published and verified; the post removal was verified on Google (23 Oct). kabsi.co runs on Vercel; Creem is the only payment route (test mode, not open). Evidence: `docs/progress/archive/evidence.md` and `where-things-stand.md`.
 - Web 2, V4, UX 1, Email 1, Sec 1 and 2, WhatsApp 2, Billing 2, Price 1 and Web 3 (26 to 30 Oct): detail in the dated files in `docs/progress/archive/`.
 - Go live 1 (5 Nov 2026, 30.28, R-108): WhatsApp for owners, the nearby check and the AI answer are on; card payments stay closed. Detail: `docs/progress/archive/2026-11-05-golive1.md`.
-- Scan 2 and Copy 3 (5 Nov 2026, PRs 369 to 376): the free check names the town and country; the Go live 1 audit's copy decisions are on kabsi.co. Detail: `docs/progress/archive/2026-11-05-scan2.md`, `2026-11-05-copy3.md`.
-- App 4 (5 Nov 2026, 30.31, R-111, PRs 378 to 388): Dashboard in the header, sign-ins last 30 days (staff pages 12 hours), /login for every case, pages open at the top, the signed-in audit. Detail: `docs/progress/archive/2026-11-05-app4.md`.
-- Guides 4 (5 Nov 2026, 30.32, R-112, PRs 390, 391, 393, 394): all 27 guides public; Nora knows the public pages; real lastmod, IndexNow, the vercel.app redirect. Detail: `docs/progress/archive/2026-11-05-guides4.md`.
-- Fix 3 (5 Nov 2026, PRs 379, 381, 383): the Coach reads Google by its location name (KABSI-EDGE-J stopped); a name guard; one reload after a deploy; a nightly kabsi.co check. Detail: `docs/progress/archive/2026-11-05-fix3.md`.
+- Scan 2 and Copy 3 (5 Nov 2026, PRs 369 to 376): the free check names the town; Go live 1's copy decisions. Detail: `docs/progress/archive/2026-11-05-scan2.md`, `2026-11-05-copy3.md`.
+- App 4 (5 Nov 2026, 30.31, R-111, PRs 378 to 388): Dashboard link, sign-in times, /login, the signed-in audit. Detail: `docs/progress/archive/2026-11-05-app4.md`.
+- Guides 4 (5 Nov 2026, 30.32, R-112, PRs 390 to 394): all 27 guides public; Nora knows them. Detail: `docs/progress/archive/2026-11-05-guides4.md`.
+- Fix 3 (5 Nov 2026, PRs 379, 381, 383): the Coach reads Google by location name; one reload after a deploy. Detail: `docs/progress/archive/2026-11-05-fix3.md`.
 - Industries 2 (5 Nov 2026, 30.32, PRs 392, 395, part C): /for is one list; 20 industry pages on Design 9; old group pages 301 to /for. Detail: `docs/progress/archive/2026-11-05-industries2.md`.
 - Style 1 (5 Nov 2026, 30.33, R-113, PRs 399, 400, 401, 404): every guide with a library photo (page, card, share image) and a filtered list; the yellow bar on every public headline, photos on Pricing, About, Founding 25 and Partners, Security in short lines; Sentry gets nothing from automated runs and a repeated Edge error once per 10 minutes. Detail: `docs/progress/archive/2026-11-05-style1.md`.
+- App 5 (5 Nov 2026, 30.33, R-113, PRs 402, 406, part C): a staff workspace (Today and six pages, same data and actions); the look on the signed-in site. Detail: `docs/progress/archive/2026-11-05-app5.md`, `docs/app5/audit.md`.
 - No customer is live yet. Before the first Meta ad: the DataForSEO top-up and a nearby check on a real business. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -51,6 +52,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 
 - Sentry (30.33 item 4): Settings, Subscription, set a pay-as-you-go budget of 5 US dollars for errors, so errors are not dropped before 30 Nov.
+- App 5: decide whether a QA account (qa-staff@test.local) may be staff, so sessions can run the staff pages signed in on kabsi.co (one row in public.staff; LATER row).
 
 ## Open After merge checks and findings
 
@@ -61,9 +63,8 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 5 Nov 2026, App 5 (30.33, R-113): PRs 402, 406 and part C, checked live. Detail: `docs/progress/archive/2026-11-05-app5.md`.
 - 5 Nov 2026, Industries 2 (30.32): PRs 392, 395 and part C.
-- 5 Nov 2026, Fix 3: PRs 379, 381, 383. Detail: `docs/progress/archive/2026-11-05-fix3.md`.
-- 5 Nov 2026, App 4 (30.31, R-111): PRs 378 to 388, checked live. Detail: `docs/progress/archive/2026-11-05-app4.md`.
 
 ## How a session updates this page
 

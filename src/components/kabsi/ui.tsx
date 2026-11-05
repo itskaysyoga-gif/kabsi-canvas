@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { Headline } from "@/components/kabsi/highlight";
 import {
   AlertTriangle,
   Check,
@@ -704,7 +705,13 @@ export function ErrorState({
       <span className="grid size-11 place-items-center rounded-full bg-bad-soft text-bad">
         <AlertTriangle className="size-5" aria-hidden />
       </span>
-      {page ? <h1 className="mt-4 text-h3">{title}</h1> : <p className="mt-4 text-h3">{title}</p>}
+      {page ? (
+        <h1 className="mt-4 text-h3">
+          <Headline text={title} />
+        </h1>
+      ) : (
+        <p className="mt-4 text-h3">{title}</p>
+      )}
       {children && <div className="mt-2 text-body text-text-2">{children}</div>}
       {onRetry && (
         <Button

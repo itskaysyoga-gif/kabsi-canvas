@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import { EmptyState, ErrorState, Skeleton, buttonClass } from "@/components/kabsi/ui";
-import { TaskPill } from "@/components/kabsi/d3-account";
+import { shortParas, TaskPill } from "@/components/kabsi/d3-account";
 import { BacklogCard } from "@/components/home/backlog-card";
 import { YesItem, type Approved } from "@/components/home/yes-item";
 import {
@@ -159,19 +159,22 @@ export function NeedsAttention({ lines }: { lines: AttentionLine[] }) {
           >
             <div className="min-w-0 flex-1 self-stretch">
               <p className="text-body font-semibold">{l.text}</p>
-              {l.detail?.map((d, i) => (
-                <p
-                  key={i}
-                  dir="auto"
-                  className={
-                    i === l.detail!.length - 1 && l.detail!.length > 2
-                      ? "mt-1 text-small font-semibold text-text-2"
-                      : "mt-1 text-small text-text-2"
-                  }
-                >
-                  {d}
-                </p>
-              ))}
+              {/* App 5: a long detail shows as short paragraphs, cut between sentences (same words). */}
+              {l.detail?.flatMap((d, i) =>
+                shortParas(d).map((part, j) => (
+                  <p
+                    key={`${i}-${j}`}
+                    dir="auto"
+                    className={
+                      i === l.detail!.length - 1 && l.detail!.length > 2
+                        ? "mt-1 text-small font-semibold text-text-2"
+                        : "mt-1 text-small text-text-2"
+                    }
+                  >
+                    {part}
+                  </p>
+                )),
+              )}
             </div>
             {l.action ? (
               <Link to={l.action.to as "/"} className={buttonClass("secondary", "md")}>
