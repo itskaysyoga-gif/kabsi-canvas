@@ -10,7 +10,7 @@ Kabsi does the parts an owner controls: accurate details, a reply to every revie
 2. Select **Read reviews**.
 3. Next to the review, select the **Reply** icon, write, and select **Reply**.
 
-Google checks every reply against its content policies before it appears, usually within 10 minutes, sometimes longer. The reply shows under the review with the business name, and the customer is notified. You can edit or delete it later on Google.
+Google checks every reply against its content policies before it appears, usually within 10 minutes, and Google says it can sometimes take up to 30 days (Google's help, read 5 Nov 2026). The reply shows under the review with the business name, and the customer is notified. You can edit or delete it later on Google.
 
 A good reply: two to four sentences, in the customer's language, mentions one thing they said, no selling or discount codes, signed as the business, promises nothing you won't do.
 

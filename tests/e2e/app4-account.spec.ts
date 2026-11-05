@@ -2,7 +2,7 @@
 // (helpers/fake-auth.ts), so these run against any deployment without an account.
 import { expect, test } from "@playwright/test";
 import { noBanner } from "./helpers/page";
-import { signInFake } from "./helpers/fake-auth";
+import { openMenu, signInFake } from "./helpers/fake-auth";
 
 const wide = (w: number) => w >= 1024;
 
@@ -11,7 +11,7 @@ test.describe("website and dashboard", () => {
     await noBanner(page);
     await page.goto("/");
     const w = page.viewportSize()!.width;
-    if (!wide(w)) await page.getByRole("button", { name: "Open menu" }).click();
+    if (!wide(w)) await openMenu(page);
     const link = page.getByRole("link", { name: "Log in", exact: true });
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute("href", "/login");
@@ -25,7 +25,7 @@ test.describe("website and dashboard", () => {
     await signInFake(page);
     await page.goto("/pricing");
     const w = page.viewportSize()!.width;
-    if (!wide(w)) await page.getByRole("button", { name: "Open menu" }).click();
+    if (!wide(w)) await openMenu(page);
     const link = page.getByRole("link", { name: "Dashboard", exact: true });
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute("href", "/app");
@@ -41,7 +41,7 @@ test.describe("website and dashboard", () => {
     await signInFake(page, { staff: true });
     await page.goto("/");
     const w = page.viewportSize()!.width;
-    if (!wide(w)) await page.getByRole("button", { name: "Open menu" }).click();
+    if (!wide(w)) await openMenu(page);
     await expect(page.getByRole("link", { name: "Dashboard", exact: true })).toHaveAttribute(
       "href",
       "/staff",
@@ -73,7 +73,7 @@ test.describe("website and dashboard", () => {
     await logo.click();
     await expect(page).toHaveURL(/\/$/);
     const w = page.viewportSize()!.width;
-    if (!wide(w)) await page.getByRole("button", { name: "Open menu" }).click();
+    if (!wide(w)) await openMenu(page);
     await expect(page.getByRole("link", { name: "Dashboard", exact: true })).toBeVisible();
   });
 
@@ -91,7 +91,7 @@ test.describe("website and dashboard", () => {
     }
     await expect(page).toHaveURL(/\/$/);
     await expect(page.getByRole("status").filter({ hasText: "You are signed out." })).toBeVisible();
-    if (!wide(w)) await page.getByRole("button", { name: "Open menu" }).click();
+    if (!wide(w)) await openMenu(page);
     await expect(page.getByRole("link", { name: "Log in", exact: true })).toBeVisible();
   });
 
@@ -132,6 +132,8 @@ test.describe("website and dashboard", () => {
     await page.getByRole("button", { name: "Sign in again" }).click();
     await expect(page).toHaveURL(/\/login\?next=%2Fapp/);
     await expect(page.getByText("You are signed out.")).toHaveCount(0);
+    // App 4 part C (case 7): the log in page says why.
+    await expect(page.getByText("Your session ended. Log in again.")).toBeVisible();
   });
 
   test("an unfinished Google sign-in does not show Dashboard", async ({ page }) => {
@@ -144,8 +146,7 @@ test.describe("website and dashboard", () => {
       }
     });
     await page.goto("/");
-    if (page.viewportSize()!.width < 1024)
-      await page.getByRole("button", { name: "Open menu" }).click();
+    if (page.viewportSize()!.width < 1024) await openMenu(page);
     await expect(page.getByRole("link", { name: "Log in", exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: "Dashboard", exact: true })).toHaveCount(0);
   });

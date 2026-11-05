@@ -43,7 +43,7 @@ export function NotFoundPage() {
           <p className="mt-5 text-lead text-text-2">
             The link may be old. Nothing on your Google profile changed.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center" data-main-cta>
             <ButtonLink to="/">Go home</ButtonLink>
             <ButtonLink to="/scan" variant="tertiary">
               Check my business free

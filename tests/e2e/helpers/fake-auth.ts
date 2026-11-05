@@ -70,3 +70,14 @@ export async function mockSupabase(page: Page, opts: FakeAuth = {}) {
     return route.fulfill({ json: {} });
   });
 }
+
+/** Opens the phone menu once the page is interactive (a tap before hydration does nothing on a slow first load). */
+export async function openMenu(page: Page) {
+  const toggle = page.getByRole("button", { name: /Open menu|Close menu/ });
+  for (let i = 0; i < 20; i++) {
+    if ((await toggle.getAttribute("aria-expanded")) === "true") return;
+    await toggle.click();
+    await page.waitForTimeout(400);
+  }
+  throw new Error("the phone menu did not open");
+}

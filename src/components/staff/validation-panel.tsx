@@ -151,7 +151,8 @@ export function ValidationPanel() {
           </button>
         </p>
       ) : null}
-      {q.data ? (
+      {q.data && !q.data.v ? <p className="mt-3 text-small text-text-2">{NO}</p> : null}
+      {q.data?.v ? (
         <div className="mt-4 space-y-4">
           <div className="grid gap-4 lg:grid-cols-2">
             <CohortCard

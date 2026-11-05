@@ -71,18 +71,18 @@ const READABLE = [
   ...files("supabase/functions/_shared/email", /\.ts$/),
   ...files("docs/email-previews", /\.(txt|html)$/),
   "knowledge/kabsi-facts.md",
-  "public/llms.txt",
+  "src/content/llms-base.txt",
   "public/llms-full.txt",
 ];
 
 // A price that means something else, and where it is allowed.
 const OTHER_AMOUNTS: Record<string, string[]> = {
   $35: ["src/components/app/knowledge-form.tsx"], // an example price in a help text
-  $50: ["knowledge/kabsi-facts.md", "public/llms-full.txt", "public/llms.txt"], // the old partner payout minimum, named as changed
+  $50: ["knowledge/kabsi-facts.md", "public/llms-full.txt", "src/content/llms-base.txt"], // the old partner payout minimum, named as changed
   $25: [
     "knowledge/kabsi-facts.md",
     "public/llms-full.txt",
-    "public/llms.txt",
+    "src/content/llms-base.txt",
     "src/components/kabsi/faq-data.ts",
     "src/routes/partners_.terms.tsx",
   ], // the partner payout minimum (30.15 section 5)

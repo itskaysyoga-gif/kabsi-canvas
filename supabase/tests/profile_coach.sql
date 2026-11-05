@@ -110,6 +110,16 @@ select is(public.coach_read_due('00000000-0000-4000-8000-0000000000c1'), false, 
 select is(private.coach_tasks('00000000-0000-4000-8000-0000000000c1'), '{}'::text[], 'and has no coach tasks');
 update public.locations set concierge = false, google_location_id = 'locations/mock-coach' where id = '00000000-0000-4000-8000-0000000000c1';
 
+-- Fix 3 (KABSI-EDGE-J): a failed read waits 24 hours, then is due again; the failure table is closed to owners.
+select public.coach_read_failed('00000000-0000-4000-8000-0000000000c1', 'Error: google 404');
+select is(public.coach_read_due('00000000-0000-4000-8000-0000000000c1'), false, 'a read that just failed is not due again');
+update public.coach_read_failures set failed_at = now() - interval '23 hours' where location_id = '00000000-0000-4000-8000-0000000000c1';
+select is(public.coach_read_due('00000000-0000-4000-8000-0000000000c1'), false, 'nor 23 hours later');
+update public.coach_read_failures set failed_at = now() - interval '25 hours' where location_id = '00000000-0000-4000-8000-0000000000c1';
+select is(public.coach_read_due('00000000-0000-4000-8000-0000000000c1'), true, '25 hours later it is due again');
+select ok(not has_function_privilege('authenticated', 'public.coach_read_failed(uuid,text)', 'execute')
+      and not has_table_privilege('authenticated', 'public.coach_read_failures', 'select'), 'owners cannot run or read the failure record');
+
 -- Plans: Pro sees the checklist (the Essentials value cannot be stored until P0.4-07); no plan sees nothing (K-126) ---------------------------------------------------------------------------------------
 select is(public.coach_checklist('00000000-0000-4000-8000-0000000000c1') ->> 'locked', 'false', 'Pro sees the checklist');
 select is(public.coach_checklist('00000000-0000-4000-8000-0000000000c1') ->> 'pro', 'true', 'and the Pro actions are on');
