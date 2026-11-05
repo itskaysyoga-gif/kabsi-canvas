@@ -66,7 +66,7 @@ export const nailSalon: Industry = {
   guides: ["how-to-choose-your-primary-category", "how-to-reply-to-google-reviews"],
   d8: {
     seo: {
-      title: "Kabsi for nail salons: seasonal designs, photos, holiday hours and replies on Google",
+      title: "Kabsi for nail salons: Google posts, photos and review replies",
       description:
         "Kabsi keeps a nail salon's Google profile right: seasonal designs as posts, photos checked, bank holiday hours asked in time, and a reply ready for every review.",
     },

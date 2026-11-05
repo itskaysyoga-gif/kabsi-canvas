@@ -21,6 +21,7 @@ export const Route = createFileRoute("/guides/$slug")({
     return {
       slug: g.slug,
       title: g.title,
+      seoTitle: g.seoTitle ?? g.title,
       description: g.description,
       updated: g.updated,
       image: photoSrc(g.photo, 1600),
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/guides/$slug")({
   head: ({ loaderData: g, params }) => {
     if (!g) return { meta: [{ title: "Guide not found | Kabsi" }] };
     return pageHead({
-      title: `${g.title} | Kabsi`,
+      title: `${g.seoTitle} | Kabsi`,
       description: g.description,
       path: `/guides/${params.slug}`,
       type: "article",

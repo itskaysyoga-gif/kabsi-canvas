@@ -23,7 +23,8 @@ export function KabsiLogo({ dark = false }: { dark?: boolean }) {
     <Link
       to="/"
       className={cn(
-        "inline-flex items-center gap-2.5 font-bold",
+        // Go live 1 (B-031): a 44 px tall touch area.
+        "inline-flex min-h-11 items-center gap-2.5 font-bold",
         dark ? "text-kb-white" : "text-text-1",
       )}
       aria-label="Kabsi home"

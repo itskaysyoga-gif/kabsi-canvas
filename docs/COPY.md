@@ -1108,6 +1108,12 @@ WhatsApp for owners, the nearby check and the AI answer are switched on (R-108),
 - Signed in, Where you show up, a failed check (insights.tsx): the title "Your first check did not finish." becomes "The check runs again later."; the line "Kabsi tries again on its own. Nothing changed on Google." stays.
 - The facts and Nora: "Kabsi has a WhatsApp number ... in testing ... so do not give the number yet" becomes "Kabsi's WhatsApp number is +1 205 745 6874."; approvals and alerts on WhatsApp are live for owners who connect it; the Visibility Map, AI Visibility and Nearby places are live; when DataForSEO refuses, the free check leaves the nearby and AI parts out, with no error and no promise.
 
+### Changed in Go live 1 part B (audit fixes, branch claude/golive1-b2)
+
+- /for/hair-salon and the /for hair salon card, job 1 (hair-salon.ts, B-015): "New services, with a price and a line each" / "... and Kabsi's Profile Coach lists what your profile is missing, services included." becomes "Services missing from your profile, listed" / "... Kabsi's Profile Coach lists the services your profile is missing, so you know what to add on Google." The FAQ's "Not yet" answer is unchanged.
+- Page titles (B-017): /for/hair-salon "Kabsi for hair salons: Google posts, hours and review replies"; /for/nail-salon "Kabsi for nail salons: Google posts, photos and review replies"; /for/restaurant "Kabsi for restaurants: Google photos, hours and review replies"; /for/barbershop "Kabsi for barbershops: Google posts, hours and review replies"; the ChatGPT guide "Why ChatGPT describes your business wrongly | Kabsi" (its H1 is unchanged). The restaurant description says "your details checked daily" instead of "every day".
+- /for and the group hubs, related links and the guides' business links (B-013): the dental clinic page is not linked while it is noindex and out of the sitemap.
+
 ### Questions for lane R
 
 1. Kabsi Partners: is "Kabsi Partners opens when card payments open." the right wording (the partners page, the hero line, the partner terms and the facts)? Partner links earn nothing until payments open, so "at launch" was no longer true.

@@ -1,7 +1,7 @@
 // Compact links to the finished industry pages (internal linking from the guides). Only indexed pages are linked.
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import { INDUSTRIES } from "@/content/industries";
+import { INDUSTRIES, industryIndexed } from "@/content/industries";
 
 /** Compact links to the finished industry pages (internal linking from the guides). */
 export function IndustryLinks({
@@ -15,7 +15,7 @@ export function IndustryLinks({
     <nav aria-label={title} className={className}>
       <p className="text-label font-bold text-text-2">{title}</p>
       <ul className="mt-3 flex flex-wrap gap-2">
-        {INDUSTRIES.filter((i) => i.finished).map((i) => (
+        {INDUSTRIES.filter(industryIndexed).map((i) => (
           <li key={i.slug}>
             <Link
               to="/for/$trade"
