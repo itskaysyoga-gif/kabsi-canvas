@@ -329,15 +329,16 @@ Deno.test("nearby places image (V4): portrait 1080 by 1500, three cards, under 2
 });
 
 // Go live 1 (master plan 30.28): DataForSEO refuses (no balance, its cost limit, a provider error). Stubbed, no paid call.
-Deno.test("golive1: a refused nearby check fails quietly, waits a day, and sends one staff alert a day saying why", async () => {
-  for (const [code, why] of [["dataforseo_40200", "no balance left"], ["dataforseo_40210", "no balance left"], ["dataforseo_40203", "the spend cap is reached"], ["dataforseo_50000", "a provider error"]] as const) {
+Deno.test("golive1: a refused nearby check fails quietly, waits a day, and sends one staff alert a day saying why (not for a passing provider error)", async () => {
+  for (const [code, why] of [["dataforseo_40200", "no balance left"], ["dataforseo_40210", "no balance left"], ["dataforseo_40203", "the spend cap is reached"], ["dataforseo_50000", null]] as const) {
     const w = world({ mode: "live", refuse: new Error(code) });
     const out = await tick(w.d);
     assertEquals([out.started, out.failed], [0, 1], code);
     assertEquals(w.scans[0].state, "failed");
     assertEquals(w.scans[0].error, code);
     assertEquals(w.next()?.toISOString(), "2026-10-26T10:00:00.000Z", "the keyword waits a day: no loop");
-    assertEquals(w.alerts, [`DataForSEO refused the nearby check: ${why}. Kabsi tries again later on its own`]);
+    // A passing provider error (50000) fails the run the same way but does not take the day's one refusal alert.
+    assertEquals(w.alerts, why ? [`DataForSEO refused the nearby check: ${why}. Kabsi tries again later on its own`] : []);
     // A second tick the same day finds nothing due (the keyword waits), so nothing more is asked or sent.
     const again = await tick(w.d);
     assertEquals([again.started, again.failed], [0, 0]);

@@ -52,3 +52,24 @@ Deno.test("golive1: the free check stops at the first refused call and spends no
   assertEquals(capped, { ok: false, reason: "paused" });
   assertEquals(calls, 1);
 });
+
+// Review of 5 Nov: DataForSEO can answer 20000 for the request and put the refusal on each task.
+Deno.test("golive1: a refusal on each posted task is read as a refusal, not as tasks not made", async () => {
+  const { dataForSeo } = await import("./dataforseo.ts");
+  const fake = ((_u: string, _i?: RequestInit) =>
+    Promise.resolve(new Response(JSON.stringify({ status_code: 20000, tasks: [{ id: "t1", status_code: 40210, data: { tag: "x:0:0" } }] }), { status: 200 }))) as typeof fetch;
+  const p = dataForSeo("login", "password", fake);
+  const err = await assertRejects(() => p.post([{ keyword: "bakery", lat: 1, lng: 1, tag: "x:0:0" }]));
+  assertEquals(refusalOf(err), "no_balance");
+  // The free check carries it up (the endpoint answers unavailable and alerts once); other post failures keep the fast part.
+  const refusingPost: MapsProvider = {
+    live: true, liveOne: () => Promise.resolve([{ title: "Yawmiyati", cid: "c", place_id: null, lat: 25, lng: 55, rank: 1, category: "Bakery", rating: null, reviews: null, photos: null, categories: [] }]),
+    post: () => Promise.reject(new ProviderError("dataforseo_task_40200")), ready: () => Promise.resolve([]), get: () => Promise.resolve(null),
+  } as unknown as MapsProvider;
+  const deps = { provider: refusingPost, source: "live" as const, code: () => "ABCDEFGH", room: () => Promise.resolve(true), spend: () => Promise.resolve(), ai: () => Promise.resolve(null) };
+  const input = { name: "Yawmiyati", address: null, country: "AE", city: "Dubai", place_id: null, term: "bakery" };
+  assertEquals(refusalOf(await assertRejects(() => startCheck(deps, input))), "no_balance");
+  const flaky = { ...deps, provider: { ...refusingPost, post: () => Promise.reject(new ProviderError("dataforseo_50000")) } as MapsProvider };
+  const kept = await startCheck(flaky, input);
+  assertEquals(kept.ok && kept.row.state, "failed");
+});

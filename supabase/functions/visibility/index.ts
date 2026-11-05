@@ -422,7 +422,7 @@ async function startFreeCheck(req: Request): Promise<Response> {
   const aiLive = (await aiSetting("ai_visibility_mode")) === "live";
   const aiRefused = async (e: unknown) => {
     const r = refusalOf(e);
-    if (r) await alertRefusal(r, "AI answer");
+    if (r && r !== "provider_error") await alertRefusal(r, "AI answer");
     return null;
   };
   let started: Awaited<ReturnType<typeof startCheck>>;
@@ -439,9 +439,11 @@ async function startFreeCheck(req: Request): Promise<Response> {
     }, o).catch(aiRefused) : Promise.resolve(null),
   }, { name, address: body.address ? String(body.address).slice(0, 200) : null, country, city, place_id: body.place_id ?? null, term });
   } catch (e) {
+    // Any failure of the paid part leaves the nearby and AI parts out quietly; only a refusal alerts staff (once a day),
+    // anything else is reported as an error for the team, never shown to the visitor.
     const r = refusalOf(e);
-    if (!r) throw e;
-    return unavailable(r);
+    if (!r || r === "provider_error") await captureError(fn, e, { route: "/check" });
+    return unavailable(r && r !== "provider_error" ? r : null);
   }
   if (!started.ok && started.reason === "paused") return unavailable("cap");
   if (!started.ok) return json({ error: started.reason }, 404);

@@ -14,6 +14,7 @@ import { locate } from "./locate.ts";
 import { businessType, type CellResult, competitors, summarize } from "./scan.ts";
 import { nearbyPlaces, type Nearby, ordinal, type PlaceName } from "./nearby.ts";
 import type { FreeCheck as AiCheck } from "./ai/run.ts";
+import { refusalOf } from "./refusal.ts";
 
 export const CHECK_LINE = "Free check. No Google access needed.";
 export const TRIAL_LINE = "The 14-day free trial is separate from this check. It starts only when Kabsi's access to your Google profile works.";
@@ -98,7 +99,10 @@ export async function startCheck(d: StartDeps, i: StartInput): Promise<Started> 
     points = pts.map((p) => ({ ...p, task: ids[`${code}:${p.row}:${p.col}`] ?? null }));
     // A map with a hole would be wrong: every point is queued, or the fast part stands on its own.
     if (points.some((p) => !p.task)) state = "failed";
-  } catch {
+  } catch (e) {
+    // Go live 1 (30.28): a refusal of the 49 tasks goes up to the endpoint (one staff alert a day); the fast part is kept
+    // only for other failures. Refused tasks are not charged.
+    if (refusalOf(e) && refusalOf(e) !== "provider_error") throw e;
     state = "failed";
   }
   const where = i.city ? ` in ${i.city}` : "";
