@@ -62,7 +62,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 5 Nov 2026, Go live 1 (30.28, R-108): PRs 362 (30.28), 363 (WhatsApp number), 364 (nearby check and AI answer on, quiet refusals), 365 (every At launch line removed), then the audit of kabsi.co and its fixes. Detail: `docs/progress/archive/2026-11-05-golive1.md`.
+- 5 Nov 2026, Go live 1 (30.28, R-108): PRs 362 (30.28), 363 (WhatsApp number), 364 (nearby check and AI answer on, quiet refusals), 365 (At launch lines removed), 366 and 367 (audit: 38 found, 15 fixed, 17 for lane R, 6 in LATER). Detail: `docs/progress/archive/2026-11-05-golive1.md`.
 - 4 Nov 2026, Fix 2 (30.27, R-107): PRs 356 to 360 (the Example, the review link line, /setup-call, a post's approval bound to its photo, the AI answer FAQ and Pricing allowances, two guides). Detail: `docs/progress/archive/2026-11-04-fix2.md`.
 
 ## How a session updates this page

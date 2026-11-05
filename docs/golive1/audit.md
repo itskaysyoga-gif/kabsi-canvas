@@ -203,3 +203,14 @@ No finding: answers 404, one H1 "This page is not here.", Go home and the free c
 - Nora's real answers and the live review link, profile-snapshot and programs functions were not called.
 - Lighthouse ran through the session's proxy, 3 runs per page, not on the CI runner; only performance was measured.
 - The meaning of every line on the 7 guides and the legal pages was read for the word lists and launch lines, not line by line against every fact.
+
+## Result (after PRs 366 and 367, 5 Nov 2026)
+
+| | Count | Findings |
+|---|---|---|
+| Found | 38 | B-001 to B-038 (0 high, 13 medium, 25 low) |
+| Fixed | 15 | B-013, B-015, B-017, B-018, B-019, B-022, B-024, B-027, B-028, B-031, B-033, B-034, B-035, B-036, B-038 (PR 366: legal, FAQ, setup help, free check, Nora, Partners; PR 367: /for pages, titles, the crawler). Also fixed: /privacy said the Meta Pixel runs "when switched on" although VITE_META_PIXEL_ID is set in production |
+| Left for lane R (a copy or design decision) | 17 | B-001, B-002, B-003, B-004, B-007, B-008, B-009, B-010, B-011, B-014, B-016, B-023, B-025, B-026, B-029, B-030, B-032 |
+| Left in docs/LATER.md (can wait, reason there) | 6 | B-005, B-006 (images), B-012, B-020, B-037 (speed: a budget per page is lane R's, and the proxy skews the numbers), B-021 (one external source answers 403 to robots) |
+
+Checked live after the deploys: /google-profile-check answers 301 to /scan; the FAQ says "The trial is 14 days of Pro, one per business, with no card." and "Yes, +1 205 745 6874."; /partners shows kabsi.co/?via=SAM; the sitemap lists /setup-call; no page of nine checked holds "At launch", "opens at launch" or "from launch", and each has wa.me/12057456874 links.
