@@ -45,6 +45,7 @@ import { pixelCustom, pixelEvent } from "@/lib/meta-pixel";
 import { AccessSteps } from "./d5-access";
 import { WAITLIST_LINE, WAITLIST_WHATSAPP_LINE } from "@/lib/waitlist-copy";
 import { NEARBY_SAMPLE, type NearbyCheck, type NearbyPlace } from "./map-data";
+import { ownName, shownTerm } from "../../../supabase/functions/_shared/visibility/area.ts";
 import { NearbyPlaces } from "./nearby-places";
 import { ScanBox } from "./scan-box";
 import { FreeCheckFrame } from "./d4-free-check";
@@ -822,6 +823,8 @@ export function LiveResult({
   // Only the mock mode's waiting list; "unavailable" (30.28) shows neither part.
   const waitlist = !!started && "state" in started && started.state === "waitlist";
   const term = check?.term ?? keyword ?? s.category?.toLowerCase() ?? null;
+  // 30.30 item 3: the search shown back follows the Latin rule (another script reads as the Google category).
+  const shownSearch = term ? (shownTerm(term, s.category ?? null, null)?.term ?? null) : null;
   const first =
     s.flags.find((f) => f.tone === "danger") ?? s.flags.find((f) => f.tone === "warning");
   const rows = foundRows(s);
@@ -848,8 +851,8 @@ export function LiveResult({
     <>
       <ResultHead
         date={check?.created_at ? new Date(check.created_at) : new Date()}
-        name={s.name}
-        line={[s.address ? `${s.address}.` : "", term ? `Searched as '${term}'.` : ""]
+        name={ownName(s.name)}
+        line={[s.address ? `${s.address}.` : "", shownSearch ? `Searched as '${shownSearch}'.` : ""]
           .filter(Boolean)
           .join(" ")}
         change={change}

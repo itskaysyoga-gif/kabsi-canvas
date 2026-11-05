@@ -1,7 +1,11 @@
 {
   "ci": {
     "collect": {
-      "url": ["https://localhost:4174/"],
+      "url": [
+        "https://localhost:4174/",
+        "https://localhost:4174/pricing",
+        "https://localhost:4174/scan"
+      ],
       "numberOfRuns": 3,
       "settings": {
         "formFactor": "mobile",

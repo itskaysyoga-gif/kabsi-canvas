@@ -1,5 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { usualLine } from "../../../supabase/functions/_shared/visibility/usual.ts";
 import { ExampleBadge } from "./ui";
 import { MAP_CREDIT, MAP_LEGEND, MapGrid, MapLegend } from "./map";
 import {
@@ -228,6 +229,8 @@ export function NearbyPlaces({
   sketchClassName?: string | undefined;
 }) {
   const img = variant === "image";
+  // Copy 3 (30.30 item 2): a real check also says where the business usually comes up; an Example does not.
+  const usual = example ? null : usualLine(check.ranks.map((r) => r || null));
   const T = title;
   return (
     <figure
@@ -277,6 +280,7 @@ export function NearbyPlaces({
       >
         <p className={cn("font-bold text-kb-ink", img ? "text-chat" : "text-body")}>
           {countLine(check.ranks)}
+          {usual ? ` ${usual}` : ""}
         </p>
         <p className={cn("text-kb-stone", img ? "mt-1" : "mt-1 text-small")}>{NEARBY_SAMPLE}</p>
         <p className={cn("font-semibold text-kb-stone", img ? "mt-0.5" : "mt-1 text-label")}>

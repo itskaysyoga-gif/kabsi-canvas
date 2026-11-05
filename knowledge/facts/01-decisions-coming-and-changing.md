@@ -146,3 +146,10 @@ The FAQ answer "Can I approve a reply or a post on WhatsApp?" follows the WhatsA
 
 ---
 
+### Copy 3 part B: the free check, where you usually come up and the Latin rule (5 Nov 2026, master plan 30.30)
+
+- The nearby part's count line has a second sentence: "Most places put you 4th." from the middle position among the places where the business is in the first 20, or "Most places did not put you in the first 20." when fewer than half of the 49 places have it there. It is on the result page, in the emailed report, in WhatsApp's "The check:" fact and on the WhatsApp image. Reason: the count alone moved from 40 of 49 to 5 of 49 for SEVEN Burgers in three hours while the middle position moved from 3rd to 4th.
+- A business name not in Latin letters reads "Your business" on every public screen, email, WhatsApp text and image of the free check. A search the visitor typed that is not in Latin letters is replaced by the Google category in lower case; if that is not in Latin letters either, the AI answer is left out and the nearby check uses the industry page's search; with no search to use, the check is not available today and the page shows only the Google part.
+- The profile check reads the town from Google's own address parts (locality, else postal town, else the first administrative area), and from the written address when those are missing.
+- Speed: Home, Pricing and /scan are each held to a script budget (live 215, 225 and 245 KB).
+
