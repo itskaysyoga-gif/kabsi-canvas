@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 5 Nov 2026, Copy 3. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 5 Nov 2026, Guides 3. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -10,6 +10,7 @@ One page, under 10 KB. Updated 5 Nov 2026, Copy 3. The history (tasks, After mer
 - Go live 1 (5 Nov 2026, 30.28, R-108): WhatsApp for owners, the nearby check and the AI answer are on; no At launch line; card payments stay closed; nobody is sent to the site until the first Meta ad. Detail: `docs/progress/archive/2026-11-05-golive1.md`.
 - Scan 2 (5 Nov 2026, 30.29, R-109, PRs 369 to 372): the free check names the town and country, names only businesses Google Maps shows nearby, and sends the report it shows. Live: CFE4RMDN. Detail: `docs/progress/archive/2026-11-05-scan2.md`.
 - Copy 3 (5 Nov 2026, 30.29 item 2, 30.30, R-110, PRs 374 to 376): the Go live 1 audit's copy decisions B-001 to B-032 are on kabsi.co ("Your weekly report", /for pages, partners rate only, one UAE schedule). Scan 2 follow-ups: where you usually come up, the Latin rule for the visitor's own text, addressComponents, a speed gate on Home, Pricing and /scan. Detail: `docs/progress/archive/2026-11-05-copy3.md`.
+- Guides 3 (5 Nov 2026, PRs 385, 387, part C): 27 guides; the server decides per request what is public, so one appears every 2 days at 06:00 UTC to 13 Dec with no deploy. Live: guide 1 200, guide 2 404 until 7 Nov. Detail: `docs/progress/archive/2026-11-05-guides3.md`.
 - No customer is live yet. Before the first Meta ad: the DataForSEO top-up and a nearby check on a real business. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -57,9 +58,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 5 Nov 2026, Copy 3 (30.29, 30.30, R-110): PRs 374 (30.30), 375 (copy decisions B-001 to B-032), 376 (Scan 2 follow-ups, speed gate); live on release 841ab8e. Detail: `docs/progress/archive/2026-11-05-copy3.md`.
-- 5 Nov 2026, Scan 2 (30.29, R-109): PRs 369 to 372, 0.09 US dollars of DataForSEO. Detail: `docs/progress/archive/2026-11-05-scan2.md`.
-- 5 Nov 2026, Go live 1 (30.28, R-108): PRs 362 to 367. Detail: `docs/progress/archive/2026-11-05-golive1.md`.
+- 5 Nov 2026, Guides 3: PRs 385 (scheduling, template, guide 1), 387 (guides 3 to 20), part C (7 earlier guides rewritten); live on release 5e7fc3c0. Detail: `docs/progress/archive/2026-11-05-guides3.md`.
 
 ## How a session updates this page
 
