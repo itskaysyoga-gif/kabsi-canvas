@@ -14,6 +14,7 @@
 import { QUESTIONS, type Question } from "./questions.ts";
 import { task, takesEffort, type Usage } from "../../supabase/functions/_shared/ai/agents.ts";
 import { fenceVisitor } from "../../supabase/functions/_shared/nora-rules.ts";
+import { pageLinks, pagesContext } from "../../supabase/functions/_shared/nora-pages.ts";
 import { WHATSAPP_NUMBER, WHATSAPP_ON } from "../../supabase/functions/_shared/whatsapp-setting.ts";
 
 /** Kabsi's own WhatsApp number, while it is on: the one number Nora may give. It is taken out of an answer before the
@@ -134,6 +135,25 @@ function breaks(answer: string, re: RegExp): boolean {
 const NEGATION =
   /\b(no|not|never|nothing|cannot|can't|cant|won't|don't|doesn't|isn't|aren't|may not|without|neither|nor)\b|n't\b|\bغير\b|\bلا\b|\bnunca\b|\bno\b|\bne\b|\bpas\b|\bjamais\b/i;
 
+/** Guides 4 part B: a link to a guide or industry page must be to a page in her list, one at most, and after the answer. */
+export function pageFindings(q: Question, answer: string): ["must" | "forbid", string][] {
+  const out: ["must" | "forbid", string][] = [];
+  const listed = new Set((q.pages ?? []).map((p) => p.path));
+  const links = pageLinks(answer);
+  for (const path of new Set(links))
+    if (!listed.has(path)) out.push(["forbid", `links ${path}, which is not in the list she was given`]);
+  if (links.length > 1) out.push(["forbid", `links ${links.length} pages, at most 1 is allowed`]);
+  if (q.link === null && links.length) out.push(["forbid", "links a page although no page answers the question"]);
+  if (q.link && !links.includes(q.link)) out.push(["must", `lacks the link ${q.link}`]);
+  if (q.link && links.includes(q.link)) {
+    // After the answer: the words before the first link, without the link's own text, are a real answer.
+    const before = answer.split(/\[[^\]]*\]\(/)[0] ?? "";
+    if (before.replace(/[^A-Za-z]/g, "").length < 80)
+      out.push(["must", "the link comes before an answer, or instead of one"]);
+  }
+  return out;
+}
+
 export function check(q: Question, answer: string, kb: string): Finding[] {
   const f: Finding[] = [];
   const add = (kind: Finding["kind"], detail: string) => f.push({ id: q.id, kind, detail });
@@ -156,6 +176,7 @@ export function check(q: Question, answer: string, kb: string): Finding[] {
     if (DATE_FOR_COMING.test(answer))
       add("honesty", "gives a date or a time frame for a [COMING] item");
   }
+  if (q.pages) for (const [kind, detail] of pageFindings(q, answer)) add(kind, detail);
   for (const re of q.must ?? []) if (!re.test(answer)) add("must", `answer lacks ${re}`);
   for (const re of q.forbid ?? []) if (re.test(answer)) add("forbid", `answer matches ${re}`);
   if (q.warnFirst) {
@@ -319,7 +340,9 @@ export function liveModel(apiKey: string, model: string, rules: string, used?: U
             },
             {
               type: "text",
-              text: "<context>\nThe visitor is not signed in. No account tools are available in this evaluation.\n</context>",
+              text: `<context>\nThe visitor is not signed in. No account tools are available in this evaluation.${
+                q.pages?.length ? `\n${pagesContext(q.pages).join("\n")}` : ""
+              }\n</context>`,
             },
           ],
           messages: [{ role: "user", content: fenceVisitor(q.ask) }],

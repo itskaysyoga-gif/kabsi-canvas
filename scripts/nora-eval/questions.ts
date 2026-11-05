@@ -9,9 +9,13 @@
 //   forbid     what it must never say;
 //   coming     the answer is about a [COMING] item: it must say "not available yet" and give no date;
 //   warnFirst  the first sentence must be this warning (any delete question, K-114.3);
+//   pages, link  Guides 4 part B (questions-pages.ts): the guide and industry pages in her context, and the one link that is
+//              right (or none). The answer may link only a page in `pages`, at most one, and only after answering;
 //   reference  Nora's answer as the team would give it. The "pass" stub returns it, which proves the set can be answered
 //              from the file without a model and that the checker is quiet on a good answer.
 // Amounts and numbers in a reference answer must also be in the facts file (the checker enforces it).
+
+import type { NoraPage } from "../../supabase/functions/_shared/nora-pages.ts";
 
 export type Lang = "en" | "es" | "fr" | "ar";
 export type Question = {
@@ -25,6 +29,10 @@ export type Question = {
   forbid?: RegExp[];
   coming?: boolean;
   warnFirst?: RegExp;
+  /** Guides 4 part B: the pages Nora is given for this question (the ones that fit, at most 5). Leave out for every other question. */
+  pages?: NoraPage[];
+  /** With `pages`: the one path her answer must link after answering, or null when it must link no guide or industry page. */
+  link?: string | null;
   reference: string;
 };
 
