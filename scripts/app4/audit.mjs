@@ -292,10 +292,10 @@ for (const r of routes) {
       }
       // Words.
       const t = document.body.innerText;
-      if (/[–—]/.test(t)) out.words.push("an em or en dash");
-      if (/!/.test(t.replace(/<!--|!important/g, "")))
+      if (/[\u2013\u2014]/.test(t)) out.words.push("an em or en dash");
+      if (t.includes("!"))
         out.words.push(`an exclamation mark: ${(t.match(/.{0,30}!.{0,10}/) || [""])[0]}`);
-      if (/[؀-ۿ]/.test(t)) out.words.push("Arabic script");
+      if (/[\u0600-\u06FF]/.test(t)) out.words.push("Arabic script");
       for (const n of [
         "Profile Score",
         "Do now",
