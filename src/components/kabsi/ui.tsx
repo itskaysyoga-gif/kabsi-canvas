@@ -219,6 +219,30 @@ export function WhatsAppGlyph({
     </svg>
   );
 }
+/**
+ * The glyph inside a short line that names the WhatsApp approval (Site 2, master plan 30.34 item 4): sized to the text
+ * beside the word WhatsApp, never on its own as decoration.
+ */
+export function WhatsAppInline({ className }: { className?: string | undefined }) {
+  return (
+    <WhatsAppGlyph
+      className={cn("ms-[0.3em] inline-block size-[0.9em] align-[-0.1em]", className)}
+    />
+  );
+}
+/** Splits a line at its first "WhatsApp" and sets the glyph right after the word. */
+export function WithWhatsAppMark({ text }: { text: string }) {
+  const i = text.indexOf("WhatsApp");
+  if (i < 0) return <>{text}</>;
+  const end = i + "WhatsApp".length;
+  return (
+    <>
+      {text.slice(0, end)}
+      <WhatsAppInline />
+      {text.slice(end)}
+    </>
+  );
+}
 const WA_RING =
   "M360,0C161.18,0,0,161.18,0,360c0,65.41,17.45,126.75,47.94,179.61L0,720l187.02-44.21c51.34,28.18,110.28,44.21,172.98,44.21,198.82,0,360-161.18,360-360S558.82,0,360,0ZM360,655.52c-60.17,0-116.13-17.98-162.82-48.87l-110.49,28.14,30.99-105.61c-33.53-47.93-53.2-106.26-53.2-169.19,0-163.21,132.31-295.52,295.52-295.52s295.52,132.31,295.52,295.52-132.31,295.52-295.52,295.52Z";
 const WA_HANDSET =

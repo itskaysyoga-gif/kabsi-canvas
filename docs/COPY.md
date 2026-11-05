@@ -1661,3 +1661,19 @@ Settings, "Where your routine messages go", the four switches and "Choose how ea
 - The choice could not be read: "We couldn't load your choice. Refresh and try again."
 - The save failed on the WhatsApp or Email choice: "Couldn't save that. Your messages still go by [WhatsApp or email]. Try again."
 - The save failed on a switch or an email timing: "Couldn't save that. It is back as it was. Try again."
+
+## 59. Site 2: header, footer, WhatsApp marks, photos, an honest About page, Beauty salon (5 Nov 2026, master plan 30.34 item 4)
+
+*Section 58 is Scan 3's, built beside this one.*
+
+### Part A: header and footer (branch claude/site2-a)
+
+- **Header**: "How it works", "Businesses", "Pricing", "Guides", "About", then "Log in" (or "Dashboard" while this browser holds a session, App 4), then "Free check". No dropdowns; the page you are on is underlined (and aria-current). The phone menu shows the same five rows, then "Log in" or "Dashboard", "Check my business free" with the trial line, then "Ask Nora" and "WhatsApp".
+- **Footer**: the logo, "Your business on Google. Taken care of." and the Facebook and Instagram icons. Product: "How it works", "Pricing", "Free check", "Review link and QR code". Explore: "Businesses", "Guides", "FAQ", "Partners". Company: "About", "Security", "Founding 25", "Contact", "WhatsApp" (with its glyph). The legal row: "Privacy", "Terms", "Partner terms", "Your privacy choices". One line: "Kabsi is independent and not affiliated with Google. © 2026 Kabsi."
+- **Moved out of the footer**: "Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co. Payments are processed by Creem, our merchant of record." now opens /terms and /privacy. On /privacy, "Who is responsible" reads "The operator, Rashid Abou Hamzy, is also the data controller for the personal data described here." (was the operator line again). "Google's guidance on working with a third party" is a link under the FAQ answer "How do I add Kabsi to my Google profile?". Removed: "Google Business Profile is free from Google. Kabsi is an independent paid service." (the FAQ answer "Can't I do this myself for free?" and /manager-steps still say it).
+
+### Part B: the WhatsApp marks (branch claude/site2-b)
+
+- No words change. The WhatsApp glyph (the one in the repo, `WhatsAppGlyph`) now sits beside every button or link that opens Kabsi's WhatsApp on the public site: "Chat on WhatsApp" (FAQ, "Talk to a person"), "Apply on WhatsApp" (Partners, both buttons), "WhatsApp +1 205 745 6874" (setup help), "WhatsApp +1 205 745 6874" in Nora's hand-over note, and, as before, the footer, the phone menu and every `WhatsAppLink` button.
+- And right after the word WhatsApp in each short line that names the WhatsApp approval: Home's hero line ("... and asks for your yes on WhatsApp."), the five steps strip and its rail ("asks you on WhatsApp", Home, How it works, Pricing and the industry pages), and "An approval on WhatsApp" on /login.
+- Not on /scan or the review link tool (Scan 3's), not on /app or /staff (App 6's), and never on its own as decoration. Nora's button is still the one floating button.
