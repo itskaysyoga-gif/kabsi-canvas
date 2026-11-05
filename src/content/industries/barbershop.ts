@@ -52,7 +52,7 @@ export const barbershop: Industry = {
       "Kabsi looks after your barber shop Google Business Profile: walk-in hours right, bank holidays asked in time, new cuts posted and a reply to every review.",
     h1: "Your barber shop on Google, kept sharp.",
     mark: "kept sharp.",
-    line: "Kabsi looks after your barber shop Google Business Profile: walk-in hours, fresh cuts as posts, and a reply to every review.",
+    line: "Kabsi looks after your barber shop Google Business Profile: walk-in hours, fresh cuts as posts, a reply to every review.",
     card: "Walk-in hours right, fresh cuts as posts.",
     answer:
       "For a barber shop Google Business Profile, the work is small and constant: hours that match the door, a reply to every review, and photos of fresh cuts. Kabsi drafts each reply and names the barber only when the review does, turns your photos into posts, asks about bank holidays in time and checks your hours every day. You approve each one.",
