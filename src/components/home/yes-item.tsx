@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronDown, Pencil, Undo2 } from "lucide-react";
 import { Button, buttonClass } from "@/components/kabsi/ui";
-import { TaskPill } from "@/components/kabsi/d3-account";
+import { ShortParas, TaskPill } from "@/components/kabsi/d3-account";
 import { cardAction } from "@/lib/home-state";
 import { loadHistory, type CardDetail } from "@/lib/home";
 import { postReply, undoReply } from "@/lib/reviews";
@@ -257,7 +257,7 @@ function Details({
           </p>
         </blockquote>
       ) : null}
-      {task.why ? <p className="text-text-1">{task.why}</p> : null}
+      {task.why ? <ShortParas className="text-text-1" text={task.why} /> : null}
       {detail?.evidence.map((e) => (
         <p key={e} className="text-text-2">
           {e}

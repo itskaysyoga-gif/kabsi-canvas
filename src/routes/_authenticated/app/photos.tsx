@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Camera, ImagePlus, ShieldCheck } from "lucide-react";
 import { EarlyAccessNotice } from "@/components/app/early-access-notice";
 import { CopyField } from "@/components/kabsi/d2-parts";
-import { AccountTop, ChoiceChips, Panel } from "@/components/kabsi/d3-account";
+import { ShortParas, AccountTop, ChoiceChips, Panel } from "@/components/kabsi/d3-account";
 import {
   OpensLater,
   TaskBlock,
@@ -64,7 +64,7 @@ export const Route = createFileRoute("/_authenticated/app/photos")({
 
 const SENT = ["publishing", "posted", "failed", "removing", "removed"];
 // App 3: photo tiles share one size, in a grid that uses the width (two on a phone, four on a computer).
-const TILE_GRID = "grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4";
+const TILE_GRID = "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 balance-tiles";
 const TILE =
   "flex min-w-0 flex-col overflow-hidden rounded-card border border-line bg-surface-1 shadow-rest";
 
@@ -158,13 +158,18 @@ function PhotosPage() {
                   <h2 className="font-display text-h3 font-bold">
                     {WHATSAPP_ON && role !== "staff" ? "Send photos on WhatsApp" : "Add photos"}
                   </h2>
-                  <p className="mt-1 text-body text-text-2">
-                    {WHATSAPP_ON && role !== "staff"
-                      ? "Send a photo to Kabsi. It checks the size and light, gets it ready and asks for your yes before it goes on Google. On Essentials and Pro."
-                      : role === "staff"
-                        ? "Add real photos of your place, your team, your work and what you sell. Kabsi checks each one, and the owner approves it."
-                        : "Add real photos of your place, your team, your work and what you sell. Kabsi checks each one before you approve it."}
-                  </p>
+                  <div className="mt-1">
+                    <ShortParas
+                      className="text-body text-text-2"
+                      text={
+                        WHATSAPP_ON && role !== "staff"
+                          ? "Send a photo to Kabsi. It checks the size and light, gets it ready and asks for your yes before it goes on Google. On Essentials and Pro."
+                          : role === "staff"
+                            ? "Add real photos of your place, your team, your work and what you sell. Kabsi checks each one, and the owner approves it."
+                            : "Add real photos of your place, your team, your work and what you sell. Kabsi checks each one before you approve it."
+                      }
+                    />
+                  </div>
                 </div>
                 {role !== "staff" ? <WhatsAppLink label="Send a photo" size="md" /> : null}
               </div>
@@ -183,8 +188,10 @@ function PhotosPage() {
                   onChange={onFiles}
                 />
                 <p className="col-span-2 text-small text-text-2">
-                  Up to 20 at a time, 20 MB each. JPG, PNG, WebP or HEIC. Videos are kept for 30
-                  days; sending videos to Google comes later.
+                  Up to 20 at a time, 20 MB each. JPG, PNG, WebP or HEIC.
+                </p>
+                <p className="col-span-2 -mt-2 text-small text-text-2">
+                  Videos are kept for 30 days; sending videos to Google comes later.
                 </p>
                 <p className="col-span-2 flex items-start gap-2 text-small text-text-1">
                   <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden />

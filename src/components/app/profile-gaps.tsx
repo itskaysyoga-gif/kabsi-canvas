@@ -1,3 +1,4 @@
+import { ShortParas } from "@/components/kabsi/d3-account";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MessageCircle } from "lucide-react";
 import { Panel } from "@/components/kabsi/d3-account";
@@ -38,7 +39,11 @@ export function ProfileGaps({
           {gaps.map((t) => (
             <li key={t.id} className="rounded-inner bg-surface-2 p-4">
               <p className="text-body font-bold text-text-1">{t.title}</p>
-              {t.why ? <p className="mt-1 text-small text-text-2">{t.why}</p> : null}
+              {t.why ? (
+                <div className="mt-1">
+                  <ShortParas className="text-small text-text-2" text={t.why} />
+                </div>
+              ) : null}
               <div className="mt-3 flex flex-wrap gap-2">
                 <ButtonLink to={t.path} variant="secondary" size="md">
                   Do it

@@ -87,7 +87,10 @@ function WhatsappConnected() {
         </>
       ) : (
         <>
-          <p className="text-small text-text-2">{WHATSAPP_CONSENT_TEXT}</p>
+          {/* The consent text is stored word for word as the proof of the opt-in (K-113), so it stays one paragraph (App 5). */}
+          <p data-long-ok className="text-small text-text-2">
+            {WHATSAPP_CONSENT_TEXT}
+          </p>
           <Button
             variant="whatsapp"
             size="md"

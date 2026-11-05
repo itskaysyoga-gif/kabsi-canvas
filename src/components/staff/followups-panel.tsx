@@ -84,8 +84,11 @@ function FollowupCard({ f }: { f: Followup }) {
             Due {fmtDate(f.due_at)}. Asked {fmtDate(f.created_at)}.
           </p>
           <p className="mt-2 text-small leading-6 text-text-2">
-            They have not added Kabsi as a Manager yet. Write from your own phone: ask if they need
-            a hand, offer the free setup call, and never ask for a Google password or code.
+            They have not added Kabsi as a Manager yet.
+          </p>
+          <p className="mt-1 text-small leading-6 text-text-2">
+            Write from your own phone: ask if they need a hand, offer the free setup call, and never
+            ask for a Google password or code.
           </p>
         </>
       ) : support ? (

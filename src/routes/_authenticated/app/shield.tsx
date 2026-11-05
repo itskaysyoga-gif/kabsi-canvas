@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, ShieldCheck } from "lucide-react";
 import { EarlyAccessNotice } from "@/components/app/early-access-notice";
-import { AccountTop, Panel } from "@/components/kabsi/d3-account";
+import { ShortParas, AccountTop, Panel } from "@/components/kabsi/d3-account";
 import { ProfileGaps } from "@/components/app/profile-gaps";
 import { TaskBlock } from "@/components/kabsi/d3-content-task";
 import {
@@ -157,7 +157,7 @@ function ProfilePage() {
       ) : null}
 
       {live && d && !reading ? (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2 lg:balance-2">
           <Panel title="Changes others made" id="changes" className="lg:col-span-2">
             {open.length ? (
               <div className="space-y-3">
@@ -201,7 +201,11 @@ function ProfilePage() {
                   <li key={t.id} className="rounded-inner bg-bad-soft p-4">
                     <StatusPill tone="bad">Needs you</StatusPill>
                     <p className="mt-3 text-body font-bold text-text-1">{t.title}</p>
-                    {t.why ? <p className="mt-1 text-small text-text-1">{t.why}</p> : null}
+                    {t.why ? (
+                      <div className="mt-1">
+                        <ShortParas className="text-small text-text-1" text={t.why} />
+                      </div>
+                    ) : null}
                     <ButtonLink to={t.path} variant="secondary" size="md" className="mt-3">
                       Open
                     </ButtonLink>

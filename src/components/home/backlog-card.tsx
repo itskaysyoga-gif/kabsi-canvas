@@ -1,3 +1,4 @@
+import { ShortParas } from "@/components/kabsi/d3-account";
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -104,7 +105,11 @@ export function BacklogCard({
     >
       <StatusPill tone="warn">Needs you</StatusPill>
       <p className="mt-3 text-body">{backlogBreakdown(counts)}</p>
-      {task.why ? <p className="mt-2 text-small leading-6 text-text-2">{task.why}</p> : null}
+      {task.why ? (
+        <div className="mt-2">
+          <ShortParas className="text-small leading-6 text-text-2" text={task.why} />
+        </div>
+      ) : null}
       {!mayApprove ? (
         <p className="mt-2 text-small text-text-2">
           The owner approves replies. They can see these.

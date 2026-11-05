@@ -2,6 +2,7 @@
 // check, "Is this your business?", Connect WhatsApp, Add Kabsi as a Manager with its three states, "Access works." with
 // the trial dates, the first task, and the rest of setup (only after the first task is done). Real data and real calls
 // only: onboarding_status, confirm_business, the WhatsApp connect code, the access steps and the task queue.
+import { ShortParas } from "@/components/kabsi/d3-account";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -135,6 +136,7 @@ export function CheckStage({ status, onNext }: { status: OnboardingStatus; onNex
     <>
       <StepTitle
         title={`Your free check for ${status.business}`}
+        mark="free check"
         sub="Here is your free check. Nothing has changed on Google, and Kabsi has no access yet."
       />
       <div className="rounded-card border border-line bg-surface-1 p-5 shadow-rest">
@@ -441,7 +443,9 @@ function WhatsAppConnect({
         <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-text-1 underline underline-offset-4">
           What Kabsi sends on WhatsApp
         </summary>
-        <p className="mt-1">{WHATSAPP_CONSENT_TEXT}</p>
+        <p data-long-ok className="mt-1">
+          {WHATSAPP_CONSENT_TEXT}
+        </p>
       </details>
     </>
   );
@@ -548,6 +552,7 @@ export function ManagerStage({
     <>
       <StepTitle
         title="Add Kabsi as a Manager on Google."
+        mark="Manager"
         sub="On Google, add Kabsi as a Manager. You stay the owner and can remove Kabsi any time."
       />
       <AccessTrack status={status} />
@@ -642,8 +647,9 @@ export function ManagerStage({
         </div>
       )}
 
-      <p className="mt-8 text-small text-text-2">
-        Your trial starts only when access is checked. {FREE_FROM_GOOGLE}{" "}
+      <p className="mt-8 text-small text-text-2">Your trial starts only when access is checked.</p>
+      <p className="mt-1 text-small text-text-2">
+        {FREE_FROM_GOOGLE}{" "}
         <a
           href={THIRD_PARTY_HELP_URL}
           target="_blank"
@@ -767,7 +773,9 @@ export function FirstTaskStage({
         <div className="rounded-card border border-line bg-surface-1 p-5 shadow-rest">
           <p className="text-title font-bold">{task.title}</p>
           {task.kind === "review_reply" ? (
-            <p className="mt-1 text-small text-text-2">{task.why}</p>
+            <div className="mt-1">
+              <ShortParas className="text-small text-text-2" text={task.why} />
+            </div>
           ) : task.recommendation ? (
             <p className="mt-1 text-small text-text-2">{task.recommendation}</p>
           ) : null}

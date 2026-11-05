@@ -258,7 +258,7 @@ export function SystemHealthPanel() {
             title="Email and notification delivery"
             note="Last 24 hours. Addresses are shown as the domain only."
           >
-            <p className="text-small">
+            <p data-long-ok className="text-small">
               Emails sent {h.delivery.emails_sent_24h} ·{" "}
               <span className={cn(h.delivery.emails_failed_24h > 0 && "font-bold text-bad")}>
                 failed {h.delivery.emails_failed_24h}

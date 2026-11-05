@@ -146,8 +146,9 @@ function CardsPage() {
           <Panel title="Optional: use your own NFC card or tag" id="nfc" className="lg:col-span-2">
             <p className="text-small text-text-2">
               Already have an NFC tag or sticker? Use a free NFC writer on your phone, choose "write
-              a URL" and paste your review link. Activity is counted the same way.
+              a URL" and paste your review link.
             </p>
+            <p className="mt-1 text-small text-text-2">Activity is counted the same way.</p>
             <div className="mt-4 space-y-3">
               {[...nfc]
                 .sort((a, b) => Number(b.status === "active") - Number(a.status === "active"))
@@ -328,9 +329,11 @@ function MakeLink({ locationId, onChanged }: { locationId: string; onChanged: ()
   return (
     <Panel title="Your review link" id="message" className="lg:col-span-2">
       <p className="text-body text-text-2">
-        A link goes straight to your Google review page, or opens a short page with the Google
-        button first and a line to message the manager. Everyone sees the same thing, and nobody is
-        asked how their visit went.
+        A link opens your Google review page, or a short page with the Google button first and a
+        line to message the manager.
+      </p>
+      <p className="mt-2 text-body text-text-2">
+        Everyone sees the same thing, and nobody is asked how their visit went.
       </p>
       <Button
         className="mt-5"
@@ -465,9 +468,12 @@ function ReviewLinks({
   return (
     <Panel title="Your review link" id="links" className="lg:col-span-2">
       <p className="text-small text-text-2">
-        A link goes straight to your Google review page, or opens a short page with the Google
-        button first and a line to message the manager. Everyone sees the same thing, and nobody is
-        asked how their visit went. Works with your own QR codes and NFC cards.
+        A link opens your Google review page, or a short page with the Google button first and a
+        line to message the manager.
+      </p>
+      <p className="mt-1 text-small text-text-2">
+        Everyone sees the same thing, and nobody is asked how their visit went. Works with your own
+        QR codes and NFC cards.
       </p>
       <div className="mt-4 space-y-3">
         {links.map((l) => (

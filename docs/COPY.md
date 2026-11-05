@@ -1641,3 +1641,11 @@ Staff pages are for the Kabsi team only and are never public. Owners never see t
 - **Today, other sections**: "New this week" · "Businesses still setting up, newest first." with "Step: [step]". "Spend against the caps" with "All costs": "DataForSEO, this month", "AI Visibility, this month" ("$x of $cap"), "AI answers, last 24 hours" ("$x for [n] answers"), "Google Places, today" ("[n] of [cap] calls"), then "Provider refusals, last 24 hours" with each alert's own line.
 - **Businesses**: "[shown] of [all]", "No business matches.", "The businesses did not load. Try again".
 - **Chats with Nora**: "Loading chats", "Nobody is waiting for a person."
+
+### Part B: the 30.32 look on the signed-in site (branch claude/app5-b)
+
+- **Headings**: every signed-in H1 puts one phrase on the highlight bar. A place's H1 marks its last word: Home, Reviews, Posts and [photos], Google [profile], Settings; Welcome to [Kabsi]; Business [Knowledge]; Get [reviews]; Your [businesses] (the business picker). Setup steps mark their last word too, except "Your [free check] for [business]" and "Add Kabsi as a [Manager] on Google.". No heading's words change.
+- **Paragraphs of at most 25 words**: long lines on Plan, Photos, Settings, Get reviews, Business knowledge hints, Profile Coach, Profile watch, Home's task lines, setup and the staff pages are shown as two short paragraphs, cut between sentences, with the same words. Two lines are reworded because one sentence alone ran past 25 words:
+  - Get reviews: "A link opens your Google review page, or a short page with the Google button first and a line to message the manager." (was "A link goes straight to your Google review page, or opens a short page with ..."), then "Everyone sees the same thing, and nobody is asked how their visit went." as its own paragraph.
+  - Staff, Evidence log: "One row for each request Kabsi does not cover, a repeated problem, time saved, a missed enquiry or sale, or support given." (was "One row for each thing an owner asks for that Kabsi does not do, ...").
+- **Kept as they are, over the rule**: the WhatsApp consent text (stored word for word as the proof of the opt-in, K-113; a LATER row for lane R), an AI assistant's own answer, and the access steps shared with the public /manager-steps page.
