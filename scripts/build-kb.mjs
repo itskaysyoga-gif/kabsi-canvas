@@ -1,5 +1,5 @@
 // Builds the facts (master plan 27.12): knowledge/facts/*.md into knowledge/kabsi-facts.md, public/llms-full.txt and
-// public/llms.txt, through scripts/kb-lib.mjs. Run after editing anything in knowledge/facts/:
+// src/content/llms-base.txt, through scripts/kb-lib.mjs. Run after editing anything in knowledge/facts/:
 //   node scripts/build-kb.mjs           write the three files
 //   node scripts/build-kb.mjs --check   exit 1 if a file is out of date (nothing is written)
 import { existsSync, readFileSync, writeFileSync } from "node:fs";

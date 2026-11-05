@@ -72,14 +72,28 @@ function relatedOf(i: Industry): Industry[] {
 
 /* ---------- One trade ---------- */
 
-export function IndustryPage({ industry: i }: { industry: Industry }) {
+export function IndustryPage({
+  industry: i,
+  guides: published = [],
+}: {
+  industry: Industry;
+  /** Guides 3: the public guides that name this page, decided on the server (links both ways). */
+  guides?: { slug: string; title: string }[];
+}) {
   const d = i.d8;
   const card = cardOf(i);
   const business = d?.business ?? `${i.example.business}, ${i.example.city}`;
   const related = relatedOf(i);
-  const guides = (i.guides ?? [])
-    .filter((s) => GUIDE_TITLES[s])
-    .map((s) => ({ slug: s, title: GUIDE_TITLES[s]! }));
+  const guides = [
+    ...new Map(
+      [
+        ...(i.guides ?? [])
+          .filter((s) => GUIDE_TITLES[s])
+          .map((s) => ({ slug: s, title: GUIDE_TITLES[s]! })),
+        ...published,
+      ].map((g) => [g.slug, g]),
+    ).values(),
+  ].slice(0, 5);
   return (
     <>
       <PageHero

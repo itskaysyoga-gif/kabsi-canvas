@@ -7,8 +7,13 @@ import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
 import { routeTree } from "../src/routeTree.gen";
 import { HUBS, INDUSTRIES, hubIndexed, industryIndexed } from "../src/content/industries";
+import { ALL_GUIDES } from "../src/content/guides";
+import { publicGuides } from "../src/content/guides/schedule";
+import { sitemapXml } from "../src/lib/sitemap";
 
-const xml = readFileSync("public/sitemap.xml", "utf8");
+// Guides 3: the sitemap is a server route now; it is built here as it is on 5 Nov 2026 at noon UTC (the first new guide
+// public, the second not yet), with every earlier guide.
+const xml = sitemapXml(publicGuides(ALL_GUIDES, new Date("2026-11-05T12:00:00Z")));
 const paths = [...xml.matchAll(/<loc>https:\/\/kabsi\.co([^<]*)<\/loc>/g)].map((m) => m[1] || "/");
 
 describe("the sitemap", () => {
@@ -38,7 +43,7 @@ describe("the sitemap", () => {
       expect(paths.includes(`/for/${i.slug}`), i.slug).toBe(industryIndexed(i));
     for (const h of HUBS) expect(paths.includes(`/for/${h.id}`), h.id).toBe(hubIndexed(h.id));
   });
-  it("leaves out the dental clinic page until it has a claim sheet (Fix 1), and counts 39 pages (Fix 2 added two guides, Go live 1 added /setup-call)", () => {
+  it("leaves out the dental clinic page until it has a claim sheet (Fix 1), and counts 40 pages on 5 Nov 2026 (Fix 2 added two guides, Go live 1 added /setup-call, Guides 3 its first guide)", () => {
     const dental = INDUSTRIES.find((i) => i.slug === "dental-clinic")!;
     let sheet = true;
     try {
@@ -49,7 +54,7 @@ describe("the sitemap", () => {
     // When the sheet lands, drop `indexed: false` from dental-clinic.ts and put the page back in the sitemap.
     expect(industryIndexed(dental)).toBe(sheet);
     expect(paths.includes("/for/dental-clinic")).toBe(sheet);
-    expect(paths).toHaveLength(sheet ? 40 : 39);
+    expect(paths).toHaveLength(sheet ? 41 : 40);
   });
   it("leaves out the pages that are noindex or one visitor's", () => {
     for (const p of paths)
