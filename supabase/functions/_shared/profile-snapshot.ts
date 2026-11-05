@@ -27,7 +27,7 @@ import type { EmailContent } from "./email/template.ts";
 import { type CoachRow, freeChecklist } from "./coach/catalog.ts";
 import { FREE_TOOL_BUSY } from "./free-tool-busy.ts";
 import { areaOfPlace } from "./visibility/area.ts";
-import { type CheckRow, CODE_RE, NOT_PART, reportParts } from "./visibility/free-check.ts";
+import { CODE_RE, NOT_PART, type ReportParts } from "./visibility/report.ts";
 
 export const TIPS_CONSENT_TEXT = "Send me tips on managing my Google profile";
 /** The words next to the WhatsApp tick. Keep equal to WHATSAPP_CONSENT_TEXT in src/lib/profile-check.ts (a test checks it). */
@@ -143,9 +143,10 @@ export type Deps = {
   captureError: (fn: string, e: unknown) => Promise<void>;
   /**
    * Scan 2 (30.29 item B): one stored free check, by its exact code only (never listed), and read in full only when it is
-   * of the place sent: "other" when the code is another place's, null when there is no such code.
+   * of the place sent: its report parts (null parts: the check never finished), "other" when the code is another
+   * place's, null when there is no such code.
    */
-  loadCheck?: (code: string, placeId: string) => Promise<CheckRow | "other" | null>;
+  loadCheck?: (code: string, placeId: string) => Promise<{ parts: ReportParts | null } | "other" | null>;
   appUrl: string;
   cors: Record<string, string>;
   esc: (s: string) => string;
@@ -154,7 +155,7 @@ export type Deps = {
 const LABEL: Record<Tone, string> = { danger: "Needs fixing", warning: "Worth fixing", neutral: "After you connect" };
 
 /** The free check's parts of the report (null: no code, or the check never finished). */
-export type Extra = ReturnType<typeof reportParts>;
+export type Extra = ReportParts | null;
 
 export function checkEmail(d: Pick<Deps, "esc" | "appUrl">, s: Snapshot, tips: boolean, extra?: Extra | "none"): EmailContent {
   const rows = s.flags.map((f) =>
@@ -199,7 +200,7 @@ export function checkEmail(d: Pick<Deps, "esc" | "appUrl">, s: Snapshot, tips: b
  * the facts are joined with spaces. Only the facts that need attention are listed; the actions are Kabsi's to explain
  * after the visitor signs up, and the template's own words say the approval stays with the owner.
  */
-export function whatsappParams(s: Snapshot, extra?: Extra): [string, string] {
+export function whatsappParams(s: Snapshot, extra?: Extra | "none"): [string, string] {
   const todo = s.flags.filter((f) => f.tone !== "neutral").map((f) => f.fact.replace(/\s+/g, " ").trim());
   const line = todo.length
     ? `${todo.length === 1 ? "1 thing to look at" : `${todo.length} things to look at`}: ${todo.join(" ")}`
@@ -207,7 +208,8 @@ export function whatsappParams(s: Snapshot, extra?: Extra): [string, string] {
   // Scan 2 (30.29 item B): with a finished free check, the count line, the AI line and the link follow the profile line,
   // within 900 characters; the profile line is cut first so the link always fits.
   const one = (t: string) => t.replace(/\s+/g, " ").trim();
-  const tail = extra
+  // A code whose check never finished says so, like the email.
+  const tail = extra === "none" ? NOT_PART : extra
     ? [extra.nearby[0], extra.ai.find((l) => l.startsWith("ChatGPT")), extra.link.replace(/^https?:\/\//, "")].filter((t): t is string => !!t).map(one).join(" ")
     : "";
   const room = tail ? 900 - tail.length - 1 : 900;
@@ -304,10 +306,11 @@ export function makeHandler(d: Deps) {
         const code = str(b.code).toUpperCase();
         if (!code) return "none";
         if (!CODE_RE.test(code) || !d.loadCheck) return "none";
-        const c = await d.loadCheck(code, placeId).catch(() => null);
+        // A database error is thrown (the visitor sees "try again"), never read as an unknown code.
+        const c = await d.loadCheck(code, placeId);
         if (!c) return "none";
-        if (c === "other" || c.self?.place_id !== placeId) return "refused";
-        return reportParts(c, d.appUrl) ?? "none";
+        if (c === "other") return "refused";
+        return c.parts ?? "none";
       };
       const refused = () => fail("bad_check", "That report is for another business. Reload the page and try again.", 400);
 
@@ -338,7 +341,10 @@ export function makeHandler(d: Deps) {
         await d.saveEmail({ email, place_id: placeId, tips_opt_in: b.tips, consent_text: TIPS_CONSENT_TEXT, page });
         // No code at all keeps the email as it was; a code that is unknown or unfinished says the other parts were not in it.
         const mail = checkEmail(d, buildSnapshot(placeId, place, true), b.tips, str(b.code) ? extra : undefined);
-        const dedupeKey = `profile_check:${(await d.sha256Hex(`${email}|${placeId}|${d.today()}`)).slice(0, 40)}`;
+        // Review of Scan 2: the code and whether the check's parts are in the email are in the key, so a report asked
+        // again once the check has finished is sent, not dropped as a repeat of the earlier Google-only one.
+        const shape = extra === "none" ? "none" : `${str(b.code).toUpperCase()}:done`;
+        const dedupeKey = `profile_check:${(await d.sha256Hex(`${email}|${placeId}|${d.today()}${str(b.code) ? `|${shape}` : ""}`)).slice(0, 40)}`;
         await d.sendEmail({ kind: "profile_check", to: email, dedupeKey, content: mail });
         return reply({ ok: true });
       }
@@ -369,7 +375,7 @@ export function makeHandler(d: Deps) {
         const place = await livePlace(placeId);
         if (place instanceof Response) return place;
         const rowId = await d.saveWhatsapp({ phone_hash: phoneHash, place_id: placeId, consent_text: WHATSAPP_CONSENT_TEXT, page });
-        const r = await d.sendWhatsapp({ to: phone, params: whatsappParams(buildSnapshot(placeId, place, true), extra === "none" ? undefined : extra) });
+        const r = await d.sendWhatsapp({ to: phone, params: whatsappParams(buildSnapshot(placeId, place, true), extra === "none" ? (str(b.code) ? "none" : undefined) : extra) });
         await d.markWhatsapp(rowId, r);
         if (r.state !== "sent") {
           return fail("whatsapp_off", "We could not send it on WhatsApp. Use email instead.", 503);

@@ -17,6 +17,8 @@ import type { FreeCheck as AiCheck } from "./ai/run.ts";
 import { core, norm } from "./ai/analyze.ts";
 import { countryName, latinName } from "./area.ts";
 import { refusalOf } from "./refusal.ts";
+import type { ReportParts } from "./report.ts";
+export { CODE_RE, NOT_PART } from "./report.ts";
 
 export const CHECK_LINE = "Free check. No Google access needed.";
 export const TRIAL_LINE = "The 14-day free trial is separate from this check. It starts only when Kabsi's access to your Google profile works.";
@@ -185,7 +187,9 @@ export async function startCheck(d: StartDeps, i: StartInput): Promise<Started> 
   const found = await locate(d.provider, { name: i.name, address: i.address, country: i.country, place_id: i.place_id });
   if (live) await d.spend(1, COST_MICROS.live);
   if (!found) return { ok: false, reason: "not_found_on_maps" };
-  const self = { title: found.title, cid: found.cid, place_id: found.place_id ?? i.place_id };
+  // Review of Scan 2: the place the visitor picked (Places) is the check's key, so the report and the 7-day reuse bind to
+  // it even when DataForSEO gives the same place under another ID; the cid still identifies it in the results.
+  const self = { title: found.title, cid: found.cid, place_id: i.place_id ?? found.place_id };
   const center = { lat: found.lat, lng: found.lng };
   const here = await d.provider.liveOne({ keyword: i.term, lat: center.lat, lng: center.lng, tag: "fast:3:3" });
   if (live) await d.spend(1, COST_MICROS.live);
@@ -292,16 +296,13 @@ export function publicAi(a: StoredAi) {
   };
 }
 
-/** A free check's code: 8 letters and digits from newCode's alphabet. */
-export const CODE_RE = /^[ABCDEFGHJKMNPQRSTUVWXYZ2-9]{8}$/;
-export const NOT_PART = "The nearby search and the AI answer were not part of this check.";
 
 /**
  * Scan 2 (30.29 item B): what "Send me this report" carries beyond the Google part, in the page's own words: the nearby
  * count line and the three cards, the AI question with its line and date, and the link to the saved result. Null when the
  * check never finished (the report then says NOT_PART).
  */
-export function reportParts(c: CheckRow, appUrl: string): { nearby: string[]; ai: string[]; link: string } | null {
+export function reportParts(c: CheckRow, appUrl: string): ReportParts | null {
   if (c.state !== "done") return null;
   const v = publicView(c);
   const n = v.map.state === "done" ? v.map.nearby : null;
