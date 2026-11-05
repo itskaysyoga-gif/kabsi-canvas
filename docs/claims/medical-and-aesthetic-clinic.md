@@ -101,3 +101,8 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 | faqs | Before and after photos: "Check your country's rules" (was "your own country's") | wording only, same meaning | A |
 
 Removed from the page: the reply task (its rule stays in the reviews cards and the first job), the review theme about the price after the consultation, the New Year's Day card and "hours in the week before Christmas", the waiting area photo tip with the photo check note, "Google may remove a post that carries a phone number", the categories note that all four names show on real profiles, and the answer's opening sentence.
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- Profile card "The Book button": "Your own consultation page. Check the link each time you change systems." Kabsi does not edit the booking link on Google yet (knowledge/facts 2.1).
+- Review card "How a treatment turned out": "A careful draft that names no treatment. A reaction or injury gets no draft." Facts 13: every review of a medical business is at least medium (a careful draft); injury and allergy are high (no draft).

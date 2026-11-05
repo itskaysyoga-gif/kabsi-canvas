@@ -52,7 +52,7 @@ export const nailSalon: Industry = {
     line: "Kabsi keeps your nail salon Google Business Profile fresh: new designs as posts, photos checked, replies for your yes.",
     card: "Seasonal designs as posts, photos checked.",
     answer:
-      "For a nail salon Google Business Profile, Kabsi turns new designs into posts, checks each photo and drafts every reply, all for your yes.",
+      "For a nail salon Google Business Profile, Kabsi turns new designs into posts, checks each photo and prepares review replies, all for your yes.",
     watch: {
       business: "Polish Room, Brighton",
       line: "Clients looking for nails expect a nail salon. Kabsi checks your main category against yours every day.",

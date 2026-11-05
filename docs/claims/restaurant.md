@@ -80,3 +80,7 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 Removed from the page: the two long guide sections (the menu photo changing the same week, the 2027 Christmas dates, a
 busy weekend's replies, the post ideas, posts archived after six months), and the guest's language and the illness line
 from the answer (both stay in the jobs). The old tasks were not shown and are deleted.
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- Answer: "prepares review replies" replaces "drafts every reply", because a high risk review gets no draft (facts 13, "What happens with hard reviews?").

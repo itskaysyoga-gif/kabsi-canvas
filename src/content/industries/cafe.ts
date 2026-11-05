@@ -48,7 +48,7 @@ export const cafe: Industry = {
     },
     {
       title: "The order link",
-      text: "When your order page changes, tell Kabsi. The link follows once you say yes.",
+      text: "Google can show an order link. Check it each time you change providers.",
     },
   ],
   reviews: [
@@ -128,7 +128,7 @@ export const cafe: Industry = {
     line: "Kabsi looks after your cafe Google Business Profile: an exact opening time, fresh bakes as posts, replies after the rush.",
     card: "Opening time exact, fresh bakes as posts.",
     answer:
-      "On a cafe Google Business Profile, the opening time comes first. Kabsi checks it daily, turns fresh bakes into posts and drafts every reply.",
+      "On a cafe Google Business Profile, the opening time comes first. Kabsi checks it daily, turns fresh bakes into posts and prepares review replies.",
     watch: {
       business: "Brew Lane Cafe, London",
       line: "The first customer of the day reads your opening time on Google. Kabsi checks it every day.",

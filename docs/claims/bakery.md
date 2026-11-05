@@ -90,3 +90,7 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 | FAQ | "No. The Kabsi chat is between Kabsi and you. It prepares your hours, posts and replies, and does not talk to your customers." | 31 | K |
 
 Removed from the page: the five long tasks, the cake that was not like the picture, UAE National Day, the photo size limits, the outside door photo tip, the order-days-ahead post advice, the four post ideas as a list, and the long answer (Christmas Eve and five days ahead stay in the jobs).
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- FAQ: "... Check the link each time your provider changes." (was "Kabsi prepares a new link for your yes": Kabsi does not edit the order link on Google yet, knowledge/facts 2.1).

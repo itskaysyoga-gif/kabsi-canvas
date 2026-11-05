@@ -180,7 +180,7 @@ export const dentalClinic: Industry = {
     },
     {
       q: "Why are some reviews sent without a reply?",
-      a: "An injury, a safety problem or a named team member gets no draft, a short checklist, and a neutral holding reply only if you ask.",
+      a: "An injury, a safety problem or a complaint naming a team member gets no draft, a short checklist, and a holding reply only if asked.",
     },
     {
       q: "Can Kabsi ask patients for reviews?",

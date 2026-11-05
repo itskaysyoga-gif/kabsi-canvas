@@ -96,3 +96,8 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 Jobs, the watch line and the AI answer are unchanged. Rows 21 and 37 still say "a route to a person at Kabsi"; the page now follows facts 13 (a short checklist, a holding reply only if asked), which replaced that route.
 
 Removed from the page: photos of the menu and the best dishes (row 5); the laptop rule post (row 7) and the review theme "Laptops and the last free table" (row 20); the task "Post after the morning rush" as a card (rows 8, 9; the story keeps it); the Order online link on real profiles and its country and provider rule (rows 10, 11); the photo tip "The seats and the sockets" (row 26); the posts list as four lines (the "Post ideas" card keeps them, without "its price and the week it ends"); "so the old opening time never shows" (row 28); "Tell Google if the doors open at the usual time" (row 29); UAE New Year's Day and UK Christmas and Boxing Day (rows 30, 31); Arafah Day and Eid's 11 and 12 Dhu al-Hijjah (row 32); "a cafe or a coffee counter, and add the others only for something you really run" (row 17); "Google lets you ask customers to scan a QR code or open a link" as its own sentence (row 33).
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- Profile card "The order link": "Google can show an order link. Check it each time you change providers." Rows 10 and 11 (G14); replaces "the link follows once you say yes", because Kabsi does not edit the booking or order link on Google yet (knowledge/facts 2.1).
+- Answer: "... and prepares review replies." (was "drafts every reply": a review about illness gets no draft, facts 13).

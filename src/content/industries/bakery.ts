@@ -181,7 +181,7 @@ export const bakery: Industry = {
     },
     {
       q: "Can customers order from my Google profile?",
-      a: "If you add an order link, yes. Ordering options depend on your country and provider. Kabsi prepares a new link for your yes.",
+      a: "If you add an order link, yes. Ordering options depend on your country and provider. Check the link each time your provider changes.",
     },
     {
       q: "Can Kabsi take cake orders on WhatsApp?",

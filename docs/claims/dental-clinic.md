@@ -100,3 +100,7 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 | faqs | "Should a clinic reply to reviews at all?": "Yes, a short reply shows the next patient that someone reads them. Kabsi's drafts never confirm someone is a patient, and you approve every one." | 47 | A, K |
 
 Removed from the page: the holiday task (its facts stay in the holidays cards), the review themes about the front desk and about children, the school holidays card, the entrance and parking photo tip, two post ideas, "What matters is what it says", and in the answer the website check and the injury clause (now the review card).
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- FAQ: "An injury, a safety problem or a complaint naming a team member gets no draft, a short checklist, and a holding reply only if asked." Facts 13: only a complaint that names a team member is high risk.

@@ -41,7 +41,7 @@ export const physiotherapy: Industry = {
     },
     {
       title: "Book opens the first assessment",
-      text: "Add your own booking link. If the page changes, the link follows after your yes.",
+      text: "Add your own booking link. Check it each time your booking page changes.",
     },
     {
       title: "Home visit hours, set apart",
@@ -59,7 +59,7 @@ export const physiotherapy: Industry = {
     },
     {
       title: "Pain that did not improve",
-      text: "A health review: no draft, a short checklist, a holding reply only if you ask.",
+      text: "A careful draft that names no treatment. An injury gets no draft.",
     },
     {
       title: "Times, parking and the waiting room",

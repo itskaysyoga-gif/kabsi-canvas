@@ -42,7 +42,7 @@ export const spaMassage: Industry = {
     },
     {
       title: "The booking link",
-      text: "Your own booking page. If it moves, Kabsi changes it after your yes.",
+      text: "Your own booking page. Check the link on Google whenever it moves.",
     },
     {
       title: "Packages as offer posts",
@@ -83,7 +83,7 @@ export const spaMassage: Industry = {
     },
     {
       title: "UK Christmas and New Year",
-      text: "Christmas 25, Boxing Day 28 December, New Year 1 January 2027. Set them early December.",
+      text: "Christmas Day 25 December 2026, Boxing Day moved to Monday 28, New Year 1 January.",
     },
   ],
   photoCards: [
@@ -182,7 +182,7 @@ export const spaMassage: Industry = {
     },
     {
       q: "Does Kabsi connect to my booking system?",
-      a: "No. Kabsi has Manager access to your Google profile only, not your bookings or clients. It keeps the booking link on Google right.",
+      a: "No. Kabsi has Manager access to your Google profile only, not your bookings or clients. Check the booking link on Google when your page moves.",
     },
     {
       q: "My spa opens later in Ramadan. How does Google show that?",

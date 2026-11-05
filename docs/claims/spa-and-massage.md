@@ -91,3 +91,8 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 | faqs | Therapist complaint: "If it names the therapist, it comes with no draft and a short checklist. Kabsi writes a neutral holding reply only if you ask." | `knowledge/facts/13-faq.md` "What happens with hard reviews?" | K |
 
 Removed from the page: the five long tasks (the price range on real profiles, the "Online scheduling" line, the reply task), the review theme about the room, quiet and scent, "a route to a person at Kabsi", the UK summer bank holiday, the walk through photo tip (now the video card), "size" in the photo check, Google's category advice wording, and "checks your details every day" in the answer.
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- Profile card "The booking link": "Your own booking page. Check the link on Google whenever it moves." and the FAQ ending "Check the booking link on Google when your page moves." Kabsi does not edit the booking link on Google yet (knowledge/facts 2.1).
+- Holiday card: "Christmas Day 25 December 2026, Boxing Day moved to Monday 28, New Year 1 January." Row 29 (the Boxing Day holiday moves to Monday 28 December 2026).

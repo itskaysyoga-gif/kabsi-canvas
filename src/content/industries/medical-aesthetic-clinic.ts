@@ -41,7 +41,7 @@ export const medicalAestheticClinic: Industry = {
     },
     {
       title: "The Book button",
-      text: "Your own consultation page. When it changes, tell Kabsi; the link follows after your yes.",
+      text: "Your own consultation page. Check the link each time you change systems.",
     },
     {
       title: "What a post can name",
@@ -59,7 +59,7 @@ export const medicalAestheticClinic: Industry = {
     },
     {
       title: "How a treatment turned out",
-      text: "Health review: no draft, a short checklist, a holding reply only if you ask.",
+      text: "A careful draft that names no treatment. A reaction or injury gets no draft.",
     },
     {
       title: "A cancelled or moved appointment",

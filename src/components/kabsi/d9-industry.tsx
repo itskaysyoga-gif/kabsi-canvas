@@ -453,8 +453,11 @@ function ReadNext({ guides, related }: { guides: ReadGuide[]; related: Industry[
                     className="press group flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface-0 shadow-rest"
                   >
                     <GuideCover title={g.title} topic={g.topic} className="rounded-none" />
-                    <span className="flex flex-1 items-start justify-between gap-3 p-3 text-body font-bold sm:p-4">
-                      {g.title}
+                    {/* The cover carries the title (it is hidden from screen readers), so the link names it once. */}
+                    <span className="flex flex-1 items-center justify-between gap-3 p-3 text-body font-bold sm:p-4">
+                      <span>
+                        Read the guide<span className="sr-only">: {g.title}</span>
+                      </span>
                       <Arrow />
                     </span>
                   </SiteLink>

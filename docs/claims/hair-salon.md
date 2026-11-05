@@ -73,3 +73,7 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 Removed from the page: the two long guide sections (custom services of your own, the category name by country, the
 reason a stylist matters, the Christmas line, the dark, blurry or too small detail), and the daily details check from the
 answer. The old tasks were not shown and are deleted.
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- Answer: "prepares review replies" replaces "drafts every reply", because a high risk review gets no draft (facts 13, "What happens with hard reviews?").

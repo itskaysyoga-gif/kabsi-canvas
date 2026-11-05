@@ -74,3 +74,7 @@ Removed from the page: the search text (row 18), the two long guide sections (ro
 artist thanked by name, which the jobs still say), "judged on close photos and reviews" from the answer (row 9), and "a
 safety matter" and "marked as needing a little more care" from the irritation answer. Rows 19 and 24 in Problems are no
 longer on the page.
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- Answer: "prepares review replies" replaces "drafts every reply", because a high risk review gets no draft (facts 13, "What happens with hard reviews?").

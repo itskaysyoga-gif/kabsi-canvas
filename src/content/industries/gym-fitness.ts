@@ -130,7 +130,7 @@ export const gymFitness: Industry = {
     line: "Kabsi looks after your gym Google Business Profile: classes as posts, holiday hours asked, and replies ready for your yes.",
     card: "Classes as posts, holiday hours asked ahead.",
     answer:
-      "On a gym Google Business Profile, people check hours and classes. Kabsi drafts dated class posts and every reply, and asks about holiday hours ahead.",
+      "On a gym Google Business Profile, people check hours and classes. Kabsi drafts dated class posts and review replies, and asks about holiday hours ahead.",
     watch: {
       business: "Harbour Strength Studio, Dubai",
       line: "Your main category tells people what you are. Kabsi checks it, and your hours, every day.",

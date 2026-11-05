@@ -58,7 +58,7 @@ export const restaurant: Industry = {
     line: "Kabsi looks after your restaurant Google Business Profile: closing times, dish photos as posts, and a reply to every review.",
     card: "Closing times right, dish photos as posts.",
     answer:
-      "For a restaurant Google Business Profile, Kabsi checks your hours daily, drafts every reply and turns dish photos into posts, all for your yes.",
+      "For a restaurant Google Business Profile, Kabsi checks your hours daily, prepares review replies and turns dish photos into posts, all for your yes.",
     watch: {
       business: "Cedar Lane Kitchen, Manchester",
       line: "A guest who reads the wrong closing time does not come. Kabsi checks your hours every day.",

@@ -116,3 +116,7 @@ Removed from the page: the two long guide sections (offers and events as other p
 months, JPG or PNG, no category of your own, a second category only for real work, the reply to a nail that lifted), and
 the daily main category check and holiday hours from the answer (the watch block still shows the category check). The old
 tasks were not shown and are deleted.
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- Answer: "prepares review replies" replaces "drafts every reply", because a high risk review gets no draft (facts 13, "What happens with hard reviews?").

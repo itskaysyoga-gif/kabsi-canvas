@@ -94,3 +94,8 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 | faqs | Treatment named: "Yes: a careful draft that does not repeat the treatment. An injury gets no draft and a short checklist. You approve or write every reply." | `knowledge/facts/13-faq.md` "What happens with hard reviews?" and the clinics FAQ | K |
 
 Removed from the page: "'physical therapist' is protected too", "a business cannot create a category" (kept as "pick it from Google's list"), the review theme about insurance and receipts, the UAE National Day card, the way in photo tip and the accessibility details, "what a first assessment costs", "so patients may ask", and the answer's opening sentence and holiday clause.
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- Profile card "Book opens the first assessment": "Add your own booking link. Check it each time your booking page changes." Kabsi does not edit the booking link on Google yet (knowledge/facts 2.1).
+- Review card "Pain that did not improve": "A careful draft that names no treatment. An injury gets no draft." Facts 13, as above.

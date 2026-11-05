@@ -90,3 +90,7 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 | FAQ | "No draft: a short checklist comes to you. Kabsi writes a neutral holding reply only if you ask. Nothing is published until you approve." | 32; `knowledge/facts/13-faq.md` "What happens with hard reviews?" | K |
 
 Removed from the page: the five long tasks, the HIIT with Karim example, the equipment and changing rooms review theme, the changing rooms photo tip, the day pass price idea, the UK Easter weekend 2027, the "route to a person at Kabsi" wording (replaced by the facts 13 rule), and the long answer (the daily category check stays in the watch line).
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- Answer: "prepares review replies" replaces "drafts every reply", because a high risk review gets no draft (facts 13, "What happens with hard reviews?").

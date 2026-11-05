@@ -52,7 +52,7 @@ export const hairSalon: Industry = {
     line: "Kabsi looks after your hair salon Google Business Profile: replies, colour posts, holiday hours and stylists, each for your yes.",
     card: "Stylists thanked by name, colour work as posts.",
     answer:
-      "For a hair salon Google Business Profile, Kabsi drafts every reply, turns colour work into posts and asks about holiday hours, all for your yes.",
+      "For a hair salon Google Business Profile, Kabsi prepares review replies, turns colour work into posts and asks about holiday hours, all for your yes.",
     watch: {
       business: "Hollis Hair, Bristol",
       line: "Clients check your hours and booking link before they come. Kabsi compares them with what you told it, every day.",

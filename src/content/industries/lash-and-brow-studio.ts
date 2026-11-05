@@ -63,7 +63,7 @@ export const lashAndBrowStudio: Industry = {
     line: "Kabsi looks after your eyelash salon Google Business Profile: new sets as posts, exact hours, replies for your yes.",
     card: "Fresh sets as posts, hours kept exact.",
     answer:
-      "For an eyelash salon Google Business Profile, Kabsi turns fresh sets into posts, checks your hours daily and drafts every reply, all for your yes.",
+      "For an eyelash salon Google Business Profile, Kabsi turns fresh sets into posts, checks your hours daily and prepares review replies, all for your yes.",
     watch: {
       business: "Flutter Lash Studio, London",
       line: "Late hours matter to clients who work. Kabsi checks the hours Google shows against yours every day.",

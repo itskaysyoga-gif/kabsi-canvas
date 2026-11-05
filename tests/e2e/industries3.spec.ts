@@ -45,7 +45,8 @@ function checkGrids(g: Awaited<ReturnType<typeof grids>>, where: string, filtere
   for (const x of g) {
     const label = `${where} ${x.id} rows ${x.rows.join("+")}`;
     if (x.rows.length < 2) continue;
-    if (!filtered)
+    // One card to a row (a phone's stacked list) is a list, not a grid with a lone card.
+    if (!filtered && x.rows[0]! > 1)
       expect(x.rows.at(-1), `${label}: a lone card in the last row`).toBeGreaterThan(1);
     if (x.rows.at(-1)! < x.rows[0]!) expect(x.centred, `${label}: last row centred`).toBe(true);
   }

@@ -118,3 +118,7 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 Removed from the page: the two long guide sections (the walk-in who goes next door, Google's "confirm your hours" line,
 why the December days move, the last walk-in post, the list of cuts, no phone number or link in a reply), and "in one
 sentence" from the unhappy customer answer. The old tasks were not shown and are deleted.
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- Answer: "prepares review replies" replaces "drafts every reply", because a high risk review gets no draft (facts 13, "What happens with hard reviews?").
