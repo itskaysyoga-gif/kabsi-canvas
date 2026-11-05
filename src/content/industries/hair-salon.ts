@@ -72,7 +72,7 @@ export const hairSalon: Industry = {
       message: "Google shows your old booking page as your website. You told me the new one.",
     },
     post: {
-      owner: "Amber's first balayage with us. Booking from Tuesday.",
+      owner: "Amber joins us for colour and balayage. Booking from Tuesday.",
       quote: "New to the team: Amber, colour and balayage. Book with her from Tuesday.",
     },
     jobs: [

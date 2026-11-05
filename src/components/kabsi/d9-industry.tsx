@@ -15,7 +15,7 @@ import { ScanBox } from "./scan-box";
 import { SiteLink } from "./site-link";
 import { Closing } from "./closing";
 import { Marked } from "./highlight";
-import { PictureButtons, StepsLine, YellowLabel, YellowNumber } from "./d9-hero";
+import { StepsLine, YellowLabel, YellowNumber } from "./d9-hero";
 import { AiAnswer, NearbyMap, PhotoToPost, PricingPreview } from "./d9-home-lower";
 
 const linkCls =
@@ -205,25 +205,30 @@ function Watch({ industry: i }: { industry: Industry }) {
                 </p>
               </div>
             </div>
-            <div className="mt-3 rounded-inner wa-ground p-3">
+            {/* The independent check of 5 Nov: Keep my information and Google is right are the choice on kabsi.co (facts 04,
+                Google Protection); WhatsApp's Put it back covers hours and website only, so the Example is not a chat. */}
+            <div className="mt-3 rounded-inner bg-surface-2 p-3 sm:p-4">
               <div className="flex items-start gap-2">
-                <KabsiMark ring={false} className="mt-0.5 size-7" />
+                <KabsiMark ring={false} className="mt-0.5 size-7 shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <div className="rounded-bubble rounded-ss-none bg-wa-in px-2.5 py-1.5 text-chat text-wa-ink shadow-bubble">
-                    {w.message}
-                    <span className="mt-0.5 block text-end text-chat-meta text-wa-time-out">
-                      08:02
+                  <p className="text-label font-semibold text-text-2">
+                    Google profile, on kabsi.co
+                  </p>
+                  <p className="mt-1 text-small">{w.message}</p>
+                  <div className="mt-3 grid grid-cols-2 gap-2" aria-hidden>
+                    <span className="grid min-h-10 place-items-center rounded-pill bg-kb-ink px-2 text-center text-label font-bold text-kb-white">
+                      Keep my information
                     </span>
-                  </div>
-                  <div className="-ms-1.5">
-                    <PictureButtons labels={["Keep my information", "Google is right"]} />
+                    <span className="grid min-h-10 place-items-center rounded-pill border border-line-strong bg-surface-0 px-2 text-center text-label font-bold">
+                      Google is right
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
           <figcaption className="sr-only">
-            {`Example: for an invented ${i.name}, Google shows ${w.what.toLowerCase()} as ${w.google}, the owner told Kabsi ${w.owner}, and Kabsi asks on WhatsApp with Keep my information and Google is right. Nothing changes without the owner's yes.`}
+            {`Example: for an invented ${i.name}, Google shows ${w.what.toLowerCase()} as ${w.google}, the owner told Kabsi ${w.owner}, and Kabsi asks the owner to choose Keep my information or Google is right. Nothing changes without the owner's yes.`}
           </figcaption>
         </figure>
       </div>
@@ -281,7 +286,7 @@ function ShowUp({ industry: i }: { industry: Industry }) {
 
 /** The long reading blocks (30.29 item 2, B-014: exempt from the section rule): searches, then the owner's guide. */
 function Reading({ industry: i }: { industry: Industry }) {
-  const d = i.d8;
+  const searchText = i.page.searchText ?? i.d8?.searchText;
   return (
     <>
       <section aria-labelledby="search-h" className="border-t border-line bg-surface-1">
@@ -289,7 +294,7 @@ function Reading({ industry: i }: { industry: Industry }) {
           <div>
             <Headline id="search-h" text="What people search for" mark="search for" />
             <p className="measure mt-4 text-body sm:text-lead">{i.page.answer}</p>
-            {d && <p className="measure mt-4 text-body text-text-2">{d.searchText}</p>}
+            {searchText && <p className="measure mt-4 text-body text-text-2">{searchText}</p>}
           </div>
           <div>
             <ul className="flex flex-wrap gap-2" aria-label="Searches like these">
@@ -347,11 +352,32 @@ function Reading({ industry: i }: { industry: Industry }) {
 
 /** The owner's guide: the trade's two written sections, or its Content 1 sections (each line has its claim sheet row). */
 function guideBlocks(i: Industry): { title: string; body: ReactNode }[] {
-  if (i.d8)
-    return i.d8.guide.map((g) => ({
-      title: g.title,
-      body: g.paras.map((p) => <p key={p.slice(0, 32)}>{p}</p>),
-    }));
+  const categories = i.categories && {
+    title: "Google categories that fit",
+    body: (
+      <>
+        <p>
+          <span className="font-bold text-text-1">First category:</span> {i.categories.primary}
+        </p>
+        {i.categories.more.length > 0 && (
+          <p>
+            <span className="font-bold text-text-1">Also:</span> {i.categories.more.join(", ")}
+          </p>
+        )}
+        <p>{i.categories.note}</p>
+      </>
+    ),
+  };
+  const guide = i.page.guide ?? i.d8?.guide;
+  if (guide)
+    return [
+      ...guide.map((g) => ({
+        title: g.title,
+        body: g.paras.map((p) => <p key={p.slice(0, 32)}>{p}</p>),
+      })),
+      // Industries 2's new trades also show their Google categories.
+      ...(i.page.guide && categories ? [categories] : []),
+    ];
   const blocks: { title: string; body: ReactNode }[] = [];
   if (i.tasks?.length)
     blocks.push({
@@ -381,23 +407,7 @@ function guideBlocks(i: Industry): { title: string; body: ReactNode }[] {
         </ul>
       ),
     });
-  if (i.categories)
-    blocks.push({
-      title: "Google categories that fit",
-      body: (
-        <>
-          <p>
-            <span className="font-bold text-text-1">First category:</span> {i.categories.primary}
-          </p>
-          {i.categories.more.length > 0 && (
-            <p>
-              <span className="font-bold text-text-1">Also:</span> {i.categories.more.join(", ")}
-            </p>
-          )}
-          <p>{i.categories.note}</p>
-        </>
-      ),
-    });
+  if (categories) blocks.push(categories);
   if (i.holidays)
     blocks.push({
       title: "Holidays and busy dates",

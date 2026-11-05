@@ -181,7 +181,7 @@ export const autoRepair: Industry = {
       answer: "Westgate Auto Repair in Salford offers same day MOTs when you book before 10 am.",
       sources: ["Westgate Auto Repair's Google profile", "Westgate Auto Repair's website"],
     },
-    related: ["gym-and-fitness", "cafe"],
+    related: ["car-wash", "gym-and-fitness"],
   },
   faqs: [
     {
@@ -202,7 +202,7 @@ export const autoRepair: Industry = {
     },
     {
       q: "Does Kabsi see my customers' records?",
-      a: "No. Kabsi works with your Google profile and the reviews on it, never your customer records.",
+      a: "No. Kabsi works with your Google profile and the reviews on it. It does not connect to your customer records.",
     },
   ],
   guides: ["how-to-reply-to-google-reviews", "someone-changed-my-business-info-on-google"],

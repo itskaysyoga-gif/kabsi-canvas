@@ -4,6 +4,14 @@ Master plan 30.17 section 2 and 30.16 section 4: every industry page has a claim
 named after the page's slug in `src/content/industries` (`barbershop.md` for `/for/barbershop`). Written by Content 1 on
 26 Oct 2026. Lane R read each sheet and approved the nine pages on 27 Oct 2026 after the fixes in DESIGN-BRIEF section 18; each is `finished: true` (indexed). Section 18's fixes are marked 'round 2' in the sheets. Web 4c (2 Nov 2026) ported Design 8's four trade pages: `hair-salon.md` and `restaurant.md` are new (the pages had no sheet before), and `barbershop.md` and `nail-salon.md` have a "Design 8" section for the new text. The dental clinic page still has no sheet (docs/LATER.md); from Fix 1 (2 Nov 2026) it is `indexed: false` (noindex, out of the sitemap) until `dental-clinic.md` exists here. Fix 1 also moved the photo tips to the one statement of the photo check (`knowledge/facts/13-faq.md`, "What photos can I post?"): it does not check faces.
 
+Industries 2 (5 Nov 2026) added nine sheets: `dental-clinic.md` (the page is indexed again with it), `lash-and-brow-studio.md`,
+`tattoo-studio.md`, `pet-grooming.md`, `veterinary-clinic.md`, `car-wash.md`, `florist.md`, `optician.md` and
+`yoga-and-pilates-studio.md`. An agent wrote them from the page files, checking each category name on a live Google profile
+page; the session fixed every row it found unsupported ("Flower delivery" left out, hard reviews worded as facts 13 says) and
+an independent check read every line against the facts. Two Google pages joined the register there: G16 service areas
+(https://support.google.com/business/answer/9157481) and G17 hiding the address
+(https://support.google.com/business/answer/2853879), both read 5 Nov 2026.
+
 ## How to read a sheet
 
 Each row is one sentence a reader sees on the page, with its type, its source and what the source says.

@@ -133,4 +133,7 @@ export type D9Trade = {
   ai: { question: string; answer: string; sources: [string, string] };
   /** Two related trades, by slug. */
   related: [string, string];
+  /** Industries 2's new trades: the long reading blocks (pages written for Design 8 keep them in `d8`). */
+  searchText?: string;
+  guide?: { title: string; paras: string[] }[];
 };

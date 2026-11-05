@@ -60,7 +60,7 @@ export const restaurant: Industry = {
     line: "Kabsi looks after your restaurant Google Business Profile: closing times, dish photos as posts, and a reply to every review.",
     card: "Closing times right, dish photos as posts.",
     answer:
-      "Diners check a restaurant Google Business Profile for the closing time, the menu and the reviews. Kabsi checks your hours every day, drafts a reply to every review in the guest's language, turns a dish photo into a post, and asks about bank holiday hours five days ahead. Reviews about illness get a calm draft with no quick yes. You approve every change.",
+      "A restaurant Google Business Profile shows diners your closing time, your menu and your reviews. Kabsi checks your hours every day, drafts a reply to every review in the guest's language, turns a dish photo into a post, and asks about bank holiday hours five days ahead. A review about illness comes to you with a checklist and no draft. You approve every change.",
     watch: {
       business: "Cedar Lane Kitchen, Manchester",
       line: "A guest who reads the wrong closing time does not come. Kabsi checks your hours every day.",
@@ -71,13 +71,13 @@ export const restaurant: Industry = {
       message: "Google shows you closing at 21:00 on Sunday. You told me 22:30.",
     },
     post: {
-      owner: "Lamb shoulder is back on Sundays.",
+      owner: "Lamb shoulder is back on Sundays, tables from 12.",
       quote: "Slow roast lamb shoulder is back on the Sunday menu. Tables from 12.",
     },
     jobs: [
       {
         title: "A reply for every review",
-        text: "In the guest's language. Illness and hygiene reviews get a calm draft, never a quick yes.",
+        text: "In the guest's language. A review about illness gets a checklist and no draft, so you decide.",
       },
       {
         title: "Dish photos, as posts",

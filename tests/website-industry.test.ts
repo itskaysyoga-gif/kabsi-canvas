@@ -93,9 +93,9 @@ describe("industry pages (Design 5, Web 2)", () => {
     expect(overlap(salon, swapped)).toBeGreaterThan(0.9);
   });
 
-  it("twelve industries, all finished (Content 1; Industries 2 adds more)", () => {
-    expect(INDUSTRIES).toHaveLength(12);
-    expect(new Set(INDUSTRIES.map((i) => i.slug)).size).toBe(12);
+  it("twenty industries, all finished (Content 1, and nine more in Industries 2)", () => {
+    expect(INDUSTRIES).toHaveLength(20);
+    expect(new Set(INDUSTRIES.map((i) => i.slug)).size).toBe(20);
     expect(INDUSTRIES.filter((i) => !i.finished).map((i) => i.slug)).toEqual([]);
   });
 
@@ -125,6 +125,13 @@ describe("industry pages (Design 5, Web 2)", () => {
           expect(c.label, i.slug).toMatch(
             /^(Opening hours|Reviews|Photos|Website|Phone|Category)$/,
           );
+        continue;
+      }
+      // Industries 2: the new trades carry two guide sections, their categories and their search text.
+      if (i.page.guide) {
+        expect(i.page.guide.length, i.slug).toBe(2);
+        expect(i.categories, i.slug).toBeDefined();
+        expect(i.page.searchText, i.slug).toBeTruthy();
         continue;
       }
       expect(i.categories, i.slug).toBeDefined();

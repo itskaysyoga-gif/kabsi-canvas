@@ -145,7 +145,7 @@ export const medicalAestheticClinic: Industry = {
     line: "Kabsi looks after your aesthetic clinic Google Business Profile: doctors' days, the consultation link, and discreet replies you approve.",
     card: "Doctors' days exact, replies that confirm no patient.",
     answer:
-      "Patients compare an aesthetic clinic on its reviews, its hours and how it answers. Kabsi looks after your aesthetic clinic Google Business Profile: replies that never confirm someone is a patient or name a treatment, your hours and consultation link checked every day, and clinic news as posts ready for your yes. You approve every one.",
+      "An aesthetic clinic is judged on its reviews, its hours and how it answers. Kabsi looks after your aesthetic clinic Google Business Profile: replies that never confirm someone is a patient or name a treatment, your hours and consultation link checked every day, and clinic news as posts ready for your yes. You approve every one.",
     watch: {
       business: "Clearview Skin Clinic, London",
       line: "Late evening clinics are easy to miss on Google. Kabsi checks your hours against yours every day.",
@@ -156,7 +156,7 @@ export const medicalAestheticClinic: Industry = {
       message: "Google shows Wednesday 09:00 to 17:00. You told me 11:00 to 20:00.",
     },
     post: {
-      owner: "Dr Shah adds Thursday evening consultations.",
+      owner: "Dr Shah adds Thursday evening consultations, until 8 pm.",
       quote: "Dr Shah now sees consultations on Thursday evenings until 8 pm. Book on our website.",
     },
     jobs: [

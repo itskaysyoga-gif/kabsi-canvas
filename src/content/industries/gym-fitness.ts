@@ -158,7 +158,7 @@ export const gymFitness: Industry = {
     },
     post: {
       owner: "New 6 am strength class from Sunday. First class free.",
-      quote: "New: a 6 am strength class every weekday from Sunday. Your first class is on us.",
+      quote: "New: a 6 am strength class from Sunday. Your first class is free.",
     },
     jobs: [
       { title: "Classes, as posts", text: "A new class with its real dates, ready for your yes." },
@@ -177,7 +177,7 @@ export const gymFitness: Industry = {
       answer: "Harbour Strength Studio in Dubai Marina runs a 6 am strength class every weekday.",
       sources: ["Harbour Strength Studio's Google profile", "Harbour Strength Studio's website"],
     },
-    related: ["physiotherapy", "spa-and-massage"],
+    related: ["yoga-and-pilates-studio", "physiotherapy"],
   },
   faqs: [
     {
