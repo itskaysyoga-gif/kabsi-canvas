@@ -18,7 +18,7 @@ export const guide: GuideDoc = {
   answer:
     "Open your Business Profile, select Read reviews, select Report next to the review, choose the reason and send the report, then follow it in Google's Reviews Management Tool. Google removes only reviews that break its content policies, such as fake engagement, spam or harassment, not reviews that are simply negative.",
   inShort: [
-    "Only Google can remove a review, and only one that breaks its policies.",
+    "You can report any review, but Google says only reviews that break its policies are eligible for removal.",
     "Report it from your profile or in the Reviews Management Tool, where you can see the status.",
     "If Google finds no violation, you can appeal once, up to 10 reviews at a time.",
     "If someone demands money to remove bad reviews, do not pay: use Google's extortion form.",
@@ -74,11 +74,11 @@ export const guide: GuideDoc = {
       id: "report-from-profile",
       heading: "How do I report a review from my Business Profile?",
       answer:
-        "Sign in to the Google Account that manages your profile, open your Business Profile, select Read reviews, then select Report next to the review. Choose the reason and select Send report; Google says the evaluation typically takes several days.",
+        "Open your Business Profile, select Read reviews, then select Report next to the review. Choose the reason and select Send report; Google says the evaluation typically takes several days.",
       body: (
         <Steps
           items={[
-            "Go to your Business Profile while signed in.",
+            "Go to your Business Profile.",
             <>
               Select <b>Read reviews</b>.
             </>,
@@ -239,7 +239,7 @@ export const guide: GuideDoc = {
   faqs: [
     {
       q: "Can I pay someone to remove a bad review?",
-      a: "No one outside Google can remove a review. Google removes reviews that break its policies, whoever reports them, and a review that follows its policies stays.",
+      a: "No. Google says you can report any review, but only reviews that break its policies are eligible for removal, so a review that follows its policies stays.",
     },
     {
       q: "Can I report the person who wrote it?",

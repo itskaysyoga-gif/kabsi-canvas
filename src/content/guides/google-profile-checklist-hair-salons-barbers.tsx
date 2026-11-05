@@ -34,9 +34,9 @@ export const guide: GuideDoc = {
           <p>
             Open Edit profile, then next to Business category select Edit, type in the Primary
             category box and pick from the list that shows up. You can add up to 9 more categories
-            with Add another category. Google asks you to use as few as possible, not to use
-            categories as keywords and not to add one for every service: the services list is where
-            each treatment goes.
+            with Add another category. Google asks you to "use a few categories from the provided
+            list", not to use categories as keywords, and says "Do not select a category for every
+            product or service": the services list is where each treatment goes.
           </p>
           <p>
             Google says health and beauty businesses can add a booking button and a list of services,

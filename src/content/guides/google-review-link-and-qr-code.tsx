@@ -27,13 +27,12 @@ export const guide: GuideDoc = {
       id: "get-the-link",
       heading: "Where do I find my Google review link?",
       answer:
-        "Sign in to the Google Account that manages your profile, open your Business Profile, select Read reviews, then Get more reviews. Google shows the link with a Copy button and other ways to share it.",
+        "Go to your Business Profile, select Read reviews, then Get more reviews. Google shows the link with a Copy button and other ways to share it.",
       body: (
         <>
           <Steps
             items={[
-              "Sign in to the Google Account you use for your Business Profile.",
-              "Search your business name on Google, or search 'my business', to open your profile.",
+              "Go to your Business Profile.",
               <>
                 Select <b>Read reviews</b>, then <b>Get more reviews</b>.
               </>,
@@ -44,8 +43,8 @@ export const guide: GuideDoc = {
           />
           <p>
             Paste the link somewhere safe, such as a note on your phone, so you have it ready. It opens
-            the review form for your business, so customers do not have to search for you first. The
-            steps are the same in the UK and the UAE.
+            the review form for your business, so customers do not have to search for you first. Google's
+            pages here name no separate rule for the UK or the UAE.
           </p>
         </>
       ),
@@ -71,7 +70,7 @@ export const guide: GuideDoc = {
           />
           <p>
             Print it large enough to scan from where people stand, and test it with your own phone before
-            you print a batch. A QR code made from your review link opens the same form as the link.
+            you print a batch.
           </p>
         </>
       ),
@@ -135,7 +134,7 @@ export const guide: GuideDoc = {
       id: "why-no-review",
       heading: "Someone scanned the code but no review appeared. Why?",
       answer:
-        "Opening the link is not the same as leaving a review: many people open it and then do not write anything. Google also says customers must be signed in to a Google Account to leave a review, and that they can create one with a non-Gmail email address.",
+        "Opening the link is not the same as leaving a review: an open is not a review. Google also says customers must be signed in to a Google Account to leave a review, and that they can create one with a non-Gmail email address.",
       body: (
         <p>
           If a customer tells you they posted a review that you cannot see, Google's help has a page
@@ -180,8 +179,9 @@ export const guide: GuideDoc = {
           The <SiteRef to="/google-review-link">free review link and QR tool</SiteRef> works without
           signing in: search your business name and city to get Google's own review link, a QR code image
           and a printable counter card, from any phone. Inside Kabsi, Get reviews gives you a short link
-          and a QR code that open your Google review page, free on every plan, and shows how often each
-          link was opened. An open is not a review: Google decides which reviews appear.
+          and a QR code, free for every business, that open your Google review page by default; you can
+          set a link to show a short Kabsi page first (kabsi.co/review/CODE), with the Google review
+          button first and large. Get reviews shows how often each link was opened. An open is not a review: Google decides which reviews appear.
         </p>
         <p>
           Send review link opens a staff member's own WhatsApp with the same message for every customer,

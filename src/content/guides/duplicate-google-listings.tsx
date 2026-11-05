@@ -58,7 +58,7 @@ export const guide: GuideDoc = {
       id: "find",
       heading: "How do I find a duplicate of my business?",
       answer:
-        "Search for your business on Google Maps the way a customer would, signed out, and look for a second result that is the same business. Duplicates often come from an old name, an old address, a profile someone else made years ago, or a second profile created for one service.",
+        "Search for your business on Google Maps the way a customer would, signed out, and look for a second result that is the same business. One reason Google names for a duplicate is a second profile for the same business that offers different services.",
       body: (
         <Steps
           items={[
@@ -184,7 +184,7 @@ export const guide: GuideDoc = {
       id: "uk-uae",
       heading: "Is anything different in the UK or the UAE?",
       answer:
-        "No. Google's duplicate, merge and ownership rules on these pages are the same in both countries. One thing to know: Google's Maps help says some editing options are only available in some countries and regions, so if you do not see an option, use Google's help from your profile.",
+        "Google's pages here name no separate rule for the UK or the UAE. One thing to know: Google's Maps help says some editing options are only available in some countries and regions, so if you do not see an option, use Google's help from your profile.",
       body: (
         <p>
           In the UAE, where many addresses use a building and an area, two results for one business can
@@ -218,7 +218,7 @@ export const guide: GuideDoc = {
   faqs: [
     {
       q: "Can a clinic have a profile for each doctor?",
-      a: "Google's guidelines say an individual practitioner who works in a public-facing role and can be contacted at the location during stated hours can have their own profile, and the clinic should have its own profile, separate from the practitioner's. A practitioner should not have several profiles for different specialisations, and support staff should not create their own.",
+      a: "Google's guidelines say an individual practitioner who works in a public-facing role and can be contacted at the location during stated hours can have their own profile, and when the practitioner is one of several public-facing practitioners at the location, the clinic should have its own profile, separate from the practitioner's. A solo practitioner who represents a branded organisation should share the organisation's profile. A practitioner should not have several profiles for different specialisations, and support staff should not create their own.",
     },
     {
       q: "Will a merge keep my star rating?",
@@ -226,7 +226,7 @@ export const guide: GuideDoc = {
     },
     {
       q: "I created the duplicate myself by mistake. What now?",
-      a: "Do not delete a profile you think is a duplicate: deleting it can lose its reviews, and Google says removing a profile removes all its content and linked managers. Check which one has your reviews, then ask Google to merge or ask Google's support from your profile which to keep.",
+      a: "Do not delete a profile you think is a duplicate: deleting it can lose its reviews. Google's page says that if you created a duplicate by mistake you can remove it without affecting your verified profile, and that removing a profile removes all its content and linked managers, so make sure it is the right one. Check which one has your reviews first.",
     },
   ],
   sources: [

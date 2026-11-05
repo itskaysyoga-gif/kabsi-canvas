@@ -16,7 +16,7 @@ export const guide: GuideDoc = {
   checked: READ,
   topic: "Google reviews",
   answer:
-    "Open your Business Profile while signed in, select Read reviews, then Reply next to the review, write your reply and select Reply. Keep it short, polite and about what the customer said, because Google checks every reply against its content policies before it shows it.",
+    "Open your Business Profile, select Read reviews, then Reply next to the review, write your reply and select Reply. Keep it short, polite and about what the customer said, because Google checks every reply against its content policies before it shows it.",
   inShort: [
     "Your profile must be verified before you can reply to reviews.",
     "Reply from your Business Profile: Read reviews, then Reply.",
@@ -28,13 +28,12 @@ export const guide: GuideDoc = {
       id: "steps",
       heading: "How do I reply to a review on Google?",
       answer:
-        "Sign in to the Google Account that manages your profile, open your Business Profile, select Read reviews, then select Reply next to the review you want to answer. Type your reply in the box and select Reply again. The steps are the same in the UK and the UAE.",
+        "Go to your Business Profile, select Read reviews, then select Reply next to the review you want to answer. Type your reply in the box and select Reply again.",
       body: (
         <>
           <Steps
             items={[
-              "Sign in to the Google Account you use for your Business Profile.",
-              "Search your business name on Google, or search 'my business', to open your profile.",
+              "Go to your Business Profile.",
               <>
                 Select <b>Read reviews</b>.
               </>,
@@ -48,10 +47,9 @@ export const guide: GuideDoc = {
             ]}
           />
           <p>
-            On a phone you can do the same in the Google Maps app: tap <b>Business</b> at the bottom
-            right, then <b>Reviews</b>. Google's help says you must verify your business before you can
-            reply, and that reviews are available only in certain countries or regions and for certain
-            business categories.
+            Google's help says you must verify your business before you can reply, and that reviews
+            are available only in certain countries or regions and for certain business categories.
+            Google's pages here name no separate rule for the UK or the UAE.
           </p>
         </>
       ),
@@ -73,7 +71,7 @@ export const guide: GuideDoc = {
             the review changes to show the latest update.
           </li>
           <li>
-            Nothing about this differs between the UK and the UAE on Google's page.
+            Google's pages here name no separate rule for the UK or the UAE.
           </li>
         </ul>
       ),
@@ -113,7 +111,7 @@ export const guide: GuideDoc = {
       id: "contact-details",
       heading: "Can I put my phone number or website in a reply?",
       answer:
-        "It is best not to. Google checks every reply against its content policies and asks you to edit one it does not approve, and its rules for content on Maps list email addresses, phone numbers, social media links and links to other websites among the advertising and solicitation it does not allow in reviews.",
+        "This guide's advice is to leave them out and point to the details on your profile. Google checks every reply against its content policies and asks you to edit one it does not approve.",
       body: (
         <>
           <p>
@@ -168,8 +166,7 @@ export const guide: GuideDoc = {
         "Yes. Open your Business Profile, select Read reviews, then select Edit under the reply. Change the text and select Update, or select Delete to remove the reply.",
       body: (
         <p>
-          An edited reply goes through Google's check again before the new text shows. If a customer
-          changes their review after your reply, read it again: a short update to your reply, or a thank
+          If a customer changes their review after your reply, read it again: a short update to your reply, or a thank
           you, is often worth it.
         </p>
       ),
@@ -220,7 +217,7 @@ export const guide: GuideDoc = {
     },
     {
       q: "Why can I not see a Reply button?",
-      a: "Google says you must verify your business before you can reply, and you must be signed in to an account that owns or manages the profile. Reviews are also available only in certain countries, regions and business categories.",
+      a: "Google says you must verify your business before you can reply. Reviews are also available only in certain countries, regions and business categories.",
     },
   ],
   sources: [

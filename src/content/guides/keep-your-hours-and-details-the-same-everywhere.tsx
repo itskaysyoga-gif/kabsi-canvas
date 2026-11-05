@@ -80,7 +80,7 @@ export const guide: GuideDoc = {
       id: "when-it-changes",
       heading: "Something changed. What do I update first?",
       answer:
-        "Change your Google profile first, because it is where most people look and where Google compares other sources. Then change your website everywhere the detail appears, and then the social pages, booking sites and directories that list you.",
+        "Change your Google profile first. Then change your website everywhere the detail appears, and then the social pages, booking sites and directories that list you.",
       body: (
         <>
           <Steps

@@ -20,7 +20,7 @@ export const guide: GuideDoc = {
     "Only reviews that break Google's policies are removed, not reviews you simply disagree with.",
     "Report from your profile (Read reviews, then Report) or from Google's Reviews Management Tool.",
     "Google says evaluation typically takes several days, and you can appeal a decision once.",
-    "Nobody outside Google can remove a review, whatever they charge.",
+    "Nobody outside Google can remove a review written on Google, whatever they charge.",
   ],
   sections: [
     {
@@ -142,7 +142,7 @@ export const guide: GuideDoc = {
       id: "paid-removal",
       heading: "Can someone remove a review for me if I pay?",
       answer:
-        "No. Only Google removes reviews, and only when they break its policies, so anyone charging to remove reviews cannot do anything you cannot do yourself for free. Offering a customer something to remove a negative review is also fake engagement under Google's rules.",
+        "No. Only Google removes reviews written on Google, and only when they break its policies, so anyone charging to remove reviews cannot do anything you cannot do yourself for free. Offering a customer something to remove a negative review is also fake engagement under Google's rules.",
       body: (
         <>
           <p>
@@ -167,9 +167,10 @@ export const guide: GuideDoc = {
         "Your profile may show reviews from websites that are not Google. Google says you cannot choose or stop them, and that you should contact the other website directly about a rating or review that comes from it.",
       body: (
         <p>
-          Google says businesses in the European Economic Area can report reviews from other websites
-          directly on Google. The UK and the UAE are not in the European Economic Area, so a business in
-          either country contacts the other website instead.
+          Google says the other website removes or updates its own review, and the change then shows
+          on your Business Profile. Google offers reporting reviews from other websites directly on
+          Google only to businesses in the European Economic Area, so a business in the UK or the UAE
+          contacts the other website.
         </p>
       ),
     },
@@ -204,8 +205,8 @@ export const guide: GuideDoc = {
           after your last update.
         </p>
         <p>
-          On every plan, Kabsi drafts a calm reply for each new review, and nothing goes on Google until
-          you approve it. <SiteRef to="/scan">Run the free check</SiteRef>.
+          On every plan, Kabsi drafts a calm reply for each new review, except a high-risk review, which
+          gets no draft and a short checklist instead. Nothing goes on Google until you approve it. <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>
     ),
@@ -239,6 +240,11 @@ export const guide: GuideDoc = {
     {
       title: "Google: Report negative review extortion scams on your Business Profile",
       url: "https://support.google.com/business/answer/16404809?hl=en",
+      read: READ,
+    },
+    {
+      title: "Google: Manage customer reviews",
+      url: "https://support.google.com/business/answer/3474050?hl=en",
       read: READ,
     },
     {

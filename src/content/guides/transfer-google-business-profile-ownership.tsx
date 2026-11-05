@@ -173,7 +173,7 @@ export const guide: GuideDoc = {
       id: "agency-rules",
       heading: "Is an agency allowed to keep ownership of my profile?",
       answer:
-        "No. Google's third-party policies say businesses must keep ownership or co-ownership of their Business Profile at all times, and that the business decides whether a partner gets owner, manager or no access. When you end the service, Google says the agency must let you regain exclusive control within 7 business days.",
+        "An agency can be a co-owner only if you choose that: Google's third-party policies say the business decides whether a partner gets Co-Owner, Manager or no access, and that customers must retain ownership or co-ownership of their Business Profile at all times. When you end the service, Google says the agency must let you regain exclusive control within 7 business days.",
       body: (
         <p>
           Google lists keeping a profile hostage in exchange for money as a prohibited practice, and
@@ -210,8 +210,8 @@ export const guide: GuideDoc = {
         </p>
         <p>
           If Google sees someone else claiming your profile, Kabsi stops sending anything to Google
-          and tells you what Google is asking. When a business changes hands, a person on the Kabsi
-          team handles moving the Kabsi account, and the new owner can remove Kabsi at any time from People
+          and tells you what Google is asking. When a business changes hands, write to the Kabsi team at
+          hello@kabsi.co about the Kabsi account, and the new owner can remove Kabsi at any time from People
           and access. <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>

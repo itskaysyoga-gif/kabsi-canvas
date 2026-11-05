@@ -96,7 +96,7 @@ export const guide: GuideDoc = {
       id: "never-write",
       heading: "What should I never write in a reply?",
       answer:
-        "Never argue about who is right, accuse the reviewer of lying, share their details, or offer a discount, refund or free service in exchange for changing or removing the review. Google treats incentives for changing or removing reviews as fake engagement, which it strictly prohibits.",
+        "Never argue about who is right, accuse the reviewer of lying, share their details, or offer a discount, refund or free service in exchange for changing or removing the review. Google says offering incentives for customers to change or remove reviews is \"fake & misleading content and is strictly prohibited\".",
       body: (
         <>
           <DoDont
@@ -116,10 +116,9 @@ export const guide: GuideDoc = {
             ]}
           />
           <p>
-            Why no phone number or link: Google checks every reply against its content policies before
-            it shows and asks you to edit one it does not approve, and its rules for content on Maps
-            treat phone numbers, emails and links as advertising and solicitation. Your profile already
-            shows how to reach you.
+            Why no phone number or link: this guide's advice is to leave them out and point to the
+            details on your profile, which already shows how to reach you. Google checks every reply
+            against its content policies before it shows and asks you to edit one it does not approve.
           </p>
         </>
       ),
@@ -176,7 +175,7 @@ export const guide: GuideDoc = {
       id: "uk-uae",
       heading: "Is anything different in the UK or the UAE?",
       answer:
-        "No. Google's reply steps, its review tips and its content policies on these pages are the same in both countries. Reply in the language the customer wrote in, whether that is English or another language.",
+        "Google's pages here name no separate rule for the UK or the UAE. Reply in the language the customer wrote in, whether that is English or another language.",
     },
   ],
   kabsi: {
@@ -187,8 +186,9 @@ export const guide: GuideDoc = {
           Kabsi emails you right away about reviews of 3 stars or less and any review it marks as medium
           or high risk, even if you chose WhatsApp for routine messages. A medium risk review gets a calm
           draft that names no one. A high-risk review, such as one about health, a threat, legal action
-          or a named member of staff, gets no draft at all: you read it and decide, and it can never be
-          approved on WhatsApp.
+          or a complaint that names a member of your team, gets no draft: you read it and decide, and
+          Kabsi writes a short, neutral holding reply only if you ask for one. It can never be approved
+          on WhatsApp.
         </p>
         <p>
           Every draft points the customer to the details on your profile and never contains a phone
@@ -201,7 +201,7 @@ export const guide: GuideDoc = {
   faqs: [
     {
       q: "Can I ask the customer to change their review?",
-      a: "You can fix the problem and let them decide. Google's tips say a constructive reply may encourage the customer to update their review, but offering anything in exchange for changing or removing it is fake engagement under Google's rules.",
+      a: "You can fix the problem and let them decide. Google's tips say a constructive reply may encourage the customer to update their review, but Google says incentives in exchange for changing or removing reviews are fake and misleading content, and its Maps policy says \"Incentivized or Biased Reviews\" are not allowed.",
     },
     {
       q: "The review is from someone who was never a customer. What do I do?",

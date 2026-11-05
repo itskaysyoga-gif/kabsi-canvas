@@ -30,9 +30,8 @@ export const guide: GuideDoc = {
         "Google's help says each user needs their own Google Account so they can manage the profile without you sharing your password. A manager can do the daily work, and you can take their access away at any time without changing your password or losing your profile.",
       body: (
         <p>
-          A shared password gives someone everything in your Google Account, not just the profile: your
-          email, your files and your other Google services. A manager invitation gives them only the
-          profile, and their name sits in a list you control. Google says users in the account can see
+          With their own account, each person signs in as themselves and no password is shared. Their
+          name sits in the People and access list you control, and Google says users in the account can see
           the names and email addresses of the other owners and managers.
         </p>
       ),
@@ -66,7 +65,8 @@ export const guide: GuideDoc = {
           <p>
             Google says invited users can accept and become users right away, and you get an email when
             they accept. Until then they are listed under <b>PENDING</b> on the People and access page,
-            where you can select <b>Cancel invitation</b>. The steps are the same in the UK and the UAE.
+            where you can select <b>Cancel invitation</b>. Google's pages here name no separate rule
+            for the UK or the UAE.
           </p>
         </>
       ),
@@ -156,7 +156,7 @@ export const guide: GuideDoc = {
       id: "agency-asks",
       heading: "An agency asked for my password or a code. Is that normal?",
       answer:
-        "No. Google's own way to give someone access is an invitation from People and access, and each user uses their own Google Account. Nobody who helps with your profile needs your password or a code Google sends you.",
+        "No. Google's own way to give someone access is an invitation from People and access, and each user uses their own Google Account. Nobody who helps with your profile needs your password.",
       body: (
         <p>
           If someone insists, invite them as a manager instead, or do not work with them. Keep yourself
@@ -170,14 +170,15 @@ export const guide: GuideDoc = {
     body: (
       <>
         <p>
-          Kabsi works exactly this way. You add the Kabsi group ID 5481006796 as a Manager from People
-          and access, and you stay the owner. Kabsi never asks for your Google password or a code. It
+          Kabsi uses Manager access too, with its group ID instead of an email address: in People and
+          access select Add, paste 5481006796, choose Manager, then Add (on some screens, Invite). You
+          stay the owner. Kabsi never asks for your Google password or a code Google sends you. It
           accepts only an invitation for the Manager role that matches a business you set up in Kabsi,
           and nothing goes on Google until you approve it.
         </p>
         <p>
           You can remove Kabsi any time without asking: in People and access select Kabsi Clients (group
-          ID 5481006796) and choose Remove person, or in Kabsi choose Settings, then Disconnect Kabsi.
+          ID 5481006796) and choose Remove person, or in Kabsi choose Settings, then Disconnect Kabsi from Google.
           Kabsi stops reading and posting at once. <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>

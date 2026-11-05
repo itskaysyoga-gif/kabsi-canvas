@@ -172,7 +172,7 @@ export const guide: GuideDoc = {
       id: "uk-uae",
       heading: "Is any of this different in the UK or the UAE?",
       answer:
-        "No. Google's pages on owners, managers, the 7 day wait and requesting ownership give the same steps for every country, so a salon in Manchester and a cafe in Dubai follow them exactly as written here.",
+        "Google's pages here name no separate rule for the UK or the UAE: its pages on owners, managers, the 7 day wait and requesting ownership give one set of steps, so a salon in Manchester and a cafe in Dubai follow them as written here.",
       body: (
         <p>
           Google's pages do not say what evidence an appeal of a denied request needs. Before you

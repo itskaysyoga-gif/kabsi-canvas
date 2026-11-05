@@ -29,19 +29,18 @@ export const guide: GuideDoc = {
       id: "where-answers-come-from",
       heading: "Where does ChatGPT get details about my business?",
       answer:
-        "OpenAI's developer guide says web search lets its models access up-to-date information from the internet and give answers with sourced citations. Perplexity describes its API the same way: web-grounded answers with built-in citations. So when an answer about your business cites pages, those pages are where the details came from.",
+        "OpenAI's developer guide says web search lets its models access up-to-date information from the internet and give answers with sourced citations. Perplexity describes its API the same way: web-grounded answers with built-in citations. So when an answer about your business cites pages, those are pages it used, though OpenAI says the full list it consulted is often longer.",
       body: (
         <>
           <p>
             OpenAI's guide says its API gives access to the fine-tuned models and tool used by Search in
-            ChatGPT, that an answer includes inline citations for the web pages it used, and that the full
-            list of pages the model consulted is often longer than the list it cites. It also describes
+            ChatGPT, that inline citations show only the most relevant references, and that the number of
+            pages the model consulted is often greater than the number of citations. It also describes
             a setting where the model itself decides whether to search at all.
           </p>
           <p>
             In plain words: some answers come with a fresh search and links, and some do not. Neither
-            OpenAI nor Perplexity says which pages it will read for a given question, and the same
-            question can get a different answer on another day.
+            OpenAI nor Perplexity says which pages it will read for a given question.
           </p>
         </>
       ),
@@ -50,7 +49,7 @@ export const guide: GuideDoc = {
       id: "why-wrong",
       heading: "Why would it give an old closing time or phone number?",
       answer:
-        "Usually because a page it found still says the old thing. The three common causes are an old page of your own that was never updated, another site that lists you with old details, and your website and your Google profile saying different things.",
+        "In this guide's experience, the usual reason is a page that still says the old thing. Three causes worth checking are an old page of your own that was never updated, another site that lists you with old details, and your website and your Google profile saying different things.",
       body: (
         <ul>
           <li>
@@ -63,7 +62,7 @@ export const guide: GuideDoc = {
           </li>
           <li>
             <b>Two versions:</b> your website footer says you close at 18:00 and your Google profile says
-            19:00, so whichever page is read wins.
+            19:00, so the two disagree and an answer can repeat either one.
           </li>
         </ul>
       ),
@@ -72,7 +71,7 @@ export const guide: GuideDoc = {
       id: "location",
       heading: "Why does it answer differently for different people?",
       answer:
-        "Location and wording change the search. OpenAI's developer guide shows that a search can be refined by an approximate user location, such as a country and a city, so someone in London and someone in Dubai asking the same question may get different pages and a different answer.",
+        "The wording of the question changes what gets searched for. OpenAI's developer guide also shows that a developer using its API can set an approximate user location, such as a country and a city, for a web search.",
       body: (
         <p>
           The way the question is asked matters too: "salon open late Saturday" and "best salon near Dubai
@@ -86,7 +85,7 @@ export const guide: GuideDoc = {
       id: "what-to-check",
       heading: "What should I check, and in what order?",
       answer:
-        "Start with the pages the answer cites, because those are the ones it used. Then make your Google profile and your website say the same correct thing, and then fix the other sites that list you, starting with any the answer cited.",
+        "Start with the pages the answer cites: OpenAI says citations show the most relevant references, though the model may have read more. Then make your Google profile and your website say the same correct thing, and then fix the other sites that list you, starting with any the answer cited.",
       body: (
         <Steps
           items={[
@@ -98,7 +97,7 @@ export const guide: GuideDoc = {
             </>,
             "Check your own website: the contact page, the footer and any page that shows hours or prices.",
             "Correct or ask the other sites that list you to correct their page, starting with the cited ones.",
-            "Ask the same question again another day. Answers change from run to run.",
+            "After your fixes, ask the same question again and compare it with the answer you saved.",
           ]}
         />
       ),

@@ -75,7 +75,7 @@ export const guide: GuideDoc = {
       id: "what-happens",
       heading: "What can happen if Google finds gated reviews?",
       answer:
-        "Google says incentivised or biased reviews are not allowed and will be removed from Maps, and reviews collected through a filter are a biased selection. For fake and incentivised reviews, Google's restrictions page adds that a business may lose the ability to receive new reviews for a set period, have its existing reviews unpublished for a set period, or show a warning that fake reviews were removed.",
+        "Google says incentivised or biased reviews are not allowed and will be removed from Maps, and its policy lists selectively asking for positive reviews as a banned practice; reviews that came through a filter are, in this guide's view, a biased selection. For fake and incentivised reviews, Google's restrictions page adds that a business may lose the ability to receive new reviews for a set period, have its existing reviews unpublished for a set period, or show a warning that fake reviews were removed.",
       body: (
         <>
           <p>
@@ -205,6 +205,11 @@ export const guide: GuideDoc = {
     {
       title: "Google: Tips to get more reviews",
       url: "https://support.google.com/business/answer/3474122?hl=en",
+      read: READ,
+    },
+    {
+      title: "Google: Create a Google link or QR code to request reviews",
+      url: "https://support.google.com/business/answer/16816815?hl=en",
       read: READ,
     },
     {

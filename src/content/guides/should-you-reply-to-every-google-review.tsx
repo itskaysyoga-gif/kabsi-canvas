@@ -157,7 +157,7 @@ export const guide: GuideDoc = {
       id: "uk-uae",
       heading: "Is anything different in the UK or the UAE?",
       answer:
-        "No. Google's steps and advice for replies are the same in both countries. Google does say reviews are available only in certain countries or regions and for certain business categories, so if you cannot see reviews at all, that may be why.",
+        "Google's pages here name no separate rule for the UK or the UAE. Google does say reviews are available only in certain countries or regions and for certain business categories, so if you cannot see reviews at all, that may be why.",
       body: (
         <p>
           The practical difference is language: in either country you may get reviews in more than one language, such as English and Arabic in the UAE. Replying in the language the customer wrote in is a natural way to make the reply personal.
@@ -175,7 +175,7 @@ export const guide: GuideDoc = {
           you approve it. A review with only stars gets a short thank-you draft, and a draft that reads
           like a reply you already posted fails Kabsi's checks, so you are not pasting the same line.
           Complaints get a careful draft with the issue shown above it, and a review with a legal
-          threat, a safety problem or a named member of your team gets no draft, only a short
+          threat, a safety problem, or a complaint that names a member of your team gets no draft, only a short
           checklist, so you decide what to say. You can also choose "I'll reply myself".
         </p>
         <p>

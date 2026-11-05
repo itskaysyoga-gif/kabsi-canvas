@@ -10,7 +10,7 @@ export const guide: GuideDoc = {
   slug: "how-google-chooses-local-results",
   title: "How does Google choose which businesses to show nearby?",
   description:
-    "What Google's own help says decides local results on Maps and Search: relevance, distance and prominence, and the parts of your profile you control.",
+    "What Google's own help says decides local results on Maps and Search: relevance, distance and popularity, and the parts of your profile you control.",
   publishAt: scheduledAt(19),
   updated: READ,
   checked: READ,
@@ -20,7 +20,7 @@ export const guide: GuideDoc = {
   inShort: [
     "Relevance: how well your Business Profile matches what someone is searching for.",
     "Distance: how far each business is from the customer who is searching.",
-    "Prominence: how well known a business is, including links to it and its reviews.",
+    "Popularity: in Google's words, \"how well-known a business is\", including links to it and its reviews.",
     "Nobody outside Google can tell you exactly how these are weighed, or promise a position.",
   ],
   sections: [
@@ -28,7 +28,7 @@ export const guide: GuideDoc = {
       id: "three-factors",
       heading: "What does Google say decides local results?",
       answer:
-        "Google's page on local ranking says, in its own words: \"Local results are mainly based on relevance, distance, and popularity. Together, these factors help Google find the best match for customers' searches.\" It then explains relevance, distance and prominence one by one, using the word prominence for the popularity part.",
+        "Google's page on local ranking says, in its own words: \"Local results are mainly based on relevance, distance, and popularity. Together, these factors help Google find the best match for customers' searches.\" It then explains relevance, distance and popularity one by one.",
       body: (
         <>
           <p>
@@ -95,10 +95,10 @@ export const guide: GuideDoc = {
       ),
     },
     {
-      id: "prominence",
-      heading: "What makes a business prominent, in Google's words?",
+      id: "popularity",
+      heading: "What makes a business popular, in Google's words?",
       answer:
-        "Google says prominence means how well known a business is, and that prominent places are more likely to show up in search results. Google says this is also based on information like how many websites link to your business and how many reviews you have, and that more reviews and positive ratings can help your business's local ranking.",
+        "For popularity, Google speaks of \"how well-known a business is\", and says prominent places are more likely to show up in search results. Google says this is also based on information like how many websites link to your business and how many reviews you have, and that more reviews and positive ratings can help your business's local ranking.",
       body: (
         <>
           <p>
@@ -198,7 +198,7 @@ export const guide: GuideDoc = {
     },
     {
       q: "Why does a business further away come up above me?",
-      a: "Google says results come from relevance, distance and prominence together, so a business further away can still be shown first for a search. Google keeps the details confidential, so nobody outside Google can tell you exactly why for one search.",
+      a: "Google says results are mainly based on relevance, distance and popularity together, so a business further away can still be shown first for a search. Google keeps the details confidential, so nobody outside Google can tell you exactly why for one search.",
     },
   ],
   sources: [
@@ -231,5 +231,5 @@ export const guide: GuideDoc = {
     "how-to-ask-for-google-reviews",
   ],
   summary:
-    "How Google picks local results, from Google's own help: relevance, distance and prominence, no paid ranking, and the profile details an owner controls.",
+    "How Google picks local results, from Google's own help: relevance, distance and popularity, no paid ranking, and the profile details an owner controls.",
 };

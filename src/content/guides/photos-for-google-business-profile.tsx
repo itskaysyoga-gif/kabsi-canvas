@@ -79,7 +79,7 @@ export const guide: GuideDoc = {
       id: "cover-logo",
       heading: "How do I set a cover photo and a logo?",
       answer:
-        "On a computer, search your business name and city on Google Search or Maps while signed in, select Photos, then Add a cover photo or Add a logo; Change cover and Change logo replace them later. Google says the cover photo is not always the first image shown, and the logo is highlighted for businesses that have their basic information filled in.",
+        "On a computer, search your business name and city on Google Search or Maps, select Photos, then Add a cover photo or Add a logo; Change cover and Change logo replace them later. Google says the cover photo is not always the first image shown, and the logo is highlighted for businesses that have their basic information filled in.",
       body: (
         <>
           <p>
@@ -100,12 +100,12 @@ export const guide: GuideDoc = {
       id: "how-to-add",
       heading: "How do I add photos to my profile?",
       answer:
-        "Sign in to the account that manages your profile, search your business name and city on Google Search or Maps, select Photos and then Add photos, and choose one or several files. Google reviews each one, so it shows as Pending, then Live or Not approved.",
+        "Search your business name and city on Google Search or Maps, select Photos and then Add photos, and choose one or several files. Google reviews each one, so it shows as Pending, then Live or Not approved.",
       body: (
         <>
           <Steps
             items={[
-              "Open Google Search or Maps on a computer, signed in to the account that manages the profile.",
+              "Open Google Search or Maps on a computer.",
               "Search your business name and city.",
               "Select Photos, then Add photos.",
               "Choose your photos or videos. You can pick several at once.",
@@ -153,8 +153,8 @@ export const guide: GuideDoc = {
       body: (
         <ul>
           <li>
-            <b>Restaurants and cafes:</b> food and drink, the inside, and the front. Menu photos sit
-            in the Menu tab; how to keep the menu itself right is in{" "}
+            <b>Restaurants and cafes:</b> food and drink, the inside, and the front. How to keep the
+            menu itself right is in{" "}
             <GuideLink slug="add-services-and-prices-to-google">
               how to add services and prices to your Google Business Profile
             </GuideLink>
@@ -179,11 +179,10 @@ export const guide: GuideDoc = {
       id: "remove",
       heading: "How do I remove a photo, including one a customer added?",
       answer:
-        "To remove your own photo, open Photos on your profile, select the photo, select Delete and confirm. For a photo a customer added, Google says you can request its removal, and for menus it says to flag an out of date customer menu photo and upload an accurate one yourself.",
+        "To remove your own photo, open Photos on your profile, select the photo, select Delete and confirm. For a photo a customer added, Google says you can request its removal.",
       body: (
         <p>
-          Google's rules on these pages are the same for a business in the UK and in the UAE: the
-          same formats, sizes and content policy. Google also says you are responsible for making
+          Google's pages here name no separate rule for the UK or the UAE. Google also says you are responsible for making
           sure your photos comply with all applicable laws, so ask staff and customers before you
           show them.
         </p>

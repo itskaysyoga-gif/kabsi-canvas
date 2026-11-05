@@ -18,7 +18,7 @@ export const guide: GuideDoc = {
   answer:
     "A restaurant or cafe profile needs a specific main category, true hours with holiday dates set in advance, a menu people can read, working order and booking links, food and room photos, a few honest attributes and a reply under each review. Google's help pages describe each of these, and food and drink businesses have their own menu editor and ordering settings.",
   inShort: [
-    "Choose the most specific category, such as Google's own example 'Pizza restaurant'.",
+    "Choose the most specific category from Google's list, as in Google's example of 'Nail salon' instead of 'Salon'.",
     "Keep the menu current with the menu editor, and fix any customer menu photo that is out of date.",
     "Check who takes your orders under Food ordering, and set a preferred provider for pickup and delivery.",
     "Set special hours for each holiday, and use More hours for times such as delivery or takeout.",
@@ -305,6 +305,11 @@ export const guide: GuideDoc = {
     {
       title: "Google: Create & manage posts on your Business Profile",
       url: "https://support.google.com/business/answer/7342169?hl=en",
+      read: READ,
+    },
+    {
+      title: "Google: Manage customer reviews",
+      url: "https://support.google.com/business/answer/3474050?hl=en",
       read: READ,
     },
     {

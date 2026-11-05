@@ -53,7 +53,7 @@ export const guide: GuideDoc = {
         <>
           <Steps
             items={[
-              "Sign in to the Google Account that manages your profile and go to your Business Profile.",
+              "Go to your Business Profile.",
               <>
                 Select <b>Read reviews</b>, then <b>Get more reviews</b>.
               </>,
@@ -203,9 +203,9 @@ export const guide: GuideDoc = {
       <>
         <p>
           Get reviews is free for every business, with or without a plan: a short review link and a
-          QR code that open your own Google review page, a counter card and a table card ready to
-          print, and one ready message to forward to a customer after a visit. Staff can send the same
-          message from their own WhatsApp. Every customer sees the same page: no rating question, no
+          QR code that open your own Google review page, and a Send review link button so staff can
+          send one ready message from their own WhatsApp after a visit. On both plans you also get a
+          counter card and a table card ready to print. Every customer sees the same page: no rating question, no
           filtering of unhappy customers, no reward, and Kabsi records nothing about who sent a link
           to whom, so there are no targets or league tables.
         </p>
