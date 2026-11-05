@@ -23,6 +23,7 @@ import { carWash } from "./car-wash";
 import { florist } from "./florist";
 import { optician } from "./optician";
 import { yogaAndPilatesStudio } from "./yoga-and-pilates-studio";
+import { beautySalon } from "./beauty-salon";
 
 export type { Card, ChatLine, D9Trade, Industry, Task, TradeCard, TradePage } from "./types";
 
@@ -48,6 +49,8 @@ export const INDUSTRIES: Industry[] = [
   florist,
   optician,
   yogaAndPilatesStudio,
+  // Site 2 (5 Nov 2026, master plan 30.34 item 4): the 21st industry.
+  beautySalon,
 ];
 
 export const industry = (slug: string) => INDUSTRIES.find((i) => i.slug === slug);

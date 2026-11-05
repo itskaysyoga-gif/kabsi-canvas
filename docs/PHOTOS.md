@@ -126,3 +126,20 @@ restaurant-dining, auto-garage, bakery-window, gym-training, aesthetic-treatment
 portrait cards; and 2:3 crops (711 by 1067 and 400 by 600, `-tall-`) of barber-shave, spa-facial, bakery-window, auto-mechanic
 and gym-training, for the tall slot beside "Send a photo. Get a Google post." on trades with no portrait photo. The alt text is
 the source photo's. The industry page heroes now use the wide photos at 3:2, so no landscape file is cut into a portrait there.
+
+## Added 5 Nov 2026 (Site 2: the beauty salon page, and Rashid's portrait)
+
+Rashid uploaded four beauty salon photos (two wide, two tall; Unsplash or Pexels, free for commercial use) and his own portrait
+to main on 5 Nov 2026, in photos-2026-11-06/. Site 2 chose by the 30.33 photo rules (no readable names, logos or Arabic), made
+1600 and 800 px WebP copies at quality 72, and removed the folder from main in the same pull request (git history keeps the
+originals). Chosen: "beauty-salon-wide 1" (makeup, the trade's own work, unlike the hair salon photos; nothing readable, nothing
+blurred) and "beauty-salon-tall 1" (a bright salon; an exit sign, product boxes on a shelf and two packs on the counter were
+blurred with a soft-edged Gaussian blur before cropping). Left out: "wide 2" (a TV screen and a wall of round mirrors, busy at
+card size) and "tall 2" (shampoo bottle labels close to the camera, and it repeats salon-wash).
+
+| File              | Upload chosen          | What it shows                                        | Best use                              | Alt text                                                     |
+| ----------------- | ---------------------- | ---------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------ |
+| beauty-salon-wide | beauty-salon-wide 1.jpg | A makeup artist lining a client's eyes at a lit mirror | Beauty salon page hero, /for card     | A makeup artist applying eyeliner to a client at a lit mirror |
+| beauty-salon-tall | beauty-salon-tall 1.jpg | A stylist blow drying a client's hair, bright salon  | Beauty salon page, photo to post      | A stylist blow drying a client's hair in a bright salon       |
+
+Rashid's portrait (rashid-portrait.jpeg, 2048 px square) replaced founder-rashid-800 and -400 (the table above).

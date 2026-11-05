@@ -11,6 +11,10 @@ import floristWide1600 from "@/assets/photos/florist-wide-1600.webp";
 import floristWide800 from "@/assets/photos/florist-wide-800.webp";
 import floristTall1600 from "@/assets/photos/florist-tall-1600.webp";
 import floristTall800 from "@/assets/photos/florist-tall-800.webp";
+import beautySalonWide1600 from "@/assets/photos/beauty-salon-wide-1600.webp";
+import beautySalonWide800 from "@/assets/photos/beauty-salon-wide-800.webp";
+import beautySalonTall1600 from "@/assets/photos/beauty-salon-tall-1600.webp";
+import beautySalonTall800 from "@/assets/photos/beauty-salon-tall-800.webp";
 import lashBrowWide1600 from "@/assets/photos/lash-brow-wide-1600.webp";
 import lashBrowWide800 from "@/assets/photos/lash-brow-wide-800.webp";
 import lashBrowTall1600 from "@/assets/photos/lash-brow-tall-1600.webp";
@@ -105,6 +109,16 @@ export const MORE_PHOTOS = {
     floristTall1600,
     floristTall800,
     "Potted flowers outside a florist's shop door",
+  ),
+  beautySalonWide: land(
+    beautySalonWide1600,
+    beautySalonWide800,
+    "A makeup artist applying eyeliner to a client at a lit mirror",
+  ),
+  beautySalonTall: port(
+    beautySalonTall1600,
+    beautySalonTall800,
+    "A stylist blow drying a client's hair in a bright salon",
   ),
   lashBrowWide: land(
     lashBrowWide1600,

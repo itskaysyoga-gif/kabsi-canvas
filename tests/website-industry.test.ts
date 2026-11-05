@@ -93,9 +93,10 @@ describe("industry pages (Design 5, Web 2)", () => {
     expect(overlap(salon, swapped)).toBeGreaterThan(0.9);
   });
 
-  it("twenty industries, all finished (Content 1, and nine more in Industries 2)", () => {
-    expect(INDUSTRIES).toHaveLength(20);
-    expect(new Set(INDUSTRIES.map((i) => i.slug)).size).toBe(20);
+  it("twenty-one industries, all finished (Content 1, and nine more in Industries 2)", () => {
+    // Site 2 (master plan 30.34 item 4): Beauty salon is the 21st industry.
+    expect(INDUSTRIES).toHaveLength(21);
+    expect(new Set(INDUSTRIES.map((i) => i.slug)).size).toBe(21);
     expect(INDUSTRIES.filter((i) => !i.finished).map((i) => i.slug)).toEqual([]);
   });
 

@@ -54,7 +54,8 @@ describe("the sitemap", () => {
     // When the sheet lands, drop `indexed: false` from dental-clinic.ts and put the page back in the sitemap.
     expect(industryIndexed(dental)).toBe(sheet);
     expect(paths.includes("/for/dental-clinic")).toBe(sheet);
-    expect(paths).toHaveLength(sheet ? 44 : 43);
+    // Site 2 (30.34 item 4): /for/beauty-salon makes 45.
+    expect(paths).toHaveLength(sheet ? 45 : 44);
   });
   it("leaves out the pages that are noindex or one visitor's", () => {
     for (const p of paths)
