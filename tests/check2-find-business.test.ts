@@ -121,6 +121,13 @@ describe("the lines a visitor reads", () => {
     expect(combo).toContain('translate="no"');
     expect(combo).toMatch(/<span translate="no">Google Maps<\/span>/);
   });
+  it("Scan 3: the tab keeps only the suggestions' signed pass, under one key, nothing from Places", () => {
+    const store = readFileSync("src/lib/suggest-pass.ts", "utf8");
+    expect(store.match(/sessionStorage\.setItem\(([^,]+),/g)).toEqual([
+      "sessionStorage.setItem(PASS_KEY,",
+    ]);
+    expect(store).not.toMatch(/localStorage|indexedDB|place_id|FoundBusiness|Snapshot/);
+  });
   it("never ask Places for more than the place ID to keep: nothing is stored from a suggestion", () => {
     expect(combo).not.toMatch(/localStorage|sessionStorage|indexedDB/);
     expect(readFileSync("src/lib/profile-check.ts", "utf8")).not.toMatch(

@@ -72,7 +72,7 @@ The signed-in website has five places (App 2, 1 Nov 2026; it is light), the same
 
 ### 2.2 [TIME-SENSITIVE] Current status: test mode and early access
 
-- Kabsi's Google Business Profile API access is still under Google's review. Until approved, Kabsi runs in **test mode**: nothing is sent to Google automatically.
+- Kabsi's Google Business Profile API access: Google opened reviews, posts and media on 22 Oct 2026 (master plan R-45), and Google is live for connected businesses (30.28). Nothing is sent to Google without the owner's yes. (Updated by Site 2, 5 Nov 2026; this line said test mode before.)
 - Every signed-in page shows a black banner: "Test mode: Kabsi isn't connected to Google yet. Nothing you post or save is sent to Google." Businesses in early access see an early-access note instead.
 - **Early access:** a business can start before the approval. A person on the Kabsi team accepts your Google invitation and posts what you approve, within one working day. Drafting, the safety checks and your approval work as normal, and you still approve every word. Google Protection stays off until Kabsi connects to Google. Early access is limited to 20 businesses.
 - Real businesses can sign up and finish setup now. A free trial or a paid plan starts when Google access works (section 4).
