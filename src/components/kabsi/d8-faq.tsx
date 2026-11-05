@@ -3,7 +3,7 @@
 // closing free check.
 import { ArrowRight } from "lucide-react";
 import { CONTACT_EMAIL, GOOGLE_THIRD_PARTY_URL, WHATSAPP_ON, WHATSAPP_URL } from "@/lib/site";
-import { Faq, buttonClass } from "./ui";
+import { Faq, WhatsAppGlyph, buttonClass } from "./ui";
 import { PageHero, popCls, stagger } from "./page-hero";
 import { Closing } from "./closing";
 import { FAQ_GROUPS } from "./faq-data";
@@ -123,6 +123,7 @@ export function D8Faq() {
                     rel="noreferrer"
                     className={`${buttonClass("whatsapp")} mt-5`}
                   >
+                    <WhatsAppGlyph className="size-5" />
                     Chat on WhatsApp
                   </a>
                 </>
