@@ -29,6 +29,7 @@ export function D8Faq() {
   return (
     <>
       <PageHero
+        mark="owners ask"
         hero={FAQ_HERO}
         visual={
           <nav

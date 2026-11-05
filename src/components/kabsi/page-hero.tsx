@@ -8,7 +8,7 @@ import { ButtonLink } from "./ui";
 import { D9Title } from "./d9-title";
 import { Marked } from "./highlight";
 
-export type PageHeroLines = { title: string; line: string; action?: string; mark?: string };
+export type PageHeroLines = { title: string; line: string; action?: string };
 
 /** A delay for one part of a hero visual; dropped under reduced motion. */
 export function stagger(i: number, base = 200, step = 140) {
@@ -25,10 +25,14 @@ export function PageHero({
   children,
   className,
   marked = true,
+  mark,
 }: {
   hero: PageHeroLines;
   /** Design 9 treatment B on every page (Web 5 part D): the title's last sentence on the yellow bar; a one-sentence title stays plain. */
   marked?: boolean;
+  /** Style 1 (30.33): the title's phrase on the bar when it is not the last sentence. Set by the page, so the shared
+   *  hero lines (in every page's bundle) stay small. */
+  mark?: string;
   eyebrow?: ReactNode;
   /** Replaces the default action (the free check). */
   action?: ReactNode;
@@ -52,8 +56,8 @@ export function PageHero({
           <h1 id="hero-title" className="text-display text-balance">
             {!marked ? (
               hero.title
-            ) : hero.mark ? (
-              <Marked text={hero.title} mark={hero.mark} />
+            ) : mark ? (
+              <Marked text={hero.title} mark={mark} />
             ) : (
               <D9Title text={hero.title} />
             )}

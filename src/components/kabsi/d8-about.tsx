@@ -9,14 +9,12 @@ import {
   WHATSAPP_ON,
   WHATSAPP_URL,
 } from "@/lib/site";
-import { FOUNDER } from "./photos";
+import { FOUNDER, PHOTOS } from "./photos";
 import { buttonClass } from "./ui";
 import { PageHero } from "./page-hero";
 import { Closing } from "./closing";
 import { ABOUT_HERO } from "./hero-lines";
 import { Marked } from "@/components/kabsi/highlight";
-import bakeryCounter1600 from "@/assets/photos/bakery-counter-1600.webp";
-import bakeryCounter800 from "@/assets/photos/bakery-counter-800.webp";
 import { SectionPhoto } from "./section-photo";
 
 const MAIL = (
@@ -44,6 +42,7 @@ export function D8About() {
   return (
     <>
       <PageHero
+        mark="the owner at the counter."
         hero={ABOUT_HERO}
         visual={
           <figure className="relative mx-auto max-w-[24rem]">
@@ -83,12 +82,7 @@ export function D8About() {
           <h2 id="how-h" className="text-h2">
             <Marked text="How Kabsi works with owners" mark="with owners" />
           </h2>
-          <SectionPhoto
-            large={bakeryCounter1600}
-            small={bakeryCounter800}
-            alt="A baker behind a counter full of bread"
-            className="mt-8"
-          />
+          <SectionPhoto photo={PHOTOS.bakeryCounter} className="mt-8" />
           <ul className="mt-8 grid gap-6 md:grid-cols-3">
             {PRINCIPLES.map((p) => (
               <li key={p.title} className="border-t-2 border-text-1 pt-4">

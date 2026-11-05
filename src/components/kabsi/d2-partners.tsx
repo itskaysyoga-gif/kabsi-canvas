@@ -22,8 +22,7 @@ import {
   buttonClass,
 } from "./ui";
 import { Marked } from "@/components/kabsi/highlight";
-import salonTablet1600 from "@/assets/photos/salon-tablet-1600.webp";
-import salonTablet800 from "@/assets/photos/salon-tablet-800.webp";
+import { PHOTOS } from "./photos";
 import { SectionPhoto } from "./section-photo";
 
 /* ---------- /partners ---------- */
@@ -126,6 +125,7 @@ export function PartnersPage() {
   return (
     <>
       <PageHero
+        mark="25% of every payment."
         hero={{
           ...PARTNERS_HERO,
           line: `${PARTNERS_HERO.line}${WHATSAPP_ON ? " Everything runs on WhatsApp." : ""}`,
@@ -170,11 +170,7 @@ export function PartnersPage() {
 
       <section aria-labelledby="p-suits" className="border-t border-line">
         <div className="container-kb pt-18 lg:pt-30">
-          <SectionPhoto
-            large={salonTablet1600}
-            small={salonTablet800}
-            alt="A salon owner looking at a tablet in her salon"
-          />
+          <SectionPhoto photo={PHOTOS.salonTablet} />
         </div>
         <div className="container-kb grid gap-10 pt-10 pb-18 lg:grid-cols-2 lg:gap-16 lg:pb-30">
           <div>

@@ -101,7 +101,7 @@ function Block({ title, children }: { title: string; children: ReactNode }) {
 export function D8Security() {
   return (
     <>
-      <PageHero hero={SECURITY_HERO} visual={<CanCannotVisual />} />
+      <PageHero mark="stays yours." hero={SECURITY_HERO} visual={<CanCannotVisual />} />
 
       <section aria-labelledby="sum-h" className="border-t border-line bg-surface-1">
         <div className="container-kb section-y grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">

@@ -113,6 +113,7 @@ export function FreeCheckFrame({
   return (
     <>
       <PageHero
+        mark="free."
         hero={CHECK_HERO}
         under={under}
         action={<div>{children}</div>}

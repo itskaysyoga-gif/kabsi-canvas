@@ -20,12 +20,10 @@ import { useFlagState } from "./d2-parts";
 import { PageHero, popCls, stagger } from "./page-hero";
 import { FOUNDING_HERO } from "./hero-lines";
 import { FOUNDING_FAQ } from "./faq-data";
-import { FOUNDER } from "./photos";
+import { FOUNDER, PHOTOS } from "./photos";
 import { FOUNDING25_TOTAL } from "./founding-total";
 import { Banner, Button, ButtonLink, Faq, Field, Segmented, StatusPill } from "./ui";
 import { Marked } from "@/components/kabsi/highlight";
-import barberCut1600 from "@/assets/photos/barber-cut-1600.webp";
-import barberCut800 from "@/assets/photos/barber-cut-800.webp";
 import { SectionPhoto } from "./section-photo";
 
 export { FOUNDING25_TOTAL };
@@ -148,6 +146,7 @@ export function FoundingPage() {
   return (
     <>
       <PageHero
+        mark="three months of Kabsi Pro, free."
         hero={FOUNDING_HERO}
         under={FOUNDING25_UNDER}
         action={
@@ -174,12 +173,7 @@ export function FoundingPage() {
         className="border-t border-line bg-surface-1"
       >
         <div className="container-kb section-y">
-          <SectionPhoto
-            large={barberCut1600}
-            small={barberCut800}
-            alt="A barber cutting a client's hair"
-            className="mb-10"
-          />
+          <SectionPhoto photo={PHOTOS.barberCut} className="mb-10" />
           <div className="grid gap-10 lg:grid-cols-3 lg:gap-12">
             <List title="Who can apply" items={WHO} />
             <List title="What you get" items={GET} />

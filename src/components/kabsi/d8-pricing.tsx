@@ -31,8 +31,7 @@ import { PRICING_HERO } from "./hero-lines";
 import { BILLING_FAQ } from "./faq-data";
 import { useAccountLink } from "@/components/auth/use-account-link";
 import { Marked } from "@/components/kabsi/highlight";
-import cafeCounter1600 from "@/assets/photos/cafe-counter-1600.webp";
-import cafeCounter800 from "@/assets/photos/cafe-counter-800.webp";
+import { PHOTOS } from "./photos";
 import { SectionPhoto } from "./section-photo";
 
 const linkCls =
@@ -293,12 +292,7 @@ export function D8Pricing() {
           <h2 id="trial-h" className="text-h2">
             <Marked text="The trial, what happens after it, and cancelling" mark="The trial" />
           </h2>
-          <SectionPhoto
-            large={cafeCounter1600}
-            small={cafeCounter800}
-            alt="A cafe owner at the counter"
-            className="mt-8"
-          />
+          <SectionPhoto photo={PHOTOS.cafeCounter} className="mt-8" />
           <ol className="mt-8 grid gap-6 md:grid-cols-2 md:gap-5 xl:grid-cols-4">
             {TRIAL_STEPS.map((s) => (
               <li key={s.when} className="border-t-2 border-text-1 pt-4">

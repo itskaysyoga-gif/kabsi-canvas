@@ -53,11 +53,21 @@ describe("Style 1 part A: guides with photos", () => {
 
 describe("Style 1 part B: the 30.32 look on every public page", () => {
   it("puts each hero's phrase on the bar once", async () => {
-    const heroes = await import("../src/components/kabsi/hero-lines");
-    for (const [name, h] of Object.entries(heroes)) {
-      if (typeof h !== "object" || !h || !("mark" in h)) continue;
-      const { title, mark } = h as { title: string; mark: string };
-      expect(title.split(mark).length, name).toBe(2);
+    const h = await import("../src/components/kabsi/hero-lines");
+    const pages: [string, string][] = [
+      ["d4-free-check", h.CHECK_HERO.title],
+      ["d8-faq", h.FAQ_HERO.title],
+      ["d8-about", h.ABOUT_HERO.title],
+      ["d8-security", h.SECURITY_HERO.title],
+      ["d5-founding", h.FOUNDING_HERO.title],
+      ["d2-partners", h.PARTNERS_HERO.title],
+    ];
+    for (const [file, title] of pages) {
+      const mark = readFileSync(`src/components/kabsi/${file}.tsx`, "utf8").match(
+        /<PageHero\s+mark="([^"]+)"/,
+      )?.[1];
+      expect(mark, file).toBeTruthy();
+      expect(title.split(mark!).length, file).toBe(2);
     }
   });
 

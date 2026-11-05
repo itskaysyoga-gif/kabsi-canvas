@@ -1,32 +1,27 @@
 // Style 1 part B (master plan 30.33 item 2): a library photo (docs/PHOTOS.md) at a good size in a section that was text
-// only. Lazy, with srcset and sizes, and the page imports only the two files it shows, so a speed-gated page (Pricing)
-// carries no other photo addresses.
+// only. Lazy, with srcset and sizes. It takes a Photo from photos.tsx, which every public page already loads, so no page
+// gains a script file (importing the image files directly made Vite split them into a chunk Home then loaded).
 import { cn } from "@/lib/utils";
+import type { Photo } from "./photos";
 
 export function SectionPhoto({
-  large,
-  small,
-  alt,
+  photo,
   className,
   position,
 }: {
-  /** The 1600 px copy. */
-  large: string;
-  /** The 800 px copy. */
-  small: string;
-  alt: string;
+  photo: Photo;
   className?: string;
   /** An object-position for the crop, for example "50% 30%". */
   position?: string;
 }) {
   return (
     <img
-      src={small}
-      srcSet={`${small} 800w, ${large} 1600w`}
+      src={photo.small}
+      srcSet={`${photo.small} 800w, ${photo.large} 1600w`}
       sizes="(min-width: 1200px) 1136px, calc(100vw - 40px)"
       width={1600}
       height={1067}
-      alt={alt}
+      alt={photo.alt}
       loading="lazy"
       decoding="async"
       style={position ? { objectPosition: position } : undefined}
