@@ -1228,3 +1228,20 @@ Each line is old, then new, then the files, found by grep first. Where a line ap
 - **The dashboard logo** (app-layout.tsx, the desktop sidebar and the phone header): a link to Home with the label "Kabsi website". The menu's "Home" stays the dashboard's Home.
 - **After Log out** (site-chrome.tsx, under the header on Home): "You are signed out."
 - **Start free while signed in**: the free check result's "Start free" opens /start and Pricing's "Start free" opens /app, without the log in page. No word change.
+
+### Part B: how long a sign-in lasts (branch claude/app4-b)
+
+- **The log in page after time away** (login.tsx, above the sheet): "You were signed out after 30 days away. Log in again." and, on a staff page, "You were signed out after 12 hours away. Log in again."
+- **Settings, Your account** (settings.tsx): the line "You stay signed in on this device for 30 days after your last visit." after the code line; the button "Sign out of all devices" becomes "Sign out on every device"; the confirm reads "Sign out on every device?" / "This signs you out on every phone and computer, this one too. You can log in again with a code." with "Stay signed in" and "Sign out on every device" ("Signing out" while it works). After it, Home says "You are signed out." The card now shows before a business is added too.
+- **/privacy section 7** (privacy.tsx): the Sign-in item adds "You stay signed in on a device for 30 days after your last visit, and each visit starts the 30 days again; Kabsi staff pages sign staff out after 12 hours without use. To know when you last visited, your browser keeps the time of your last visit, on this device only. Settings has Sign out on every device."
+- **Facts 11**: the same rule, the lines, Sign out on every device, and that the times are enforced in the app until Supabase Pro.
+
+### Part C: the log in page (branch claude/app4-c)
+
+- **Lines above the sheet** (login.tsx): "Google sign-in did not finish. Use the email code below, or try Google again." (Google cancelled or refused, with the email field ready); "Your session ended. Log in again." (after the session-ended screen); the two time-away lines of part B.
+- **While a signed-in person is sent on**: "Opening your dashboard."
+- **The quiet panel** (from 1024 px, beside the sheet): "You stay the owner of your Google profile." "Kabsi never asks for your Google password." "Nothing is published without your yes." Then "An approval on WhatsApp" over the Example phone with the review message (Yes, Edit, Skip). The panel's heading for screen readers: "Why owners trust Kabsi".
+- **In-app browsers** (sign-in-panel.tsx): the email form first; under it "Continue with Google" (not available) with "Google sign-in does not work inside this app. Open kabsi.co in your browser to use it." and "Copy the link" ("Link copied").
+- **The countdown**: "You can ask for a new code in 42 seconds." (was "in 42s").
+- **Errors** (src/lib/sign-in-errors.ts): "That code did not work. Check it, or send a new one." (wrong); "That code has expired. Send a new one." (sent more than 10 minutes ago); "Wait 42 seconds, then try again." or "Wait 5 minutes, then try again." (Supabase's 429 with a time) else "Too many tries for now. Wait a few minutes, then try again."; "You are offline. Check your connection, then try again."; "Kabsi can't be reached right now. Try again in a minute." (also for the code request, replacing "We couldn't reach Kabsi. Check your connection and try again."). The code request's own limits keep their words from the auth-code function.
+- **/staff for a session that is not staff**: the not-found page ("This page is not here."), replacing "This page is for the Kabsi team only."

@@ -8,10 +8,8 @@ import { anonHeaders, supabase, supabaseUrl } from "@/lib/supabase";
 export const GOOGLE_SCOPES = "openid";
 export const GOOGLE_SCOPES_REQUESTED = ["email", "profile", "openid"] as const;
 
-/** Only same-site paths: "/x", never "//host" or "/\\host" (browsers treat both as another site). */
-export function safeNext(next?: string) {
-  return next && /^\/(?![/\\])/.test(next) && !next.includes("\\") ? next : "/app";
-}
+import { safeNext } from "@/lib/signup-next";
+export { safeNext };
 
 export class SignupError extends Error {
   constructor(
@@ -31,9 +29,13 @@ export async function requestEmailCode(email: string, turnstile: string): Promis
       body: JSON.stringify({ email, turnstile }),
     });
   } catch {
+    // Offline, or Kabsi unreachable (App 4): two different lines.
+    const offline = typeof navigator !== "undefined" && navigator.onLine === false;
     throw new SignupError(
       "network",
-      "We couldn't reach Kabsi. Check your connection and try again.",
+      offline
+        ? "You are offline. Check your connection, then try again."
+        : "Kabsi can't be reached right now. Try again in a minute.",
     );
   }
   const body = (await res.json().catch(() => ({}))) as { error?: string; message?: string };
