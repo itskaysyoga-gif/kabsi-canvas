@@ -93,8 +93,9 @@ export async function startDue(d: RunDeps, limit = 10): Promise<Record<string, n
       out.failed++;
       // Go live 1 (30.28): a refusal (no balance, the provider's cost limit, an account block) is one staff alert a day;
       // the keyword waits a day like any failure, so nothing retries in a loop.
+      // A passing provider error is not a refusal: it is logged with the failed scan and does not take the day's alert.
       const r = refusalOf(e);
-      if (r) {
+      if (r && r !== "provider_error") {
         const a = refusalAlert(r, "nearby check", d.now());
         await d.staffAlert(a.summary, a.key);
       }

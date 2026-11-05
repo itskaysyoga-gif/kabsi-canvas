@@ -382,7 +382,10 @@ async function staffAction(action: string) {
         const st = await ctx.out.db.state(target.phone);
         if (!st.live_ok) return { ok: false, error: "phone_not_allow_listed" };
         const t = ref("work_update", { business: target.locations!.name });
-        const used = sendName(t.name, await templateStatuses());
+        const statuses = await templateStatuses();
+        const used = sendName(t.name, statuses);
+        // Only a template Meta approved (the stored statuses); the v2 name is the Utility replacement of 29 Oct.
+        if (statuses[used] !== "APPROVED") return { ok: false, error: "template_not_approved", template: used };
         const sent = await ctx.out.live.template(target.phone, used, t.params);
         await admin().rpc("whatsapp_record", { p_user: target.user_id, p_location: target.location_id, p_kind: "qa_owner_delivery_proof", p_state: "sent", p_provider_id: sent.id, p_template: used });
         return { ok: true, provider_id: sent.id, to_ending: target.phone.slice(-4), business: target.locations!.name, template: used };
