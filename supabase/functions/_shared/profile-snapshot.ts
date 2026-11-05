@@ -56,7 +56,7 @@ export type Snapshot = {
   open_now: boolean | null; hours: string[]; phone: string | null; website: string | null;
   has_photos: boolean; photo_count: number; flags: Flag[]; checklist: CoachRow[]; cached: boolean;
   /** Scan 2 (30.29): the town, for the free check's AI question; from the address, inside the same field mask. */
-  area: string | null;
+  area?: string | null;
 };
 
 const ORDER: Record<Tone, number> = { danger: 0, warning: 1, neutral: 2 };
