@@ -43,7 +43,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - Master plan 19.6: two-step verification everywhere, recovery codes offline, the second Kabsi Google account.
 - Growth 1: the Meta and Speed Insights steps in docs/EVENTS.md (last section).
 - V3 heads-up (25 Oct): on the Yawmiyati phone tap Skip on the old photo message, never Yes, and reply No to the monthly question. Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
-- Fix 3: Cloudflare, Turnstile, the Kabsi widget, Hostname management, add `kabsi-canvas.vercel.app` (Sentry KABSI-WEB-9).
+- Fix 3: Cloudflare, Turnstile, the widget, Hostname management: add `kabsi-canvas.vercel.app` (KABSI-WEB-9).
 - Check 2: on a phone, pick 3 businesses at kabsi.co/scan, then read today's `places_usage` (autocomplete above 0, details 3 or more); add a Google Cloud quota alert for Places Autocomplete.
 - UX 1: after the deploy, `POST /visibility/terms` once (two DataForSEO calls, about 0.15 USD) and the read-back in the UX 1 archive file.
 - V1: a free Geoapify key, saved as the Supabase secret GEOAPIFY_API_KEY (clicks in `docs/progress/archive/2026-10-25-v1-visibility-map.md`); until then maps draw on a plain ground. DataForSEO top-up (50 US dollars) before the first Meta ad (30.28; the balance read 0.31 after Scan 2 on 5 Nov); Gemini stays off.
