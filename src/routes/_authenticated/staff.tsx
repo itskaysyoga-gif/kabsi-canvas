@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layouts/app-layout";
 import { supabase } from "@/lib/supabase";
 import { amStaff } from "@/lib/reviews";
+import { NotFoundPage } from "@/components/kabsi/status-pages";
 import { OpsPanel } from "@/components/staff/ops-panel";
 import { OperationsPanel } from "@/components/staff/operations-panel";
 import { BusinessDiagnostics, SystemHealthPanel } from "@/components/staff/system-health-panel";
@@ -60,6 +61,8 @@ function StaffPage() {
     queryFn: allLocations,
     enabled: staff.data === true,
   });
+  // A session that is not Kabsi staff sees the not-found page, not a staff page that says no (App 4, 30.31 item 3).
+  if (staff.data === false) return <NotFoundPage />;
   return (
     <AppLayout area="staff">
       <AccountTop
@@ -68,9 +71,6 @@ function StaffPage() {
         tabs={false}
       />
       {staff.isLoading ? <p className="text-text-2">Loading</p> : null}
-      {staff.data === false ? (
-        <p className="text-text-2">This page is for the Kabsi team only.</p>
-      ) : null}
       {staff.data ? (
         <>
           <nav

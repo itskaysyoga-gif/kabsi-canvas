@@ -132,6 +132,8 @@ test.describe("website and dashboard", () => {
     await page.getByRole("button", { name: "Sign in again" }).click();
     await expect(page).toHaveURL(/\/login\?next=%2Fapp/);
     await expect(page.getByText("You are signed out.")).toHaveCount(0);
+    // App 4 part C (case 7): the log in page says why.
+    await expect(page.getByText("Your session ended. Log in again.")).toBeVisible();
   });
 
   test("an unfinished Google sign-in does not show Dashboard", async ({ page }) => {
