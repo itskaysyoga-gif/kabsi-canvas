@@ -26,7 +26,7 @@ import type { PlacesResult } from "./google/places/live.ts";
 import type { EmailContent } from "./email/template.ts";
 import { type CoachRow, freeChecklist } from "./coach/catalog.ts";
 import { FREE_TOOL_BUSY } from "./free-tool-busy.ts";
-import { areaOfPlace } from "./visibility/area.ts";
+import { areaOfPlace, ownName } from "./visibility/area.ts";
 import { CODE_RE, NOT_PART, type ReportParts } from "./visibility/report.ts";
 
 export const TIPS_CONSENT_TEXT = "Send me tips on managing my Google profile";
@@ -181,18 +181,18 @@ export function checkEmail(d: Pick<Deps, "esc" | "appUrl">, s: Snapshot, tips: b
   const content = {
     preheader: "What customers see on Google, and what needs fixing.",
     title: "Your Google Profile Check",
-    bodyHtml: `<p style="margin:0 0 16px 0;"><strong>${d.esc(s.name)}</strong><br>${d.esc(s.address)}${facts ? `<br>${d.esc(facts)}` : ""}</p>${rows}` +
+    bodyHtml: `<p style="margin:0 0 16px 0;"><strong>${d.esc(ownName(s.name))}</strong><br>${d.esc(s.address)}${facts ? `<br>${d.esc(facts)}` : ""}</p>${rows}` +
       extraHtml + `<p style="margin:16px 0 0 0;">Kabsi can take care of these. You approve each one.</p>`,
     button: { label: "Start your free trial", url: `${d.appUrl}/get-started` },
     note: `This check uses public information from Google Maps, as it was when you asked. It is not a score.${tips ? " You asked for tips, so we may send a few. Reply stop at any time." : ""}`,
   };
   const text = [
-    "Your Google Profile Check", "", s.name, s.address, facts, "",
+    "Your Google Profile Check", "", ownName(s.name), s.address, facts, "",
     ...s.flags.map((f) => `${LABEL[f.tone]}: ${f.fact}\n${f.action}\n`),
     ...extraText,
     "Kabsi can take care of these. You approve each one.", `Start your free trial: ${d.appUrl}/get-started`,
   ].filter((l) => l !== null).join("\n");
-  return { subject: `${s.name}: your Google Profile Check`, ...content, text };
+  return { subject: `${ownName(s.name)}: your Google Profile Check`, ...content, text };
 }
 
 /**
@@ -214,7 +214,7 @@ export function whatsappParams(s: Snapshot, extra?: Extra | "none"): [string, st
     : "";
   const room = tail ? 900 - tail.length - 1 : 900;
   const head = line.length > room ? `${line.slice(0, Math.max(0, room - 1)).trimEnd()}…` : line;
-  return [s.name.replace(/\s+/g, " ").trim().slice(0, 120), (tail ? `${head} ${tail}` : head).slice(0, 900)];
+  return [ownName(s.name).slice(0, 120), (tail ? `${head} ${tail}` : head).slice(0, 900)];
 }
 
 export function makeHandler(d: Deps) {

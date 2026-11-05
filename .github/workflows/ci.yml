@@ -191,8 +191,10 @@ jobs:
         with:
           fail-on-severity: high
 
-  # Lean 1 (1 Nov 2026, master plan 24.9): the speed gate. Home at 390 px on a throttled phone, 3 runs, median. It FAILS the
-  # pull request when LCP is over 2.5 s or the script Home downloads is over its budget (LH_JS_KB). Claude branches have no
+  # Lean 1 (1 Nov 2026, master plan 24.9): the speed gate. Home at 390 px on a throttled phone, 3 runs, median. Copy 3 (5 Nov
+  # 2026, master plan 30.29 item 2 and 30.30 item 5): Pricing and /scan are measured the same way, each with its own script
+  # budget (LH_PAGES). It FAILS the pull request when LCP is over its limit or the script a page downloads is over its
+  # budget. Claude branches have no
   # Vercel preview (vercel.json switches them off), so the pull request is measured on its own production build behind
   # scripts/serve-compressed.mjs, which serves like Vercel (HTTP/2 over a throwaway certificate, brotli quality 4, the long
   # cache header on hashed files; over plain HTTP/1.1 the same build read 2.7 s instead of 2.1 s);
@@ -200,7 +202,7 @@ jobs:
   # ratcheted down by the pull request that earns it: the Lean 1 target is 150 KB, master plan 24.9 says 120 KB (see
   # docs/progress/archive/2026-11-01-lean1.md for what stands in the way).
   speed:
-    name: Speed gate (Home at 390 px)
+    name: Speed gate (Home, Pricing and /scan at 390 px)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -210,7 +212,9 @@ jobs:
       LH_LCP_MS: "3000"
       # Polish 1 (1 Nov 2026): 203 KB measured by this gate on the pull request build, plus 10 (was 260). Lane R target: 200.
       # R-106 (4 Nov 2026, master plan 30.26): lowered to 205 to keep Polish 4's gain (the pull request build read 199 KB).
-      LH_JS_KB: "205"
+      # Copy 3 (master plan 30.29 item 2): Pricing 215 and /scan 235 KB in CI, so neither grows (the live budgets, 225 and
+      # 245 KB, are in lighthouse-live.yml).
+      LH_PAGES: "/=205,/pricing=215,/scan=235"
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -225,10 +229,10 @@ jobs:
           PORT=4173 node .output/server/index.mjs > serve.log 2>&1 &
           TLS_KEY="$RUNNER_TEMP/key.pem" TLS_CERT="$RUNNER_TEMP/cert.pem" node scripts/serve-compressed.mjs 4174 4173 > front.log 2>&1 &
           for i in $(seq 1 30); do curl -skf https://localhost:4174/ > /dev/null && break; sleep 1; done
-      - name: Lighthouse on Home (3 runs, 390 px)
+      - name: Lighthouse on Home, Pricing and /scan (3 runs each, 390 px)
         run: npx --yes @lhci/cli@0.15.1 collect --config=lighthouserc.speed.json
       - name: Gate
-        run: node scripts/lighthouse-gate.mjs .lighthouseci /
+        run: node scripts/lighthouse-gate.mjs .lighthouseci
       - name: Keep the reports
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

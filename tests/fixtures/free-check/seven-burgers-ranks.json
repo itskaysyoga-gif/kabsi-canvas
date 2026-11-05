@@ -1,0 +1,11 @@
+{
+  "note": "The owner's rank at each of the 49 checked places (row by row; every point was in the first 20), read back from the two stored free checks of SEVEN Burgers & Beyond, Boqaata, 5 Nov 2026: 3954W376 (morning) and CFE4RMDN (three hours later). Ranks only, no business names.",
+  "3954W376": {
+    "top3": 40,
+    "ranks": [5,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,7,4,3,3,3,3,3,3,2,3,3,3,3,3,4,4,3,3,3,3,3,4,5,3,3,3,3,3,4,4,3,3,3]
+  },
+  "CFE4RMDN": {
+    "top3": 5,
+    "ranks": [6,4,4,4,4,4,4,4,4,4,3,4,4,4,4,4,7,4,3,4,4,4,4,4,2,3,4,4,5,5,5,4,3,4,4,5,5,5,6,5,5,5,5,5,6,6,5,5,5]
+  }
+}

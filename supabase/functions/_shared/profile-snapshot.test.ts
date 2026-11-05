@@ -139,7 +139,7 @@ Deno.test("every Places request sends the field mask, and none asks for reviews"
     for (const r of details) assert.equal(r.mask, SNAPSHOT_FIELD_MASK);
     assert.deepEqual(
       SNAPSHOT_FIELD_MASK.split(","),
-      ["id", "displayName", "formattedAddress", "primaryTypeDisplayName", "businessStatus", "rating", "userRatingCount", "regularOpeningHours", "currentOpeningHours", "nationalPhoneNumber", "websiteUri", "photos"],
+      ["id", "displayName", "formattedAddress", "addressComponents", "primaryTypeDisplayName", "businessStatus", "rating", "userRatingCount", "regularOpeningHours", "currentOpeningHours", "nationalPhoneNumber", "websiteUri", "photos"],
     );
     // Check 2: the category joins the name and address (the same Pro tier), so the visitor can tell two matches apart.
     assert.equal(w.requests.find((r) => r.url.includes(":searchText"))!.mask, "places.id,places.displayName,places.formattedAddress,places.primaryTypeDisplayName");
@@ -748,3 +748,78 @@ Deno.test("scan2: WhatsApp carries the profile line, the count line, the AI line
   assert.ok(p.length <= 900, `length ${p.length}`);
   assert.ok(p.endsWith("In the first 3 at 18 of 49 places Kabsi checked. ChatGPT named you. kabsi.co/scan/SEVEN234"));
 });
+
+// Copy 3 (master plan 30.30 item 3): the visitor's own business name follows the Latin rule in the emailed report and the
+// WhatsApp message; a name in Latin letters is shown as it is.
+Deno.test(
+  "copy3: a business name not in Latin letters reads 'Your business' in the email and the WhatsApp message",
+  () => {
+    const arabic = buildSnapshot(
+      PLACE_B,
+      {
+        id: PLACE_B,
+        displayName: { text: "مطعم سفن" },
+        formattedAddress: "Boqaata, Lebanon",
+        userRatingCount: 0,
+      },
+      true,
+    );
+    const mail = checkEmail({ esc, appUrl: "https://kabsi.co" }, arabic, false);
+    assert.equal(mail.subject, "Your business: your Google Profile Check");
+    assert.match(mail.bodyHtml, /<strong>Your business<\/strong>/);
+    assert.doesNotMatch(mail.bodyHtml + mail.text + mail.subject, /\p{Script=Arabic}/u);
+    assert.equal(whatsappParams(arabic)[0], "Your business");
+    const latin = buildSnapshot(
+      PLACE_B,
+      {
+        id: PLACE_B,
+        displayName: { text: "SEVEN Burgers & Beyond" },
+        formattedAddress: "Boqaata, Lebanon",
+        userRatingCount: 0,
+      },
+      true,
+    );
+    assert.equal(
+      checkEmail({ esc, appUrl: "https://kabsi.co" }, latin, false).subject,
+      "SEVEN Burgers & Beyond: your Google Profile Check",
+    );
+    assert.equal(whatsappParams(latin)[0], "SEVEN Burgers & Beyond");
+  },
+);
+
+Deno.test(
+  "copy3: the snapshot's area is the town from addressComponents (Lebanon, the UAE, the UK)",
+  () => {
+    const part = (longText: string, ...types: string[]) => ({
+      longText,
+      shortText: longText,
+      types,
+    });
+    const at = (formattedAddress: string, addressComponents: ReturnType<typeof part>[]) =>
+      buildSnapshot(
+        PLACE_B,
+        { id: PLACE_B, displayName: { text: "X" }, formattedAddress, addressComponents },
+        false,
+      ).area;
+    assert.equal(
+      at("Main Road, Boqaata, Lebanon", [
+        part("Boqaata", "locality"),
+        part("Mount Lebanon Governorate", "administrative_area_level_1"),
+      ]),
+      "Boqaata",
+    );
+    assert.equal(
+      at("Downtown Dubai - Dubai - United Arab Emirates", [
+        part("Dubai", "administrative_area_level_1"),
+      ]),
+      "Dubai",
+    );
+    assert.equal(
+      at("10 Downing St, London SW1A 2AA, UK", [
+        part("London", "postal_town"),
+        part("England", "administrative_area_level_1"),
+      ]),
+      "London",
+    );
+  },
+);

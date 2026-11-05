@@ -57,8 +57,13 @@ export async function getPlace(key: string, placeId: string, fieldMask: string, 
 // The free Profile Check (P0.4-01, K-100): the one field mask the snapshot ever sends. Rating, review count, hours,
 // open status, phone, website, category and photo presence, plus the name and address to show. The reviews field is
 // never in it (it moves the whole call to the 30 dollar per 1,000 tier); tests hold that.
+//
+// Copy 3 (master plan 30.30 item 4): addressComponents joins the mask so the town comes from Google's own address parts. It is
+// a Place Details Essentials field (developers.google.com/maps/documentation/places/web-service/data-fields, read 5 Nov 2026)
+// and the mask already holds Enterprise fields (rating, userRatingCount, regularOpeningHours, currentOpeningHours,
+// nationalPhoneNumber, websiteUri), so the request's SKU stays the same; formattedAddress is Essentials as well.
 export const SNAPSHOT_FIELD_MASK =
-  "id,displayName,formattedAddress,primaryTypeDisplayName,businessStatus,rating,userRatingCount,regularOpeningHours,currentOpeningHours,nationalPhoneNumber,websiteUri,photos";
+  "id,displayName,formattedAddress,addressComponents,primaryTypeDisplayName,businessStatus,rating,userRatingCount,regularOpeningHours,currentOpeningHours,nationalPhoneNumber,websiteUri,photos";
 
 // Check 2: with the session token of the suggestions the call ends the Autocomplete session.
 export const getSnapshotPlace = (key: string, placeId: string, sessionToken?: string): Promise<PlacesResult<Place>> =>

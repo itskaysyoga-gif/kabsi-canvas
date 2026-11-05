@@ -3,8 +3,9 @@ name: Lighthouse live
 # Lean 1 (30 Oct plan, speed): Lighthouse on a throttled phone (mobile, 3 runs, median) against the real site.
 # By hand (Actions tab, Run workflow): five pages, before and after a speed change; the numbers land in the job summary
 # and the uploaded report. After every Production deploy (Vercel's deployment_status): Home at 390 px against kabsi.co,
-# and that run FAILS when Home misses the speed gate (scripts/lighthouse-gate.mjs; same budgets as the `speed` job of
-# ci.yml). A by-hand run never fails. It never touches the site and never fails a pull request.
+# and that run FAILS when Home, Pricing or /scan misses the speed gate (scripts/lighthouse-gate.mjs; the same pages as the
+# `speed` job of ci.yml, with the live budgets of master plan 30.29 item 2). A by-hand run never fails. It never touches
+# the site and never fails a pull request.
 on:
   deployment_status:
   workflow_dispatch:
@@ -35,7 +36,8 @@ jobs:
       # Polish 1 (1 Nov 2026): kabsi.co read 215 KB on this gate after the change (237 before), plus 10 (was 260). The pull
       # request build reads lower (203 KB, local compression); see docs/progress/archive/2026-11-01-polish1.md.
       # R-106 (4 Nov 2026, master plan 30.26): lowered to 215 to keep Polish 4's gain (kabsi.co read 208 KB, run 41811248799).
-      LH_JS_KB: "215"
+      # Copy 3 (master plan 30.29 item 2): the gate also reads Pricing and /scan, each with its own live budget.
+      LH_PAGES: "/=215,/pricing=225,/scan=245"
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -44,7 +46,7 @@ jobs:
       - name: Lighthouse (3 runs per page)
         env:
           BASE_URL: ${{ inputs.base_url || 'https://kabsi.co' }}
-          PAGES: ${{ inputs.pages || '/' }}
+          PAGES: ${{ inputs.pages || '/ /pricing /scan' }}
           EVENT: ${{ github.event_name }}
         run: |
           set -f
@@ -60,9 +62,9 @@ jobs:
       - name: Summary
         if: always()
         run: node scripts/lighthouse-summary.mjs .lighthouseci
-      - name: Gate (Home, after a deploy only)
+      - name: Gate (Home, Pricing and /scan, after a deploy only)
         if: github.event_name == 'deployment_status'
-        run: node scripts/lighthouse-gate.mjs .lighthouseci /
+        run: node scripts/lighthouse-gate.mjs .lighthouseci
       - name: Keep the reports
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

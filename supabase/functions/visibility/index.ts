@@ -30,7 +30,7 @@ import { type CheckRow, cleanTerm, collectCheck, newCode, publicView, safeNearby
 import { businessType } from "../_shared/visibility/scan.ts";
 import { freeScanCheck } from "../_shared/visibility/ai/run.ts";
 import { MARKETS, pickTerms, searchVolumes } from "../_shared/visibility/terms.ts";
-import { latinName, townOf } from "../_shared/visibility/area.ts";
+import { latinName, ownName, townOf } from "../_shared/visibility/area.ts";
 import { checkWaitlist } from "../_shared/visibility/waitlist.ts";
 import { WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
 import { accuracyDeps, aiDeps, doneRuns, enabledProviders, realProvider, setting as aiSetting, syncPrompts } from "../_shared/visibility/ai/deps.ts";
@@ -297,7 +297,7 @@ async function image(req: Request, url: URL): Promise<Response> {
     const c = await loadCheck(code);
     if (!c) return json({ error: "not_found" }, 404);
     if (c.state !== "done" || !c.nearby) return json({ error: "not_ready" }, 409);
-    return png(await renderNearby(safeNearby(c.nearby, c.radius_km, businessType(c.category))!, { business: c.business, date: mapDate(new Date(c.created_at), "UTC") }));
+    return png(await renderNearby(safeNearby(c.nearby, c.radius_km, businessType(c.category), c.points.map((p) => p.rank ?? null))!, { business: ownName(c.business), date: mapDate(new Date(c.created_at), "UTC") }));
   }
   const scanId = url.searchParams.get("scan") ?? "";
   const { data: scan } = await db().from("visibility_scans")
@@ -404,9 +404,12 @@ async function startFreeCheck(req: Request): Promise<Response> {
   const city = sent && latinName(sent) ? sent : townOf(body.address ? String(body.address).slice(0, 200) : null, String(body.country ?? ""));
   const industry = body.industry && /^[a-z0-9-]{2,40}$/.test(body.industry) ? body.industry : null;
   let term = cleanTerm(body.term);
-  if (!term && industry) {
+  // The industry page's term: the search when the visitor typed none, and (30.30 item 3) the fallback when the term typed is not in Latin letters.
+  let industryTerm: string | null = null;
+  if (industry && (!term || !latinName(term))) {
     const { data } = await db().from("industry_search_terms").select("term").eq("industry", industry).eq("market", country).maybeSingle();
-    term = (data?.term as string | undefined) ?? null;
+    industryTerm = (data?.term as string | undefined) ?? null;
+    if (!term) term = industryTerm;
   }
   if (name.length < 2 || !/^[A-Z]{2}$/.test(country) || !term) return json({ error: "bad_request" }, 400);
   if (!internal) {
@@ -447,7 +450,7 @@ async function startFreeCheck(req: Request): Promise<Response> {
       // memory; only the fact that differs and ChatGPT's sentence are kept (30.10.3).
       accuracy: { extractor: accuracyDeps.extractor, profile: () => liveProfile(o.place_id) },
     }, o).catch(aiRefused) : Promise.resolve(null),
-  }, { name, address: body.address ? String(body.address).slice(0, 200) : null, country, city, place_id: placeId, term });
+  }, { name, address: body.address ? String(body.address).slice(0, 200) : null, country, city, place_id: placeId, term, industry_term: industryTerm });
   } catch (e) {
     // Any failure of the paid part leaves the nearby and AI parts out quietly; only a refusal alerts staff (once a day),
     // anything else is reported as an error for the team, never shown to the visitor.
@@ -457,6 +460,8 @@ async function startFreeCheck(req: Request): Promise<Response> {
   }
   if (started.ok === "reused") return reused(started.check);
   if (!started.ok && started.reason === "paused") return unavailable("cap");
+  // 30.30 item 3: no term in Latin letters to search or show, so the existing unavailable state, with nothing to say about it.
+  if (!started.ok && started.reason === "term") return unavailable(null, "no_latin_term");
   if (!started.ok) return json({ error: started.reason }, 404);
   const r = started.row;
   const saved = must(await db().from("free_checks").insert({
@@ -476,7 +481,11 @@ function reused(c: CheckRow): Response {
 /** A live check of this place and search from the last 7 days, still mapping or done, asked with the Scan 2 question. */
 async function recentCheck(placeId: string, term: string): Promise<CheckRow | null> {
   const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
-  const { data } = await db().from("free_checks").select(CHECK_COLS).eq("self->>place_id", placeId).eq("term", term)
+  // Copy 3 (30.30 item 3): a term typed in another script is stored as the Google category or the industry term, so the
+  // lookup cannot key on it; the place alone finds the check (the page says what was searched).
+  let q = db().from("free_checks").select(CHECK_COLS).eq("self->>place_id", placeId);
+  if (latinName(term)) q = q.eq("term", term);
+  const { data } = await q
     .eq("source", "live").in("state", ["mapping", "done"]).gte("created_at", since).not("ai->>question", "is", null)
     .order("created_at", { ascending: false }).limit(1).maybeSingle();
   return (data as CheckRow | null) ?? null;
@@ -489,9 +498,9 @@ async function alertRefusal(r: Refusal, what: "nearby check" | "AI answer" | "fr
 }
 
 /** The free check's nearby and AI parts are left out today (30.28); `r` null is the day's own cap, which is no refusal. */
-async function unavailable(r: Refusal | null): Promise<Response> {
+async function unavailable(r: Refusal | null, why?: string): Promise<Response> {
   if (r) await alertRefusal(r, "free check");
-  log(fn, { action: "free_check", state: "unavailable", reason: r ?? "daily_cap" });
+  log(fn, { action: "free_check", state: "unavailable", reason: r ?? why ?? "daily_cap" });
   return json({ state: "unavailable" }, 200);
 }
 

@@ -1,14 +1,15 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 5 Nov 2026, Scan 2. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 5 Nov 2026, Copy 3. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
 - Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati; the first real reply was published and verified; the post removal was verified on Google (23 Oct). kabsi.co runs on Vercel; Creem is the only payment route (test mode, not open). Evidence: `docs/progress/archive/evidence.md` and `where-things-stand.md`.
-- Web 2 (PR 252), V4 (PR 250), UX 1 and Email 1 (26 and 27 Oct): the public pages, the free check, onboarding in four stages, one email design. Detail: `docs/progress/archive/2026-10-27-web2.md`, `-v4.md`, `-ux1.md`, `-email1.md`.
+- Web 2 (PR 252), V4 (PR 250), UX 1 and Email 1 (26 and 27 Oct): the public pages, the free check, onboarding in four stages, one email design. Detail: `docs/progress/archive/2026-10-27-*.md`.
 - Sec 1 and Sec 2 (PRs 261, 266, 27 Oct), WhatsApp 2 (PRs 268, 270, 271), Billing 2 (PR 269), Price 1 (PRs 285 to 288, list prices 29 and 59, founding 19 and 39) and Web 3 (PRs 289 to 292, 30 Oct). Detail: the dated files in `docs/progress/archive/`.
-- Go live 1 (5 Nov 2026, 30.28, R-108): WhatsApp for owners, the nearby check and the AI answer are on; every At launch line is gone; card payments stay closed. Nobody is sent to the site until the first Meta ad. Detail: `docs/progress/archive/2026-11-05-golive1.md`.
-- Scan 2 (5 Nov 2026, 30.29, R-109, PRs 369 to 372): the free check's AI question names the town and country with web search forced, only businesses Google Maps shows nearby are named, the question and date are shown, the report sent is the report shown, no names outside Latin letters, a check reused for 7 days, Lead moved to a contact given. Live: check CFE4RMDN. Detail: `docs/progress/archive/2026-11-05-scan2.md`.
+- Go live 1 (5 Nov 2026, 30.28, R-108): WhatsApp for owners, the nearby check and the AI answer are on; no At launch line; card payments stay closed; nobody is sent to the site until the first Meta ad. Detail: `docs/progress/archive/2026-11-05-golive1.md`.
+- Scan 2 (5 Nov 2026, 30.29, R-109, PRs 369 to 372): the free check names the town and country, names only businesses Google Maps shows nearby, and sends the report it shows. Live: CFE4RMDN. Detail: `docs/progress/archive/2026-11-05-scan2.md`.
+- Copy 3 (5 Nov 2026, 30.29 item 2, 30.30, R-110, PRs 374, 375 and the part B PR): the Go live 1 audit's copy decisions B-001 to B-032 are on kabsi.co ("Your weekly report", /for pages, partners rate only, one UAE schedule). Scan 2 follow-ups: where you usually come up, the Latin rule for the visitor's own text, addressComponents, a speed gate on Home, Pricing and /scan. Detail: `docs/progress/archive/2026-11-05-copy3.md`.
 - No customer is live yet. Before the first Meta ad: the DataForSEO top-up and a nearby check on a real business. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -30,7 +31,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - Done 25 Oct: Clean 1 drops, the Places purge, the Resend webhook, R2 and the backup secrets, SENTRY_AUTH_TOKEN in Vercel, Pub/Sub, WHATSAPP_LIVE true, the post Undo test (full line in `docs/progress/archive/2026-11-05-golive1.md`).
 - Phone test (13b part 1): passed 25 Oct (ladder above). 13b part 2: send START from the staff phone (it is stopped); delete the Supabase secrets SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET and the Supabase SENTRY_AUTH_TOKEN; run `supabase/manual/20261025_drop_slack_leftovers.sql` (expect `0 | 0 | 0 | 0`); remove the Kabsi app from Slack when you like.
 - Sec 2: the backup secret, unused secrets, two-step logins (`docs/security/secrets-and-accounts.md` steps 1 to 3); the retention switch (`supabase/data/20261027_sec2_retention_on.sql`); check the go.kabsi.co rate limit is Deployed.
-- Postponed to `docs/LATER.md`: the failing Backup run, the disabled branch ruleset, the inbox tests, Sentry membership (free plan allows 1).
+- Postponed to `docs/LATER.md`: the failing Backup run, the disabled branch ruleset, the inbox tests, Sentry membership.
 - Supabase Auth: leaked-password protection; paste the four `emails/auth/*.html` templates again, rebuilt on 5 Nov with the WhatsApp line (steps in emails/auth/README.md).
 - Email 1: news.kabsi.co in Resend and Cloudflare before lifecycle emails go on (LATER row).
 - Google Cloud: Places quotas and budget alerts; contacts and owners on kabsi.co addresses only.
@@ -45,7 +46,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - Check 2: on a phone, pick 3 businesses at kabsi.co/scan, then read today's `places_usage` (autocomplete above 0, details 3 or more); add a Google Cloud quota alert for Places Autocomplete.
 - UX 1: after the deploy, `POST /visibility/terms` once (two DataForSEO calls, about 0.15 USD) and the read-back in the UX 1 archive file.
 - V1: a free Geoapify key, saved as the Supabase secret GEOAPIFY_API_KEY (clicks in `docs/progress/archive/2026-10-25-v1-visibility-map.md`); until then maps draw on a plain ground. DataForSEO top-up (50 US dollars) before the first Meta ad (30.28; the balance read 0.31 after Scan 2 on 5 Nov); Gemini stays off.
-- Scan 2: on a phone, open kabsi.co/scan, pick SEVEN Burgers & Beyond, wait for the nearby places, untick tips and send the report to your email: it should hold the nearby places, the AI question with its date, and kabsi.co/scan/[code] (the session could not pass Turnstile).
+- Scan 2: on a phone, open kabsi.co/scan, pick SEVEN Burgers & Beyond, wait for the nearby places, untick tips and send the report to your email: it should hold the nearby places with "Most places put you ..." under the count, the AI question with its date, and kabsi.co/scan/[code] (the session could not pass Turnstile).
 
 ## Open After merge checks and findings
 
@@ -56,8 +57,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 5 Nov 2026, Scan 2 (30.29, R-109): PRs 369 (30.29), 370 (the AI question, nearby names only, Latin names, reuse), 371 (the report sent is the report shown), 372 (the result page, Meta events). Spent 0.09 US dollars of DataForSEO. Detail: `docs/progress/archive/2026-11-05-scan2.md`.
-- 5 Nov 2026, Go live 1 (30.28, R-108): PRs 362 (30.28), 363 (WhatsApp number), 364 (nearby check and AI answer on, quiet refusals), 365 (At launch lines removed), 366 and 367 (audit: 38 found, 15 fixed, 17 for lane R, 6 in LATER). Detail: `docs/progress/archive/2026-11-05-golive1.md`.
+- 5 Nov 2026, Copy 3 (30.29, 30.30, R-110): PRs 374 (30.30), 375 (copy decisions B-001 to B-032), and the Scan 2 follow-ups with the speed gate. Detail: `docs/progress/archive/2026-11-05-copy3.md`.
+- 5 Nov 2026, Scan 2 (30.29, R-109): PRs 369 to 372, 0.09 US dollars of DataForSEO. Detail: `docs/progress/archive/2026-11-05-scan2.md`.
+- 5 Nov 2026, Go live 1 (30.28, R-108): PRs 362 to 367. Detail: `docs/progress/archive/2026-11-05-golive1.md`.
 
 ## How a session updates this page
 

@@ -11,6 +11,8 @@ import { DEPTH, isSame, type Identity } from "./dataforseo.ts";
 import { type Direction, directionOf, GRID_SIZE, type LatLng } from "./grid.ts";
 import type { CellResult } from "./scan.ts";
 import { latinName } from "./area.ts";
+import { countWithUsual } from "./usual.ts";
+export { countWithUsual, usualLine, usualRank } from "./usual.ts";
 
 export const SAMPLE_NOTE = "Sample Google Maps results, not customer counts.";
 
@@ -118,7 +120,7 @@ export async function nearbyPlaces(o: {
   if (centre) cards.push(await card(centre, "home"));
   for (const c of pickAway(o.cells)) cards.push(await card(c as CellResult & LatLng, "away"));
   const top3 = o.cells.filter((c) => c.rank != null && c.rank <= 3).length;
-  return { cards, top3, points: o.cells.length, count_line: countLine(top3, o.cells.length), keyword: o.keyword, note: SAMPLE_NOTE };
+  return { cards, top3, points: o.cells.length, count_line: countWithUsual(top3, o.cells.length, o.cells.map((c) => c.rank)), keyword: o.keyword, note: SAMPLE_NOTE };
 }
 
 /** One card in words: "Near your salon you came up 2nd for 'hair salon'." / "Near the metro station, Juniper Hair Studio came first." */

@@ -5,12 +5,12 @@ import { assert, assertEquals, assertMatch } from "jsr:@std/assert@1";
 import fx from "../../../../tests/fixtures/free-check/scan2-5nov.json" with { type: "json" };
 import type { MapsItem, MapsProvider } from "./dataforseo.ts";
 import {
-  aiLine, aiLines, aiQuestion, type CheckRow, collectCheck, matchLocal, NOT_NEAR, publicView, safeNearby, startCheck, type StartDeps, storeAi,
+  aiLine, aiLines, aiQuestion, type CheckRow, collectCheck, matchLocal, NOT_NEAR, publicView, safeNearby, shownTerm, startCheck, type StartDeps, storeAi,
 } from "./free-check.ts";
 import { cardLine, type Nearby } from "./nearby.ts";
 import { analyze } from "./ai/analyze.ts";
 import type { FreeCheck } from "./ai/run.ts";
-import { areaOfPlace, countryName, latinName, townOf } from "./area.ts";
+import { areaOfPlace, countryName, latinName, ownName, townOf } from "./area.ts";
 import { dataForSeoAi, unknownCity } from "./ai/providers.ts";
 
 const item = (rank: number, title: string, extra: Partial<MapsItem> = {}): MapsItem => ({
@@ -206,4 +206,179 @@ Deno.test("scan2: ChatGPT is asked with web search forced, from the town; an unk
   const p2 = dataForSeoAi("chatgpt", "l", "p", "m", (_u, i) => { one.push(JSON.parse(String(i?.body))[0]); return Promise.resolve(new Response(JSON.stringify(ok))); });
   assertEquals((await p2.ask("q", { country: "LB", city: "Boqaata" })).cityDropped, false);
   assertEquals(one.length, 1);
+});
+
+// Copy 3 (master plan 30.30 item 3): the Latin rule covers the visitor's own text.
+Deno.test(
+  "copy3: a term typed in another script becomes the Google category, else the industry page's term, else nothing",
+  () => {
+    assertEquals(shownTerm("fast food", "Fast food restaurant", null), {
+      term: "fast food",
+      ai: true,
+    });
+    assertEquals(
+      shownTerm("مطعم", "Fast food restaurant", "restaurant"),
+      { term: "fast food restaurant", ai: true },
+      "the category, in lower case",
+    );
+    assertEquals(
+      shownTerm("مطعم", "مطعم وجبات سريعة", "restaurant"),
+      { term: "restaurant", ai: false },
+      "no Latin category: the industry term, no AI part",
+    );
+    assertEquals(shownTerm("مطعم", null, "مطعم"), null);
+    assertEquals(shownTerm("مطعم", "مطعم وجبات سريعة", null), null);
+    assertEquals(
+      [
+        ownName("SEVEN Burgers & Beyond"),
+        ownName("مطعم سفن"),
+        ownName("Shawarma كريم"),
+        ownName(""),
+        ownName(null),
+      ],
+      [
+        "SEVEN Burgers & Beyond",
+        "Your business",
+        "Your business",
+        "Your business",
+        "Your business",
+      ],
+    );
+  },
+);
+
+Deno.test(
+  "copy3: a check started with an Arabic term searches and asks with the category; the page names the business 'Your business' when its name is Arabic",
+  async () => {
+    const { p, calls } = maps(fx.seven.business, fx.seven.address, fx.seven.points);
+    const ai = answer(
+      fx.seven.business,
+      "best fast food restaurant in Boqaata, Lebanon",
+      fx.seven.answer,
+    );
+    const run = deps(p, ai);
+    const s = await startCheck(run.d, {
+      name: fx.seven.business,
+      address: null,
+      country: "LB",
+      city: "Boqaata",
+      place_id: "ChIJself0000",
+      term: "مطعم وجبات سريعة",
+    });
+    assert(s.ok === true);
+    assertEquals(s.row.term, "fast food restaurant");
+    assertEquals(run.asked, ["best fast food restaurant in Boqaata, Lebanon"]);
+    assertEquals(s.row.fast.line, "At your address you rank 1 for 'fast food restaurant'.");
+    assert(calls.post === 1);
+    assertEquals(publicView(asRow({ ...s.row, business: "مطعم سفن" })).business, "Your business");
+    assertEquals(publicView(asRow(s.row)).business, s.row.business);
+  },
+);
+
+Deno.test(
+  "copy3: with no Latin category the AI part is left out and the nearby part uses the industry page's term; with neither the check stops",
+  async () => {
+    const { p } = maps(fx.seven.business, fx.seven.address, fx.seven.points);
+    const arabicCategory: MapsProvider = {
+      ...p,
+      liveOne: async (t) =>
+        (await p.liveOne(t)).map((x) =>
+          x.cid === "self" ? { ...x, category: "مطعم وجبات سريعة" } : x,
+        ),
+    };
+    const run = deps(arabicCategory, answer(fx.seven.business, "q", fx.seven.answer));
+    const s = await startCheck(run.d, {
+      name: fx.seven.business,
+      address: null,
+      country: "LB",
+      city: "Boqaata",
+      place_id: "ChIJself0000",
+      term: "مطعم",
+      industry_term: "restaurant",
+    });
+    assert(s.ok === true);
+    assertEquals([s.row.term, s.row.ai, run.asked], ["restaurant", null, []]);
+    const none = deps(arabicCategory, null);
+    const stopped = await startCheck(none.d, {
+      name: fx.seven.business,
+      address: null,
+      country: "LB",
+      city: "Boqaata",
+      place_id: "ChIJself0000",
+      term: "مطعم",
+    });
+    assertEquals(stopped, { ok: false, reason: "term" });
+  },
+);
+
+// Copy 3 (master plan 30.30 item 4): the town comes from Google's own address parts: the locality, else the postal town,
+// else the first administrative area below the country; the formatted address stays the fallback (areaOf).
+Deno.test("copy3: the town from addressComponents, in a Lebanese, a UAE and a UK address", () => {
+  const part = (longText: string, ...types: string[]) => ({ longText, shortText: longText, types });
+  const lb = {
+    formattedAddress: "Main Road, Boqaata, Lebanon",
+    addressComponents: [
+      part("Main Road", "route"),
+      part("Boqaata", "locality", "political"),
+      part("Mount Lebanon Governorate", "administrative_area_level_1", "political"),
+      { longText: "Lebanon", shortText: "LB", types: ["country", "political"] },
+    ],
+  };
+  assertEquals(areaOfPlace(lb), "Boqaata");
+  // The UAE: no locality in many addresses, the emirate is the first administrative area.
+  const ae = {
+    formattedAddress:
+      "Sheikh Mohammed bin Rashid Blvd, Downtown Dubai - Dubai - United Arab Emirates",
+    addressComponents: [
+      part("Sheikh Mohammed bin Rashid Boulevard", "route"),
+      part("Downtown Dubai", "sublocality_level_1", "sublocality", "political"),
+      part("Dubai", "administrative_area_level_1", "political"),
+      { longText: "United Arab Emirates", shortText: "AE", types: ["country", "political"] },
+    ],
+  };
+  assertEquals(areaOfPlace(ae), "Dubai");
+  // The UK: the postal town, never the county.
+  const gb = {
+    formattedAddress: "10 Downing St, London SW1A 2AA, UK",
+    addressComponents: [
+      part("10", "street_number"),
+      part("Downing Street", "route"),
+      part("London", "postal_town"),
+      part("Greater London", "administrative_area_level_2", "political"),
+      part("England", "administrative_area_level_1", "political"),
+      { longText: "United Kingdom", shortText: "GB", types: ["country", "political"] },
+    ],
+  };
+  assertEquals(areaOfPlace(gb), "London");
+  // The locality wins over the postal town and the emirate or county.
+  assertEquals(
+    areaOfPlace({
+      addressComponents: [
+        part("Hove", "locality"),
+        part("Brighton", "postal_town"),
+        part("England", "administrative_area_level_1"),
+      ],
+    }),
+    "Hove",
+  );
+  // A town in another script falls back to the formatted address, then to nothing.
+  assertEquals(
+    areaOfPlace(
+      {
+        formattedAddress: "Main Road, Boqaata, Lebanon",
+        addressComponents: [part("بقعاتا", "locality")],
+      },
+      "LB",
+    ),
+    "Boqaata",
+  );
+  assertEquals(
+    areaOfPlace(
+      { formattedAddress: "بقعاتا، لبنان", addressComponents: [part("بقعاتا", "locality")] },
+      "LB",
+    ),
+    null,
+  );
+  // No components at all (a call made before the mask had them): the address parts as before.
+  assertEquals(areaOfPlace({ formattedAddress: "12 High St, Austin, TX 78701, USA" }), "Austin");
 });

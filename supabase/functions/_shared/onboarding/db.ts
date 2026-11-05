@@ -38,8 +38,8 @@ export function onboardingHooks(out: Out): OnboardingHooks {
         const name = [meta.first_name, meta.name, meta.full_name].find((v) => typeof v === "string" && v.trim()) as string | undefined;
         let check: FirstBack["check"] = null;
         if (f.check) {
-          const { data: c } = await admin().from("free_checks").select("fast, nearby, created_at").eq("code", f.check.code).maybeSingle();
-          if (c) check = { term: f.check.term, date: mapDate(new Date(c.created_at as string), f.time_zone), fact: checkFact(c as unknown as Pick<CheckRow, "fast" | "nearby">) };
+          const { data: c } = await admin().from("free_checks").select("fast, nearby, points, created_at").eq("code", f.check.code).maybeSingle();
+          if (c) check = { term: f.check.term, date: mapDate(new Date(c.created_at as string), f.time_zone), fact: checkFact(c as unknown as Pick<CheckRow, "fast" | "nearby" | "points">) };
         }
         return { location_id: id, business: f.business, name: name ?? null, check };
       }

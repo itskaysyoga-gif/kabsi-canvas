@@ -231,7 +231,7 @@ Deno.test("run: a due search becomes a finished grid with its numbers, line, off
   assertEquals([s.state, s.source, s.first, s.costMicros], ["done", "mock", true, 0]);
   assertEquals(s.data?.centre_rank, 1);
   // V4 (30.15 section 2): the WhatsApp line leads with the nearby places and ends with the one count and the sample note.
-  assertMatch((s.data?.message as { body: string }).body, /^Your first map is ready\. Near your bakery you came up 1st for 'bakery'\. .+ In the first 3 at \d+ of 49 places Kabsi checked\. 'bakery', .+\. Sample Google Maps results, not customer counts\.$/);
+  assertMatch((s.data?.message as { body: string }).body, /^Your first map is ready\. Near your bakery you came up 1st for 'bakery'\. .+ In the first 3 at \d+ of 49 places Kabsi checked\. Most places (put you \d+(st|nd|rd|th)|did not put you in the first 20)\. 'bakery', .+\. Sample Google Maps results, not customer counts\.$/);
   assertEquals((s.data?.nearby as { cards: unknown[] }).cards.length, 3);
   assertEquals(w.spent, []);
   assertEquals(w.next()?.toISOString(), "2026-11-24T10:00:00.000Z");

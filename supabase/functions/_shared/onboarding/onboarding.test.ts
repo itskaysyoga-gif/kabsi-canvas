@@ -324,7 +324,7 @@ Deno.test("the free check: a fast result at once, the full search queued, the ne
   assert.ok(!JSON.stringify(v1).includes("Juniper"));
   assert.equal(v1.check_line, "Free check. No Google access needed.");
   assert.match(v1.trial_line, /starts only when Kabsi's access to your Google profile works/);
-  assert.match(checkFact(done!), /^In the first 3 at \d+ of 49 places Kabsi checked\.$/);
+  assert.match(checkFact(done!), /^In the first 3 at \d+ of 49 places Kabsi checked\. Most places (put you \d+(st|nd|rd|th)|did not put you in the first 20)\.$/);
 });
 Deno.test("the free check stops before spending past the cap, and its words", async () => {
   const s = await startCheck({ provider: mockProvider({ title: "X" }), source: "live", code: newCode, room: async () => false, spend: async () => {}, ai: async () => null },
