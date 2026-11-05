@@ -503,6 +503,19 @@ async function collectChecks(): Promise<number> {
   return n;
 }
 
+/**
+ * Go live 1 (30.28), staff op: DataForSEO's balance from its user data endpoint (free to call). Only the money fields
+ * come back; the login and password stay in the function's secrets and are never returned or logged.
+ */
+async function balance(): Promise<Response> {
+  const login = Deno.env.get("DATAFORSEO_LOGIN"), password = Deno.env.get("DATAFORSEO_PASSWORD");
+  if (!login || !password) return json({ error: "dataforseo_not_configured" }, 503);
+  const res = await fetch("https://api.dataforseo.com/v3/appendix/user_data", { headers: { authorization: "Basic " + btoa(`${login}:${password}`) } });
+  const j = await res.json().catch(() => null) as { status_code?: number; cost?: number; tasks?: { result?: { money?: { balance?: number; total?: number } }[] }[] } | null;
+  const money = j?.tasks?.[0]?.result?.[0]?.money;
+  return json({ http: res.status, status_code: j?.status_code ?? null, cost_usd: j?.cost ?? null, balance_usd: money?.balance ?? null, total_usd: money?.total ?? null });
+}
+
 /** Staff op: the search each wave 1 industry page prefills, from DataForSEO keyword data (one call per market). */
 async function terms(): Promise<Response> {
   const login = Deno.env.get("DATAFORSEO_LOGIN"), password = Deno.env.get("DATAFORSEO_PASSWORD");
@@ -566,6 +579,7 @@ Deno.serve(async (req) => {
       return data ? json(data) : json({ error: "not_found" }, 404);
     }
     if (req.method === "POST" && route === "/terms") return (await isInternal(req)) ? await terms() : json({ error: "forbidden" }, 403);
+    if (req.method === "POST" && route === "/balance") return (await isInternal(req)) ? await balance() : json({ error: "forbidden" }, 403);
     return json({ error: "not_found" }, 404);
   } catch (e) {
     await captureError(fn, e, { route });
