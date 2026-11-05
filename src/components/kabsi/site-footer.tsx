@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import {
   BRAND_LINE,
   CONTACT_EMAIL,
-  GOOGLE_THIRD_PARTY_URL,
   NOT_AFFILIATED,
   SOCIAL_LINKS,
   WHATSAPP_ON,
@@ -15,11 +14,11 @@ import { SiteLink } from "./site-link";
 import { openPrivacyChoices } from "@/lib/consent";
 
 /**
- * Design 9 footer (Web 5 part A, master plan 30.24): the logo, the brand line and the SOCIAL_LINKS icons; three short
- * groups (Product, Explore, Company) with no industry links; then the quiet row with every legal item: Privacy, Terms,
- * Partner terms, Your privacy choices, the independence line with Google's guidance link, the operator, contact and
- * Creem line. "Review link and QR code" stays in Product (lane R decision 4 of 1 Nov). WhatsApp shows only while
- * WHATSAPP_ON; hello@kabsi.co is always there.
+ * The short footer (Site 2, master plan 30.34 item 4): the logo, the brand line and the SOCIAL_LINKS icons; three short
+ * groups (Product, Explore, Company) with no industry links; then the legal row (Privacy, Terms, Partner terms, Your
+ * privacy choices) and one line: the independence line and the year. The operator, contact and Creem lines are at the
+ * top of /terms and /privacy; Google's third-party guidance link is in the FAQ answer on adding Kabsi as a Manager.
+ * WhatsApp shows only while WHATSAPP_ON, with its glyph; hello@kabsi.co is always there.
  */
 type FootLink = { label: string; to: string; kind?: "mail" | "whatsapp" };
 const GROUPS: { title: string; links: FootLink[] }[] = [
@@ -30,7 +29,6 @@ const GROUPS: { title: string; links: FootLink[] }[] = [
       { label: "Pricing", to: "/pricing" },
       { label: "Free check", to: "/scan" },
       { label: "Review link and QR code", to: "/google-review-link" },
-      { label: "Security", to: "/security" },
     ],
   },
   {
@@ -46,6 +44,7 @@ const GROUPS: { title: string; links: FootLink[] }[] = [
     title: "Company",
     links: [
       { label: "About", to: "/about" },
+      { label: "Security", to: "/security" },
       { label: "Founding 25", to: "/founding" },
       { label: "Contact", to: `mailto:${CONTACT_EMAIL}`, kind: "mail" },
       ...(WHATSAPP_ON ? [{ label: "WhatsApp", to: WHATSAPP_URL, kind: "whatsapp" as const }] : []),
@@ -160,28 +159,7 @@ export function SiteFooter() {
               </button>
             </li>
           </ul>
-          <p className="max-w-[80ch]">
-            {NOT_AFFILIATED} Google Business Profile is free from Google. Kabsi is an independent
-            paid service.{" "}
-            <a
-              href={GOOGLE_THIRD_PARTY_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="text-text-2 underline underline-offset-4 hover:text-text-1"
-            >
-              Google's guidance on working with a third party
-            </a>
-          </p>
-          <p className="max-w-[80ch]">
-            Kabsi is operated by Rashid Abou Hamzy. Contact:{" "}
-            <a
-              href={`mailto:${CONTACT_EMAIL}`}
-              className="text-text-2 underline underline-offset-4 hover:text-text-1"
-            >
-              {CONTACT_EMAIL}
-            </a>
-            . Payments are processed by Creem, our merchant of record. © 2026 Kabsi
-          </p>
+          <p className="max-w-[80ch]">{NOT_AFFILIATED} © 2026 Kabsi.</p>
         </div>
       </div>
     </footer>

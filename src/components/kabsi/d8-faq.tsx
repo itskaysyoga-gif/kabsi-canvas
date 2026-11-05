@@ -2,7 +2,7 @@
 // groups (faq-data.ts FAQ_GROUPS, the same words as the FAQPage data in the route head), "Talk to a person" and the
 // closing free check.
 import { ArrowRight } from "lucide-react";
-import { CONTACT_EMAIL, WHATSAPP_ON, WHATSAPP_URL } from "@/lib/site";
+import { CONTACT_EMAIL, GOOGLE_THIRD_PARTY_URL, WHATSAPP_ON, WHATSAPP_URL } from "@/lib/site";
 import { Faq, buttonClass } from "./ui";
 import { PageHero, popCls, stagger } from "./page-hero";
 import { Closing } from "./closing";
@@ -24,6 +24,33 @@ const GROUP_MARKS: Record<string, string> = {
   whatsapp: "WhatsApp",
   privacy: "data",
 };
+
+/**
+ * Site 2 (master plan 30.34 item 4): Google's own guidance on working with a third party moved from the footer to the
+ * answer on adding Kabsi as a Manager. The FAQPage data keeps the plain answer.
+ */
+const MANAGER_Q = "How do I add Kabsi to my Google profile?";
+const withGuidance = (f: { q: string; a: string }) =>
+  f.q === MANAGER_Q
+    ? {
+        q: f.q,
+        a: (
+          <>
+            <p>{f.a}</p>
+            <p className="mt-3">
+              <a
+                href={GOOGLE_THIRD_PARTY_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="font-semibold underline underline-offset-4"
+              >
+                Google's guidance on working with a third party
+              </a>
+            </p>
+          </>
+        ),
+      }
+    : f;
 
 export function D8Faq() {
   return (
@@ -77,7 +104,7 @@ export function D8Faq() {
                 <h2 id={g.id} className="text-h2">
                   <Marked text={g.title} mark={GROUP_MARKS[g.id]} />
                 </h2>
-                <Faq className="mt-6" items={g.items} />
+                <Faq className="mt-6" items={g.items.map(withGuidance)} />
               </section>
             ))}
             <div className="rounded-panel border border-line bg-surface-0 p-6 sm:p-8">

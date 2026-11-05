@@ -7,6 +7,7 @@ import {
   KABSI_GROUP_ID,
   KABSI_GROUP_NAME,
   OPERATOR_NAME,
+  MERCHANT_LINE,
   OPERATOR_LINE,
   WHATSAPP_NUMBER,
   WHATSAPP_ON,
@@ -48,6 +49,12 @@ function Page() {
     >
       <section>
         <p>
+          {OPERATOR_LINE} {MERCHANT_LINE}
+        </p>
+      </section>
+
+      <section>
+        <p>
           This policy explains what Kabsi collects, why, who helps us process it, how long we keep
           it and what you can ask us to do. It covers the website, your Kabsi account on kabsi.co,
           emails from Kabsi, the free review link tool, Kabsi review links, QR codes and cards,
@@ -58,7 +65,7 @@ function Page() {
       <section>
         <h2>Who is responsible</h2>
         <p>
-          {OPERATOR_LINE}. The operator is also the data controller for the personal data described
+          The operator, {OPERATOR_NAME}, is also the data controller for the personal data described
           here.
         </p>
       </section>
