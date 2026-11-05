@@ -9,11 +9,13 @@ import {
   WHATSAPP_ON,
   WHATSAPP_URL,
 } from "@/lib/site";
-import { FOUNDER } from "./photos";
+import { FOUNDER, PHOTOS } from "./photos";
 import { buttonClass } from "./ui";
 import { PageHero } from "./page-hero";
 import { Closing } from "./closing";
 import { ABOUT_HERO } from "./hero-lines";
+import { Marked } from "@/components/kabsi/highlight";
+import { SectionPhoto } from "./section-photo";
 
 const MAIL = (
   <a className="font-semibold underline underline-offset-4" href={`mailto:${CONTACT_EMAIL}`}>
@@ -40,6 +42,7 @@ export function D8About() {
   return (
     <>
       <PageHero
+        mark="the owner at the counter."
         hero={ABOUT_HERO}
         visual={
           <figure className="relative mx-auto max-w-[24rem]">
@@ -77,8 +80,9 @@ export function D8About() {
       <section aria-labelledby="how-h" className="border-t border-line">
         <div className="container-kb section-y">
           <h2 id="how-h" className="text-h2">
-            How Kabsi works with owners
+            <Marked text="How Kabsi works with owners" mark="with owners" />
           </h2>
+          <SectionPhoto photo={PHOTOS.bakeryCounter} className="mt-8" />
           <ul className="mt-8 grid gap-6 md:grid-cols-3">
             {PRINCIPLES.map((p) => (
               <li key={p.title} className="border-t-2 border-text-1 pt-4">
@@ -93,7 +97,7 @@ export function D8About() {
         <div className="container-kb section-y grid gap-12 lg:grid-cols-2 lg:gap-16">
           <div>
             <h2 id="facts-h" className="text-h2">
-              Plain facts
+              <Marked text="Plain facts" mark="facts" />
             </h2>
             <ul className="mt-8 divide-y divide-line border-y border-line text-body">
               <li className="py-4">{NOT_AFFILIATED}</li>
@@ -103,7 +107,9 @@ export function D8About() {
             </ul>
           </div>
           <div>
-            <h2 className="text-h2">Follow Kabsi</h2>
+            <h2 className="text-h2">
+              <Marked text="Follow Kabsi" mark="Kabsi" />
+            </h2>
             <ul className="mt-8 flex flex-wrap gap-3">
               {SOCIAL_LINKS.map((s) => (
                 <li key={s.name}>

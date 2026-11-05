@@ -5,6 +5,7 @@ import { KABSI_GROUP_ID } from "@/lib/site";
 import { FlowProgress, PageTop, useFlagState } from "./d2-parts";
 import { AccessSteps, type AccessState } from "./d5-access";
 import { Button, ButtonLink, ErrorState, StatusPill, buttonClass } from "./ui";
+import { Marked } from "@/components/kabsi/highlight";
 
 const FLOW = ["Find your business", "Your email", "Add Kabsi as a Manager"];
 
@@ -39,7 +40,7 @@ export function ManagerSteps() {
   return (
     <>
       <PageTop
-        title="Add Kabsi as a Manager on Google."
+        title={<Marked text="Add Kabsi as a Manager on Google." mark="as a Manager" />}
         lead="You stay the owner. You can remove Kabsi any time."
       >
         <FlowProgress steps={FLOW} current={2} className="mt-8 max-w-xl" />

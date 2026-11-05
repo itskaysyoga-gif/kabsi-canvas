@@ -50,3 +50,42 @@ describe("Style 1 part A: guides with photos", () => {
     expect(src).toContain("md:w-[calc((100%-1rem)/2)] xl:w-[calc((100%-2rem)/3)]");
   });
 });
+
+describe("Style 1 part B: the 30.32 look on every public page", () => {
+  it("puts each hero's phrase on the bar once", async () => {
+    const h = await import("../src/components/kabsi/hero-lines");
+    const pages: [string, string][] = [
+      ["d4-free-check", h.CHECK_HERO.title],
+      ["d8-faq", h.FAQ_HERO.title],
+      ["d8-about", h.ABOUT_HERO.title],
+      ["d8-security", h.SECURITY_HERO.title],
+      ["d5-founding", h.FOUNDING_HERO.title],
+      ["d2-partners", h.PARTNERS_HERO.title],
+    ];
+    for (const [file, title] of pages) {
+      const mark = readFileSync(`src/components/kabsi/${file}.tsx`, "utf8").match(
+        /<PageHero\s+mark="([^"]+)"/,
+      )?.[1];
+      expect(mark, file).toBeTruthy();
+      expect(title.split(mark!).length, file).toBe(2);
+    }
+  });
+
+  it("marks the closing check and the pricing preview by default", () => {
+    expect(readFileSync("src/components/kabsi/closing.tsx", "utf8")).toContain("marked = true,");
+    expect(readFileSync("src/components/kabsi/d9-home-lower.tsx", "utf8")).toContain(
+      "PricingPreview({ marked = true }",
+    );
+  });
+
+  it("gives Founding 25, Partners, About and Pricing a library photo", () => {
+    for (const f of ["d5-founding", "d2-partners", "d8-about", "d8-pricing"])
+      expect(readFileSync(`src/components/kabsi/${f}.tsx`, "utf8"), f).toContain("<SectionPhoto");
+  });
+
+  it("keeps Security's reading blocks to short lines", () => {
+    const src = readFileSync("src/components/kabsi/d8-security.tsx", "utf8");
+    for (const m of src.matchAll(/<li>([^<{]+)<\/li>/g))
+      expect(m[1]!.trim().split(/\s+/).length, m[1]).toBeLessThanOrEqual(15);
+  });
+});
