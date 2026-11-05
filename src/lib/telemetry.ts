@@ -60,29 +60,32 @@ declare global {
 export { isPrivatePath } from "@/lib/private-paths";
 import { isPrivatePath } from "@/lib/private-paths";
 
-/** Style 1 part C: the user agents of Kabsi's own automated runs (the Edge Functions use the same list, sentry-gate.ts). */
+/** Style 1 part C (master plan 30.33 item 4): the user agents of Kabsi's own automated runs (the Edge Functions use the same
+ *  list, sentry-gate.ts). In the boot script below, `bot` (webdriver, or one of these) makes beforeSend drop the event, so
+ *  the errors quota is spent on real visitors. No comment inside the script string: it ships to every visitor. */
 export const AUTOMATED_UA_PATTERN =
   "HeadlessChrome|Playwright|Chrome-Lighthouse|Lighthouse|kabsi-nightly|kabsi-qa";
 
 // Inline boot script: sets environment, configures Sentry before its loader runs, and installs
 // the standard PostHog snippet with replay off until a public page turns it on.
+// Notes on the script (kept out of the string, which ships to every visitor):
+// Sec 1: links carry a one-time credential or code in the path (/a/, /h/, /u/, /activate/, /scan/, /review/,
+// /start/resume/) or the query (t, code, access_token...): never send it anywhere (src/lib/scrub.ts, scrubUrl).
+// 20.5: no email address, phone number or review text in a report or an event (src/lib/scrub.ts).
+// distinct_id (a user id) and token (PostHog's public key) pass untouched: the phone rule could break an id.
+// PostHog starts only after React has hydrated the page (startAnalytics in __root): anything it inserts
+// into the DOM earlier makes hydration fail (Sentry KABSI-WEB-1, 26 Sep 2026).
 const bootScript = `
 (function(){
   var h = location.hostname;
   var env = /\\.vercel\\.app$/.test(h) ? "preview" : (h === "localhost" || h === "127.0.0.1") ? "local" : "production";
   window.__kabsiEnv = env;
-  // Sec 1: links carry a one-time credential or code in the path (/a/, /h/, /u/, /activate/, /scan/, /review/,
-  // /start/resume/) or the query (t, code, access_token...): never send it anywhere (src/lib/scrub.ts, scrubUrl).
   var TP = new RegExp(${JSON.stringify(TOKEN_PATH_PATTERN)}, "g"), TQ = new RegExp(${JSON.stringify(TOKEN_QUERY_PATTERN)}, "g");
-  // 20.5: no email address, phone number or review text in a report or an event (src/lib/scrub.ts).
   var EM = new RegExp(${JSON.stringify(EMAIL_PATTERN)}, "g"), PH = new RegExp(${JSON.stringify(PHONE_PATTERN)}, "g"), SK = ${JSON.stringify(SECRET_KEYS)};
   var scrub = function(u){ return typeof u === "string" ? u.replace(TP, "/$1/:token").replace(TQ, "$1redacted").replace(EM, "[email]") : u; };
   var pii = function(v){ return typeof v === "string" ? scrub(v).replace(PH, "[phone]") : v; };
-  // distinct_id (a user id) and token (PostHog's public key) pass untouched: the phone rule could break an id.
   var props = function(o){ if (!o || typeof o !== "object") return o; Object.keys(o).forEach(function(k){ if (k === "distinct_id" || k === "token") return; if (SK.indexOf(k.toLowerCase()) >= 0) delete o[k]; else if (k.charAt(0) !== "$") o[k] = pii(o[k]); else o[k] = scrub(o[k]); }); return o; };
-  // Style 1 part C (master plan 30.33 item 4): Kabsi's own automated runs (Playwright and the nightly check, which drive a
-  // webdriver or headless browser, and Lighthouse) send Sentry nothing, so the errors quota is spent on real visitors.
-  var bot = navigator.webdriver === true || new RegExp(${JSON.stringify(AUTOMATED_UA_PATTERN)}, "i").test(navigator.userAgent || "");
+  var bot = navigator.webdriver || new RegExp(${JSON.stringify(AUTOMATED_UA_PATTERN)}, "i").test(navigator.userAgent || "");
   window.sentryOnLoad = function(){
     Sentry.init({ environment: env, release: ${JSON.stringify(SENTRY_RELEASE)}, sendDefaultPii: false, tracesSampleRate: 0,
       replaysSessionSampleRate: 0, replaysOnErrorSampleRate: 0,
@@ -98,8 +101,6 @@ const bootScript = `
       ignoreErrors: ["ResizeObserver loop limit exceeded", "ResizeObserver loop completed with undelivered notifications"] });
   };
   if (env === "local") return;
-  // PostHog starts only after React has hydrated the page (startAnalytics in __root): anything it inserts
-  // into the DOM earlier makes hydration fail (Sentry KABSI-WEB-1, 26 Sep 2026).
   window.__kabsiStartAnalytics = function(){
   if (window.__kabsiAnalyticsStarted) return; window.__kabsiAnalyticsStarted = true;
   !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
