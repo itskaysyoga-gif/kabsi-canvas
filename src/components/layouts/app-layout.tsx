@@ -83,6 +83,7 @@ import { TestModeBanner } from "@/components/shared/test-mode-banner";
 import { useAuth } from "@/components/auth/auth-provider";
 import { setAnalyticsPaused } from "@/lib/telemetry";
 import { cn } from "@/lib/utils";
+import { Headline } from "@/components/kabsi/highlight";
 
 const ICON: Record<SectionId, LucideIcon> = {
   home: Home,
@@ -196,7 +197,7 @@ function BusinessMenu({ compact = false }: { compact?: boolean }) {
         >
           <SheetHeader className="border-b border-line px-5 pt-6 pb-4 text-start sm:text-start">
             <SheetTitle className="font-display text-h3 font-bold text-text-1">
-              Your businesses
+              <Headline text="Your businesses" />
             </SheetTitle>
             <SheetDescription className="text-small text-text-2">
               Tap a business to open it.

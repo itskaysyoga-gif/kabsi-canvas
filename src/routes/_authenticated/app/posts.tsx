@@ -278,7 +278,7 @@ function MonthView({
         </p>
       ) : null}
       {order.length ? (
-        <ol className="grid items-start gap-4 lg:grid-cols-2">
+        <ol className="grid items-start gap-4 lg:grid-cols-2 lg:balance-2">
           {order.map((p) => (
             <li key={p.id}>
               {p.state === "draft" ? (

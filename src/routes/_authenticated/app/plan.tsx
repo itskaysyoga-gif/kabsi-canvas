@@ -293,10 +293,8 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
                   </li>
                 ))}
               </ul>
-              <p className="mt-4 text-small">
-                <span className="block font-bold">{p.help}</span>
-                <span className="block text-text-2">{WORKING_HOURS}</span>
-              </p>
+              <p className="mt-4 text-small font-bold">{p.help}</p>
+              <p className="text-small text-text-2">{WORKING_HOURS}</p>
               {showChoose ? (
                 <Button
                   full
@@ -449,9 +447,9 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
           ))}
         </dl>
         <p className="mt-3 text-small text-text-2">
-          Prices are in US dollars, {TAX_NOTE}, and the same in every country. Every trial is 14
-          days of Pro with no card.
+          Prices are in US dollars, {TAX_NOTE}, and the same in every country.
         </p>
+        <p className="mt-1 text-small text-text-2">Every trial is 14 days of Pro with no card.</p>
         {left !== null && left > 0 ? (
           <p className="mt-2 text-small text-text-2">
             {FOUNDING_SENTENCE} {foundingPlacesLine(left)}
@@ -481,9 +479,10 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
 
       <div className="space-y-2">
         <p className="text-small text-text-2">{PLAN_COPY.creem}</p>
+        <p className="text-small text-text-2">Yearly plans are refundable within 14 days.</p>
         <p className="text-small text-text-2">
-          Yearly plans are refundable within 14 days. If your plan ends, your review link and QR
-          code keep working; only reply drafts, Google Protection and reports stop.
+          If your plan ends, your review link and QR code keep working; only reply drafts, Google
+          Protection and reports stop.
         </p>
       </div>
     </div>

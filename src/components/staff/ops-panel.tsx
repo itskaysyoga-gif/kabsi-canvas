@@ -88,7 +88,7 @@ function JobHealth() {
           <p className="mt-1 text-small text-text-2">
             Google: {h.google_mode} · sending as {h.email_from} · checked {when(h.checked_at)}
           </p>
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+          <div className="mt-4 grid grid-cols-2 gap-3 [--g:0.75rem] max-sm:balance-2 sm:grid-cols-5">
             <Stat
               label="Failed calls, 24h"
               value={`${h.http_errors_24h} / ${h.http_calls_24h}`}

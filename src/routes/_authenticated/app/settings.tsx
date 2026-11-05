@@ -481,6 +481,8 @@ function AccountCard() {
     <Panel title="Your account" id="account">
       <p className="text-small text-text-2">
         You sign in with a 6-digit code sent to your email. There&apos;s no password to remember.
+      </p>
+      <p className="mt-1 text-small text-text-2">
         You stay signed in on this device for 30 days after your last visit.
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
@@ -584,8 +586,10 @@ function DisconnectGoogle({
           </p>
           <p className="mt-2 text-small text-text-2">
             Nothing more goes to Google, approvals still waiting are cancelled, and Kabsi removes
-            its Manager access to your Google profile. You stay the owner. Your review link and
-            cards keep working until your plan ends.
+            its Manager access to your Google profile.
+          </p>
+          <p className="mt-1 text-small text-text-2">
+            You stay the owner. Your review link and cards keep working until your plan ends.
           </p>
           {settings.is_demo ? (
             <p className="mt-3 text-small text-text-2">Demo businesses stay connected.</p>
@@ -683,8 +687,13 @@ function DeleteBusiness({
         <>
           <p className="mt-2 text-small text-text-2">
             After 7 days we delete its reviews, drafts, posts, photos, reports and settings, and
-            your NFC cards stop opening your review page. Payment records are kept where the law
-            requires. To stop Kabsi reaching your Google profile, also remove the Kabsi group (ID{" "}
+            your NFC cards stop opening your review page.
+          </p>
+          <p className="mt-1 text-small text-text-2">
+            Payment records are kept where the law requires.
+          </p>
+          <p className="mt-1 text-small text-text-2">
+            To stop Kabsi reaching your Google profile, also remove the Kabsi group (ID{" "}
             {KABSI_GROUP_ID}) under People and access.
           </p>
           <Field
@@ -782,8 +791,11 @@ function EmailSettings({
     <Panel title="Review emails" id="emails">
       <form onSubmit={(e) => void save(null, e)}>
         <p className="text-small text-text-2">
-          Reviews that need extra care are emailed right away. Other reviews are emailed at once
-          while you are open and come together in one daily email after hours.
+          Reviews that need extra care are emailed right away.
+        </p>
+        <p className="mt-1 text-small text-text-2">
+          Other reviews are emailed at once while you are open and come together in one daily email
+          after hours.
         </p>
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
           <div>

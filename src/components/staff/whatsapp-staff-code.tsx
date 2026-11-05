@@ -25,8 +25,10 @@ export function WhatsappStaffCode() {
     <section className={STAFF_CARD} data-testid="whatsapp-staff-code">
       <h2 className={STAFF_H2}>WhatsApp staff phone</h2>
       <p className="mt-1 text-small leading-6 text-text-2">
-        Make a code, then send it from the staff phone to Kabsi&apos;s WhatsApp number. That phone
-        gets the staff commands. The code works once, for 15 minutes.
+        Make a code, then send it from the staff phone to Kabsi&apos;s WhatsApp number.
+      </p>
+      <p className="mt-1 text-small leading-6 text-text-2">
+        That phone gets the staff commands. The code works once, for 15 minutes.
       </p>
       <Button
         variant="outline"

@@ -132,7 +132,8 @@ describe("the screen (P0.4-05)", () => {
   it("waits for access: the live status, a way on, and no details to confirm yet", () => {
     expect(confirmMode(loc)).toBe("waiting");
     const html = render(loc, FACTS);
-    expect(html).toContain("Waiting for your invitation");
+    // App 5: the heading puts its last word on the highlight bar.
+    expect(html).toContain('Waiting for your <span class="d9-mark">invitation</span>');
     expect(html).toContain("Go to Home");
     expect(html).toContain("waiting costs you no days");
     expect(html).not.toContain("Correct");
@@ -140,7 +141,7 @@ describe("the screen (P0.4-05)", () => {
 
   it("once access works it asks for the six details, each with Correct and Change, and marks the confirmed one", () => {
     const html = render({ ...loc, access_granted_at: "2026-10-22T11:00:00Z" }, FACTS);
-    expect(html).toContain("Confirm your details");
+    expect(html).toContain('Confirm your <span class="d9-mark">details</span>');
     for (const d of DETAILS) expect(html).toContain(d.label);
     expect((html.match(/>Correct</g) ?? []).length).toBe(6);
     expect((html.match(/>Change</g) ?? []).length).toBe(6);

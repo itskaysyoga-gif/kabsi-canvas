@@ -2,6 +2,7 @@
 // panels, source labels and the task track every task shows (approved, sent to Google, on Google, or did not go
 // through with what happens next; 30.15 section 3.1). The shell is src/components/layouts/app-layout.tsx.
 import { Link, useRouterState } from "@tanstack/react-router";
+import { Headline } from "@/components/kabsi/highlight";
 import { Check, ExternalLink, Undo2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -32,7 +33,10 @@ export function AccountTop({
   action,
   tabs = true,
   className,
+  mark,
 }: {
+  /** The phrase of a string title on the highlight bar; the title's last word when not given (App 5). */
+  mark?: string | undefined;
   title: ReactNode;
   lead?: ReactNode;
   action?: ReactNode;
@@ -55,7 +59,13 @@ export function AccountTop({
     <div className={cn("mb-6", className)}>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="font-display text-h2 font-bold text-balance text-text-1">{heading}</h1>
+          <h1 className="font-display text-h2 font-bold text-balance text-text-1">
+            {typeof heading === "string" ? (
+              <Headline text={heading} mark={heading === title ? mark : undefined} />
+            ) : (
+              heading
+            )}
+          </h1>
           {lead && <p className="mt-2 max-w-[42rem] text-body text-text-2">{lead}</p>}
         </div>
         {action}
@@ -306,5 +316,43 @@ export function ChoiceChips({
         </p>
       ) : null}
     </fieldset>
+  );
+}
+
+/** Sentences of a text, split after a full stop or question mark (and a closing quote) that a capital or a digit follows. */
+export function sentences(text: string): string[] {
+  return text
+    .trim()
+    .split(/(?<=[.?]["'\u2019]?)\s+(?=[A-Z0-9"'\u2018])/)
+    .filter(Boolean);
+}
+
+/**
+ * App 5 (master plan 30.33 item 2): a long line shown as paragraphs of at most 25 words, cut only between sentences, so
+ * not one word changes. A single sentence longer than 25 words stays whole.
+ */
+export function shortParas(text: string, max = 25): string[] {
+  const out: string[] = [];
+  let cur = "";
+  for (const s of sentences(text)) {
+    const next = cur ? `${cur} ${s}` : s;
+    if (cur && next.split(/\s+/).length > max) {
+      out.push(cur);
+      cur = s;
+    } else cur = next;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+export function ShortParas({ text, className }: { text: string; className?: string }) {
+  return (
+    <>
+      {shortParas(text).map((p, i) => (
+        <p key={i} className={cn(className, i > 0 && "mt-2")}>
+          {p}
+        </p>
+      ))}
+    </>
   );
 }
