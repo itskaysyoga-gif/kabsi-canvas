@@ -1,40 +1,17 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Banner, Button, Field, buttonClass } from "@/components/kabsi/ui";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Turnstile } from "@/components/turnstile";
 import { supabase } from "@/lib/supabase";
 import { continueWithGoogle, requestEmailCode, SignupError } from "@/lib/signup";
+import { emailTypoSuggestion } from "@/lib/email-typo";
+import { codeErrorWords, GOOGLE_UNAVAILABLE, IN_APP_LINE, OFFLINE } from "@/lib/sign-in-errors";
 
-// Plain words for the errors Supabase Auth returns when a code is checked.
-function friendlyAuthError(message: string) {
-  const m = message.toLowerCase();
-  if (m.includes("expired") || m.includes("invalid"))
-    return "That code did not work. Check it, or send a new one.";
-  if (m.includes("rate") || m.includes("seconds") || m.includes("too many"))
-    return "Please wait a minute before trying again.";
-  return "Something went wrong. Please try again.";
-}
-// Common domain typos, shown as a hint only, never applied automatically.
-const DOMAIN_TYPOS: Record<string, string> = {
-  "gmail.co": "gmail.com",
-  "gmial.com": "gmail.com",
-  "gamil.com": "gmail.com",
-  "gmai.com": "gmail.com",
-  "hotmial.com": "hotmail.com",
-  "hotmal.com": "hotmail.com",
-  "outlok.com": "outlook.com",
-  "outlook.co": "outlook.com",
-  "icloud.co": "icloud.com",
-};
-function emailTypoSuggestion(value: string): string | null {
-  const at = value.lastIndexOf("@");
-  if (at < 1) return null;
-  const fixed = DOMAIN_TYPOS[value.slice(at + 1).toLowerCase()];
-  return fixed ? `${value.slice(0, at)}@${fixed}` : null;
-}
 // The approved line for an email that is not a full address (COPY.md 24, Design 4).
 const EMAIL_ERROR = "Check the email. It needs a full address, like name@shop.com.";
 const looksLikeEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+const RESEND_SECONDS = 60;
+const online = () => typeof navigator === "undefined" || navigator.onLine !== false;
 function webmailLink(domain: string): { label: string; href: string } | null {
   if (domain === "gmail.com" || domain === "googlemail.com")
     return { label: "Open Gmail", href: "https://mail.google.com/" };
@@ -43,10 +20,77 @@ function webmailLink(domain: string): { label: string; href: string } | null {
   return null;
 }
 
-/** The sign-up sheet's body, shared by /login and the "Save your snapshot and continue" sheet (P0.4-02, K-91):
- * "Continue with Google" first, "Continue with email" (a 6-digit code) second. No passwords. */
-export function SignInPanel({ next, onDone }: { next: string; onDone: () => void }) {
-  const [step, setStep] = useState<"choose" | "email" | "code">("choose");
+/** "Continue with Google", or, inside an in-app browser, the line saying why it does not work there and a copy link. */
+function GoogleChoice({
+  inApp,
+  busy,
+  onGoogle,
+}: {
+  inApp: boolean;
+  busy: boolean;
+  onGoogle: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  }
+  return (
+    <div className="space-y-3">
+      <button
+        type="button"
+        onClick={onGoogle}
+        disabled={busy || inApp}
+        aria-describedby={inApp ? "google-in-app" : undefined}
+        className={buttonClass("secondary", "lg", true) + " disabled:opacity-60"}
+      >
+        <span className="grid size-7 place-items-center rounded-full border border-line bg-kb-white">
+          <img src="/brand/google-g.svg" alt="" className="size-[18px]" />
+        </span>
+        Continue with Google
+      </button>
+      {inApp ? (
+        <div id="google-in-app" className="text-small text-text-2">
+          <p>{IN_APP_LINE}</p>
+          <button
+            type="button"
+            onClick={() => void copy()}
+            className={buttonClass("tertiary") + " mt-1"}
+          >
+            {copied ? "Link copied" : "Copy the link"}
+          </button>
+          <span className="sr-only" role="status">
+            {copied ? "Link copied" : ""}
+          </span>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/** The sign-up sheet's body, shared by /login and the "Save your snapshot and continue" sheet (P0.4-02, K-91; App 4):
+ * "Continue with Google" first and "Continue with email" (a 6-digit code) second; in an in-app browser the email code
+ * comes first and Google below it. No passwords. */
+export function SignInPanel({
+  next,
+  onDone,
+  start = "choose",
+  inApp = false,
+  focusFirst = false,
+}: {
+  next: string;
+  onDone: () => void;
+  /** "email" opens with the email field ready (after Google was cancelled, and in in-app browsers). */
+  start?: "choose" | "email";
+  inApp?: boolean;
+  /** Moves focus to the first field or button when the sheet appears (the log in page). */
+  focusFirst?: boolean;
+}) {
+  const [step, setStep] = useState<"choose" | "email" | "code">(inApp ? "email" : start);
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [token, setToken] = useState("");
@@ -55,6 +99,13 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
   const [emailError, setEmailError] = useState("");
   const [busy, setBusy] = useState(false);
   const [seconds, setSeconds] = useState(0);
+  const sentAt = useRef<number | null>(null);
+  const root = useRef<HTMLDivElement>(null);
+  const moved = useRef(false);
+
+  useEffect(() => {
+    if (inApp) setStep((s) => (s === "choose" ? "email" : s));
+  }, [inApp]);
 
   useEffect(() => {
     if (seconds <= 0) return;
@@ -62,13 +113,24 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
     return () => window.clearInterval(timer);
   }, [seconds]);
 
+  // Focus: the first field when the log in page opens, then the field of each new step.
+  useEffect(() => {
+    if (!focusFirst && !moved.current) return;
+    const el = root.current?.querySelector<HTMLElement>(
+      step === "code" ? "input" : step === "email" ? "input[type=email]" : "button",
+    );
+    el?.focus({ preventScroll: true });
+  }, [focusFirst, step]);
+
   async function google() {
     setError("");
+    if (!online()) return setError(OFFLINE);
     setBusy(true);
     try {
       await continueWithGoogle(next);
     } catch (e) {
-      setError(e instanceof SignupError ? e.message : "Something went wrong. Please try again.");
+      setError(e instanceof SignupError ? e.message : GOOGLE_UNAVAILABLE);
+      setStep("email");
       setBusy(false);
     }
   }
@@ -78,12 +140,16 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
     setEmailError("");
     const normalized = email.trim().toLowerCase();
     if (!normalized || !looksLikeEmail(normalized)) return setEmailError(EMAIL_ERROR);
+    if (!online()) return setError(OFFLINE);
     setBusy(true);
     try {
       await requestEmailCode(normalized, token);
       setEmail(normalized);
+      moved.current = true;
       setStep("code");
-      setSeconds(60);
+      setCode("");
+      sentAt.current = Date.now();
+      setSeconds(RESEND_SECONDS);
     } catch (e) {
       setError(e instanceof SignupError ? e.message : "Something went wrong. Please try again.");
     }
@@ -92,18 +158,27 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
     setRound((n) => n + 1);
     setBusy(false);
   }
-  async function verifyCode(event: FormEvent) {
-    event.preventDefault();
+  async function verifyCode(event?: FormEvent) {
+    event?.preventDefault();
     setError("");
     if (code.length !== 6) return setError("Enter the 6-digit code.");
+    if (!online()) return setError(OFFLINE);
     setBusy(true);
-    const { error: authError } = await supabase.auth.verifyOtp({
-      email,
-      token: code,
-      type: "email",
-    });
+    let authError: {
+      status?: number | undefined;
+      message?: string | undefined;
+      name?: string | undefined;
+    } | null = null;
+    try {
+      const r = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
+      authError = r.error;
+    } catch {
+      authError = { message: "fetch failed" };
+    }
     if (authError) {
-      setError(friendlyAuthError(authError.message));
+      setError(
+        codeErrorWords(authError, { online: online(), sentAt: sentAt.current, now: Date.now() }),
+      );
       setCode("");
       setBusy(false);
       return;
@@ -111,27 +186,77 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
     onDone();
   }
 
-  return (
-    <div>
-      {step === "choose" ? (
-        <div className="space-y-3">
+  const typo = emailTypoSuggestion(email.trim());
+  const emailForm = (
+    <form onSubmit={sendCode} noValidate>
+      <Field
+        id="email"
+        label="Email"
+        name="email"
+        type="email"
+        inputMode="email"
+        autoComplete="email"
+        autoCapitalize="none"
+        spellCheck={false}
+        value={email}
+        onChange={(e) => {
+          setEmail(e.target.value);
+          setEmailError("");
+        }}
+        placeholder="name@shop.com"
+        required
+        error={emailError || undefined}
+        hint="Kabsi emails you a 6-digit code. There is no password."
+      />
+      {typo ? (
+        <p className="mt-2 text-small text-text-2" role="status">
+          Did you mean {typo}?{" "}
           <button
             type="button"
-            onClick={() => void google()}
-            disabled={busy}
-            className={buttonClass("secondary", "lg", true)}
+            className="inline-flex min-h-11 items-center font-bold text-text-1 underline underline-offset-4"
+            onClick={() => setEmail(typo)}
           >
-            <span className="grid size-7 place-items-center rounded-full border border-line bg-kb-white">
-              <img src="/brand/google-g.svg" alt="" className="size-[18px]" />
-            </span>
-            Continue with Google
+            Use it
           </button>
+        </p>
+      ) : null}
+      <div className="mt-3">
+        <Turnstile key={round} onToken={setToken} />
+      </div>
+      <div className="mt-3" data-main-cta>
+        <Button type="submit" full loading={busy} disabled={!token}>
+          Send me a code
+        </Button>
+      </div>
+      {inApp ? null : (
+        <button
+          type="button"
+          className={buttonClass("tertiary") + " mt-3"}
+          onClick={() => {
+            setError("");
+            setEmailError("");
+            moved.current = true;
+            setStep("choose");
+          }}
+        >
+          Back to Continue with Google
+        </button>
+      )}
+    </form>
+  );
+
+  return (
+    <div ref={root}>
+      {step === "choose" ? (
+        <div className="space-y-3">
+          <GoogleChoice inApp={false} busy={busy} onGoogle={() => void google()} />
           <Button
             variant="secondary"
             full
             disabled={busy}
             onClick={() => {
               setError("");
+              moved.current = true;
               setStep("email");
             }}
           >
@@ -143,59 +268,14 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
           </p>
         </div>
       ) : step === "email" ? (
-        <form onSubmit={sendCode} noValidate>
-          <Field
-            id="email"
-            label="Email"
-            name="email"
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setEmailError("");
-            }}
-            placeholder="name@shop.com"
-            required
-            error={emailError || undefined}
-            hint="Kabsi emails you a 6-digit code. There is no password."
-          />
-          {(() => {
-            const suggestion = emailTypoSuggestion(email.trim());
-            return suggestion ? (
-              <p className="mt-2 text-small text-text-2">
-                Did you mean {suggestion}?{" "}
-                <button
-                  type="button"
-                  className="inline-flex min-h-11 items-center font-bold text-text-1 underline underline-offset-4"
-                  onClick={() => setEmail(suggestion)}
-                >
-                  Use it
-                </button>
-              </p>
-            ) : null;
-          })()}
-          <div className="mt-3">
-            <Turnstile key={round} onToken={setToken} />
-          </div>
-          <div className="mt-3" data-main-cta>
-            <Button type="submit" full loading={busy} disabled={!token}>
-              Send me a code
-            </Button>
-          </div>
-          <button
-            type="button"
-            className={buttonClass("tertiary") + " mt-3"}
-            onClick={() => {
-              setError("");
-              setEmailError("");
-              setStep("choose");
-            }}
-          >
-            Back to Continue with Google
-          </button>
-        </form>
+        <>
+          {emailForm}
+          {inApp ? (
+            <div className="mt-6 border-t border-line pt-5">
+              <GoogleChoice inApp busy={busy} onGoogle={() => void google()} />
+            </div>
+          ) : null}
+        </>
       ) : (
         <form onSubmit={verifyCode}>
           <Banner tone="ok" title="Sent. Check your email.">
@@ -209,9 +289,13 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
             id="login-code"
             maxLength={6}
             value={code}
+            autoComplete="one-time-code"
+            inputMode="numeric"
+            pattern="^[0-9]*$"
             onChange={(value) => {
-              setCode(value);
-              if (value.length === 6 && !busy)
+              const digits = value.replace(/\D/g, "").slice(0, 6);
+              setCode(digits);
+              if (digits.length === 6 && !busy)
                 window.setTimeout(
                   () =>
                     (document.getElementById("login-submit") as HTMLButtonElement | null)?.click(),
@@ -253,7 +337,9 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
             ) : null;
           })()}
           {seconds > 0 ? (
-            <p className="mt-5 text-small text-text-2">You can ask for a new code in {seconds}s.</p>
+            <p className="mt-5 text-small text-text-2" aria-live="off" data-countdown>
+              You can ask for a new code in {seconds} {seconds === 1 ? "second" : "seconds"}.
+            </p>
           ) : (
             <div className="mt-5">
               <Turnstile key={round} onToken={setToken} />
@@ -271,6 +357,7 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
             type="button"
             className={buttonClass("tertiary") + " mt-2 block"}
             onClick={() => {
+              moved.current = true;
               setStep("email");
               setCode("");
               setError("");
