@@ -365,9 +365,31 @@ async function staffAction(action: string) {
         await admin().rpc("whatsapp_record", { p_user: target.user_id, p_location: null, p_kind: "qa_delivery_proof", p_state: "sent", p_provider_id: sent.id, p_template: via === "template" ? used : null });
         return { ok: true, provider_id: sent.id, to_ending: (target.phone as string).slice(-4), via, template: via === "template" ? used : null };
       }
+      // Go live 1 (30.28): one owner-facing template (the work update) to Kabsi's own phone as the owner of its own business:
+      // the phone must be both a staff phone and an owner phone, so it can only ever be Kabsi's own. Once an hour at most.
+      case "ownerdelivery": {
+        const ctx = await whatsappCtx();
+        if (!ctx.out?.live.live) return { ok: false, error: "live_sender_off" };
+        const since = new Date(Date.now() - 3600_000).toISOString();
+        const { data: recent } = await admin().from("whatsapp_messages").select("provider_id, state").eq("kind", "qa_owner_delivery_proof").gte("created_at", since).limit(1);
+        if (recent?.length) return { ok: false, error: "already_sent_this_hour", provider_id: recent[0]?.provider_id, state: recent[0]?.state };
+        const staff = new Set(await staffAdminPhones());
+        const { data: owners } = await admin().from("phone_roles").select("phone, user_id, location_id, locations(name)").eq("role", "owner").is("revoked_at", null);
+        const target = ((owners ?? []) as unknown as { phone: string; user_id: string; location_id: string; locations: { name: string } | null }[])
+          .find((r) => staff.has(r.phone) && r.locations?.name);
+        if (!target) return { ok: false, error: "no_staff_owner_phone" };
+        const st = await ctx.out.db.state(target.phone);
+        if (!st.live_ok) return { ok: false, error: "phone_not_allow_listed" };
+        const t = ref("work_update", { business: target.locations!.name });
+        const used = sendName(t.name, await templateStatuses());
+        const sent = await ctx.out.live.template(target.phone, used, t.params);
+        await admin().rpc("whatsapp_record", { p_user: target.user_id, p_location: target.location_id, p_kind: "qa_owner_delivery_proof", p_state: "sent", p_provider_id: sent.id, p_template: used });
+        return { ok: true, provider_id: sent.id, to_ending: target.phone.slice(-4), business: target.locations!.name, template: used };
+      }
       case "deliverystatus": {
-        const { data } = await admin().from("whatsapp_messages").select("provider_id, state, template, error, created_at, updated_at").eq("kind", "qa_delivery_proof").order("created_at", { ascending: false }).limit(1);
-        return { ok: true, message: data?.[0] ?? null };
+        const last = async (kind: string) =>
+          (await admin().from("whatsapp_messages").select("provider_id, state, template, error, created_at, updated_at").eq("kind", kind).order("created_at", { ascending: false }).limit(1)).data?.[0] ?? null;
+        return { ok: true, message: await last("qa_delivery_proof"), owner: await last("qa_owner_delivery_proof") };
       }
       case "health": {
         const h = await readHealth(env);

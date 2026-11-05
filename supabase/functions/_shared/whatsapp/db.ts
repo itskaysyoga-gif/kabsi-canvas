@@ -9,6 +9,7 @@ import { recordAiUsage } from "../ai-budget.ts";
 import { type Nora, noraUser, noraWhatsAppSystem } from "./nora.ts";
 import { acceptUpload } from "../photos/intake.ts";
 import { WHATSAPP_ON } from "../whatsapp-setting.ts";
+import { isFictionalPhone } from "./phone.ts";
 import type { AgentDb, AgentDeps, BillingDeps } from "./agent.ts";
 import { addLocation, cancelAtEnd, changePlan, currentSub, familyOfSub, keepPlan, portal, productIds } from "../billing.ts";
 import { type Ctx, type Db, type MaySend, mockSender, type Sender } from "./deliver.ts";
@@ -87,7 +88,11 @@ function guarded(live: Sender, mock: Sender): Sender {
 }
 
 export const outDb: OutDb = {
-  state: (phone) => rpc<SendState>("whatsapp_send_state", { p_phone: phone }),
+  // Go live 1 (30.28): a fictional test number never gets a live send, whatever the setting says.
+  state: async (phone) => {
+    const s = await rpc<SendState>("whatsapp_send_state", { p_phone: phone });
+    return isFictionalPhone(phone) ? { ...s, live_ok: false } : s;
+  },
   add: (r) => rpc<number | null>("whatsapp_outbox_add", {
     p_phone: r.phone, p_user: r.userId, p_location: r.locationId, p_kind: r.kind, p_body: r.body, p_buttons: r.buttons ?? [],
     p_template: r.template ?? null, p_urgent: !!r.urgent, p_dedupe: r.dedupe ?? null, p_due_at: (r.dueAt ?? new Date()).toISOString(),

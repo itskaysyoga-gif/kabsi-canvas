@@ -3,7 +3,7 @@
 // goes to Vault and never into an answer).
 import assert from "node:assert/strict";
 import { route, routerSystem } from "./intent.ts";
-import { last4, toE164 } from "./phone.ts";
+import { isFictionalPhone, last4, toE164 } from "./phone.ts";
 import { decide, inQuietHours, next0800 } from "./policy.ts";
 import { parse } from "./router.ts";
 import { ACCESS_CHANGE_TEMPLATE, allDefs, isReplacement, ref, sendName, submission, type TemplateDef, TEMPLATES } from "./templates.ts";
@@ -310,4 +310,10 @@ Deno.test("a replacement Meta filed under Marketing is never sent, whatever its 
   assert.equal(sendName("kabsi_listing_change", map), "kabsi_listing_change", "approved as Marketing: not used");
   assert.equal(sendName("kabsi_google_action", map), "kabsi_google_action", "still pending");
   assert.ok(isReplacement("kabsi_billing_notice_v3") && !isReplacement("kabsi_billing_notice"));
+});
+
+// Go live 1 (master plan 30.28): with owners switched on, the test personas' fictional numbers still never get a live send.
+Deno.test("golive1: 555-0100 to 555-0199 numbers are fictional and always mocked; real numbers are not", () => {
+  for (const p of ["+12125550101", "+12125550199", "+13105550150"]) assert.equal(isFictionalPhone(p), true, p);
+  for (const p of ["+12057456874", "+12125550200", "+12125551234", "+447700900123", "+96170000000"]) assert.equal(isFictionalPhone(p), false, p);
 });
