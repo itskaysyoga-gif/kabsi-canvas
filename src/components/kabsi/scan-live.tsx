@@ -421,7 +421,9 @@ export function LiveFreeCheck({
           {phase.kind === "none" && (
             <NotFound query={query} keyword={keyword} industry={industry} />
           )}
-          {phase.kind === "error" && <Failed message={phase.message} theirs={phase.theirs ?? false} />}
+          {phase.kind === "error" && (
+            <Failed message={phase.message} theirs={phase.theirs ?? false} />
+          )}
           {phase.kind === "pick" && (
             <PickBusiness
               places={phase.places}
