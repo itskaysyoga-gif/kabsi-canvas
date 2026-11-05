@@ -1,5 +1,9 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Button as KabsiButton } from "@/components/kabsi/ui";
+import { AccountTop, ChoiceChips } from "@/components/kabsi/d3-account";
+import { Marked } from "@/components/kabsi/highlight";
+import type { StaffPage } from "@/lib/staff-nav";
 import { cn } from "@/lib/utils";
 
 // The staff page's parts on the light system (Design 3 tokens). The staff page has no main action, so no staff button
@@ -41,3 +45,69 @@ export const Button = forwardRef<
     </KabsiButton>
   );
 });
+
+// ─── App 5 (master plan 30.33 item 3): the parts every staff page shares ────────────────────────────────────────────
+
+/** The staff page's H1 with its one phrase on the highlight bar, and the one line that says what the page is for. */
+export function StaffTop({ page, action }: { page: StaffPage; action?: ReactNode }) {
+  return (
+    <AccountTop
+      tabs={false}
+      title={<Marked text={page.title} mark={page.mark} />}
+      lead={page.purpose}
+      action={action}
+    />
+  );
+}
+
+/**
+ * Chips that choose which of a page's panels show ("All" first), kept in the address as ?show= so a link from Today
+ * opens the right one. Every panel stays on the page; a chip only hides the others.
+ */
+export function usePanelChips<T extends string>(ids: readonly T[]) {
+  const navigate = useNavigate();
+  const raw = useRouterState({
+    select: (s) => (s.location.search as Record<string, unknown>)["show"],
+  });
+  const show = typeof raw === "string" && (ids as readonly string[]).includes(raw) ? (raw as T) : "all";
+  const set = (v: string) =>
+    void navigate({
+      to: ".",
+      search: (v === "all" ? {} : { show: v }) as never,
+      replace: true,
+      resetScroll: false,
+    });
+  const on = (id: T) => show === "all" || show === id;
+  return { show, set, on };
+}
+
+export function PanelChips({
+  value,
+  onChange,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <ChoiceChips
+      name="staff-show"
+      legend="Show"
+      legendClassName="sr-only"
+      className="mb-5"
+      value={value}
+      onChange={onChange}
+      options={[{ value: "all", label: "All" }, ...options]}
+    />
+  );
+}
+
+/** Loading, error and empty, the same on every staff page. */
+export function StaffLoading({ what }: { what: string }) {
+  return (
+    <p className="text-small text-text-2" role="status">
+      Loading {what}
+    </p>
+  );
+}

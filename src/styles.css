@@ -477,6 +477,57 @@ body:not(:has(.page-light)):has(.theme-dark),
   box-decoration-break: clone;
 }
 
+/* App 5 (master plan 30.33 item 3): a staff table becomes one card per row below 640 px. Each cell carries its column's
+   name in data-label, which the card shows on the left; the header row is kept for screen readers only. */
+@utility stack-table {
+  @media (max-width: 639px) {
+    & thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    & tbody,
+    & tfoot,
+    & tr,
+    & td,
+    & th {
+      display: block;
+      width: 100%;
+    }
+    & tbody tr,
+    & tfoot tr {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-inner, 12px);
+      background: var(--surface-1);
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    & td,
+    & tbody th,
+    & tfoot th {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.25rem 0;
+      text-align: end;
+      border: 0;
+      overflow-wrap: anywhere;
+    }
+    & td[data-label]::before,
+    & tbody th[data-label]::before,
+    & tfoot th[data-label]::before {
+      content: attr(data-label);
+      font-weight: 700;
+      color: var(--text-2);
+      text-align: start;
+      flex-shrink: 0;
+    }
+  }
+}
+
 @utility wa-ground {
   background-color: var(--wa-chat-bg);
   background-image: radial-gradient(rgb(17 27 33 / 0.05) 1px, transparent 1.2px);

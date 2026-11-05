@@ -8,7 +8,7 @@ import { Button, STAFF_H2 } from "./staff-ui";
 // Staff operations (spec §9): job health, read through the staff-only RPC staff_job_health. Card codes and card
 // orders are gone (K-125, P0.8-01): Kabsi sells no NFC cards and mints no new codes; existing codes keep working.
 
-type Health = {
+export type JobHealthData = {
   schedules: {
     name: string;
     schedule: string;
@@ -56,10 +56,10 @@ type Health = {
 };
 const when = (iso: string | null) => (iso ? fmtDateTime(iso) : "-");
 
-async function loadHealth(): Promise<Health> {
+export async function loadJobHealth(): Promise<JobHealthData> {
   const { data, error } = await supabase.rpc("staff_job_health");
   if (error) throw new Error(error.message);
-  return data as Health;
+  return data as JobHealthData;
 }
 
 export function OpsPanel() {
@@ -71,7 +71,7 @@ export function OpsPanel() {
 }
 
 function JobHealth() {
-  const q = useQuery({ queryKey: ["staff-health"], queryFn: loadHealth });
+  const q = useQuery({ queryKey: ["staff-health"], queryFn: loadJobHealth });
   const h = q.data;
   const bad = (n: number) => (n > 0 ? "text-bad font-bold" : "");
   return (
@@ -117,7 +117,7 @@ function JobHealth() {
             aria-label="Schedules"
             className="mt-4 overflow-x-auto rounded-inner border border-line"
           >
-            <table className="w-full text-start text-small">
+            <table className="stack-table w-full text-start text-small">
               <thead className="text-text-2">
                 <tr>
                   <th className="p-3 font-medium">Schedule</th>
@@ -129,12 +129,12 @@ function JobHealth() {
               <tbody className="divide-y divide-line">
                 {h.schedules.map((s) => (
                   <tr key={s.name}>
-                    <td className="p-3 font-mono text-label">{s.name.replace(/^kabsi_/, "")}</td>
-                    <td className="p-3 font-mono text-label">{s.schedule}</td>
-                    <td className={cn("p-3", s.last_status === "failed" && "text-bad")}>
+                    <th scope="row" className="p-3 text-start font-mono text-label font-bold">{s.name.replace(/^kabsi_/, "")}</th>
+                    <td data-label="Runs" className="p-3 font-mono text-label">{s.schedule}</td>
+                    <td data-label="Last run" className={cn("p-3", s.last_status === "failed" && "text-bad")}>
                       {when(s.last_start)} · {s.active ? (s.last_status ?? "never") : "paused"}
                     </td>
-                    <td className={cn("p-3", bad(s.failed_24h))}>{s.failed_24h}</td>
+                    <td data-label="Failed 24h" className={cn("p-3", bad(s.failed_24h))}>{s.failed_24h}</td>
                   </tr>
                 ))}
               </tbody>

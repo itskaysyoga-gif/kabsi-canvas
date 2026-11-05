@@ -1529,3 +1529,25 @@ Every guide's words are in its own content file, src/content/guides/<slug>.tsx; 
 - **404 and error screens**: one <title> each, "Kabsi: This page is not here." and "Kabsi: Something went wrong on our side." (the root's default "Kabsi" no longer sits beside them). No other wording changes.
 - **Facts (02, 07, 13)**: "The printable counter card from the free review link tool is free for everyone. The branded counter card and table tent PDFs (made for a business by Get reviews) come with the plans." The FAQ's "Is there a free part?" answer names the printable counter card, not the table card. No screen's wording changes: the Get reviews buttons "Print a counter card" and "Print a table card" stay.
 - **Guides**: a guide may quote Google's help page on how local results are chosen, word for word in quotation marks, when it cites that page with its link and the date read (tests/claims-k144.test.ts). Promises of rankings and the word "prominence" outside such a quote stay banned.
+
+## 57. App 5: a clear staff workspace, and the 30.32 look on the signed-in site (5 Nov 2026, master plan 30.33)
+
+Staff pages are for the Kabsi team only and are never public. Owners never see them.
+
+### Part A: the staff workspace (branch claude/app5-a)
+
+- **Menu** (side bar, under "Staff"): Today, Businesses, Conversations, Programs, System, Costs, then Settings apart. Phone bar: Today, Businesses, Chats, Programs, System. Phone menu ("Staff menu"): Costs, Settings, Business account, Guides, Log out. Phone top bar: "Staff · <page>".
+- **Headings and purpose lines** (the phrase on the highlight bar in brackets):
+  - Today: "What needs [a person] today" · "Everything waiting for the team now, with a button to the page that handles it."
+  - Businesses: "[Every business] on Kabsi" · "Newest first, with concierge, the Pro trial and diagnostics for each one."
+  - Conversations: "People [waiting] for an answer" · "Chats with Nora, follow-ups done by hand and the concierge queue."
+  - Programs: "[Founding 25] and Kabsi Partners" · "Applications to decide, the start checklist, partners and their payouts."
+  - System: "How the system is [running]" · "Operations, system and job health, the validation figures and the evidence log."
+  - Costs: "What Kabsi [spends]" · "Paid data providers and AI answers. Mock mode costs nothing and is not counted."
+  - Settings: "Staff [settings]" · "The WhatsApp staff phone: make a code and send it from that phone."
+- **Panel chips** (one row under the heading, "All" first): Conversations: Chats with Nora, Follow-ups, Concierge. Programs: Founding 25, Kabsi Partners. System: Operations, System health, Jobs, Validation, Evidence log. Businesses: All, Setting up, Active, Concierge. Chats with Nora: Show (Every chat, Needs a person), Lead (All, hot, warm, cold), Period (7, 30, 90, 365 days).
+- **Today**: "Needs a person now" with "[n] to look at" or "Nothing waiting". Rows, each with its count and a button: "[n] approval(s) not sent after 15 minutes" (Open operations), "[n] job(s) failed or stopped in the last 24 hours" (Open system health), "[n] business has / businesses have lost Google access" (Open operations), "[n] refusal(s) or provider error(s) in the last 24 hours" (See what was refused), "[n] chat is / chats are waiting for a person" (Open the chats), "[n] follow-up is / follow-ups are due" (Open follow-ups), "[n] concierge task is / tasks are waiting" (Open concierge), "[n] Founding 25 application(s) to decide" (Open Founding 25), "[n] partner application(s) to decide" (Open Partners), "[n] new business is / businesses are still setting up" (Open businesses).
+- **Today, empty**: "All clear." · "Nothing is waiting for a person. Today checks again each time you open it." Loading: "Checking every page". A read that fails: "Some figures did not load: [names]. The rows below leave them out. Try again".
+- **Today, other sections**: "New this week" · "Businesses still setting up, newest first." with "Step: [step]". "Spend against the caps" with "All costs": "DataForSEO, this month", "AI Visibility, this month" ("$x of $cap"), "AI answers, last 24 hours" ("$x for [n] answers"), "Google Places, today" ("[n] of [cap] calls"), then "Provider refusals, last 24 hours" with each alert's own line.
+- **Businesses**: "[shown] of [all]", "No business matches.", "The businesses did not load. Try again".
+- **Chats with Nora**: "Loading chats", "Nobody is waiting for a person."

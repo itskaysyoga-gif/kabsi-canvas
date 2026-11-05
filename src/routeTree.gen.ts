@@ -31,7 +31,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/app/route'
-import { Route as AuthenticatedStaffRouteImport } from './routes/_authenticated/staff'
+import { Route as AuthenticatedStaffRouteRouteImport } from './routes/_authenticated/staff/route'
 import { Route as AuthenticatedStartRouteImport } from './routes/_authenticated/start'
 import { Route as ATokenRouteImport } from './routes/a.$token'
 import { Route as ActivateCodeRouteImport } from './routes/activate.$code'
@@ -62,6 +62,13 @@ import { Route as AuthenticatedAppReviewsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app/settings'
 import { Route as AuthenticatedAppShieldRouteImport } from './routes/_authenticated/app/shield'
 import { Route as AuthenticatedAppTeamRouteImport } from './routes/_authenticated/app/team'
+import { Route as AuthenticatedStaffIndexRouteImport } from './routes/_authenticated/staff/index'
+import { Route as AuthenticatedStaffBusinessesRouteImport } from './routes/_authenticated/staff/businesses'
+import { Route as AuthenticatedStaffConversationsRouteImport } from './routes/_authenticated/staff/conversations'
+import { Route as AuthenticatedStaffCostsRouteImport } from './routes/_authenticated/staff/costs'
+import { Route as AuthenticatedStaffProgramsRouteImport } from './routes/_authenticated/staff/programs'
+import { Route as AuthenticatedStaffSettingsRouteImport } from './routes/_authenticated/staff/settings'
+import { Route as AuthenticatedStaffSystemRouteImport } from './routes/_authenticated/staff/system'
 import { Route as AuthenticatedStartResumeCodeRouteImport } from './routes/_authenticated/start_.resume.$code'
 
 const IndexRoute = IndexRouteImport.update({
@@ -173,7 +180,7 @@ const AuthenticatedAppRouteRoute = AuthenticatedAppRouteRouteImport.update({
   path: '/app',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedStaffRoute = AuthenticatedStaffRouteImport.update({
+const AuthenticatedStaffRouteRoute = AuthenticatedStaffRouteRouteImport.update({
   id: '/staff',
   path: '/staff',
   getParentRoute: () => AuthenticatedRouteRoute,
@@ -331,6 +338,46 @@ const AuthenticatedAppTeamRoute = AuthenticatedAppTeamRouteImport.update({
   path: '/team',
   getParentRoute: () => AuthenticatedAppRouteRoute,
 } as any)
+const AuthenticatedStaffIndexRoute = AuthenticatedStaffIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedStaffRouteRoute,
+} as any)
+const AuthenticatedStaffBusinessesRoute =
+  AuthenticatedStaffBusinessesRouteImport.update({
+    id: '/businesses',
+    path: '/businesses',
+    getParentRoute: () => AuthenticatedStaffRouteRoute,
+  } as any)
+const AuthenticatedStaffConversationsRoute =
+  AuthenticatedStaffConversationsRouteImport.update({
+    id: '/conversations',
+    path: '/conversations',
+    getParentRoute: () => AuthenticatedStaffRouteRoute,
+  } as any)
+const AuthenticatedStaffCostsRoute = AuthenticatedStaffCostsRouteImport.update({
+  id: '/costs',
+  path: '/costs',
+  getParentRoute: () => AuthenticatedStaffRouteRoute,
+} as any)
+const AuthenticatedStaffProgramsRoute =
+  AuthenticatedStaffProgramsRouteImport.update({
+    id: '/programs',
+    path: '/programs',
+    getParentRoute: () => AuthenticatedStaffRouteRoute,
+  } as any)
+const AuthenticatedStaffSettingsRoute =
+  AuthenticatedStaffSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedStaffRouteRoute,
+  } as any)
+const AuthenticatedStaffSystemRoute =
+  AuthenticatedStaffSystemRouteImport.update({
+    id: '/system',
+    path: '/system',
+    getParentRoute: () => AuthenticatedStaffRouteRoute,
+  } as any)
 const AuthenticatedStartResumeCodeRoute =
   AuthenticatedStartResumeCodeRouteImport.update({
     id: '/start_/resume/$code',
@@ -360,7 +407,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/app': typeof AuthenticatedAppRouteRouteWithChildren
-  '/staff': typeof AuthenticatedStaffRoute
+  '/staff': typeof AuthenticatedStaffRouteRouteWithChildren
   '/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
@@ -390,7 +437,14 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/app/shield': typeof AuthenticatedAppShieldRoute
   '/app/team': typeof AuthenticatedAppTeamRoute
+  '/staff/businesses': typeof AuthenticatedStaffBusinessesRoute
+  '/staff/conversations': typeof AuthenticatedStaffConversationsRoute
+  '/staff/costs': typeof AuthenticatedStaffCostsRoute
+  '/staff/programs': typeof AuthenticatedStaffProgramsRoute
+  '/staff/settings': typeof AuthenticatedStaffSettingsRoute
+  '/staff/system': typeof AuthenticatedStaffSystemRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/staff/': typeof AuthenticatedStaffIndexRoute
   '/start/resume/$code': typeof AuthenticatedStartResumeCodeRoute
 }
 export interface FileRoutesByTo {
@@ -414,7 +468,6 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
-  '/staff': typeof AuthenticatedStaffRoute
   '/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
@@ -444,7 +497,14 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/app/shield': typeof AuthenticatedAppShieldRoute
   '/app/team': typeof AuthenticatedAppTeamRoute
+  '/staff/businesses': typeof AuthenticatedStaffBusinessesRoute
+  '/staff/conversations': typeof AuthenticatedStaffConversationsRoute
+  '/staff/costs': typeof AuthenticatedStaffCostsRoute
+  '/staff/programs': typeof AuthenticatedStaffProgramsRoute
+  '/staff/settings': typeof AuthenticatedStaffSettingsRoute
+  '/staff/system': typeof AuthenticatedStaffSystemRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/staff': typeof AuthenticatedStaffIndexRoute
   '/start/resume/$code': typeof AuthenticatedStartResumeCodeRoute
 }
 export interface FileRoutesById {
@@ -471,7 +531,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteRouteWithChildren
-  '/_authenticated/staff': typeof AuthenticatedStaffRoute
+  '/_authenticated/staff': typeof AuthenticatedStaffRouteRouteWithChildren
   '/_authenticated/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
@@ -501,7 +561,14 @@ export interface FileRoutesById {
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
   '/_authenticated/app/shield': typeof AuthenticatedAppShieldRoute
   '/_authenticated/app/team': typeof AuthenticatedAppTeamRoute
+  '/_authenticated/staff/businesses': typeof AuthenticatedStaffBusinessesRoute
+  '/_authenticated/staff/conversations': typeof AuthenticatedStaffConversationsRoute
+  '/_authenticated/staff/costs': typeof AuthenticatedStaffCostsRoute
+  '/_authenticated/staff/programs': typeof AuthenticatedStaffProgramsRoute
+  '/_authenticated/staff/settings': typeof AuthenticatedStaffSettingsRoute
+  '/_authenticated/staff/system': typeof AuthenticatedStaffSystemRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/staff/': typeof AuthenticatedStaffIndexRoute
   '/_authenticated/start_/resume/$code': typeof AuthenticatedStartResumeCodeRoute
 }
 export interface FileRouteTypes {
@@ -558,7 +625,14 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/shield'
     | '/app/team'
+    | '/staff/businesses'
+    | '/staff/conversations'
+    | '/staff/costs'
+    | '/staff/programs'
+    | '/staff/settings'
+    | '/staff/system'
     | '/app/'
+    | '/staff/'
     | '/start/resume/$code'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -582,7 +656,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/unsubscribe'
-    | '/staff'
     | '/start'
     | '/a/$token'
     | '/activate/$code'
@@ -612,7 +685,14 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/shield'
     | '/app/team'
+    | '/staff/businesses'
+    | '/staff/conversations'
+    | '/staff/costs'
+    | '/staff/programs'
+    | '/staff/settings'
+    | '/staff/system'
     | '/app'
+    | '/staff'
     | '/start/resume/$code'
   id:
     | '__root__'
@@ -668,7 +748,14 @@ export interface FileRouteTypes {
     | '/_authenticated/app/settings'
     | '/_authenticated/app/shield'
     | '/_authenticated/app/team'
+    | '/_authenticated/staff/businesses'
+    | '/_authenticated/staff/conversations'
+    | '/_authenticated/staff/costs'
+    | '/_authenticated/staff/programs'
+    | '/_authenticated/staff/settings'
+    | '/_authenticated/staff/system'
     | '/_authenticated/app/'
+    | '/_authenticated/staff/'
     | '/_authenticated/start_/resume/$code'
   fileRoutesById: FileRoutesById
 }
@@ -870,7 +957,7 @@ declare module '@tanstack/react-router' {
       id: '/_authenticated/staff'
       path: '/staff'
       fullPath: '/staff'
-      preLoaderRoute: typeof AuthenticatedStaffRouteImport
+      preLoaderRoute: typeof AuthenticatedStaffRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/start': {
@@ -1083,6 +1170,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppTeamRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/staff/': {
+      id: '/_authenticated/staff/'
+      path: '/'
+      fullPath: '/staff/'
+      preLoaderRoute: typeof AuthenticatedStaffIndexRouteImport
+      parentRoute: typeof AuthenticatedStaffRouteRoute
+    }
+    '/_authenticated/staff/businesses': {
+      id: '/_authenticated/staff/businesses'
+      path: '/businesses'
+      fullPath: '/staff/businesses'
+      preLoaderRoute: typeof AuthenticatedStaffBusinessesRouteImport
+      parentRoute: typeof AuthenticatedStaffRouteRoute
+    }
+    '/_authenticated/staff/conversations': {
+      id: '/_authenticated/staff/conversations'
+      path: '/conversations'
+      fullPath: '/staff/conversations'
+      preLoaderRoute: typeof AuthenticatedStaffConversationsRouteImport
+      parentRoute: typeof AuthenticatedStaffRouteRoute
+    }
+    '/_authenticated/staff/costs': {
+      id: '/_authenticated/staff/costs'
+      path: '/costs'
+      fullPath: '/staff/costs'
+      preLoaderRoute: typeof AuthenticatedStaffCostsRouteImport
+      parentRoute: typeof AuthenticatedStaffRouteRoute
+    }
+    '/_authenticated/staff/programs': {
+      id: '/_authenticated/staff/programs'
+      path: '/programs'
+      fullPath: '/staff/programs'
+      preLoaderRoute: typeof AuthenticatedStaffProgramsRouteImport
+      parentRoute: typeof AuthenticatedStaffRouteRoute
+    }
+    '/_authenticated/staff/settings': {
+      id: '/_authenticated/staff/settings'
+      path: '/settings'
+      fullPath: '/staff/settings'
+      preLoaderRoute: typeof AuthenticatedStaffSettingsRouteImport
+      parentRoute: typeof AuthenticatedStaffRouteRoute
+    }
+    '/_authenticated/staff/system': {
+      id: '/_authenticated/staff/system'
+      path: '/system'
+      fullPath: '/staff/system'
+      preLoaderRoute: typeof AuthenticatedStaffSystemRouteImport
+      parentRoute: typeof AuthenticatedStaffRouteRoute
+    }
     '/_authenticated/start_/resume/$code': {
       id: '/_authenticated/start_/resume/$code'
       path: '/start/resume/$code'
@@ -1134,16 +1270,42 @@ const AuthenticatedAppRouteRouteWithChildren =
     AuthenticatedAppRouteRouteChildren,
   )
 
+interface AuthenticatedStaffRouteRouteChildren {
+  AuthenticatedStaffBusinessesRoute: typeof AuthenticatedStaffBusinessesRoute
+  AuthenticatedStaffConversationsRoute: typeof AuthenticatedStaffConversationsRoute
+  AuthenticatedStaffCostsRoute: typeof AuthenticatedStaffCostsRoute
+  AuthenticatedStaffProgramsRoute: typeof AuthenticatedStaffProgramsRoute
+  AuthenticatedStaffSettingsRoute: typeof AuthenticatedStaffSettingsRoute
+  AuthenticatedStaffSystemRoute: typeof AuthenticatedStaffSystemRoute
+  AuthenticatedStaffIndexRoute: typeof AuthenticatedStaffIndexRoute
+}
+
+const AuthenticatedStaffRouteRouteChildren: AuthenticatedStaffRouteRouteChildren =
+  {
+    AuthenticatedStaffBusinessesRoute: AuthenticatedStaffBusinessesRoute,
+    AuthenticatedStaffConversationsRoute: AuthenticatedStaffConversationsRoute,
+    AuthenticatedStaffCostsRoute: AuthenticatedStaffCostsRoute,
+    AuthenticatedStaffProgramsRoute: AuthenticatedStaffProgramsRoute,
+    AuthenticatedStaffSettingsRoute: AuthenticatedStaffSettingsRoute,
+    AuthenticatedStaffSystemRoute: AuthenticatedStaffSystemRoute,
+    AuthenticatedStaffIndexRoute: AuthenticatedStaffIndexRoute,
+  }
+
+const AuthenticatedStaffRouteRouteWithChildren =
+  AuthenticatedStaffRouteRoute._addFileChildren(
+    AuthenticatedStaffRouteRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppRouteRoute: typeof AuthenticatedAppRouteRouteWithChildren
-  AuthenticatedStaffRoute: typeof AuthenticatedStaffRoute
+  AuthenticatedStaffRouteRoute: typeof AuthenticatedStaffRouteRouteWithChildren
   AuthenticatedStartRoute: typeof AuthenticatedStartRoute
   AuthenticatedStartResumeCodeRoute: typeof AuthenticatedStartResumeCodeRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRouteRoute: AuthenticatedAppRouteRouteWithChildren,
-  AuthenticatedStaffRoute: AuthenticatedStaffRoute,
+  AuthenticatedStaffRouteRoute: AuthenticatedStaffRouteRouteWithChildren,
   AuthenticatedStartRoute: AuthenticatedStartRoute,
   AuthenticatedStartResumeCodeRoute: AuthenticatedStartResumeCodeRoute,
 }
