@@ -139,10 +139,14 @@ test.describe("public pages", () => {
     const sent = await mockFreeCheck(page);
     await page.goto("/scan?q=SEVEN%20Burgers");
     await page.getByRole("button", { name: "This is my business" }).click({ timeout: 30_000 });
-    await expect(page.getByText("We asked ChatGPT: 'best fast food restaurant in Boqaata, Lebanon'")).toBeVisible({ timeout: 30_000 });
+    await expect(
+      page.getByText("We asked ChatGPT: 'best fast food restaurant in Boqaata, Lebanon'"),
+    ).toBeVisible({ timeout: 30_000 });
     expect(sent.check?.["city"]).toBe("Boqaata");
     await expect(page.getByText("No sources cited.")).toBeVisible();
-    await expect(page.getByText(/^Asked on 5 November 2026 through OpenAI's API, with web search\./)).toBeVisible();
+    await expect(
+      page.getByText(/^Asked on 5 November 2026 through OpenAI's API, with web search\./),
+    ).toBeVisible();
     await expect(page.getByText("1 to look at, 5 shown on Google")).toBeVisible();
     const at = page.getByRole("heading", { name: "At your address on Google Maps" });
     await expect(at).toBeVisible();
@@ -152,7 +156,9 @@ test.describe("public pages", () => {
     const [a, c, h] = await Promise.all([at.boundingBox(), card.boundingBox(), how.boundingBox()]);
     expect(a!.y).toBeLessThan(c!.y);
     expect(c!.y).toBeLessThan(h!.y);
-    expect(await page.locator("main").innerText()).not.toMatch(/[\u0600-\u06FF]|already right|McDonald/);
+    expect(await page.locator("main").innerText()).not.toMatch(
+      /[\u0600-\u06FF]|already right|McDonald/,
+    );
     await page.getByLabel("Email").last().fill("qa-report@test.local");
     await page.getByRole("button", { name: "Send me this report" }).click();
     await expect(page.getByText("Sent.")).toBeVisible();
