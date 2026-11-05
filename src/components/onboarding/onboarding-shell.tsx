@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { Headline } from "@/components/kabsi/highlight";
+import { ShortParas } from "@/components/kabsi/d3-account";
 import { KabsiLogo } from "@/components/shared/kabsi-logo";
 import { cn } from "@/lib/utils";
 import { STAGES } from "@/lib/onboarding-flow";
@@ -118,7 +119,13 @@ export function StepTitle({
       <h1 className="font-display text-h2 font-bold text-text-1">
         {typeof title === "string" ? <Headline text={title} mark={mark} /> : title}
       </h1>
-      {sub ? <p className="mt-3 text-lead text-text-2">{sub}</p> : null}
+      {typeof sub === "string" ? (
+        <div className="mt-3">
+          <ShortParas className="text-lead text-text-2" text={sub} />
+        </div>
+      ) : sub ? (
+        <p className="mt-3 text-lead text-text-2">{sub}</p>
+      ) : null}
     </div>
   );
 }
