@@ -6,7 +6,7 @@ import {
   type FoundBusiness,
   type Snapshot,
 } from "@/lib/profile-check";
-import { pixelCustom, pixelEvent } from "@/lib/meta-pixel";
+import { pixelCustom } from "@/lib/meta-pixel";
 import { track } from "@/lib/telemetry";
 
 export type Phase = "find" | "result";
@@ -47,7 +47,8 @@ export function useProfileCheck(source: "tool" | "onboarding" | "home") {
       setPhase("result");
       // 20.1 and 20.4: the result is on screen.
       track("free_scan_completed", { source });
-      pixelEvent("Lead", { content_name: "free_scan" });
+      // Scan 2 (30.29): a finished check is the custom FreeScanCompleted; Lead is a contact given.
+      pixelCustom("FreeScanCompleted");
     } catch (e) {
       fail(e);
     }

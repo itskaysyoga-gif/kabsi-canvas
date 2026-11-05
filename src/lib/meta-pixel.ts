@@ -122,6 +122,6 @@ export function pixelPageView(path: string) {
 export function pixelEvent(name: PixelEvent, params: Record<string, unknown> = {}) {
   send("track", name, params);
 }
-export function pixelCustom(name: "FreeScanStarted") {
+export function pixelCustom(name: "FreeScanStarted" | "FreeScanCompleted") {
   send("trackCustom", name);
 }

@@ -117,6 +117,8 @@ describe("Polish 3: the free check result's order (decision 1)", () => {
     expect(events.sort()).toEqual(
       [
         "pixelCustom:FreeScanStarted",
+        // Scan 2 (30.29): a finished check is FreeScanCompleted; Lead fires when the report is sent.
+        "pixelCustom:FreeScanCompleted",
         "pixelEvent:Lead",
         "track:free_scan_completed",
         "track:free_scan_started",
