@@ -9,6 +9,9 @@ import { ArrowRight, ArrowUpRight, Check, Clock3 } from "lucide-react";
 import { ScanBox } from "@/components/kabsi/scan-box";
 import { KabsiMark, TrialLine } from "@/components/kabsi/ui";
 import { GuidePublic } from "@/components/marketing/guide-links";
+import { GuideImage, TopicPill } from "@/components/marketing/guide-photo";
+import { Marked } from "@/components/kabsi/highlight";
+import { guideLook } from "@/content/guides/look";
 import type { GuideDoc, GuideMeta } from "@/content/guides/types";
 import { NOT_AFFILIATED } from "@/lib/site";
 import { track } from "@/lib/telemetry";
@@ -27,42 +30,6 @@ const link =
 
 const cta = (guide: string, box: "after_answer" | "end" | "start_free") => () =>
   track("guide_cta_clicked", { guide, box });
-
-/** The typographic cover: the guide's question on the black band, the mark and the topic. The same design is the
- *  guide's 1200 by 630 share image (scripts/guide-covers.mjs). Decorative: the H1 carries the words. */
-export function GuideCover({
-  title,
-  topic,
-  className,
-}: {
-  title: string;
-  topic: string;
-  className?: string;
-}) {
-  return (
-    <div
-      aria-hidden="true"
-      className={cn(
-        "theme-dark relative flex aspect-[1200/630] w-full flex-col justify-between overflow-hidden rounded-panel bg-band p-5 [container-type:inline-size] sm:p-8",
-        className,
-      )}
-    >
-      <div className="flex items-center gap-3">
-        <KabsiMark className="size-7 sm:size-9" />
-        <span className="text-small font-bold text-text-1">Kabsi guide</span>
-        <span className="rounded-full border border-line-strong px-3 py-0.5 text-label text-text-2">
-          {topic}
-        </span>
-      </div>
-      <div>
-        <p className="max-w-[16em] font-display text-[6.2cqw] leading-[1.06] font-bold tracking-[-0.02em] text-balance text-text-1">
-          {title}
-        </p>
-        <span className="mt-[2.8cqw] block h-[1.2cqw] w-[10cqw] rounded-full bg-kb-yellow" />
-      </div>
-    </div>
-  );
-}
 
 function Byline({ g }: { g: GuideMeta; sources: GuideDoc["sources"] }) {
   return (
@@ -208,7 +175,7 @@ function Related({
     <section aria-labelledby="related" className="container-kb pb-16 lg:pb-24">
       <div className="border-t border-line pt-12">
         <h2 id="related" className="font-display text-h2 font-bold text-text-1">
-          Read next
+          <Marked text="Read next" mark="next" />
         </h2>
         {related.length ? (
           <ul className="mt-6 grid gap-3 md:grid-cols-3">
@@ -217,13 +184,18 @@ function Related({
                 <Link
                   to="/guides/$slug"
                   params={{ slug: r.slug }}
-                  className="press group flex h-full flex-col rounded-card border border-line bg-surface-1 p-5 shadow-rest hover:border-line-strong"
+                  className="press group flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface-1 shadow-rest hover:border-line-strong"
                 >
-                  <span className="text-label text-text-2">{r.topic}</span>
-                  <span className="mt-1 text-title font-bold text-text-1">{r.title}</span>
-                  <span className="mt-2 flex-1 text-small text-text-2">{r.description}</span>
-                  <span className="mt-4 inline-flex items-center gap-1.5 text-small font-bold text-text-1">
-                    Read the guide <ArrowRight className="size-4" aria-hidden />
+                  <GuideImage slug={r.slug} ratio="16/9" sizes="(min-width: 768px) 380px, 100vw" />
+                  <span className="flex flex-1 flex-col p-5">
+                    <TopicPill>{guideLook(r.slug).group}</TopicPill>
+                    <span className="mt-3 text-title font-bold text-text-1">{r.title}</span>
+                    <span className="mt-2 line-clamp-2 flex-1 text-small text-text-2">
+                      {r.description}
+                    </span>
+                    <span className="mt-4 inline-flex items-center gap-1.5 text-small font-bold text-text-1">
+                      Read the guide <ArrowRight className="size-4" aria-hidden />
+                    </span>
                   </span>
                 </Link>
               </li>
@@ -312,16 +284,25 @@ export function GuideArticle({
             <li>{doc.topic}</li>
           </ol>
         </nav>
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,38rem)_1fr] lg:gap-16">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,38rem)_1fr] lg:items-center lg:gap-16">
           <header className="min-w-0">
-            <h1 className="mt-2 font-display text-h2 font-bold text-balance text-text-1 sm:text-display">
-              {doc.title}
+            <p className="mt-2">
+              <TopicPill>{guideLook(doc.slug).group}</TopicPill>
+            </p>
+            <h1 className="mt-3 font-display text-h2 font-bold text-balance text-text-1 sm:text-display">
+              <Marked text={doc.title} mark={guideLook(doc.slug).mark} />
             </h1>
             <p className="mt-5 text-lead text-text-1">{doc.answer}</p>
             <Byline g={meta} sources={doc.sources} />
             <p className="mt-1 text-small text-text-2">{checkedLine(doc)}</p>
           </header>
-          <GuideCover title={doc.title} topic={doc.topic} className="lg:mt-4" />
+          <GuideImage
+            slug={doc.slug}
+            ratio="3/2"
+            priority
+            sizes="(min-width: 1024px) 560px, 100vw"
+            className="rounded-panel"
+          />
         </div>
       </div>
 
