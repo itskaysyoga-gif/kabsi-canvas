@@ -103,6 +103,7 @@ function SetupCallPage() {
                 <p>
                   Prefer to type? Message us on{" "}
                   <WhatsappLink
+                    glyph
                     kind={kind === "setup" ? "setup" : kind === "partner" ? "partner" : "general"}
                   >
                     WhatsApp {WHATSAPP_NUMBER}

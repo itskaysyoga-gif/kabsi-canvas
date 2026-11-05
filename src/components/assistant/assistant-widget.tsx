@@ -480,7 +480,7 @@ export function AssistantWidget({
                 {WHATSAPP_ON ? (
                   <>
                     You can also message us on{" "}
-                    <WhatsappLink kind="handover" className="font-bold">
+                    <WhatsappLink kind="handover" glyph className="font-bold">
                       WhatsApp {WHATSAPP_NUMBER}
                     </WhatsappLink>
                     .
