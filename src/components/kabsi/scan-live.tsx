@@ -1009,7 +1009,7 @@ export function LiveResult({
             </Fold>
           </div>
 
-          <SendReport placeId={s.place_id} />
+          <SendReport placeId={s.place_id} code={check?.code ?? null} />
         </div>
       </div>
     </>
@@ -1153,7 +1153,7 @@ function Waitlist({
 
 /* ---------- Send me this report (the profile-snapshot function's email and WhatsApp actions) ---------- */
 
-function SendReport({ placeId }: { placeId: string }) {
+function SendReport({ placeId, code }: { placeId: string; code: string | null }) {
   const { take, widget } = useTokens();
   const [email, setEmail] = useState("");
   const [tips, setTips] = useState(false);
@@ -1179,6 +1179,7 @@ function SendReport({ placeId }: { placeId: string }) {
           tips,
           page: "/google-profile-check",
           turnstile: await take(),
+          code,
         });
       if (byPhone)
         await whatsappCheck({
@@ -1186,6 +1187,7 @@ function SendReport({ placeId }: { placeId: string }) {
           phone,
           page: "/google-profile-check",
           turnstile: await take(),
+          code,
         });
       track("free_tool_used", { source: "profile_check_email" });
       setState("sent");

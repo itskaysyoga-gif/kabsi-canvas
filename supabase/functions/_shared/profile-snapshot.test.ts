@@ -10,6 +10,7 @@ import { buildSnapshot, CHECK_PAGES, checkEmail, type Deps, flags, LIMITS, makeH
 import { esc } from "./email-layout.ts";
 import { FREE_TOOL_BUSY } from "./free-tool-busy.ts";
 import { visibleText, type EmailContent, renderEmail } from "./email/template.ts";
+import { type CheckRow, reportParts } from "./visibility/free-check.ts";
 
 const CTX = { appUrl: "https://kabsi.test", defaultWhy: "You asked for this email." };
 const real = { ...guard };
@@ -45,7 +46,7 @@ const SESSION = "6f1c2c2e-9a0b-4f0e-8d57-0a4e0d1f3b21";
 type Seen = { url: string; method: string; mask: string | null; body: string }[];
 
 // A world with the Places day cap, an in-memory limiter and every outbound effect recorded. PLACE_B is not on Google.
-function world(opts: { cap?: number; place?: Place; turnstile?: boolean; whatsapp?: boolean; waState?: "sent" | "mock_sent" | "held" | "failed"; autoStatus?: number; noSecret?: boolean } = {}) {
+function world(opts: { checks?: Record<string, CheckRow>; cap?: number; place?: Place; turnstile?: boolean; whatsapp?: boolean; waState?: "sent" | "mock_sent" | "held" | "failed"; autoStatus?: number; noSecret?: boolean } = {}) {
   const clock = { ms: Date.parse("2026-11-01T10:00:00Z") };
   const cap = opts.cap ?? 100;
   const requests: Seen = [];
@@ -98,6 +99,10 @@ function world(opts: { cap?: number; place?: Place; turnstile?: boolean; whatsap
     saveEmail: (row) => (saved.push(row), Promise.resolve()),
     sendEmail: (o) => (sent.push({ ...o, subject: o.content.subject, ...renderEmail(o.content, CTX) }), Promise.resolve({ sent: "x" })),
     captureError: (_fn, e) => (errors.push(e), Promise.resolve()),
+    loadCheck: (code, placeId) => {
+      const c = opts.checks?.[code];
+      return Promise.resolve(!c ? null : c.self.place_id === placeId ? { parts: reportParts(c, "https://kabsi.co") } : "other");
+    },
     appUrl: "https://kabsi.co",
     cors: {},
     esc,
@@ -645,4 +650,101 @@ Deno.test("search: the match carries its category, so two businesses with one na
   } finally {
     restore();
   }
+});
+
+// ─── Scan 2 (master plan 30.29 item B): the report sent is the report shown ─────────────────────────────────────────
+const CHECK_DONE: CheckRow = {
+  id: "c1", code: "SEVEN234", business: "Harbour Lane Coffee", term: "coffee shop", country: "GB", city: "Example Town",
+  self: { title: "Harbour Lane Coffee", cid: "self", place_id: PLACE_A }, center: { lat: 51.5, lng: -0.1 }, radius_km: 1.5,
+  category: "Coffee shop", source: "live", state: "done", created_at: "2026-11-05T09:00:00.000Z",
+  fast: { rank: 2, line: "At your address you rank 2 for 'coffee shop'.", competitors: [{ name: "Corner Crumb", rating: 4.8, reviews: 20 }] },
+  points: [],
+  nearby: {
+    cards: [
+      { kind: "home", row: 3, col: 3, place: "Near your coffee shop", name: null, rank: 2, position: "2nd", first: "Corner Crumb", firstIsYou: false },
+      { kind: "away", row: 0, col: 0, place: "About 2 km north west of your coffee shop", name: null, rank: 7, position: "7th", first: "قطر الندى", firstIsYou: false },
+      { kind: "away", row: 6, col: 3, place: "About 1 km south of your coffee shop", name: null, rank: 1, position: "1st", first: null, firstIsYou: true },
+    ],
+    top3: 18, points: 49, count_line: "In the first 3 at 18 of 49 places Kabsi checked.", keyword: "coffee shop", note: "Sample Google Maps results, not customer counts.",
+  },
+  ai: {
+    provider: "chatgpt", named: false, sources: [], label: "One sample. AI answers change from run to run.", accuracy: null,
+    question: "best coffee shop in Example Town, United Kingdom", assistant: "ChatGPT", model: "gpt-4.1-mini", asked_at: "2026-11-05T09:00:00.000Z",
+    web_search_forced: true, city_dropped: false, local: [], named_local: [], named_other: 3,
+  },
+};
+const MAPPING: CheckRow = { ...CHECK_DONE, code: "MAPPYNG2", state: "mapping", nearby: null };
+const OTHER: CheckRow = { ...CHECK_DONE, code: "XTHERPZ2", self: { ...CHECK_DONE.self, place_id: PLACE_C } };
+const CHECKS = { SEVEN234: CHECK_DONE, MAPPYNG2: MAPPING, XTHERPZ2: OTHER };
+const MAIL = { action: "email", place_id: PLACE_A, email: "owner@example-cafe.com", tips: false, consent_text: TIPS_CONSENT_TEXT, page: "/google-profile-check" };
+
+Deno.test("scan2: with the check's code the email holds the nearby part, the AI question with its line and date, and the link", async () => {
+  const w = world({ checks: CHECKS });
+  try {
+    const r = await w.call({ ...MAIL, code: "seven234" });
+    assert.equal(r.status, 200);
+    const t = w.sent[0].text;
+    for (const line of [
+      "In the first 3 at 18 of 49 places Kabsi checked.",
+      "Near your coffee shop you came up 2nd for 'coffee shop'.",
+      "About 2 km north west of your coffee shop, another business came first. You were 7th.",
+      "We asked ChatGPT: 'best coffee shop in Example Town, United Kingdom'",
+      "ChatGPT did not name you. The businesses it named are not near you on Google Maps, so this answer does not reflect your area.",
+      "Asked on 5 November 2026 through OpenAI's API, with web search.",
+      "https://kabsi.co/scan/SEVEN234",
+    ]) assert.ok(t.includes(line), `missing: ${line}`);
+    assert.ok(!/\p{Script=Arabic}/u.test(w.sent[0].html + t), "no Arabic in the email");
+    assert.ok(w.sent[0].html.includes('href="https://kabsi.co/scan/SEVEN234"'));
+    assert.equal(w.requests.length, 1, "the Google part is read live again");
+  } finally {
+    restore();
+  }
+});
+
+Deno.test("scan2: no code keeps the email as it was; an unknown or unfinished check sends the Google part and says so; another place's code is refused", async () => {
+  const w = world({ checks: CHECKS });
+  try {
+    await w.call(MAIL);
+    assert.ok(!w.sent[0].text.includes("were not part of this check"), "no code: the email is unchanged");
+    await w.call({ ...MAIL, email: "b@example-cafe.com", code: "ZZZZZZZZ" });
+    assert.ok(w.sent[1].text.includes("The nearby search and the AI answer were not part of this check."));
+    assert.ok(!w.sent[1].text.includes("/scan/"));
+    await w.call({ ...MAIL, email: "c@example-cafe.com", code: "MAPPYNG2" });
+    assert.ok(w.sent[2].text.includes("The nearby search and the AI answer were not part of this check."), "a check that never finished");
+    const other = await w.call({ ...MAIL, email: "d@example-cafe.com", code: "XTHERPZ2" });
+    assert.equal(other.status, 400);
+    assert.equal(other.body.error, "bad_check");
+    assert.equal(w.sent.length, 3, "nothing sent for another place's check");
+    // Review of Scan 2: asked again once the check has finished, the report goes out (a new dedupe key), not dropped.
+    const keys = new Set(w.sent.map((m) => m.dedupeKey));
+    assert.equal(keys.size, 3);
+    assert.equal(w.saved.length, 3);
+  } finally {
+    restore();
+  }
+});
+
+Deno.test("scan2: WhatsApp carries the profile line, the count line, the AI line and the link in the one template, within 900 characters", async () => {
+  const w = world({ checks: CHECKS, whatsapp: true });
+  try {
+    assert.equal((await w.call({ ...WA, code: "SEVEN234" })).status, 200);
+    const [, line] = w.wa.sent[0].params;
+    assert.ok(line.includes("In the first 3 at 18 of 49 places Kabsi checked. ChatGPT did not name you."));
+    assert.ok(line.endsWith("kabsi.co/scan/SEVEN234"));
+    assert.ok(!/\n/.test(line));
+    const other = await w.call({ ...WA, phone: "+1 201 555 0101", code: "XTHERPZ2" }, "203.0.113.9");
+    assert.equal(other.status, 400);
+    assert.equal(w.wa.sent.length, 1);
+    // A check that never finished says so on WhatsApp too.
+    assert.equal((await w.call({ ...WA, phone: "+1 201 555 0102", code: "MAPPYNG2" }, "203.0.113.10")).status, 200);
+    assert.ok(w.wa.sent[1].params[1].endsWith("The nearby search and the AI answer were not part of this check."));
+  } finally {
+    restore();
+  }
+  // The 900 characters: a long profile line is cut, the link always fits.
+  const bare = buildSnapshot(PLACE_A, { id: PLACE_A, displayName: { text: "X" }, formattedAddress: "Y" }, true);
+  const long = { ...bare, flags: Array.from({ length: 40 }, (_, i) => ({ tone: "warning" as const, fact: `A long fact number ${i} that keeps going for a while.`, action: "x" })) };
+  const [, p] = whatsappParams(long, { nearby: ["In the first 3 at 18 of 49 places Kabsi checked."], ai: ["We asked ChatGPT: 'q'", "ChatGPT named you."], link: "https://kabsi.co/scan/SEVEN234" });
+  assert.ok(p.length <= 900, `length ${p.length}`);
+  assert.ok(p.endsWith("In the first 3 at 18 of 49 places Kabsi checked. ChatGPT named you. kabsi.co/scan/SEVEN234"));
 });

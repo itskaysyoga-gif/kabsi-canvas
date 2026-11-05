@@ -10,7 +10,8 @@
 //     suggestion limits, the Places cap or any Google error, "available" is false and the page falls back to search.
 //   POST { action: "check", place_id, session_token?, turnstile }     -> { snapshot }
 //     The session token of the suggestions, passed to Place Details, ends the Autocomplete session.
-//   POST { action: "email", place_id, email, tips, consent_text, page, turnstile } -> { ok: true }
+//   POST { action: "email", place_id, email, tips, consent_text, page, turnstile, code? } -> { ok: true }
+//     Scan 2 (30.29): with the free check's code, the email holds its nearby and AI parts and the link (the report shown).
 //   POST { action: "whatsapp", place_id, phone, consent, consent_text, page, turnstile } -> { ok: true }
 //     Only while Kabsi has a WhatsApp number (WHATSAPP_NUMBER). One message, after a ticked opt-in whose words are
 //     recorded; no follow-up sequence. The number is used to send and is not stored, only its hash.
@@ -26,6 +27,7 @@ import type { EmailContent } from "./email/template.ts";
 import { type CoachRow, freeChecklist } from "./coach/catalog.ts";
 import { FREE_TOOL_BUSY } from "./free-tool-busy.ts";
 import { areaOfPlace } from "./visibility/area.ts";
+import { CODE_RE, NOT_PART, type ReportParts } from "./visibility/report.ts";
 
 export const TIPS_CONSENT_TEXT = "Send me tips on managing my Google profile";
 /** The words next to the WhatsApp tick. Keep equal to WHATSAPP_CONSENT_TEXT in src/lib/profile-check.ts (a test checks it). */
@@ -139,6 +141,12 @@ export type Deps = {
   /** The notification engine (category direct: the visitor just asked for this email). */
   sendEmail: (o: { kind: string; to: string; dedupeKey: string; content: EmailContent }) => Promise<unknown>;
   captureError: (fn: string, e: unknown) => Promise<void>;
+  /**
+   * Scan 2 (30.29 item B): one stored free check, by its exact code only (never listed), and read in full only when it is
+   * of the place sent: its report parts (null parts: the check never finished), "other" when the code is another
+   * place's, null when there is no such code.
+   */
+  loadCheck?: (code: string, placeId: string) => Promise<{ parts: ReportParts | null } | "other" | null>;
   appUrl: string;
   cors: Record<string, string>;
   esc: (s: string) => string;
@@ -146,7 +154,10 @@ export type Deps = {
 
 const LABEL: Record<Tone, string> = { danger: "Needs fixing", warning: "Worth fixing", neutral: "After you connect" };
 
-export function checkEmail(d: Pick<Deps, "esc" | "appUrl">, s: Snapshot, tips: boolean): EmailContent {
+/** The free check's parts of the report (null: no code, or the check never finished). */
+export type Extra = ReportParts | null;
+
+export function checkEmail(d: Pick<Deps, "esc" | "appUrl">, s: Snapshot, tips: boolean, extra?: Extra | "none"): EmailContent {
   const rows = s.flags.map((f) =>
     `<p style="margin:0 0 12px 0;"><strong>${d.esc(LABEL[f.tone])}: ${d.esc(f.fact)}</strong><br>${d.esc(f.action)}</p>`
   ).join("");
@@ -155,17 +166,30 @@ export function checkEmail(d: Pick<Deps, "esc" | "appUrl">, s: Snapshot, tips: b
     s.review_count !== null ? `${s.review_count} reviews` : null,
     s.category,
   ].filter(Boolean).join(" · ");
+  // Scan 2 (30.29 item B): the report sent is the report shown. With a free check's code, its nearby and AI parts follow
+  // the Google part in the page's own words, with the link to the saved result; without one, a line says they were not part.
+  const x = extra && extra !== "none" ? extra : null;
+  const para = (t: string) => `<p style="margin:0 0 12px 0;">${d.esc(t)}</p>`;
+  const extraHtml = extra === undefined ? "" : x
+    ? (x.nearby.length ? `<p style="margin:16px 0 8px 0;"><strong>Where you come up nearby</strong></p>${x.nearby.map(para).join("")}` : "") +
+      (x.ai.length ? `<p style="margin:16px 0 8px 0;"><strong>An answer customers might see</strong></p>${x.ai.map(para).join("")}` : "") +
+      `<p style="margin:16px 0 0 0;"><a href="${d.esc(x.link)}">${d.esc(x.link.replace(/^https?:\/\//, ""))}</a></p>`
+    : `<p style="margin:16px 0 0 0;">${d.esc(NOT_PART)}</p>`;
+  const extraText = extra === undefined ? [] : x
+    ? [...(x.nearby.length ? ["Where you come up nearby", ...x.nearby, ""] : []), ...(x.ai.length ? ["An answer customers might see", ...x.ai, ""] : []), x.link, ""]
+    : [NOT_PART, ""];
   const content = {
     preheader: "What customers see on Google, and what needs fixing.",
     title: "Your Google Profile Check",
     bodyHtml: `<p style="margin:0 0 16px 0;"><strong>${d.esc(s.name)}</strong><br>${d.esc(s.address)}${facts ? `<br>${d.esc(facts)}` : ""}</p>${rows}` +
-      `<p style="margin:16px 0 0 0;">Kabsi can take care of these. You approve each one.</p>`,
+      extraHtml + `<p style="margin:16px 0 0 0;">Kabsi can take care of these. You approve each one.</p>`,
     button: { label: "Start your free trial", url: `${d.appUrl}/get-started` },
     note: `This check uses public information from Google Maps, as it was when you asked. It is not a score.${tips ? " You asked for tips, so we may send a few. Reply stop at any time." : ""}`,
   };
   const text = [
     "Your Google Profile Check", "", s.name, s.address, facts, "",
     ...s.flags.map((f) => `${LABEL[f.tone]}: ${f.fact}\n${f.action}\n`),
+    ...extraText,
     "Kabsi can take care of these. You approve each one.", `Start your free trial: ${d.appUrl}/get-started`,
   ].filter((l) => l !== null).join("\n");
   return { subject: `${s.name}: your Google Profile Check`, ...content, text };
@@ -176,12 +200,21 @@ export function checkEmail(d: Pick<Deps, "esc" | "appUrl">, s: Snapshot, tips: b
  * the facts are joined with spaces. Only the facts that need attention are listed; the actions are Kabsi's to explain
  * after the visitor signs up, and the template's own words say the approval stays with the owner.
  */
-export function whatsappParams(s: Snapshot): [string, string] {
+export function whatsappParams(s: Snapshot, extra?: Extra | "none"): [string, string] {
   const todo = s.flags.filter((f) => f.tone !== "neutral").map((f) => f.fact.replace(/\s+/g, " ").trim());
   const line = todo.length
     ? `${todo.length === 1 ? "1 thing to look at" : `${todo.length} things to look at`}: ${todo.join(" ")}`
     : "Nothing needs fixing in what Google shows the public.";
-  return [s.name.replace(/\s+/g, " ").trim().slice(0, 120), line.slice(0, 900)];
+  // Scan 2 (30.29 item B): with a finished free check, the count line, the AI line and the link follow the profile line,
+  // within 900 characters; the profile line is cut first so the link always fits.
+  const one = (t: string) => t.replace(/\s+/g, " ").trim();
+  // A code whose check never finished says so, like the email.
+  const tail = extra === "none" ? NOT_PART : extra
+    ? [extra.nearby[0], extra.ai.find((l) => l.startsWith("ChatGPT")), extra.link.replace(/^https?:\/\//, "")].filter((t): t is string => !!t).map(one).join(" ")
+    : "";
+  const room = tail ? 900 - tail.length - 1 : 900;
+  const head = line.length > room ? `${line.slice(0, Math.max(0, room - 1)).trimEnd()}…` : line;
+  return [s.name.replace(/\s+/g, " ").trim().slice(0, 120), (tail ? `${head} ${tail}` : head).slice(0, 900)];
 }
 
 export function makeHandler(d: Deps) {
@@ -266,6 +299,21 @@ export function makeHandler(d: Deps) {
         return reply({ snapshot: buildSnapshot(placeId, r.data, false) });
       }
 
+      // Scan 2 (30.29 item B): "Send me this report" may carry the free check's code. It is read only by that exact code,
+      // never listed, and only when the check is of the place sent; a code for another place is refused, an unknown or
+      // unfinished one sends the Google part only.
+      const checkOf = async (placeId: string): Promise<Extra | "refused" | "none"> => {
+        const code = str(b.code).toUpperCase();
+        if (!code) return "none";
+        if (!CODE_RE.test(code) || !d.loadCheck) return "none";
+        // A database error is thrown (the visitor sees "try again"), never read as an unknown code.
+        const c = await d.loadCheck(code, placeId);
+        if (!c) return "none";
+        if (c === "other") return "refused";
+        return c.parts ?? "none";
+      };
+      const refused = () => fail("bad_check", "That report is for another business. Reload the page and try again.", 400);
+
       if (action === "email") {
         const placeId = str(b.place_id);
         const email = str(b.email).trim().toLowerCase().slice(0, 254);
@@ -286,11 +334,17 @@ export function makeHandler(d: Deps) {
           return fail("address_limit", "We already sent checks to this email today. Try again tomorrow.", 429);
         }
         // The email is built from a fresh read of Google: nothing from Places is kept between the check and the email.
+        const extra = await checkOf(placeId);
+        if (extra === "refused") return refused();
         const place = await livePlace(placeId);
         if (place instanceof Response) return place;
         await d.saveEmail({ email, place_id: placeId, tips_opt_in: b.tips, consent_text: TIPS_CONSENT_TEXT, page });
-        const mail = checkEmail(d, buildSnapshot(placeId, place, true), b.tips);
-        const dedupeKey = `profile_check:${(await d.sha256Hex(`${email}|${placeId}|${d.today()}`)).slice(0, 40)}`;
+        // No code at all keeps the email as it was; a code that is unknown or unfinished says the other parts were not in it.
+        const mail = checkEmail(d, buildSnapshot(placeId, place, true), b.tips, str(b.code) ? extra : undefined);
+        // Review of Scan 2: the code and whether the check's parts are in the email are in the key, so a report asked
+        // again once the check has finished is sent, not dropped as a repeat of the earlier Google-only one.
+        const shape = extra === "none" ? "none" : `${str(b.code).toUpperCase()}:done`;
+        const dedupeKey = `profile_check:${(await d.sha256Hex(`${email}|${placeId}|${d.today()}${str(b.code) ? `|${shape}` : ""}`)).slice(0, 40)}`;
         await d.sendEmail({ kind: "profile_check", to: email, dedupeKey, content: mail });
         return reply({ ok: true });
       }
@@ -315,11 +369,13 @@ export function makeHandler(d: Deps) {
         if (!(await d.rateLimit(`snapshot:wa-number:${phoneHash}`, LIMITS.whatsappPerNumberPerDay, 86400, { failClosed: true }))) {
           return fail("number_limit", "We already sent a check to this number today.", 429);
         }
+        const extra = await checkOf(placeId);
+        if (extra === "refused") return refused();
         // Built from a fresh read of Google, like the email.
         const place = await livePlace(placeId);
         if (place instanceof Response) return place;
         const rowId = await d.saveWhatsapp({ phone_hash: phoneHash, place_id: placeId, consent_text: WHATSAPP_CONSENT_TEXT, page });
-        const r = await d.sendWhatsapp({ to: phone, params: whatsappParams(buildSnapshot(placeId, place, true)) });
+        const r = await d.sendWhatsapp({ to: phone, params: whatsappParams(buildSnapshot(placeId, place, true), extra === "none" ? (str(b.code) ? "none" : undefined) : extra) });
         await d.markWhatsapp(rowId, r);
         if (r.state !== "sent") {
           return fail("whatsapp_off", "We could not send it on WhatsApp. Use email instead.", 503);

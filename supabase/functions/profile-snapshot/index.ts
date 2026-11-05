@@ -6,6 +6,7 @@ import { autocomplete, getSnapshotPlace, searchText } from "../_shared/google/in
 import { admin, APP_URL, captureError, CORS, esc, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { notify } from "../_shared/notify.ts";
 import { makeHandler } from "../_shared/profile-snapshot.ts";
+import { type CheckRow, reportParts } from "../_shared/visibility/free-check.ts";
 import { whatsappCtx } from "../_shared/whatsapp/db.ts";
 import { WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
 import { BODY_LIMITS, withBodyCap } from "../_shared/body-cap.ts";
@@ -57,6 +58,20 @@ Deno.serve(withBodyCap(makeHandler({
   // Sent because the visitor just asked for it: no choices and no quiet hours (category direct).
   sendEmail: (o) => notify({ category: "direct", kind: o.kind, key: o.dedupeKey, to: [{ email: o.to, userId: null }], content: o.content }),
   captureError,
+  // Scan 2 (30.29 item B): first only the place of the code, then the whole check when it is that place's.
+  loadCheck: async (code, placeId) => {
+    const { data: head, error: e1 } = await admin().from("free_checks").select("place:self->>place_id").eq("code", code).maybeSingle();
+    if (e1) throw e1;
+    if (!head) return null;
+    if ((head as { place: string | null }).place !== placeId) return "other";
+    const { data, error } = await admin().from("free_checks")
+      .select("id, code, business, term, country, city, self, center, radius_km, category, source, state, fast, ai, points, nearby, created_at")
+      .eq("code", code).eq("self->>place_id", placeId).maybeSingle();
+    if (error) throw error;
+    const c = data as CheckRow | null;
+    if (!c || c.self?.place_id !== placeId) return "other";
+    return { parts: reportParts(c, APP_URL) };
+  },
   appUrl: APP_URL,
   cors: CORS,
   esc,
