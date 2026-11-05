@@ -1,0 +1,230 @@
+[
+  {
+    "path": "/",
+    "changefreq": "weekly",
+    "priority": "1.0",
+    "sources": ["src/routes/index.tsx", "src/lib/home.ts", "src/content/home-examples.ts"]
+  },
+  {
+    "path": "/pricing",
+    "changefreq": "monthly",
+    "priority": "0.9",
+    "sources": ["src/routes/pricing.tsx", "src/lib/plans.ts"]
+  },
+  {
+    "path": "/how-it-works",
+    "changefreq": "monthly",
+    "priority": "0.8",
+    "sources": ["src/routes/how-it-works.tsx"]
+  },
+  {
+    "path": "/scan",
+    "changefreq": "monthly",
+    "priority": "0.9",
+    "sources": ["src/routes/scan.index.tsx"]
+  },
+  {
+    "path": "/google-review-link",
+    "changefreq": "monthly",
+    "priority": "0.8",
+    "sources": ["src/routes/google-review-link.tsx"]
+  },
+  {
+    "path": "/founding",
+    "changefreq": "weekly",
+    "priority": "0.7",
+    "sources": ["src/routes/founding.tsx"]
+  },
+  {
+    "path": "/for",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/routes/for.index.tsx", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/hair-salon",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/hair-salon.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/restaurant",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/restaurant.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/barbershop",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/barbershop.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/nail-salon",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/nail-salon.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/spa-and-massage",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/spa-massage.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/medical-and-aesthetic-clinic",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": [
+      "src/content/industries/medical-aesthetic-clinic.ts",
+      "src/components/kabsi/d9-industry.tsx"
+    ]
+  },
+  {
+    "path": "/for/physiotherapy",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/physiotherapy.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/cafe",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/cafe.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/bakery",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/bakery.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/auto-repair",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/auto-repair.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/gym-and-fitness",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/gym-fitness.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/dental-clinic",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/dental-clinic.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/lash-and-brow-studio",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": [
+      "src/content/industries/lash-and-brow-studio.ts",
+      "src/components/kabsi/d9-industry.tsx"
+    ]
+  },
+  {
+    "path": "/for/tattoo-studio",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/tattoo-studio.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/pet-grooming",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/pet-grooming.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/veterinary-clinic",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": [
+      "src/content/industries/veterinary-clinic.ts",
+      "src/components/kabsi/d9-industry.tsx"
+    ]
+  },
+  {
+    "path": "/for/car-wash",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/car-wash.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/florist",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/florist.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/optician",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/optician.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/yoga-and-pilates-studio",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": [
+      "src/content/industries/yoga-and-pilates-studio.ts",
+      "src/components/kabsi/d9-industry.tsx"
+    ]
+  },
+  {
+    "path": "/about",
+    "changefreq": "yearly",
+    "priority": "0.5",
+    "sources": ["src/routes/about.tsx"]
+  },
+  {
+    "path": "/security",
+    "changefreq": "yearly",
+    "priority": "0.5",
+    "sources": ["src/routes/security.tsx"]
+  },
+  {
+    "path": "/faq",
+    "changefreq": "monthly",
+    "priority": "0.6",
+    "sources": ["src/routes/faq.tsx", "src/lib/faq.ts"]
+  },
+  {
+    "path": "/partners",
+    "changefreq": "monthly",
+    "priority": "0.4",
+    "sources": ["src/routes/partners.tsx"]
+  },
+  {
+    "path": "/partners/terms",
+    "changefreq": "yearly",
+    "priority": "0.2",
+    "sources": ["src/routes/partners_.terms.tsx"]
+  },
+  {
+    "path": "/setup-call",
+    "changefreq": "yearly",
+    "priority": "0.3",
+    "sources": ["src/routes/setup-call.tsx"]
+  },
+  {
+    "path": "/privacy",
+    "changefreq": "yearly",
+    "priority": "0.2",
+    "sources": ["src/routes/privacy.tsx"]
+  },
+  {
+    "path": "/terms",
+    "changefreq": "yearly",
+    "priority": "0.2",
+    "sources": ["src/routes/terms.tsx"]
+  },
+  {
+    "path": "/guides",
+    "changefreq": "monthly",
+    "priority": "0.5",
+    "sources": ["src/routes/guides.index.tsx"]
+  }
+]

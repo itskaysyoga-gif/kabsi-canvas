@@ -322,7 +322,7 @@ Essentials is $29 a month or $290 a year. Pro is $59 a month or $590 a year. Ext
 Yes. 14 days, no card. It starts when Kabsi's access to your Google profile works.
 
 **Is there a free plan?**
-Yes. Free is your review link, a QR code, a printable table card and a message to share. It keeps working for as long as Kabsi operates.
+Yes. Free is your review link, a QR code, a printable counter card from the free review link tool and a message to share. The branded counter card and table tent PDFs come with the plans. The free part keeps working for as long as Kabsi operates.
 
 **Are prices the same in every country?**
 Yes, in US dollars.
