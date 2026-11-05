@@ -17,3 +17,9 @@ export function alertSummary(raw: unknown): string {
 
 /** The hour the alert belongs to, so a night of retries makes one message, not many. */
 export const alertHour = (d: Date) => d.toISOString().slice(0, 13);
+
+/** Fix 3 part D: which nightly check failed. "site" is qa2-live.yml's check of kabsi.co (03:45 UTC); anything else is the
+ *  smoke test (03:30 UTC). Each has its own title and its own hourly dedupe, so one never hides the other. */
+export function alertCheck(raw: unknown): { key: "smoke" | "site"; title: string } {
+  return raw === "site" ? { key: "site", title: "Nightly kabsi.co check failed" } : { key: "smoke", title: "Nightly smoke test failed" };
+}
