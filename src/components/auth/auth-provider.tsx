@@ -1,11 +1,19 @@
 import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useLocation } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { clearAssistantChat } from "@/lib/assistant-storage";
 import { identify, isPrivatePath } from "@/lib/telemetry";
 import { saveSignupAttribution } from "@/lib/attribution";
-import { clearSeen, isIdle, lastSeen, OWNER_IDLE_MS, STAFF_IDLE_MS, touch } from "@/lib/idle";
+import { awayVerdict, clearSeen, lastSeen, touch } from "@/lib/idle";
 import { hasStoredSession, signInInUrl, SUPABASE_READY_EVENT } from "@/lib/stored-session";
 import { resetSessionEnded } from "@/lib/session-ended";
 import { setSignedOutReason, takeSignedOutReason } from "@/lib/signed-out";
@@ -81,6 +89,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         queryClient.clear();
         clearAssistantChat();
       }
+      // Signed out: this device forgets the last visit, so the next person starts their own 30 days.
+      if (event === "SIGNED_OUT") clearSeen();
       // A fresh sign-in clears "Your session ended" (session-ended.ts).
       if (event === "SIGNED_IN") {
         resetSessionEnded();
@@ -132,55 +142,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!loading && userId) void saveSignupAttribution(userId);
   }, [loading, userId]);
 
-  // Idle sign-out: staff after 12 hours, owners after 30 days (D301).
+  // How long a sign-in lasts (App 4, 30.31 item 2): 30 days after the last visit for an owner, 12 hours on staff pages
+  // for staff (idle.ts). Judged when the session is read and the staff answer is in, before this visit is recorded, then
+  // on every page change, when the tab comes back and every 5 minutes. A sign-out for time away is local to this device
+  // and leaves the reason, so the log in page says why.
+  const pathRef = useRef(pathname);
+  pathRef.current = pathname;
+  const awayOut = useRef<(() => boolean) | null>(null);
   useEffect(() => {
-    if (!userId || !client) {
-      if (!userId) clearSeen();
+    if (!userId || !client || isStaff === null) {
+      awayOut.current = null;
       return;
     }
-    let limit = OWNER_IDLE_MS;
     let stopped = false;
-    const seenAtStart = lastSeen();
-    const check = () => {
-      if (!stopped && isIdle(limit)) void client.auth.signOut({ scope: "local" });
+    const judge = () => {
+      if (stopped) return true;
+      const verdict = awayVerdict(lastSeen(), Date.now(), {
+        staff: isStaff,
+        pathname: pathRef.current,
+      });
+      if (!verdict) return false;
+      stopped = true;
+      setSignedOutReason(verdict);
+      clearSeen();
+      void client.auth.signOut({ scope: "local" });
+      return true;
     };
-    void client.rpc("is_staff").then(({ data }) => {
-      if (data === true) {
-        limit = STAFF_IDLE_MS;
-        // Judge by the stamp from before this page load touched it.
-        if (seenAtStart !== null && Date.now() - seenAtStart > limit && !stopped)
-          void client.auth.signOut({ scope: "local" });
-      }
-      check();
-    });
-    check();
-    let last = 0;
+    awayOut.current = judge;
+    if (judge()) return;
+    touch();
     const mark = () => {
-      const now = Date.now();
-      if (now - last > 60_000) {
-        last = now;
-        touch();
-      }
+      if (!judge()) touch();
     };
     const onVisible = () => {
-      if (document.visibilityState === "visible") {
-        check();
-        mark();
-      }
+      if (document.visibilityState === "visible") mark();
     };
-    mark();
-    window.addEventListener("click", mark);
-    window.addEventListener("keydown", mark);
+    window.addEventListener("click", mark, true);
+    window.addEventListener("keydown", mark, true);
     document.addEventListener("visibilitychange", onVisible);
-    const timer = window.setInterval(check, 300_000);
+    const timer = window.setInterval(judge, 300_000);
     return () => {
       stopped = true;
-      window.removeEventListener("click", mark);
-      window.removeEventListener("keydown", mark);
+      awayOut.current = null;
+      window.removeEventListener("click", mark, true);
+      window.removeEventListener("keydown", mark, true);
       document.removeEventListener("visibilitychange", onVisible);
       window.clearInterval(timer);
     };
-  }, [userId, client]);
+  }, [userId, client, isStaff]);
+  // A page change is a visit too, judged first (a staff page has the shorter time).
+  useEffect(() => {
+    const judge = awayOut.current;
+    if (judge && !judge()) touch();
+  }, [pathname]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
