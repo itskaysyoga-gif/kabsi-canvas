@@ -12,10 +12,10 @@ select ok(has_function_privilege('authenticated', 'public.set_routine_delivery(u
 -- Not connected: WhatsApp is refused and nothing is written; Email works.
 select tests.act_as('00000000-0000-4000-8000-0000000000a1');
 select throws_ok($$ select public.set_routine_delivery('00000000-0000-4000-8000-0000000000c1', 'whatsapp') $$, 'P0001', 'whatsapp_not_connected', 'WhatsApp needs a connected WhatsApp');
-select is((select count(*)::int from public.routine_channels), 0, 'a refused WhatsApp choice wrote nothing');
 select throws_ok($$ select public.set_routine_delivery('00000000-0000-4000-8000-0000000000c1', 'sms') $$, '22023', 'unknown channel', 'only email or whatsapp');
 select is(public.set_routine_delivery('00000000-0000-4000-8000-0000000000c1', 'email') ->> 'channel', 'email', 'the owner can choose email in one call');
 reset role;
+select is((select count(*)::int from public.routine_channels where user_id = '00000000-0000-4000-8000-0000000000a1' and channel = 'whatsapp'), 0, 'the refused WhatsApp choice wrote nothing');
 
 -- Connected: one call stores the channel and turns both WhatsApp switches on.
 insert into public.whatsapp_optins (user_id, phone, state, consent_text, review_alerts, digest_optin)
