@@ -40,7 +40,7 @@ export const cafe: Industry = {
     },
     {
       title: "Drinks, with prices",
-      text: "Google can show menu items with a price and a line of description.",
+      text: "Google can show menu items; a real coffee shop lists drinks with prices.",
     },
     {
       title: "What the room offers",
@@ -76,7 +76,7 @@ export const cafe: Industry = {
       text: "Private sector hours drop by two a day. Kabsi sets yours once you say yes.",
     },
     {
-      title: "UK bank holiday Mondays",
+      title: "England and Wales bank holidays",
       text: "Early May bank holiday is 3 May 2027, the spring one 31 May.",
     },
     {

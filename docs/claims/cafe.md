@@ -77,7 +77,7 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 | --- | --- | --- | --- |
 | Answer | "On a cafe Google Business Profile, the opening time comes first. Kabsi checks it daily, turns fresh bakes into posts and drafts every reply." | 1, 8, 9; `knowledge/facts/04-product.md` (the daily profile check, a reply for every new review) | A, K |
 | Profile card "Opening time to the minute" | "Weekly hours say when the doors open; special hours cover days that differ." | 2 | G |
-| Profile card "Drinks, with prices" | "Google can show menu items with a price and a line of description." | 4 | G, P |
+| Profile card "Drinks, with prices" | "Google can show menu items; a real coffee shop lists drinks with prices." | 4 | G, P |
 | Profile card "What the room offers" | "A coffee shop profile can show Free Wi-Fi and Good for working on laptop." | 6 | P |
 | Profile card "The order link" | "When your order page changes, tell Kabsi. The link follows once you say yes." | 12 | K |
 | Review card "The coffee itself" | "The reply names the drink back and adds nothing you did not say." | 18 | K |
@@ -85,7 +85,7 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 | Review card "Feeling unwell after a meal" | "A health review gets no draft, a short checklist, and a holding reply only if asked." | 21 (no draft); `knowledge/facts/13-faq.md` "What happens with hard reviews?" (checklist, holding reply only if asked) | K |
 | Categories line | "Google shows all three on real profiles. Choose the first by what most of your sales are." | 16, 17 | C, A |
 | Holiday card "Ramadan, UAE" | "Private sector hours drop by two a day. Kabsi sets yours once you say yes." | 27, 28 | T, K |
-| Holiday card "UK bank holiday Mondays" | "Early May bank holiday is 3 May 2027, the spring one 31 May." | 29 | T |
+| Holiday card "England and Wales bank holidays" | "Early May bank holiday is 3 May 2027, the spring one 31 May." | 29 | T |
 | Holiday card "Eid al-Adha, UAE" | "Set by the moon, from 10 Dhu al-Hijjah. Kabsi asks five days ahead." | 32 | T, K |
 | Photo card "A drink by the window" | "One cup in daylight, no filter. Google asks for photos in focus and well lit." | 25 (the rest is advice) | G, A |
 | Photo card "The counter and the cabinet" | "What is on show at ten answers 'is there food' before anyone asks." | 26 | A |
