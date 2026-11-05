@@ -8,10 +8,10 @@ One page, under 10 KB. Updated 5 Nov 2026, App 4 and Guides 3. The history (task
 - Web 2, V4, UX 1 and Email 1 (26 and 27 Oct, PRs 250, 252): public pages, free check, onboarding, emails. Detail: `docs/progress/archive/2026-10-27-*.md`.
 - Sec 1 and Sec 2 (PRs 261, 266, 27 Oct), WhatsApp 2 (PRs 268, 270, 271), Billing 2 (PR 269), Price 1 (PRs 285 to 288, list prices 29 and 59, founding 19 and 39) and Web 3 (PRs 289 to 292, 30 Oct). Detail: the dated files in `docs/progress/archive/`.
 - Go live 1 (5 Nov 2026, 30.28, R-108): WhatsApp for owners, the nearby check and the AI answer are on; card payments stay closed. Detail: `docs/progress/archive/2026-11-05-golive1.md`.
-- Scan 2 (5 Nov 2026, 30.29, R-109, PRs 369 to 372): the free check names the town and country and only businesses Google Maps shows nearby. Detail: `docs/progress/archive/2026-11-05-scan2.md`.
-- Copy 3 (5 Nov 2026, 30.29 item 2, 30.30, R-110, PRs 374 to 376): the Go live 1 audit's copy decisions B-001 to B-032 and the Scan 2 follow-ups are on kabsi.co. Detail: `docs/progress/archive/2026-11-05-copy3.md`.
+- Scan 2 and Copy 3 (5 Nov 2026, R-109, R-110, PRs 369 to 376): the free check names the town and nearby businesses; the copy decisions B-001 to B-032 are live. Detail: `docs/progress/archive/2026-11-05-scan2.md`, `-copy3.md`.
 - App 4 (5 Nov 2026, 30.31, R-111, PRs 378 to 388): Dashboard in the header, sign-ins last 30 days (staff pages 12 hours), /login for every case, pages open at the top, the signed-in audit. Detail: `docs/progress/archive/2026-11-05-app4.md`.
 - Guides 3 (5 Nov 2026, PRs 385, 387, part C): 27 guides; the server decides per request what is public, so one appears every 2 days at 06:00 UTC to 13 Dec with no deploy. Live: guide 1 200, guide 2 404 until 7 Nov. Detail: `docs/progress/archive/2026-11-05-guides3.md`.
+- Fix 3 (5 Nov 2026, PRs 379, 381, 383): the Coach reads Google by its location name (KABSI-EDGE-J stopped, Yawmiyati read live 14:56 UTC); a name guard; one reload after a deploy; a nightly kabsi.co check. Detail: `docs/progress/archive/2026-11-05-fix3.md`.
 - No customer is live yet. Before the first Meta ad: the DataForSEO top-up and a nearby check on a real business. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -45,6 +45,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - Growth 1: the Meta and Speed Insights steps in docs/EVENTS.md (last section).
 - V3 heads-up (25 Oct): on the Yawmiyati phone tap Skip on the old photo message, never Yes, and reply No to the monthly question. Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
 - Templates: all approved 29 Oct (ladder). Voice notes stay off: the voice test failed for Gulf Arabic and mixed notes (LATER row).
+- Fix 3: Cloudflare, Turnstile, the Kabsi widget, Hostname management, add `kabsi-canvas.vercel.app` (Sentry KABSI-WEB-9).
 - Check 2: on a phone, pick 3 businesses at kabsi.co/scan, then read today's `places_usage` (autocomplete above 0, details 3 or more); add a Google Cloud quota alert for Places Autocomplete.
 - UX 1: after the deploy, `POST /visibility/terms` once (two DataForSEO calls, about 0.15 USD) and the read-back in the UX 1 archive file.
 - V1: a free Geoapify key, saved as the Supabase secret GEOAPIFY_API_KEY (clicks in `docs/progress/archive/2026-10-25-v1-visibility-map.md`); until then maps draw on a plain ground. DataForSEO top-up (50 US dollars) before the first Meta ad (30.28; the balance read 0.31 after Scan 2 on 5 Nov); Gemini stays off.
@@ -59,9 +60,8 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 5 Nov 2026, Fix 3: PRs 379, 381, 383. Detail: `docs/progress/archive/2026-11-05-fix3.md`.
 - 5 Nov 2026, App 4 (30.31, R-111): PRs 378 to 388, checked live. Detail: `docs/progress/archive/2026-11-05-app4.md`.
-- 5 Nov 2026, Guides 3: PRs 385 (scheduling, template, guide 1), 387 (guides 3 to 20), part C (7 earlier guides rewritten); live on release 5e7fc3c0. Detail: `docs/progress/archive/2026-11-05-guides3.md`.
-- 5 Nov 2026, Copy 3 (30.29, 30.30, R-110): PRs 374 (30.30), 375 (copy decisions B-001 to B-032), 376 (Scan 2 follow-ups, speed gate); live on release 841ab8e. Detail: `docs/progress/archive/2026-11-05-copy3.md`.
 
 ## How a session updates this page
 
