@@ -8,7 +8,8 @@ import { ArrowRight, Check, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MAIN_CTA } from "@/lib/site";
 import { industriesAtoZ, type Card, type Industry } from "@/content/industries";
-import { GuideCover } from "@/components/marketing/guide-article";
+import { GuideImage, TopicPill } from "@/components/marketing/guide-photo";
+import { guideLook } from "@/content/guides/look";
 import { ExampleBadge, Faq, KabsiMark } from "./ui";
 import { Img } from "./photos";
 import { ScanBox } from "./scan-box";
@@ -433,7 +434,7 @@ function CardGroup({ id, title, items }: { id: string; title: string; items: Car
 export type ReadGuide = { slug: string; title: string; topic: string };
 
 /**
- * Read next (30.33 item 2): three guides as photo cards (the guide's cover; its photo once Style 1 adds one), then six
+ * Read next (30.33 item 2): three guides as photo cards (the guide's photo and group, Style 1), then six
  * related businesses as photo cards, 3 by 2 (2 by 3 on a phone), and "See every business".
  */
 function ReadNext({ guides, related }: { guides: ReadGuide[]; related: Industry[] }) {
@@ -452,13 +453,17 @@ function ReadNext({ guides, related }: { guides: ReadGuide[]; related: Industry[
                     to={`/guides/${g.slug}`}
                     className="press group flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface-0 shadow-rest"
                   >
-                    <GuideCover title={g.title} topic={g.topic} className="rounded-none" />
-                    {/* The cover carries the title (it is hidden from screen readers), so the link names it once. */}
-                    <span className="flex flex-1 items-center justify-between gap-3 p-3 text-body font-bold sm:p-4">
-                      <span>
-                        Read the guide<span className="sr-only">: {g.title}</span>
+                    <GuideImage
+                      slug={g.slug}
+                      ratio="3/2"
+                      sizes="(min-width: 768px) 24rem, calc(100vw - 2rem)"
+                    />
+                    <span className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
+                      <TopicPill>{guideLook(g.slug).group}</TopicPill>
+                      <span className="flex items-start justify-between gap-3 text-body font-bold">
+                        {g.title}
+                        <Arrow />
                       </span>
-                      <Arrow />
                     </span>
                   </SiteLink>
                 </li>

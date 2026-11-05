@@ -308,7 +308,8 @@ export function pageHead(o: {
   // WebP. Page photos are WebP and reach search through the image sitemap and Article JSON-LD instead.
   // Style 1 and Industries 3: a guide's or an industry page's cover is its photo, so it is a JPEG (a photo as PNG is
   // too heavy for link previews).
-  const ext = o.image?.startsWith("guides/") || o.image?.startsWith("industries/") ? "jpg" : "png";
+  const industryExt = o.image?.startsWith("industries/") ? "jpg" : "png";
+  const ext = o.image?.startsWith("guides/") ? "jpg" : industryExt;
   const og = `${SITE_URL}/og/${o.image ?? "home"}.${ext}`;
   const url = `${SITE_URL}${o.path === "/" ? "" : o.path}`;
   const meta: Meta[] = [
