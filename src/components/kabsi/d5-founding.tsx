@@ -20,9 +20,11 @@ import { useFlagState } from "./d2-parts";
 import { PageHero, popCls, stagger } from "./page-hero";
 import { FOUNDING_HERO } from "./hero-lines";
 import { FOUNDING_FAQ } from "./faq-data";
-import { FOUNDER } from "./photos";
+import { FOUNDER, PHOTOS } from "./photos";
 import { FOUNDING25_TOTAL } from "./founding-total";
 import { Banner, Button, ButtonLink, Faq, Field, Segmented, StatusPill } from "./ui";
+import { Marked } from "@/components/kabsi/highlight";
+import { SectionPhoto } from "./section-photo";
 
 export { FOUNDING25_TOTAL };
 export const FOUNDING25_LINE =
@@ -144,6 +146,7 @@ export function FoundingPage() {
   return (
     <>
       <PageHero
+        mark="three months of Kabsi Pro, free."
         hero={FOUNDING_HERO}
         under={FOUNDING25_UNDER}
         action={
@@ -169,10 +172,13 @@ export function FoundingPage() {
         aria-label="Who, what and what Kabsi asks"
         className="border-t border-line bg-surface-1"
       >
-        <div className="container-kb section-y grid gap-10 lg:grid-cols-3 lg:gap-12">
-          <List title="Who can apply" items={WHO} />
-          <List title="What you get" items={GET} />
-          <List title="What Kabsi asks" items={GIVE} />
+        <div className="container-kb section-y">
+          <SectionPhoto photo={PHOTOS.barberCut} className="mb-10" />
+          <div className="grid gap-10 lg:grid-cols-3 lg:gap-12">
+            <List title="Who can apply" items={WHO} />
+            <List title="What you get" items={GET} />
+            <List title="What Kabsi asks" items={GIVE} />
+          </div>
         </div>
       </section>
 
@@ -190,7 +196,7 @@ export function FoundingPage() {
       <section aria-labelledby="founding-faq" className="border-t border-line bg-surface-1">
         <div className="container-kb section-y grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <h2 id="founding-faq" className="text-h2">
-            Questions about Founding 25
+            <Marked text="Questions about Founding 25" mark="Founding 25" />
           </h2>
           <Faq items={FOUNDING_FAQ} />
         </div>
@@ -258,10 +264,18 @@ function PlacesVisual({ places }: { places: FoundingPlaces | null }) {
   );
 }
 
+const LIST_MARKS: Record<string, string> = {
+  "Who can apply": "can apply",
+  "What you get": "you get",
+  "What Kabsi asks": "Kabsi asks",
+};
+
 function List({ title, items }: { title: string; items: string[] }) {
   return (
     <div>
-      <h2 className="text-h3">{title}</h2>
+      <h2 className="text-h3">
+        <Marked text={title} mark={LIST_MARKS[title]} />
+      </h2>
       <ul className="mt-5 space-y-3">
         {items.map((i) => (
           <li key={i} className="flex gap-3 text-body text-text-2">
@@ -441,7 +455,7 @@ function Application({ onSent }: { onSent: () => void }) {
   return (
     <form ref={check.area} onSubmit={(e) => void submit(e)} noValidate className="space-y-5">
       <h2 id="founding-form-h" className="text-h2">
-        Apply for a place
+        <Marked text="Apply for a place" mark="a place" />
       </h2>
       <p className="text-body text-text-2">Two minutes. Rashid answers within 2 working days.</p>
       <Field

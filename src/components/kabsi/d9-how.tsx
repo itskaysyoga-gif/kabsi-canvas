@@ -21,6 +21,7 @@ import {
   type DemoCase,
   type DemoState,
 } from "./d9-data";
+import { Marked } from "@/components/kabsi/highlight";
 
 type Outcome = { state: DemoState; other?: string | undefined };
 /** How long "Sent to Google" shows before the answer, in the demonstration only. */
@@ -107,7 +108,7 @@ export function DemoThreeCases() {
       <div className="container-kb section-y">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 id="demo-h" className="text-h2">
-            What happens after your yes.
+            <Marked text="What happens after your yes." mark="your yes." />
           </h2>
           <ExampleBadge />
         </div>

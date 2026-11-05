@@ -15,6 +15,7 @@ import { HOW_HERO } from "./hero-lines";
 import { StepsLine, YellowNumber } from "./d9-hero";
 import { DemoThreeCases, HowVisual } from "./d9-how";
 import { D9_HOW_LINE } from "./d9-data";
+import { Marked } from "@/components/kabsi/highlight";
 
 const linkCls =
   "press inline-flex min-h-11 items-center gap-1.5 font-semibold text-text-1 underline decoration-text-3 decoration-1 underline-offset-4 hover:decoration-text-1";
@@ -38,7 +39,7 @@ export function HowItWorksPage() {
         <div className="container-kb section-y grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:gap-16">
           <div>
             <h2 id="start-h" className="text-h2">
-              Getting started
+              <Marked text="Getting started" mark="started" />
             </h2>
             <ol className="mt-8 space-y-8">
               <li className="flex gap-4">

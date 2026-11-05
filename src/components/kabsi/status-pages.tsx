@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Button, ButtonLink, KabsiMark } from "./ui";
 import { SiteShell } from "./site-chrome";
 import { useSearchFlag } from "./page-signals";
+import { Marked } from "@/components/kabsi/highlight";
 
 /** A quiet 7 by 7 of empty places with the mark in the middle: nothing to show here. */
 function EmptyPlaces({ className }: { className?: string }) {
@@ -39,7 +40,9 @@ export function NotFoundPage() {
       <meta name="robots" content="noindex" />
       <section className="container-kb grid min-h-[80dvh] items-center gap-12 pt-12 pb-20 md:grid-cols-[1fr_auto]">
         <div className="max-w-xl">
-          <h1 className="text-display">This page is not here.</h1>
+          <h1 className="text-display">
+            <Marked text="This page is not here." mark="not here." />
+          </h1>
           <p className="mt-5 text-lead text-text-2">
             The link may be old. Nothing on your Google profile changed.
           </p>
@@ -91,7 +94,9 @@ export function ErrorView({ onRetry }: { onRetry?: () => void }) {
       <meta name="robots" content="noindex" />
       <section className="container-kb grid min-h-[80dvh] items-center pt-12 pb-20">
         <div className="max-w-xl">
-          <h1 className="text-display">Something went wrong on our side.</h1>
+          <h1 className="text-display">
+            <Marked text="Something went wrong on our side." mark="on our side." />
+          </h1>
           <p className="mt-5 text-lead text-text-2">Nothing you did. Try again in a minute.</p>
           <Button
             className="mt-8"
