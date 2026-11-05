@@ -1274,3 +1274,9 @@ Every guide's words are in its own content file, src/content/guides/<slug>.tsx; 
 ### Part A: every guide public (branch claude/guides4-a)
 
 - No new line. The 20 guides of section 53 are all public from 5 Nov 2026 (one value, PUBLISH_ALL_AT in src/content/guides/schedule.ts). The guides list shows them in the Guides 3 order, guide 1 first. Each guide's byline reads "Published 5 Nov 2026" (guide 1: 5 Nov 2026, the earlier ones their own dates). New guides from 16 Nov 2026, one a week, are listed first, newest first.
+
+### Part C: search housekeeping (branch claude/guides4-c)
+
+- **404 and error screens**: one <title> each, "Kabsi: This page is not here." and "Kabsi: Something went wrong on our side." (the root's default "Kabsi" no longer sits beside them). No other wording changes.
+- **Facts (02, 07, 13)**: "The printable counter card from the free review link tool is free for everyone. The branded counter card and table tent PDFs (made for a business by Get reviews) come with the plans." The FAQ's "Is there a free part?" answer names the printable counter card, not the table card. No screen's wording changes: the Get reviews buttons "Print a counter card" and "Print a table card" stay.
+- **Guides**: a guide may quote Google's help page on how local results are chosen, word for word in quotation marks, when it cites that page with its link and the date read (tests/claims-k144.test.ts). Promises of rankings and the word "prominence" outside such a quote stay banned.

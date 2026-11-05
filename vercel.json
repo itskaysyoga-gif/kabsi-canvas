@@ -12,6 +12,17 @@
   "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude,glob)docs/**' ':(exclude,glob)**/*.md'",
   "redirects": [
     {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "kabsi-canvas.vercel.app"
+        }
+      ],
+      "destination": "https://kabsi.co/$1",
+      "statusCode": 308
+    },
+    {
       "source": "/r/:code(SEVEN1|seven1)",
       "destination": "https://search.google.com/local/writereview?placeid=ChIJJ8-7quchHxURgn5sxhONNLI",
       "statusCode": 302
