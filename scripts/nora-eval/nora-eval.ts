@@ -19,7 +19,8 @@ import { WHATSAPP_NUMBER, WHATSAPP_ON } from "../../supabase/functions/_shared/w
 /** Kabsi's own WhatsApp number, while it is on: the one number Nora may give. It is taken out of an answer before the
  * phone check, so any other number (or a different one beside it) is still a finding. */
 const OWN_NUMBER = WHATSAPP_ON ? WHATSAPP_NUMBER : null;
-const withoutOwnNumber = (answer: string) => (OWN_NUMBER ? answer.split(OWN_NUMBER).join("Kabsi's number") : answer);
+const withoutOwnNumber = (answer: string) =>
+  OWN_NUMBER ? answer.split(OWN_NUMBER).join("Kabsi's number") : answer;
 
 export type Answerer = { name: string; answer: (q: Question, kb: string) => Promise<string> };
 
@@ -142,7 +143,8 @@ export function check(q: Question, answer: string, kb: string): Finding[] {
   }
   for (const re of BAD_STYLE) if (re.test(answer)) add("style", `answer matches ${re}`);
   for (const [what, re] of HONESTY)
-    if (breaks(what === "gives a phone number" ? withoutOwnNumber(answer) : answer, re)) add("honesty", what);
+    if (breaks(what === "gives a phone number" ? withoutOwnNumber(answer) : answer, re))
+      add("honesty", what);
   // A number the facts file does not hold is a fact Nora made up. The question may name the number (it is the owner's).
   const known = new Set([...numbersIn(kb), ...numbersIn(q.ask), ...numbersIn(q.gloss ?? "")]);
   for (const n of numbersIn(answer))
