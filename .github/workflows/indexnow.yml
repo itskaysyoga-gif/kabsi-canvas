@@ -1,0 +1,80 @@
+name: IndexNow
+
+# Guides 4 part C (master plan 30.32 item 4): after each production deploy, tell IndexNow (Bing, and so the search ChatGPT draws
+# on) which kabsi.co pages changed since the previous production deploy; and every morning, which guides became public that day.
+# The step never fails the run: scripts/indexnow.mjs logs the response code and exits 0. The key is public by design
+# (kabsi.co/<key>.txt, scripts/lib/indexnow-lib.mjs). By hand: Actions, IndexNow, Run workflow, with the two commits.
+on:
+  deployment_status:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+    inputs:
+      before:
+        description: "Previous production commit (leave empty for the daily send)"
+        required: false
+      after:
+        description: "This production commit"
+        required: false
+
+permissions:
+  contents: read
+  deployments: read
+
+concurrency:
+  group: indexnow
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: After a production deploy
+    if: >-
+      (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success' &&
+      github.event.deployment.environment == 'Production') ||
+      (github.event_name == 'workflow_dispatch' && inputs.before != '' && inputs.after != '')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Tell IndexNow what changed
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_SHA: ${{ github.event.deployment.sha }}
+          INPUT_BEFORE: ${{ inputs.before }}
+          INPUT_AFTER: ${{ inputs.after }}
+        run: |
+          after="${INPUT_AFTER:-$EVENT_SHA}"
+          before="$INPUT_BEFORE"
+          if [ -z "$before" ]; then
+            # The previous successful production deployment, so a deploy that was skipped or replaced is not missed.
+            for id in $(gh api "repos/${GITHUB_REPOSITORY}/deployments?environment=Production&per_page=15" --jq '.[].id'); do
+              sha=$(gh api "repos/${GITHUB_REPOSITORY}/deployments/$id" --jq '.sha')
+              [ "$sha" = "$after" ] && continue
+              state=$(gh api "repos/${GITHUB_REPOSITORY}/deployments/$id/statuses" --jq '.[0].state')
+              if [ "$state" = "success" ]; then before="$sha"; break; fi
+            done
+          fi
+          [ -z "$before" ] && before="$(git rev-parse "${after}^1" 2>/dev/null || true)"
+          echo "previous production commit: ${before:-none}; this one: $after"
+          node scripts/indexnow.mjs --deploy "${before:-$after}" "$after" || true
+  daily:
+    name: Guides that became public today
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.before == '')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Tell IndexNow about the guides published in the last 24 hours
+        continue-on-error: true
+        run: node scripts/indexnow.mjs --daily || true

@@ -1,0 +1,262 @@
+[
+ {
+  "path": "/",
+  "changefreq": "weekly",
+  "priority": "1.0",
+  "sources": [
+   "src/routes/index.tsx",
+   "src/lib/home.ts",
+   "src/content/home-examples.ts"
+  ]
+ },
+ {
+  "path": "/pricing",
+  "changefreq": "monthly",
+  "priority": "0.9",
+  "sources": [
+   "src/routes/pricing.tsx",
+   "src/lib/plans.ts"
+  ]
+ },
+ {
+  "path": "/how-it-works",
+  "changefreq": "monthly",
+  "priority": "0.8",
+  "sources": [
+   "src/routes/how-it-works.tsx"
+  ]
+ },
+ {
+  "path": "/scan",
+  "changefreq": "monthly",
+  "priority": "0.9",
+  "sources": [
+   "src/routes/scan.index.tsx"
+  ]
+ },
+ {
+  "path": "/google-review-link",
+  "changefreq": "monthly",
+  "priority": "0.8",
+  "sources": [
+   "src/routes/google-review-link.tsx"
+  ]
+ },
+ {
+  "path": "/founding",
+  "changefreq": "weekly",
+  "priority": "0.7",
+  "sources": [
+   "src/routes/founding.tsx"
+  ]
+ },
+ {
+  "path": "/for",
+  "changefreq": "monthly",
+  "priority": "0.7",
+  "sources": [
+   "src/routes/for.index.tsx"
+  ]
+ },
+ {
+  "path": "/for/beauty-and-wellness",
+  "changefreq": "monthly",
+  "priority": "0.5",
+  "sources": [
+   "src/content/industries/index.ts"
+  ]
+ },
+ {
+  "path": "/for/food-and-drink",
+  "changefreq": "monthly",
+  "priority": "0.5",
+  "sources": [
+   "src/content/industries/index.ts"
+  ]
+ },
+ {
+  "path": "/for/health",
+  "changefreq": "monthly",
+  "priority": "0.5",
+  "sources": [
+   "src/content/industries/index.ts"
+  ]
+ },
+ {
+  "path": "/for/auto",
+  "changefreq": "monthly",
+  "priority": "0.5",
+  "sources": [
+   "src/content/industries/index.ts"
+  ]
+ },
+ {
+  "path": "/for/fitness-and-sport",
+  "changefreq": "monthly",
+  "priority": "0.5",
+  "sources": [
+   "src/content/industries/index.ts"
+  ]
+ },
+ {
+  "path": "/for/hair-salon",
+  "changefreq": "monthly",
+  "priority": "0.7",
+  "sources": [
+   "src/content/industries/hair-salon.ts"
+  ]
+ },
+ {
+  "path": "/for/restaurant",
+  "changefreq": "monthly",
+  "priority": "0.7",
+  "sources": [
+   "src/content/industries/restaurant.ts"
+  ]
+ },
+ {
+  "path": "/for/barbershop",
+  "changefreq": "monthly",
+  "priority": "0.7",
+  "sources": [
+   "src/content/industries/barbershop.ts"
+  ]
+ },
+ {
+  "path": "/for/nail-salon",
+  "changefreq": "monthly",
+  "priority": "0.7",
+  "sources": [
+   "src/content/industries/nail-salon.ts"
+  ]
+ },
+ {
+  "path": "/for/spa-and-massage",
+  "changefreq": "monthly",
+  "priority": "0.7",
+  "sources": [
+   "src/content/industries/spa-massage.ts"
+  ]
+ },
+ {
+  "path": "/for/medical-and-aesthetic-clinic",
+  "changefreq": "monthly",
+  "priority": "0.7",
+  "sources": [
+   "src/content/industries/medical-aesthetic-clinic.ts"
+  ]
+ },
+ {
+  "path": "/for/physiotherapy",
+  "changefreq": "monthly",
+  "priority": "0.7",
+  "sources": [
+   "src/content/industries/physiotherapy.ts"
+  ]
+ },
+ {
+  "path": "/for/cafe",
+  "changefreq": "monthly",
+  "priority": "0.7",
+  "sources": [
+   "src/content/industries/cafe.ts"
+  ]
+ },
+ {
+  "path": "/for/bakery",
+  "changefreq": "monthly",
+  "priority": "0.7",
+  "sources": [
+   "src/content/industries/bakery.ts"
+  ]
+ },
+ {
+  "path": "/for/auto-repair",
+  "changefreq": "monthly",
+  "priority": "0.7",
+  "sources": [
+   "src/content/industries/auto-repair.ts"
+  ]
+ },
+ {
+  "path": "/for/gym-and-fitness",
+  "changefreq": "monthly",
+  "priority": "0.7",
+  "sources": [
+   "src/content/industries/gym-fitness.ts"
+  ]
+ },
+ {
+  "path": "/about",
+  "changefreq": "yearly",
+  "priority": "0.5",
+  "sources": [
+   "src/routes/about.tsx"
+  ]
+ },
+ {
+  "path": "/security",
+  "changefreq": "yearly",
+  "priority": "0.5",
+  "sources": [
+   "src/routes/security.tsx"
+  ]
+ },
+ {
+  "path": "/faq",
+  "changefreq": "monthly",
+  "priority": "0.6",
+  "sources": [
+   "src/routes/faq.tsx",
+   "src/lib/faq.ts"
+  ]
+ },
+ {
+  "path": "/partners",
+  "changefreq": "monthly",
+  "priority": "0.4",
+  "sources": [
+   "src/routes/partners.tsx"
+  ]
+ },
+ {
+  "path": "/partners/terms",
+  "changefreq": "yearly",
+  "priority": "0.2",
+  "sources": [
+   "src/routes/partners_.terms.tsx"
+  ]
+ },
+ {
+  "path": "/setup-call",
+  "changefreq": "yearly",
+  "priority": "0.3",
+  "sources": [
+   "src/routes/setup-call.tsx"
+  ]
+ },
+ {
+  "path": "/privacy",
+  "changefreq": "yearly",
+  "priority": "0.2",
+  "sources": [
+   "src/routes/privacy.tsx"
+  ]
+ },
+ {
+  "path": "/terms",
+  "changefreq": "yearly",
+  "priority": "0.2",
+  "sources": [
+   "src/routes/terms.tsx"
+  ]
+ },
+ {
+  "path": "/guides",
+  "changefreq": "monthly",
+  "priority": "0.5",
+  "sources": [
+   "src/routes/guides.index.tsx"
+  ]
+ }
+]
