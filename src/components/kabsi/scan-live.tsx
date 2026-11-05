@@ -42,7 +42,6 @@ import {
 } from "@/lib/public-api";
 import { track } from "@/lib/telemetry";
 import { pixelCustom, pixelEvent } from "@/lib/meta-pixel";
-import { AccessSteps } from "./d5-access";
 import { WAITLIST_LINE, WAITLIST_WHATSAPP_LINE } from "@/lib/waitlist-copy";
 import { NEARBY_SAMPLE, type NearbyCheck, type NearbyPlace } from "./map-data";
 import { ownName, shownTerm } from "../../../supabase/functions/_shared/visibility/area.ts";
@@ -51,6 +50,25 @@ import { ScanBox } from "./scan-box";
 import { FreeCheckFrame } from "./d4-free-check";
 import { SiteLink } from "./site-link";
 import { Banner, Button, Field, Skeleton, StatusPill, WhatsAppGlyph, buttonClass } from "./ui";
+import { Highlight, Marked, YellowNumber } from "./highlight";
+import {
+  ACCESS_LINES,
+  ACCESS_TITLE,
+  AI_QUESTION,
+  AI_SAMPLE,
+  CANNOT_PROMISE,
+  TRIAL_BUTTON,
+  TRIAL_LINES,
+  WHY_VARIES,
+  aiAskedLines,
+  aiVerdict,
+  mainFinding,
+  nearbyCount,
+  nearbyLead,
+  ord,
+  wouldDo,
+  type MainFinding,
+} from "@/lib/scan-words";
 
 /* ---------- Turnstile tokens, one per call ---------- */
 
@@ -474,21 +492,6 @@ export function toNearbyCheck(c: FreeCheck): NearbyCheck | null {
   };
 }
 
-function Fold({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <details className="group rounded-card border border-line bg-surface-1 px-5 sm:px-7">
-      <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-4 text-title font-bold [&::-webkit-details-marker]:hidden">
-        <h2 className="text-title">{title}</h2>
-        <ChevronDown
-          className="size-5 shrink-0 transition-transform duration-200 ease-kb group-open:rotate-180"
-          aria-hidden
-        />
-      </summary>
-      <div className="pb-6">{children}</div>
-    </details>
-  );
-}
-
 function useCheck(started: StartedCheck | null) {
   const [check, setCheck] = useState<FreeCheck | null>(
     started && "code" in started ? started : null,
@@ -606,42 +609,80 @@ function ResultHead({
 }) {
   return (
     <section aria-labelledby="hero-title" data-hero className="container-kb pt-6 md:pt-12">
-      <p className="text-label font-bold text-text-2">Free check, {longDate(date)}</p>
+      <p className="text-small font-bold text-text-2">Free check, {longDate(date)}</p>
+      {/* Scan 3 (30.34): the business first, its name on the highlight bar. */}
       <h1 id="hero-title" className="mt-2 text-h2 break-words sm:text-display">
-        {name}
+        <Highlight>{name}</Highlight>
       </h1>
-      <p className="mt-1 text-small text-text-2">
-        {line}{" "}
-        <Link
-          to="/scan"
-          search={changeSearch(change.q, change.keyword, change.industry) as never}
-          className="inline-flex min-h-11 items-center font-semibold text-text-1 underline underline-offset-4"
-        >
-          Not your business? Change it
-        </Link>
-      </p>
+      <p className="mt-2 text-body text-text-2">{line}</p>
+      <Link
+        to="/scan"
+        search={changeSearch(change.q, change.keyword, change.industry) as never}
+        className="inline-flex min-h-11 items-center font-semibold text-text-1 underline underline-offset-4"
+      >
+        Not your business? Change it
+      </Link>
     </section>
   );
 }
 
-/** Scan 2 (30.29): who comes up at the business's own address, in the open, before the cards (it was folded away). */
-function AtAddress({ check, line }: { check: FreeCheck; line: boolean }) {
+/** Scan 3 (30.34 item 2): a part of the result opened on request, with its one-line answer showing while it is closed. */
+function Detail({
+  id,
+  title,
+  mark,
+  summary,
+  children,
+}: {
+  id: string;
+  title: string;
+  mark: string;
+  summary?: string | null | undefined;
+  children: ReactNode;
+}) {
+  return (
+    <details
+      data-detail={id}
+      className="group rounded-panel border border-line bg-surface-1 px-5 sm:px-7"
+    >
+      <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-4 py-4 [&::-webkit-details-marker]:hidden">
+        <span className="min-w-0">
+          <h3 className="text-h3">
+            <Marked text={title} mark={mark} />
+          </h3>
+          {summary && <span className="mt-1 block text-body text-text-2">{summary}</span>}
+        </span>
+        <span className="inline-flex shrink-0 items-center gap-1 text-small font-semibold">
+          <span className="group-open:hidden">Show</span>
+          <span className="hidden group-open:inline">Hide</span>
+          <ChevronDown
+            className="size-5 transition-transform duration-200 ease-kb group-open:rotate-180"
+            aria-hidden
+          />
+        </span>
+      </summary>
+      <div className="pb-6">{children}</div>
+    </details>
+  );
+}
+
+/** Scan 2 (30.29): who comes up at the business's own address. Scan 3: their positions, in plain words. */
+function AtAddress({ check }: { check: FreeCheck }) {
   const rows = check.fast.competitors;
   if (!rows.length) return null;
   return (
     <div>
-      <h2 className="text-h3">At your address on Google Maps</h2>
-      {line && <p className="mt-2 text-body text-text-2">{check.fast.line}</p>}
+      <h4 className="text-title font-bold">Who came first at your address</h4>
       <ol className="mt-3 divide-y divide-line rounded-inner border border-line bg-surface-2 px-4">
         {rows.map((x, i) => (
           <li key={x.name} className="flex min-h-14 items-center gap-3 py-2">
-            <span className="w-5 text-small font-bold text-text-3">{i + 1}</span>
+            <span className="w-9 shrink-0 text-body font-bold">{ord(i + 1)}</span>
             <span className="min-w-0 flex-1 break-words text-body font-semibold">{x.name}</span>
             {x.rating !== null && (
               <span className="flex shrink-0 items-center gap-1 text-small text-text-2">
                 <Star className="size-4 fill-current text-warn" aria-hidden />
                 {x.rating}
-                {x.reviews !== null && <span className="text-text-3">({x.reviews} reviews)</span>}
+                {x.reviews !== null && <span>({x.reviews} reviews)</span>}
               </span>
             )}
           </li>
@@ -651,81 +692,88 @@ function AtAddress({ check, line }: { check: FreeCheck; line: boolean }) {
   );
 }
 
-function NearbySection({ check, handoff }: { check: FreeCheck; handoff: string | null }) {
+/** The nearby details: the plain lines, who came first, the cards with the diagram and the 49 points, why it varies. */
+function NearbyDetails({ check, handoff }: { check: FreeCheck; handoff: string | null }) {
   const nearby = toNearbyCheck(check);
-  // Scan 2 (30.29): at your address first, then the card, then "How to read it" under it, at every width (no column of
-  // text beside the card).
+  const done = check.map.state === "done" ? check.map : null;
   return (
-    <section className="space-y-6 rounded-panel border border-line bg-surface-1 p-5 sm:p-8">
-      <AtAddress check={check} line={!!nearby} />
+    <div className="space-y-6">
+      <div className="space-y-2 text-body">
+        {done && nearby && (
+          <p>
+            {nearbyCount(
+              done.top3,
+              done.points,
+              nearby.ranks.map((r) => r || null),
+            )}
+          </p>
+        )}
+        <p className="text-text-2">{NEARBY_SAMPLE}</p>
+      </div>
+      <AtAddress check={check} />
+      {done?.rivals?.length ? (
+        <div>
+          <h4 className="text-title font-bold">Who came up most around you</h4>
+          <ul className="mt-3 divide-y divide-line rounded-inner border border-line bg-surface-2 px-4">
+            {done.rivals.map((r) => (
+              <li
+                key={r.name}
+                className="flex min-h-14 flex-wrap items-center justify-between gap-x-3 py-2 text-body"
+              >
+                <span className="min-w-0 break-words font-semibold">{r.name}</span>
+                <span className="text-text-2">
+                  In the results at {r.places} of {done.points} points
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       {nearby ? (
-        <>
-          <NearbyPlaces check={nearby} example={false} title="h2" />
-          <div>
-            <h2 className="text-h3">How to read it</h2>
-            <p className="mt-3 max-w-[40rem] text-body text-text-2">
-              Kabsi searched '{nearby.keyword}' on Google Maps from 49 places around you, like a
-              customer standing there. A, B and C are three of them: near you, and the two places
-              with the most different results. Your position changes with where someone searches.
-            </p>
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="rounded-panel bg-kb-white p-5 text-kb-ink shadow-lift">
-            <h2 className="font-display text-title font-bold">
-              '{check.term}' near {check.business}
-            </h2>
-            <p className="mt-3 text-body">{check.fast.line}</p>
-            <p className="mt-3 text-small text-kb-stone">{NEARBY_SAMPLE}</p>
-          </div>
-          {check.map.state === "mapping" ? (
-            <div>
-              <StatusPill tone="info">Searching</StatusPill>
-              <p className="mt-4 text-h3">
-                This was the quick check, from your address. The full check from 49 places around
-                you takes a few minutes.
-              </p>
-              {handoff && (
-                <a
-                  href={handoff}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={cn(buttonClass("whatsapp"), "mt-6")}
-                >
-                  <WhatsAppGlyph />
-                  Send the full map to my WhatsApp
-                </a>
-              )}
-            </div>
-          ) : null}
-        </>
-      )}
-    </section>
+        <NearbyPlaces check={nearby} example={false} title="p" diagram />
+      ) : check.map.state === "mapping" ? (
+        <div>
+          <StatusPill tone="info">Searching</StatusPill>
+          <p className="mt-3 text-body">
+            This was the quick check, from your address. The full check from 49 places around you
+            takes a few minutes.
+          </p>
+          {handoff && (
+            <a
+              href={handoff}
+              target="_blank"
+              rel="noreferrer"
+              className={cn(buttonClass("whatsapp"), "mt-4")}
+            >
+              <WhatsAppGlyph />
+              Send the full map to my WhatsApp
+            </a>
+          )}
+        </div>
+      ) : null}
+      <p className="text-body text-text-2">{WHY_VARIES}</p>
+    </div>
   );
 }
 
-function AiAnswer({ ai }: { ai: NonNullable<FreeCheck["ai"]> }) {
+/** "Did ChatGPT name your business?": the verdict, the question, model and date, the sources, the sample note. */
+function AiDetails({ ai }: { ai: NonNullable<FreeCheck["ai"]> }) {
   const sources = ai.sources ?? [];
+  const asked = aiAskedLines(ai);
   return (
-    <section
-      aria-labelledby="ai-h"
-      className="rounded-panel border border-line bg-surface-1 p-5 sm:p-8"
-    >
-      <h2 id="ai-h" className="text-h3">
-        An answer customers might see
-      </h2>
-      {/* Scan 2 (master plan 30.29, docs/COPY.md 49): the question, the line, the sources, then when and how it was asked.
-          A check from before Scan 2 has no question and shows its line and label only. */}
-      {ai.question_line && (
-        <p className="mt-3 text-body break-words text-text-2">{ai.question_line}</p>
+    <div className="space-y-3">
+      {asked.length > 0 && (
+        <ul className="space-y-1 text-body break-words text-text-2">
+          {asked.map((l) => (
+            <li key={l}>{l}</li>
+          ))}
+        </ul>
       )}
-      {ai.line && <p className="mt-3 text-body font-semibold">{ai.line}</p>}
-      {ai.question_line &&
+      {ai.question &&
         (sources.length ? (
-          <div className="mt-3">
-            <p className="text-small font-bold">Sources cited</p>
-            <ul className="mt-1 space-y-1 text-small text-text-2">
+          <div>
+            <p className="text-body font-bold">Sources cited</p>
+            <ul className="mt-1 space-y-1 text-body text-text-2">
               {sources.map((x) => (
                 <li key={`${x.domain}|${x.title}`} className="break-words">
                   <span className="font-semibold text-text-1">{x.domain}</span>
@@ -735,21 +783,25 @@ function AiAnswer({ ai }: { ai: NonNullable<FreeCheck["ai"]> }) {
             </ul>
           </div>
         ) : ai.sources_line ? (
-          <p className="mt-3 text-small text-text-2">{ai.sources_line}</p>
+          <p className="text-body text-text-2">{ai.sources_line}</p>
         ) : null)}
       {ai.accuracy ? (
         <>
-          <p className="mt-3 text-body font-semibold">{ai.accuracy.line}</p>
-          <p dir="auto" className="mt-2 border-s-2 border-line-strong ps-3 text-small text-text-2">
+          <p className="text-body font-semibold">{ai.accuracy.line}</p>
+          <p
+            dir="auto"
+            data-long-ok
+            className="border-s-2 border-line-strong ps-3 text-body text-text-2"
+          >
             &ldquo;{ai.accuracy.sentence}&rdquo;
           </p>
-          <p className="mt-3 text-small text-text-1">
+          <p className="text-body">
             Make sure your Google profile and website say this. AI assistants read them.
           </p>
         </>
       ) : null}
-      <p className="mt-3 text-label text-text-2">{ai.asked_line ?? ai.label}</p>
-    </section>
+      <p className="text-small text-text-2">{ai.question ? AI_SAMPLE : ai.label}</p>
+    </div>
   );
 }
 
@@ -774,7 +826,7 @@ function NearbyMark() {
   );
 }
 
-/** Under "Start free" (Polish 2, decision 6; facts 4.3 and 5). */
+/** The full trial terms, on request (Polish 2, decision 6; facts 4.3 and 5). */
 const START_STEPS = [
   { dt: "Free", dd: "This check, and your first 14 days of Pro. No card." },
   {
@@ -791,18 +843,152 @@ const START_STEPS = [
   },
 ] as const;
 
-const SideLinks = () => (
-  <div className="flex flex-col items-start px-1 text-small">
-    <SiteLink to="/how-it-works" className={resultLinkCls}>
-      See how it works
-      <ArrowRight className="size-4" aria-hidden />
-    </SiteLink>
-    <SiteLink to="/pricing" className={resultLinkCls}>
-      See the plans
-      <ArrowRight className="size-4" aria-hidden />
-    </SiteLink>
-  </div>
-);
+/** The main finding: one fact, why it matters, one next step (30.34 item 2). */
+function MainFindingCard({ f }: { f: MainFinding }) {
+  return (
+    <section
+      aria-labelledby="first-h"
+      className="animate-enter rounded-panel border border-line bg-surface-1 p-5 sm:p-8"
+    >
+      <h2 id="first-h" className="text-h3">
+        <Marked text="The main thing we found" mark="main thing" />
+      </h2>
+      <p className="mt-3 text-h3 font-bold">{f.fact}</p>
+      <p className="mt-2 text-lead text-text-2">{f.why}</p>
+      <p className="mt-4 flex gap-3 rounded-inner bg-surface-2 p-4 text-body">
+        <ArrowRight className="mt-1 size-4 shrink-0" aria-hidden />
+        <span>
+          <span className="font-bold">Next step: </span>
+          {f.next}
+        </span>
+      </p>
+    </section>
+  );
+}
+
+/** What Kabsi would do: three short lines, each saying who does what, then what Kabsi cannot promise. */
+function WouldDoCard({ lines }: { lines: { who: string; line: string }[] }) {
+  return (
+    <section
+      aria-labelledby="day1-h"
+      className="rounded-panel border border-line bg-surface-1 p-5 sm:p-8"
+    >
+      <h2 id="day1-h" className="text-h3">
+        <Marked text="What Kabsi would do" mark="would do" />
+      </h2>
+      <ol className="mt-4 space-y-4">
+        {lines.map((l, i) => (
+          <li key={l.line} className="flex gap-3">
+            <YellowNumber n={i + 1} className="mt-0.5" />
+            <div className="min-w-0">
+              <p className="text-small font-bold text-text-2">{l.who}</p>
+              <p className="text-body">{l.line}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <p className="mt-4 text-body text-text-2">{CANNOT_PROMISE}</p>
+    </section>
+  );
+}
+
+/** The one primary button, when the trial starts, the full terms on request, Founding 25 as a quiet line. */
+function TrialCard({
+  onStart,
+  handoff,
+  founding,
+}: {
+  onStart: () => void;
+  handoff: string | null;
+  founding: boolean;
+}) {
+  return (
+    <section
+      aria-labelledby="trial-h"
+      data-main-cta
+      className="rounded-panel border border-text-1 bg-surface-1 p-5 shadow-lift sm:p-7"
+    >
+      <h2 id="trial-h" className="text-h3">
+        <Marked text="Your next step" mark="next step" />
+      </h2>
+      <button type="button" onClick={onStart} className={cn(buttonClass("primary"), "mt-4 w-full")}>
+        {TRIAL_BUTTON}
+      </button>
+      <ul className="mt-3 space-y-1 text-body text-text-2">
+        {TRIAL_LINES.map((l) => (
+          <li key={l}>{l}</li>
+        ))}
+      </ul>
+      {handoff && (
+        <a
+          href={handoff}
+          target="_blank"
+          rel="noreferrer"
+          className={cn(resultLinkCls, "mt-2 text-body")}
+        >
+          <WhatsAppGlyph />
+          Get this on WhatsApp
+        </a>
+      )}
+      <details className="group mt-3 border-t border-line pt-2">
+        <summary className="press flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-body font-semibold [&::-webkit-details-marker]:hidden">
+          The full trial terms
+          <ChevronDown
+            className="size-5 transition-transform duration-200 ease-kb group-open:rotate-180"
+            aria-hidden
+          />
+        </summary>
+        <dl className="space-y-3 pb-2 text-body">
+          {START_STEPS.map((x) => (
+            <div key={x.dt}>
+              <dt className="font-bold">{x.dt}</dt>
+              <dd className="text-text-2">{x.dd}</dd>
+            </div>
+          ))}
+        </dl>
+      </details>
+      {founding && (
+        <p className="mt-2 text-small text-text-2">
+          <SiteLink
+            to="/founding"
+            className="inline-flex min-h-11 items-center underline decoration-text-3 underline-offset-4 hover:decoration-text-1"
+          >
+            Or apply for Founding 25: three months of Pro, free
+          </SiteLink>
+        </p>
+      )}
+    </section>
+  );
+}
+
+/** Manager access in three lines; the full steps stay in onboarding (30.34 item 2). */
+function AccessCard() {
+  return (
+    <section
+      aria-labelledby="access-h"
+      className="rounded-panel border border-line bg-surface-1 p-5 sm:p-7"
+    >
+      <h2 id="access-h" className="text-title font-bold">
+        {ACCESS_TITLE}
+      </h2>
+      <ul className="mt-3 space-y-2">
+        {ACCESS_LINES.map((l) => (
+          <li key={l} className="flex gap-3 text-body">
+            <Check className="mt-1 size-4 shrink-0 text-ok" strokeWidth={2.5} aria-hidden />
+            {l}
+          </li>
+        ))}
+      </ul>
+      <SiteLink
+        to="/guides/add-manager-google-business-profile"
+        className={cn(resultLinkCls, "mt-2 text-body")}
+      >
+        See the setup steps
+        <ArrowRight className="size-4" aria-hidden />
+      </SiteLink>
+    </section>
+  );
+}
 
 export function LiveResult({
   snapshot: s,
@@ -825,8 +1011,6 @@ export function LiveResult({
   const term = check?.term ?? keyword ?? s.category?.toLowerCase() ?? null;
   // 30.30 item 3: the search shown back follows the Latin rule (another script reads as the Google category).
   const shownSearch = term ? (shownTerm(term, s.category ?? null, null)?.term ?? null) : null;
-  const first =
-    s.flags.find((f) => f.tone === "danger") ?? s.flags.find((f) => f.tone === "warning");
   const rows = foundRows(s);
   const fix = rows.filter((r) => !r.ok).length;
   const handoff =
@@ -849,14 +1033,19 @@ export function LiveResult({
     if (hasSessionKey()) void navigate({ to: "/start" as never });
     else void navigate({ to: "/login", search: { next: "/start" } as never });
   };
+  const ai = check?.ai ?? null;
 
   return (
     <>
       <ResultHead
         date={check?.created_at ? new Date(check.created_at) : new Date()}
         name={ownName(s.name)}
-        line={[s.address ? `${s.address}.` : "", shownSearch ? `Searched as '${shownSearch}'.` : ""]
+        line={[
+          [s.area, s.category].filter(Boolean).join(", ") || s.address,
+          shownSearch ? `Searched as '${shownSearch}'.` : "",
+        ]
           .filter(Boolean)
+          .map((x) => (x.endsWith(".") ? x : `${x}.`))
           .join(" ")}
         change={change}
       />
@@ -866,36 +1055,24 @@ export function LiveResult({
         <PlacesAttribution />
       </div>
 
-      <div className="container-kb mt-6 grid gap-4 pb-16 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-x-8 lg:pb-24">
-        {/* Polish 3 (lane R decision 1 of 3 Nov 2026): the useful part first, at every width. The order in the page, and so
-            the tab order, is: the most important thing; what Kabsi found; what Kabsi would do from day one with Start free and
-            the next steps; the AI answer and the nearby check; the links, the two open questions and the report. Nothing was removed. */}
+      {/* Scan 3 (master plan 30.34 item 2): a progressive result. The business, one main finding, what Kabsi would do in
+          three lines, the details on request, then one primary button with the trial lines, Manager access in three lines
+          and the report. On a computer the action column sits beside the finding; the order in the page stays the same. */}
+      <div className="container-kb mt-6 grid gap-4 pb-16 lg:grid-cols-[minmax(0,1fr)_23rem] lg:items-start lg:gap-x-8 lg:pb-24">
         <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-1">
-          {/* Design 8: the most important finding first, in plain words, on the dark band. */}
-          {first && (
-            <section
-              aria-labelledby="first-h"
-              className="theme-dark animate-enter rounded-panel bg-band p-6 text-text-1 sm:p-8"
-            >
-              <p className="text-label font-bold text-text-2">The most important thing</p>
-              <h2 id="first-h" className="mt-2 text-h2">
-                {first.fact}
-              </h2>
-              <p className="mt-3 max-w-[38rem] text-lead text-text-2">{first.action}</p>
-            </section>
-          )}
+          <MainFindingCard f={mainFinding(s.flags)} />
+          <WouldDoCard lines={wouldDo(s.flags)} />
 
-          <section
-            aria-labelledby="found-h"
-            className="rounded-panel border border-line bg-surface-1 p-5 sm:p-8"
+          <h2 className="pt-4 text-h3">
+            <Marked text="The details, when you want them" mark="details" />
+          </h2>
+          <Detail
+            id="google"
+            title="What Google shows about you"
+            mark="Google shows"
+            summary={foundCount(fix, rows.length - fix)}
           >
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 id="found-h" className="text-h3">
-                What Kabsi found
-              </h2>
-              <p className="text-small text-text-2">{foundCount(fix, rows.length - fix)}</p>
-            </div>
-            <ul className="mt-3 divide-y divide-line">
+            <ul className="divide-y divide-line">
               {rows.map((r) => (
                 <li key={r.label} className="flex gap-3 py-3">
                   {r.ok ? (
@@ -907,150 +1084,80 @@ export function LiveResult({
                     <p className="flex flex-wrap items-baseline justify-between gap-x-4 text-body">
                       <span className="font-semibold">{r.label}</span>
                       <span className="min-w-0 break-words font-semibold">
-                        {r.value ?? <StatusPill tone="warn">Missing</StatusPill>}
+                        {r.value ?? "Missing"}
                       </span>
                     </p>
-                    <p className="text-small text-text-2">{r.why}</p>
+                    <p className="text-body text-text-2">{r.why}</p>
                   </div>
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-label text-text-2">
+            <p className="mt-3 text-small text-text-2">
               Shown live from Google. Kabsi does not store it.
             </p>
             <PlacesAttribution className="mt-1" />
-          </section>
+          </Detail>
+
+          {check ? (
+            <Detail
+              id="nearby"
+              title="Where you come up nearby"
+              mark="nearby"
+              summary={nearbyLead(check.term, check.fast.rank)}
+            >
+              <NearbyDetails check={check} handoff={handoff} />
+            </Detail>
+          ) : waitlist ? (
+            <section
+              aria-labelledby="near-h"
+              className="rounded-panel border border-dashed border-line-strong p-5 sm:p-8"
+            >
+              <div className="flex gap-4">
+                <NearbyMark />
+                <div>
+                  <h3 id="near-h" className="text-h3">
+                    Where you come up nearby
+                  </h3>
+                  <p className="mt-2 text-body text-text-2">
+                    Kabsi will search Google Maps from places around you, like a customer standing
+                    there.
+                  </p>
+                </div>
+              </div>
+              <Waitlist
+                business={s.name}
+                country={countryOfAddress(s.address)}
+                placeId={s.place_id}
+                term={term}
+              />
+            </section>
+          ) : null}
+
+          {ai ? (
+            <Detail
+              id="ai"
+              title={AI_QUESTION}
+              mark="ChatGPT"
+              summary={aiVerdict(ai).line}
+            >
+              <AiDetails ai={ai} />
+            </Detail>
+          ) : null}
         </div>
 
-        <aside className="space-y-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-3 lg:row-start-1">
-          <section
-            aria-labelledby="day1-h"
-            data-main-cta
-            className="rounded-panel border border-text-1 bg-surface-1 p-5 shadow-lift sm:p-7"
-          >
-            <h2 id="day1-h" className="text-h3">
-              What Kabsi would do from day one
-            </h2>
-            <ul className="mt-4 space-y-3">
-              {dayOne(s).map((l) => (
-                <li key={l} className="flex gap-3 text-body">
-                  <Check className="mt-1 size-4 shrink-0 text-ok" strokeWidth={2.5} aria-hidden />
-                  {l}
-                </li>
-              ))}
-            </ul>
-            <p className="mt-4 text-small text-text-2">Nothing goes live without your yes.</p>
-            <div className="mt-5 flex flex-col gap-2">
-              {handoff ? (
-                <>
-                  <a
-                    href={handoff}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={cn(buttonClass("primary"), "w-full")}
-                  >
-                    Get this on WhatsApp
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => void startWeb()}
-                    className={cn(buttonClass("tertiary"), "w-full")}
-                  >
-                    Start free on the web
-                  </button>
-                </>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => void startWeb()}
-                  className={cn(buttonClass("primary"), "w-full")}
-                >
-                  Start free
-                </button>
-              )}
-            </div>
-            {/* Polish 2 (lane R decision 6 of 3 Nov 2026): what is free, what starting needs, the first days, and when the
-                14 days start. Founding 25 is a secondary link. The buttons and their events above are unchanged. */}
-            <dl className="mt-5 space-y-3 border-t border-line pt-4 text-small">
-              {START_STEPS.map((x) => (
-                <div key={x.dt}>
-                  <dt className="font-bold">{x.dt}</dt>
-                  <dd className="text-text-2">{x.dd}</dd>
-                </div>
-              ))}
-            </dl>
-            {f25 && f25.left > 0 && (
-              <p className="mt-3 text-small">
-                <SiteLink
-                  to="/founding"
-                  className="font-semibold underline decoration-text-3 underline-offset-4 hover:decoration-text-1"
-                >
-                  Or apply for Founding 25: three months of Pro, free
-                </SiteLink>
-              </p>
-            )}
-          </section>
+        <aside className="space-y-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1">
+          <TrialCard
+            onStart={() => void startWeb()}
+            handoff={handoff}
+            founding={!!f25 && f25.left > 0}
+          />
+          <AccessCard />
+          <SendReport
+            placeId={s.place_id}
+            code={check?.code ?? null}
+            parts={{ nearby: check?.map.state === "done", ai: !!ai }}
+          />
         </aside>
-
-        {/* The AI answer, then the nearby check, after the action. Go live 1 (30.28): when the check is not available
-            today (the provider refused, a cap is reached, or it could not start) both parts are left out, with no error
-            and no promise; the Google part above stands on its own. The waiting list shows only in mock mode. */}
-        {check || waitlist ? (
-          <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-2">
-            {check?.ai ? <AiAnswer ai={check.ai} /> : null}
-
-            {check ? (
-              <NearbySection check={check} handoff={handoff} />
-            ) : (
-              <section
-                aria-labelledby="near-h"
-                className="rounded-panel border border-dashed border-line-strong p-5 sm:p-8"
-              >
-                <div className="flex gap-4">
-                  <NearbyMark />
-                  <div>
-                    <h2 id="near-h" className="text-h3">
-                      Where you come up nearby
-                    </h2>
-                    <p className="mt-2 text-body text-text-2">
-                      Kabsi will search Google Maps from places around you, like a customer standing
-                      there.
-                    </p>
-                  </div>
-                </div>
-                <Waitlist
-                  business={s.name}
-                  country={countryOfAddress(s.address)}
-                  placeId={s.place_id}
-                  term={term}
-                />
-              </section>
-            )}
-          </div>
-        ) : null}
-
-        {/* Then the links, the two open questions and the report. */}
-        <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-3">
-          <SideLinks />
-          <div className="grid gap-4">
-            <Fold title="What Kabsi sees once connected">
-              <p className="text-body text-text-2">
-                Reviews without a reply, posts, changes others made to your Google profile, and
-                Google's own warnings. Calls and direction requests come from your Google Business
-                Profile and are shown on their own, labelled with where they come from.
-              </p>
-            </Fold>
-            <Fold title="When you start: add Kabsi on Google">
-              <p className="mb-8 max-w-[40rem] text-body text-text-2">
-                This check needed no access. To start your 14 free days, add Kabsi as a Manager on
-                your Google profile. You stay the owner.
-              </p>
-              <AccessSteps headingLevel="h3" />
-            </Fold>
-          </div>
-
-          <SendReport placeId={s.place_id} code={check?.code ?? null} />
-        </div>
       </div>
     </>
   );
@@ -1171,26 +1278,51 @@ function Waitlist({
 
 /* ---------- Send me this report (the profile-snapshot function's email and WhatsApp actions) ---------- */
 
-function SendReport({ placeId, code }: { placeId: string; code: string | null }) {
+/** Scan 3 (30.34 item 2): what the report holds, said before it is asked for. */
+export function reportHolds(parts: { nearby: boolean; ai: boolean }): string {
+  const extra = [parts.nearby ? "the nearby check" : null, parts.ai ? "the ChatGPT answer" : null]
+    .filter(Boolean)
+    .join(" and ");
+  return `You get the summary of what Google shows${extra ? `, ${extra}` : ""}, and the link to this result.`;
+}
+
+function SendReport({
+  placeId,
+  code,
+  parts,
+}: {
+  placeId: string;
+  code: string | null;
+  parts: { nearby: boolean; ai: boolean };
+}) {
   const { take, widget } = useTokens();
+  // Scan 3 (30.34 item 2): one delivery choice at a time. Without Kabsi's WhatsApp number there is only email.
+  const [via, setVia] = useState<"email" | "whatsapp">("email");
   const [email, setEmail] = useState("");
   const [tips, setTips] = useState(false);
   const [phone, setPhone] = useState("");
   const [waOk, setWaOk] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
+  const byWhatsapp = WHATSAPP_ON && via === "whatsapp";
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    const byEmail = /@/.test(email);
-    const byPhone = WHATSAPP_ON && phone.replace(/\D/g, "").length >= 7 && waOk;
-    if (!byEmail && !byPhone) {
-      setErr("Type an email address or a WhatsApp number with its country code.");
+    if (!byWhatsapp && !/@/.test(email)) {
+      setErr("Type your email address.");
+      return;
+    }
+    if (byWhatsapp && phone.replace(/\D/g, "").length < 7) {
+      setErr("Type your WhatsApp number with its country code.");
+      return;
+    }
+    if (byWhatsapp && !waOk) {
+      setErr("Tick the box to get the report on WhatsApp.");
       return;
     }
     setErr(null);
     setState("sending");
     try {
-      if (byEmail)
+      if (!byWhatsapp)
         await emailCheck({
           placeId,
           email,
@@ -1199,7 +1331,7 @@ function SendReport({ placeId, code }: { placeId: string; code: string | null })
           turnstile: await take(),
           code,
         });
-      if (byPhone)
+      else
         await whatsappCheck({
           placeId,
           phone,
@@ -1217,36 +1349,80 @@ function SendReport({ placeId, code }: { placeId: string; code: string | null })
     }
   };
   return (
-    <div className="rounded-panel border border-line bg-surface-1 p-5 sm:p-8">
-      <h2 className="flex items-center gap-2 text-h3">
+    <section
+      aria-labelledby="report-h"
+      className="rounded-panel border border-line bg-surface-1 p-5 sm:p-7"
+    >
+      <h2 id="report-h" className="flex items-center gap-2 text-title font-bold">
         <Mail className="size-5" aria-hidden /> Send me this report
       </h2>
+      <p className="mt-2 text-body text-text-2">{reportHolds(parts)}</p>
       {state === "sent" ? (
         <Banner tone="ok" title="Sent." className="mt-4" />
       ) : (
         <form onSubmit={(e) => void submit(e)} noValidate className="mt-4 space-y-4">
-          <Field
-            label="Email"
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              if (err) setErr(null);
-            }}
-            error={err}
-          />
-          <label className="flex min-h-11 cursor-pointer items-start gap-3 text-small text-text-1">
-            <input
-              type="checkbox"
-              checked={tips}
-              onChange={(e) => setTips(e.target.checked)}
-              className="mt-0.5 size-5 shrink-0 accent-kb-green"
-            />
-            {TIPS_CONSENT_TEXT}
-          </label>
           {WHATSAPP_ON && (
+            <fieldset>
+              <legend className="text-small font-bold">Send it by</legend>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {(
+                  [
+                    ["email", "Email"],
+                    ["whatsapp", "WhatsApp"],
+                  ] as const
+                ).map(([v, label]) => (
+                  <label
+                    key={v}
+                    className={cn(
+                      "press inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-full border px-4 text-small font-semibold has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--focus)]",
+                      via === v
+                        ? "border-text-1 bg-text-1 text-surface-1"
+                        : "border-stroke bg-surface-1 text-text-1 hover:bg-surface-2",
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="report-via"
+                      value={v}
+                      checked={via === v}
+                      onChange={() => {
+                        setVia(v);
+                        setErr(null);
+                      }}
+                      className="sr-only"
+                    />
+                    {v === "whatsapp" && <WhatsAppGlyph />}
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
+          {!byWhatsapp ? (
+            <>
+              <Field
+                label="Email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (err) setErr(null);
+                }}
+                error={err}
+              />
+              <label className="flex min-h-11 cursor-pointer items-start gap-3 text-small text-text-1">
+                <input
+                  type="checkbox"
+                  checked={tips}
+                  onChange={(e) => setTips(e.target.checked)}
+                  className="mt-0.5 size-5 shrink-0 accent-kb-green"
+                />
+                {TIPS_CONSENT_TEXT}
+              </label>
+            </>
+          ) : (
             <>
               <Field
                 label="WhatsApp number"
@@ -1254,7 +1430,11 @@ function SendReport({ placeId, code }: { placeId: string; code: string | null })
                 inputMode="tel"
                 autoComplete="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => {
+                  setPhone(e.target.value);
+                  if (err) setErr(null);
+                }}
+                error={err}
               />
               <label className="flex min-h-11 cursor-pointer items-start gap-3 text-small text-text-1">
                 <input
@@ -1273,12 +1453,12 @@ function SendReport({ placeId, code }: { placeId: string; code: string | null })
           </Button>
         </form>
       )}
-    </div>
+    </section>
   );
 }
 
 /** /scan/CODE: a free check opened again from its code (the WhatsApp hand-off and shared links). Places facts are not
- * kept, so it shows what the code holds: the nearby check and the AI answer. */
+ * kept, so it shows what the code holds: the nearby check and the AI answer, in Scan 3's order. */
 export function SavedFreeCheck({ code }: { code: string }) {
   const [c, setC] = useState<FreeCheck | null | "missing">(null);
   useEffect(() => {
@@ -1299,10 +1479,13 @@ export function SavedFreeCheck({ code }: { code: string }) {
   if (c === "missing" || !live)
     return (
       <section className="container-kb pt-6 pb-16 md:pt-12">
-        <h1 className="max-w-2xl text-h2 sm:text-display">This report has expired.</h1>
+        <h1 className="max-w-2xl text-h2 sm:text-display">
+          This report has <Highlight>expired.</Highlight>
+        </h1>
         <ScanBox className="mt-8 max-w-xl" />
       </section>
     );
+  const done = live.map.state === "done" ? live.map : null;
   return (
     <>
       <ResultHead
@@ -1314,23 +1497,61 @@ export function SavedFreeCheck({ code }: { code: string }) {
       <div className="container-kb">
         <PlacesAttribution />
       </div>
-      <div className="container-kb mt-6 grid gap-4 pb-16 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-8 lg:pb-24">
-        <div className="min-w-0 space-y-4">
-          <NearbySection check={live} handoff={null} />
-          {live.ai && <AiAnswer ai={live.ai} />}
+      <div className="container-kb mt-6 grid gap-4 pb-16 lg:grid-cols-[minmax(0,1fr)_23rem] lg:items-start lg:gap-x-8 lg:pb-24">
+        <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-1">
+          <section
+            aria-labelledby="first-h"
+            className="rounded-panel border border-line bg-surface-1 p-5 sm:p-8"
+          >
+            <h2 id="first-h" className="text-h3">
+              <Marked text="The main thing we found" mark="main thing" />
+            </h2>
+            <p className="mt-3 text-h3 font-bold">{nearbyLead(live.term, live.fast.rank)}</p>
+            {done && (
+              <p className="mt-2 text-lead text-text-2">
+                {nearbyCount(
+                  done.top3,
+                  done.points,
+                  done.dots.map((d) => d.rank),
+                )}
+              </p>
+            )}
+          </section>
+          <WouldDoCard lines={wouldDo([])} />
+          <h2 className="pt-4 text-h3">
+            <Marked text="The details, when you want them" mark="details" />
+          </h2>
+          <Detail
+            id="nearby"
+            title="Where you come up nearby"
+            mark="nearby"
+            summary={nearbyLead(live.term, live.fast.rank)}
+          >
+            <NearbyDetails check={live} handoff={null} />
+          </Detail>
+          {live.ai && (
+            <Detail
+              id="ai"
+              title={AI_QUESTION}
+              mark="ChatGPT"
+              summary={aiVerdict(live.ai).line}
+            >
+              <AiDetails ai={live.ai} />
+            </Detail>
+          )}
         </div>
-        <aside className="space-y-4 lg:sticky lg:top-24">
+        <aside className="space-y-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1">
           <section
             aria-labelledby="again-h"
             data-main-cta
             className="rounded-panel border border-text-1 bg-surface-1 p-5 shadow-lift sm:p-7"
           >
             <h2 id="again-h" className="text-h3">
-              Start with a free check.
+              Start with a <Highlight>free check.</Highlight>
             </h2>
             <ScanBox className="mt-4" />
           </section>
-          <SideLinks />
+          <AccessCard />
         </aside>
       </div>
     </>

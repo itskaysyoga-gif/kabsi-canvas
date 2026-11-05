@@ -4,6 +4,7 @@ import { usualLine } from "../../../supabase/functions/_shared/visibility/usual.
 import { ExampleBadge } from "./ui";
 import { MAP_CREDIT, MAP_LEGEND, MapGrid, MapLegend } from "./map";
 import {
+  DIAGRAM_LABEL,
   NEARBY_SAMPLE,
   SALON_CHECK,
   countLine,
@@ -216,7 +217,10 @@ export function NearbyPlaces({
   title = "h3",
   className,
   sketchClassName,
+  diagram = false,
 }: {
+  /** Scan 3 (30.34 item 2): the free check result labels the drawing as a diagram and says the count above the card. */
+  diagram?: boolean | undefined;
   check?: NearbyCheck | undefined;
   variant?: "page" | "image";
   /** Every product example carries the badge; a real check in kabsi-canvas does not. */
@@ -257,11 +261,16 @@ export function NearbyPlaces({
         {example && !img && <ExampleBadge className="shrink-0" />}
       </div>
 
+      {diagram && !img && (
+        <p className="mt-4 text-small font-bold text-kb-stone">
+          {DIAGRAM_LABEL}. A, B and C are three of the places Kabsi searched from.
+        </p>
+      )}
       <NearbySketch
         check={check}
         className={cn(
           "overflow-hidden",
-          img ? "mt-2 rounded-[0.25rem]" : "mt-4 rounded-inner",
+          img ? "mt-2 rounded-[0.25rem]" : diagram ? "mt-2 rounded-inner" : "mt-4 rounded-inner",
           sketchClassName,
         )}
       />
@@ -278,11 +287,15 @@ export function NearbyPlaces({
           img ? "pt-2 text-chat-meta leading-snug" : "pt-3.5",
         )}
       >
-        <p className={cn("font-bold text-kb-ink", img ? "text-chat" : "text-body")}>
-          {countLine(check.ranks)}
-          {usual ? ` ${usual}` : ""}
-        </p>
-        <p className={cn("text-kb-stone", img ? "mt-1" : "mt-1 text-small")}>{NEARBY_SAMPLE}</p>
+        {!diagram && (
+          <p className={cn("font-bold text-kb-ink", img ? "text-chat" : "text-body")}>
+            {countLine(check.ranks)}
+            {usual ? ` ${usual}` : ""}
+          </p>
+        )}
+        {!diagram && (
+          <p className={cn("text-kb-stone", img ? "mt-1" : "mt-1 text-small")}>{NEARBY_SAMPLE}</p>
+        )}
         <p className={cn("font-semibold text-kb-stone", img ? "mt-0.5" : "mt-1 text-label")}>
           {MAP_CREDIT}
         </p>

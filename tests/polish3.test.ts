@@ -92,23 +92,26 @@ describe("Polish 3: the free check result's order (decision 1)", () => {
     expect(i, s).toBeGreaterThan(-1);
     return i;
   };
-  it("puts the useful part first at every width: most important, found, day one with Start free, then the AI answer and the nearby check, then the rest", () => {
+  // Scan 3 (master plan 30.34 item 2) replaced Polish 3's order with a progressive result: the business, one main finding,
+  // what Kabsi would do in three lines, the details on request, then the one trial button, Manager access and the report.
+  it("Scan 3: the business, the main finding, what Kabsi would do, the details on request, then the trial, access and the report", () => {
     const order = [
-      'aria-labelledby="first-h"',
-      'aria-labelledby="found-h"',
-      'aria-labelledby="day1-h"',
-      "START_STEPS.map",
-      "Or apply for Founding 25",
-      "<AiAnswer ai={check.ai} />",
-      'aria-labelledby="near-h"',
-      "<SideLinks />",
-      'Fold title="What Kabsi sees once connected"',
-      'Fold title="When you start: add Kabsi on Google"',
+      "<ResultHead",
+      "<MainFindingCard",
+      "<WouldDoCard",
+      'id="google"',
+      'id="nearby"',
+      'id="ai"',
+      "<TrialCard",
+      "<AccessCard />",
       "<SendReport",
     ].map(at);
     expect(order).toEqual([...order].sort((a, b) => a - b));
-    // Start free is in the day one block, ahead of the AI answer and the nearby check.
-    expect(at(">\n                  Start free\n")).toBeLessThan(at("<AiAnswer"));
+    // One primary button in the result: the trial.
+    expect(
+      live.slice(0, live.indexOf("/* ---------- Save my place")).match(/buttonClass\("primary"\)/g),
+    ).toBeNull();
+    expect(src.match(/\{TRIAL_BUTTON\}/g)?.length).toBe(1);
   });
   it("keeps every analytics and Meta event with the same name and trigger", () => {
     const events = [...src.matchAll(/(track|pixelEvent|pixelCustom)\(\s*"([^"]+)"[^)]*\)/g)].map(
