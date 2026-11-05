@@ -11,6 +11,7 @@ One page, under 10 KB. Updated 5 Nov 2026, Guides 4. The history (tasks, After m
 - App 4 (5 Nov 2026, 30.31, R-111, PRs 378 to 388): Dashboard in the header, sign-ins last 30 days (staff pages 12 hours), /login for every case, pages open at the top, the signed-in audit. Detail: `docs/progress/archive/2026-11-05-app4.md`.
 - Guides 3 (5 Nov 2026, PRs 385, 387, 389): 27 guides on one template, public or not decided per request on the server. Detail: `docs/progress/archive/2026-11-05-guides3.md`.
 - Guides 4 (5 Nov 2026, 30.32, R-112, PRs 390, 391, 393, 394): all 27 guides public now (new ones weekly from 16 Nov); Nora knows every public guide and industry page from kabsi.co/nora-pages.json and may link one after answering; lastmod from git, IndexNow, kabsi-canvas.vercel.app redirects to kabsi.co, one title per page, K-144 allows quoting Google's page, the free printable counter card. Detail: `docs/progress/archive/2026-11-05-guides4.md`.
+- Fix 3 (5 Nov 2026, PRs 379, 381, 383): the Coach reads Google by its location name (KABSI-EDGE-J stopped); a name guard; one reload after a deploy; a nightly kabsi.co check. Detail: `docs/progress/archive/2026-11-05-fix3.md`.
 - No customer is live yet. Before the first Meta ad: the DataForSEO top-up and a nearby check on a real business. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -42,6 +43,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - Master plan 19.6: two-step verification everywhere, recovery codes offline, the second Kabsi Google account.
 - Growth 1: the Meta and Speed Insights steps in docs/EVENTS.md (last section).
 - V3 heads-up (25 Oct): on the Yawmiyati phone tap Skip on the old photo message, never Yes, and reply No to the monthly question. Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
+- Fix 3: Cloudflare, Turnstile, the widget, Hostname management: add `kabsi-canvas.vercel.app` (KABSI-WEB-9).
 - Check 2: on a phone, pick 3 businesses at kabsi.co/scan, then read today's `places_usage` (autocomplete above 0, details 3 or more); add a Google Cloud quota alert for Places Autocomplete.
 - UX 1: after the deploy, `POST /visibility/terms` once (two DataForSEO calls, about 0.15 USD) and the read-back in the UX 1 archive file.
 - V1: a free Geoapify key, saved as the Supabase secret GEOAPIFY_API_KEY (clicks in `docs/progress/archive/2026-10-25-v1-visibility-map.md`); until then maps draw on a plain ground. DataForSEO top-up (50 US dollars) before the first Meta ad (30.28; the balance read 0.31 after Scan 2 on 5 Nov); Gemini stays off.
@@ -59,8 +61,8 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 ## Recent entries (newest first)
 
 - 5 Nov 2026, Industries 2: part A (PR 392) merged, part B (PR 395) in review.
+- 5 Nov 2026, Fix 3: PRs 379, 381, 383. Detail: `docs/progress/archive/2026-11-05-fix3.md`.
 - 5 Nov 2026, App 4 (30.31, R-111): PRs 378 to 388, checked live. Detail: `docs/progress/archive/2026-11-05-app4.md`.
-- 5 Nov 2026, Guides 4 (30.32, R-112): PRs 390, 391, 393, 394, checked live on kabsi.co. Detail: `docs/progress/archive/2026-11-05-guides4.md`.
 
 ## How a session updates this page
 
