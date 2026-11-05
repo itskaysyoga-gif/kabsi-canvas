@@ -210,9 +210,9 @@ export function D8Pricing() {
                       ))}
                     </ul>
                   </div>
-                  <p className="mt-5 text-label text-text-2">
-                    {p.help} {WORKING_HOURS}
-                  </p>
+                  {/* Site 2 (30.34 item 4): the help line and the working hours are two lines, each under 25 words. */}
+                  <p className="mt-5 text-label text-text-2">{p.help}</p>
+                  <p className="mt-1 text-label text-text-2">{WORKING_HOURS}</p>
                   <div className="mt-auto pt-6">
                     <ButtonLink
                       to={signedIn ? "/app" : "/get-started"}

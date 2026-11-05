@@ -14,7 +14,7 @@ import { usePrefersReducedMotion } from "./use-in-view";
 export { KABSI_GROUP_ID };
 
 /** The approved line (brief section 16.1). */
-export const ACCESS_LINE = `On Google, open your profile (search your business name while signed in), then Menu, Business Profile settings, People and access, Add. Paste ${KABSI_GROUP_ID}, choose Manager, then Add (on some screens, Invite).`;
+export const ACCESS_LINE = `On Google, open your profile, then Menu, Business Profile settings, People and access, Add. Paste ${KABSI_GROUP_ID}, choose Manager, then Add (on some screens, Invite).`;
 export const ID_LINE = `${KABSI_GROUP_ID} is Kabsi Clients, Kabsi's business group on Google. Never send us a password or a code.`;
 export const PENDING_LINE =
   "It shows as Pending until a person at Kabsi accepts it, within one working day.";
