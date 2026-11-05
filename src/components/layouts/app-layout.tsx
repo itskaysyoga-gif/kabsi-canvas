@@ -672,6 +672,7 @@ export function AppLayout({
           ) : area === "app" && myLoc.isError ? (
             <ErrorState
               className="mt-6 max-w-xl"
+              page
               title="Something went wrong on our side."
               onRetry={() => void myLoc.refetch()}
             >

@@ -23,8 +23,11 @@ async function opensAtTop(page: Page, from: string, selector: string) {
   await link.scrollIntoViewIfNeeded();
   const before = await page.evaluate(() => window.scrollY);
   const href = await link.getAttribute("href");
+  const h1 = await page.locator("h1").first().innerText();
   await link.click();
   await page.waitForURL((u) => u.pathname === new URL(href!, "https://x").pathname);
+  // The address changes before the new page's code has loaded; judge the new page once it is drawn.
+  await expect(page.locator("h1").first()).not.toHaveText(h1);
   const ys = await scrollYs(page);
   expect(ys, `${from} to ${href} (from ${before} px)`).toEqual([0, 0, 0, 0]);
 }
@@ -54,12 +57,19 @@ test.describe("pages open at the top", () => {
     await noBanner(page);
     await page.goto("/for");
     await page.waitForLoadState("load");
+    // The page's own first scroll (to its top, after hydration) comes before the visitor scrolls.
+    await page.waitForLoadState("networkidle", { timeout: 4000 }).catch(() => {});
+    await page.waitForTimeout(800);
     const link = page.locator('main a[href^="/for/"]').last();
     await link.scrollIntoViewIfNeeded();
+    // A visitor reads before tapping; the router keeps the place it was left at (it saves after a short pause).
+    await page.waitForTimeout(600);
     const before = await page.evaluate(() => window.scrollY);
     expect(before).toBeGreaterThan(300);
+    const h1 = await page.locator("h1").first().innerText();
     await link.click();
     await page.waitForURL(/\/for\/.+/);
+    await expect(page.locator("h1").first()).not.toHaveText(h1);
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
     await page.goBack();
     await page.waitForURL(/\/for$/);

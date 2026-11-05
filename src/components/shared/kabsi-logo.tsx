@@ -30,7 +30,10 @@ export function KabsiLogo({ dark = false }: { dark?: boolean }) {
       aria-label="Kabsi home"
     >
       <KabsiMark className={dark ? "rounded-full ring-2 ring-kb-white/20" : undefined} />
-      <span className="text-title leading-none">kabsi</span>
+      {/* The same wordmark as the website's logo (App 4 audit: setup said "kabsi" in the body font). */}
+      <span className="font-display text-[1.375rem] leading-none font-bold tracking-[-0.02em]">
+        Kabsi
+      </span>
     </Link>
   );
 }
