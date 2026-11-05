@@ -46,7 +46,7 @@ function ResumePage() {
   if (step.isError)
     return (
       <OnboardingShell>
-        <ErrorState title="This page did not load." onRetry={() => void step.refetch()}>
+        <ErrorState page title="This page did not load." onRetry={() => void step.refetch()}>
           Nothing you did, and nothing changed on Google. Try again in a minute.
         </ErrorState>
       </OnboardingShell>

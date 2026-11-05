@@ -55,8 +55,6 @@ export type GuideDoc = {
   related: string[];
   /** One line for llms.txt. */
   summary: string;
-  /** Guides 3 part A only: an earlier guide not yet rewritten on this template keeps its old body (part D removes it). */
-  legacyBody?: ReactNode;
 };
 
 /** What every page that is not the guide itself needs: no body, so it can travel from the server as data. */

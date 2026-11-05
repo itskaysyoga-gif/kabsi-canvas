@@ -6,6 +6,7 @@ import { AppLayout } from "@/components/layouts/app-layout";
 import { supabase } from "@/lib/supabase";
 import { amStaff } from "@/lib/reviews";
 import { NotFoundPage } from "@/components/kabsi/status-pages";
+import { ErrorState } from "@/components/kabsi/ui";
 import { OpsPanel } from "@/components/staff/ops-panel";
 import { OperationsPanel } from "@/components/staff/operations-panel";
 import { BusinessDiagnostics, SystemHealthPanel } from "@/components/staff/system-health-panel";
@@ -71,6 +72,11 @@ function StaffPage() {
         tabs={false}
       />
       {staff.isLoading ? <p className="text-text-2">Loading</p> : null}
+      {staff.isError ? (
+        <ErrorState title="This page did not load." onRetry={() => void staff.refetch()}>
+          Nothing you did. Try again in a minute.
+        </ErrorState>
+      ) : null}
       {staff.data ? (
         <>
           <nav

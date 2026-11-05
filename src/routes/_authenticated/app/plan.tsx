@@ -586,8 +586,8 @@ function StateBanner({
           </p>
         ) : (
           <p className="mt-1">
-            When the trial ends without a plan, reply drafts, Google Protection and the Results
-            Report pause. Your review link and QR code keep working.
+            When the trial ends without a plan, reply drafts, Google Protection and your weekly
+            report pause. Your review link and QR code keep working.
           </p>
         )}
       </Banner>
@@ -596,8 +596,8 @@ function StateBanner({
   if (sum.tier === "free" && !d.paidWaiting)
     return (
       <Banner tone="warn" title="No plan">
-        Your review link and QR code keep working. Reply drafts, Google Protection and the Results
-        Report are paused until you choose a plan.
+        Your review link and QR code keep working. Reply drafts, Google Protection and your weekly
+        report are paused until you choose a plan.
       </Banner>
     );
   if (d.current) {

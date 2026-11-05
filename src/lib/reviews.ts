@@ -224,7 +224,9 @@ export async function undoAction(token: string, publication: string) {
 // ── Staff test tool (mock Google only): adds a review to the simulated Google profile
 export async function amStaff() {
   const { data, error } = await supabase.rpc("is_staff");
-  return !error && data === true;
+  // No answer is not "not staff": the staff page shows its error, not the not-found page (App 4 audit).
+  if (error) throw new Error(error.message);
+  return data === true;
 }
 export async function addTestReview(
   locationId: string,

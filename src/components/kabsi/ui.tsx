@@ -689,8 +689,11 @@ export function ErrorState({
   onRetry,
   retryLabel = "Try again",
   className,
+  page = false,
 }: {
   title: string;
+  /** The error takes the whole page's place: its title is the page's H1 (App 4 audit). */
+  page?: boolean | undefined;
   children?: ReactNode | undefined;
   onRetry?: (() => void) | undefined;
   retryLabel?: string | undefined;
@@ -701,7 +704,7 @@ export function ErrorState({
       <span className="grid size-11 place-items-center rounded-full bg-bad-soft text-bad">
         <AlertTriangle className="size-5" aria-hidden />
       </span>
-      <p className="mt-4 text-h3">{title}</p>
+      {page ? <h1 className="mt-4 text-h3">{title}</h1> : <p className="mt-4 text-h3">{title}</p>}
       {children && <div className="mt-2 text-body text-text-2">{children}</div>}
       {onRetry && (
         <Button

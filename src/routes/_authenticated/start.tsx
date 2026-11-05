@@ -196,7 +196,7 @@ function StartPage() {
   if (query.isError || status.isError)
     return (
       <OnboardingShell>
-        <ErrorState title="This page did not load." onRetry={() => void refresh()}>
+        <ErrorState page title="This page did not load." onRetry={() => void refresh()}>
           Nothing you did, and nothing changed on Google. Try again in a minute.
         </ErrorState>
       </OnboardingShell>
