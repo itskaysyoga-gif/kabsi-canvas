@@ -57,3 +57,19 @@ Example), with Gloss Garage and Bubble Bay Wash, both invented.
 ## Left out
 
 * None: both category names were shown by live profiles on 5 Nov 2026.
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field | Line on the page | Row(s) above | Type |
+| --- | --- | --- | --- |
+| Answer | "A car wash Google Business Profile must show you are open. Kabsi checks that daily, and drafts posts and calm replies for your yes." | 8, 9 | A, K |
+| Profile | "Hours and open status, right": "Kabsi compares them with what you confirmed every day, and asks before public holidays." | 18, 19 | A, K |
+| Profile | "If you also come to customers": "Google lets you set the areas you cover, alongside your address." | 20 | G |
+| Profile | "A finished car, as a post": "Kabsi checks your photo is sharp, then prepares a post for your yes." | 22 | K |
+| Profile | "Reviews about a scratch or wait": "A wait gets one apology. Damage gets a calm draft, no argument, no refund promised." | 24, 25 | A, K |
+| Categories line | "Add detailing as a second category only if you do it. Read the names in your own profile, because they can differ by country." | 5 (unchanged, moved from the note) | A, G |
+| FAQ | "A calm draft asking the customer to get in touch. It never argues, admits fault or promises a refund, and waits for you." | 26 | K |
+
+Removed from the page: the search text paragraph (row 17), "A photo of a finished car shows the work better than any words" (row 21), "A review may be about the shine or the wait" (row 23), and the long answer (holiday hours stay in the profile card).

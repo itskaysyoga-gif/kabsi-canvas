@@ -286,7 +286,9 @@ export type ShareImage =
   | "about"
   | "founding"
   /** Guides 3 and Style 1: each guide's own photo cover, public/og/guides/<slug>.jpg. */
-  | `guides/${string}`;
+  | `guides/${string}`
+  /** Industries 3: each industry page's own photo card, public/og/industries/<slug>.jpg (scripts/industry-og.mjs). */
+  | `industries/${string}`;
 
 export function pageHead(o: {
   title: string;
@@ -294,6 +296,8 @@ export function pageHead(o: {
   path: string;
   /** The share image; Home's when not given. */
   image?: ShareImage;
+  /** The share image's alt text, when the image carries its own words (Industries 3: the page's H1). */
+  imageAlt?: string;
   jsonLd?: Record<string, unknown>[];
   noindex?: boolean;
   /** Breadcrumb trail after Home; adds BreadcrumbList JSON-LD. */
@@ -302,8 +306,10 @@ export function pageHead(o: {
 }) {
   // Share image: a designed 1200x630 PNG per page type, because some link previews (LinkedIn, older WhatsApp) skip
   // WebP. Page photos are WebP and reach search through the image sitemap and Article JSON-LD instead.
-  // Style 1: a guide's cover is its photo, so it is a JPEG (a photo as PNG is too heavy for link previews).
-  const ext = o.image?.startsWith("guides/") ? "jpg" : "png";
+  // Style 1 and Industries 3: a guide's or an industry page's cover is its photo, so it is a JPEG (a photo as PNG is
+  // too heavy for link previews).
+  const industryExt = o.image?.startsWith("industries/") ? "jpg" : "png";
+  const ext = o.image?.startsWith("guides/") ? "jpg" : industryExt;
   const og = `${SITE_URL}/og/${o.image ?? "home"}.${ext}`;
   const url = `${SITE_URL}${o.path === "/" ? "" : o.path}`;
   const meta: Meta[] = [
@@ -320,7 +326,7 @@ export function pageHead(o: {
     { property: "og:image:height", content: "630" },
     {
       property: "og:image:alt",
-      content: `Kabsi. ${BRAND_LINE}`,
+      content: o.imageAlt ?? `Kabsi. ${BRAND_LINE}`,
     },
     { property: "og:locale", content: "en_US" },
     { name: "twitter:card", content: "summary_large_image" },
@@ -329,7 +335,7 @@ export function pageHead(o: {
     { name: "twitter:image", content: og },
     {
       name: "twitter:image:alt",
-      content: `Kabsi. ${BRAND_LINE}`,
+      content: o.imageAlt ?? `Kabsi. ${BRAND_LINE}`,
     },
   ];
   if (o.noindex) meta.push({ name: "robots", content: "noindex" });

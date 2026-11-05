@@ -64,3 +64,35 @@ they are service searches kept from the template and need a DataForSEO read by W
 - "Massage therapist" as a category. No Google page or live profile read today showed the name.
 - Any statement about health benefits, pain relief or treatments for a condition. Not sourced and not Kabsi's to say.
 - Licensing rules for massage in the UAE or UK. Not read today.
+
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field | Line on the page | Row(s) above | Type |
+| --- | --- | --- | --- |
+| answer | "Kabsi keeps your spa Google Business Profile current: a calm reply to every review, holiday hours asked ahead, photos as posts, all for your yes." | 1, 21 | K |
+| profile | "Each treatment, length and price": "Google can show a service with a price and description. Spa profiles add minutes." | 2, 3 | G, P |
+| profile | "The booking link": "Your own booking page. If it moves, Kabsi changes it after your yes." | 5, 6 | G, K |
+| profile | "Packages as offer posts": "Google puts a View Offer button on an offer. Give it an end date." | 9, 10 | G, A |
+| profile | "The room on video": "A walk through of up to 30 seconds, 75 MB, at 720p or higher." | 11, 25 | G |
+| reviews | "The therapist's hands": "The reply thanks her, passes it on, and never says what the treatment did." | 7, 17 | K |
+| reviews | "A session late or short": "Sorry once, no minutes it cannot confirm, and a way to get in touch." | 19 | K |
+| reviews | "Pain or injury after treatment": "No draft: a short checklist, and a neutral holding reply only if you ask." | 8, 20; `knowledge/facts/13-faq.md` "What happens with hard reviews?" | K |
+| categories.line | "Both show on real spa profiles. Choose the one for what you mainly sell, not one per treatment." | 15, 16 | C, G |
+| holidays | "UAE National Day": "2 and 3 December. Special hours a few days ahead, packages with an end date." | 27; A (the old holiday advice) | T, A |
+| holidays | "Arafah Day and Eid al-Adha": "9 to 12 Dhu al-Hijjah, set by the moon. Say your days once announced." | 28 | T |
+| holidays | "UK Christmas and New Year": "Christmas 25, Boxing Day 28 December, New Year 1 January 2027. Set them early December." | 29, 31 | T, A |
+| photoCards | "The treatment room, empty and lit": "Table made up, towels folded, never a client. Kabsi checks light and focus, not faces." | 12, 24 | A, K |
+| photoCards | "Reception and the way in": "In a hotel or tower, a photo of the entrance and lift sign helps." | 26 | A |
+| photoCards | "Post ideas": "A couples package with an end date, a new treatment, long weekend hours." | 23 | A |
+| faqs | Booking system: "No. Kabsi has Manager access to your Google profile only, not your bookings or clients. It keeps the booking link on Google right." | 33, 5 | K |
+| faqs | Therapist complaint: "If it names the therapist, it comes with no draft and a short checklist. Kabsi writes a neutral holding reply only if you ask." | `knowledge/facts/13-faq.md` "What happens with hard reviews?" | K |
+
+Removed from the page: the five long tasks (the price range on real profiles, the "Online scheduling" line, the reply task), the review theme about the room, quiet and scent, "a route to a person at Kabsi", the UK summer bank holiday, the walk through photo tip (now the video card), "size" in the photo check, Google's category advice wording, and "checks your details every day" in the answer.
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- Profile card "The booking link": "Your own booking page. Check the link on Google whenever it moves." and the FAQ ending "Check the booking link on Google when your page moves." Kabsi does not edit the booking link on Google yet (knowledge/facts 2.1).
+- Holiday card: "Christmas Day 25 December 2026, Boxing Day moved to Monday 28, New Year 1 January." Row 29 (the Boxing Day holiday moves to Monday 28 December 2026).

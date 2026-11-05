@@ -33,49 +33,71 @@ export const spaMassage: Industry = {
     "spa day package",
     "moroccan bath",
   ],
-  tasks: [
+  // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
+  // docs/claims/spa-and-massage.md, whose "Industries 3" section maps it to its row.
+  profile: [
     {
-      title: "Put each treatment on the menu with its length and price",
-      text: "Aromatherapy massage, deep tissue, a cleansing facial. Google can show a service with a price and a description, and real spa profiles on Google list the minutes and the price range for each massage.",
+      title: "Each treatment, length and price",
+      text: "Google can show a service with a price and description. Spa profiles add minutes.",
     },
     {
-      title: "Link the page where people book",
-      text: "Some profiles on Google show a booking button and an 'Online scheduling' line. Yours can too, once the link points at your own booking page. When the page moves, tell Kabsi and the link changes after your Yes.",
+      title: "The booking link",
+      text: "Your own booking page. Check the link on Google whenever it moves.",
     },
     {
-      title: "Reply to the calm reviews, hand over the sensitive ones",
-      text: "Praise gets a reply that thanks the client and passes the words to the therapist. A review about pain or an injury after a treatment comes to you with no draft.",
+      title: "Packages as offer posts",
+      text: "Google puts a View Offer button on an offer. Give it an end date.",
     },
     {
-      title: "Post the package with its dates",
-      text: "A couples package before a long weekend is an offer post. Google puts a View Offer button on it, and the dates tell people when it ends.",
+      title: "The room on video",
+      text: "A walk through of up to 30 seconds, 75 MB, at 720p or higher.",
+    },
+  ],
+  reviews: [
+    {
+      title: "The therapist's hands",
+      text: "The reply thanks her, passes it on, and never says what the treatment did.",
     },
     {
-      title: "Keep the room looking like the room",
-      text: "A clean, lit photo of the treatment room and a walk through that lasts no more than 30 seconds. Google accepts video of that length, up to 75 MB, at 720p or higher.",
+      title: "A session late or short",
+      text: "Sorry once, no minutes it cannot confirm, and a way to get in touch.",
+    },
+    {
+      title: "Pain or injury after treatment",
+      text: "No draft: a short checklist, and a neutral holding reply only if you ask.",
     },
   ],
   categories: {
     primary: "Massage spa",
     more: ["Day spa"],
-    note: "Both names are ones Google shows under real spa profiles. Choose the one that matches the main thing you sell. Google's advice is not to add a category for every treatment but a few for the departments you really run.",
+    line: "Both show on real spa profiles. Choose the one for what you mainly sell, not one per treatment.",
   },
-  reviewThemes: [
+  holidays: [
     {
-      theme: "The therapist's hands",
-      text: "A client praises the pressure or the care. The reply thanks her and passes it on to the therapist. It does not repeat what the treatment did for her body.",
+      title: "UAE National Day",
+      text: "2 and 3 December. Special hours a few days ahead, packages with an end date.",
     },
     {
-      theme: "The room, the quiet, the scent",
-      text: "The reply picks one thing the writer said and gives it back in a line.",
+      title: "Arafah Day and Eid al-Adha",
+      text: "9 to 12 Dhu al-Hijjah, set by the moon. Say your days once announced.",
     },
     {
-      theme: "A session that started late or ended short",
-      text: "The reply says sorry once and states no minutes it cannot confirm. It asks the client to get in touch through the details on the profile.",
+      title: "UK Christmas and New Year",
+      text: "Christmas Day 25 December 2026, Boxing Day moved to Monday 28, New Year 1 January.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "The treatment room, empty and lit",
+      text: "Table made up, towels folded, never a client. Kabsi checks light and focus, not faces.",
     },
     {
-      theme: "Pain or an injury after a treatment",
-      text: "This is a health review. It comes to you with no draft and a route to a person at Kabsi, and the reply is yours to write.",
+      title: "Reception and the way in",
+      text: "In a hotel or tower, a photo of the entrance and lift sign helps.",
+    },
+    {
+      title: "Post ideas",
+      text: "A couples package with an end date, a new treatment, long weekend hours.",
     },
   ],
   story: {
@@ -102,44 +124,6 @@ export const spaMassage: Industry = {
       },
     ],
   },
-  posts: [
-    "A couples package with its end date and your booking link.",
-    "A new treatment, how long it takes and the starting price.",
-    "Opening hours for the long weekend.",
-    "A quiet weekday morning with a short treatment and a place free.",
-  ],
-  photoTips: [
-    {
-      title: "The treatment room, empty and lit",
-      text: "Table made up, towels folded, lights low but enough for the camera. Never a client on the table: Kabsi checks light, focus and size, not faces.",
-    },
-    {
-      title: "A short walk through",
-      text: "From the door to the room in under 30 seconds. Google takes video up to 30 seconds long.",
-    },
-    {
-      title: "Reception and the way in",
-      text: "A spa inside a hotel or a tower is hard to find. A photo of the entrance and the sign by the lift helps a first visit.",
-    },
-  ],
-  holidays: [
-    {
-      when: "UAE National Day, 2 and 3 December",
-      text: "A public holiday of two days. Put special hours on Google a few days ahead and give any package an end date.",
-    },
-    {
-      when: "Arafah Day and Eid al-Adha, UAE",
-      text: "Arafah Day is 9 Dhu al-Hijjah and Eid al-Adha runs 10 to 12 Dhu al-Hijjah, four days in all. The moon sets them, so say which days you open as soon as they are announced.",
-    },
-    {
-      when: "UK: Christmas and New Year 2026",
-      text: "Christmas Day is Friday 25 December, the Boxing Day holiday moves to Monday 28 December and New Year's Day is Friday 1 January 2027. Hours for all three go on Google in the first week of December.",
-    },
-    {
-      when: "UK: the summer bank holiday",
-      text: "Monday 30 August in 2027 in England and Wales. A post with your opening hours for the weekend is enough.",
-    },
-  ],
   page: {
     query: "spa Google Business Profile",
     title: "Spa Google Business Profile help | Kabsi",
@@ -150,7 +134,7 @@ export const spaMassage: Industry = {
     line: "Kabsi keeps your spa Google Business Profile current: treatments clear, holiday hours set, calm replies ready for your yes.",
     card: "Treatments clear, holiday hours set in time.",
     answer:
-      "A spa is judged on its photos, its treatments and how it answers reviews. Kabsi keeps your spa Google Business Profile current: it drafts a calm reply to every review, asks about Eid and public holiday hours before they come, turns your photos into posts, and checks your details every day. Nothing reaches Google without your yes.",
+      "Kabsi keeps your spa Google Business Profile current: a calm reply to every review, holiday hours asked ahead, photos as posts, all for your yes.",
     watch: {
       business: "Stillwater Spa, Dubai",
       line: "Holiday hours differ from your week. Kabsi asks before each one and checks Google shows what you chose.",
@@ -182,7 +166,14 @@ export const spaMassage: Industry = {
         "Stillwater Spa in Jumeirah is open until 1 am during Ramadan, with treatments from 60 minutes.",
       sources: ["Stillwater Spa's Google profile", "Stillwater Spa's website"],
     },
-    related: ["medical-and-aesthetic-clinic", "yoga-and-pilates-studio"],
+    related: [
+      "nail-salon",
+      "lash-and-brow-studio",
+      "physiotherapy",
+      "yoga-and-pilates-studio",
+      "hair-salon",
+      "medical-and-aesthetic-clinic",
+    ],
   },
   faqs: [
     {
@@ -191,7 +182,7 @@ export const spaMassage: Industry = {
     },
     {
       q: "Does Kabsi connect to my booking system?",
-      a: "No. Kabsi has Manager access to your Google profile only. It does not see your bookings or your clients. It can keep the booking link on Google right.",
+      a: "No. Kabsi has Manager access to your Google profile only, not your bookings or clients. Check the booking link on Google when your page moves.",
     },
     {
       q: "My spa opens later in Ramadan. How does Google show that?",
@@ -203,8 +194,12 @@ export const spaMassage: Industry = {
     },
     {
       q: "Can Kabsi reply to a review that complains about a therapist?",
-      a: "A complaint that names a therapist comes to you marked as needing a little more care, with a short checklist and no draft. Kabsi writes a short, neutral holding reply only if you ask.",
+      a: "If it names the therapist, it comes with no draft and a short checklist. Kabsi writes a neutral holding reply only if you ask.",
     },
   ],
-  guides: ["how-to-reply-to-google-reviews", "how-to-choose-your-primary-category"],
+  guides: [
+    "how-to-set-holiday-hours-on-google",
+    "how-to-reply-to-google-reviews",
+    "add-services-and-prices-to-google",
+  ],
 };

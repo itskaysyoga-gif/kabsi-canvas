@@ -28,10 +28,30 @@ export const florist: Industry = {
     "funeral flowers",
     "flower shop",
   ],
+  // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of docs/claims/florist.md,
+  // whose "Industries 3" section maps it to its row.
+  profile: [
+    {
+      title: "The phone number, yours",
+      text: "Orders come by phone. Kabsi compares phone, hours and website with yours every day.",
+    },
+    {
+      title: "Busy days, their own hours",
+      text: "Kabsi asks before each public holiday and sets special hours once you say yes.",
+    },
+    {
+      title: "An arrangement, as a post",
+      text: "A photo of an arrangement with one line becomes a post for your yes.",
+    },
+    {
+      title: "Weddings and birthdays",
+      text: "A warm reply thanks the customer for the occasion they named, adding nothing else.",
+    },
+  ],
   categories: {
     primary: "Florist",
     more: [],
-    note: "Choose the category that matches most of your work, and read the names in your own profile, because they can differ by country. Say in your description and posts if you deliver.",
+    line: "Pick the category for most of your work; names can differ by country. Say in your description and posts if you deliver.",
   },
   page: {
     query: "florist Google Business Profile",
@@ -43,7 +63,7 @@ export const florist: Industry = {
     line: "Kabsi looks after your florist Google Business Profile: the right phone, holiday hours, arrangements as posts.",
     card: "The right phone, arrangements as posts.",
     answer:
-      "Orders come by phone, so a florist Google Business Profile has to show the right number. Kabsi checks your phone and hours every day, asks about public holiday hours in time, sets busy day hours you give it, turns a photo of an arrangement into a post, and drafts a warm reply for a celebration and a gentle one for a sympathy order. You approve each one.",
+      "Orders come by phone, so a florist Google Business Profile needs the right number. Kabsi checks it daily and drafts posts and replies you approve.",
     watch: {
       business: "Bloom and Twine, Bristol",
       line: "Flower orders often start with a call. Kabsi checks the phone Google shows against yours every day.",
@@ -68,7 +88,7 @@ export const florist: Industry = {
       },
       {
         title: "Gentle replies",
-        text: "Warm for a wedding, gentle for a funeral, never adding what the customer did not say.",
+        text: "Warm for a wedding, gentle for a funeral, adding nothing the customer did not say.",
       },
     ],
     nearby: { kind: "shop", term: "florist" },
@@ -77,25 +97,7 @@ export const florist: Industry = {
       answer: "Bloom and Twine in Clifton makes same day bouquets when you order by 1 pm.",
       sources: ["Bloom and Twine's Google profile", "Bloom and Twine's website"],
     },
-    related: ["bakery", "cafe"],
-    searchText:
-      "People search for the moment, same day flowers, a wedding or a funeral, then check whether you deliver, what your arrangements look like and how you treated customers at a hard time.",
-    guide: [
-      {
-        title: "The phone, the busy days and the photos",
-        paras: [
-          "When orders come by phone, the number on Google has to be yours. Kabsi compares your phone, hours and website on Google with what you confirmed, every day, and asks when they differ.",
-          "Busy days have their own hours. Before each public holiday Kabsi asks what you will do and sets special hours once you say yes, and you can add a late night before a busy day the same way. A photo of an arrangement with one line becomes a post for your yes.",
-        ],
-      },
-      {
-        title: "Replies for happy days and hard ones",
-        paras: [
-          "Reviews after a wedding or a birthday can get a warm reply that thanks the customer for the occasion they named. Kabsi never adds details the customer did not share.",
-          "Reviews after a funeral need a gentle reply. Kabsi keeps it short and kind, adds nothing the customer did not share, and waits for your yes.",
-        ],
-      },
-    ],
+    related: ["bakery", "cafe", "optician", "restaurant", "nail-salon", "pet-grooming"],
   },
   faqs: [
     {
@@ -119,5 +121,9 @@ export const florist: Industry = {
       a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything.",
     },
   ],
-  guides: ["how-to-reply-to-google-reviews", "google-review-link-and-qr-code"],
+  guides: [
+    "google-posts-for-local-businesses",
+    "how-to-set-holiday-hours-on-google",
+    "how-to-reply-to-google-reviews",
+  ],
 };

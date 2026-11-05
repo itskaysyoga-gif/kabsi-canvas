@@ -62,3 +62,35 @@ and 49,500) and is on the page. The other terms are product searches with no vol
   or live profile read today showed them.
 - A second photo: the bakery has one (`bakery-window`). `bakery-counter` shows a brand sign and is not used (DESIGN-PROPOSAL, Design 5
   round 2).
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field | Line on the page | Row(s) above | Type |
+| --- | --- | --- | --- |
+| Answer | "On a bakery Google Business Profile, early and holiday hours come first. Kabsi checks them, drafts posts and replies, and you approve each." | 1, 2, 3, 9; `knowledge/facts/09-industry-notes.md` 7.2 | K |
+| Profile | "Early opening hours, exact": "Whatever time the doors open, Google carries it. Special hours cover days that differ." | 2 | G |
+| Profile | "Cakes and breads, with prices": "Google can show each with a price. Prices come from you; Kabsi never invents one." | 4, 5 | G, K |
+| Profile | "The cake order page": "Google lets you add your own link, so it can open your cake order page." | 6 | G |
+| Profile | "What is fresh today": "A seasonal pastry or a loaf that is back. Kabsi drafts the post; you approve." | 9 | K |
+| Reviews | "The bread itself": "The reply names the loaf back and adds nothing you did not say." | 15 | K |
+| Reviews | "Sold out when they arrived": "Sorry once, your hours and order page, and no promise to hold anything." | 15 | K |
+| Reviews | "An allergy or a reaction": "No draft: a short checklist, and a neutral holding reply only if you ask." | 16; `knowledge/facts/13-faq.md` "What happens with hard reviews?" | K |
+| Categories line | "Google itself uses 'Bakery' in its example. Add 'Cafe' only if people sit and drink there. Google says not to add one per product." | 13, 14 | G, A |
+| Holidays | "England and Wales: Easter 2027": "Good Friday 26 March, Easter Monday 29 March. A post names the last order day." | 23, 7 | T, A |
+| Holidays | "Eid al-Fitr, UAE": "1 to 3 Shawwal. Closed days go on Google; a post gives the order deadline." | 24 | T, A |
+| Holidays | "UK: Christmas week 2027": "Holidays fall on Monday 27 and Tuesday 28 December. Deadlines go on Google in November." | 26, 27 | T, A |
+| Photos | "The shelf at its fullest": "Early, in daylight, every tray in view, in focus and well lit." | 21, 10 | A, G |
+| Photos | "A cake beside its price card": "One cake, straight on. A custom order starts from what customers can see." | 21 | A |
+| Photos | "Post ideas": "The first loaf out, weekend cake order deadlines, a seasonal bake, bank holiday hours." | 20 | A |
+| FAQ | "Kabsi cannot see your shelves. A sold out post comes from what you tell it, and you approve it first." | 28 | K |
+| FAQ | "No. Kabsi writes only facts you give it; allergen information comes from your recipes and local rules. A review about a reaction gets no draft." | 29, 16 | K, A |
+| FAQ | "If you add an order link, yes. Ordering options depend on your country and provider. Kabsi prepares a new link for your yes." | 30 | G, K |
+| FAQ | "No. The Kabsi chat is between Kabsi and you. It prepares your hours, posts and replies, and does not talk to your customers." | 31 | K |
+
+Removed from the page: the five long tasks, the cake that was not like the picture, UAE National Day, the photo size limits, the outside door photo tip, the order-days-ahead post advice, the four post ideas as a list, and the long answer (Christmas Eve and five days ahead stay in the jobs).
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- FAQ: "... Check the link each time your provider changes." (was "Kabsi prepares a new link for your yes": Kabsi does not edit the order link on Google yet, knowledge/facts 2.1).

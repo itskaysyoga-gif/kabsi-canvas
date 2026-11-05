@@ -72,3 +72,37 @@ clinic" as the free check term; Web 2 can use "skin clinic" for the UK check. "m
 - "Cosmetic surgeon", "Aesthetic clinic" and "Doctor" as categories. No Google page or live profile read today showed those names
   in English.
 - Before and after photos, and any claim about results or safety.
+
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field | Line on the page | Row(s) above | Type |
+| --- | --- | --- | --- |
+| answer | "Kabsi looks after your aesthetic clinic Google Business Profile: replies that confirm no patient, hours checked daily, doctors' days as posts for your yes." | 3, 10, 22; `knowledge/facts/13-faq.md` "Google Protection" | K |
+| profile | "Treatments your doctors really offer": "Google can show a service with a description, and clinic profiles list them by name." | 2 | G, P |
+| profile | "The Book button": "Your own consultation page. When it changes, tell Kabsi; the link follows after your yes." | 5, 6, 7 | G, P, K |
+| profile | "What a post can name": "UK rules: a post may promote a consultation, never name Botox or a prescription medicine." | 8, 9 | T |
+| profile | "Each doctor's day, honest": "Weekly hours say when you open; a post says which doctor is in when." | 10 | G |
+| reviews | "The welcome at the front desk": "The reply passes thanks to the team and names no patient or treatment." | 18 | K |
+| reviews | "How a treatment turned out": "Health review: no draft, a short checklist, a holding reply only if you ask." | 1, 19; `knowledge/facts/13-faq.md` "What happens with hard reviews?" | K |
+| reviews | "A cancelled or moved appointment": "No word that they were booked: thanks, and an invitation to get in touch." | 4, 20 | K |
+| categories.line | "'Medical clinic' only with a licensed doctor, 'Dermatologist' only with a registered dermatologist. Use few categories, kept specific." | 16, 17 | A, G |
+| holidays | "Eid al-Adha, UAE": "Three days, 10 to 12 Dhu al-Hijjah. Point urgent problems to the Call button." | 28, 37 | T, G |
+| holidays | "Ramadan, UAE": "Private sector hours drop by two a day. Check doctors' hours against the shorter day." | 29 | T, A |
+| holidays | "Closed a week or more": "Special hours suit up to 6 days closed. From 7 days, mark temporarily closed." | 31 | G |
+| photoCards | "Consultation room, screen off": "Bright, clean and calm. No details on a monitor, no one on the couch." | 25 | A |
+| photoCards | "The sign at the door": "In a tower, photos of the sign and lift button save a missed appointment." | 27 | A |
+| photoCards | "Post ideas": "A new consultation day, a new doctor, closed for Eid, how to book." | 24 | A |
+| faqs | Botox: "Rules differ by country. In the UK, no: Botox is a prescription-only medicine. A consultation may be promoted, naming no prescription medicine. Not legal advice." | 8, 34 | T, A |
+| faqs | Five star reply: "It thanks the writer and says the team will hear the words. Nothing about a visit, a treatment or a date, and no names." | 35 | K |
+| faqs | Privacy law: "Drafts follow a careful habit: a public reply never confirms a patient or mentions their care. Not legal advice; ask a person about privacy law." | 36 | K |
+| faqs | Before and after photos: "Check your country's rules" (was "your own country's") | wording only, same meaning | A |
+
+Removed from the page: the reply task (its rule stays in the reviews cards and the first job), the review theme about the price after the consultation, the New Year's Day card and "hours in the week before Christmas", the waiting area photo tip with the photo check note, "Google may remove a post that carries a phone number", the categories note that all four names show on real profiles, and the answer's opening sentence.
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- Profile card "The Book button": "Your own consultation page. Check the link each time you change systems." Kabsi does not edit the booking link on Google yet (knowledge/facts 2.1).
+- Review card "How a treatment turned out": "A careful draft that names no treatment. A reaction or injury gets no draft." Facts 13: every review of a medical business is at least medium (a careful draft); injury and allergy are high (no draft).

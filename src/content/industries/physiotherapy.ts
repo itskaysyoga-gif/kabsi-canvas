@@ -32,49 +32,71 @@ export const physiotherapy: Industry = {
     "physio home visit",
     "dry needling",
   ],
-  tasks: [
+  // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
+  // docs/claims/physiotherapy.md, whose "Industries 3" section maps it to its row.
+  profile: [
     {
-      title: "Say what you treat, in the words people type",
-      text: "Back pain, a stiff neck, knee rehab, sports injuries. Google can show a service with a description, and real physio profiles list conditions by name.",
+      title: "What you treat, in their words",
+      text: "Back pain, knee rehab, sports injuries. Google can show each service with a description.",
     },
     {
-      title: "Open the first assessment from the Book button",
-      text: "Google lets you add your own booking link. It should open the first assessment page. When the page changes, tell Kabsi and the link follows after your Yes.",
+      title: "Book opens the first assessment",
+      text: "Add your own booking link. Check it each time your booking page changes.",
     },
     {
-      title: "Reply without naming an injury or confirming a patient",
-      text: "A public reply thanks the writer and never repeats an injury, a treatment or a visit date. A review that describes pain or a result comes to you with no draft.",
+      title: "Home visit hours, set apart",
+      text: "Home visits only: hide the address. Clinic and visits: set Google's more hours.",
     },
     {
-      title: "Set home visit hours apart from clinic hours",
-      text: "A physio who only treats at the client's home keeps one profile for the area and hides the address. A clinic that also visits homes sets those hours apart, with Google's more hours setting.",
+      title: "Only names on your team list",
+      text: "In the UK, only HCPC registered staff may be called physiotherapists. Kabsi uses listed names.",
+    },
+  ],
+  reviews: [
+    {
+      title: "The physio who explained the plan",
+      text: "The reply thanks her, passes it to the team, and never mentions the injury.",
     },
     {
-      title: "Name only the people on your team list",
-      text: "In the UK only staff on the HCPC register may be called physiotherapists, and 'physical therapist' is protected too. Kabsi uses only the names you list.",
+      title: "Pain that did not improve",
+      text: "A careful draft that names no treatment. An injury gets no draft.",
+    },
+    {
+      title: "Times, parking and the waiting room",
+      text: "A short reply that points to the hours and directions on the profile.",
     },
   ],
   categories: {
     primary: "Physical therapist",
     more: [],
-    note: "Searches say 'physio', but the category Google shows on real physiotherapy profiles is 'Physical therapist'. You pick it from Google's list, because a business cannot create a category. Add a second only for a department you really run.",
+    line: "Searches say physio, but real profiles show 'Physical therapist'. Pick it from Google's list; add a second only for a real department.",
   },
-  reviewThemes: [
+  holidays: [
     {
-      theme: "The physio who explained the plan",
-      text: "A patient says she finally understood her exercises. The reply thanks her and passes it to the team, with no mention of the injury.",
+      title: "UK: late May and August",
+      text: "31 May and 30 August 2027, both Mondays. Post who covers urgent bookings.",
     },
     {
-      theme: "Pain that did not improve",
-      text: "This is a health review. It comes to you with no draft and a route to a person at Kabsi. The reply is yours to write and stays out of a public argument.",
+      title: "Eid al-Fitr, UAE",
+      text: "1 to 3 Shawwal, set by the moon. Say on Google when you reopen.",
     },
     {
-      theme: "Times, parking and the waiting room",
-      text: "A practical review gets a short reply that points to the hours and directions on the profile.",
+      title: "Closing at noon before a holiday",
+      text: "Special hours for that day alone. The rest of the week stays as it is.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "Treatment room and exercise area",
+      text: "Couches made up, equipment tidy, no patient in the frame. Kabsi does not check faces.",
     },
     {
-      theme: "Insurance and receipts",
-      text: "A review about a claim or a bill gets no detail in public. The reply invites the writer to contact the clinic.",
+      title: "The physios in clinic clothes",
+      text: "Patients want to know who they will meet. Good light, and ask each physio first.",
+    },
+    {
+      title: "Post ideas",
+      text: "A Thursday evening clinic, a new physio, home visit areas, bank holiday hours.",
     },
   ],
   story: {
@@ -97,44 +119,6 @@ export const physiotherapy: Industry = {
       },
     ],
   },
-  posts: [
-    "An evening clinic on Thursdays, with the booking link.",
-    "A new physio joins: their qualifications and the days they work.",
-    "Home visits now cover these areas, with your booking link.",
-    "Opening hours for the bank holiday weekend.",
-  ],
-  photoTips: [
-    {
-      title: "The treatment room and the exercise area",
-      text: "Couches made up, equipment tidy, no patient in the frame. Kabsi checks light, focus and size, not faces, so keep patients out of it.",
-    },
-    {
-      title: "The physios in clinic clothes",
-      text: "A patient wants to know who they will meet. Take it in good light and ask each physio first.",
-    },
-    {
-      title: "The way in, step free or not",
-      text: "A photo of the door and the ramp or the stairs. Profiles on Google can also show accessibility details, such as a wheelchair accessible restroom.",
-    },
-  ],
-  holidays: [
-    {
-      when: "UK: the late May and August bank holidays",
-      text: "In England and Wales the spring holiday is Monday 31 May 2027 and the summer holiday Monday 30 August 2027. Put hours on Google and say in a post who covers urgent bookings.",
-    },
-    {
-      when: "Eid al-Fitr, UAE",
-      text: "1 to 3 Shawwal, set by the moon. A clinic closed for the days says on Google when it opens again.",
-    },
-    {
-      when: "UAE National Day, 2 and 3 December",
-      text: "Two public holidays. Special hours go on a few days ahead, and the booking page should show no appointments on those days.",
-    },
-    {
-      when: "Part of a day, not all of it",
-      text: "A clinic that closes at noon before a holiday sets special hours for that day alone. Google's hours for the rest of the week stay as they are.",
-    },
-  ],
   page: {
     query: "physiotherapist Google Business Profile",
     title: "Physiotherapist Google Business Profile help | Kabsi",
@@ -145,7 +129,7 @@ export const physiotherapy: Industry = {
     line: "Kabsi looks after your physiotherapist Google Business Profile: hours, the assessment link, and replies that never name an injury.",
     card: "Assessment link right, replies that name no injury.",
     answer:
-      "A physiotherapist Google Business Profile needs exact hours and replies that protect patients. Kabsi checks your open status, hours and website every day, drafts replies that never name an injury or a treatment, turns news like a new physio into a post, and asks about holiday hours in time. You approve each one before it reaches Google.",
+      "Kabsi looks after your physiotherapist Google Business Profile: open status checked daily, replies that name no injury, clinic news as posts for your yes.",
     watch: {
       business: "Motion Works Physio, Manchester",
       line: "A clinic shown as closed loses the patients who check first. Kabsi checks your open status every day.",
@@ -180,12 +164,19 @@ export const physiotherapy: Industry = {
         "Motion Works Physio in Didsbury has appointments on Saturday mornings, with sports massage.",
       sources: ["Motion Works Physio's Google profile", "Motion Works Physio's website"],
     },
-    related: ["gym-and-fitness", "yoga-and-pilates-studio"],
+    related: [
+      "medical-and-aesthetic-clinic",
+      "dental-clinic",
+      "yoga-and-pilates-studio",
+      "gym-and-fitness",
+      "spa-and-massage",
+      "optician",
+    ],
   },
   faqs: [
     {
       q: "Can Kabsi say how many sessions a patient needs?",
-      a: "No. Kabsi writes only the facts you give it, such as what you treat, when you open and what a first assessment costs. It makes no promise about results.",
+      a: "No. Kabsi writes only the facts you give it, like what you treat and when you open. It promises nothing about results.",
     },
     {
       q: "Does Kabsi see patient notes or bookings?",
@@ -193,7 +184,7 @@ export const physiotherapy: Industry = {
     },
     {
       q: "Does my profile need to say whether a GP referral is needed?",
-      a: "Say it in a post: tell Kabsi whether patients can book without a referral and it prepares the post for your Yes. The NHS says some people can get NHS physiotherapy without a GP referral, so patients may ask.",
+      a: "Say it in a post: tell Kabsi your rule and it prepares one for your yes. NHS physio is sometimes possible without a GP referral.",
     },
     {
       q: "Can I give a free assessment to anyone who leaves a review?",
@@ -201,8 +192,12 @@ export const physiotherapy: Industry = {
     },
     {
       q: "Can Kabsi reply to a review that names a treatment?",
-      a: "A review that names a treatment gets a careful draft that does not repeat it; a review about an injury gets no draft and a short checklist. You approve or write every reply.",
+      a: "Yes: a careful draft that does not repeat the treatment. An injury gets no draft and a short checklist. You approve or write every reply.",
     },
   ],
-  guides: ["how-to-reply-to-google-reviews", "google-review-link-and-qr-code"],
+  guides: [
+    "how-to-reply-to-google-reviews",
+    "add-services-and-prices-to-google",
+    "google-posts-for-local-businesses",
+  ],
 };

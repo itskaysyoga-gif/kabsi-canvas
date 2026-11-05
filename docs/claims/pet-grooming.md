@@ -54,3 +54,22 @@ Example), with Biscuit, Fluff and Fold and Pawfect Grooming, all invented.
 ## Left out
 
 * None: "Pet groomer" was shown by a live profile on 5 Nov 2026.
+
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field | Line on the page | Row(s) above | Type |
+| --- | --- | --- | --- |
+| Answer | "On a pet groomer Google Business Profile, photos and reviews come first. Kabsi turns fresh trims into posts and drafts warm replies for your yes." | 1, 8, 9 | A, K |
+| Profile card "The best photo you have" | "A clean, happy dog, sent with one line, becomes a post for your yes." | 18 | A, K |
+| Profile card "If you travel to customers" | "Set a service area on Google, and hide an address customers cannot visit." | 19 | G |
+| Profile card "A review about a shaved coat" | "A careful draft that admits nothing and asks the owner to get in touch." | 22 | K |
+| Profile card "A nick or an injury" | "No draft, a short checklist, and a neutral holding reply only if you ask." | 23, 25 | K |
+| Categories line | "Choose the category that matches what most of your work is." | 4 | A |
+| FAQ "What does Kabsi say to a review about a nick?" | "An injury is a safety matter: no draft and a short checklist. Kabsi writes a neutral holding reply only if you ask." | 25 | K |
+
+Jobs, the watch line and the AI answer are unchanged. Related: vet clinic, barbershop, hair salon, nail salon, car wash, florist. Guides: posts, hours and details the same everywhere, negative reviews.
+
+Removed from the page: the search text (row 17); the two guide blocks as paragraphs; "Kabsi checks each photo before it reaches Google" (row 18); the warm thank you reply with the pet's name and "only what the review and your own facts say" (row 21); the guide line on the daily service area check (row 20; job row 14 and the watch keep it); the note's second sentence (row 5; the "If you travel to customers" card keeps it); from the answer, the daily hours and area check, "marks a hard one for more care" and holiday hours (row 9); "through the details on your profile" and "waits for your yes" (row 22); "marked as needing a little more care" in the nick FAQ.

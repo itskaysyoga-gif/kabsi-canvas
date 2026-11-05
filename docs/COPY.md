@@ -1570,6 +1570,45 @@ Every guide's words are in its own content file, src/content/guides/<slug>.tsx; 
 | why-chatgpt-describes-your-business-wrongly | florist-wide | AI answers | wrongly? |
 | keep-your-hours-and-details-the-same-everywhere | bakery-counter | Hours and details | the same everywhere? |
 
+## 56. Industries 3: the industry pages short and scannable (5 Nov 2026, master plan 30.33 item 2)
+
+*Changes section 52 for /for and the twenty industry pages. No reading block: each section is a headline, at most one line of up to 25 words, then a picture, chips or cards (a short title and one line of at most 15 words). Every trade's lines are in its own content file (src/content/industries/<slug>.ts) and each has its row in the "Industries 3" section of its claim sheet (docs/claims/<slug>.md). Every business, person and number on these pages is an invented Example.*
+
+### The template (d9-industry.tsx)
+
+- "What people search for" (bar: "search for"): the trade's answer line (at most 25 words, the page's main query once), the searches as chips, "Searches like these. On Pro, Kabsi shows the words people searched on Google to find you." and the free check link. The trade's second reading paragraph is gone.
+- "Your Google profile, as a [trade] owner" (bar: "Your Google profile"): two to four cards. Then, on the pages that have them, in this order: "What customers write about" (two or three cards; the illness, injury or safety card says the review gets no draft), "Google categories that fit" (the names as chips, the first marked "First category" for screen readers, then one line), "Holidays and busy dates" (two or three cards) and "Photos and posts" (two or three cards). "See how it works" and "See the plans" stay.
+- "Read next." (bar: "next."): "Guides for you", three guides as photo cards (the guide's photo of section 55, its group as a pill, its title); "Businesses like yours" with "See every business" (to /for), six related businesses as photo cards (photo, name, one line).
+- Removed: "The Google work of a [trade]" with its five long tasks, the review themes' long paragraphs, "Post ideas" as a bullet list, the holidays' long paragraphs, the two long guide sections of the Design 8 and Industries 2 pages, and the second paragraph under "What people search for".
+- The share image of each industry page (public/og/industries/<slug>.jpg): "Kabsi", the page's H1 with its marked phrase in yellow, "kabsi.co/for/[slug]". Its alt text: "Kabsi. [H1]".
+
+### /for
+
+- No line changes. The cards are 2 to a row below 1024 px and 4 from 1024 px; a filtered list that does not fill its last row centres it.
+
+### Each page's answer line (the first answer, with its query)
+
+- **/for/auto-repair** (query: "auto repair shop Google Business Profile"): "On an auto repair shop Google Business Profile, the phone comes first. Kabsi checks phone and hours daily, drafts calm replies, and you approve."
+- **/for/bakery** (query: "bakery Google Business Profile"): "On a bakery Google Business Profile, early and holiday hours come first. Kabsi checks them, drafts posts and replies, and you approve each."
+- **/for/barbershop** (query: "barber shop Google Business Profile"): "For a barber shop Google Business Profile, Kabsi prepares review replies, turns fresh cuts into posts and checks your hours daily, all for your yes."
+- **/for/cafe** (query: "cafe Google Business Profile"): "On a cafe Google Business Profile, the opening time comes first. Kabsi checks it daily, turns fresh bakes into posts and prepares review replies."
+- **/for/car-wash** (query: "car wash Google Business Profile"): "A car wash Google Business Profile must show you are open. Kabsi checks that daily, and drafts posts and calm replies for your yes."
+- **/for/dental-clinic** (query: "dental clinic Google Business Profile"): "Kabsi keeps your dental clinic Google Business Profile exact: hours and phone checked daily, careful replies that never confirm a patient, holiday hours asked ahead."
+- **/for/florist** (query: "florist Google Business Profile"): "Orders come by phone, so a florist Google Business Profile needs the right number. Kabsi checks it daily and drafts posts and replies you approve."
+- **/for/gym-and-fitness** (query: "gym Google Business Profile"): "On a gym Google Business Profile, people check hours and classes. Kabsi drafts dated class posts and review replies, and asks about holiday hours ahead."
+- **/for/hair-salon** (query: "hair salon Google Business Profile"): "For a hair salon Google Business Profile, Kabsi prepares review replies, turns colour work into posts and asks about holiday hours, all for your yes."
+- **/for/lash-and-brow-studio** (query: "eyelash salon Google Business Profile"): "For an eyelash salon Google Business Profile, Kabsi turns fresh sets into posts, checks your hours daily and prepares review replies, all for your yes."
+- **/for/medical-and-aesthetic-clinic** (query: "aesthetic clinic Google Business Profile"): "Kabsi looks after your aesthetic clinic Google Business Profile: replies that confirm no patient, hours checked daily, doctors' days as posts for your yes."
+- **/for/nail-salon** (query: "nail salon Google Business Profile"): "For a nail salon Google Business Profile, Kabsi turns new designs into posts, checks each photo and prepares review replies, all for your yes."
+- **/for/optician** (query: "optician Google Business Profile"): "Kabsi looks after your optician Google Business Profile: the eye test link and hours checked daily, new frames as posts, careful replies for your yes."
+- **/for/pet-grooming** (query: "pet groomer Google Business Profile"): "On a pet groomer Google Business Profile, photos and reviews come first. Kabsi turns fresh trims into posts and drafts warm replies for your yes."
+- **/for/physiotherapy** (query: "physiotherapist Google Business Profile"): "Kabsi looks after your physiotherapist Google Business Profile: open status checked daily, replies that name no injury, clinic news as posts for your yes."
+- **/for/restaurant** (query: "restaurant Google Business Profile"): "For a restaurant Google Business Profile, Kabsi checks your hours daily, prepares review replies and turns dish photos into posts, all for your yes."
+- **/for/spa-and-massage** (query: "spa Google Business Profile"): "Kabsi keeps your spa Google Business Profile current: a calm reply to every review, holiday hours asked ahead, photos as posts, all for your yes."
+- **/for/tattoo-studio** (query: "tattoo shop Google Business Profile"): "A tattoo shop Google Business Profile should say how to book. Kabsi checks your description daily and prepares healed work posts and replies."
+- **/for/veterinary-clinic** (query: "veterinarian Google Business Profile"): "A worried owner checks a veterinarian Google Business Profile for your phone and hours. Kabsi checks both daily and drafts careful replies for your yes."
+- **/for/yoga-and-pilates-studio** (query: "yoga studio Google Business Profile"): "A yoga studio Google Business Profile shows where and when you teach. Kabsi checks address and hours daily, and prepares posts and replies."
+
 ### Part B: the look on every other public page (branch claude/style1-b)
 
 - **The bar** (30.32 item 3): one phrase in every H1 and light section headline. Heroes: "free." (free check), "owners ask" (FAQ), "the owner at the counter." (About), "stays yours." (Security), "three months of Kabsi Pro, free." (Founding 25), "25% of every payment." (Partners), "review link and QR code." (review link tool), "as a Manager" (manager steps), "help" (setup help), "Log in" (log in), "not here." and "on our side." (404 and error), the last word of each legal title; the last sentence on Pricing and How it works as before. Sections: "you choose.", "show up", "a weekly report.", "in control.", "your business", "owners ask", "The work comes first.", "free check" (the closing check, now on every page), "your yes.", "started", "each plan", "the plans", "The trial", "Billing", "control", "billing", "WhatsApp", "data", "a person", "with owners", "facts", "Kabsi", "plain words", "how to remove it", "who to ask", "works", "suits", "partners ask", "can apply", "you get", "Kabsi asks", "a place", "Founding 25", "get back", "Google shows", "short".

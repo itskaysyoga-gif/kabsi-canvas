@@ -50,3 +50,22 @@ Hillside Animal Clinic and Riverside Vets, both invented.
 ## Left out
 
 * None: all three category names were shown by live profiles on 5 Nov 2026.
+
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field | Line on the page | Row(s) above | Type |
+| --- | --- | --- | --- |
+| Answer | "A worried owner checks a veterinarian Google Business Profile for your phone and hours. Kabsi checks both daily and drafts careful replies for your yes." | 9, 10 | A, K |
+| Profile card "Hours and the phone first" | "Exact hours. Kabsi asks before each public holiday and sets special hours on your yes." | 18, 19, 20 | A, G, K |
+| Profile card "Out of hours calls" | "Sent to another clinic? Say so in your description and posts, not the category." | 21 | A |
+| Profile card "No treatment in a reply" | "Drafts thank the owner and invite contact through your profile, never the pet's treatment." | 23, 24, 26 | A, K |
+| Profile card "A pet hurt, or a death" | "No draft, a short checklist, and a neutral holding reply only if you ask." | 25 | K |
+| Categories line | "Add the emergency category only if you really take emergencies in those hours. Names can differ by country." | 6 | A, G |
+| FAQ "What happens with a very hard review?" | "No draft, just a short checklist. You write the reply, ask Kabsi for a neutral holding reply, or skip it." | 29 | K |
+
+Jobs, the watch line and the AI answer are unchanged. Related: pet grooming, dental clinic, physiotherapy, medical and aesthetic clinic, optician, florist. Guides: hours and details the same everywhere, negative reviews, holiday hours.
+
+Removed from the page: the search text (row 17); the two guide blocks as paragraphs; "you can add anything it should never say in About your business" (row 24); the guide line on the daily phone, hours and description check (row 22; job row 13 and the watch keep it); "and nothing is published until you approve it" (row 25); "Read the names in your own profile" (row 6); from the answer, "whether you are open now", "shows you a hard review as one that needs more care" and holiday hours (rows 9, 10; the holiday card keeps the last); "marked as needing a little more care" in the hard review FAQ.

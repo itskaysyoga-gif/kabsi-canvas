@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 5 Nov 2026, Style 1. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 5 Nov 2026, Industries 3. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -13,6 +13,7 @@ One page, under 10 KB. Updated 5 Nov 2026, Style 1. The history (tasks, After me
 - Fix 3 (5 Nov 2026, PRs 379, 381, 383): the Coach reads Google by its location name (KABSI-EDGE-J stopped); a name guard; one reload after a deploy; a nightly kabsi.co check. Detail: `docs/progress/archive/2026-11-05-fix3.md`.
 - Industries 2 (5 Nov 2026, 30.32, PRs 392, 395, part C): /for is one list; 20 industry pages on Design 9; old group pages 301 to /for. Detail: `docs/progress/archive/2026-11-05-industries2.md`.
 - Style 1 (5 Nov 2026, 30.33, R-113, PRs 399, 400, 401, 404): every guide with a library photo (page, card, share image) and a filtered list; the yellow bar on every public headline, photos on Pricing, About, Founding 25 and Partners, Security in short lines; Sentry gets nothing from automated runs and a repeated Edge error once per 10 minutes. Detail: `docs/progress/archive/2026-11-05-style1.md`.
+- Industries 3 (PR 403): short industry pages. Detail: `docs/progress/archive/2026-11-05-industries3.md`.
 - No customer is live yet. Before the first Meta ad: the DataForSEO top-up and a nearby check on a real business. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -61,9 +62,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 5 Nov 2026, Industries 2 (30.32): PRs 392, 395 and part C.
-- 5 Nov 2026, Fix 3: PRs 379, 381, 383. Detail: `docs/progress/archive/2026-11-05-fix3.md`.
-- 5 Nov 2026, App 4 (30.31, R-111): PRs 378 to 388, checked live. Detail: `docs/progress/archive/2026-11-05-app4.md`.
+- 5 Nov 2026, Industries 3: PR 403.
 
 ## How a session updates this page
 

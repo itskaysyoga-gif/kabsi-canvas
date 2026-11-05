@@ -72,3 +72,35 @@ problem, a legal threat, a complaint that names a team member, and the rest of t
 ## Left out
 
 * None of the six category names: all were shown by live profiles on 5 Nov 2026.
+
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field | Line on the page | Row(s) above | Type |
+| --- | --- | --- | --- |
+| answer | "Kabsi keeps your dental clinic Google Business Profile exact: hours and phone checked daily, careful replies that never confirm a patient, holiday hours asked ahead." | 35, 37 | K |
+| profile | "Replies that confirm no patient": "The reply thanks the writer and never repeats a treatment, name or visit." | 3 | K |
+| profile | "Emergency number and hours exact": "Toothache at 9 at night: the number on Google has to ring someone." | 4 | A, K |
+| profile | "Only treatments you really offer": "Keep services to what your dentists do now. Profile Coach lists what is missing." | 5 | A, K |
+| profile | "The appointment link": "It should land on your booking page, not the clinic's home page." | 6 | A |
+| reviews | "A gentle dentist": "The reply thanks nervous patients without mentioning the visit." | 15 | A, K |
+| reviews | "Cost explained, or not": "A reply about a bill never argues and invites the writer to get in touch." | 16 | K |
+| reviews | "An injury or a safety problem": "No draft: a short checklist, and a neutral holding reply only if you ask." | 36, 45; F 13 hard reviews | K |
+| categories.line | "Use a specialist category only when a dentist on your team practises it, like Orthodontist." | 13, 14 | A, C |
+| holidays | "Eid al-Fitr and Eid al-Adha": "If you close, special hours, and a post on what to do in an emergency." | 27 | T, A |
+| holidays | "UAE National Day": "2 and 3 December. Kabsi asks five days before, and about the Saturday after." | 28 | T, K |
+| holidays | "UK bank holidays": "Closed days on Google, and the urgent care line for patients in pain." | 30 | T, A |
+| photoCards | "The treatment room, empty": "Clean, bright and calm. Never a patient's face or mouth, even with permission." | 24 | A |
+| photoCards | "The team": "Dentists and reception in clinic clothes, so patients know who they will meet." | 25 | A |
+| photoCards | "Post ideas": "Saturday check-ups, what to do in an emergency, a new dentist joining." | 23 | A |
+| faqs | "Why are some reviews sent without a reply?": "An injury, a safety problem or a named team member gets no draft, a short checklist, and a neutral holding reply only if you ask." | 45 | K |
+| faqs | "Can Kabsi ask patients for reviews?": "Kabsi never receives a patient's number. Your team gets a ready message with the review link to forward after a visit, if you choose." | 46 | K |
+| faqs | "Should a clinic reply to reviews at all?": "Yes, a short reply shows the next patient that someone reads them. Kabsi's drafts never confirm someone is a patient, and you approve every one." | 47 | A, K |
+
+Removed from the page: the holiday task (its facts stay in the holidays cards), the review themes about the front desk and about children, the school holidays card, the entrance and parking photo tip, two post ideas, "What matters is what it says", and in the answer the website check and the injury clause (now the review card).
+
+### Industries 3: fixed after the independent check (5 Nov 2026)
+
+- FAQ: "An injury, a safety problem or a complaint naming a team member gets no draft, a short checklist, and a holding reply only if asked." Facts 13: only a complaint that names a team member is high risk.

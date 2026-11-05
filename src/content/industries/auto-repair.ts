@@ -33,49 +33,71 @@ export const autoRepair: Industry = {
     "tyre shop",
     "garage open Saturday",
   ],
-  tasks: [
+  // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
+  // docs/claims/auto-repair.md, whose "Industries 3" section maps it to its row.
+  profile: [
     {
-      title: "Put each job on the list: service, brakes, air conditioning",
-      text: "Google can show a service with a price and a description, and a real auto repair profile lists jobs such as air conditioning and filter replacement. Add the work you do and drop what you stopped.",
+      title: "Every job on the list",
+      text: "Service, brakes, air conditioning. Google can show each with a price; drop what you stopped.",
     },
     {
-      title: "Say what you do about the MOT or the inspection",
-      text: "In Great Britain most cars need an MOT by their third anniversary, then every year, and it can be taken up to a month early without losing the renewal date. A garage that tests cars posts its free slots. In Dubai the RTA requires an inspection appointment to register or renew a car.",
+      title: "The MOT or the inspection",
+      text: "In Great Britain most cars need a yearly MOT from three years. Post free slots.",
     },
     {
-      title: "Keep the phone number and the hours exact",
-      text: "Kabsi watches the phone number and the hours for changes you did not make. Google expects the garage to be staffed and open for the hours it states.",
+      title: "Phone and hours, exact",
+      text: "Kabsi watches both every day for changes you did not make.",
     },
     {
-      title: "Answer price and honesty reviews calmly",
-      text: "A review about a bill gets a draft that never argues, never admits fault and never promises a refund or discount. It comes to you to read before anything is published, with no quick Post button.",
+      title: "If you come to the car",
+      text: "No workshop? One profile for the area, address hidden. A garage with bays shows it.",
+    },
+  ],
+  reviews: [
+    {
+      title: "The bill against the quote",
+      text: "Calm, never argues or promises a refund. You read it first: no quick Post button.",
     },
     {
-      title: "If you come to the car, show the area and hide the address",
-      text: "A mobile mechanic with no workshop keeps one profile for the area and hides the address. A garage with bays keeps its address on show.",
+      title: "The same fault came back",
+      text: "No argument, no admission of fault. It asks them to contact the garage.",
+    },
+    {
+      title: "A safety problem with the car",
+      text: "No draft: a short checklist, and a neutral holding reply only if you ask.",
     },
   ],
   categories: {
     primary: "Auto repair shop",
     more: ["Tyre shop"],
-    note: "Google's own guidelines name both categories in an example of a tyre and service chain whose locations all have 'Tyre Shop' and also 'Auto Repair Shop'. Add 'Tyre shop' only if you really sell and fit tyres.",
+    line: "Google's guidelines name both in a tyre and service chain example. Add 'Tyre shop' only if you sell and fit tyres.",
   },
-  reviewThemes: [
+  holidays: [
     {
-      theme: "They told me what did not need doing",
-      text: "A customer thanks the garage for honesty about a repair they could skip. The reply thanks them and adds nothing the owner did not say.",
+      title: "Bank holiday Mondays, England and Wales",
+      text: "3 May, 31 May and 30 August 2027. Say until when keys can be collected.",
     },
     {
-      theme: "The bill against the quote",
-      text: "The reply stays calm and asks the writer to get in touch through the details on the profile. It does not argue the amount in public.",
+      title: "Eid al-Fitr, UAE",
+      text: "1 to 3 Shawwal, by the moon. Special hours, and when you take cars again.",
     },
     {
-      theme: "The same fault came back",
-      text: "No argument and no admission of fault in a public reply. It asks the customer to contact the garage and leaves the diagnosis to you.",
+      title: "Ramadan, UAE",
+      text: "Private sector hours drop by two a day. Check key collection against the shorter day.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "A car on the lift",
+      text: "Tidy tools, good light, no customer's number plate in focus.",
     },
     {
-      theme: "The car was ready later than promised",
-      text: "The reply says sorry for the wait once. It states no reason the owner did not give.",
+      title: "The front and the parking",
+      text: "Google says an outside photo helps people recognise you. Show where to leave the car.",
+    },
+    {
+      title: "Post ideas",
+      text: "Brake checks with the price, free MOT slots, air con checks before summer, Saturday hours.",
     },
   ],
   story: {
@@ -99,44 +121,6 @@ export const autoRepair: Industry = {
       },
     ],
   },
-  posts: [
-    "Brake checks this week, with the price and how long they take.",
-    "MOT slots free on Thursday, with the booking link.",
-    "Air conditioning checks before the summer, with the starting price.",
-    "New opening hours on Saturdays.",
-  ],
-  photoTips: [
-    {
-      title: "The bays, with a car on the lift",
-      text: "Tidy tools, good light, no customer's number plate in focus. It shows the work happens in a proper workshop.",
-    },
-    {
-      title: "The team in work clothes",
-      text: "The person who will look under the bonnet, with their say so. Names come from your team list.",
-    },
-    {
-      title: "The front, the sign and where to park",
-      text: "Google says an outside photo helps customers recognise the place when they come. Add one of the parking, so a driver knows where to leave the car.",
-    },
-  ],
-  holidays: [
-    {
-      when: "UK: bank holiday Mondays in 2027",
-      text: "Monday 3 May, Monday 31 May and Monday 30 August in England and Wales. Say on Google if the workshop opens and until what time the keys can be collected.",
-    },
-    {
-      when: "Eid al-Fitr, UAE",
-      text: "1 to 3 Shawwal, set by the moon. Special hours go on Google, with the day the garage takes cars again.",
-    },
-    {
-      when: "Ramadan, UAE",
-      text: "Private sector working hours fall by two hours a day for the month, so check the garage's key collection time against the shorter day.",
-    },
-    {
-      when: "UK: Christmas week 2027",
-      text: "Christmas Day is a Saturday, so the bank holidays fall on Monday 27 and Tuesday 28 December. Put them on Google in November, with the last day for drop offs.",
-    },
-  ],
   page: {
     query: "auto repair shop Google Business Profile",
     title: "Auto repair shop Google Business Profile help | Kabsi",
@@ -147,7 +131,7 @@ export const autoRepair: Industry = {
     line: "Kabsi looks after your auto repair shop Google Business Profile: the right phone, exact hours, and calm replies you approve.",
     card: "The right phone number, calm replies.",
     answer:
-      "Drivers call a garage from its auto repair shop Google Business Profile, so the phone number has to be right. Kabsi checks your phone and hours every day, drafts calm replies to reviews about price that never argue or promise refunds, turns a photo from the workshop into a post, and asks about bank holiday hours in time. You approve every change.",
+      "On an auto repair shop Google Business Profile, the phone comes first. Kabsi checks phone and hours daily, drafts calm replies, and you approve.",
     watch: {
       business: "Westgate Auto Repair, Manchester",
       line: "Drivers call the number Google shows. Kabsi compares it with yours every day.",
@@ -172,7 +156,7 @@ export const autoRepair: Industry = {
       },
       {
         title: "Workshop photos, as posts",
-        text: "A photo and a line become a post. Kabsi never writes a price you did not give.",
+        text: "A photo and a line become a post, with no price you did not give.",
       },
     ],
     nearby: { kind: "garage", term: "car repair" },
@@ -181,20 +165,27 @@ export const autoRepair: Industry = {
       answer: "Westgate Auto Repair in Salford offers same day MOTs when you book before 10 am.",
       sources: ["Westgate Auto Repair's Google profile", "Westgate Auto Repair's website"],
     },
-    related: ["car-wash", "gym-and-fitness"],
+    related: [
+      "car-wash",
+      "optician",
+      "pet-grooming",
+      "veterinary-clinic",
+      "dental-clinic",
+      "barbershop",
+    ],
   },
   faqs: [
     {
       q: "What does Kabsi say when a customer claims the repair was not done properly?",
-      a: "It writes a calm reply that never admits fault and never argues. In the UK the law says a trader must perform a service with reasonable care and skill, and a reply never changes the garage's duty. This is not legal advice.",
+      a: "A calm draft that never admits fault or argues. A reply never changes your UK duty of reasonable care and skill. Not legal advice.",
     },
     {
       q: "Will Kabsi write prices into a post?",
-      a: "Only the prices you give it. Kabsi never invents a price, an offer or a discount, and you approve each post before it goes out.",
+      a: "Only prices you give it. Kabsi never invents a price, offer or discount, and you approve each post.",
     },
     {
       q: "I come to the customer's car. What does my profile show?",
-      a: "Google says a business that serves customers at their location should have one profile and hide its address. Your profile then shows the area you serve.",
+      a: "Google says a business serving customers at their location should have one profile and hide its address. Your profile then shows the area you serve.",
     },
     {
       q: "Where does the review QR code go in a garage?",
@@ -205,5 +196,9 @@ export const autoRepair: Industry = {
       a: "No. Kabsi works with your Google profile and the reviews on it. It does not connect to your customer records.",
     },
   ],
-  guides: ["how-to-reply-to-google-reviews", "someone-changed-my-business-info-on-google"],
+  guides: [
+    "someone-changed-my-hours-on-google",
+    "how-to-respond-to-negative-google-reviews",
+    "google-posts-for-local-businesses",
+  ],
 };

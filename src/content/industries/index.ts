@@ -24,7 +24,7 @@ import { florist } from "./florist";
 import { optician } from "./optician";
 import { yogaAndPilatesStudio } from "./yoga-and-pilates-studio";
 
-export type { ChatLine, D9Trade, Industry, Task, TradeCard, TradePage } from "./types";
+export type { Card, ChatLine, D9Trade, Industry, Task, TradeCard, TradePage } from "./types";
 
 export const INDUSTRIES: Industry[] = [
   hairSalon,

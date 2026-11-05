@@ -99,12 +99,13 @@ describe("industry pages (Design 5, Web 2)", () => {
     expect(INDUSTRIES.filter((i) => !i.finished).map((i) => i.slug)).toEqual([]);
   });
 
-  it("every page has its searches, five tasks, its own example and photos with alt text", () => {
+  it("every page has its searches, its cards, its own example and photos with alt text", () => {
     const businesses = new Set<string>();
     for (const i of INDUSTRIES) {
-      // Design 8 (Web 4c): the four trades written for their own page show five searches.
-      expect(i.searches.length, i.slug).toBeGreaterThanOrEqual(i.d8 ? 5 : 6);
+      expect(i.searches.length, i.slug).toBeGreaterThanOrEqual(5);
       expect(i.page.jobs, i.slug).toHaveLength(3);
+      // Industries 3 (30.33 item 2): Your Google profile is two to four cards (tests/industries3.test.ts has the rest).
+      expect(i.profile.length, i.slug).toBeGreaterThanOrEqual(2);
       expect(i.keyword, i.slug).toBeTruthy();
       for (const p of i.photos) expect(p.alt, i.slug).toBeTruthy();
       businesses.add(i.example.business);
@@ -112,41 +113,20 @@ describe("industry pages (Design 5, Web 2)", () => {
     expect(businesses.size).toBe(INDUSTRIES.length);
   });
 
-  it("finished pages carry every section, and at least 600 words of their own", () => {
+  // Industries 3 (master plan 30.33 item 2, 5 Nov 2026): the pages were cut to short cards, so the 600-word floor of
+  // Content 1 no longer fits; each page keeps its own words (the 40 percent similarity check above still holds) and at
+  // least 250 of them, and every section it had.
+  it("finished pages carry every section, and at least 250 words of their own", () => {
     for (const i of INDUSTRIES.filter((x) => x.finished)) {
       expect(i.faqs?.length, i.slug).toBeGreaterThanOrEqual(4);
-      expect(pageText(i).length, i.slug).toBeGreaterThanOrEqual(600);
-      // Design 8 (Web 4c): the four trades carry their own hero message, two guide sections, the free check example
-      // (only what the check reads, K-82) and two related trades instead of Content 1's sections.
-      if (i.d8) {
-        expect(i.d8.guide.length, i.slug).toBe(2);
-        expect(i.d8.check.length, i.slug).toBe(4);
-        for (const c of i.d8.check)
-          expect(c.label, i.slug).toMatch(
-            /^(Opening hours|Reviews|Photos|Website|Phone|Category)$/,
-          );
-        continue;
-      }
-      // Industries 2: the new trades carry two guide sections, their categories and their search text.
-      if (i.page.guide) {
-        expect(i.page.guide.length, i.slug).toBe(2);
+      expect(pageText(i).length, i.slug).toBeGreaterThanOrEqual(250);
+      expect(i.guides, i.slug).toHaveLength(3);
+      // The Content 1 pages keep their review, holiday and photo groups; the Industries 2 trades their categories.
+      if (i.reviews) {
         expect(i.categories, i.slug).toBeDefined();
-        expect(i.page.searchText, i.slug).toBeTruthy();
-        continue;
+        expect(i.holidays, i.slug).toBeDefined();
+        expect(i.photoCards, i.slug).toBeDefined();
       }
-      expect(i.categories, i.slug).toBeDefined();
-      expect(i.reviewThemes?.length, i.slug).toBeGreaterThanOrEqual(4);
-      expect(i.story?.lines.length, i.slug).toBeGreaterThanOrEqual(4);
-      expect(i.posts?.length, i.slug).toBeGreaterThanOrEqual(4);
-      expect(i.photoTips?.length, i.slug).toBeGreaterThanOrEqual(3);
-      expect(i.holidays?.length, i.slug).toBeGreaterThanOrEqual(3);
-      expect(i.faqs?.length, i.slug).toBeGreaterThanOrEqual(4);
-      // At least one of its two guides exists on kabsi.co; the page links only those (never a dead link).
-      expect(
-        (i.guides ?? []).some((g) => GUIDE_TITLES[g]),
-        i.slug,
-      ).toBe(true);
-      expect(pageText(i).length, i.slug).toBeGreaterThanOrEqual(600);
     }
   });
 

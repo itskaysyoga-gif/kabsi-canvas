@@ -296,7 +296,9 @@ describe("the head of every public page (30.16 section 4)", () => {
     for (const r of PUBLIC_FILES.filter((f) => f.startsWith("src/routes/"))) {
       const code = read(r);
       expect(code, r).toMatch(/pageHead\(|<LegalPage/);
-      if (/pageHead\(/.test(code)) expect(code, r).toMatch(/image: "\w+"/);
+      // Industries 3: an industry page names its own image, public/og/industries/<slug>.jpg (tests/industries3.test.ts).
+      if (/pageHead\(/.test(code))
+        expect(code, r).toMatch(/image: "\w+"|image: `industries\/\$\{i\.slug\}`/);
     }
     for (const img of [
       "home",
