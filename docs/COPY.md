@@ -1245,3 +1245,11 @@ Each line is old, then new, then the files, found by grep first. Where a line ap
 - **The countdown**: "You can ask for a new code in 42 seconds." (was "in 42s").
 - **Errors** (src/lib/sign-in-errors.ts): "That code did not work. Check it, or send a new one." (wrong); "That code has expired. Send a new one." (sent more than 10 minutes ago); "Wait 42 seconds, then try again." or "Wait 5 minutes, then try again." (Supabase's 429 with a time) else "Too many tries for now. Wait a few minutes, then try again."; "You are offline. Check your connection, then try again."; "Kabsi can't be reached right now. Try again in a minute." (also for the code request, replacing "We couldn't reach Kabsi. Check your connection and try again."). The code request's own limits keep their words from the auth-code function.
 - **/staff for a session that is not staff**: the not-found page ("This page is not here."), replacing "This page is for the Kabsi team only."
+
+### Part E: the audit's word fixes (branch claude/app4-e, docs/app4/audit.md)
+
+- **E-01, Plan** (plan.tsx): "When the trial ends without a plan, reply drafts, Google Protection and the Results Report pause." becomes "... and your weekly report pause."; "Reply drafts, Google Protection and the Results Report are paused until you choose a plan." becomes "... and your weekly report are paused until you choose a plan." (B-008).
+- **E-04**: a page still loading is titled "Kabsi" until it sets its own title.
+- **E-05, /staff when the staff check does not answer**: "This page did not load." with "Nothing you did. Try again in a minute." and Try again.
+- **E-02, /staff validation figures with nothing to show**: "No data".
+- **E-07, the setup header**: the wordmark reads "Kabsi" (was "kabsi").
