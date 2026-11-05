@@ -1219,3 +1219,16 @@ Each line is old, then new, then the files, found by grep first. Where a line ap
 - **addressComponents** (google/places/live.ts SNAPSHOT_FIELD_MASK): no words. The town is the locality, else the postal town, else the first administrative area below the country; the formatted address stays the fallback.
 - **The speed gate** (scripts/lighthouse-gate.mjs, ci.yml, lighthouse-live.yml): no words a reader sees. Budgets: CI Home 205, Pricing 215, /scan 235 KB; live Home 215, Pricing 225, /scan 245 KB.
 
+
+## 53. Guides 3: twenty new guides, one every 2 days, each a way into the free check (5 Nov 2026)
+
+Every guide's words are in its own content file, src/content/guides/<slug>.tsx; each claim about Google is checked against the Google help page it cites, read on the date shown. The template's lines (src/components/marketing/guide-article.tsx), checked against knowledge/kabsi-facts.md:
+
+- Byline: "By Kabsi. Published [date]. Updated [date]." with "[n] min read", then "Checked against Google's help pages on [date]." (when a guide also cites a government or other official page: "Checked against Google's help pages and the other sources below on [date]."). Replaces section 6's "Kabsi team, reviewed by Rashid Abou Hamzy" byline on the guides.
+- The box after the answer: "See what Google shows about you" / "Type your business and Kabsi reads your Google profile and searches around it, like a customer." with the scan box (MAIN_CTA, SCAN_LINE).
+- "In short" (the summary box, was "The short answer"), "In this guide" (the contents list, on guides with five or more sections), "What Kabsi does here" (or "What Kabsi does and does not do here"), "Questions owners ask", "Sources" with "Read on [date]" under each, then NOT_AFFILIATED.
+- "Read next" (related guides, each "Read the guide"), "For your kind of business" with "Kabsi for [trade]", "All guides".
+- The closing band: "Let Kabsi look after this." / "Start with the free check. It shows what Google shows about your business today." with the scan box, then "Start free" (to /get-started) and TRIAL_LINE.
+- The cover and the share image: "Kabsi guide", the guide's topic, the question; the share image adds "kabsi.co/guides" and "Checked against Google's help pages".
+- The guides list: lead "Short answers, then the steps. Each one is checked against Google's own help pages, and dated." (adds "and dated"); meta description "Plain guides for owners: your business on Google Maps, verification, hours and holidays, categories, photos, posts and Google reviews, each checked against Google's help."; each card shows the publishing date and the reading time.
+- Part A (branch claude/guides3-a) publishes guide 1, "Why is my business not showing on Google Maps?", on the merge day; the other guides are added by parts B to D and appear on their day. A guide link inside a guide is plain text until the linked guide is public.

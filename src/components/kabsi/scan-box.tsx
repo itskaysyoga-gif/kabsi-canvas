@@ -18,6 +18,7 @@ export function ScanBox({
   keyword,
   industry,
   note,
+  onStart,
 }: {
   /** Kept for older callers: the line under the box is always the free check line. */
   under?: "trial" | "scan";
@@ -30,10 +31,18 @@ export function ScanBox({
   industry?: string | undefined;
   /** Replaces the line under the box. */
   note?: string | undefined;
+  /** Guides 3: called once when the visitor starts the check from this box (the guide's own click event). */
+  onStart?: (() => void) | undefined;
 }) {
   return (
     <div data-main-cta className={cn("w-full", className)}>
-      <ScanForm id={id} defaultValue={defaultValue} keyword={keyword} industry={industry} />
+      <ScanForm
+        id={id}
+        defaultValue={defaultValue}
+        keyword={keyword}
+        industry={industry}
+        onStart={onStart}
+      />
       <p className="mt-3 text-small text-text-2">{note ?? SCAN_LINE}</p>
     </div>
   );
@@ -44,11 +53,13 @@ function ScanForm({
   defaultValue,
   keyword,
   industry,
+  onStart,
 }: {
   id?: string | undefined;
   defaultValue: string;
   keyword?: string | undefined;
   industry?: string | undefined;
+  onStart?: (() => void) | undefined;
 }) {
   const navigate = useNavigate();
   const [q, setQ] = useState(defaultValue);
@@ -59,6 +70,7 @@ function ScanForm({
       setError("Type your business name and city.");
       return;
     }
+    onStart?.();
     void navigate({
       to: "/scan",
       search: { q: q.trim(), ...(keyword ? { keyword } : {}), ...(industry ? { industry } : {}) },
@@ -67,6 +79,7 @@ function ScanForm({
   // Check 2: a suggestion the visitor chose goes straight to the check with its Place ID; the session token ends the
   // Autocomplete session at Place Details.
   const pick = (place: FoundBusiness, sessionToken: string) => {
+    onStart?.();
     void navigate({
       to: "/scan",
       search: {

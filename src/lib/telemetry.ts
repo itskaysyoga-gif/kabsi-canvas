@@ -198,7 +198,8 @@ export type BrowserEvent =
   | "connect_started"
   | "profile_state_seen"
   | "setup_call_booked"
-  | "weekly_report_opened";
+  | "weekly_report_opened"
+  | "guide_cta_clicked";
 
 // The server's names, listed so both sides read the same table. track() refuses them at compile time.
 export type ServerEvent =
@@ -256,6 +257,7 @@ const BROWSER_EVENTS: ReadonlySet<string> = new Set<BrowserEvent>([
   "profile_state_seen",
   "setup_call_booked",
   "weekly_report_opened",
+  "guide_cta_clicked",
 ]);
 
 // Ids, countries, labels and UTM fields only. Never review text, reviewer names or email addresses.
@@ -271,6 +273,8 @@ type SafeProps = Partial<
     | "state"
     | "page_type"
     | "category"
+    | "guide"
+    | "box"
     | "utm_source"
     | "utm_medium"
     | "utm_campaign"

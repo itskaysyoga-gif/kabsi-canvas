@@ -1,5 +1,5 @@
 // The facts come from the one generator (scripts/kb-lib.mjs, master plan 27.12): knowledge/facts/*.md built into the
-// combined facts file, public/llms-full.txt and public/llms.txt. Tests read the generated text, not the committed copy, so a
+// combined facts file, public/llms-full.txt and src/content/llms-base.txt. Tests read the generated text, not the committed copy, so a
 // stale copy cannot hide a change; tests/knowledge-build.test.ts proves the committed copies equal it.
 import { readFileSync } from "node:fs";
 import { OUTPUTS, buildAll } from "../../scripts/kb-lib.mjs";

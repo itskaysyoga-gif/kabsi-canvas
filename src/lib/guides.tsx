@@ -25,6 +25,7 @@ import {
   Steps,
 } from "@/components/marketing/guide-kit";
 import type { PhotoId } from "@/lib/site-photos";
+import type { GuideDoc } from "@/content/guides/types";
 
 // Guides (D253): short, practical how-tos for business owners. Every step is checked against Google's own
 // help pages (listed as sources at the end of each guide). Facts only (§3): no promises of reviews, ratings
@@ -697,3 +698,33 @@ export const GUIDES: Guide[] = [
 ];
 
 export const guideBySlug = (slug: string) => GUIDES.find((g) => g.slug === slug);
+
+// Guides 3 part A: the earlier guides in the Guides 3 shape until part D rewrites each on the template. They were public
+// before Guides 3, so their publishAt is their first day.
+const LEGACY_INDUSTRIES: Record<string, string[]> = {
+  "how-to-reply-to-google-reviews": ["hair-salon", "restaurant", "cafe"],
+  "how-to-respond-to-negative-google-reviews": ["restaurant", "auto-repair"],
+  "can-you-remove-a-google-review": ["restaurant"],
+  "add-manager-google-business-profile": ["hair-salon"],
+  "google-review-link-and-qr-code": ["cafe", "bakery"],
+  "why-chatgpt-describes-your-business-wrongly": [],
+  "keep-your-hours-and-details-the-same-everywhere": ["restaurant"],
+};
+export const LEGACY_GUIDES: GuideDoc[] = GUIDES.map((g) => ({
+  slug: g.slug,
+  title: g.title,
+  description: g.description,
+  publishAt: `${g.published ?? "2026-09-26"}T00:00:00Z`,
+  updated: g.updated,
+  checked: g.updated,
+  topic: "Google reviews",
+  answer: g.description,
+  inShort: g.summary,
+  sections: [],
+  kabsi: { heading: "", body: null },
+  sources: g.sources.map((s) => ({ title: s.label, url: s.href, read: g.updated })),
+  industries: LEGACY_INDUSTRIES[g.slug] ?? [],
+  related: [],
+  summary: g.description,
+  legacyBody: g.body,
+}));

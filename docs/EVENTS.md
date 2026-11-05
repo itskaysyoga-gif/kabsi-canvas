@@ -26,6 +26,7 @@ Rules:
 | `profile_state_seen`      | The owner says what state the profile is in                                    | /start                                  | state, location_id                                                                      |
 | `setup_call_booked`       | A setup call is booked                                                         | /setup-call                             | source                                                                                  |
 | `weekly_report_opened`    | The Results Report screen is opened, once per report                           | App                                     | location_id, source                                                                     |
+| `guide_cta_clicked`       | A guide's free check box is used, or its Start free link is clicked (Guides 3) | /guides/SLUG                            | guide (the slug), box (after_answer, end, start_free); the free check's own events are unchanged |
 
 Renamed by Growth 1: `snapshot_viewed` is `free_scan_completed`; the free check now sends `free_scan_started` at the search, not `business_found` (which stays for onboarding only).
 
