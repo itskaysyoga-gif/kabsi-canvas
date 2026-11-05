@@ -2,6 +2,7 @@
 // panels, source labels and the task track every task shows (approved, sent to Google, on Google, or did not go
 // through with what happens next; 30.15 section 3.1). The shell is src/components/layouts/app-layout.tsx.
 import { Link, useRouterState } from "@tanstack/react-router";
+import { Headline } from "@/components/kabsi/highlight";
 import { Check, ExternalLink, Undo2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -32,7 +33,10 @@ export function AccountTop({
   action,
   tabs = true,
   className,
+  mark,
 }: {
+  /** The phrase of a string title on the highlight bar; the title's last word when not given (App 5). */
+  mark?: string | undefined;
   title: ReactNode;
   lead?: ReactNode;
   action?: ReactNode;
@@ -55,7 +59,9 @@ export function AccountTop({
     <div className={cn("mb-6", className)}>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="font-display text-h2 font-bold text-balance text-text-1">{heading}</h1>
+          <h1 className="font-display text-h2 font-bold text-balance text-text-1">
+            {typeof heading === "string" ? <Headline text={heading} mark={heading === title ? mark : undefined} /> : heading}
+          </h1>
           {lead && <p className="mt-2 max-w-[42rem] text-body text-text-2">{lead}</p>}
         </div>
         {action}

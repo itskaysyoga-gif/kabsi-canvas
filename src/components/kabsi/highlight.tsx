@@ -8,6 +8,19 @@ export function Highlight({ children }: { children: ReactNode }) {
   return <span className="d9-mark">{children}</span>;
 }
 
+/** The last word of a title, without its closing punctuation: the default phrase of a signed-in heading (App 5). */
+export function lastWord(text: string): string | undefined {
+  return text.trim().match(/([\p{L}\p{N}'’-]+)[^\p{L}\p{N}]*$/u)?.[1];
+}
+
+/**
+ * A signed-in heading (App 5, master plan 30.33 item 2): one phrase on the bar, the one named or else the title's last
+ * word ("Home", "Reviews", "Posts and photos", "Google profile").
+ */
+export function Headline({ text, mark }: { text: string; mark?: string | undefined }) {
+  return <Marked text={text} mark={mark ?? lastWord(text)} />;
+}
+
 /**
  * A headline with its key phrase on the bar. `mark` must appear once in `text`; when it does not, the headline stays plain
  * (tests/industries2.test.ts checks every page's marks, so that never ships).

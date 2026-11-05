@@ -135,6 +135,7 @@ export function CheckStage({ status, onNext }: { status: OnboardingStatus; onNex
     <>
       <StepTitle
         title={`Your free check for ${status.business}`}
+        mark="free check"
         sub="Here is your free check. Nothing has changed on Google, and Kabsi has no access yet."
       />
       <div className="rounded-card border border-line bg-surface-1 p-5 shadow-rest">
@@ -548,6 +549,7 @@ export function ManagerStage({
     <>
       <StepTitle
         title="Add Kabsi as a Manager on Google."
+        mark="Manager"
         sub="On Google, add Kabsi as a Manager. You stay the owner and can remove Kabsi any time."
       />
       <AccessTrack status={status} />

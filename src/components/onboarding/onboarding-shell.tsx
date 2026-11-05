@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from "react";
+import { Headline } from "@/components/kabsi/highlight";
 import { KabsiLogo } from "@/components/shared/kabsi-logo";
 import { cn } from "@/lib/utils";
 import { STAGES } from "@/lib/onboarding-flow";
@@ -102,10 +103,21 @@ export function Stages({ current }: { current: number }) {
   );
 }
 
-export function StepTitle({ title, sub }: { title: ReactNode; sub?: ReactNode }) {
+/** The step's H1, with one phrase on the highlight bar (App 5, 30.33 item 2): `mark`, or else the title's last word. */
+export function StepTitle({
+  title,
+  sub,
+  mark,
+}: {
+  title: ReactNode;
+  sub?: ReactNode;
+  mark?: string;
+}) {
   return (
     <div className="mb-6">
-      <h1 className="font-display text-h2 font-bold text-text-1">{title}</h1>
+      <h1 className="font-display text-h2 font-bold text-text-1">
+        {typeof title === "string" ? <Headline text={title} mark={mark} /> : title}
+      </h1>
       {sub ? <p className="mt-3 text-lead text-text-2">{sub}</p> : null}
     </div>
   );
