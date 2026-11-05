@@ -44,7 +44,7 @@ The home page shows pictures of the real screens (a review with its reply ready,
 ### How it works
 
 **Does Kabsi post replies by itself?**
-No. Kabsi drafts a reply and sends it to you, by email today and on WhatsApp once owners are switched on, if you choose WhatsApp for routine messages. Nothing goes on your Google profile until you tap Approve reply, and you see the exact text first.
+No. Kabsi drafts a reply and sends it to you, on WhatsApp if you connected it and chose it for routine messages, otherwise by email. Nothing goes on your Google profile until you tap Approve reply, and you see the exact text first.
 
 **What does Kabsi need from me?**
 Add the Kabsi group ID 5481006796 as a Manager on your Google Business Profile, then tell Kabsi a few facts in About your business. Drafts only use the facts you give.
@@ -53,10 +53,10 @@ Add the Kabsi group ID 5481006796 as a Manager on your Google Business Profile, 
 A few minutes: find your business, add the Kabsi group ID 5481006796 as a Manager, fill in About your business, choose a plan.
 
 **How fast do new reviews reach me?**
-Kabsi checks every few minutes. Today new reviews come by email; once owners are switched on to WhatsApp you choose one place for them, WhatsApp or email, and a review that needs care still also comes by email. Reviews of 3 stars or less, and any review Kabsi marks medium or high risk, are emailed right away; other reviews are emailed at once while your business is open and come together in the daily email, at the hour you choose, outside your opening hours. Nothing is emailed between 22:00 and 08:00; it waits until 08:00.
+Kabsi checks every few minutes. You choose one place for new reviews, WhatsApp or email, and a review that needs care still also comes by email. Reviews of 3 stars or less, and any review Kabsi marks medium or high risk, are emailed right away; other reviews are emailed at once while your business is open and come together in the daily email, at the hour you choose, outside your opening hours. Nothing is emailed between 22:00 and 08:00; it waits until 08:00.
 
 **Can I reply from my phone?**
-Yes. Tap Approve reply, Edit or Skip in the email (or on WhatsApp once owners are switched on), confirm on the page that opens, or use Kabsi in your phone's browser. A high-risk review asks you to sign in on that page first.
+Yes. Tap Approve reply, Edit or Skip in the email (or on WhatsApp), confirm on the page that opens, or use Kabsi in your phone's browser. A high-risk review asks you to sign in on that page first.
 
 **Can I edit a draft before posting?**
 Yes. Change anything you like. Kabsi publishes exactly the text you approve.
@@ -220,7 +220,7 @@ Yes. On the Posts page, under Kabsi's posts, tap Turn off. Your own posts still 
 Yes. On Posts, under Write a post, choose Update, Offer or Event, write it in your words, add a photo and a button if you like, and tap Save the post. Kabsi checks it, then you approve it in its month.
 
 **Can I send photos on WhatsApp?**
-Yes, on both plans, once owners are switched on to WhatsApp. Send a photo on its own and Kabsi gets it ready and asks you to put it on your Google profile: Yes, Edit or Skip. Send a photo with a line about it and Kabsi turns it into a Google post with that photo, shows you the exact words, and asks for your yes: Approve, Edit on kabsi.co or Skip. A post counts against your plan's posts (2 a month on Essentials, one a week on Pro). Nothing goes on Google until you say yes. Staff can send photos too; the owner or a manager approves.
+Yes, on both plans, once you connect WhatsApp. Send a photo on its own and Kabsi gets it ready and asks you to put it on your Google profile: Yes, Edit or Skip. Send a photo with a line about it and Kabsi turns it into a Google post with that photo, shows you the exact words, and asks for your yes: Approve, Edit on kabsi.co or Skip. A post counts against your plan's posts (2 a month on Essentials, one a week on Pro). Nothing goes on Google until you say yes. Staff can send photos too; the owner or a manager approves.
 
 **Which buttons can a post have?**
 Call now, Book, Order online, Shop, Learn more or Sign up, or no button. These are the buttons Google offers.
