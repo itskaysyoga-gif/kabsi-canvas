@@ -9,13 +9,12 @@ One page, under 10 KB. Updated 5 Nov 2026, Scan 3. The history (tasks, After mer
 - Go live 1 (5 Nov 2026, 30.28, R-108): WhatsApp for owners, the nearby check and the AI answer are on; card payments stay closed. Detail: `docs/progress/archive/2026-11-05-golive1.md`.
 - Scan 2 and Copy 3 (5 Nov 2026, PRs 369 to 376): the free check names the town; Go live 1's copy decisions. Detail: `docs/progress/archive/2026-11-05-scan2.md`, `2026-11-05-copy3.md`.
 - App 4 (5 Nov 2026, 30.31, R-111, PRs 378 to 388): Dashboard link, sign-in times, /login, the signed-in audit. Detail: `docs/progress/archive/2026-11-05-app4.md`.
-- Guides 4 (5 Nov 2026, 30.32, R-112, PRs 390 to 394): all 27 guides public; Nora knows them. Detail: `docs/progress/archive/2026-11-05-guides4.md`.
-- Fix 3 (5 Nov 2026, PRs 379, 381, 383): the Coach reads Google by location name; one reload after a deploy. Detail: `docs/progress/archive/2026-11-05-fix3.md`.
-- Industries 2 (5 Nov 2026, 30.32, PRs 392, 395, part C): /for is one list; 20 industry pages on Design 9; old group pages 301 to /for. Detail: `docs/progress/archive/2026-11-05-industries2.md`.
+- Guides 4, Fix 3 and Industries 2 (5 Nov 2026, 30.32, R-112, PRs 379 to 395): 27 public guides Nora knows; the Coach reads Google by location name; /for is one list of 20 industry pages. Detail: `docs/progress/archive/2026-11-05-guides4.md`, `-fix3.md`, `-industries2.md`.
 - Style 1 (R-113, PRs 399 to 404): guide photos, the yellow bar on every public headline, Sentry quiet for automated runs. Detail: `docs/progress/archive/2026-11-05-style1.md`.
 - App 5 (PRs 402, 406): staff workspace with Today. Detail: `docs/progress/archive/2026-11-05-app5.md`.
 - Industries 3 (PR 403): short industry pages. Detail: `docs/progress/archive/2026-11-05-industries3.md`.
-- Scan 3 (30.34, R-114, PRs 409, 411, 418, 419): one bot check per search session; the progressive free check result; the review link tool with a branded A6 QR card. Detail: `docs/progress/archive/2026-11-05-scan3.md`.
+- App 6 (30.34 item 5, PRs 414, 415): Settings' delivery choice saves in one call and shows at once; checked live. Nora's live page-link run not run (no key in the session). Detail: `docs/progress/archive/2026-11-05-app6.md`.
+- Scan 3 (30.34, R-114, PRs 409 to 419): one bot check per search session; progressive free check; review link tool with an A6 QR card. Detail: `docs/progress/archive/2026-11-05-scan3.md`.
 - No customer is live yet. Before the first Meta ad: the DataForSEO top-up and a nearby check on a real business. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -29,7 +28,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 | Webhook verified | 25 Oct 2026 | Rashid's live phone test: his 12 messages reached Kabsi's function through the registered Kapso webhook (Fix 1, request 49115); his chat export confirms them |
 | Templates approved | 29 Oct 2026 | Every account and approval notice has an approved Utility template (lane R, request 58250, 15:16 UTC): the 13 replacements and new names (access change, access lost, Google action, holiday question, profile change, map ready, updates waiting, photo ready, setup step, billing notice v3, staff alert v3, business update v2, work update v2) read APPROVED and UTILITY; the sender switches to them on its hourly status read. Earlier reads: 55390, 55676, 57544 |
 | Inbound tested | 25 Oct 2026 | Rashid's live test: 12 messages in, each handled (chat export); the suite (now 231 WhatsApp cases) passes in CI |
-| Outbound tested | 25 Oct 2026 | Rashid's live test: 11 replies delivered to his phone (chat export); QA 1's delivered receipt read back. 28 Oct: a real template (`kabsi_staff_alert`) delivered to the staff phone, request 55442 |
+| Outbound tested | 25 Oct 2026 | Rashid's live test: 11 replies delivered to his phone (chat export); 28 Oct: template `kabsi_staff_alert` delivered to the staff phone, request 55442 |
 | Owners switched on | 5 Nov 2026 | `whatsapp_owners_on` true at 04:32:11 UTC (Rashid's yes, Go live 1); `kabsi_work_update_v2` delivered to Yawmiyati's owner phone at 04:31:08 UTC (request 72591) |
 
 ## Open for Rashid (as last recorded; the full table is `docs/progress/archive/steps-only-rashid-can-do.md`)
@@ -66,8 +65,8 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 5 Nov 2026, App 6: PRs 414, 415. Detail: `docs/progress/archive/2026-11-05-app6.md`.
 - 5 Nov 2026, App 5: PRs 402, 406 and part C. Detail: `docs/progress/archive/2026-11-05-app5.md`.
-- 5 Nov 2026, Industries 3: PR 403.
 
 ## How a session updates this page
 
