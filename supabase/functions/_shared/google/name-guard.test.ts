@@ -86,7 +86,7 @@ Deno.test("Fix 3: the exact KABSI-EDGE-J calls are refused (location and attribu
 });
 
 Deno.test("Fix 3: other wrong names are refused too (demo, concierge, empty, under an account, a path trick)", async () => {
-  const seen = world([false, false, false, false, false, false, false]);
+  const seen = world([]);
   try {
     for (const url of [
       `${BI}/locations/demo-harbour-lane-coffee?readMask=title`,
@@ -96,6 +96,8 @@ Deno.test("Fix 3: other wrong names are refused too (demo, concierge, empty, und
       `https://mybusiness.googleapis.com/v4/accounts/demo/locations/demo-x/reviews`,
       `https://mybusiness.googleapis.com/v4/${ACC}/${KABSI_ID}/reviews`,
       `https://example.com/v1/${LOC}`,
+      `${BI}/locations/${KABSI_ID}?readMask=title`,
+      `${BI}/locations/${KABSI_ID}/attributes`,
     ]) {
       assert.ok((await refused(() => gbp(url))) instanceof GoogleNameRefused, url);
     }

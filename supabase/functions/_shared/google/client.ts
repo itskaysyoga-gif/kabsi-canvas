@@ -100,7 +100,8 @@ export async function assertWritesOpen() {
 // ("locations/456", alone or under its account), or one of the few documented collection forms (the account list, the
 // category list, the media upload). A live call whose path is anything else (Kabsi's own business id, a demo or
 // concierge id, an empty name) is refused before the network, with no retry, and reported to Sentry at most once a day.
-const ID = "[0-9]+";
+// An id is Google's (digits for real accounts and locations); never Kabsi's own uuid, a demo or a concierge id.
+const ID = "(?!demo-|concierge-)(?![0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(?:[/:]|$))[A-Za-z0-9_-]+";
 // What may follow the resource: a custom method (":accept", ":getGoogleUpdated"), the account's location list, or one of
 // the sub-collections the live modules read and write, with that collection's own item names after it.
 const SUB = "reviews|localPosts|media|admins|invitations|notificationSetting|attributes|searchkeywords|VoiceOfMerchantState|verifications|placeActionLinks";
