@@ -3,6 +3,7 @@ import { categoryOf, isStaffCategory, SYSTEM_WHY, type SystemCategory } from "..
 import { catalog } from "./catalog.ts";
 import { BRAND_LINE, NOT_AFFILIATED, renderEmail } from "./template.ts";
 import { TOKENS } from "./tokens.ts";
+import { WHATSAPP_DIGITS } from "../whatsapp-setting.ts";
 
 // P0.4-08 done-when: every email has exactly one yellow button; the review email subject matches R-30; plain text exists
 // for every template; house style (no dashes, no exclamation marks, the business name first in the subject).
@@ -279,8 +280,12 @@ Deno.test("Email 1: emoji only as small section markers, at most one per card, n
   }
 });
 
-Deno.test("Email 1: every link is absolute and on kabsi.co, except the social links, Google's third-party page and mailto", () => {
-  const allowed = /^(https:\/\/kabsi\.co(\/|$)|https:\/\/www\.facebook\.com\/profile\.php\?id=|https:\/\/www\.instagram\.com\/kabsi\.co$|https:\/\/support\.google\.com\/business\/answer\/7163406$|mailto:)/;
+Deno.test("Email 1: every link is absolute and on kabsi.co, except the social links, Google's third-party page, mailto and Kabsi's own WhatsApp", () => {
+  // Go live 1 (5 Nov 2026): the footer's WhatsApp line links to Kabsi's own number only, from its one setting.
+  const ownWhatsapp = WHATSAPP_DIGITS ? `|https:\\/\\/wa\\.me\\/${WHATSAPP_DIGITS}\\?text=` : "";
+  const allowed = new RegExp(
+    `^(https:\\/\\/kabsi\\.co(\\/|$)|https:\\/\\/www\\.facebook\\.com\\/profile\\.php\\?id=|https:\\/\\/www\\.instagram\\.com\\/kabsi\\.co$|https:\\/\\/support\\.google\\.com\\/business\\/answer\\/7163406$|mailto:${ownWhatsapp})`,
+  );
   for (const c of catalog()) {
     const { html } = render(c);
     for (const m of html.matchAll(/href="([^"]+)"/g)) {
