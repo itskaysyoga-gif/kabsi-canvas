@@ -32,8 +32,8 @@ export const FAQ_HERO = {
 
 /** About's hero (Design 8; the headline approved). */
 export const ABOUT_HERO = {
-  title: "Kabsi is built for the owner at the counter.",
-  line: "One founder, one job: the Google work a local business never has time for, done and brought to the owner for a yes.",
+  title: "Built for owners who have no time for Google.",
+  line: "Kabsi does the Google work a local business never gets to, and asks the owner for a yes first.",
 } as const;
 
 /** Security's hero (Design 8). */
@@ -52,5 +52,5 @@ export const FOUNDING_HERO = {
 /** Partners' hero (approved). */
 export const PARTNERS_HERO = {
   title: "Earn 25% of every payment.",
-  line: "Recommend Kabsi to local business owners you know. You earn while the referred subscription stays paid. Kabsi Partners opens when card payments open.",
+  line: "Recommend Kabsi to owners you know. You earn while the referred subscription stays paid. Kabsi Partners opens when card payments open.",
 } as const;

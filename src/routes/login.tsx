@@ -14,6 +14,7 @@ import { hasSessionKey } from "@/lib/stored-session";
 import { inAppBrowserNow } from "@/lib/in-app-browser";
 import { GOOGLE_STOPPED } from "@/lib/sign-in-errors";
 import { Marked } from "@/components/kabsi/highlight";
+import { WhatsAppInline } from "@/components/kabsi/ui";
 
 const searchSchema = (
   s: Record<string, unknown>,
@@ -161,7 +162,10 @@ function LoginPage() {
               ))}
             </ul>
             <div className="mt-10">
-              <p className="mb-3 text-small font-bold text-text-2">An approval on WhatsApp</p>
+              <p className="mb-3 text-small font-bold text-text-2">
+                An approval on WhatsApp
+                <WhatsAppInline />
+              </p>
               <D9Phone
                 items={D9_HERO_STREAM.filter((m) => m.id === "review")}
                 caption="Example: a new review on WhatsApp with a reply ready, and Yes, Edit and Skip."

@@ -553,6 +553,39 @@ export const FOR_HERO = {
   line: "Each kind of local business has its own Google work. Find yours, or start with the free check.",
 } as const;
 
+/**
+ * Site 2 (master plan 30.34 item 4): the /for hero shows four kinds of business from their own photos, so the page
+ * opens with real trades at work. Each photo links to its page; the alt text is the photo's own (docs/PHOTOS.md).
+ */
+const COLLAGE = ["hair-salon", "restaurant", "dental-clinic", "auto-repair"] as const;
+
+function ForCollage({ all }: { all: Industry[] }) {
+  const picks = COLLAGE.map((s) => all.find((i) => i.slug === s)).filter((i): i is Industry => !!i);
+  return (
+    <ul className="grid grid-cols-2 gap-3 pb-6 sm:gap-4">
+      {picks.map((i, n) => (
+        <li key={i.slug} className={cn(n % 2 === 1 && "translate-y-6")}>
+          <SiteLink
+            to={`/for/${i.slug}`}
+            className="press group relative block overflow-hidden rounded-panel bg-surface-3 shadow-float"
+          >
+            <Img
+              photo={i.photos[0]}
+              sizes="(min-width: 1024px) 15rem, 45vw"
+              priority={n < 2}
+              style={{ objectPosition: i.focus ?? "50% 50%" }}
+              className="aspect-[4/3] w-full object-cover transition-transform duration-400 ease-kb group-hover:scale-[1.04] motion-reduce:group-hover:scale-100 lg:aspect-[4/5]"
+            />
+            <span className="absolute start-2 bottom-2 rounded-full bg-surface-0 px-3 py-1 text-label font-semibold text-text-1 shadow-rest">
+              {i.plural}
+            </span>
+          </SiteLink>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function ForIndex() {
   const all = useMemo(() => industriesAtoZ(), []);
   const [q, setQ] = useState("");
@@ -564,7 +597,7 @@ export function ForIndex() {
   return (
     <>
       <section aria-labelledby="hero-title" data-hero className="relative isolate z-10">
-        <div className="container-kb pt-6 pb-10 md:pt-10 lg:pt-14 lg:pb-14">
+        <div className="container-kb grid gap-8 pt-6 pb-10 md:pt-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-center lg:gap-14 lg:pt-14 lg:pb-14">
           <div className="max-w-[40rem]">
             <h1 id="hero-title" className="text-display text-balance">
               <Marked text={FOR_HERO.h1} mark={FOR_HERO.mark} />
@@ -574,6 +607,7 @@ export function ForIndex() {
               <ScanBox id="hero-scan" />
             </div>
           </div>
+          <ForCollage all={all} />
         </div>
       </section>
       <section aria-labelledby="list-h" className="border-t border-line bg-surface-1">
@@ -613,13 +647,13 @@ export function ForIndex() {
           {/* Industries 3: 4 columns from 1024 px, 2 below (no 3 column step); a filtered count that does not fill
               its last row centres it (the no-lone-card rule, 30.33 item 2). */}
           <ul id="for-list" className="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4">
-            {all.map((i, n) => (
+            {all.map((i) => (
               <li
                 key={i.slug}
                 hidden={!shown.includes(i)}
                 className="w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]"
               >
-                <TradeCard industry={i} sizes="(min-width: 1024px) 18rem, 45vw" priority={n < 2} />
+                <TradeCard industry={i} sizes="(min-width: 1024px) 18rem, 45vw" />
               </li>
             ))}
           </ul>

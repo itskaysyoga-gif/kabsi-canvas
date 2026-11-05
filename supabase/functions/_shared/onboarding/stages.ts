@@ -66,32 +66,40 @@ export const RESUME_CODE = /^[0-9a-f]{20}$/;
 // ─── The words (docs/COPY.md 20, onboarding; 30.17 section 3; 30.18 section 6) ───────────────────────────────────────
 const firstName = (name: string | null) => (name ?? "").trim().split(/\s+/)[0] || "there";
 const longDate = (iso: string, tz: string) =>
-  new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", timeZone: tz }).format(new Date(iso));
+  new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", timeZone: tz }).format(
+    new Date(iso),
+  );
 
 export const SAY_ONBOARDING = {
   firstBack: (name: string | null, business: string, hasCheck: boolean) =>
     `Hi ${firstName(name)}, I am Nora, Kabsi's AI assistant. ${hasCheck ? `I have your free check for ${business}.` : `I am setting up Kabsi for ${business}.`} Can Kabsi send your setup steps and approvals here? Reply Yes, or Help to talk to Rashid, the founder. Reply Stop any time.`,
   check: (term: string, date: string, fact: string) =>
     `Your nearby check for '${term}', ${date}: ${fact} Results change by place and time. Nothing has changed on Google.`,
-  invite:
-    `Next, add Kabsi as a Manager on your Google profile. On Google: your profile, Business Profile settings, People and access, Add. Paste Kabsi's ID ${KABSI_GROUP_ID} (it comes in the next message, to copy), choose Manager, then Add (on some screens, Invite). Manager access lets Kabsi make changes, and Kabsi publishes only what you approve. You stay the owner and can remove Kabsi any time. Never send us a password or a code.`,
+  invite: `Next, add Kabsi as a Manager on your Google profile. On Google: your profile, Business Profile settings, People and access, Add. Paste Kabsi's ID ${KABSI_GROUP_ID} (it comes in the next message, to copy), choose Manager, then Add (on some screens, Invite). Manager access lets Kabsi make changes, and Kabsi publishes only what you approve. You stay the owner and can remove Kabsi any time. Never send us a password or a code.`,
   id: KABSI_GROUP_ID,
-  someoneElse: `Send these steps to whoever looks after your Google profile:\nOn Google, open your profile (search your business name while signed in), then Menu, Business Profile settings, People and access, Add. Paste ${KABSI_GROUP_ID}, choose Manager, then Add (on some screens, Invite).`,
+  someoneElse: `Send these steps to whoever looks after your Google profile:\nOn Google, open your profile, then Menu, Business Profile settings, People and access, Add. Paste ${KABSI_GROUP_ID}, choose Manager, then Add (on some screens, Invite).`,
   cannotFind: (business: string) =>
     `You may be signed in to another Google account, or you may be a manager yourself. Only an owner can invite Kabsi. Does someone else look after Google for ${business}?`,
-  founderAsked: "Thanks. Rashid, the founder, will message you here to help you finish. You make every change on your own phone.",
+  founderAsked:
+    "Thanks. Rashid, the founder, will message you here to help you finish. You make every change on your own phone.",
   /** For Rashid to send himself (it goes to the staff phone with the request; Kabsi never sends it as him). */
   founderDraft: (name: string | null) =>
     `Hi ${firstName(name)}, Rashid here, Kabsi's founder. I can help you finish this. Steps here, or a short call? You make every change on your own phone.`,
-  checkMap: "Here are the places around you where Kabsi searched like a customer. Sample Google Maps results, not customer counts.",
-  inviteSent: "Thanks. Kabsi checks for your invitation every few minutes and tells you here when access works.",
+  checkMap:
+    "Here are the places around you where Kabsi searched like a customer. Sample Google Maps results, not customer counts.",
+  inviteSent:
+    "Thanks. Kabsi checks for your invitation every few minutes and tells you here when access works.",
   skipped: "Okay, skipped. Nothing was published.",
   factsAsk: (business: string, lines: string[]) =>
     `${business}: Kabsi also noted ${lines.length === 1 ? "a new detail" : `${lines.length} new details`} for About your business, in your words: ${lines.map((l) => `"${l}"`).join(" ")} Save ${lines.length === 1 ? "it" : "them"} so Kabsi can use ${lines.length === 1 ? "it" : "them"} in replies and posts?`,
-  factsSaved: (n: number) => `Saved ${n === 1 ? "1 detail" : `${n} details`} to About your business. Change or remove them any time in Kabsi.`,
+  factsSaved: (n: number) =>
+    `Saved ${n === 1 ? "1 detail" : `${n} details`} to About your business. Change or remove them any time in Kabsi.`,
   factsNotSaved: "Okay. Nothing was saved to About your business.",
   accessWorks: (business: string, trialEnds: string | null, tz: string) =>
-    `Kabsi now has Manager access to ${business}. ${trialEnds ? `Your free trial starts today and ends on ${longDate(trialEnds, tz)}. No card, and no charge unless you choose a plan.` : ""} Nothing has been published. I am preparing your first task.`.replace(/\s+/g, " "),
+    `Kabsi now has Manager access to ${business}. ${trialEnds ? `Your free trial starts today and ends on ${longDate(trialEnds, tz)}. No card, and no charge unless you choose a plan.` : ""} Nothing has been published. I am preparing your first task.`.replace(
+      /\s+/g,
+      " ",
+    ),
   firstReview: (business: string, review: string, draft: string) =>
     `This review for ${business} has no reply: '${review}'. Here is the reply I suggest: '${draft}'. Publish it on Google?`,
   postQuestion: (service: string) =>
@@ -100,7 +108,13 @@ export const SAY_ONBOARDING = {
     `Google shows ${what} for ${business}, which is not what you told Kabsi. Kabsi can put your hours back on Google after your yes.`,
   reminder: (business: string, what: "reply" | "post" | "change") =>
     `Your ${what} for ${business} is ready. Nothing has been published. Review it now, or later?`,
-  after48: (business: string, done: string[], waiting: string | null, trialEnds: string | null, tz: string) =>
+  after48: (
+    business: string,
+    done: string[],
+    waiting: string | null,
+    trialEnds: string | null,
+    tz: string,
+  ) =>
     `Done for ${business} so far: ${done.length ? done.join("; ") : "nothing published yet"}. Waiting for you: ${waiting ?? "nothing"}. ${trialEnds ? `Your trial ends on ${longDate(trialEnds, tz)}. ` : ""}What still feels like work you do yourself?`,
   stillBlocked: (business: string, step: string) =>
     `Setup for ${business} is waiting for ${step}. Your trial has not started and nothing has been published. Want help with that step?`,
@@ -114,7 +128,15 @@ export const STEP_WORDS: Record<Exclude<Stage, "first_task" | "done">, string> =
 };
 
 // ─── The first task (30.16 section 3): one, chosen in this order ─────────────────────────────────────────────────────
-export type ReviewCandidate = { review_id: string; stars: number; text: string | null; draft: string | null; draft_ok: boolean; risk: string | null; sensitive: boolean };
+export type ReviewCandidate = {
+  review_id: string;
+  stars: number;
+  text: string | null;
+  draft: string | null;
+  draft_ok: boolean;
+  risk: string | null;
+  sensitive: boolean;
+};
 export type PostCandidate = { fact_id: string; service: string };
 export type HoursCandidate = { change_id: string; shown: string };
 export type FirstTask =
@@ -128,11 +150,21 @@ export type FirstTask =
  * a post from facts the owner confirmed, else an hours fix only when Google shows hours that differ from what the owner gave.
  * Nothing sensitive (category, address) is ever changed to show activity.
  */
-export function pickFirstTask(c: { reviews: ReviewCandidate[]; posts: PostCandidate[]; hours: HoursCandidate[] }): FirstTask {
-  const r = c.reviews.find((x) =>
-    !x.sensitive && x.risk !== "high" && x.draft_ok && !!x.draft?.trim() && (x.text ?? "").trim().length >= 15
+export function pickFirstTask(c: {
+  reviews: ReviewCandidate[];
+  posts: PostCandidate[];
+  hours: HoursCandidate[];
+}): FirstTask {
+  const r = c.reviews.find(
+    (x) =>
+      !x.sensitive &&
+      x.risk !== "high" &&
+      x.draft_ok &&
+      !!x.draft?.trim() &&
+      (x.text ?? "").trim().length >= 15,
   );
-  if (r) return { kind: "review", review_id: r.review_id, text: r.text!.trim(), draft: r.draft!.trim() };
+  if (r)
+    return { kind: "review", review_id: r.review_id, text: r.text!.trim(), draft: r.draft!.trim() };
   const p = c.posts.find((x) => x.service.trim().length >= 3);
   if (p) return { kind: "post", fact_id: p.fact_id, service: p.service.trim() };
   const h = c.hours[0];
@@ -143,24 +175,44 @@ export function pickFirstTask(c: { reviews: ReviewCandidate[]; posts: PostCandid
 /** A review quoted on WhatsApp: the customer's words cut to 200 characters (the full text stays in Kabsi). */
 export const quote = (s: string, max = 200) => {
   const t = s.replace(/\s+/g, " ").trim();
-  return [...t].length <= max ? t : [...t].slice(0, max - 1).join("").trimEnd() + "…";
+  return [...t].length <= max
+    ? t
+    : [...t]
+        .slice(0, max - 1)
+        .join("")
+        .trimEnd() + "…";
 };
 
 // ─── The owner's replies to the setup messages ────────────────────────────────────────────────────────────────────
 export type SetupReply = "yes" | "help" | "someone_else" | "cannot_find" | "done" | null;
 export function setupReply(raw: string): SetupReply {
-  const t = raw.toLowerCase().replace(/[.!?]+$/g, "").trim();
+  const t = raw
+    .toLowerCase()
+    .replace(/[.!?]+$/g, "")
+    .trim();
   if (/^(yes|yes please|ok|okay|sure|yep|yeah|go ahead|si|sí|نعم|اي|أيوه)$/.test(t)) return "yes";
   if (/^(help|founder|talk to rashid|rashid|call me|a call)$/.test(t)) return "help";
-  if (/(someone else|my manager|my agency|agency|not me|another person|my partner) (looks after|manages|does|handles)|^someone else$|^my manager$/.test(t)) return "someone_else";
-  if (/(can'?t|cannot|could not|couldn'?t|don'?t) (find|see)|not there|no (add|people and access)/.test(t)) return "cannot_find";
+  if (
+    /(someone else|my manager|my agency|agency|not me|another person|my partner) (looks after|manages|does|handles)|^someone else$|^my manager$/.test(
+      t,
+    )
+  )
+    return "someone_else";
+  if (
+    /(can'?t|cannot|could not|couldn'?t|don'?t) (find|see)|not there|no (add|people and access)/.test(
+      t,
+    )
+  )
+    return "cannot_find";
   if (/^(done|sent|invited|i (sent|added|invited) (it|kabsi)|added)$/.test(t)) return "done";
   return null;
 }
 
 // ─── The monthly answer as Business Knowledge proposals (30.15 3.3, V4 item 7) ──────────────────────────────────────
-const SERVICE = /\b(new|now|offer|offering|launch|launched|introduc\w*|added|adding|start(ing|ed)?)\b[^.\n]{0,80}\b(service|treatment|menu|product|dish|item|class|package|massage|cut|colour|color|facial|cake|coffee)/i;
-const PRICE = /(\$|aed|dhs?|dirhams?|usd|dollars?|pounds?|£|€|eur|euros?)\s?\d|\d+(\.\d+)?\s?(\$|aed|dhs?|dirhams?|usd|dollars?|pounds?|£|€|eur|euros?)\b/i;
+const SERVICE =
+  /\b(new|now|offer|offering|launch|launched|introduc\w*|added|adding|start(ing|ed)?)\b[^.\n]{0,80}\b(service|treatment|menu|product|dish|item|class|package|massage|cut|colour|color|facial|cake|coffee)/i;
+const PRICE =
+  /(\$|aed|dhs?|dirhams?|usd|dollars?|pounds?|£|€|eur|euros?)\s?\d|\d+(\.\d+)?\s?(\$|aed|dhs?|dirhams?|usd|dollars?|pounds?|£|€|eur|euros?)\b/i;
 
 /**
  * Sentences of the owner's answer that state a new service, product or price, as proposals for About your business. Never a
@@ -168,7 +220,10 @@ const PRICE = /(\$|aed|dhs?|dirhams?|usd|dollars?|pounds?|£|€|eur|euros?)\s?\
  */
 export function monthlyFacts(answer: string): { key: "service" | "price_note"; text: string }[] {
   const out: { key: "service" | "price_note"; text: string }[] = [];
-  for (const s of answer.split(/(?<=[.?!])\s+|\n+/).map((x) => x.replace(/\s+/g, " ").trim()).filter(Boolean)) {
+  for (const s of answer
+    .split(/(?<=[.?!])\s+|\n+/)
+    .map((x) => x.replace(/\s+/g, " ").trim())
+    .filter(Boolean)) {
     if (s.length > 200 || /https?:|www\.|@\w|\+?\d[\d\s-]{7,}\d/.test(s)) continue;
     if (PRICE.test(s)) out.push({ key: "price_note", text: s });
     else if (SERVICE.test(s)) out.push({ key: "service", text: s });

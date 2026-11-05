@@ -5,7 +5,7 @@
 import { ArrowRight } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { ExampleBadge, KabsiMark } from "./ui";
+import { ExampleBadge, KabsiMark, WithWhatsAppMark } from "./ui";
 import { Img, PHOTOS, type Photo } from "./photos";
 import { ScanBox } from "./scan-box";
 import { SiteLink } from "./site-link";
@@ -39,7 +39,9 @@ export function D9Hero() {
           <h1 id="hero-title" className="text-display text-balance">
             <D9Title text="Your business on Google. Taken care of." />
           </h1>
-          <p className="mt-4 max-w-[36rem] text-lead text-text-2 sm:mt-6">{D9_HERO_LINE}</p>
+          <p className="mt-4 max-w-[36rem] text-lead text-text-2 sm:mt-6">
+            <WithWhatsAppMark text={D9_HERO_LINE} />
+          </p>
           {/* relative z-10: the suggestion list opens above the hero phone that follows (Web 4 review). */}
           <div className="relative z-10 mt-5 max-w-[36rem] sm:mt-7">
             <ScanBox id="hero-scan" />
@@ -252,7 +254,7 @@ export function StepsLine({
                     className="relative translate-y-[-0.15em] md:absolute md:top-0 md:translate-y-0"
                   />
                   <span className="font-display text-h3 font-bold tracking-[-0.015em]">
-                    {s.word}
+                    <WithWhatsAppMark text={s.word} />
                     {i < D9_STEPS.length - 1 ? <span className="md:hidden">,</span> : "."}
                   </span>
                 </span>
@@ -288,10 +290,12 @@ export function StepRail({ on, className }: { on: readonly StepId[]; className?:
       </span>
       <span>
         <span className="sr-only">Steps: </span>
-        {words
-          .join(", ")
-          .replace(/^kabsi /i, "Kabsi ")
-          .replace(/^./, (c) => c.toUpperCase())}
+        <WithWhatsAppMark
+          text={words
+            .join(", ")
+            .replace(/^kabsi /i, "Kabsi ")
+            .replace(/^./, (c) => c.toUpperCase())}
+        />
       </span>
     </p>
   );
