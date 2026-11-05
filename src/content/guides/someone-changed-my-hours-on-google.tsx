@@ -1,6 +1,6 @@
 import { Callout, Steps } from "@/components/marketing/guide-kit";
 import { GuideLink, SiteRef } from "@/components/marketing/guide-links";
-import { scheduledAt } from "./schedule";
+import { PUBLISH_ALL_AT } from "./schedule";
 import type { GuideDoc } from "./types";
 
 // Guides 3, guide 4. Every claim about Google is from the sources below, read on 5 Nov 2026.
@@ -11,7 +11,7 @@ export const guide: GuideDoc = {
   title: "Someone changed my hours on Google. How do I fix it?",
   description:
     "Why your opening hours on Google changed without you, how to see who or what changed them, how to put them right and how to stop it happening again.",
-  publishAt: scheduledAt(3),
+  publishAt: PUBLISH_ALL_AT,
   updated: READ,
   checked: READ,
   topic: "Opening hours",

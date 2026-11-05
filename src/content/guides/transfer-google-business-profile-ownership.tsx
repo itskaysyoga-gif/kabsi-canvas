@@ -1,6 +1,6 @@
 import { Callout, Compare, Steps } from "@/components/marketing/guide-kit";
 import { GuideLink, SiteRef } from "@/components/marketing/guide-links";
-import { scheduledAt } from "./schedule";
+import { PUBLISH_ALL_AT } from "./schedule";
 import type { GuideDoc } from "./types";
 
 // Guides 3, guide 17. Every claim about Google is from the sources below, read on 5 Nov 2026.
@@ -11,7 +11,7 @@ export const guide: GuideDoc = {
   title: "How do I transfer ownership of my Google Business Profile?",
   description:
     "How to make someone else the primary owner of a Google Business Profile, the 7-day wait, selling a business, and what to do when the owner will not reply.",
-  publishAt: scheduledAt(16),
+  publishAt: PUBLISH_ALL_AT,
   updated: READ,
   checked: READ,
   topic: "Ownership",

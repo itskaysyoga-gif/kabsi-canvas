@@ -1,6 +1,6 @@
 import { Callout, Steps } from "@/components/marketing/guide-kit";
 import { GuideLink, SiteRef } from "@/components/marketing/guide-links";
-import { scheduledAt } from "./schedule";
+import { PUBLISH_ALL_AT } from "./schedule";
 import type { GuideDoc } from "./types";
 
 // Guides 3, guide 5. Every claim about Google is from the Google sources below; the UK dates are from GOV.UK and the
@@ -12,7 +12,7 @@ export const guide: GuideDoc = {
   title: "How do I set holiday hours on Google?",
   description:
     "Set special hours on your Google profile for UK bank holidays and UAE public holidays, step by step, with the coming dates and what to do for Ramadan.",
-  publishAt: scheduledAt(4),
+  publishAt: PUBLISH_ALL_AT,
   updated: READ,
   checked: READ,
   topic: "Opening hours",

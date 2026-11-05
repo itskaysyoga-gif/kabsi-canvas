@@ -38,7 +38,7 @@ import { photoFileStore, removeDuePhotoFiles } from "../_shared/retention.ts";
 import { detectTasks } from "../_shared/tasks.ts";
 import { type Cadence, careMonth, type Planned } from "../_shared/posts/plan.ts";
 import { checkContext, postMaterial } from "../_shared/posts/context.ts";
-import { type CoachRefreshDeps, refreshCoach } from "../_shared/coach/refresh.ts";
+import { coachTarget, type CoachRefreshDeps, refreshCoach } from "../_shared/coach/refresh.ts";
 import { type HolidayAsk, type HolidayAskDeps, sendHolidayAsks } from "../_shared/holiday.ts";
 import { sendTeamInvite, type TeamInvite, teamInviteEmail } from "../_shared/team.ts";
 import { whatsappPostAlert } from "../_shared/whatsapp/db.ts";
@@ -373,9 +373,20 @@ const HOLIDAY_ASKS: HolidayAskDeps = {
 };
 
 // The Profile Coach's weekly read of the profile (P0.8-09, _shared/coach/refresh.ts): the database says when it is due.
+// Fix 3: Google is asked with the business's Google location name (google_location_id), as the sync and Protection do,
+// never with Kabsi's own id. No name, or a concierge business: nothing is read. A demo business reads the mock. A failed
+// read is recorded so the read is not due again for 24 hours.
 const COACH_READ: CoachRefreshDeps = {
   due: async (locationId) => (await rpcJson<boolean>("coach_read_due", { p_location: locationId })) === true,
-  read: coachRead,
+  async read(locationId) {
+    const { data: l, error } = await admin().from("locations").select("google_location_id, concierge, is_demo").eq("id", locationId).maybeSingle();
+    if (error) throw error;
+    const t = coachTarget(l);
+    return t ? coachRead(t.name, t.demo) : null;
+  },
+  async failed(locationId, error) {
+    await rpcJson("coach_read_failed", { p_location: locationId, p_error: error });
+  },
   async save(locationId, n) {
     await rpcJson("coach_profile_put", {
       p_location: locationId, p_description_length: n.descriptionLength, p_additional_categories: n.additionalCategories,
