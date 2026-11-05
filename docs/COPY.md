@@ -1220,6 +1220,15 @@ Each line is old, then new, then the files, found by grep first. Where a line ap
 - **The speed gate** (scripts/lighthouse-gate.mjs, ci.yml, lighthouse-live.yml): no words a reader sees. Budgets: CI Home 205, Pricing 215, /scan 235 KB; live Home 215, Pricing 225, /scan 245 KB.
 
 
+## 51. App 4: the website and the dashboard, how long a sign-in lasts, the log in page (5 Nov 2026, master plan 30.31, R-111)
+
+### Part A: moving between the website and the dashboard (branch claude/app4-a)
+
+- **The website header and phone menu** (site-header.tsx): "Log in" while this browser holds no session; "Dashboard" while it does (to /app, or /staff for Kabsi staff). The server render shows neither word, in the space both take.
+- **The dashboard logo** (app-layout.tsx, the desktop sidebar and the phone header): a link to Home with the label "Kabsi website". The menu's "Home" stays the dashboard's Home.
+- **After Log out** (site-chrome.tsx, under the header on Home): "You are signed out."
+- **Start free while signed in**: the free check result's "Start free" opens /start and Pricing's "Start free" opens /app, without the log in page. No word change.
+
 ## 53. Guides 3: twenty new guides, one every 2 days, each a way into the free check (5 Nov 2026)
 
 Every guide's words are in its own content file, src/content/guides/<slug>.tsx; each claim about Google is checked against the Google help page it cites, read on the date shown. The template's lines (src/components/marketing/guide-article.tsx), checked against knowledge/kabsi-facts.md:

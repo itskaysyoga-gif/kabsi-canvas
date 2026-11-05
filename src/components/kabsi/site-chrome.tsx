@@ -8,6 +8,30 @@ import { SiteHeader } from "./site-header";
 import { SiteFooter } from "./site-footer";
 import { FoundingLine } from "./founding-line";
 import { DeferredAssistant, prefetchNora } from "@/components/assistant/deferred-assistant";
+import { SIGNED_OUT_EVENT, SIGNED_OUT_LINE, takeSignedOutReason } from "@/lib/signed-out";
+
+/** "You are signed out." under the header, once, after Log out in this tab or another (App 4, 30.31 item 1). */
+function SignedOutLine() {
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const read = () => {
+      if (takeSignedOutReason(["you"])) setShown(true);
+    };
+    read();
+    window.addEventListener(SIGNED_OUT_EVENT, read);
+    return () => window.removeEventListener(SIGNED_OUT_EVENT, read);
+  }, []);
+  if (!shown) return null;
+  return (
+    <p
+      role="status"
+      data-signed-out
+      className="border-b border-line bg-surface-2 py-3 text-center text-small font-semibold text-text-1"
+    >
+      {SIGNED_OUT_LINE}
+    </p>
+  );
+}
 
 /**
  * Every public page: the Founding 25 line, the sticky header, main, footer and the phone bar. Design 6 (Web 3) made
@@ -43,6 +67,7 @@ export function SiteShell({
       </a>
       <FoundingLine />
       <SiteHeader />
+      <SignedOutLine />
       <main id="main">{children}</main>
       <div className={light ? "theme-dark" : undefined}>
         <SiteFooter />

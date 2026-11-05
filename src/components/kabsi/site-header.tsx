@@ -1,11 +1,12 @@
 import { useRouterState } from "@tanstack/react-router";
 import { ChevronRight, Menu, MessageCircle, X } from "lucide-react";
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { cn } from "@/lib/utils";
 import { HEADER_CTA, MAIN_CTA, NAV_LINKS, WHATSAPP_ON, WHATSAPP_URL } from "@/lib/site";
 import { ButtonLink, Logo, TrialLine, WhatsAppGlyph, buttonClass } from "./ui";
 import { SiteLink } from "./site-link";
 import { setChrome, useScrolledPast, useSearchFlag } from "./page-signals";
+import { useAccountLink, type AccountState } from "@/components/auth/use-account-link";
 
 /**
  * The public header (Design 9, Web 5 part A, master plan 30.24): sticky, so the slim Founding 25 line can sit above it
@@ -17,6 +18,45 @@ const navLinkCls =
   "press relative inline-flex min-h-11 items-center rounded-full px-3.5 text-small font-semibold text-text-2 hover:text-text-1 after:absolute after:inset-x-3.5 after:bottom-1.5 after:h-0.5 after:rounded-full after:bg-transparent";
 /** The active page carries a 2 px charcoal bar under its word (and aria-current), not a colour change alone. */
 const navActiveCls = "!text-text-1 after:!bg-text-1";
+
+/**
+ * Log in, or Dashboard while this browser holds a session (App 4, 30.31 item 1). Both words sit in the same grid cell,
+ * so the link takes the width of the longer one whichever shows, and nothing moves when the browser finds out. Until
+ * then (the server render) neither word shows and there is no link.
+ */
+function AccountWords({ state }: { state: AccountState }) {
+  return (
+    <span className="grid">
+      <span className={cn("col-start-1 row-start-1", state !== "out" && "invisible")}>Log in</span>
+      <span className={cn("col-start-1 row-start-1", state !== "in" && "invisible")}>
+        Dashboard
+      </span>
+    </span>
+  );
+}
+
+function AccountLink({
+  className,
+  onClick,
+  children,
+}: {
+  className: string;
+  onClick?: () => void;
+  children: (state: AccountState) => ReactNode;
+}) {
+  const { state, to } = useAccountLink();
+  if (state === "unknown")
+    return (
+      <span aria-hidden className={className}>
+        {children(state)}
+      </span>
+    );
+  return (
+    <SiteLink to={state === "in" ? to : "/login"} onClick={onClick} className={className}>
+      {children(state)}
+    </SiteLink>
+  );
+}
 
 /** Focusable parts of a panel that are actually shown. */
 function focusables(root: HTMLElement | null) {
@@ -107,9 +147,9 @@ export function SiteHeader() {
             ))}
           </nav>
           <div className="ms-auto flex items-center gap-2">
-            <SiteLink to="/login" className={cn(navLinkCls, "hidden px-4 lg:inline-flex")}>
-              Log in
-            </SiteLink>
+            <AccountLink className={cn(navLinkCls, "hidden px-4 lg:inline-flex")}>
+              {(state) => <AccountWords state={state} />}
+            </AccountLink>
             <ButtonLink to="/scan" size="md" variant="dark" className="hidden sm:inline-flex">
               {HEADER_CTA}
             </ButtonLink>
@@ -156,7 +196,7 @@ function PhoneMenu({
     "press flex min-h-12 items-center justify-between gap-4 font-display text-title font-semibold text-text-1 focus-visible:outline-offset-0";
   const quietCls =
     "press inline-flex min-h-12 items-center gap-2 rounded-full px-4 text-small font-semibold text-text-1 hover:bg-surface-2";
-  const rows = [...NAV_LINKS, { to: "/login", label: "Log in" }];
+  const rows = NAV_LINKS;
   return (
     <div
       id="phone-menu"
@@ -176,7 +216,7 @@ function PhoneMenu({
                 <SiteLink
                   to={n.to}
                   onClick={close}
-                  className={cn(rowCls, n.to === "/login" && "font-sans text-body text-text-2")}
+                  className={rowCls}
                   activeClassName="[&>span]:underline [&>span]:decoration-2 [&>span]:underline-offset-8"
                 >
                   <span>{n.label}</span>
@@ -184,6 +224,19 @@ function PhoneMenu({
                 </SiteLink>
               </li>
             ))}
+            <li>
+              <AccountLink
+                onClick={close}
+                className={cn(rowCls, "font-sans text-body text-text-2")}
+              >
+                {(state) => (
+                  <>
+                    <AccountWords state={state} />
+                    <ChevronRight className="size-5 text-text-3 rtl:-scale-x-100" aria-hidden />
+                  </>
+                )}
+              </AccountLink>
+            </li>
           </ul>
         </nav>
         <div className="mt-6">
