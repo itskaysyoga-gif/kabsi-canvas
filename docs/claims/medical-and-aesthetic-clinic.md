@@ -98,6 +98,6 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 | faqs | Botox: "Rules differ by country. In the UK, no: Botox is a prescription-only medicine. A consultation may be promoted, naming no prescription medicine. Not legal advice." | 8, 34 | T, A |
 | faqs | Five star reply: "It thanks the writer and says the team will hear the words. Nothing about a visit, a treatment or a date, and no names." | 35 | K |
 | faqs | Privacy law: "Drafts follow a careful habit: a public reply never confirms a patient or mentions their care. Not legal advice; ask a person about privacy law." | 36 | K |
-| faqs | Before and after photos: "Check your country's rules" (was "your own country's") | none changed in meaning | A |
+| faqs | Before and after photos: "Check your country's rules" (was "your own country's") | wording only, same meaning | A |
 
 Removed from the page: the reply task (its rule stays in the reviews cards and the first job), the review theme about the price after the consultation, the New Year's Day card and "hours in the week before Christmas", the waiting area photo tip with the photo check note, "Google may remove a post that carries a phone number", the categories note that all four names show on real profiles, and the answer's opening sentence.
