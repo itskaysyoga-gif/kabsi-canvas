@@ -56,7 +56,13 @@ async function stubCheck(page: Page) {
         website: "https://example.com",
         has_photos: true,
         photo_count: 10,
-        flags: [{ tone: "warning", fact: "No phone number is shown on Google.", action: "Add your phone number." }],
+        flags: [
+          {
+            tone: "warning",
+            fact: "No phone number is shown on Google.",
+            action: "Add your phone number.",
+          },
+        ],
         checklist: [],
         cached: false,
         area: "Example Town",
@@ -67,11 +73,16 @@ async function stubCheck(page: Page) {
     json(route, { ...DONE, code: "HARB2345", business: PLACE.name }),
   );
   await page.route("**/functions/v1/visibility/check/result", (route) => json(route, DONE));
-  await page.route("**/functions/v1/programs/founding", (route) => json(route, { total: 25, left: 12 }));
+  await page.route("**/functions/v1/programs/founding", (route) =>
+    json(route, { total: 25, left: 12 }),
+  );
 }
 
 test.describe("one door to sign-up, with the real QA owner", () => {
-  test.skip(() => !savedSession("owner"), "no saved session for the QA owner (KABSI_QA_CODE_OWNER)");
+  test.skip(
+    () => !savedSession("owner"),
+    "no saved session for the QA owner (KABSI_QA_CODE_OWNER)",
+  );
 
   test("Pricing: a visitor's Start free goes to Log in with next=/start, and the QA owner signed in lands on /start", async ({
     page,
