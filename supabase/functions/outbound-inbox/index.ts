@@ -30,10 +30,11 @@ serve(async (req) => {
       // (nothing is sent). SMTP accepting means the password is right and IMAP is off in Zoho; both refusing means the
       // app password itself is wrong. Neither line ever holds the password.
       const smtp = await smtpProbe(await zohoConnect(), { user: db.SENDER.address, password }).catch(() => null);
-      log(fn, {
-        action: "login_refused", imap_step: e.step, imap_says: e.serverText,
-        smtp_auth: smtp ? (smtp.ok ? "accepted" : `refused ${smtp.code}`) : "unreachable", smtp_says: smtp?.text ?? "",
-      });
+      // Both replies went through serverSays: the server's words, printable, short, the password cut out.
+      const imapSays = e.serverText;
+      const smtpAuth = smtp ? (smtp.ok ? "accepted" : `refused ${smtp.step} ${smtp.code}`) : "unreachable";
+      const smtpSays = smtp?.text ?? "";
+      log(fn, { action: "login_refused", imap_step: e.step, imap_says: imapSays, smtp_auth: smtpAuth, smtp_says: smtpSays });
       await captureError(fn, e, { step: "imap_login" });
       return json({ error: "login_refused", smtp_auth: smtp?.ok ?? null }, 500);
     }
