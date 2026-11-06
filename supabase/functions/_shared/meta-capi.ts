@@ -40,16 +40,16 @@ export function logNoDataset(fn: string): void {
 export function datasetRefusal(
   status: number,
   body: string,
-): { code: number | null; subcode: number | null } | null {
+): { graphError: number | null; graphSubcode: number | null } | null {
   if (status < 400) return null;
-  let code: number | null = null;
-  let subcode: number | null = null;
+  let graphError: number | null = null;
+  let graphSubcode: number | null = null;
   try {
     const e = (JSON.parse(body) as { error?: { code?: unknown; error_subcode?: unknown } }).error ?? {};
-    code = typeof e.code === "number" ? e.code : null;
-    subcode = typeof e.error_subcode === "number" ? e.error_subcode : null;
+    graphError = typeof e.code === "number" ? e.code : null;
+    graphSubcode = typeof e.error_subcode === "number" ? e.error_subcode : null;
   } catch { /* not JSON: read the words below */ }
-  if (code === 100 || /does not exist|Unsupported post request/i.test(body)) return { code, subcode };
+  if (graphError === 100 || /does not exist|Unsupported post request/i.test(body)) return { graphError, graphSubcode };
   return null;
 }
 
@@ -64,8 +64,8 @@ export function logDatasetRefusal(fn: string, status: number, body: string, data
     ok: false,
     error: "meta_dataset_refused",
     status,
-    code: r.code,
-    subcode: r.subcode,
+    meta_error: r.graphError,
+    meta_subcode: r.graphSubcode,
     dataset_digits: datasetId.length,
     detail: "Meta refused the dataset: check that META_PIXEL_ID is the dataset id and the token can send to it.",
   });

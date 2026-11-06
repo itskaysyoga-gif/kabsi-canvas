@@ -92,17 +92,17 @@ Deno.test("Meta refuses the dataset: one clear line without the token, the event
   const line = JSON.parse(errs[0]);
   assert.equal(line.fn, "meta_capi_web");
   assert.equal(line.status, 400);
-  assert.equal(line.code, 100);
-  assert.equal(line.subcode, 33);
+  assert.equal(line.meta_error, 100);
+  assert.equal(line.meta_subcode, 33);
   for (const bad of [TOKEN, "4f8a2c1e", "0b9d6c1e", "fb.1.", "AbC123", "Unsupported"]) {
     assert.ok(!errs[0].includes(bad), bad);
   }
 });
 
 Deno.test("only a dataset refusal is called one; other failures are not", () => {
-  assert.deepEqual(datasetRefusal(400, REFUSED), { code: 100, subcode: 33 });
+  assert.deepEqual(datasetRefusal(400, REFUSED), { graphError: 100, graphSubcode: 33 });
   assert.equal(datasetRefusal(200, REFUSED), null);
   assert.equal(datasetRefusal(400, JSON.stringify({ error: { code: 190, message: "Invalid OAuth access token" } })), null);
   assert.equal(datasetRefusal(500, "upstream error"), null);
-  assert.deepEqual(datasetRefusal(400, "Object does not exist"), { code: null, subcode: null });
+  assert.deepEqual(datasetRefusal(400, "Object does not exist"), { graphError: null, graphSubcode: null });
 });
