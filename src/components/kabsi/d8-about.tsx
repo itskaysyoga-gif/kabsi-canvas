@@ -1,7 +1,9 @@
-// About, true facts only (Site 2, master plan 30.34 item 4). Every line is in knowledge/facts or the repo: the founder's
-// background is his own founder note (facts 11, "running ads and online presence for local businesses"); Yawmiyati's
-// figures were read from Kabsi's database on 5 Nov 2026 (reads only) and carry that date; how Kabsi is built is facts 11
-// and 13. No team, advisors, credentials, customers, numbers or quotes beyond these. docs/COPY.md section 59 part D.
+// About, true facts only (Site 2, master plan 30.34 item 4; Launch 1, 30.35 items 2 and 3). Every line is in
+// knowledge/facts or the repo: the founder's background is his own stated background (30.35 item 3) and his founder
+// note; the record of the real Google profile Kabsi runs every feature on first was read from Kabsi's database on
+// 5 Nov 2026 (reads only) and carries that date. The business is never named in public material (K-85 item 6, 30.35
+// item 2). How Kabsi is built is facts 11 and 13. No team, advisors, credentials, customers, numbers or quotes beyond
+// these. docs/COPY.md section 59 part D and section 61 part A.
 import type { ReactNode } from "react";
 import { Check } from "lucide-react";
 import {
@@ -26,11 +28,11 @@ const WHY = [
 ] as const;
 
 const FOUNDER_LINES = [
-  "Spent years running ads and online presence for local businesses.",
+  "Works in Meta advertising, e-commerce and digital marketing, and runs the online presence and paid campaigns of a real estate partnership.",
   "Saw the same gap every time: unanswered reviews and Google details out of date.",
 ] as const;
 
-/** Yawmiyati, read from Kabsi's database on 5 Nov 2026 (reads only). Update the date with the figures. */
+/** The real Google profile Kabsi runs each feature on first, read from Kabsi's database on 5 Nov 2026 (reads only). Never named here. Update the date with the figures. */
 const OWN_DATE = "5 November 2026";
 const OWN = [
   "Added to Kabsi on 25 September 2026.",
@@ -153,9 +155,14 @@ export function D8About() {
         </div>
       </section>
 
-      <Section id="own-h" title="We run Kabsi on our own business first" mark="our own business">
+      <Section
+        id="own-h"
+        title="Every feature runs on a real Google profile first"
+        mark="real Google profile"
+      >
         <p className="text-body text-text-2">
-          Yawmiyati is the founder's own business on Google. What Kabsi did for it:
+          Before an owner sees a feature, Kabsi runs it on a real Google profile. What Kabsi did
+          there:
         </p>
         <div className="mt-6">
           <Ticks items={OWN} />
