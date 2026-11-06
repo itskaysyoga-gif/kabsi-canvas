@@ -11,8 +11,9 @@
 // Run by hand, never in CI: run tests/e2e/seed/qa-owner-reset.sql first (it puts the account back to "business found,
 // nothing confirmed, no agreement"), then with KABSI_QA_CODE_OWNER set:
 //   npx playwright test tests/e2e/onboarding.spec.ts --update-snapshots   (the first run after Fix 1 writes the baselines)
-// Without the code the tests are skipped. While Kabsi has no WhatsApp number (WHATSAPP_ON false), stage 3 is the
-// "WhatsApp: coming soon" screen; once the number is set, step 2 is skipped and needs the QR flow written.
+// Without the code the tests are skipped. Launch 2 (30.36 item 5): today's screens. Kabsi's WhatsApp number is set, so
+// stage 3 is the Connect WhatsApp step with Open WhatsApp, and it is skipped for an owner whose WhatsApp is already
+// connected (the QA owner is); the waiting state offers "Send on WhatsApp" and "Send by email" (no "Your setup link").
 import { expect, test, type Page } from "@playwright/test";
 import { savedSession, signedIn } from "./helpers/auth";
 import { axeClean, keep, MASKS, noBanner, settle } from "./helpers/page";
@@ -65,28 +66,39 @@ test.describe("sign up and onboarding, four stages (QA owner)", () => {
     await page.getByRole("button", { name: /Kabsi QA Cafe/ }).click();
     await page.getByRole("radio", { name: "I do. I am the owner or I can add people." }).check();
     await page.getByRole("button", { name: "Yes, this is my business" }).click();
-    await expect(page.getByRole("heading", { name: "Connect WhatsApp" })).toBeVisible({
-      timeout: 20_000,
-    });
+    // Next is Connect WhatsApp, or, for an owner whose WhatsApp is connected already, Add Kabsi on Google.
+    await expect(
+      page
+        .getByRole("heading", { name: "Connect WhatsApp" })
+        .or(page.getByRole("heading", { name: "Add Kabsi as a Manager on Google." })),
+    ).toBeVisible({ timeout: 20_000 });
   });
 
-  test("2. stage 3, Connect WhatsApp: coming soon, then on to Google", async ({ page }) => {
+  test("2. stage 3, Connect WhatsApp: skipped when WhatsApp is connected, otherwise Open WhatsApp", async ({
+    page,
+  }) => {
     await page.goto("/start");
-    await expect(page.getByRole("heading", { name: "Connect WhatsApp" })).toBeVisible();
-    await expect(stageNow(page)).toContainText("Connect WhatsApp");
-    await expect(page.getByTestId("whatsapp-coming-soon")).toBeVisible();
-    await shot(page, "onboarding-2-whatsapp");
-    await page.getByRole("button", { name: "Next: add Kabsi on Google" }).click();
-    await expect(
-      page.getByRole("heading", { name: "Add Kabsi as a Manager on Google." }),
-    ).toBeVisible({ timeout: 20_000 });
+    const manager = page.getByRole("heading", { name: "Add Kabsi as a Manager on Google." });
+    const whatsapp = page.getByRole("heading", { name: "Connect WhatsApp" });
+    await expect(manager.or(whatsapp)).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId("whatsapp-coming-soon")).toHaveCount(0);
+    if (await whatsapp.isVisible()) {
+      await expect(stageNow(page)).toContainText("Connect WhatsApp");
+      await expect(page.getByText("Open WhatsApp").first()).toBeVisible();
+      await shot(page, "onboarding-2-whatsapp");
+      await page.getByRole("button", { name: "Next: add Kabsi on Google" }).click();
+      await expect(manager).toBeVisible({ timeout: 20_000 });
+    } else {
+      // Skipped: the strip moves straight to Add Kabsi on Google.
+      await expect(stageNow(page)).toContainText("Add Kabsi on Google");
+    }
   });
 
   test("3. stage 4, Add Kabsi on Google: the agreement, then waiting for the invite", async ({
     page,
   }) => {
     await page.goto("/start");
-    // Stage 3 is not kept by the server; with no agreement yet, /start opens on it again. Move past it.
+    // Stage 3 is not kept by the server; for an owner without WhatsApp, /start opens on it again. Move past it.
     const next = page.getByRole("button", { name: "Next: add Kabsi on Google" });
     if (await next.isVisible().catch(() => false)) await next.click();
     await expect(
@@ -104,7 +116,7 @@ test.describe("sign up and onboarding, four stages (QA owner)", () => {
     });
   });
 
-  test("4. after the agreement: /start opens on the waiting state, with the setup link", async ({
+  test("4. after the agreement: /start opens on the waiting state, with Send on WhatsApp and Send by email", async ({
     page,
   }) => {
     await page.goto("/start");
@@ -112,7 +124,8 @@ test.describe("sign up and onboarding, four stages (QA owner)", () => {
       page.getByRole("heading", { name: "Add Kabsi as a Manager on Google." }),
     ).toBeVisible();
     await expect(page.getByTestId("access-pill")).toContainText("Waiting for your invite.");
-    await expect(page.getByText("Your setup link").first()).toBeVisible();
+    await expect(page.getByText("Send on WhatsApp", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("Send by email", { exact: true }).first()).toBeVisible();
     await shot(page, "onboarding-4-waiting");
   });
 });

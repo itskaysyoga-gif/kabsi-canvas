@@ -71,3 +71,50 @@ export const setPolicy = (locationId: string, kind: ApprovalKind, managersToo: b
     p_kind: kind,
     p_policy: managersToo ? "owner_and_managers" : "owner",
   });
+
+// Launch 2 part A (master plan 30.36 item 5): what the Team page shows at once, before the server answers. Each returns a
+// new team; the page puts the old one back if the save fails, with saveError's line.
+export const withRole = (t: Team, userId: string, role: Role): Team => ({
+  ...t,
+  members: t.members.map((m) => (m.user_id === userId ? { ...m, role } : m)),
+});
+export const withoutMember = (t: Team, userId: string): Team => ({
+  ...t,
+  members: t.members.filter((m) => m.user_id !== userId),
+});
+export const PENDING = "pending-";
+export const withInvite = (
+  t: Team,
+  email: string,
+  role: Exclude<Role, "owner">,
+  now = new Date(),
+): Team => ({
+  ...t,
+  invites: [
+    ...t.invites.filter((i) => i.email !== email),
+    {
+      id: `${PENDING}${email}`,
+      email,
+      role,
+      created_at: now.toISOString(),
+      expires_at: new Date(now.getTime() + 7 * 86_400_000).toISOString(),
+    },
+  ],
+});
+export const withoutInvite = (t: Team, inviteId: string): Team => ({
+  ...t,
+  invites: t.invites.filter((i) => i.id !== inviteId),
+});
+export const withPolicy = (t: Team, kinds: ApprovalKind[], managersToo: boolean): Team => ({
+  ...t,
+  policies: {
+    ...t.policies,
+    ...Object.fromEntries(kinds.map((k) => [k, managersToo ? "owner_and_managers" : "owner"])),
+  },
+});
+const ROLLED_BACK = "Couldn't save that. It is back as it was. Try again.";
+/** The line after a refused save: the plain reason when there is one, then that the list is back as it was. */
+export function saveError(e: unknown): string {
+  const why = e instanceof Error ? e.message : "";
+  return Object.values(FRIENDLY).includes(why) ? `${why} ${ROLLED_BACK}` : ROLLED_BACK;
+}

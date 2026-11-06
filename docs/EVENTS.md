@@ -122,13 +122,15 @@ Pixel (`src/lib/meta-pixel.ts`): public pages only, never /app, /start, /staff, 
 | PageView                 | Browser                  | every public page   |
 | ViewContent              | Browser                  | pricing_viewed, and every industry page (/for/<kind>, content_name industry_<kind>; Launch 1) |
 | FreeScanStarted (custom) | Browser                  | free_scan_started   |
-| FreeScanCompleted (custom) | Browser                | free_scan_completed |
-| Lead                     | Browser                  | a contact given: "Send me this report" sent (email or WhatsApp), or a Founding 25 application sent (no PostHog event of its own) |
+| FreeScanCompleted (custom) | Browser and server (same event id, Launch 2) | free_scan_completed |
+| Lead                     | Browser and server (same event id, Launch 2) | a contact given: "Send me this report" sent (email or WhatsApp), or a Founding 25 application sent (no PostHog event of its own) |
 | CompleteRegistration     | Server (Conversions API) | signup_completed    |
 | StartTrial               | Server (Conversions API) | trial_started       |
 | Subscribe                | Server (Conversions API) | paid                |
 
 Conversions API (`supabase/functions/_shared/meta-capi.ts`, the `meta_capi` job): event_id is the `product_events` row id; email, phone and the account id are hashed with SHA-256; fbc and fbp from sign-up. When the owner's chat came from a Click to WhatsApp ad and `META_WABA_ID` is set, the event goes as business_messaging on WhatsApp with that ctwa_clid. Sent only when the person allowed ad measurement (their latest privacy choice, otherwise `ads_ok` from sign-up). Without `META_PIXEL_ID` and `META_CAPI_TOKEN` (Supabase secrets) every job ends as skipped (mock).
+
+Server copies of Lead and FreeScanCompleted (Launch 2, master plan 30.36 item 4; `supabase/functions/_shared/meta-capi-web.ts`, called as `POST /functions/v1/consent/meta`): the browser sends the event's name, the event id its Pixel used, the page address without its query, the random visitor id of its stored privacy choice and Meta's `_fbp` and `_fbc` cookies. The server reads that visitor's latest `consent_records` row and sends only when it says advertising yes and is under 12 months old; a browser with no stored choice sends nothing. The event Meta receives: event_name and event_id as the browser's, event_time (now), action_source website, event_source_url (kabsi.co and the path only), and user_data with external_id (SHA-256 of the visitor id), fbp and fbc; for Lead, custom_data content_name (free_check_report or founding_25). No email, phone, name, business or IP address is sent. Without Meta's secrets the function logs the payload (field names only, no hashed id) and sends nothing; with `META_TEST_EVENT_CODE` set the request goes to Events Manager's Test events.
 
 ### Retargeting audiences (26.4), made in Meta Ads Manager from the Pixel
 

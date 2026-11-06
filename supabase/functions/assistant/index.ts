@@ -23,7 +23,7 @@ import { countryFromTimezone } from "../_shared/tz-country.ts";
 import { nextTasks } from "../_shared/tasks.ts";
 import { WHATSAPP_NUMBER, WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
 import { fenceVisitor, knownLinksOnly, noraRules } from "../_shared/nora-rules.ts";
-import { type NoraPage, pageLinksOnly, pagesContext, parsePages, relevantPages } from "../_shared/nora-pages.ts";
+import { finalLinks, type NoraPage, pagesContext, parsePages, parseSitePaths, relevantPages } from "../_shared/nora-pages.ts";
 import { type ContactRow, contactContextLine, exactEmailPattern, newsConsent, ownsContact } from "../_shared/nora-contact.ts";
 import { cleanScreen, inOnboarding, ONBOARDING_RULES, onboardingHandoffLine, onboardingLines, onboardingStateResult, type OnboardingState } from "../_shared/onboarding-context.ts";
 import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
@@ -65,18 +65,24 @@ async function knowledge() {
 // for every answer, so a guide is known on the day it is published; the last good list is kept for when the website does not
 // answer, and a guide that was public stays public, so an old list never names a page that is not yet public.
 const PAGES_URL = `${APP_URL}/nora-pages.json`;
+// Launch 2 part A (30.36 item 3): the same answer carries the sitemap's paths, so every kabsi.co link in her final text is
+// checked against the public pages (finalLinks in _shared/nora-pages.ts).
 let pagesCache: NoraPage[] = [];
-async function publicPages(): Promise<NoraPage[]> {
+let pathsCache: string[] = [];
+async function publicPages(): Promise<{ pages: NoraPage[]; paths: string[] }> {
   try {
     const res = await fetch(PAGES_URL, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(2500) });
     if (res.ok) {
-      const list = parsePages(await res.json());
+      const body = await res.json();
+      const list = parsePages(body);
       if (list.length) pagesCache = list;
+      const paths = parseSitePaths(body);
+      if (paths.length) pathsCache = paths;
     }
   } catch (e) {
     await captureError("assistant", e, { step: "pages" });
   }
-  return pagesCache;
+  return { pages: pagesCache, paths: pathsCache };
 }
 
 const RULES = noraRules(WHATSAPP_ON, WHATSAPP_NUMBER);
@@ -447,7 +453,7 @@ serve(async (req) => {
 
     const kb = await knowledge();
     // The pages that fit this question (at most 5) go in the context block, so the prompt does not grow with every guide.
-    const pages = await publicPages();
+    const { pages, paths: sitePaths } = await publicPages();
     ctx.push(...pagesContext(relevantPages(text, pages)));
     const system = [
       { type: "text", text: `${RULES}\n\n${ONBOARDING_RULES}\n\n<knowledge_base>\n${kb || "(The knowledge base could not be loaded. Answer nothing factual; offer to pass the question to the team.)"}\n</knowledge_base>`, cache_control: { type: "ephemeral" } },
@@ -475,7 +481,7 @@ serve(async (req) => {
       meterAdd(meter, MODEL, out.usage);
       const texts = out.content.filter((c) => c.type === "text").map((c) => c.text ?? "").join("\n").trim();
       const uses = out.content.filter((c) => c.type === "tool_use");
-      if (!uses.length) { reply = pageLinksOnly(knownLinksOnly(texts, kb), pages); break; }
+      if (!uses.length) { reply = finalLinks(knownLinksOnly(texts, kb), pages, sitePaths); break; }
       turn.push({ role: "assistant", content: out.content });
       const results: unknown[] = [];
       for (const u of uses) {
@@ -586,7 +592,7 @@ serve(async (req) => {
         results.push({ type: "tool_result", tool_use_id: u.id, content: JSON.stringify(result) });
       }
       turn.push({ role: "user", content: results });
-      if (i === MAX_TURNS - 1) reply = pageLinksOnly(knownLinksOnly(texts, kb), pages);
+      if (i === MAX_TURNS - 1) reply = finalLinks(knownLinksOnly(texts, kb), pages, sitePaths);
     }
     reply = noDashes(reply || "Sorry, I couldn't answer that. Please email hello@kabsi.co and a person will reply.").slice(0, 4000);
 
