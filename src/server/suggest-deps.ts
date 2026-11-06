@@ -41,8 +41,15 @@ async function take(
   const sql = db();
   if (!sql) return { allowed: false, reason: "error" };
   try {
-    const rows = await sql<{ r: { allowed?: unknown; reason?: unknown } }[]>`
-      select public.suggest_take(${visitor}, ${limits[0]}::integer, ${limits[1]}::integer, ${limits[2]}::integer, ${places}) as r`;
+    // The connect and the server each have their own limit; this one covers a stalled connection (review of 6 Nov).
+    const stalled = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("db_timeout")), 3000),
+    );
+    const rows = await Promise.race([
+      sql<{ r: { allowed?: unknown; reason?: unknown } }[]>`
+      select public.suggest_take(${visitor}, ${limits[0]}::integer, ${limits[1]}::integer, ${limits[2]}::integer, ${places}) as r`,
+      stalled,
+    ]);
     const j = rows[0]?.r ?? {};
     if (j.allowed === true) return { allowed: true };
     return {
