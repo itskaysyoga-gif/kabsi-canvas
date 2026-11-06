@@ -3,6 +3,7 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { withLeanHead, wantsLeanHead } from "./lib/head-hints";
+import { wantsEdgeCache, withEdgeCache } from "./lib/edge-cache";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -51,7 +52,8 @@ export default {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       const normal = await normalizeCatastrophicSsrResponse(response);
-      return wantsLeanHead(request, normal) ? withLeanHead(normal) : normal;
+      const lean = wantsLeanHead(request, normal) ? withLeanHead(normal) : normal;
+      return wantsEdgeCache(request, lean) ? withEdgeCache(lean) : lean;
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {

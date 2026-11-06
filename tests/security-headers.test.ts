@@ -5,7 +5,11 @@ import { describe, expect, it } from "vitest";
 
 type Rule = { source: string; headers: { key: string; value: string }[]; has?: unknown };
 const vercel = JSON.parse(readFileSync("vercel.json", "utf8")) as { headers: Rule[] };
-const all = vercel.headers.find((h) => h.source === "/(.*)" && !h.has);
+// Launch 4 (speed): pages get the full set; the hashed files under /assets/ get only HSTS and nosniff, because a frame,
+// referrer, permissions or content policy means nothing on a script, font or image, and every script on a page paid
+// those bytes again (Lighthouse counts response headers in a page's script weight).
+const all = vercel.headers.find((h) => h.source === "/((?!assets/).*)" && !h.has);
+const assets = vercel.headers.find((h) => h.source === "/assets/(.*)" && !h.has);
 const header = (k: string) => all?.headers.find((h) => h.key === k)?.value ?? "";
 
 describe("security headers", () => {
@@ -18,6 +22,15 @@ describe("security headers", () => {
     expect(header("X-Frame-Options")).toBe("DENY");
     expect(header("Referrer-Policy")).toBe("strict-origin-when-cross-origin");
     expect(header("Permissions-Policy")).toBe("camera=(), microphone=(), geolocation=()");
+  });
+
+  it("keeps HSTS and nosniff on the hashed files, and sends the page headers on every other path", () => {
+    const keys = (assets?.headers ?? []).map((h) => h.key).sort();
+    expect(keys).toEqual(["Strict-Transport-Security", "X-Content-Type-Options"]);
+    const pages = new RegExp(`^${all?.source}$`);
+    for (const path of ["/", "/pricing", "/scan", "/app/reviews", "/assetsfoo", "/privacy"])
+      expect(pages.test(path), path).toBe(true);
+    expect(pages.test("/assets/index-abc.js")).toBe(false);
   });
 
   it("keeps the content policy in report-only mode, with frame-ancestors none and reports to Sentry", () => {

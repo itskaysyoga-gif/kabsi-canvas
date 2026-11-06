@@ -295,6 +295,15 @@ export type ShareImage =
   /** Industries 3: each industry page's own photo card, public/og/industries/<slug>.jpg (scripts/industry-og.mjs). */
   | `industries/${string}`;
 
+/**
+ * Launch 4 (speed, R-118 item 3): a JSON-LD block that only the server writes. A route's head runs in the shared entry
+ * script on every page, so a FAQ list named in a head would ship its whole text to every visitor. Search engines read
+ * the server's HTML, so a page writes `import.meta.env.SSR ? faqJsonLd(LIST) : SERVER_ONLY_LD`: the client build drops
+ * the list, and the browser keeps the block the server sent (the script is hydrated with an empty body, and React leaves
+ * a data script's server text in place).
+ */
+export const SERVER_ONLY_LD: Record<string, unknown> = Object.freeze({});
+
 export function pageHead(o: {
   title: string;
   description: string;
@@ -349,7 +358,7 @@ export function pageHead(o: {
     links: [{ rel: "canonical", href: url }],
     scripts: [...(o.jsonLd ?? []), ...(o.crumbs ? [breadcrumbLd(o.crumbs)] : [])].map((data) => ({
       type: "application/ld+json",
-      children: JSON.stringify(data),
+      children: data === SERVER_ONLY_LD ? "" : JSON.stringify(data),
     })),
   };
 }
