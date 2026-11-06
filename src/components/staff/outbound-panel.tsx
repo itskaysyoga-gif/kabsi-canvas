@@ -176,30 +176,34 @@ function LockState({ lock, queued }: { lock: Lock | null; queued: number }) {
 function Source({ p }: { p: Prospect | null }) {
   if (!p) return null;
   return (
-    <dl className="mt-2 grid gap-1 text-label text-text-2">
-      <div>
-        <dt className="inline font-bold">Source page: </dt>
-        <dd className="inline break-all">{p.source_page}</dd>
-      </div>
-      <div>
-        <dt className="inline font-bold">Read on: </dt>
-        <dd className="inline">{fmtDate(p.source_date)}</dd>
-      </div>
-      <div>
-        <dt className="inline font-bold">Detail: </dt>
-        <dd className="inline">{p.detail_used}</dd>
-      </div>
-      <div>
-        <dt className="inline font-bold">Company number: </dt>
-        <dd className="inline">
-          {p.company_number ?? "none"}
-          {p.company_status ? ` (${p.company_status})` : ""}
-        </dd>
-      </div>
+    <>
+      <dl className="mt-2 grid gap-1 text-label text-text-2">
+        <div>
+          <dt className="inline font-bold">Source page: </dt>
+          <dd className="inline break-all">{p.source_page}</dd>
+        </div>
+        <div>
+          <dt className="inline font-bold">Read on: </dt>
+          <dd className="inline">{fmtDate(p.source_date)}</dd>
+        </div>
+        <div>
+          <dt className="inline font-bold">Detail: </dt>
+          <dd className="inline">{p.detail_used}</dd>
+        </div>
+        <div>
+          <dt className="inline font-bold">Company number: </dt>
+          <dd className="inline">
+            {p.company_number ?? "none"}
+            {p.company_status ? ` (${p.company_status})` : ""}
+          </dd>
+        </div>
+      </dl>
       {p.test ? (
-        <div className="font-bold">Test business: the email goes to a test address only.</div>
+        <p className="mt-1 text-label font-bold text-text-2">
+          Test business: the email goes to a test address only.
+        </p>
       ) : null}
-    </dl>
+    </>
   );
 }
 
