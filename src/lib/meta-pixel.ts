@@ -4,7 +4,7 @@
 // before "Accept", and anywhere "Let Kabsi measure its ads" is off it never loads. Without VITE_META_PIXEL_ID (Rashid's
 // step in Meta Events Manager) nothing loads at all.
 //
-// Browser events: PageView, ViewContent (pricing), Lead (free scan completed), and the custom FreeScanStarted for the
+// Browser events: PageView, ViewContent (pricing and each industry page, Launch 1), Lead (a contact given), and the custom FreeScanStarted for the
 // retargeting audience "started the scan" (26.4). CompleteRegistration, StartTrial and Subscribe go from Kabsi's servers
 // through the Conversions API (supabase/functions/_shared/meta-capi.ts), because sign-up and paying happen on private
 // pages. Every browser event carries an event_id, so Meta can match it with a server event of the same id.
@@ -99,9 +99,20 @@ function send(kind: "track" | "trackCustom", name: string, params: Record<string
   }
 }
 
+/** The ViewContent a page sends: Pricing, and each industry page by its name (Launch 1). Null for every other page. */
+export function viewContentOf(path: string): Record<string, string> | null {
+  const p = path.replace(/\/+$/, "") || "/";
+  if (p === "/pricing") return { content_name: "pricing" };
+  const industry = /^\/for\/([a-z0-9-]+)$/.exec(p);
+  return industry
+    ? { content_name: `industry_${industry[1]}`, content_category: "industry" }
+    : null;
+}
+
 function pageEvents(path: string) {
   send("track", "PageView");
-  if (path === "/pricing") send("track", "ViewContent", { content_name: "pricing" });
+  const vc = viewContentOf(path);
+  if (vc) send("track", "ViewContent", vc);
 }
 
 // Called on every page view from the root component. The first allowed public page loads the Pixel, at once or the
