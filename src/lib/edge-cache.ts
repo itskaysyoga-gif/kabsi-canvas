@@ -4,10 +4,11 @@
 // copy is made in the background. A deploy starts a new cache, so a merge shows at once. Only the fixed pages of the
 // sitemap are cached; the guides and the industry pages (which list guides published on a schedule), a saved check
 // (/scan/<code>), the app and every link page are rendered on each visit as before.
-import SITEMAP_PAGES from "@/content/sitemap-pages.json";
+import SITEMAP_PAGES from "../content/sitemap-pages.json";
 
 const NEVER = new Set(["/guides"]);
-const CACHED = new Set(
+/** The pages Vercel's edge keeps a copy of (also read by the ad click rewrite, ad-click.ts). */
+export const CACHED_PATHS: ReadonlySet<string> = new Set(
   (SITEMAP_PAGES as { path: string }[])
     .map((p) => p.path)
     .filter((p) => !NEVER.has(p) && !p.startsWith("/for/")),
@@ -20,7 +21,7 @@ export function wantsEdgeCache(request: Request, response: Response): boolean {
   if (request.method !== "GET" || response.status !== 200) return false;
   if (!(response.headers.get("content-type") ?? "").includes("text/html")) return false;
   if (response.headers.has("set-cookie")) return false;
-  return CACHED.has(new URL(request.url).pathname);
+  return CACHED_PATHS.has(new URL(request.url).pathname);
 }
 
 /** The same response with the edge cache header. */
