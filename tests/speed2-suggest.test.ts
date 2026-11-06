@@ -59,7 +59,7 @@ function rig(
   const env: Record<string, string> = {
     PLACES_API_KEY: "places-key",
     TURNSTILE_SECRET_KEY: SECRET,
-    SUGGEST_ROUTE_KEY: "a".repeat(64),
+    SUGGEST_DB_URL: "postgres://suggest_route.test:x@localhost:6543/postgres",
     ...opts.env,
   };
   r.deps = {
@@ -268,7 +268,7 @@ describe("Speed 2 part A: /api/suggest", () => {
     expect((await h(new Request("https://kabsi.co/api/suggest"))).status).toBe(405);
     expect((await h(post({ action: "nope" }))).status).toBe(400);
     expect(r.google).toEqual([]);
-    const off = rig({ env: { SUGGEST_ROUTE_KEY: "" } });
+    const off = rig({ env: { SUGGEST_DB_URL: "" } });
     const res = await makeSuggestHandler(off.deps)(suggest());
     expect(res.status).toBe(503);
     expect(((await res.json()) as { error: string }).error).toBe("not_configured");
@@ -296,8 +296,8 @@ describe("Speed 2 part A: /api/suggest", () => {
 
   it("the route holds no service key and the Google address stays in the Google layer", () => {
     const deps = readFileSync("src/server/suggest-deps.ts", "utf8");
-    expect(deps).toContain("SUGGEST_ROUTE_KEY");
-    expect(deps).toContain("supabasePublishableKey");
+    expect(deps).toContain("SUGGEST_DB_URL");
+    expect(deps).toContain("suggest_take");
     expect(deps).not.toMatch(/googleapis/);
     expect(
       readFileSync("supabase/functions/_shared/google/places/autocomplete-web.ts", "utf8"),

@@ -88,5 +88,5 @@ description = "Made-up Autocomplete session token (a UUID) in the /api/suggest t
 condition = "AND"
 targetRules = ["generic-api-key"]
 paths = ['''^tests/speed2-suggest\.test\.ts$''']
-regexTarget = "line"
-regexes = ['''^const TOKEN = "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}";$''']
+regexTarget = "match"
+regexes = ['''TOKEN = "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"''']
