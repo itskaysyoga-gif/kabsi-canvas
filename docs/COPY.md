@@ -1824,3 +1824,10 @@ Every new or changed line of Scan 3. The result's lines are in src/lib/scan-word
 - **/privacy** has a new section 15, "Businesses on Kabsi's contact list" ("Changes" is now 16; the date at the top is 6 November 2026). Three short paragraphs, under 200 words, in the page's own voice: who keeps the list and what it holds (name, kind of business, address, phone number, website and an email address the business publishes itself, from OpenStreetMap and the business's own website, no names of owners or staff); the lawful basis (legitimate interests: telling businesses about a service that may help them), that no message has been sent and none is sent without a further check of the law in the country where the business is, the six-month check and the closed mark, and that the list is held privately and never sold or shared; and how a business asks to be removed or never contacted (hello@kabsi.co, Kabsi acts within 30 days) with the right to ask what Kabsi holds, to object and to complain to the data protection authority.
 - Never in it: the name of the collection tool, the number of countries, any number of businesses.
 - Facts 11 (9.2, 9.3, 9.7) say the same; Nora's rules did not say Kabsi holds no such data and are unchanged.
+
+## 64. Launch 4: the contact list's retention (6 Nov 2026, master plan 30.38 item 2, R-118)
+
+- **/privacy section 15**, second paragraph, after "marks one that has closed.": "We delete an entry 24 months after we add it, or 90 days after the business closes, whichever is sooner."
+- Third paragraph now opens: "If you ask us to remove your business or never contact it, we do so within 30 days and keep only a coded form of the address, so we never write to it. Write to hello@kabsi.co." It replaces "Any business can ask to be removed or never to be contacted. Write to hello@kabsi.co and Kabsi acts within 30 days. A business that asks never to be contacted goes on a list that stops it being added again.", which the new sentence covers, so the section stays under 220 words (209). The rights line after it is unchanged.
+- Facts 11 says the same (the contact list bullet and the retention table row).
+
