@@ -66,7 +66,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 6 Nov 2026, Harvey 4A: PRs 450 to 458, PR_E.
+- 6 Nov 2026, Harvey 4A: PRs 450 to 462. `2026-11-06-harvey4a.md`.
 - 6 Nov 2026, Speed 2: PRs 452 to 460. `2026-11-06-speed2.md`.
 
 ## How a session updates this page
