@@ -51,6 +51,8 @@ describe("Speed 2 part B: the founding count through kabsi.co", () => {
     }
     expect(calls).toEqual([[FOUNDING_COUNT_PATH, undefined]]);
     expect(FOUNDING_COUNT_PATH).toBe("/api/founding-count");
-    expect(readFileSync("src/routes/api.founding-count.ts", "utf8")).toContain("foundingCountResponse()");
+    expect(readFileSync("src/routes/api.founding-count.ts", "utf8")).toContain(
+      "foundingCountResponse()",
+    );
   });
 });
