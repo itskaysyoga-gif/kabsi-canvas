@@ -1869,3 +1869,5 @@ Rashid Abou Hamzy, founder of Kabsi. Drafted with Nora, Kabsi's AI assistant.
 kabsi.co
 Facebook: <SOCIAL_LINKS Facebook>
 Instagram: <SOCIAL_LINKS Instagram>"
+
+**The staff page kabsi.co/staff/outbound** (Harvey 4A part C): H1 "Emails waiting for your yes" (highlight on "your yes"); line "The day's drafts with their sources, the replies that need you, and whether sending is locked." Panels: "Sending" (one of: "Sending is locked. Test mode: only the test addresses receive mail." / "Sending is locked. Nothing is prepared or sent." / "Sending is open since <date>. Only what you approve is sent." / "Stopped on <date>: <reason>. Only lane R reopens it.", then "Approved and waiting to send: <n>."), "Today's drafts" (each with Source page, Read on, Detail, Company number; buttons Approve, Edit, Edit follow-up, Skip; at the end "Read every draft above first. This approves the <n> shown and their follow-ups." and "Approve all <n>"), "Replies" (each reply with "Your answer, ready to send" and Send, Edit, Skip, or "No answer is prepared. Kabsi drafts one only for a clear yes. Answer from rashid@getkabsi.com."). There is no control that opens sending.

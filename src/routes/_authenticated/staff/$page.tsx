@@ -11,6 +11,7 @@ const TITLES: Record<string, string> = {
   businesses: "Businesses",
   conversations: "Conversations",
   programs: "Programs",
+  outbound: "Outbound",
   system: "System",
   costs: "Costs",
   settings: "Settings",

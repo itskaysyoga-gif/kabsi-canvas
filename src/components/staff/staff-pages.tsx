@@ -9,6 +9,7 @@ import { FollowupsPanel } from "@/components/staff/followups-panel";
 import { FoundingPanel } from "@/components/staff/founding-panel";
 import { OperationsPanel } from "@/components/staff/operations-panel";
 import { OpsPanel } from "@/components/staff/ops-panel";
+import { OutboundPanel } from "@/components/staff/outbound-panel";
 import { PartnersPanel } from "@/components/staff/partners-panel";
 import { PanelChips, STAFF_CARD, StaffTop, usePanelChips } from "@/components/staff/staff-ui";
 import { SystemHealthPanel } from "@/components/staff/system-health-panel";
@@ -140,6 +141,17 @@ function CostsPage() {
   );
 }
 
+function OutboundPage() {
+  return (
+    <>
+      <StaffTop page={STAFF_PAGES.outbound} />
+      <div className="max-w-2xl">
+        <OutboundPanel />
+      </div>
+    </>
+  );
+}
+
 function SettingsPage() {
   return (
     <>
@@ -156,6 +168,7 @@ export const STAFF_SUB_PAGES = {
   businesses: BusinessesPage,
   conversations: Conversations,
   programs: Programs,
+  outbound: OutboundPage,
   system: SystemPage,
   costs: CostsPage,
   settings: SettingsPage,
