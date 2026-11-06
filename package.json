@@ -23,7 +23,10 @@
     "e2e:smoke": "playwright test tests/e2e/smoke.spec.ts --project=m390"
   },
   "overrides": {
-    "rolldown": "1.2.1"
+    "rolldown": "1.2.1",
+    "@vercel/cli-config": {
+      "zod": "$zod"
+    }
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
