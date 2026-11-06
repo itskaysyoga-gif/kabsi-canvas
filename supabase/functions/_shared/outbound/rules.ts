@@ -190,7 +190,8 @@ export function textOf(html: string): string {
     else out += c;
   }
   return out
-    .replace(/&nbsp;/gi, " ").replace(/&amp;/gi, "&").replace(/&#64;|&commat;/gi, "@").replace(/&#46;/g, ".")
+    // &amp; last, so "&amp;#64;" stays the text "&#64;" and is never decoded twice.
+    .replace(/&nbsp;/gi, " ").replace(/&#64;|&commat;/gi, "@").replace(/&#46;/g, ".").replace(/&amp;/gi, "&")
     .replace(/[ \t\r\f\v]+/g, " ");
 }
 
