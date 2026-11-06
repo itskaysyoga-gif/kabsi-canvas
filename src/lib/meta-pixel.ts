@@ -7,8 +7,10 @@
 // Browser events: PageView, ViewContent (pricing and each industry page, Launch 1), Lead (a contact given), and the custom FreeScanStarted for the
 // retargeting audience "started the scan" (26.4). CompleteRegistration, StartTrial and Subscribe go from Kabsi's servers
 // through the Conversions API (supabase/functions/_shared/meta-capi.ts), because sign-up and paying happen on private
-// pages. Every browser event carries an event_id, so Meta can match it with a server event of the same id.
-import { advertisingAllowed, runWhenAdvertisingAllowed } from "@/lib/consent";
+// pages. Every browser event carries an event_id, so Meta can match it with a server event of the same id. Lead and
+// FreeScanCompleted also have a server copy with that id (Launch 2, serverCopy below).
+import { advertisingAllowed, liveChoice, runWhenAdvertisingAllowed } from "@/lib/consent";
+import { anonHeaders, supabaseUrl } from "@/lib/supabase-config";
 import { isPrivatePath } from "@/lib/private-paths";
 import { afterPaint } from "@/lib/after-paint";
 
@@ -87,13 +89,73 @@ function newEventId(): string {
   }
 }
 
-// Sends one event when the Pixel may run on this page; otherwise nothing.
-function send(kind: "track" | "trackCustom", name: string, params: Record<string, unknown> = {}) {
-  if (typeof window === "undefined" || !PIXEL_ID || !pixelAllowedOn(currentPath)) return;
-  if (!advertisingAllowed()) return;
+// Sends one event when the Pixel may run on this page; otherwise nothing. Returns the event id it used.
+function send(
+  kind: "track" | "trackCustom",
+  name: string,
+  params: Record<string, unknown> = {},
+): string | null {
+  if (typeof window === "undefined" || !PIXEL_ID || !pixelAllowedOn(currentPath)) return null;
+  if (!advertisingAllowed()) return null;
   load();
+  const eventID = newEventId();
   try {
-    window.fbq?.(kind, name, params, { eventID: newEventId() });
+    window.fbq?.(kind, name, params, { eventID });
+  } catch {
+    /* never let measurement break the page */
+  }
+  return eventID;
+}
+
+// Launch 2 part A (master plan 30.36 item 4): Lead and FreeScanCompleted also go from Kabsi's server through the
+// Conversions API with the same event id, so Meta keeps one of the pair. Only a visitor with a stored choice is asked
+// about: the server reads that stored choice (consent_records) and sends nothing without a yes there. The body holds the
+// random visitor id, the event, its id, the page address without its query, Meta's own two cookies and the content name.
+function cookie(name: string): string | null {
+  const m = new RegExp(`(?:^|; )${name}=([^;]*)`).exec(document.cookie);
+  return m?.[1] ? decodeURIComponent(m[1]) : null;
+}
+export function serverCopyBody(
+  name: "Lead" | "FreeScanCompleted",
+  eventId: string,
+  visitorId: string,
+  href: string,
+  cookies: { fbp: string | null; fbc: string | null },
+  contentName?: string,
+): Record<string, unknown> {
+  return {
+    visitor_id: visitorId,
+    event_name: name,
+    event_id: eventId,
+    event_source_url: href.split(/[?#]/)[0],
+    fbp: cookies.fbp,
+    fbc: cookies.fbc,
+    ...(contentName ? { content_name: contentName } : {}),
+  };
+}
+function serverCopy(
+  name: "Lead" | "FreeScanCompleted",
+  eventId: string | null,
+  contentName?: string,
+) {
+  const visitor = liveChoice()?.visitor;
+  if (!eventId || !visitor || !supabaseUrl) return;
+  try {
+    void fetch(`${supabaseUrl}/functions/v1/consent/meta`, {
+      method: "POST",
+      headers: { "content-type": "application/json", ...anonHeaders },
+      body: JSON.stringify(
+        serverCopyBody(
+          name,
+          eventId,
+          visitor,
+          window.location.href,
+          { fbp: cookie("_fbp"), fbc: cookie("_fbc") },
+          contentName,
+        ),
+      ),
+      keepalive: true,
+    }).catch(() => undefined);
   } catch {
     /* never let measurement break the page */
   }
@@ -131,8 +193,15 @@ export function pixelPageView(path: string) {
 }
 
 export function pixelEvent(name: PixelEvent, params: Record<string, unknown> = {}) {
-  send("track", name, params);
+  const id = send("track", name, params);
+  if (name === "Lead")
+    serverCopy(
+      "Lead",
+      id,
+      typeof params["content_name"] === "string" ? params["content_name"] : undefined,
+    );
 }
 export function pixelCustom(name: "FreeScanStarted" | "FreeScanCompleted") {
-  send("trackCustom", name);
+  const id = send("trackCustom", name);
+  if (name === "FreeScanCompleted") serverCopy("FreeScanCompleted", id);
 }

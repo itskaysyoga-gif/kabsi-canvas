@@ -14,7 +14,11 @@
 import { QUESTIONS, type Question } from "./questions.ts";
 import { task, takesEffort, type Usage } from "../../supabase/functions/_shared/ai/agents.ts";
 import { fenceVisitor } from "../../supabase/functions/_shared/nora-rules.ts";
-import { pageLinks, pagesContext } from "../../supabase/functions/_shared/nora-pages.ts";
+import {
+  finalLinks,
+  pageLinks,
+  pagesContext,
+} from "../../supabase/functions/_shared/nora-pages.ts";
 import { WHATSAPP_NUMBER, WHATSAPP_ON } from "../../supabase/functions/_shared/whatsapp-setting.ts";
 
 /** Kabsi's own WhatsApp number, while it is on: the one number Nora may give. It is taken out of an answer before the
@@ -360,10 +364,13 @@ export function liveModel(apiKey: string, model: string, rules: string, used?: U
         used.cacheRead += Number(u.cache_read_input_tokens ?? 0);
         used.cacheWrite += Number(u.cache_creation_input_tokens ?? 0);
       }
-      return (data.content ?? [])
+      const text = (data.content ?? [])
         .filter((c: { type: string }) => c.type === "text")
         .map((c: { text: string }) => c.text)
         .join("");
+      // Launch 2 part A (30.36 item 3): a page-link question is scored on the text the assistant would send, after the
+      // same server-side link filter, with the question's list as the public pages and the sitemap's own pages.
+      return q.pages ? finalLinks(text, q.pages, []) : text;
     },
   };
 }
