@@ -170,3 +170,10 @@ Deno.test("open: only active registered companies whose page still shows the add
   }
   assert.equal(r.refused.email_not_on_page ?? 0, 1);
 });
+
+Deno.test("robots.txt wildcards and end anchors, without building a pattern from the file", () => {
+  assert.ok(!robotsAllows("User-agent: *\nDisallow: /*.pdf$", "/menu.pdf"));
+  assert.ok(robotsAllows("User-agent: *\nDisallow: /*.pdf$", "/menu.pdf.html"));
+  assert.ok(!robotsAllows("User-agent: *\nDisallow: /team/*/private", "/team/a/private/x"));
+  assert.ok(robotsAllows("User-agent: *\nDisallow: /(.*)+$", "/contact"), "a rule is text, never a pattern");
+});
