@@ -1751,3 +1751,13 @@ Every new or changed line of Scan 3. The result's lines are in src/lib/scan-word
 - **Related**: nail salons, lash and brow studios, hair salons, spas and massage, medical and aesthetic clinics, barbershops. Guides: photos, replying to reviews, categories.
 - **Share image**: public/og/industries/beauty-salon.jpg, alt "Kabsi. Your beauty salon, ready for its close up."
 - **Free check search**: "beauty salon" for the UK and the UAE (migration 20261105200756, source lane_r_approved).
+
+## 61. Launch 1: the last fixes before paid ads (6 Nov 2026, master plan 30.35, R-115)
+
+*Section 60 is App 6's. Every line here was checked against the facts; About's by an independent agent.*
+
+### Part A: About (branch claude/launch1-a, 30.35 items 2 and 3)
+
+- **The founder** (charcoal band): the two lines are now "Works in Meta advertising, e-commerce and digital marketing, and runs the online presence and paid campaigns of a real estate partnership." (Rashid's own stated background, 30.35 item 3; was "Spent years running ads and online presence for local businesses.") and, unchanged, "Saw the same gap every time: unanswered reviews and Google details out of date."
+- **Every feature runs on a real Google profile first** ("real Google profile" on the bar; was "We run Kabsi on our own business first"): "Before an owner sees a feature, Kabsi runs it on a real Google profile. What Kabsi did there:" then the same five lines and "From Kabsi's own records, 5 November 2026." The business is not named anywhere public (K-85 item 6, 30.35 item 2): not on About, in the facts, the llms files, Nora's rules or the social images.
+- **Facts, FAQ**: the example of a web address Google removes from a name is now "Rosa Bakery.com" to "Rosa Bakery" (an invented example).
