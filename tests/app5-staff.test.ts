@@ -13,12 +13,13 @@ const DIR = "src/routes/_authenticated/staff";
 const words = (n: string) => n.trim().split(/\s+/).length;
 
 describe("the staff menu", () => {
-  it("has the seven pages of 30.33 item 3, each at its own address", () => {
+  it("has the seven pages of 30.33 item 3 and Outbound (30.39), each at its own address", () => {
     expect(STAFF_MENU).toEqual([
       "today",
       "businesses",
       "conversations",
       "programs",
+      "outbound",
       "system",
       "costs",
       "settings",
@@ -28,13 +29,14 @@ describe("the staff menu", () => {
       "/staff/businesses",
       "/staff/conversations",
       "/staff/programs",
+      "/staff/outbound",
       "/staff/system",
       "/staff/costs",
       "/staff/settings",
     ]);
   });
 
-  it("puts five in the phone bar and the other two in the phone menu, so every page is reachable", () => {
+  it("puts five in the phone bar and the other three in the phone menu, so every page is reachable", () => {
     expect(STAFF_BAR).toHaveLength(5);
     expect([...STAFF_BAR, ...STAFF_MORE].sort()).toEqual([...STAFF_MENU].sort());
   });
