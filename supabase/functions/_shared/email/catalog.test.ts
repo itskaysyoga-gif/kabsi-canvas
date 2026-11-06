@@ -207,7 +207,7 @@ Deno.test("P0.8-02b: wording fixes (the Profile Check, access and report emails,
   const find = (k: string) => catalog().find((c) => c.kind === k)!;
   const profile = render(find("profile_check"));
   assert.equal(find("profile_check").content.button?.label, "Start your free trial");
-  assert.equal(find("profile_check").content.button?.url, "https://kabsi.co/get-started");
+  assert.equal(find("profile_check").content.button?.url, "https://kabsi.co/login?next=/start");
   assert.doesNotMatch(profile.text + profile.html, /Join early access/);
   assert.equal(profile.text.split("This check uses public information").length - 1, 1);
   for (const k of ["access_removed", "access_removing", "weekly_report"]) {

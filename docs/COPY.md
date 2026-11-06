@@ -1811,3 +1811,10 @@ Every new or changed line of Scan 3. The result's lines are in src/lib/scan-word
 
 - No new line. The holiday question keeps its words ("Your hours for [holiday]", "[holiday] is on [day]. Customers check Google for your hours first, so tell Kabsi what you will do."); a Scottish or Northern Ireland business now gets its own nation's holidays, with GOV.UK's names (for example "St Andrew's Day", "2nd January (substitute day)", "Battle of the Boyne (Orangemen's Day)").
 
+## 63. Launch 3: links in Kabsi's own messages (6 Nov 2026, master plan 30.36 item 8, R-116)
+
+### Part A: the /get-started links (branch claude/launch3-a)
+
+- **No words changed.** Only the address in each line. Starting or signing up links https://kabsi.co/login?next=/start: the trial line ("Start free here, no card, about 10 minutes:" then the link, and "The free trial starts once Kabsi can reach your Google profile." on its own line), the partner code line ("Start here:"), the needs-an-account line ("Start free, no card:") and the free check email's button "Start your free trial" (and the same line in its plain text).
+- **A reply about a check** links the saved result. When a scan code arrives: "Thanks, I have your scan [code]. Your full map comes here as soon as it is ready. Kabsi is free for 14 days, no card. Your saved result: https://kabsi.co/scan/[code]". When only a business name arrives: "... Until then you can check your business free at https://kabsi.co/scan and send me the code from the page." (was "scan your business at kabsi.co").
+- Approved WhatsApp templates: none holds a link, so none changes.
