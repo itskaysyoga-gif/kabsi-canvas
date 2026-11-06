@@ -25,6 +25,13 @@ const PAGES = [
     path: "/staff/programs",
     h1: "Founding 25 and Kabsi Partners",
   },
+  {
+    label: "Outbound",
+    short: "Outbound",
+    path: "/staff/outbound",
+    h1: "Emails waiting for your yes",
+    more: true,
+  },
   { label: "System", short: "System", path: "/staff/system", h1: "How the system is running" },
   { label: "Costs", short: "Costs", path: "/staff/costs", h1: "What Kabsi spends", more: true },
   {
