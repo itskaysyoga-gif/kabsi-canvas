@@ -715,21 +715,24 @@ const OTHER: CheckRow = { ...CHECK_DONE, code: "XTHERPZ2", self: { ...CHECK_DONE
 const CHECKS = { SEVEN234: CHECK_DONE, MAPPYNG2: MAPPING, XTHERPZ2: OTHER };
 const MAIL = { action: "email", place_id: PLACE_A, email: "owner@example-cafe.com", tips: false, consent_text: TIPS_CONSENT_TEXT, page: "/google-profile-check" };
 
-Deno.test("scan2: with the check's code the email holds the nearby part, the AI question with its line and date, and the link", async () => {
+Deno.test("launch1: with the check's code the email holds the result page's nearby lines, the ChatGPT question with its answer, question, model and date, and the link", async () => {
   const w = world({ checks: CHECKS });
   try {
     const r = await w.call({ ...MAIL, code: "seven234" });
     assert.equal(r.status, 200);
     const t = w.sent[0].text;
     for (const line of [
-      "In the first 3 at 18 of 49 places Kabsi checked.",
-      "Near your coffee shop you came up 2nd for 'coffee shop'.",
-      "About 2 km north west of your coffee shop, another business came first. You were 7th.",
-      "We asked ChatGPT: 'best coffee shop in Example Town, United Kingdom'",
-      "ChatGPT did not name you. The businesses it named are not near you on Google Maps, so this answer does not reflect your area.",
-      "Asked on 5 November 2026 through OpenAI's API, with web search.",
+      "When someone searches for 'coffee shop' near you, you appear 2nd in this Google Maps check.",
+      "You appeared in the first three at 18 of 49 points around you.",
+      "Did ChatGPT name your business?",
+      "Not clear from this answer. ChatGPT named businesses Kabsi could not match to your area on Google Maps, so it does not show whether ChatGPT would name you here.",
+      "Question: 'best coffee shop in Example Town, United Kingdom'",
+      "Model: ChatGPT (gpt-4.1-mini)",
+      "Asked on 5 November 2026",
       "https://kabsi.co/scan/SEVEN234",
     ]) assert.ok(t.includes(line), `missing: ${line}`);
+    assert.ok(w.sent[0].html.includes("<strong>Did ChatGPT name your business?</strong>"));
+    assert.ok(!t.includes("An answer customers might see"), "the page's own heading, not the old one");
     assert.ok(!/\p{Script=Arabic}/u.test(w.sent[0].html + t), "no Arabic in the email");
     assert.ok(w.sent[0].html.includes('href="https://kabsi.co/scan/SEVEN234"'));
     assert.equal(w.requests.length, 1, "the Google part is read live again");
@@ -761,12 +764,14 @@ Deno.test("scan2: no code keeps the email as it was; an unknown or unfinished ch
   }
 });
 
-Deno.test("scan2: WhatsApp carries the profile line, the count line, the AI line and the link in the one template, within 900 characters", async () => {
+Deno.test("launch1: WhatsApp carries the profile line, the result page's nearby lines, the ChatGPT question and answer and the link in the one template, within 900 characters", async () => {
   const w = world({ checks: CHECKS, whatsapp: true });
   try {
     assert.equal((await w.call({ ...WA, code: "SEVEN234" })).status, 200);
     const [, line] = w.wa.sent[0].params;
-    assert.ok(line.includes("In the first 3 at 18 of 49 places Kabsi checked. ChatGPT did not name you."));
+    assert.ok(line.includes("When someone searches for 'coffee shop' near you, you appear 2nd in this Google Maps check. You appeared in the first three at 18 of 49 points around you. Did ChatGPT name your business? Not clear from this answer."));
+    assert.ok(line.includes("Question: 'best coffee shop in Example Town, United Kingdom'. Model: ChatGPT (gpt-4.1-mini). Asked on 5 November 2026. kabsi.co/scan/SEVEN234"));
+    assert.ok(line.length <= 900);
     assert.ok(line.endsWith("kabsi.co/scan/SEVEN234"));
     assert.ok(!/\n/.test(line));
     const other = await w.call({ ...WA, phone: "+1 201 555 0101", code: "XTHERPZ2" }, "203.0.113.9");
@@ -781,9 +786,9 @@ Deno.test("scan2: WhatsApp carries the profile line, the count line, the AI line
   // The 900 characters: a long profile line is cut, the link always fits.
   const bare = buildSnapshot(PLACE_A, { id: PLACE_A, displayName: { text: "X" }, formattedAddress: "Y" }, true);
   const long = { ...bare, flags: Array.from({ length: 40 }, (_, i) => ({ tone: "warning" as const, fact: `A long fact number ${i} that keeps going for a while.`, action: "x" })) };
-  const [, p] = whatsappParams(long, { nearby: ["In the first 3 at 18 of 49 places Kabsi checked."], ai: ["We asked ChatGPT: 'q'", "ChatGPT named you."], link: "https://kabsi.co/scan/SEVEN234" });
+  const [, p] = whatsappParams(long, { nearby: ["You appeared in the first three at 18 of 49 points around you."], ai: ["Did ChatGPT name your business?", "Yes. ChatGPT named your business.", "Question: 'q'"], link: "https://kabsi.co/scan/SEVEN234" });
   assert.ok(p.length <= 900, `length ${p.length}`);
-  assert.ok(p.endsWith("In the first 3 at 18 of 49 places Kabsi checked. ChatGPT named you. kabsi.co/scan/SEVEN234"));
+  assert.ok(p.endsWith("You appeared in the first three at 18 of 49 points around you. Did ChatGPT name your business? Yes. ChatGPT named your business. Question: 'q'. kabsi.co/scan/SEVEN234"));
 });
 
 // Copy 3 (master plan 30.30 item 3): the visitor's own business name follows the Latin rule in the emailed report and the

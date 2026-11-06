@@ -219,7 +219,7 @@ describe("Scan 3: the trial, access and the report", () => {
     expect(report).toContain("WHATSAPP_ON && (");
   });
   it("carries no dash, no exclamation mark and no Arabic", () => {
-    const src = readFileSync("src/lib/scan-words.ts", "utf8");
+    const src = readFileSync("supabase/functions/_shared/visibility/scan-words.ts", "utf8");
     // Every line a reader sees is a string literal; the code around it may use "!".
     const code = src
       .split("\n")
