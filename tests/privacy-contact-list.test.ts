@@ -30,17 +30,25 @@ describe("the contact list notice (30.37 item 6)", () => {
 
   it("answers who, what, why, basis, source, retention, rights and objection", () => {
     expect(section).toMatch(/Rashid Abou Hamzy runs Kabsi/); // who
-    expect(section).toMatch(/name, kind of business, address, phone number, website and an email address the business publishes/); // what
+    expect(section).toMatch(
+      /name, kind of business, address, phone number, website and an email address the business publishes/,
+    ); // what
     expect(section).toMatch(/tell suitable ones about its service later/); // why
-    expect(section).toMatch(/lawful basis is legitimate interests: telling businesses about a service that may help them/); // basis
+    expect(section).toMatch(
+      /lawful basis is legitimate interests: telling businesses about a service that may help them/,
+    ); // basis
     expect(section).toMatch(/OpenStreetMap and from the business's own website/); // source
     expect(section).toMatch(/at least every six months and marks one that has closed/); // retention
     expect(section).toMatch(/never sold or shared/);
-    expect(section).toMatch(/No message has been sent, and none is sent without a further check of the law in the country where the business is/);
+    expect(section).toMatch(
+      /No message has been sent, and none is sent without a further check of the law in the country where the business is/,
+    );
     expect(section).toMatch(/no names of owners or staff/);
     expect(section).toMatch(/ask to be removed or never to be contacted/); // objection
     expect(section).toMatch(/hello@kabsi\.co and Kabsi acts within 30 days/);
-    expect(section).toMatch(/ask what Kabsi holds about your business, object to Kabsi holding it, or complain to the data protection authority/); // rights
+    expect(section).toMatch(
+      /ask what Kabsi holds about your business, object to Kabsi holding it, or complain to the data protection authority/,
+    ); // rights
   });
 
   it("does not name the tool, the countries' count or any number of businesses", () => {
