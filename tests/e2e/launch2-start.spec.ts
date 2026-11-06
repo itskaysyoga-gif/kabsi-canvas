@@ -71,9 +71,7 @@ async function stubCheck(page: Page) {
     json(route, { ...DONE, code: "HARB2345", business: PLACE.name }),
   );
   await page.route("**/functions/v1/visibility/check/result", (route) => json(route, DONE));
-  await page.route("**/functions/v1/programs/founding", (route) =>
-    json(route, { total: 25, left: 12 }),
-  );
+  await page.route("**/api/founding-count", (route) => json(route, { total: 25, left: 12 }));
 }
 
 /** Signs the made-up new owner in (no business yet) and opens the log in page with next=/start, as the link left it. */

@@ -7,7 +7,7 @@ import { SiteLink } from "./site-link";
 
 /**
  * The slim Founding 25 line above the header (Design 8, Web 4, lane R decision 2 of 1 Nov 2026). The count is never
- * typed: it is the real one from GET programs/founding, and no number shows while it is unknown. Once applications
+ * typed: it is the real one from GET /api/founding-count, and no number shows while it is unknown. Once applications
  * are closed (no place left) the line goes. A visitor can hide it. Both are kept in this browser ("hidden", or
  * "closed" as last read) and applied before the first paint by the small script below, so a returning visitor never
  * sees the page shift; a "closed" that reopens is cleared when the count says so.
