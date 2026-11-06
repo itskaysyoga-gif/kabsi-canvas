@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 5 Nov 2026, Scan 3. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 6 Nov 2026, Launch 1. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -9,16 +9,12 @@ Files named in this list are in `docs/progress/archive/`.
 - Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati; the first real reply was published and verified; the post removal was verified on Google (23 Oct). kabsi.co runs on Vercel; Creem is the only payment route (test mode, not open). Evidence: `docs/progress/archive/evidence.md` and `where-things-stand.md`.
 - Web 2, V4, UX 1, Email 1, Sec 1 and 2, WhatsApp 2, Billing 2, Price 1 and Web 3 (26 to 30 Oct): detail in the dated files in `docs/progress/archive/`.
 - Go live 1 (5 Nov 2026, 30.28, R-108): WhatsApp for owners, the nearby check and the AI answer are on; card payments stay closed. Detail: `2026-11-05-golive1.md`.
-- Scan 2 and Copy 3 (5 Nov 2026, PRs 369 to 376): the free check names the town; Go live 1's copy decisions. Detail: `2026-11-05-scan2.md`, `2026-11-05-copy3.md`.
-- App 4 (5 Nov 2026, 30.31, R-111, PRs 378 to 388): Dashboard link, sign-in times, /login, the signed-in audit. Detail: `2026-11-05-app4.md`.
-- Guides 4, Fix 3 and Industries 2 (5 Nov 2026, 30.32, R-112, PRs 379 to 395): 27 public guides Nora knows; the Coach reads Google by location name; /for is one list of 20 industry pages. Detail: `2026-11-05-guides4.md`, `-fix3.md`, `-industries2.md`.
-- Style 1 (R-113, PRs 399 to 404): guide photos, the yellow bar on every public headline, Sentry quiet for automated runs. Detail: `2026-11-05-style1.md`.
-- App 5 (PRs 402, 406): staff workspace with Today. Detail: `2026-11-05-app5.md`.
-- Industries 3 (PR 403): short industry pages. Detail: `2026-11-05-industries3.md`.
+- 5 Nov 2026: Scan 2, Copy 3, App 4, Guides 4, Fix 3, Industries 2 and 3, Style 1, App 5 (PRs 369 to 408): the free check names the town; sign-in times; 27 public guides; the yellow bar; the staff workspace; short industry pages. Detail: the dated `2026-11-05-*.md` files.
 - App 6 (30.34 item 5, PRs 414, 415): Settings' delivery choice saves in one call and shows at once; checked live. Nora's live page-link run not run (no key in the session). Detail: `2026-11-05-app6.md`.
 - Scan 3 (30.34, R-114, PRs 409 to 419): one bot check per search session; progressive free check; review link tool with an A6 QR card. Detail: `2026-11-05-scan3.md`.
 - Site 2 (PRs 410, 412, 413, 416, 417): header, footer, WhatsApp marks, photos, About, Beauty salon. `2026-11-05-site2.md`.
-- No customer is live yet. Before the first Meta ad: the DataForSEO top-up and a nearby check on a real business. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
+- Launch 1 (30.35, R-115, PRs 422 to 426 and E): About without the test business's name; the report uses the page's words; Settings answers at once; Nora's page-link eval live (4 of 5); the readiness check in `docs/launch1/readiness.md`. Detail: `2026-11-06-launch1.md`.
+- No customer is live yet. Before the first Meta ad (30.35 item 5): the DataForSEO top-up, Vercel Pro and the open lines of `docs/launch1/readiness.md`. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
 
@@ -48,7 +44,6 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - A lawyer reads /terms, /privacy and the partner terms (master plan 29.8).
 - Master plan 19.6: two-step verification everywhere, recovery codes offline, the second Kabsi Google account.
 - Growth 1: the Meta and Speed Insights steps in docs/EVENTS.md (last section).
-- V3 heads-up (25 Oct): on the Yawmiyati phone tap Skip on the old photo message, never Yes, and reply No to the monthly question. Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
 - Check 2: on a phone, pick 3 businesses at kabsi.co/scan, then read today's `places_usage` (autocomplete above 0, details 3 or more); add a Google Cloud quota alert for Places Autocomplete.
 - UX 1: after the deploy, `POST /visibility/terms` once (two DataForSEO calls, about 0.15 USD) and the read-back in the UX 1 archive file.
 - V1: a free Geoapify key, saved as the Supabase secret GEOAPIFY_API_KEY (clicks in `docs/progress/archive/2026-10-25-v1-visibility-map.md`); until then maps draw on a plain ground. DataForSEO top-up (50 US dollars) before the first Meta ad (30.28; the balance read 0.31 after Scan 2 on 5 Nov); Gemini stays off.
@@ -58,7 +53,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - Scan 3: on a phone at kabsi.co/scan, type a business name and see suggestions within about a second; on /google-review-link pick yours, download the A6 PDF and scan the printed code with the phone camera.
 - Sentry (30.33 item 4): Settings, Subscription, set a pay-as-you-go budget of 5 US dollars for errors, so errors are not dropped before 30 Nov.
 - App 5: may qa-staff@test.local be staff, for live staff runs? (LATER row)
-- Site 2: your own words for About's founder lines, if wanted (LATER row).
+- Launch 1: on a phone, type a business at kabsi.co/scan and see suggestions; send one Founding 25 application named "QA Launch 1 test" (a session removes the row). Turn off Meta's automatic events for the dataset, if wanted (LATER row).
 
 ## Open After merge checks and findings
 
@@ -69,8 +64,8 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 6 Nov 2026, Launch 1: PRs 422 to 426 and E. `2026-11-06-launch1.md`.
 - 5 Nov 2026, Site 2: PRs 410, 412, 413, 416, 417. `2026-11-05-site2.md`.
-- 5 Nov 2026, App 6: PRs 414, 415. `2026-11-05-app6.md`.
 
 ## How a session updates this page
 

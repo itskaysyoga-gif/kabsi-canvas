@@ -120,7 +120,7 @@ Pixel (`src/lib/meta-pixel.ts`): public pages only, never /app, /start, /staff, 
 | Meta event               | From                     | Kabsi event         |
 | ------------------------ | ------------------------ | ------------------- |
 | PageView                 | Browser                  | every public page   |
-| ViewContent              | Browser                  | pricing_viewed      |
+| ViewContent              | Browser                  | pricing_viewed, and every industry page (/for/<kind>, content_name industry_<kind>; Launch 1) |
 | FreeScanStarted (custom) | Browser                  | free_scan_started   |
 | FreeScanCompleted (custom) | Browser                | free_scan_completed |
 | Lead                     | Browser                  | a contact given: "Send me this report" sent (email or WhatsApp), or a Founding 25 application sent (no PostHog event of its own) |
