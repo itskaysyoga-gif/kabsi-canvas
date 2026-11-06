@@ -86,6 +86,17 @@ values ('google_access_removal', '00000000-0000-4000-8000-0000000000c1', 'Victim
 -- Scope 1: one staff evidence row (staff only).
 insert into public.staff_evidence (location_id, source, type, words)
 values ('00000000-0000-4000-8000-0000000000c1', 'call', 'request', 'Victim evidence');
+-- Harvey 4A: one Outbound prospect, message and event (staff only).
+insert into public.outbound_prospects (id, harvey_company_id, country, industry, city, business_name, email, email_domain,
+  source_page, source_date, detail_kind, detail_used, test)
+values ('00000000-0000-4000-8000-0000000000d7', 'victim-company', 'GB', 'hair salon', 'Exampleton', 'Victim Salon',
+  'hello@victim-salon.example.test', 'victim-salon.example.test', 'https://victim-salon.example.test/contact', current_date,
+  'hours', 'Your site lists your opening hours, and keeping Google''s hours the same saves wasted trips.', true);
+insert into public.outbound_messages (id, prospect_id, kind, to_address, subject, body)
+values ('00000000-0000-4000-8000-0000000000d8', '00000000-0000-4000-8000-0000000000d7', 'first', 'inbox@example.test',
+  'Victim Salon''s Google profile', 'Hi Victim Salon team, a victim draft. kabsi.co');
+insert into public.outbound_events (prospect_id, message_id, kind, inbound_id)
+values ('00000000-0000-4000-8000-0000000000d7', '00000000-0000-4000-8000-0000000000d8', 'auto_reply', '<victim-inbound@example.test>');
 -- P0.4-04: the situation the victim owner reported while adding Kabsi.
 insert into public.onboarding_scenarios (location_id, scenario) values ('00000000-0000-4000-8000-0000000000c1', 'needs_verifying');
 insert into public.style_offers (id, location_id, kind, text, text_hash)
