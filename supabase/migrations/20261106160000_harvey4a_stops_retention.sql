@@ -27,9 +27,10 @@ begin
     perform public.outbound_stop('A complaint came in');
     return 'stopped';
   end if;
-  with last as (select id from public.outbound_messages where status = 'sent' order by sent_at desc limit 100)
-  select (select count(*) from last), (select count(distinct e.message_id) from public.outbound_events e where e.kind = 'bounce' and e.message_id in (select id from last))
-    into v_sent, v_bounced;
+  -- From the daily tallies, which the 90-day and opt-out deletions never touch: the most recent days that hold the last
+  -- 100 sends, and the bounces counted on those days.
+  with d as (select sent, bounces, sum(sent) over (order by day desc) as upto from public.outbound_days)
+  select coalesce(sum(sent), 0), coalesce(sum(bounces), 0) into v_sent, v_bounced from d where upto - sent < 100;
   if v_sent > 0 and v_bounced::numeric / v_sent > 0.03 then
     perform public.outbound_stop(format('Bounces at %s of the last %s sends, above 3 percent', v_bounced, v_sent));
     return 'stopped';
@@ -42,7 +43,7 @@ language plpgsql security definer set search_path = '' as $$
 declare r record; n_contacted integer := 0; n_no integer := 0; n_drafts integer := 0;
 begin
   for r in select id, email, email_domain from public.outbound_prospects
-            where status in ('written', 'answered', 'needs_you') and not interested
+            where status in ('written', 'answered') and not interested
               and coalesce(last_email_at, created_at) < now() - interval '90 days'
               and updated_at < now() - interval '90 days'
   loop
@@ -52,7 +53,7 @@ begin
   end loop;
   with gone as (delete from public.outbound_prospects where status in ('opted_out', 'bounced') and updated_at < now() - interval '1 day' returning 1)
   select count(*) into n_no from gone;
-  with gone as (delete from public.outbound_prospects where status in ('drafted', 'approved', 'skipped') and last_email_at is null
+  with gone as (delete from public.outbound_prospects where status in ('drafted', 'skipped') and last_email_at is null
                   and created_at < now() - interval '30 days' returning 1)
   select count(*) into n_drafts from gone;
   return jsonb_build_object('contacted', n_contacted, 'no_or_bounce', n_no, 'unsent', n_drafts);

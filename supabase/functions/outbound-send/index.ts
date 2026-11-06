@@ -13,14 +13,15 @@ serve(async (req) => {
   if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
   try {
     const r = await sendTick({
-      settings: db.settings, refreshSuppression: db.refreshSuppression, due: db.due, suppressed: db.suppressed,
+      settings: db.settings, refreshSuppression: db.refreshSuppression, due: db.due, failStale: db.failStale,
+      reserveSlot: db.reserveSlot, claim: db.claim, suppressed: db.suppressed,
       heardFrom: db.heardFrom, sentOn: db.sentOn, sentThisMonth: () => db.sentThisMonth(),
-      deliver: async (to, message) => {
+      deliver: async (to, message, onAccepted) => {
         const password = Deno.env.get("ZOHO_SMTP_PASSWORD");
         if (!password) throw Object.assign(new Error("ZOHO_SMTP_PASSWORD is not set"), { step: "no_password" });
-        await smtpSend(await zohoConnect(), { user: db.SENDER.address, password, from: db.SENDER.address, to, message });
+        await smtpSend(await zohoConnect(), { user: db.SENDER.address, password, from: db.SENDER.address, to, message, onAccepted });
       },
-      markSent: db.markSent, markCancelled: db.markCancelled, markFailed: db.markFailed, setNextSendAt: db.setNextSendAt,
+      markSent: db.markSent, markCancelled: db.markCancelled, markFailed: db.markFailed,
       testRecipients: db.testRecipients(), sender: db.SENDER, now: new Date(),
     });
     log(fn, { action: "send", ...r });

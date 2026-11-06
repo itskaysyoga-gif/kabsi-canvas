@@ -103,10 +103,12 @@ export async function insertDraft(d: NewDraft) {
 // ─── outbound-send (part D)
 
 /** Approved messages that are due, replies first, oldest first, with their business and their Email 1. */
-export async function due(now: Date): Promise<DueMessage[]> {
-  const { data, error } = await admin().from("outbound_messages")
-    .select("id, prospect_id, parent_id, kind, to_address, subject, body, send_after, in_reply_to, references_ids, prospect:outbound_prospects(email, email_domain, time_zone, test, status), parent:outbound_messages!parent_id(status, message_id, sent_at)")
-    .eq("status", "approved").lte("send_after", now.toISOString()).order("send_after").limit(20);
+export async function due(now: Date, testOnly: boolean): Promise<DueMessage[]> {
+  let q = admin().from("outbound_messages")
+    .select("id, prospect_id, parent_id, kind, to_address, subject, body, send_after, in_reply_to, references_ids, prospect:outbound_prospects!inner(email, email_domain, time_zone, test, status), parent:outbound_messages!parent_id(status, message_id, sent_at)")
+    .eq("status", "approved").is("claimed_at", null).lte("send_after", now.toISOString());
+  if (testOnly) q = q.eq("prospect.test", true);
+  const { data, error } = await q.order("send_after").limit(20);
   if (error) throw new Error(`due: ${error.message}`);
   const rows = (data ?? []) as unknown as DueMessage[];
   return [...rows.filter((m) => m.kind === "reply"), ...rows.filter((m) => m.kind !== "reply")];
@@ -160,9 +162,24 @@ export async function markFailed(id: string, why: string) {
   if (error) throw new Error(`markFailed: ${error.message}`);
 }
 
-export async function setNextSendAt(at: Date) {
-  const { error } = await admin().from("outbound_settings").update({ next_send_at: at.toISOString() }).eq("id", true);
-  if (error) throw new Error(`setNextSendAt: ${error.message}`);
+export async function failStale(now: Date): Promise<number> {
+  const { data, error } = await admin().from("outbound_messages").update({ status: "failed", error: "delivery_unknown" })
+    .eq("status", "approved").not("claimed_at", "is", null).lt("claimed_at", new Date(now.getTime() - 30 * 60_000).toISOString()).select("id");
+  if (error) throw new Error(`failStale: ${error.message}`);
+  return (data ?? []).length;
+}
+
+export async function reserveSlot(gapMs: number): Promise<boolean> {
+  const { data, error } = await admin().rpc("outbound_reserve_slot", { p_gap_seconds: Math.round(gapMs / 1000) });
+  if (error) throw new Error(`reserveSlot: ${error.message}`);
+  return data === true;
+}
+
+export async function claim(id: string): Promise<boolean> {
+  const { data, error } = await admin().from("outbound_messages").update({ claimed_at: new Date().toISOString() })
+    .eq("id", id).eq("status", "approved").is("claimed_at", null).select("id");
+  if (error) throw new Error(`claim: ${error.message}`);
+  return (data ?? []).length === 1;
 }
 
 // ─── outbound-inbox (part E)

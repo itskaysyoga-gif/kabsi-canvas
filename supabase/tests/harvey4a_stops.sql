@@ -7,29 +7,30 @@ select ok(not has_function_privilege('authenticated', 'public.outbound_stop(text
   and not has_function_privilege('authenticated', 'public.outbound_check_stops(text)', 'execute')
   and not has_function_privilege('authenticated', 'private.outbound_retention()', 'execute'), 'the stop and retention functions are not the browser''s');
 
--- 40 sent messages, one bounce: 2.5 percent, no stop.
+-- Prospects for the retention checks below.
 insert into public.outbound_prospects (id, harvey_company_id, country, industry, city, business_name, email, email_domain, source_page,
   source_date, detail_kind, detail_used, status, last_email_at, created_at, updated_at)
 select ('00000000-0000-4000-8000-' || lpad(i::text, 12, '0'))::uuid, 'stops-' || i, 'GB', 'hair salon', 'Exampleton', 'Salon ' || i,
   'hello@salon' || i || '.example.com', 'salon' || i || '.example.com', 'https://salon' || i || '.example.com/contact', current_date,
   'hours', 'Your site lists your opening hours, and keeping Google''s hours the same saves wasted trips.', 'written', now(), now(), now()
-from generate_series(1, 40) i;
-insert into public.outbound_messages (id, prospect_id, kind, to_address, subject, body, status, sent_at, message_id)
-select ('00000000-0000-4000-9000-' || lpad(i::text, 12, '0'))::uuid, ('00000000-0000-4000-8000-' || lpad(i::text, 12, '0'))::uuid, 'first',
-  'hello@salon' || i || '.example.com', 'Salon''s Google profile', 'Hi team, a body long enough here. kabsi.co', 'sent', now() - make_interval(mins => i),
-  '<ob.00000000-0000-4000-9000-' || lpad(i::text, 12, '0') || '@getkabsi.com>'
-from generate_series(1, 40) i;
-insert into public.outbound_events (prospect_id, message_id, kind, inbound_id)
-values ('00000000-0000-4000-8000-000000000001', '00000000-0000-4000-9000-000000000001', 'bounce', '<b1@example.com>');
+from generate_series(1, 6) i;
+
+-- The rate comes from the tallies, which deletions never touch: 40 sends with 1 bounce is 2.5 percent, 2 is 5 percent.
+insert into public.outbound_days (day, sent, bounces) values (current_date, 40, 1);
 select is(public.outbound_check_stops('bounce'), 'ok', '1 bounce in 40 sends is 2.5 percent: no stop');
-insert into public.outbound_events (prospect_id, message_id, kind, inbound_id)
-values ('00000000-0000-4000-8000-000000000002', '00000000-0000-4000-9000-000000000002', 'bounce', '<b2@example.com>');
+update public.outbound_days set bounces = 2 where day = current_date;
 select is(public.outbound_check_stops('bounce'), 'stopped', '2 bounces in 40 sends is 5 percent: stop');
 select is((select row(sending_open, stopped_reason is not null)::text from public.outbound_settings), row(false, true)::text,
   'sending is off with a reason');
 select ok(exists (select 1 from public.ops_events where kind = 'outbound_stop'), 'Rashid is alerted');
 select is(public.outbound_stop('again'), false, 'a second stop changes nothing');
-update public.outbound_settings set stopped_reason = null, stopped_at = null;  -- postgres: lane R
+-- Only the last 100 sends count: an old bad day beyond them does not.
+update public.outbound_settings set stopped_reason = null, stopped_at = null;
+update public.outbound_days set day = current_date - 30 where day = current_date;
+update public.outbound_days set bounces = 9, sent = 60 where day = current_date - 30;
+insert into public.outbound_days (day, sent, bounces) values (current_date, 100, 1);
+select is(public.outbound_check_stops('bounce'), 'ok', '1 in the last 100; the 9 older bounces are outside them');
+delete from public.outbound_days;
 select is(public.outbound_check_stops('complaint'), 'stopped', 'any complaint stops');
 update public.outbound_settings set stopped_reason = null, stopped_at = null;
 
@@ -51,7 +52,9 @@ select is((select reason from public.outbound_suppression where hash = private.o
 select ok(exists (select 1 from public.outbound_prospects where id = '00000000-0000-4000-8000-000000000004'), 'a yes stays as a contact');
 select ok(not exists (select 1 from public.outbound_prospects where id = '00000000-0000-4000-8000-000000000005'), 'a no keeps only the hash');
 select ok(not public.outbound_is_suppressed('hello@olddraft.example.com'), 'a draft never sent leaves no hash');
-select is((select sum(sent)::int from public.outbound_days), 0, 'the tallies count only status changes to sent, and stay');
+update public.outbound_prospects set status = 'needs_you', last_email_at = now() - interval '200 days', updated_at = now() - interval '200 days'
+ where id = '00000000-0000-4000-8000-000000000006';
+select is(private.outbound_retention() ->> 'contacted', '0', 'a reply nobody has handled is never deleted by the 90-day rule');
 
 select * from finish();
 rollback;

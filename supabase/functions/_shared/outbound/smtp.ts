@@ -39,10 +39,25 @@ export function lines(conn: Deno.Conn): Line {
 }
 
 /** One reply: the code and the text of all its lines ("250-..." continues, "250 ..." ends). */
+const READ_TIMEOUT_MS = 30_000;
+
+/** A line, or an error after 30 seconds: a silent server never holds the function until the runtime kills it. */
+async function readLine(io: Line): Promise<string | null> {
+  let t: number | undefined;
+  try {
+    return await Promise.race([
+      io.readLine(),
+      new Promise<never>((_r, reject) => { t = setTimeout(() => reject(new SmtpError("timeout", 0)), READ_TIMEOUT_MS); }),
+    ]);
+  } finally {
+    clearTimeout(t);
+  }
+}
+
 async function reply(io: Line): Promise<{ code: number; text: string }> {
   const parts: string[] = [];
   for (;;) {
-    const l = await io.readLine();
+    const l = await readLine(io);
     if (l === null) throw new Error("smtp: connection closed");
     parts.push(l.slice(4));
     if (!/^\d{3}-/.test(l)) return { code: Number(l.slice(0, 3)), text: parts.join(" ") };
@@ -70,7 +85,11 @@ export function dataBlock(message: string): string {
   return message.replace(/\r?\n/g, "\r\n").split("\r\n").map((l) => (l.startsWith(".") ? `.${l}` : l)).join("\r\n") + "\r\n.\r\n";
 }
 
-export async function smtpSend(io: Line, o: { user: string; password: string; from: string; to: string; message: string; helo?: string }) {
+/** Sends one message. `onAccepted` runs as soon as the server accepts the message (250 after DATA), before QUIT, so the
+ *  message is recorded as sent even if the goodbye never comes. */
+export async function smtpSend(io: Line, o: {
+  user: string; password: string; from: string; to: string; message: string; helo?: string; onAccepted?: () => Promise<void>;
+}) {
   try {
     await expect(io, "greeting", (c) => c === 220);
     await io.write(`EHLO ${o.helo ?? "getkabsi.com"}\r\n`);
@@ -85,7 +104,8 @@ export async function smtpSend(io: Line, o: { user: string; password: string; fr
     await expect(io, "data", (c) => c === 354);
     await io.write(dataBlock(o.message));
     await expect(io, "message", (c) => c === 250);
-    await io.write("QUIT\r\n");
+    await o.onAccepted?.();
+    await io.write("QUIT\r\n").catch(() => undefined);
     await reply(io).catch(() => undefined);
   } finally {
     io.close();
@@ -99,7 +119,8 @@ export async function zohoConnect(host = Deno.env.get("OUTBOUND_SMTP_HOST") ?? "
 
 // ─── the message
 /** RFC 2047 for a header that is not plain ASCII. */
-export function headerWord(text: string): string {
+export function headerWord(raw: string): string {
+  const text = String(raw ?? "").replace(/[\r\n]+/g, " ");
   if (/^[\x20-\x7e]*$/.test(text)) return text;
   const b = btoa(String.fromCharCode(...new TextEncoder().encode(text)));
   return `=?UTF-8?B?${b}?=`;
@@ -127,6 +148,11 @@ export function quotedPrintable(text: string): string {
   return out.join("\r\n");
 }
 
+/** Message-IDs only, as <token> each; anything else in the value is dropped (no line breaks, no other header). */
+export function idList(v: string | null | undefined): string[] {
+  return [...String(v ?? "").matchAll(/<[^<>\s@]{1,200}@[^<>\s@]{1,100}>/g)].map((m) => m[0]);
+}
+
 export function newMessageId(): string {
   return `<ob.${crypto.randomUUID()}@getkabsi.com>`;
 }
@@ -142,12 +168,13 @@ export function buildMessage(m: {
     `Subject: ${headerWord(m.subject)}`,
     `Date: ${m.date.toUTCString().replace("GMT", "+0000")}`,
     `Message-ID: ${m.messageId}`,
-    ...(m.inReplyTo ? [`In-Reply-To: ${m.inReplyTo}`] : []),
-    ...(m.references ? [`References: ${m.references}`] : []),
+    ...(idList(m.inReplyTo).slice(-1).map((x) => `In-Reply-To: ${x}`)),
+    ...(idList(m.references).length ? [`References: ${idList(m.references).slice(-10).join(" ")}`] : []),
     `List-Unsubscribe: <mailto:${m.from.address}?subject=no%20thanks>`,
     "MIME-Version: 1.0",
     "Content-Type: text/plain; charset=UTF-8",
     "Content-Transfer-Encoding: quoted-printable",
   ];
+  if (h.some((x) => /[\r\n]/.test(x))) throw new Error("smtp: a header held a line break");
   return `${h.join("\r\n")}\r\n\r\n${quotedPrintable(m.body)}\r\n`;
 }
