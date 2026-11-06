@@ -64,7 +64,8 @@ export const JOBS: Job[] = [
     text: "Kabsi checks your hours, phone, website and address every day. If Google shows something different, Kabsi tells you and you choose.",
   },
   {
-    title: "Every review answered",
+    // Launch 2 (30.36 item 10): a reply goes live only after the owner's yes.
+    title: "A reply ready for every review",
     text: "A reply in your voice, using only what the review says. You read it, then say Yes, Edit or Skip.",
   },
   {
