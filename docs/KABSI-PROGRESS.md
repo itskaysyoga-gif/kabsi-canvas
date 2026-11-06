@@ -13,7 +13,7 @@ Files named in this list are in `docs/progress/archive/`.
 - App 6 (30.34 item 5, PRs 414, 415): Settings' delivery choice saves in one call and shows at once; checked live. Nora's live page-link run not run (no key in the session). Detail: `2026-11-05-app6.md`.
 - Scan 3 (30.34, R-114, PRs 409 to 419): one bot check per search session; progressive free check; review link tool with an A6 QR card. Detail: `2026-11-05-scan3.md`.
 - Site 2 (PRs 410, 412, 413, 416, 417): header, footer, WhatsApp marks, photos, About, Beauty salon. `2026-11-05-site2.md`.
-- Launch 1 (30.35, R-115, PRs 422 to 426 and E): About without the test business's name; the report uses the page's words; Settings answers at once; Nora's page-link eval live (4 of 5); the readiness check in `docs/launch1/readiness.md`. Detail: `2026-11-06-launch1.md`.
+- Launch 1 (30.35, R-115, PRs 422 to 427): About without the test business's name; the report uses the page's words; Settings answers at once; Nora's page-link eval live (4 of 5); the readiness check in `docs/launch1/readiness.md`. Detail: `2026-11-06-launch1.md`.
 - No customer is live yet. Before the first Meta ad (30.35 item 5): the DataForSEO top-up, Vercel Pro and the open lines of `docs/launch1/readiness.md`. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -64,7 +64,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 6 Nov 2026, Launch 1: PRs 422 to 426 and E. `2026-11-06-launch1.md`.
+- 6 Nov 2026, Launch 1: PRs 422 to 427. `2026-11-06-launch1.md`.
 - 5 Nov 2026, Site 2: PRs 410, 412, 413, 416, 417. `2026-11-05-site2.md`.
 
 ## How a session updates this page

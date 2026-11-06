@@ -31,7 +31,7 @@ The account was reset with `tests/e2e/seed/qa-owner-reset.sql` part 2 (one row: 
 | Stage 4, Add Kabsi on Google: the agreement, then "Waiting for your invite." | Passed at 390 and 1440 px |
 | Back on /start after the agreement | Opens on "Waiting for your invite." at both sizes; the spec's "Your setup link" is now "Send on WhatsApp" and "Send by email" (LATER row) |
 | The Google access step's states in mock | The pill's words for none, pending, granted, lost and error: tests/manager-guide.test.ts, 23 passed. A browser stand-in of the state on production did not take (the page reads it through another call), so the states were not seen on screen live |
-| Settings (part C) | Every switch and choice on /app/settings saved, persisted after a reload and was put back; times on screen in PR 426 |
+| Settings (part C) | Every switch and choice on /app/settings saved, persisted after a reload and was put back (PR 426). After the deploy the WhatsApp panel's two switches answered in 20 and 14 ms (were 540 and 668), persisted and were restored; whatsapp_owners_on answers true signed in and 401 to a visitor |
 
 ## 3. Meta Pixel and Conversions API
 
@@ -41,7 +41,7 @@ Run against production with Meta's /tr calls caught in the browser and answered 
 |---|---|
 | Without consent | No fbevents.js load and no event on Home, /for/hair-salon, Pricing and /founding |
 | PageView | Once per page, with an event id (Home with ?utm_source=meta&utm_campaign=founding25&fbclid=QA123) |
-| ViewContent on a /for page | Did not fire: ViewContent was sent on Pricing only. Fixed in this pull request: every /for/<kind> page sends ViewContent (content_name industry_<kind>), unit tested; to be seen live after the deploy |
+| ViewContent on a /for page | Did not fire: ViewContent was sent on Pricing only. Fixed in PR 427: every /for/<kind> page sends ViewContent (content_name industry_<kind>), unit tested. Seen live after the deploy: /for/hair-salon sent PageView and ViewContent industry_hair-salon once each, each with an event id |
 | ViewContent on Pricing | Once, with an event id |
 | FreeScanCompleted | Once, with an event id (FreeScanStarted once before it) |
 | Lead on the report sent | Once, with an event id, after "Sent." |
@@ -65,4 +65,4 @@ Every page of the live sitemap (64) as text, searched for the never-say lists (C
 
 ## Remaining
 
-Ready for paid ads once: the DataForSEO top-up and Vercel Pro are done (Rashid), Rashid has typed a business at kabsi.co/scan on a phone and seen suggestions and sent one Founding 25 test application, ViewContent on a /for page is seen live after this deploy, and lane R has decided Home's 2.7 s LCP (fix it or land the ads on /founding) and Nora's pg03.
+Ready for paid ads once: the DataForSEO top-up and Vercel Pro are done (Rashid), Rashid has typed a business at kabsi.co/scan on a phone and seen suggestions and sent one Founding 25 test application, and lane R has decided Home's 2.7 s LCP (fix it or land the ads on /founding) and Nora's pg03.
