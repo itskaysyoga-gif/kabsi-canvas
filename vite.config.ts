@@ -17,7 +17,13 @@ export default defineConfig(({ command }) => ({
   // Ops 1 part B (master plan 29.9): when the Vercel build has a Sentry token, it also writes source maps. "hidden" leaves
   // no sourceMappingURL in the files, scripts/sentry-sourcemaps.mjs uploads the maps to Sentry under the release tag above,
   // and deletes them from the output so they are never served.
-  build: { sourcemap: process.env["SENTRY_AUTH_TOKEN"] ? "hidden" : false },
+  build: {
+    sourcemap: process.env["SENTRY_AUTH_TOKEN"] ? "hidden" : false,
+    // Launch 4 (speed): a small font file was written into the stylesheet as text (Vite inlines files under 4 KB), so
+    // every page's render-blocking CSS carried a Cyrillic font no English page uses. Fonts always stay separate files,
+    // fetched only when a page's text needs them.
+    assetsInlineLimit: (file: string) => (/\.woff2?$/.test(file) ? false : undefined),
+  },
   css: { transformer: "lightningcss" },
   resolve: {
     alias: { "@": `${process.cwd()}/src` },
