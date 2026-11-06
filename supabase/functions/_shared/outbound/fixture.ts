@@ -6,12 +6,15 @@ const page = (email: string, extra: string) =>
   `<html><body><h1>Welcome</h1><p>Email us at <a href="mailto:${email}">${email}</a>.</p>${extra}<footer>&copy; 2019</footer></body></html>`;
 
 export function fixtureRows(stamp: string): FixtureRow[] {
+  // The register's Companies House columns (30.39 item 12): Active, on a file dated the run's own day.
+  const fileDate = /^\d{8}$/.test(stamp) ? `${stamp.slice(0, 4)}-${stamp.slice(4, 6)}-${stamp.slice(6)}` : "";
   const row = (slug: string, name: string, industry: string, extra: string): FixtureRow => {
     const email = `hello.${stamp}@${slug}.example.com`;
     return {
       company_id: `fixture-${slug}-${stamp}`, business_name: name, industry, country: "GB", city: "Exampleton",
       website: `https://${slug}.example.com`, email, email_page_url: `https://${slug}.example.com/contact`,
-      company_type: "registered company", company_number: "00000000", quality_score: "1", html: page(email, extra),
+      company_type: "registered company", company_number: "00000000", company_status: "Active",
+      company_status_date: fileDate, quality_score: "1", html: page(email, extra),
     };
   };
   return [

@@ -15,7 +15,7 @@ export type NewDraft = {
   prospect: {
     harvey_company_id: string; country: string; industry: string; city: string; business_name: string; email: string;
     email_domain: string; time_zone: string; source_page: string; source_date: string; company_number: string | null;
-    company_status: string | null; detail_kind: string; detail_used: string; test: boolean;
+    company_status: string | null; company_status_date: string | null; detail_kind: string; detail_used: string; test: boolean;
   };
   first: { to_address: string; subject: string; body: string; send_after: string };
   follow: { to_address: string; subject: string; body: string };
@@ -25,8 +25,6 @@ export type PrepareDeps = {
   settings(): Promise<Settings>;
   refreshSuppression(): Promise<void>;
   register(): Promise<string>;
-  /** Companies House: the company's status ("active", "dissolved"), or null when it cannot be read. */
-  companyStatus(number: string): Promise<string | null>;
   page(url: string): Promise<{ html: string } | { refused: string }>;
   /** Not suppressed, not a Kabsi customer, applicant or partner by name, never written to (address, domain or company). */
   eligible(c: { email: string; domain: string; name: string; country: string; company_id: string }): Promise<boolean>;
@@ -70,7 +68,8 @@ export async function prepare(deps: PrepareDeps, opts: { today?: boolean } = {})
   let looked = 0;
   for (const r of rows) {
     if (drafted >= room || looked >= MAX_LOOKS) break;
-    const why = rowRefusal(r, countries);
+    // A UK row is refused here unless Harvey's register shows its company Active on a file at most 40 days old.
+    const why = rowRefusal(r, countries, today);
     if (why) { no(why); continue; }
     const c = toCandidate(r);
     const domain = domainOf(c.email);
@@ -79,11 +78,6 @@ export async function prepare(deps: PrepareDeps, opts: { today?: boolean } = {})
       continue;
     }
     looked++;
-    let status: string | null = null;
-    if (c.country === "GB" && !test) {
-      status = await deps.companyStatus(c.company_number);
-      if (status !== "active") { no(status ? "company_not_active" : "companies_house_unreadable"); continue; }
-    }
     const read = test ? { html: html.get(c.company_id) ?? "" } : await deps.page(c.email_page_url);
     if ("refused" in read) { no(`page_${read.refused}`); continue; }
     if (!emailOnPage(read.html, c.email)) { no("email_not_on_page"); continue; }
@@ -97,7 +91,8 @@ export async function prepare(deps: PrepareDeps, opts: { today?: boolean } = {})
       prospect: {
         harvey_company_id: c.company_id, country: c.country, industry: c.industry, city: c.city, business_name: c.business_name,
         email: c.email, email_domain: domain, time_zone: tz, source_page: c.email_page_url, source_date: today,
-        company_number: c.company_number || null, company_status: test ? "test" : status, detail_kind: detail.kind,
+        company_number: c.company_number || null, company_status: test ? "test" : c.country === "GB" ? c.company_status : null,
+        company_status_date: !test && c.country === "GB" ? c.company_status_date : null, detail_kind: detail.kind,
         detail_used: detail.sentence, test,
       },
       first: { to_address: to, ...one, send_after: localNine(day, tz).toISOString() },

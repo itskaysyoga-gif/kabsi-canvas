@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { clearYes, looksLikeAutoReply, looksLikeBounce, optOutReason, OurText, stripQuoted } from "./classify.ts";
 import { handleInbox, type InboxDeps, type Matched, yesReply } from "./inbox.ts";
-import { fetchNew, type ByteIo, ourIds, parseMessage } from "./mail.ts";
+import { fetchNew, type ByteIo, Imap, ImapError, ourIds, parseMessage } from "./mail.ts";
 import { emailOne, FOOTER, linksOk } from "./rules.ts";
 
 const isOptOut = (body: string) => {
@@ -89,7 +89,7 @@ Deno.test("IMAP: read only (EXAMINE and BODY.PEEK), from the last UID, literal b
     LOGOUT: "* BYE\r\na5 OK bye\r\n",
   };
   const sent: string[] = [];
-  let pending = "* OK ready\r\n";
+  let pending = "* OK [CAPABILITY IMAP4rev1] ready\r\n";
   const io: ByteIo = {
     read: async () => {
       if (!pending) return null;
@@ -110,6 +110,60 @@ Deno.test("IMAP: read only (EXAMINE and BODY.PEEK), from the last UID, literal b
   assert.equal(r.lastUid, 42);
   assert.ok(sent.some((s) => /EXAMINE INBOX/.test(s)) && !sent.some((s) => /SELECT|STORE|\\Seen|EXPUNGE/i.test(s)));
   assert.ok(sent.some((s) => /UID SEARCH UID 42:\*/.test(s)) && sent.some((s) => /BODY\.PEEK\[\]/.test(s)));
+});
+
+/** A scripted IMAP server: each write gets the next reply. */
+function scripted(replies: string[], first = "* OK ready\r\n") {
+  const sent: string[] = [];
+  let pending = first;
+  const io: ByteIo = {
+    read: async () => {
+      if (!pending) return null;
+      const out = new TextEncoder().encode(pending);
+      pending = "";
+      return out;
+    },
+    write: async (t) => {
+      sent.push(t);
+      pending = replies.shift() ?? "";
+    },
+    close: () => {},
+  };
+  return { io, sent };
+}
+
+const SPECIAL = 'p"a\\ss wörd{3}';
+
+Deno.test("Inbox login: AUTHENTICATE PLAIN when offered, so no character of the password needs quoting", async () => {
+  const s = scripted(["+ \r\n", "a1 OK [CAPABILITY IMAP4rev1] Success\r\n"]);
+  const c = new Imap(s.io);
+  assert.equal(await c.login("rashid@getkabsi.com", SPECIAL, await c.greet().then(() => "IMAP4rev1 AUTH=PLAIN AUTH=XOAUTH2")), "plain");
+  assert.equal(s.sent[0], "a1 AUTHENTICATE PLAIN\r\n");
+  const bytes = new TextEncoder().encode(`\u0000rashid@getkabsi.com\u0000${SPECIAL}`);
+  assert.equal(s.sent[1], `${btoa(String.fromCharCode(...bytes))}\r\n`);
+  assert.ok(!s.sent.some((x) => x.includes(SPECIAL)), "the password never travels as text");
+});
+
+Deno.test("Inbox login: LOGIN with quoted strings when PLAIN is not offered; capabilities asked when the greeting has none", async () => {
+  const s = scripted(["* CAPABILITY IMAP4rev1 IDLE\r\na1 OK done\r\n", "a2 OK logged in\r\n"]);
+  const c = new Imap(s.io);
+  assert.equal(await c.login("rashid@getkabsi.com", 'p"a\\ss', await c.greet()), "login");
+  assert.equal(s.sent[0], "a1 CAPABILITY\r\n");
+  assert.equal(s.sent[1], 'a2 LOGIN "rashid@getkabsi.com" "p\\"a\\\\ss"\r\n');
+});
+
+Deno.test("Inbox login refused: the error carries Zoho's own words and never the password", async () => {
+  const pw = "abcd1234efgh";
+  const s = scripted(["+ \r\n", `a1 NO [AUTHENTICATIONFAILED] Invalid credentials ${pw}\r\n`]);
+  const c = new Imap(s.io);
+  await c.greet();
+  await assert.rejects(c.login("rashid@getkabsi.com", pw, "IMAP4rev1 AUTH=PLAIN"), (e: unknown) => {
+    assert.ok(e instanceof ImapError);
+    assert.equal(e.step, "AUTHENTICATE");
+    assert.equal(e.serverText, "NO [AUTHENTICATIONFAILED] Invalid credentials [redacted]");
+    assert.ok(!e.message.includes(pw));
+    return true;
+  });
 });
 
 const PROSPECT: Matched["prospect"] = { id: "p1", email: "hello@rose.example.com", email_domain: "rose.example.com", business_name: "Rose Lane Salon", industry: "hair salon", city: "Exampleton", country: "GB", test: false };

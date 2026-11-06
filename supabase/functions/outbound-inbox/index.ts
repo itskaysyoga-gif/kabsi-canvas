@@ -4,7 +4,8 @@
 import { captureError, isInternal, json, log, serve } from "../_shared/kabsi.ts";
 import * as db from "../_shared/outbound/db.ts";
 import { handleInbox } from "../_shared/outbound/inbox.ts";
-import { fetchNew, parseMessage, zohoImap } from "../_shared/outbound/mail.ts";
+import { fetchNew, ImapError, parseMessage, zohoImap } from "../_shared/outbound/mail.ts";
+import { smtpProbe, zohoConnect } from "../_shared/outbound/smtp.ts";
 
 const fn = "outbound-inbox";
 
@@ -13,13 +14,30 @@ serve(async (req) => {
   if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
   try {
     // Read whatever the lock says: after a stop, opt-outs, bounces and replies still have to be handled.
-    const password = Deno.env.get("ZOHO_SMTP_PASSWORD");
+    // Trimmed: a space or line break pasted with the app password would make Zoho refuse it.
+    const password = (Deno.env.get("ZOHO_SMTP_PASSWORD") ?? "").trim();
     if (!password) return json({ state: "no_password" });
     const st = await db.inboxState();
-    const got = await fetchNew(await zohoImap(), {
-      user: db.SENDER.address, password, lastUid: st.inbox_last_uid, validity: st.inbox_uid_validity,
-      since: new Date(Date.now() - 2 * 86_400_000),
-    });
+    let got: Awaited<ReturnType<typeof fetchNew>>;
+    try {
+      got = await fetchNew(await zohoImap(), {
+        user: db.SENDER.address, password, lastUid: st.inbox_last_uid, validity: st.inbox_uid_validity,
+        since: new Date(Date.now() - 2 * 86_400_000),
+      });
+    } catch (e) {
+      if (!(e instanceof ImapError) || !["LOGIN", "AUTHENTICATE"].includes(e.step)) throw e;
+      // The login was refused: log Zoho's own words, then log in to SMTP 465 with the same app password and quit
+      // (nothing is sent). SMTP accepting means the password is right and IMAP is off in Zoho; both refusing means the
+      // app password itself is wrong. Neither line ever holds the password.
+      const smtp = await smtpProbe(await zohoConnect(), { user: db.SENDER.address, password }).catch(() => null);
+      // Both replies went through serverSays: the server's words, printable, short, the password cut out.
+      const imapSays = e.serverText;
+      const smtpAuth = smtp ? (smtp.ok ? "accepted" : `refused ${smtp.step} ${smtp.code}`) : "unreachable";
+      const smtpSays = smtp?.text ?? "";
+      log(fn, { action: "login_refused", imap_step: e.step, imap_says: imapSays, smtp_auth: smtpAuth, smtp_says: smtpSays });
+      await captureError(fn, e, { step: "imap_login" });
+      return json({ error: "login_refused", smtp_auth: smtp?.ok ?? null }, 500);
+    }
     const r = await handleInbox({
       seen: db.seen, match: db.match, matchBySender: db.matchBySender, self: db.SENDER.address, record: db.record, suppress: db.suppress, cancelQueue: db.cancelQueue, setStatus: db.setStatus,
       checkStops: db.checkStops, alert: db.alert, freeCheck: db.freeCheck, draftReply: db.draftReply, harveyHashes: db.harveyHashes,

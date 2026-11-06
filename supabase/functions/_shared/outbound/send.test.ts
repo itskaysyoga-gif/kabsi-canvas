@@ -1,7 +1,7 @@
 // Harvey 4A part D: the SMTP conversation, the plain text message and every sending rule, with fakes and fictional
 // example.com data. Nothing here opens a connection.
 import assert from "node:assert/strict";
-import { buildMessage, dataBlock, type Line, quotedPrintable, smtpSend } from "./smtp.ts";
+import { buildMessage, dataBlock, type Line, quotedPrintable, serverSays, smtpProbe, smtpSend } from "./smtp.ts";
 import { type DueMessage, modeRefusal, sendTick, type SendDeps, type SendSettings, testFast } from "./send.ts";
 import { localParts } from "./rules.ts";
 
@@ -195,4 +195,20 @@ Deno.test("links and house style are checked again; a failed delivery is recorde
   const b = deps({ deliver: async () => { throw Object.assign(new Error("smtp auth refused (535)"), { step: "auth" }); } });
   assert.equal((await sendTick(b.d)).state, "failed");
   assert.ok(b.log.includes("failed:m1:smtp_auth"));
+});
+
+Deno.test("SMTP probe: logs in and quits, never MAIL, RCPT or DATA, so nothing is sent", async () => {
+  const ok = fakeServer(["220 smtp.example ESMTP", "250-smtp.example", "250 AUTH PLAIN LOGIN", "235 Authentication Successful", "221 bye"]);
+  const r = await smtpProbe(ok.io, { user: "rashid@getkabsi.com", password: "app-password" });
+  assert.deepEqual({ ok: r.ok, code: r.code }, { ok: true, code: 235 });
+  assert.ok(!ok.written.some((x) => /^(MAIL|RCPT|DATA)/.test(x)));
+  assert.ok(ok.written.some((x) => x.startsWith("QUIT")));
+  const no = fakeServer(["220 smtp.example ESMTP", "250 smtp.example", "535 Authentication Failed app-password"]);
+  const r2 = await smtpProbe(no.io, { user: "rashid@getkabsi.com", password: "app-password" });
+  assert.deepEqual(r2, { ok: false, step: "auth", code: 535, text: "Authentication Failed [redacted]" });
+});
+
+Deno.test("serverSays: printable, short, and every secret and its base64 form cut out", () => {
+  assert.equal(serverSays("NO bad c2VjcmV0LXZhbHVl and secret-value\r\n\u0007", ["secret-value"]), "NO bad [redacted] and [redacted]");
+  assert.equal(serverSays("x".repeat(500)).length, 160);
 });
