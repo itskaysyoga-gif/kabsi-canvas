@@ -42,7 +42,8 @@ language plpgsql security definer set search_path = '' as $$
 declare r record; n_contacted integer := 0; n_no integer := 0; n_drafts integer := 0;
 begin
   for r in select id, email, email_domain from public.outbound_prospects
-            where status in ('written', 'answered', 'needs_you') and coalesce(last_email_at, created_at) < now() - interval '90 days'
+            where status in ('written', 'answered', 'needs_you') and not interested
+              and coalesce(last_email_at, created_at) < now() - interval '90 days'
               and updated_at < now() - interval '90 days'
   loop
     perform public.outbound_suppress(r.email, 'contacted', true);
