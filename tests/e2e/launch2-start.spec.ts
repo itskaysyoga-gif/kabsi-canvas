@@ -71,7 +71,7 @@ async function stubCheck(page: Page) {
     json(route, { ...DONE, code: "HARB2345", business: PLACE.name }),
   );
   await page.route("**/functions/v1/visibility/check/result", (route) => json(route, DONE));
-  await page.route("**/functions/v1/programs/founding", (route) =>
+  await page.route("**/api/founding-count", (route) =>
     json(route, { total: 25, left: 12 }),
   );
 }
