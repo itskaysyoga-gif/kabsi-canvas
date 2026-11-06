@@ -129,7 +129,9 @@ export async function sendWebCapi(
   });
   if (!res.ok) {
     const text = await res.text();
-    logDatasetRefusal("meta_capi_web", res.status, text, pixel);
+    if (logDatasetRefusal("meta_capi_web", res.status, text, pixel)) {
+      throw new Error(`meta_capi_web ${res.status} dataset_refused`);
+    }
     throw new Error(`meta_capi_web ${res.status}: ${text.slice(0, 200)}`);
   }
   log("meta_capi_web", { ok: true, sent_fields: loggable(ev), test_event: Boolean(test) });

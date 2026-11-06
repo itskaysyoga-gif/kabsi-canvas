@@ -34,8 +34,10 @@ export function logNoDataset(fn: string): void {
 }
 
 /**
- * Meta refused the dataset itself (a wrong id, or a token without access to it): Graph error code 100 (subcode 33 is
- * "does not exist") or the words "does not exist". Pure, so a test can read it. Null for every other answer.
+ * Meta refused the dataset itself (a wrong id, or a token without access to it): Graph error code 100 with subcode 33
+ * ("does not exist"), or the words "does not exist". Code 100 alone is Meta's general "invalid parameter" and also
+ * covers a stale or badly formed event, so it is not read as a dataset refusal. Pure, so a test can read it. Null for
+ * every other answer.
  */
 export function datasetRefusal(
   status: number,
@@ -49,7 +51,7 @@ export function datasetRefusal(
     graphError = typeof e.code === "number" ? e.code : null;
     graphSubcode = typeof e.error_subcode === "number" ? e.error_subcode : null;
   } catch { /* not JSON: read the words below */ }
-  if (graphError === 100 || /does not exist|Unsupported post request/i.test(body)) return { graphError, graphSubcode };
+  if ((graphError === 100 && graphSubcode === 33) || /does not exist/i.test(body)) return { graphError, graphSubcode };
   return null;
 }
 
@@ -224,7 +226,8 @@ export async function sendCapi(
   });
   if (!res.ok) {
     const text = await res.text();
-    logDatasetRefusal("meta_capi", res.status, text, pixel);
+    // A refused dataset is told once, in the clear line above; the error then carries no words of Meta's answer.
+    if (logDatasetRefusal("meta_capi", res.status, text, pixel)) throw new Error(`meta_capi ${res.status} dataset_refused`);
     throw new Error(`meta_capi ${res.status}: ${text.slice(0, 200)}`);
   }
   log("meta_capi", { ok: true, event: row.event, messaging: Boolean(ctwa) });
