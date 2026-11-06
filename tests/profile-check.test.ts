@@ -121,9 +121,7 @@ describe("Free Profile Check (P0.4-01)", () => {
     expect(labels.replace(/\s+/g, " ").trim()).toBe(
       'danger: "Needs fixing", warning: "Worth fixing", neutral: "After you connect",',
     );
-    for (const f of [
-      "src/routes/google-profile-check.tsx",
-    ]) {
+    for (const f of ["src/routes/google-profile-check.tsx"]) {
       const text = read(f);
       expect(text, f).not.toMatch(/[\u2013\u2014]/);
       expect(text, f).not.toMatch(/\b(profile score|do now|listing shield|put mine back)\b/i);
