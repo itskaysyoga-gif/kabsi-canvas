@@ -1807,3 +1807,7 @@ Every new or changed line of Scan 3. The result's lines are in src/lib/scan-word
 - **The line under the homepage headline** (site.ts heroSub): "Every review answered, every change to your Google profile caught, a fresh post every week." is now "A reply ready for every review, every change to your Google profile caught, a fresh post every week."; the WhatsApp sentence after it is unchanged.
 - Facts 04 carries the new line; Nora's rules did not use the old words.
 
+### Part D: holidays by UK nation (branch claude/launch2-d, 30.36 item 9)
+
+- No new line. The holiday question keeps its words ("Your hours for [holiday]", "[holiday] is on [day]. Customers check Google for your hours first, so tell Kabsi what you will do."); a Scottish or Northern Ireland business now gets its own nation's holidays, with GOV.UK's names (for example "St Andrew's Day", "2nd January (substitute day)", "Battle of the Boyne (Orangemen's Day)").
+
