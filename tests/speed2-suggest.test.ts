@@ -1,16 +1,10 @@
 // Speed 2 part A: POST /api/suggest on kabsi.co. The bot check, the limits and the cap (one database call), the database
-// and Google at the same time with Google's answer dropped on a refusal, the 10 minute cache, Server-Timing, the pass
-// shared with profile-snapshot, and nothing personal in the cache or the log.
+// and Google at the same time with Google's answer dropped on a refusal, no cache of Google's answers, Server-Timing, the
+// pass shared with profile-snapshot, and nothing personal in the log.
 import { createHmac, createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  cacheKey,
-  makeSuggestHandler,
-  type SuggestDeps,
-  type Take,
-  visitorIp,
-} from "@/server/suggest";
+import { makeSuggestHandler, type SuggestDeps, type Take, visitorIp } from "@/server/suggest";
 
 const SECRET = "test-turnstile-secret";
 const SALT = "https://ynjdqjlmdwjgbfezevxy.supabase.co";
@@ -36,7 +30,6 @@ type Rig = {
   takes: { visitor: string; limits: unknown; places: boolean }[];
   google: string[];
   logs: Record<string, unknown>[];
-  cache: Map<string, unknown>;
   setTake: (t: Take) => void;
   release: () => void;
 };
@@ -51,7 +44,6 @@ function rig(
     takes: [],
     google: [],
     logs: [],
-    cache: new Map(),
     setTake: (t) => (take = t),
     release: () => release(),
     deps: undefined as unknown as SuggestDeps,
@@ -74,8 +66,6 @@ function rig(
       return { ok: true, status: 200, data: PREDICTION };
     },
     verifyTurnstile: async (t) => (opts.turnstile ?? true) && t === "good-token",
-    cacheGet: async (k) => (r.cache.get(k) as never) ?? null,
-    cacheSet: async (k, v) => void r.cache.set(k, v),
     log: (f) => void r.logs.push(f),
     now: () => NOW,
     salt: SALT,
@@ -165,7 +155,7 @@ describe("Speed 2 part A: /api/suggest", () => {
     }
   });
 
-  it("a refused limit drops Google's answer: 429, no suggestions, nothing cached", async () => {
+  it("a refused limit drops Google's answer: 429, no suggestions", async () => {
     const r = rig({ holdGoogle: true });
     r.setTake({ allowed: false, reason: "rate_limited" });
     const handler = makeSuggestHandler(r.deps);
@@ -173,7 +163,6 @@ describe("Speed 2 part A: /api/suggest", () => {
     r.release();
     expect(res.status).toBe(429);
     expect(JSON.stringify(await res.json())).not.toContain("Seven One");
-    expect(r.cache.size).toBe(0);
     // A visitor this instance has not seen allowed goes to the database first: no Google call at all.
     expect(r.google).toEqual([]);
   });
@@ -210,37 +199,18 @@ describe("Speed 2 part A: /api/suggest", () => {
     expect(j.available).toBe(false);
   });
 
-  it("a repeat within 10 minutes is answered from the cache: no Google call, nothing from the cap, the limits still count", async () => {
+  it("nothing from Google is kept: a repeat goes to Google again and is counted against the cap", async () => {
     const r = rig();
     const handler = makeSuggestHandler(r.deps);
-    await handler(suggest({ query: "Seven  One" }));
+    await handler(suggest({ query: "seven one" }));
     const res = await handler(
       suggest({ query: "seven one", turnstile: undefined, pass: snapshotPass() }),
     );
-    const j = (await res.json()) as { available: boolean; suggestions: unknown[] };
-    expect(j.available).toBe(true);
-    expect(j.suggestions).toHaveLength(1);
-    expect(r.google).toEqual(["Seven  One"]);
-    expect(r.takes.map((t) => t.places)).toEqual([true, false]);
-    expect(res.headers.get("server-timing")).not.toContain("google");
-    // A refused limit is refused on a cached answer too.
-    r.setTake({ allowed: false, reason: "rate_limited" });
-    expect((await handler(suggest({ turnstile: undefined, pass: snapshotPass() }))).status).toBe(
-      429,
-    );
-  });
-
-  it("the cache holds only Google's list for a prefix and a country: never the visitor, the pass or the token", async () => {
-    const r = rig();
-    await makeSuggestHandler(r.deps)(suggest({}));
-    const [[key, value]] = [...r.cache.entries()];
-    expect(key).toBe("XX:seven one");
-    const text = JSON.stringify(value);
-    expect(text).not.toContain(IP);
-    expect(text).not.toContain(TOKEN);
-    expect(text).not.toMatch(/pass|visitor|session/);
-    expect(cacheKey(" Seven\tOne ", "GB")).toBe("GB:seven one");
-    expect(cacheKey("seven one", "gb")).toBe("XX:seven one");
+    expect(((await res.json()) as { available: boolean }).available).toBe(true);
+    expect(r.google).toEqual(["seven one", "seven one"]);
+    expect(r.takes.map((t) => t.places)).toEqual([true, true]);
+    expect(res.headers.get("server-timing")).toMatch(/(^|, )google;dur=\d+/);
+    expect(res.headers.get("server-timing")).not.toContain("cache");
   });
 
   it("the log line carries the outcome and timings only", async () => {
@@ -253,7 +223,7 @@ describe("Speed 2 part A: /api/suggest", () => {
     for (const bad of [IP, TOKEN, "seven", "other letters", "good-token", SECRET, "places-key"]) {
       expect(text).not.toContain(bad);
     }
-    expect(r.logs[0]).toMatchObject({ fn: "suggest", status: 200, outcome: "ok", cache: "miss" });
+    expect(r.logs[0]).toMatchObject({ fn: "suggest", status: 200, outcome: "ok" });
   });
 
   it("refuses bad input, other sites and other methods; says when it is not set up", async () => {
@@ -325,19 +295,6 @@ describe("Speed 2 part A: the review's findings (6 Nov)", () => {
     expect(r.google).toEqual(["bbb one", "bbb two"]);
     await h(suggest({ query: "bbb three", turnstile: undefined, pass: snapshotPass() }));
     expect(r.google).toEqual(["bbb one", "bbb two"]);
-  });
-
-  it("a cached entry whose stored key differs is never served", async () => {
-    const r = rig();
-    r.cache.set("XX:seven one", {
-      key: "XX:something else",
-      suggestions: [{ place_id: "ChIJ_planted_1", name: "Planted", address: "" }],
-    });
-    const j = (await (await makeSuggestHandler(r.deps)(suggest())).json()) as {
-      suggestions: { name: string }[];
-    };
-    expect(j.suggestions[0]!.name).toBe("Seven One Salon");
-    expect(r.google).toEqual(["seven one"]);
   });
 
   it("at most 10 bot checks a minute per visitor, before Cloudflare is asked", async () => {
