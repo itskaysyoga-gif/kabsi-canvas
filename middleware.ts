@@ -29,5 +29,7 @@ export const config = {
 export default function middleware(request: Request): Response | undefined {
   const clean = adClickRewrite(request);
   // The header Vercel's rewrite() helper (@vercel/functions) sets; returning nothing lets the request continue as it is.
-  return clean ? new Response(null, { headers: { "x-middleware-rewrite": clean.toString() } }) : undefined;
+  return clean
+    ? new Response(null, { headers: { "x-middleware-rewrite": clean.toString() } })
+    : undefined;
 }
