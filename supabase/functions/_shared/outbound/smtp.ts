@@ -64,20 +64,59 @@ async function reply(io: Line): Promise<{ code: number; text: string }> {
   }
 }
 
+/** Base64 of the UTF-8 bytes (the SASL PLAIN form). */
+export function b64(s: string): string {
+  return btoa(String.fromCharCode(...new TextEncoder().encode(s)));
+}
+
+/** The server's own words, safe to log: printable ASCII only, at most 160 characters, and every secret given (with its
+ *  base64 forms) cut out. Zoho never echoes a password, but the rule holds whatever a server says. */
+export function serverSays(text: string, secrets: string[] = []): string {
+  let t = String(text ?? "").replace(/[^\x20-\x7e]+/g, " ");
+  for (const s of secrets.filter((x) => x && x.length >= 4)) {
+    for (const form of [s, b64(s)]) t = t.split(form).join("[redacted]");
+  }
+  return t.replace(/\s+/g, " ").trim().slice(0, 160);
+}
+
 export class SmtpError extends Error {
   step: string;
   code: number;
-  constructor(step: string, code: number) {
+  /** What the server said (serverSays), for the log; never the password. */
+  serverText: string;
+  constructor(step: string, code: number, serverText = "") {
     super(`smtp ${step} refused (${code})`);
     this.step = step;
     this.code = code;
+    this.serverText = serverText;
   }
 }
 
-async function expect(io: Line, step: string, ok: (c: number) => boolean) {
+async function expect(io: Line, step: string, ok: (c: number) => boolean, secrets: string[] = []) {
   const r = await reply(io);
-  if (!ok(r.code)) throw new SmtpError(step, r.code);
+  if (!ok(r.code)) throw new SmtpError(step, r.code, serverSays(r.text, secrets));
   return r;
+}
+
+/** Logs in on 465 and quits: EHLO, AUTH PLAIN, QUIT. No MAIL FROM, no RCPT, no DATA, so nothing is ever sent. Used to
+ *  tell a wrong app password (SMTP refuses too) from IMAP being off in Zoho (SMTP accepts). */
+export async function smtpProbe(io: Line, o: { user: string; password: string; helo?: string }): Promise<{ ok: boolean; step: string; code: number; text: string }> {
+  const secrets = [o.password, `\u0000${o.user}\u0000${o.password}`];
+  try {
+    await expect(io, "greeting", (c) => c === 220, secrets);
+    await io.write(`EHLO ${o.helo ?? "getkabsi.com"}\r\n`);
+    await expect(io, "ehlo", (c) => c === 250, secrets);
+    await io.write(`AUTH PLAIN ${b64(`\u0000${o.user}\u0000${o.password}`)}\r\n`);
+    const r = await expect(io, "auth", (c) => c === 235, secrets);
+    await io.write("QUIT\r\n").catch(() => undefined);
+    await reply(io).catch(() => undefined);
+    return { ok: true, step: "auth", code: r.code, text: serverSays(r.text, secrets) };
+  } catch (e) {
+    if (e instanceof SmtpError) return { ok: false, step: e.step, code: e.code, text: e.serverText };
+    return { ok: false, step: "connect", code: 0, text: serverSays(e instanceof Error ? e.message : String(e), secrets) };
+  } finally {
+    io.close();
+  }
 }
 
 /** Dot-stuffing and CRLF line ends for DATA. */
@@ -90,12 +129,13 @@ export function dataBlock(message: string): string {
 export async function smtpSend(io: Line, o: {
   user: string; password: string; from: string; to: string; message: string; helo?: string; onAccepted?: () => Promise<void>;
 }) {
+  const secrets = [o.password, `\u0000${o.user}\u0000${o.password}`];
   try {
     await expect(io, "greeting", (c) => c === 220);
     await io.write(`EHLO ${o.helo ?? "getkabsi.com"}\r\n`);
     await expect(io, "ehlo", (c) => c === 250);
-    await io.write(`AUTH PLAIN ${btoa(`\u0000${o.user}\u0000${o.password}`)}\r\n`);
-    await expect(io, "auth", (c) => c === 235);
+    await io.write(`AUTH PLAIN ${b64(`\u0000${o.user}\u0000${o.password}`)}\r\n`);
+    await expect(io, "auth", (c) => c === 235, secrets);
     await io.write(`MAIL FROM:<${o.from}>\r\n`);
     await expect(io, "mail", (c) => c === 250);
     await io.write(`RCPT TO:<${o.to}>\r\n`);
