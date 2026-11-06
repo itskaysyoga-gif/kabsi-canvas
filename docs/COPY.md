@@ -1774,3 +1774,13 @@ Every new or changed line of Scan 3. The result's lines are in src/lib/scan-word
 - **Where your routine messages go**, when WhatsApp is switched off for owners (whatsapp_owners_on false): "WhatsApp messages from Kabsi are paused for now. Your reports and reminders come by email." Email reads as chosen. The other lines of section 60 are unchanged.
 - **The WhatsApp panel**: "Review alerts with Approve" and "Your weekly report on WhatsApp" move at once; a failed save puts the switch back with "Couldn't save that. It is back as it was. Try again." (section 60's line; was "Couldn't save. Please try again.").
 - No other words change. The field "Also send review alerts to (optional, up to 3)" gets its own id (it shared one with the "Review emails" heading).
+
+### Part B: the review link tool tells the truth (branch claude/launch2-b, 30.36 item 7)
+
+- **Copy (every page that uses the shared copy field: the review link tool, onboarding's setup link, the team photo link)**: "Copied" only after the copy worked. When it fails the button stays, the link is selected, and the line (announced) is "Press and hold the link to copy it." on a phone, "Press Ctrl+C or Cmd+C to copy it." on a computer.
+- **Test the link** (a secondary action beside Copy link), and under the result: "Check it opens your business. Google may ask customers to sign in before they write a review."
+- **Name on the card** (only when the card cannot print Google's name in full): the field "Name on the card", filled with what the card can print, and "Type the business name in English letters as you want it printed." The confirm card shows that name (or "Your business" while the field is empty); the message reads "Thank you for visiting [name]." or "Thank you for visiting us." while it is empty. No Arabic is shown (R-61).
+- **A card the device cannot draw**: "The card could not be made on this device. Try the PDF, or another browser."
+- **Busy** (this tool only; the free check keeps its own line): "The review link tool is busy right now." then "Try again in a few minutes.", with "Start your free trial" kept. Was "Today's free checks are used up." and the shared line.
+- **The guide google-review-link-and-qr-code**: "get Google's own review link" becomes "get a review link for your Google profile".
+
