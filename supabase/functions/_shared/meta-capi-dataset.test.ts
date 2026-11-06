@@ -78,15 +78,16 @@ Deno.test("a secret with no digits: nothing is sent and one clear line is logged
 
 Deno.test("Meta refuses the dataset: one clear line without the token, the event or Meta's message, then an error", async () => {
   const fetchImpl = (async () => new Response(REFUSED, { status: 400 })) as unknown as typeof fetch;
-  let threw = false;
+  let threw = "";
   const lines = await captured(async () => {
     try {
       await sendWebCapi(ev, yes, envWith("2179603053433551"), fetchImpl);
-    } catch {
-      threw = true;
+    } catch (e) {
+      threw = (e as Error).message;
     }
   });
-  assert.ok(threw);
+  // The error carries no words of Meta's answer: the clear line below is the one place a refusal is told.
+  assert.equal(threw, "meta_capi_web 400 dataset_refused");
   const errs = lines.filter((l) => l.includes("meta_dataset_refused"));
   assert.equal(errs.length, 1);
   const line = JSON.parse(errs[0]);
@@ -105,4 +106,9 @@ Deno.test("only a dataset refusal is called one; other failures are not", () => 
   assert.equal(datasetRefusal(400, JSON.stringify({ error: { code: 190, message: "Invalid OAuth access token" } })), null);
   assert.equal(datasetRefusal(500, "upstream error"), null);
   assert.deepEqual(datasetRefusal(400, "Object does not exist"), { graphError: null, graphSubcode: null });
+  // Code 100 alone is Meta's general invalid parameter (a stale event_time, a bad user_data field): not the dataset.
+  assert.equal(
+    datasetRefusal(400, JSON.stringify({ error: { code: 100, error_subcode: 2804003, message: "Invalid parameter" } })),
+    null,
+  );
 });
