@@ -48,16 +48,16 @@ export type InboxResult = { handled_to_uid: number | null; failed: number; looke
 
 const reSubject = (s: string) => `Re: ${String(s ?? "").replace(/^\s*((re|aw|sv|fwd?)\s*:\s*)+/i, "").trim()}`.slice(0, 200);
 
-/** Rashid's reply to a clear yes (docs/COPY.md section 65), with the full R-59 signature. */
+/** Rashid's reply to a clear yes (docs/COPY.md section 65), with the Facebook and Instagram addresses of R-59. */
 export function yesReply(business: string, code: string): string {
-  const fb = SOCIAL_LINKS.find((s) => s.name === "Facebook")!.href;
-  const ig = SOCIAL_LINKS.find((s) => s.name === "Instagram")!.href;
+  const fb = SOCIAL_LINKS.find((s) => s.name === "Facebook")!.href.replace(/^https:\/\//, "");
+  const ig = SOCIAL_LINKS.find((s) => s.name === "Instagram")!.href.replace(/^https:\/\//, "");
+  // Lane R, 6 Nov 2026 (30.39 item 11): word for word; a template wrote it, so it is signed without Nora.
   return [
     `Hi ${business} team,`,
-    `Thanks for the yes. Here is the free check of ${business}'s Google profile: kabsi.co/scan/${code}`,
-    "We're taking 25 founding businesses, with three months of Pro free. If you would like one of the places, reply here and I will set it up with you.",
-    "Rashid Abou Hamzy, founder of Kabsi. Drafted with Nora, Kabsi's AI assistant.\nkabsi.co\n" +
-      `Facebook: ${fb.replace(/^https:\/\//, "")}\nInstagram: ${ig.replace(/^https:\/\//, "")}`,
+    `Thanks. Here is the free check of ${business}'s Google profile: kabsi.co/scan/${code}`,
+    "We're taking 25 founding businesses, with three months of Pro free. If you'd like one of the places, apply at kabsi.co/founding, or reply here and I'll help.",
+    `Rashid Abou Hamzy, founder of Kabsi\nkabsi.co\nFacebook: ${fb}\nInstagram: ${ig}`,
   ].join("\n\n");
 }
 

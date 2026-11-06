@@ -144,9 +144,15 @@ Deno.test("a person's yes: follow-up cancelled, needs Rashid, alert, the free ch
   assert.equal(r.yes, 1);
   assert.deepEqual(log, ["cancel:follow_up", "status:needs_you", "draft:amy@rose.example.com:true", "alert", "event:reply:yes"]);
   const body = yesReply("Rose Lane Salon", "ABC123");
-  assert.match(body, /kabsi\.co\/scan\/ABC123/);
-  assert.match(body, /Drafted with Nora, Kabsi's AI assistant\./);
+  assert.equal(body.replace(/Facebook: .*\nInstagram: .*$/, "Facebook: F\nInstagram: I"), [
+    "Hi Rose Lane Salon team,",
+    "Thanks. Here is the free check of Rose Lane Salon's Google profile: kabsi.co/scan/ABC123",
+    "We're taking 25 founding businesses, with three months of Pro free. If you'd like one of the places, apply at kabsi.co/founding, or reply here and I'll help.",
+    "Rashid Abou Hamzy, founder of Kabsi\nkabsi.co\nFacebook: F\nInstagram: I",
+  ].join("\n\n"), "lane R's words, word for word");
+  assert.ok(!/Nora/.test(body), "signed without Nora");
   assert.match(body, /Facebook: www\.facebook\.com\/profile\.php\?id=\d+\nInstagram: www\.instagram\.com\/kabsi\.co$/);
+  assert.ok(linksOk(body, "reply"));
   assert.ok(!/[–—!]/.test(body));
 });
 
