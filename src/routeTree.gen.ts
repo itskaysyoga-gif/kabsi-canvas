@@ -35,6 +35,7 @@ import { Route as AuthenticatedStartRouteImport } from './routes/_authenticated/
 import { Route as ATokenRouteImport } from './routes/a.$token'
 import { Route as ActivateCodeRouteImport } from './routes/activate.$code'
 import { Route as ApiGeoRouteImport } from './routes/api.geo'
+import { Route as ApiSuggestRouteImport } from './routes/api.suggest'
 import { Route as BillingDoneRouteImport } from './routes/billing.done'
 import { Route as ForIndexRouteImport } from './routes/for.index'
 import { Route as ForTradeRouteImport } from './routes/for.$trade'
@@ -192,6 +193,11 @@ const ActivateCodeRoute = ActivateCodeRouteImport.update({
 const ApiGeoRoute = ApiGeoRouteImport.update({
   id: '/api/geo',
   path: '/api/geo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSuggestRoute = ApiSuggestRouteImport.update({
+  id: '/api/suggest',
+  path: '/api/suggest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BillingDoneRoute = BillingDoneRouteImport.update({
@@ -370,6 +376,7 @@ export interface FileRoutesByFullPath {
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
   '/api/geo': typeof ApiGeoRoute
+  '/api/suggest': typeof ApiSuggestRoute
   '/billing/done': typeof BillingDoneRoute
   '/for/$trade': typeof ForTradeRoute
   '/guides/$slug': typeof GuidesSlugRoute
@@ -424,6 +431,7 @@ export interface FileRoutesByTo {
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
   '/api/geo': typeof ApiGeoRoute
+  '/api/suggest': typeof ApiSuggestRoute
   '/billing/done': typeof BillingDoneRoute
   '/for/$trade': typeof ForTradeRoute
   '/guides/$slug': typeof GuidesSlugRoute
@@ -482,6 +490,7 @@ export interface FileRoutesById {
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
   '/api/geo': typeof ApiGeoRoute
+  '/api/suggest': typeof ApiSuggestRoute
   '/billing/done': typeof BillingDoneRoute
   '/for/$trade': typeof ForTradeRoute
   '/guides/$slug': typeof GuidesSlugRoute
@@ -540,6 +549,7 @@ export interface FileRouteTypes {
     | '/a/$token'
     | '/activate/$code'
     | '/api/geo'
+    | '/api/suggest'
     | '/billing/done'
     | '/for/$trade'
     | '/guides/$slug'
@@ -594,6 +604,7 @@ export interface FileRouteTypes {
     | '/a/$token'
     | '/activate/$code'
     | '/api/geo'
+    | '/api/suggest'
     | '/billing/done'
     | '/for/$trade'
     | '/guides/$slug'
@@ -651,6 +662,7 @@ export interface FileRouteTypes {
     | '/a/$token'
     | '/activate/$code'
     | '/api/geo'
+    | '/api/suggest'
     | '/billing/done'
     | '/for/$trade'
     | '/guides/$slug'
@@ -706,6 +718,7 @@ export interface RootRouteChildren {
   ATokenRoute: typeof ATokenRoute
   ActivateCodeRoute: typeof ActivateCodeRoute
   ApiGeoRoute: typeof ApiGeoRoute
+  ApiSuggestRoute: typeof ApiSuggestRoute
   BillingDoneRoute: typeof BillingDoneRoute
   ForTradeRoute: typeof ForTradeRoute
   GuidesSlugRoute: typeof GuidesSlugRoute
@@ -901,6 +914,13 @@ declare module '@tanstack/react-router' {
       path: '/api/geo'
       fullPath: '/api/geo'
       preLoaderRoute: typeof ApiGeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/suggest': {
+      id: '/api/suggest'
+      path: '/api/suggest'
+      fullPath: '/api/suggest'
+      preLoaderRoute: typeof ApiSuggestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/billing/done': {
@@ -1207,6 +1227,7 @@ const rootRouteChildren: RootRouteChildren = {
   ATokenRoute: ATokenRoute,
   ActivateCodeRoute: ActivateCodeRoute,
   ApiGeoRoute: ApiGeoRoute,
+  ApiSuggestRoute: ApiSuggestRoute,
   BillingDoneRoute: BillingDoneRoute,
   ForTradeRoute: ForTradeRoute,
   GuidesSlugRoute: GuidesSlugRoute,
