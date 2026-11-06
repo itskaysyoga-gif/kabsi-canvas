@@ -68,12 +68,16 @@ select is(
   '{}'::text[],
   'every function on the browser list is still callable by authenticated');
 
+-- Speed 2 part A (Rashid's yes, 6 Nov 2026): one exception, public.suggest_take, the database call of the kabsi.co route
+-- /api/suggest. It is reached with the public key and refuses every call without the route key held in Vault (a login
+-- role was ruled out: on this project any login role reaches pg_net's queue). supabase/tests/speed2_suggest_take.sql
+-- proves the refusal. Any other function anon can run still fails here.
 select is(
   (select coalesce(array_agg(p.oid::regprocedure::text order by 1), '{}') from pg_proc p
    where p.pronamespace = 'public'::regnamespace and p.prosecdef
      and has_function_privilege('anon', p.oid, 'execute')),
-  '{}'::text[],
-  'anon can run no SECURITY DEFINER function in public');
+  array['suggest_take(text,text,integer,integer,integer,boolean)'],
+  'anon can run no SECURITY DEFINER function in public but suggest_take, which needs the route key');
 
 select ok(not has_function_privilege('anon', 'public.google_mode()', 'execute'), 'anon cannot run google_mode()');
 
