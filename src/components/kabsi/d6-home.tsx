@@ -447,7 +447,7 @@ export function PricingPreview() {
 /* ---------- Founding 25, with the founder ---------- */
 
 export function FoundingWithFounder() {
-  // The real count (GET programs/founding); while it has not loaded, or did not load, no number shows.
+  // The real count (GET /api/founding-count); while it has not loaded, or did not load, no number shows.
   const places = useFoundingPlaces();
   const left = places?.left ?? null;
   return (
