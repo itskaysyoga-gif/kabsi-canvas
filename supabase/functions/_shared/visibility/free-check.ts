@@ -19,6 +19,7 @@ import { countryName, latinName, ownName, shownTerm } from "./area.ts";
 export { shownTerm } from "./area.ts";
 import { refusalOf } from "./refusal.ts";
 import type { ReportParts } from "./report.ts";
+import { AI_QUESTION, aiAskedLines, aiVerdict, nearbyCount, nearbyLead } from "./scan-words.ts";
 export { CODE_RE, NOT_PART } from "./report.ts";
 
 export const CHECK_LINE = "Free check. No Google access needed.";
@@ -306,20 +307,23 @@ export function publicAi(a: StoredAi) {
 
 
 /**
- * Scan 2 (30.29 item B): what "Send me this report" carries beyond the Google part, in the page's own words: the nearby
- * count line and the three cards, the AI question with its line and date, and the link to the saved result. Null when the
- * check never finished (the report then says NOT_PART).
+ * What "Send me this report" carries beyond the Google part, in the result page's own words from the one shared module
+ * (scan-words.ts; Launch 1, master plan 30.35 item 4): the nearby lead ("When someone searches for ... you appear 2nd in
+ * this Google Maps check."), the points line with the usual position, "Did ChatGPT name your business?" with the answer
+ * line, the question, the model and the date, and the link to the saved result. Null when the check never finished (the
+ * report then says NOT_PART). A part the check does not hold is left out.
  */
 export function reportParts(c: CheckRow, appUrl: string): ReportParts | null {
   if (c.state !== "done") return null;
   const v = publicView(c);
-  const n = v.map.state === "done" ? v.map.nearby : null;
-  const l = aiLines(c.ai);
-  return {
-    nearby: n ? [n.count_line, ...n.cards.map((x) => cardLine(x, n.keyword))] : [],
-    ai: l ? [l.question, l.line, l.asked].filter((x): x is string => !!x) : [],
-    link: `${appUrl.replace(/\/$/, "")}/scan/${c.code}`,
-  };
+  const done = v.map.state === "done" ? v.map : null;
+  // The counts of the nearby card the page shows (the same as the map's for every real check of 49 points).
+  const n = done?.nearby ?? null;
+  const nearby = done
+    ? [nearbyLead(v.term, c.fast.rank), nearbyCount(n?.top3 ?? done.top3, n?.points ?? done.points, c.points.map((p) => p.rank ?? null))]
+    : [];
+  const ai = v.ai ? [AI_QUESTION, aiVerdict(v.ai).line, ...aiAskedLines(v.ai)] : [];
+  return { nearby, ai, link: `${appUrl.replace(/\/$/, "")}/scan/${c.code}` };
 }
 
 /** One factual line for WhatsApp's "The check:" message (docs/COPY.md 20). */
