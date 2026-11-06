@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { fixtureRows } from "./fixture.ts";
 import { prepare, type PrepareDeps, type Settings } from "./prepare.ts";
 import { robotsAllows } from "./page.ts";
-import { ordered, parseCsv, rowRefusal } from "./register.ts";
+import { COMPANY_FILE_MAX_DAYS, companyRefusal, ordered, parseCsv, rowRefusal, toCandidate } from "./register.ts";
 import {
   dailyCap, emailOne, emailOnPage, followUp, followUpDate, houseStyleOk, inWindow, isSuppressed, keysOf, linksOk, localParts,
   nameOk, ownDomain, pickDetail, sha,
@@ -80,19 +80,47 @@ Deno.test("robots.txt is respected: the Kabsi group, else *, longest match wins"
 Deno.test("the register: own-domain email, UK registered company with a number, open countries only", () => {
   const ok = { company_id: "1", business_name: "Rose Lane Salon", industry: "hair salon", country: "GB", city: "Exampleton",
     website: "https://www.rose.example.com", email: "hello@rose.example.com", email_page_url: "https://rose.example.com/contact",
-    company_type: "registered company", company_number: "01234567" };
-  assert.equal(rowRefusal(ok, ["GB"]), null);
-  assert.equal(rowRefusal(ok, []), "country_closed");
-  assert.equal(rowRefusal({ ...ok, email: "rose@gmail.com" }, ["GB"]), "not_own_domain");
-  assert.equal(rowRefusal({ ...ok, company_type: "sole trader" }, ["GB"]), "not_registered_company");
-  assert.equal(rowRefusal({ ...ok, company_type: "unknown" }, ["GB"]), "not_registered_company");
-  assert.equal(rowRefusal({ ...ok, company_number: "" }, ["GB"]), "no_company_number");
-  assert.equal(rowRefusal({ ...ok, business_name: "Yo Salon!" }, ["GB"]), "name");
+    company_type: "registered company", company_number: "01234567", company_status: "Active", company_status_date: "2026-11-01" };
+  const day = "2026-11-06";
+  assert.equal(rowRefusal(ok, ["GB"], day), null);
+  assert.equal(rowRefusal(ok, [], day), "country_closed");
+  assert.equal(rowRefusal({ ...ok, email: "rose@gmail.com" }, ["GB"], day), "not_own_domain");
+  assert.equal(rowRefusal({ ...ok, company_type: "sole trader" }, ["GB"], day), "not_registered_company");
+  assert.equal(rowRefusal({ ...ok, company_type: "unknown" }, ["GB"], day), "not_registered_company");
+  assert.equal(rowRefusal({ ...ok, company_number: "" }, ["GB"], day), "no_company_number");
+  assert.equal(rowRefusal({ ...ok, business_name: "Yo Salon!" }, ["GB"], day), "name");
   assert.ok(ownDomain("hello@rose.example.com", "https://shop.rose.example.com/"));
   assert.ok(!nameOk("Salon — Rose"));
   const csv = 'company_id,business_name,industry,quality_score\n1,"Cafe, Ltd",cafe,5\n2,Rose,hair salon,1\n3,Barb,barbershop,9\n';
   assert.deepEqual(ordered(parseCsv(csv)).map((r) => r.company_id), ["2", "3", "1"], "salons and barbers first");
   assert.equal(parseCsv(csv)[0].business_name, "Cafe, Ltd");
+});
+
+Deno.test("Companies House from Harvey's register: Active on a Basic Company Data file at most 40 days old", () => {
+  const ok = { company_id: "1", business_name: "Rose Lane Salon", industry: "hair salon", country: "GB", city: "Exampleton",
+    website: "https://rose.example.com", email: "hello@rose.example.com", email_page_url: "https://rose.example.com/contact",
+    company_type: "registered company", company_number: "01234567", company_status: "Active", company_status_date: "2026-10-01" };
+  const day = "2026-11-06";
+  assert.equal(COMPANY_FILE_MAX_DAYS, 40);
+  assert.equal(companyRefusal({ ...ok, company_status_date: "2026-09-27" }, day), null, "exactly 40 days old");
+  assert.equal(companyRefusal({ ...ok, company_status_date: "2026-09-26" }, day), "company_status_stale", "41 days old");
+  assert.equal(rowRefusal({ ...ok, company_status_date: "2026-08-01" }, ["GB"], day), "company_status_stale", "a stale file refuses even an Active company");
+  assert.equal(companyRefusal({ ...ok, company_status_date: day }, day), null, "a file of today");
+  assert.equal(companyRefusal({ ...ok, company_status: "active" }, day), null, "case does not matter");
+  for (const st of ["Dissolved", "Liquidation", "In Administration", "Active - Proposal to Strike off", "Receivership Action", "Voluntary Arrangement"]) {
+    assert.equal(rowRefusal({ ...ok, company_status: st }, ["GB"], day), "company_not_active", st);
+  }
+  assert.equal(companyRefusal({ ...ok, company_status: "" }, day), "no_company_status");
+  assert.equal(companyRefusal({ ...ok, company_status_date: "" }, day), "no_company_status");
+  assert.equal(companyRefusal({ ...ok, company_status_date: "01/10/2026" }, day), "no_company_status");
+  assert.equal(companyRefusal({ ...ok, company_status_date: "2026-02-30" }, day), "no_company_status", "not a real date");
+  assert.equal(companyRefusal({ ok: "x" }, day), "no_company_status", "an older register without the columns");
+  assert.equal(companyRefusal({ ...ok, company_status_date: "2026-11-07" }, day), "company_status_date_ahead");
+  assert.equal(rowRefusal({ ...ok, country: "US", company_status: "" }, ["US"], day), null, "only UK rows need Companies House");
+  for (const n of ["LP012345", "SL012345", "NL012345"]) assert.equal(rowRefusal({ ...ok, company_number: n }, ["GB"], day), "limited_partnership", n);
+  for (const n of ["OC412345", "SO301234", "NC001234", "SC123456", "NI012345"]) assert.equal(rowRefusal({ ...ok, company_number: n }, ["GB"], day), null, n);
+  assert.equal(toCandidate(ok).company_status, "active");
+  assert.equal(toCandidate(ok).company_status_date, "2026-10-01");
 });
 
 Deno.test("the ramp and the window", () => {
@@ -117,7 +145,6 @@ function fakeDeps(over: Partial<PrepareDeps> & { settings?: () => Promise<Settin
   const base: PrepareDeps = {
     settings: async () => ({ sending_open: false, test_mode: true, open_countries: [], ramp_week1: 3, ramp_week2: 5, ramp_after: 10, monthly_cap: 300, started_on: null, stopped_reason: null }),
     refreshSuppression: async () => {}, register: async () => { throw new Error("test mode never reads the register"); },
-    companyStatus: async () => { throw new Error("test mode never calls Companies House"); },
     page: async () => { throw new Error("test mode never reads a real page"); },
     eligible: async () => true, queuedFor: async () => 0, sentThisMonth: async () => 0,
     insert: async (d) => void inserted.push(d), testRecipients: ["inbox@test.example.com"], now: NOW,
@@ -130,8 +157,9 @@ Deno.test("test mode: fixture businesses only, addressed to the test recipients,
   const r = await prepare(deps);
   assert.equal(r.state, "test");
   assert.equal(r.drafted, 3);
-  for (const d of inserted as { prospect: { email: string; test: boolean }; first: { to_address: string; send_after: string } }[]) {
+  for (const d of inserted as { prospect: { email: string; test: boolean; company_status: string; company_status_date: string | null }; first: { to_address: string; send_after: string } }[]) {
     assert.match(d.prospect.email, /@[a-z]+\.example\.com$/);
+    assert.deepEqual([d.prospect.company_status, d.prospect.company_status_date], ["test", null], "no file date shown for a test row");
     assert.equal(d.prospect.test, true);
     assert.equal(d.first.to_address, "inbox@test.example.com");
     assert.equal(localParts(new Date(d.first.send_after), "Europe/London").date, "2026-11-09", "Friday prepares Monday");
@@ -150,25 +178,39 @@ Deno.test("locked, stopped, full, or no test recipients: nothing is drafted", as
 });
 
 Deno.test("open: only active registered companies whose page still shows the address and has a detail", async () => {
-  const rows = fixtureRows("x");
-  const csv = ["company_id,business_name,industry,country,city,website,email,email_page_url,company_type,company_number,quality_score",
-    ...rows.map((r) => [r.company_id, r.business_name, r.industry, "GB", r.city, r.website, r.email, r.email_page_url, r.company_type, "0123456" + r.company_id.length % 10, "1"].join(","))].join("\n");
+  const base = fixtureRows("x");
+  // Five fictional companies: Active on a fresh file (two, one page no longer shows the address), dissolved, Active on
+  // a stale file, Active - Proposal to Strike off.
+  const rows = [
+    { ...base[0], company_status: "Active", company_status_date: "2026-10-30" },
+    { ...base[1], company_status: "Dissolved", company_status_date: "2026-10-30" },
+    { ...base[2], company_status: "Active", company_status_date: "2026-10-30" },
+    { ...base[0], company_id: "stale", email: "hi@stale.example.com", website: "https://stale.example.com", email_page_url: "https://stale.example.com/c", company_status: "Active", company_status_date: "2026-09-01" },
+    { ...base[1], company_id: "strike", email: "hi@strike.example.com", website: "https://strike.example.com", email_page_url: "https://strike.example.com/c", company_status: "Active - Proposal to Strike off", company_status_date: "2026-10-30" },
+  ];
+  const cols = ["company_id", "business_name", "industry", "country", "city", "website", "email", "email_page_url", "company_type", "company_number", "company_status", "company_status_date", "quality_score"];
+  const csv = [cols.join(","), ...rows.map((r) => cols.map((k) => (k === "company_number" ? "01234567" : `"${r[k]}"`)).join(","))].join("\n");
   const pages: Record<string, string> = Object.fromEntries(rows.map((r) => [r.email_page_url, r.html]));
   pages[rows[2].email_page_url] = "<p>no address here</p>";
+  const read: string[] = [];
   const { deps, inserted } = fakeDeps({
     settings: async () => ({ sending_open: true, test_mode: true, open_countries: ["GB"], ramp_week1: 3, ramp_week2: 5, ramp_after: 10, monthly_cap: 300, started_on: "2026-11-02", stopped_reason: null }),
     register: async () => csv,
-    companyStatus: async (n) => (n.endsWith("8") ? "dissolved" : "active"),
-    page: async (u) => ({ html: pages[u] ?? "" }),
+    page: async (u) => (read.push(u), { html: pages[u] ?? "" }),
   });
   const r = await prepare(deps);
   assert.equal(r.state, "open");
-  assert.ok(r.drafted <= 2);
-  for (const d of inserted as { prospect: { test: boolean; email: string }; first: { to_address: string } }[]) {
+  assert.equal(r.drafted, 1);
+  assert.equal(r.refused.company_not_active, 2, "dissolved, and Active - Proposal to Strike off");
+  assert.equal(r.refused.company_status_stale, 1);
+  assert.equal(r.refused.email_not_on_page ?? 0, 1);
+  assert.deepEqual(read.sort(), [rows[0].email_page_url, rows[2].email_page_url].sort(), "a refused company's page is never read");
+  for (const d of inserted as { prospect: { test: boolean; email: string; company_status: string; company_status_date: string }; first: { to_address: string } }[]) {
     assert.equal(d.prospect.test, false);
     assert.equal(d.first.to_address, d.prospect.email, "a real run writes to the business's own address");
+    assert.equal(d.prospect.company_status, "active");
+    assert.equal(d.prospect.company_status_date, "2026-10-30");
   }
-  assert.equal(r.refused.email_not_on_page ?? 0, 1);
 });
 
 Deno.test("robots.txt wildcards and end anchors, without building a pattern from the file", () => {

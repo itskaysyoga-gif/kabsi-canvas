@@ -15,6 +15,7 @@ const P = {
     "Your site lists your opening hours, and keeping Google's hours the same saves wasted trips.",
   company_number: "00000000",
   company_status: "test",
+  company_status_date: "2026-11-06",
   test: true,
 };
 const first = {
