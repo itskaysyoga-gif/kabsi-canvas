@@ -67,3 +67,5 @@ major_version = 17
 verify_jwt = false
 [functions.visibility]        # Visibility Map (V1): /tick needs x-cron-secret (pg_cron sends the anon JWT with it); /keyword, /picks and /image check the member or staff in code; V4 /check and /terms are public (anon JWT, Turnstile, rate limits and the daily cap in code)
 verify_jwt = true
+[functions.outbound-prepare]  # Outbound drafts (Harvey 4A, 30.39): pg_cron calls it with x-cron-secret and no JWT; the secret is checked in code; it never sends
+verify_jwt = false
