@@ -1798,3 +1798,12 @@ Every new or changed line of Scan 3. The result's lines are in src/lib/scan-word
 - **/get-started** is gone: its two screens ("Which business is yours?" and "Here's what customers see", with "Save your snapshot and continue") are removed, and the address answers with a 301 to /scan.
 - **Nora on WhatsApp**: her example address is kabsi.co/scan (was kabsi.co/get-started).
 
+### Part E: "A reply ready for every review" (branch claude/launch2-e, 30.36 item 10)
+
+*A reply goes live only after the owner's yes, so "answered" said more than Kabsi does.*
+
+- **Home's supporting line and meta description** (hero-lines.ts HOME_LINE): was "Your details kept right, every review answered and your profile kept fresh, without doing it yourself. Kabsi prepares the work and asks for your yes before anything goes live." (175 characters); now "Your details kept right, a reply ready for every review and your profile kept fresh, without doing it yourself. Kabsi prepares the work, and nothing goes live without your yes." (176 characters).
+- **Home, "The work your Google profile needs, every week."** (d8-data.ts): the card title "Every review answered" is now "A reply ready for every review"; its text is unchanged.
+- **The line under the homepage headline** (site.ts heroSub): "Every review answered, every change to your Google profile caught, a fresh post every week." is now "A reply ready for every review, every change to your Google profile caught, a fresh post every week."; the WhatsApp sentence after it is unchanged.
+- Facts 04 carries the new line; Nora's rules did not use the old words.
+

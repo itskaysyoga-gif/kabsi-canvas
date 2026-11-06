@@ -135,7 +135,7 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     expect(home).toContain('<D9Title text="Your business on Google. Taken care of." />');
     expect(read("src/routes/index.tsx")).toContain("description: HOME_LINE");
     expect(read("src/components/kabsi/hero-lines.ts")).toContain(
-      "Your details kept right, every review answered and your profile kept fresh, without doing it yourself. Kabsi prepares the work and asks for your yes before anything goes live.",
+      "Your details kept right, a reply ready for every review and your profile kept fresh, without doing it yourself. Kabsi prepares the work, and nothing goes live without your yes.",
     );
     // Go live 1 (30.28): the WhatsApp launch line is gone from the hero.
     expect(home).not.toMatch(/WHATSAPP_LAUNCH_LINE|opens at launch/);

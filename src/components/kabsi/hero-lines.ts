@@ -1,9 +1,10 @@
 // The hero lines a route's head needs (Design 8, Web 4). Their own tiny file: route heads stay in the shared bundle on
 // every page (Lean 1), so a head must never import a page component or a page's data.
 
-/** Home's supporting line (lane R, Polish 2, 3 Nov 2026: the owner's benefit first, then how it works). */
+/** Home's supporting line (lane R, Polish 2, 3 Nov 2026: the owner's benefit first, then how it works). Launch 2 (30.36 item
+ * 10): "a reply ready for every review", because a reply goes live only after the owner's yes; the length is kept. */
 export const HOME_LINE =
-  "Your details kept right, every review answered and your profile kept fresh, without doing it yourself. Kabsi prepares the work and asks for your yes before anything goes live.";
+  "Your details kept right, a reply ready for every review and your profile kept fresh, without doing it yourself. Kabsi prepares the work, and nothing goes live without your yes.";
 
 /** The free check's hero. */
 export const CHECK_HERO = {
