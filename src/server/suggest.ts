@@ -21,16 +21,13 @@
 // costs no Google call that the cap does not count (review of 6 Nov: at most one uncounted call per visitor and
 // instance, and only right after an allowed one). After any refusal the instance asks the database first for a minute.
 //
-// Answers are kept 10 minutes per normalised prefix and country (in this instance's memory, then Vercel's Runtime Cache
-// for the region), so a repeat costs no Google call. What is kept is Google's suggestion list for a few letters
-// (business names, short addresses, place ids): never the visitor, the address, the pass or the session token. A cached
-// answer still passes the bot check and the limits; it takes nothing from the Autocomplete cap.
+// Nothing from Google is kept (lane R, 6 Nov 2026): Google's Maps Platform terms allow no caching of Places content
+// except place IDs (and coordinates for 30 days), so every suggestion is asked of Google and counted against the cap.
 //
-// Server-Timing says db, google and total. One log line per call carries only the outcome and the timings.
+// Server-Timing says bot, db, google and total. One log line per call carries only the outcome and the timings.
 import type { AutocompleteResponse } from "../../supabase/functions/_shared/google/types.ts";
 
 export const LIMITS = { perMinute: 20, perHour: 120, perDay: 60 } as const;
-export const CACHE_SECONDS = 600;
 const PASS_SECONDS = 15 * 60;
 const SERIAL_AFTER_REFUSAL_MS = 60_000;
 const TRUSTED_MS = 30_000;
@@ -41,8 +38,6 @@ const IP_RE = /^[0-9a-fA-F:.]{2,45}$/;
 
 export type Suggestion = { place_id: string; name: string; address: string };
 export type Take = { allowed: boolean; reason?: "rate_limited" | "back_soon" | "error" };
-/** The key is stored with the list and compared on read, so a hash collision is never served (review of 6 Nov). */
-export type Cached = { key: string; suggestions: Suggestion[] };
 
 export type SuggestDeps = {
   env: (name: string) => string | undefined;
@@ -59,8 +54,6 @@ export type SuggestDeps = {
     signal: AbortSignal,
   ) => Promise<{ ok: boolean; status: number; data: AutocompleteResponse }>;
   verifyTurnstile: (token: string, ip: string) => Promise<boolean>;
-  cacheGet: (key: string) => Promise<Cached | null>;
-  cacheSet: (key: string, value: Cached) => Promise<void>;
   log: (fields: Record<string, unknown>) => void;
   now: () => number;
   /** The salt of the visitor hash: profile-snapshot's SUPABASE_URL, so both paths share one count per visitor. */
@@ -73,13 +66,6 @@ export function visitorIp(req: Request): string {
   if (IP_RE.test(first)) return first;
   const real = (req.headers.get("x-real-ip") ?? "").trim();
   return IP_RE.test(real) ? real : "unknown";
-}
-
-/** The cache key: lower case, single spaces, NFKC, plus the visitor's country (from Vercel, two letters or "XX"). */
-export function cacheKey(query: string, country: string | null): string {
-  const q = query.normalize("NFKC").toLowerCase().replace(/\s+/g, " ").trim();
-  const cc = /^[A-Z]{2}$/.test(country ?? "") ? country! : "XX";
-  return `${cc}:${q}`;
 }
 
 async function sha256Hex(text: string): Promise<string> {
@@ -110,9 +96,6 @@ function mapSuggestions(data: AutocompleteResponse): Suggestion[] {
     })
     .slice(0, 5);
 }
-
-const isCached = (v: unknown): v is Cached =>
-  !!v && Array.isArray((v as Cached).suggestions) && (v as Cached).suggestions.length <= 5;
 
 export function makeSuggestHandler(d: SuggestDeps) {
   // After a refusal (a limit or the day's cap), this instance waits for the database before asking Google.
@@ -270,24 +253,6 @@ export function makeSuggestHandler(d: SuggestDeps) {
       });
     };
 
-    // A repeat within 10 minutes: no Google call, nothing from the cap; the limits still count.
-    const key = cacheKey(q, req.headers.get("x-vercel-ip-country"));
-    const cached = await timed(
-      "cache",
-      d.cacheGet(key).catch(() => null),
-    );
-    if (cached && isCached(cached) && cached.key === key) {
-      const take = await timed("db", d.take(visitor, limits, false));
-      if (!take.allowed) return refused(take);
-      const me = seen.get(visitor);
-      if (me) me.allowedAt = d.now();
-      else seen.set(visitor, { allowedAt: d.now(), inFlight: 0 });
-      return reply(withPass({ suggestions: cached.suggestions, available: true }), 200, {
-        outcome: "ok",
-        cache: "hit",
-      });
-    }
-
     const ctrl = new AbortController();
     const google = async () => {
       const r = await timed("google", d.autocomplete(placesKey!, q, sessionToken, ctrl.signal));
@@ -325,7 +290,6 @@ export function makeSuggestHandler(d: SuggestDeps) {
     } finally {
       me.inFlight -= 1;
     }
-    await d.cacheSet(key, { key, suggestions }).catch(() => undefined);
-    return reply(withPass({ suggestions, available: true }), 200, { outcome: "ok", cache: "miss" });
+    return reply(withPass({ suggestions, available: true }), 200, { outcome: "ok" });
   };
 }

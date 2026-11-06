@@ -1,12 +1,10 @@
-// The production wiring of POST /api/suggest (src/server/suggest.ts): the database, Google, Turnstile and the two caches.
+// The production wiring of POST /api/suggest (src/server/suggest.ts): the database, Google and Turnstile (no cache).
 // Server only (src/server is never bundled for the browser). The three secrets are read from Vercel's environment at
 // call time and never logged: PLACES_API_KEY, TURNSTILE_SECRET_KEY and SUGGEST_ROUTE_KEY (the key the database made for
 // this route, which opens public.suggest_take only; no service key is ever on Vercel).
-import { createHash } from "node:crypto";
-import { getCache } from "@vercel/functions";
 import { autocompleteWeb } from "../../supabase/functions/_shared/google/places/autocomplete-web.ts";
 import { supabasePublishableKey, supabaseUrl } from "../lib/supabase-config";
-import { CACHE_SECONDS, type Cached, type SuggestDeps, type Take } from "./suggest";
+import type { SuggestDeps, Take } from "./suggest";
 
 const env = (name: string) => {
   const v = process.env[name];
@@ -74,69 +72,11 @@ async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
   }
 }
 
-// The first cache: this instance's memory (Vercel keeps an instance for many requests). At most 2,000 answers.
-const memory = new Map<string, { at: number; value: Cached }>();
-const MEMORY_MAX = 2000;
-function memoryGet(key: string): Cached | null {
-  const e = memory.get(key);
-  if (!e) return null;
-  if (Date.now() - e.at > CACHE_SECONDS * 1000) {
-    memory.delete(key);
-    return null;
-  }
-  return e.value;
-}
-function memorySet(key: string, value: Cached) {
-  if (memory.size >= MEMORY_MAX) memory.delete(memory.keys().next().value!);
-  memory.set(key, { at: Date.now(), value });
-}
-
-// The second cache: Vercel's Runtime Cache, shared by every instance in the region. Keys are hashed by the library; the
-// entry name is left empty so the typed letters never reach Vercel's cache dashboard. A slow cache is not waited for.
-const runtime = (() => {
-  try {
-    // SHA-256 for the key, not the library's 32 bit default, so two prefixes never share an entry (review of 6 Nov).
-    return getCache({
-      namespace: "kabsi-suggest-v1",
-      keyHashFunction: (k: string) => createHash("sha256").update(k).digest("hex"),
-    });
-  } catch {
-    return null;
-  }
-})();
-const within = <T>(p: Promise<T>, ms: number, fallback: T) =>
-  Promise.race([p, new Promise<T>((r) => setTimeout(() => r(fallback), ms))]);
-
-async function cacheGet(key: string): Promise<Cached | null> {
-  const m = memoryGet(key);
-  if (m) return m;
-  if (!runtime) return null;
-  const v = (await within(
-    runtime.get(key).catch(() => null),
-    60,
-    null,
-  )) as Cached | null;
-  if (!v || v.key !== key || !Array.isArray(v.suggestions)) return null;
-  memorySet(key, v);
-  return v;
-}
-async function cacheSet(key: string, value: Cached): Promise<void> {
-  memorySet(key, value);
-  await within(
-    runtime?.set(key, value, { ttl: CACHE_SECONDS, name: "" }).catch(() => undefined) ??
-      Promise.resolve(),
-    100,
-    undefined,
-  );
-}
-
 export const suggestDeps: SuggestDeps = {
   env,
   take,
   autocomplete: (key, input, token, signal) => autocompleteWeb(key, input, token, signal),
   verifyTurnstile,
-  cacheGet,
-  cacheSet,
   // One line per call: the outcome and the timings only (no address, letters, pass or token).
   log: (fields) => console.log(JSON.stringify(fields)),
   now: () => Date.now(),
