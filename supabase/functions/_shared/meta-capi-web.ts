@@ -7,6 +7,7 @@
 // Called by the consent function (POST /consent/meta). Mock: without META_PIXEL_ID and META_CAPI_TOKEN nothing is sent and
 // the payload is logged without its hashed id, so a session can show the pair without Meta.
 import { log, sha256Hex } from "./kabsi.ts";
+import { logDatasetRefusal, logNoDataset, metaDatasetId } from "./meta-capi.ts";
 
 export const WEB_EVENTS = ["Lead", "FreeScanCompleted"] as const;
 export type WebEvent = (typeof WEB_EVENTS)[number];
@@ -91,7 +92,7 @@ export function loggable(ev: Record<string, unknown>): Record<string, unknown> {
   };
 }
 
-export type WebResult = "sent" | "skipped_mock" | "skipped_no_consent";
+export type WebResult = "sent" | "skipped_mock" | "skipped_no_dataset" | "skipped_no_consent";
 
 type Latest = { advertising: boolean; created_at: string } | null;
 /**
@@ -109,11 +110,16 @@ export async function sendWebCapi(
     return "skipped_no_consent";
   }
   const ev = await webCapiEvent(i);
-  const pixel = env("META_PIXEL_ID") ?? "";
+  const raw = env("META_PIXEL_ID") ?? "";
+  const pixel = metaDatasetId(raw);
   const token = env("META_CAPI_TOKEN") ?? "";
-  if (!pixel || !token) {
+  if (!raw || !token) {
     log("meta_capi_web", { ok: true, mock: true, sent_fields: loggable(ev) });
     return "skipped_mock";
+  }
+  if (!pixel) {
+    logNoDataset("meta_capi_web");
+    return "skipped_no_dataset";
   }
   const test = env("META_TEST_EVENT_CODE") ?? "";
   const res = await fetchImpl(`${GRAPH}/${encodeURIComponent(pixel)}/events`, {
@@ -121,7 +127,11 @@ export async function sendWebCapi(
     headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
     body: JSON.stringify({ data: [ev], ...(test ? { test_event_code: test } : {}) }),
   });
-  if (!res.ok) throw new Error(`meta_capi_web ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  if (!res.ok) {
+    const text = await res.text();
+    logDatasetRefusal("meta_capi_web", res.status, text, pixel);
+    throw new Error(`meta_capi_web ${res.status}: ${text.slice(0, 200)}`);
+  }
   log("meta_capi_web", { ok: true, sent_fields: loggable(ev), test_event: Boolean(test) });
   return "sent";
 }

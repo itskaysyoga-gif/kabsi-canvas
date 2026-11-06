@@ -18,6 +18,60 @@ export const META_EVENT: Record<string, string> = {
 
 const GRAPH = "https://graph.facebook.com/v21.0";
 
+// Launch 4 part E (6 Nov 2026): the secret once held "ID 2179603053433551" (the label copied with the number), and Meta
+// answered "Object with ID 'ID 2179603053433551' does not exist". The dataset id is the digits only.
+export function metaDatasetId(raw: string | null | undefined): string {
+  return (raw ?? "").replace(/\D/g, "");
+}
+
+/** The one line logged when META_PIXEL_ID is set but holds no digits. No token, no person, no event. */
+export function logNoDataset(fn: string): void {
+  log(fn, {
+    ok: false,
+    error: "meta_dataset_missing",
+    detail: "META_PIXEL_ID holds no digits, so nothing was sent to Meta. Save the dataset id (digits only) as the secret.",
+  });
+}
+
+/**
+ * Meta refused the dataset itself (a wrong id, or a token without access to it): Graph error code 100 (subcode 33 is
+ * "does not exist") or the words "does not exist". Pure, so a test can read it. Null for every other answer.
+ */
+export function datasetRefusal(
+  status: number,
+  body: string,
+): { graphError: number | null; graphSubcode: number | null } | null {
+  if (status < 400) return null;
+  let graphError: number | null = null;
+  let graphSubcode: number | null = null;
+  try {
+    const e = (JSON.parse(body) as { error?: { code?: unknown; error_subcode?: unknown } }).error ?? {};
+    graphError = typeof e.code === "number" ? e.code : null;
+    graphSubcode = typeof e.error_subcode === "number" ? e.error_subcode : null;
+  } catch { /* not JSON: read the words below */ }
+  if (graphError === 100 || /does not exist|Unsupported post request/i.test(body)) return { graphError, graphSubcode };
+  return null;
+}
+
+/**
+ * Logs one clear line when Meta refused the dataset: only the status, Meta's error code and the dataset id's length
+ * (never the token, the event, Meta's whole answer or anything about a person). True when it was such a refusal.
+ */
+export function logDatasetRefusal(fn: string, status: number, body: string, datasetId: string): boolean {
+  const r = datasetRefusal(status, body);
+  if (!r) return false;
+  log(fn, {
+    ok: false,
+    error: "meta_dataset_refused",
+    status,
+    meta_error: r.graphError,
+    meta_subcode: r.graphSubcode,
+    dataset_digits: datasetId.length,
+    detail: "Meta refused the dataset: check that META_PIXEL_ID is the dataset id and the token can send to it.",
+  });
+  return true;
+}
+
 export function normEmail(email: string | null | undefined): string | null {
   const e = (email ?? "").trim().toLowerCase();
   return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e) ? e : null;
@@ -79,7 +133,12 @@ export function adsAllowed(latestChoice: boolean | null, adsOk: boolean | null):
   return adsOk === true;
 }
 
-export type CapiResult = "sent" | "skipped_mock" | "skipped_no_consent" | "skipped_not_listed";
+export type CapiResult =
+  | "sent"
+  | "skipped_mock"
+  | "skipped_no_dataset"
+  | "skipped_no_consent"
+  | "skipped_not_listed";
 
 export async function sendCapi(
   eventId: string,
@@ -93,11 +152,16 @@ export async function sendCapi(
     .maybeSingle();
   if (error) throw error;
   if (!row || !META_EVENT[row.event as string]) return "skipped_not_listed";
-  const pixel = Deno.env.get("META_PIXEL_ID") ?? "";
+  const raw = Deno.env.get("META_PIXEL_ID") ?? "";
+  const pixel = metaDatasetId(raw);
   const token = Deno.env.get("META_CAPI_TOKEN") ?? "";
-  if (!pixel || !token) {
+  if (!raw || !token) {
     log("meta_capi", { ok: true, mock: true, event: row.event });
     return "skipped_mock";
+  }
+  if (!pixel) {
+    logNoDataset("meta_capi");
+    return "skipped_no_dataset";
   }
   const userId = row.distinct_id as string;
   const [{ data: attr }, { data: choice }, { data: u }, { data: role }] = await Promise.all([
@@ -158,7 +222,11 @@ export async function sendCapi(
     headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
     body: JSON.stringify({ data: [event] }),
   });
-  if (!res.ok) throw new Error(`meta_capi ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  if (!res.ok) {
+    const text = await res.text();
+    logDatasetRefusal("meta_capi", res.status, text, pixel);
+    throw new Error(`meta_capi ${res.status}: ${text.slice(0, 200)}`);
+  }
   log("meta_capi", { ok: true, event: row.event, messaging: Boolean(ctwa) });
   return "sent";
 }
