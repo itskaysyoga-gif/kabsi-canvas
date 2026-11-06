@@ -137,7 +137,7 @@ export class Imap {
   }
 
   private async fill(): Promise<boolean> {
-    let t: number | undefined;
+    let t: ReturnType<typeof setTimeout> | undefined;
     const c = await Promise.race([
       this.io.read(),
       new Promise<never>((_r, reject) => { t = setTimeout(() => reject(new Error("imap: timeout")), 30_000); }),
