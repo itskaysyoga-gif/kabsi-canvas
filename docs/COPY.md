@@ -1761,3 +1761,9 @@ Every new or changed line of Scan 3. The result's lines are in src/lib/scan-word
 - **The founder** (charcoal band): the two lines are now "Works in Meta advertising, e-commerce and digital marketing, and runs the online presence and paid campaigns of a real estate partnership." (Rashid's own stated background, 30.35 item 3; was "Spent years running ads and online presence for local businesses.") and, unchanged, "Saw the same gap every time: unanswered reviews and Google details out of date."
 - **Every feature runs on a real Google profile first** ("real Google profile" on the bar; was "We run Kabsi on our own business first"): "Before an owner sees a feature, Kabsi runs it on a real Google profile. What Kabsi did there:" then the same five lines and "From Kabsi's own records, 5 November 2026." The business is not named anywhere public (K-85 item 6, 30.35 item 2): not on About, in the facts, the llms files, Nora's rules or the social images.
 - **Facts, FAQ**: the example of a web address Google removes from a name is now "Rosa Bakery.com" to "Rosa Bakery" (an invented example).
+
+### Part C: Settings, finished (branch claude/launch1-c)
+
+- **Where your routine messages go**, when WhatsApp is switched off for owners (whatsapp_owners_on false): "WhatsApp messages from Kabsi are paused for now. Your reports and reminders come by email." Email reads as chosen. The other lines of section 60 are unchanged.
+- **The WhatsApp panel**: "Review alerts with Approve" and "Your weekly report on WhatsApp" move at once; a failed save puts the switch back with "Couldn't save that. It is back as it was. Try again." (section 60's line; was "Couldn't save. Please try again.").
+- No other words change. The field "Also send review alerts to (optional, up to 3)" gets its own id (it shared one with the "Review emails" heading).

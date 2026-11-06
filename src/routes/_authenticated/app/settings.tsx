@@ -45,7 +45,7 @@ import {
   deliveryFailedLine,
   whatsappBlock,
 } from "@/lib/routine-delivery";
-import { whatsappStatus, type WhatsappStatus } from "@/lib/whatsapp-owner";
+import { whatsappOwnersOn, whatsappStatus, type WhatsappStatus } from "@/lib/whatsapp-owner";
 
 // Settings (UX 1, Design 3; COPY.md 19): the business and the email, where routine messages go and the four switches, the
 // email timing (D220, through the membership-checked update_notification_settings RPC), WhatsApp, the tone and the AI
@@ -257,6 +257,13 @@ function RoutineChannel({ locationId }: { locationId: string }) {
     queryFn: () => loadPrefs(locationId),
     enabled: WHATSAPP_ON,
   });
+  // Launch 1: whether owners' WhatsApp is switched on, so the one-line reason is right. A failed read blocks nothing.
+  const ownersOn = useQuery({
+    queryKey: ["whatsapp-owners-on"],
+    queryFn: whatsappOwnersOn,
+    enabled: WHATSAPP_ON,
+    staleTime: 60_000,
+  });
   const [err, setErr] = useState("");
   const burst = useRef<{
     shown: DeliveryChannel;
@@ -267,6 +274,7 @@ function RoutineChannel({ locationId }: { locationId: string }) {
   const prefsKey = ["notification-prefs", locationId];
   const inputs = () => ({
     whatsappOn: WHATSAPP_ON,
+    ownersOn: qc.getQueryData<boolean>(["whatsapp-owners-on"]),
     status: qc.getQueryData<WhatsappStatus>(["whatsapp-status"]),
     statusFailed: false,
     stored: qc.getQueryData<DeliveryChannel | null>(["routine-channel"]),
@@ -325,7 +333,11 @@ function RoutineChannel({ locationId }: { locationId: string }) {
     },
   });
   const failed = WHATSAPP_ON && (stored.isError || prefs.isError);
-  if (WHATSAPP_ON && (status.isLoading || stored.isLoading || prefs.isLoading) && !failed)
+  if (
+    WHATSAPP_ON &&
+    (status.isLoading || stored.isLoading || prefs.isLoading || ownersOn.isLoading) &&
+    !failed
+  )
     return null;
   if (failed)
     return (
@@ -335,6 +347,7 @@ function RoutineChannel({ locationId }: { locationId: string }) {
     );
   const input = {
     whatsappOn: WHATSAPP_ON,
+    ownersOn: ownersOn.data,
     status: status.data,
     statusFailed: status.isError,
     stored: stored.data,
@@ -909,7 +922,7 @@ function EmailSettings({
           </div>
         </div>
         <Field
-          id="emails"
+          id="alert-emails"
           className="mt-5"
           label="Also send review alerts to (optional, up to 3)"
           value={emails}

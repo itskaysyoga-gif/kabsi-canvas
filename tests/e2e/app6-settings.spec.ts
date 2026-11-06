@@ -17,6 +17,8 @@ type Server = {
   prefs: Pref[];
   failSaves: boolean;
   delayMs: number;
+  /** Launch 1: whatsapp_owners_on. */
+  ownersOn: boolean;
   calls: string[];
 };
 
@@ -26,6 +28,7 @@ const newServer = (over: Partial<Server> = {}): Server => ({
   prefs: [],
   failSaves: false,
   delayMs: 0,
+  ownersOn: true,
   calls: [],
   ...over,
 });
@@ -60,6 +63,18 @@ async function open(page: Page, srv: Server) {
     const path = new URL(req.url()).pathname;
     const body = req.postData() ? JSON.parse(req.postData()!) : {};
     if (path.endsWith("/rpc/whatsapp_status")) return route.fulfill(json(srv.status));
+    if (path.endsWith("/rpc/whatsapp_owners_on")) return route.fulfill(json(srv.ownersOn));
+    if (path.endsWith("/rpc/whatsapp_set_prefs")) {
+      srv.calls.push(`wa:${body.p_review_alerts}:${body.p_digest}`);
+      await new Promise((r) => setTimeout(r, srv.delayMs));
+      if (srv.failSaves) return route.fulfill(json({ message: "boom" }, 500));
+      srv.status = {
+        ...srv.status,
+        ...(body.p_review_alerts == null ? {} : { review_alerts: body.p_review_alerts }),
+        ...(body.p_digest == null ? {} : { digest_optin: body.p_digest }),
+      };
+      return route.fulfill(json(srv.status));
+    }
     if (path.endsWith("/rpc/my_notification_prefs")) return route.fulfill(json(srv.prefs));
     if (path.endsWith("/rest/v1/routine_channels"))
       return route.fulfill(
@@ -296,6 +311,45 @@ test.describe("Settings: the switches and the list", () => {
     await expect(digest).not.toBeChecked();
     expect(srv.prefs).toEqual([saved]);
     await axeClean(page);
+  });
+  test("Launch 1: owners' WhatsApp switched off reads as paused, with Email chosen", async ({
+    page,
+  }) => {
+    const srv = newServer({ ownersOn: false, stored: "whatsapp" });
+    await open(page, srv);
+    await expect(
+      page.getByText(
+        "WhatsApp messages from Kabsi are paused for now. Your reports and reminders come by email.",
+      ),
+    ).toBeVisible();
+    await expect(checked(page)).toHaveText("Email");
+    await axeClean(page);
+  });
+
+  test("Launch 1: the WhatsApp panel's switches move at once while the save is slow, and stay after a reload", async ({
+    page,
+  }) => {
+    const srv = newServer({ delayMs: 1500 });
+    await open(page, srv);
+    const sw = page.getByRole("switch", { name: "Your weekly report on WhatsApp" });
+    await expect(sw).toHaveAttribute("aria-checked", "false");
+    await sw.click();
+    await expect(sw).toHaveAttribute("aria-checked", "true", { timeout: 300 });
+    await expect.poll(() => srv.status.digest_optin, { timeout: 8000 }).toBe(true);
+    await page.reload();
+    await expect(
+      page.getByRole("switch", { name: "Your weekly report on WhatsApp" }),
+    ).toHaveAttribute("aria-checked", "true");
+    // A failed save puts the switch back and says so.
+    srv.failSaves = true;
+    srv.delayMs = 200;
+    const alerts = page.getByRole("switch", { name: "Review alerts with Approve" });
+    await alerts.click();
+    await expect(alerts).toHaveAttribute("aria-checked", "true", { timeout: 300 });
+    await expect(
+      page.getByText("Couldn't save that. It is back as it was. Try again."),
+    ).toBeVisible();
+    await expect(alerts).toHaveAttribute("aria-checked", "false");
   });
 });
 

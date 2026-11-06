@@ -8,6 +8,7 @@ import {
   whatsappDisconnect,
   whatsappPrefs,
   whatsappStatus,
+  type WhatsappStatus,
 } from "@/lib/whatsapp-owner";
 
 // The WhatsApp panel in Settings (P0.8-03, K-129). While Kabsi has no WhatsApp number it says "coming soon" and calls
@@ -43,11 +44,33 @@ function WhatsappConnected() {
     },
     onError: () => setErr("Couldn't start. Please try again."),
   });
+  // Launch 1 (part C): a switch moves at once and the server's answer only confirms it (it took 540 to 670 ms on
+  // production before). One save after another; a failure puts the switch back and says so.
   const prefs = useMutation({
+    mutationKey: ["whatsapp-prefs"],
+    scope: { id: "whatsapp-prefs" },
     mutationFn: (v: { alerts: boolean | null; digest: boolean | null }) =>
       whatsappPrefs(v.alerts, v.digest),
-    onSuccess: refresh,
-    onError: () => setErr("Couldn't save. Please try again."),
+    onMutate: async (v) => {
+      setErr("");
+      await qc.cancelQueries({ queryKey: ["whatsapp-status"] });
+      const before = qc.getQueryData<WhatsappStatus>(["whatsapp-status"]);
+      if (before)
+        qc.setQueryData<WhatsappStatus>(["whatsapp-status"], {
+          ...before,
+          ...(v.alerts === null ? {} : { review_alerts: v.alerts }),
+          ...(v.digest === null ? {} : { digest_optin: v.digest }),
+        });
+      return { before };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.before) qc.setQueryData(["whatsapp-status"], ctx.before);
+      setErr("Couldn't save that. It is back as it was. Try again.");
+    },
+    onSettled: () => {
+      // Read the truth back once the last save is done.
+      if (qc.isMutating({ mutationKey: ["whatsapp-prefs"] }) <= 1) refresh();
+    },
   });
   const disconnect = useMutation({ mutationFn: whatsappDisconnect, onSuccess: refresh });
   const s = status.data;
@@ -65,13 +88,11 @@ function WhatsappConnected() {
             <Switch
               label="Review alerts with Approve"
               checked={s.review_alerts !== false}
-              disabled={prefs.isPending}
               onChange={(v) => prefs.mutate({ alerts: v, digest: null })}
             />
             <Switch
               label="Your weekly report on WhatsApp"
               checked={s.digest_optin === true}
-              disabled={prefs.isPending}
               onChange={(v) => prefs.mutate({ alerts: null, digest: v })}
             />
           </div>

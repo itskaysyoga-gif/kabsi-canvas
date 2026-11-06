@@ -27,6 +27,13 @@ export async function whatsappStatus(): Promise<WhatsappStatus> {
 }
 
 /** The wa.me link that opens a chat with Kabsi's number with the code already typed. */
+/** Launch 1: whether WhatsApp is switched on for owners (whatsapp_owners_on), the one boolean and nothing else. */
+export async function whatsappOwnersOn(): Promise<boolean> {
+  const { data, error } = await supabase.rpc("whatsapp_owners_on");
+  if (error) throw error;
+  return data === true;
+}
+
 export function connectHref(code: string, digits: string = WHATSAPP_DIGITS): string {
   return `https://wa.me/${digits}?text=${encodeURIComponent(`KABSI ${code}`)}`;
 }
