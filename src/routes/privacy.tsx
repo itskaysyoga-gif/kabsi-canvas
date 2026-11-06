@@ -718,13 +718,15 @@ function Page() {
           The lawful basis is legitimate interests: telling businesses about a service that may help
           them. No message has been sent, and none is sent without a further check of the law in the
           country where the business is. Kabsi checks each business again at least every six months
-          and marks one that has closed. The list is held privately and is never sold or shared.
+          and marks one that has closed. We delete an entry 24 months after we add it, or 90 days
+          after the business closes, whichever is sooner. The list is held privately and is never
+          sold or shared.
         </p>
         <p>
-          Any business can ask to be removed or never to be contacted. Write to {CONTACT_EMAIL} and
-          Kabsi acts within 30 days. A business that asks never to be contacted goes on a list that
-          stops it being added again. You can also ask what Kabsi holds about your business, object
-          to Kabsi holding it, or complain to the data protection authority where you are.
+          If you ask us to remove your business or never contact it, we do so within 30 days and
+          keep only a coded form of the address, so we never write to it. Write to {CONTACT_EMAIL}.
+          You can also ask what Kabsi holds about your business, object to Kabsi holding it, or
+          complain to the data protection authority where you are.
         </p>
       </section>
 
