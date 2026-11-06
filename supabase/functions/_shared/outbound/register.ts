@@ -77,6 +77,9 @@ export function rowRefusal(r: Record<string, string>, openCountries: readonly st
   if (r.country === "GB") {
     if (r.company_type !== "registered company") return "not_registered_company";
     if (!/^[A-Z0-9]{8}$/i.test(r.company_number)) return "no_company_number";
+    // Limited partnerships (LP England and Wales, SL Scotland, NL Northern Ireland) are partnerships, not companies:
+    // PECR's exemption covers limited companies and LLPs only (LLP numbers start OC, SO or NC and stay allowed).
+    if (/^(LP|SL|NL)/i.test(r.company_number)) return "limited_partnership";
     const company = companyRefusal(r, today);
     if (company) return company;
   }

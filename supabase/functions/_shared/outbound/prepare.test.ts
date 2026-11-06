@@ -117,6 +117,8 @@ Deno.test("Companies House from Harvey's register: Active on a Basic Company Dat
   assert.equal(companyRefusal({ ok: "x" }, day), "no_company_status", "an older register without the columns");
   assert.equal(companyRefusal({ ...ok, company_status_date: "2026-11-07" }, day), "company_status_date_ahead");
   assert.equal(rowRefusal({ ...ok, country: "US", company_status: "" }, ["US"], day), null, "only UK rows need Companies House");
+  for (const n of ["LP012345", "SL012345", "NL012345"]) assert.equal(rowRefusal({ ...ok, company_number: n }, ["GB"], day), "limited_partnership", n);
+  for (const n of ["OC412345", "SO301234", "NC001234", "SC123456", "NI012345"]) assert.equal(rowRefusal({ ...ok, company_number: n }, ["GB"], day), null, n);
   assert.equal(toCandidate(ok).company_status, "active");
   assert.equal(toCandidate(ok).company_status_date, "2026-10-01");
 });
@@ -155,8 +157,9 @@ Deno.test("test mode: fixture businesses only, addressed to the test recipients,
   const r = await prepare(deps);
   assert.equal(r.state, "test");
   assert.equal(r.drafted, 3);
-  for (const d of inserted as { prospect: { email: string; test: boolean }; first: { to_address: string; send_after: string } }[]) {
+  for (const d of inserted as { prospect: { email: string; test: boolean; company_status: string; company_status_date: string | null }; first: { to_address: string; send_after: string } }[]) {
     assert.match(d.prospect.email, /@[a-z]+\.example\.com$/);
+    assert.deepEqual([d.prospect.company_status, d.prospect.company_status_date], ["test", null], "no file date shown for a test row");
     assert.equal(d.prospect.test, true);
     assert.equal(d.first.to_address, "inbox@test.example.com");
     assert.equal(localParts(new Date(d.first.send_after), "Europe/London").date, "2026-11-09", "Friday prepares Monday");

@@ -92,7 +92,7 @@ export async function prepare(deps: PrepareDeps, opts: { today?: boolean } = {})
         harvey_company_id: c.company_id, country: c.country, industry: c.industry, city: c.city, business_name: c.business_name,
         email: c.email, email_domain: domain, time_zone: tz, source_page: c.email_page_url, source_date: today,
         company_number: c.company_number || null, company_status: test ? "test" : c.country === "GB" ? c.company_status : null,
-        company_status_date: c.country === "GB" ? c.company_status_date : null, detail_kind: detail.kind,
+        company_status_date: !test && c.country === "GB" ? c.company_status_date : null, detail_kind: detail.kind,
         detail_used: detail.sentence, test,
       },
       first: { to_address: to, ...one, send_after: localNine(day, tz).toISOString() },
