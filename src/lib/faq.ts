@@ -99,7 +99,8 @@ export const FAQ: { q: string; a: string }[] = [
   },
 ];
 
-export const faqJsonLd = (items = FAQ) => ({
+// Launch 4: no default list, so a route head that builds FAQPage markup does not pull FAQ into the shared entry script.
+export const faqJsonLd = (items: { q: string; a: string }[]) => ({
   "@context": "https://schema.org",
   "@type": "FAQPage",
   mainEntity: items.map((f) => ({
