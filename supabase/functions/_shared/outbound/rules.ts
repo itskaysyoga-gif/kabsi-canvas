@@ -120,9 +120,32 @@ const DAY = "(?:mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)(?:day|nesday|sday|u
 const TIME = "(?:[01]?\\d|2[0-3])(?:[:.][0-5]\\d)?\\s*(?:am|pm)?";
 const HOURS_RE = new RegExp(`\\b${DAY}\\b[^\\n<]{0,40}?\\b${TIME}\\s*(?:-|to|until|till|–)\\s*${TIME}`, "i");
 
+/** The page without its script, style and noscript blocks: a plain scan, not a pattern. The text is only searched for
+ *  the address and the detail, never shown or stored. */
+export function withoutBlocks(html: string): string {
+  const src = String(html ?? "");
+  const low = src.toLowerCase();
+  let out = "";
+  let at = 0;
+  for (;;) {
+    let next = -1;
+    let tag = "";
+    for (const t of ["script", "style", "noscript"]) {
+      const i = low.indexOf(`<${t}`, at);
+      if (i >= 0 && (next < 0 || i < next)) { next = i; tag = t; }
+    }
+    if (next < 0) return out + src.slice(at);
+    out += src.slice(at, next) + " ";
+    const end = low.indexOf(`</${tag}`, next);
+    if (end < 0) return out;
+    const close = low.indexOf(">", end);
+    if (close < 0) return out;
+    at = close + 1;
+  }
+}
+
 export function textOf(html: string): string {
-  return String(html ?? "")
-    .replace(/<(script|style|noscript)\b[\s\S]*?<\/\1>/gi, " ")
+  return withoutBlocks(html)
     .replace(/<br\s*\/?>|<\/(p|div|li|tr|h\d)>/gi, "\n")
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;/gi, " ").replace(/&amp;/gi, "&").replace(/&#64;|&commat;/gi, "@").replace(/&#46;/g, ".")
