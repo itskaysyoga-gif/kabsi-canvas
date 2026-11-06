@@ -869,3 +869,18 @@ Deno.test(
     );
   },
 );
+
+Deno.test("launch4: the warm-up answers at once, with no limit, no bot check, no database and no Google call", async () => {
+  const w = world({ turnstile: false });
+  try {
+    const r = await w.call({ action: "warm", turnstile: "" });
+    assert.equal(r.status, 200);
+    assert.deepEqual(r.body, { ok: true });
+    assert.equal(w.requests.length, 0);
+    assert.equal(w.hits.size, 0);
+    assert.equal(w.saved.length, 0);
+    assert.equal(w.errors.length, 0);
+  } finally {
+    restore();
+  }
+});

@@ -17,7 +17,12 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
-import { newSessionToken, suggestBusinesses, type FoundBusiness } from "@/lib/profile-check";
+import {
+  newSessionToken,
+  suggestBusinesses,
+  wakeSuggestions,
+  type FoundBusiness,
+} from "@/lib/profile-check";
 
 // Scan 3: the pass's code and the bot check's widget load on the box's first touch, not with the page.
 const passStore = () => import("@/lib/suggest-pass");
@@ -126,6 +131,8 @@ export function BusinessCombobox({
   // first suggestion call carries it and the function is awake before the third character. A pass this tab already holds
   // (another box, an earlier page) is used as it is. If the pass cannot be had, the first suggestion asks as before.
   const warm = useCallback(() => {
+    // Launch 4 part D: wake the function now (once per page), while the bot check below is still being solved.
+    if (available) wakeSuggestions();
     if (!available || warming.current || warmed.current || asking.current) return;
     warmed.current = true;
     warming.current = (async () => {
