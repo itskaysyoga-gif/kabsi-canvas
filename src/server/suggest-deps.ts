@@ -2,6 +2,7 @@
 // Server only (src/server is never bundled for the browser). The three secrets are read from Vercel's environment at
 // call time and never logged: PLACES_API_KEY, TURNSTILE_SECRET_KEY and SUGGEST_ROUTE_KEY (the key the database made for
 // this route, which opens public.suggest_take only; no service key is ever on Vercel).
+import { createHash } from "node:crypto";
 import { getCache } from "@vercel/functions";
 import { autocompleteWeb } from "../../supabase/functions/_shared/google/places/autocomplete-web.ts";
 import { supabasePublishableKey, supabaseUrl } from "../lib/supabase-config";
@@ -94,7 +95,11 @@ function memorySet(key: string, value: Cached) {
 // entry name is left empty so the typed letters never reach Vercel's cache dashboard. A slow cache is not waited for.
 const runtime = (() => {
   try {
-    return getCache({ namespace: "kabsi-suggest-v1" });
+    // SHA-256 for the key, not the library's 32 bit default, so two prefixes never share an entry (review of 6 Nov).
+    return getCache({
+      namespace: "kabsi-suggest-v1",
+      keyHashFunction: (k: string) => createHash("sha256").update(k).digest("hex"),
+    });
   } catch {
     return null;
   }
@@ -111,7 +116,8 @@ async function cacheGet(key: string): Promise<Cached | null> {
     60,
     null,
   )) as Cached | null;
-  if (v && Array.isArray(v.suggestions)) memorySet(key, v);
+  if (!v || v.key !== key || !Array.isArray(v.suggestions)) return null;
+  memorySet(key, v);
   return v;
 }
 async function cacheSet(key: string, value: Cached): Promise<void> {

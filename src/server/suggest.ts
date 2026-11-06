@@ -15,9 +15,11 @@
 //   cap, in one database round trip: public.suggest_take, reached with the public key and this route's own key (Vercel
 //   env SUGGEST_ROUTE_KEY, made by the database and kept in Vault), which opens that one function only. The route
 //   holds no service key (Sec 1).
-// The database call and the Google call run at the same time; Google's answer is dropped when the database refuses.
-// After a refusal this instance asks the database first, for a while, so a visitor over the limits (or a day at the cap)
-// does not keep costing Google calls.
+// The database call and the Google call run at the same time only for a visitor this instance saw allowed in the last
+// 30 seconds with none of their calls in flight (the typing session's later letters); Google's answer is then dropped
+// if the database refuses. Every other call asks the database first, so a burst, a fresh instance or a day at the cap
+// costs no Google call that the cap does not count (review of 6 Nov: at most one uncounted call per visitor and
+// instance, and only right after an allowed one). After any refusal the instance asks the database first for a minute.
 //
 // Answers are kept 10 minutes per normalised prefix and country (in this instance's memory, then Vercel's Runtime Cache
 // for the region), so a repeat costs no Google call. What is kept is Google's suggestion list for a few letters
@@ -31,13 +33,16 @@ export const LIMITS = { perMinute: 20, perHour: 120, perDay: 60 } as const;
 export const CACHE_SECONDS = 600;
 const PASS_SECONDS = 15 * 60;
 const SERIAL_AFTER_REFUSAL_MS = 60_000;
+const TRUSTED_MS = 30_000;
+const BOT_TRIES_PER_MINUTE = 10;
 const SESSION_RE = /^[A-Za-z0-9-]{16,64}$/;
 const PLACE_ID_RE = /^[A-Za-z0-9_-]{10,200}$/;
 const IP_RE = /^[0-9a-fA-F:.]{2,45}$/;
 
 export type Suggestion = { place_id: string; name: string; address: string };
 export type Take = { allowed: boolean; reason?: "rate_limited" | "back_soon" | "error" };
-export type Cached = { suggestions: Suggestion[] };
+/** The key is stored with the list and compared on read, so a hash collision is never served (review of 6 Nov). */
+export type Cached = { key: string; suggestions: Suggestion[] };
 
 export type SuggestDeps = {
   env: (name: string) => string | undefined;
@@ -112,6 +117,17 @@ const isCached = (v: unknown): v is Cached =>
 export function makeSuggestHandler(d: SuggestDeps) {
   // After a refusal (a limit or the day's cap), this instance waits for the database before asking Google.
   let serialUntil = 0;
+  // Visitors this instance saw allowed lately, and how many of their calls are in flight (memory only, hashes only).
+  const seen = new Map<string, { allowedAt: number; inFlight: number }>();
+  // Turnstile attempts per visitor and minute in this instance, before any database or Cloudflare call.
+  const botTries = new Map<string, { at: number; n: number }>();
+  const prune = () => {
+    if (seen.size + botTries.size < 5000) return;
+    const now = d.now();
+    for (const [k, v] of seen)
+      if (now - v.allowedAt > TRUSTED_MS && v.inFlight === 0) seen.delete(k);
+    for (const [k, v] of botTries) if (now - v.at > 60_000) botTries.delete(k);
+  };
 
   return async (req: Request): Promise<Response> => {
     const t0 = d.now();
@@ -139,9 +155,23 @@ export function makeSuggestHandler(d: SuggestDeps) {
     ) => reply({ error: code, message }, status, { outcome: code, ...extra });
 
     if (req.method !== "POST") return fail("method_not_allowed", "Use POST.", 405);
-    // Same-origin only: a browser on another site cannot spend Kabsi's suggestions.
+    // Same-origin only: a browser on another site cannot spend Kabsi's suggestions. The hosts are compared (the scheme
+    // seen behind Vercel's edge can differ from the browser's).
     const origin = req.headers.get("origin");
-    if (origin && origin !== new URL(req.url).origin) return fail("forbidden", "Not allowed.", 403);
+    if (origin) {
+      const host = (
+        req.headers.get("x-forwarded-host") ??
+        req.headers.get("host") ??
+        new URL(req.url).host
+      ).toLowerCase();
+      let originHost = "";
+      try {
+        originHost = new URL(origin).host.toLowerCase();
+      } catch {
+        originHost = "";
+      }
+      if (originHost !== host) return fail("forbidden", "Not allowed.", 403);
+    }
     const text = await req.text().catch(() => "");
     if (text.length > 2048) return fail("too_large", "Too large.", 413);
     let b: Record<string, unknown> = {};
@@ -176,6 +206,18 @@ export function makeSuggestHandler(d: SuggestDeps) {
       for (let i = 0; i < want.length; i++) diff |= want.charCodeAt(i) ^ pass.charCodeAt(i);
       return diff === 0;
     };
+    prune();
+    // A cheap stop before Turnstile: at most 10 bot checks a minute per visitor in this instance.
+    const botTry = () => {
+      const now = d.now();
+      const e = botTries.get(visitor);
+      if (!e || now - e.at > 60_000) {
+        botTries.set(visitor, { at: now, n: 1 });
+        return true;
+      }
+      e.n += 1;
+      return e.n <= BOT_TRIES_PER_MINUTE;
+    };
     const timed = async <T>(name: string, p: Promise<T>): Promise<T> => {
       const s = d.now();
       try {
@@ -188,6 +230,8 @@ export function makeSuggestHandler(d: SuggestDeps) {
     if (action === "pass") {
       const take = await timed("db", d.take(visitor, [LIMITS.perMinute, null, null], false));
       if (!take.allowed)
+        return fail("rate_limited", "That is a lot of searches. Try again in a minute.", 429);
+      if (!botTry())
         return fail("rate_limited", "That is a lot of searches. Try again in a minute.", 429);
       if (!(await timed("bot", d.verifyTurnstile(str(b["turnstile"]), ip)))) {
         return fail("challenge_failed", "Please complete the check and try again.", 400);
@@ -206,6 +250,8 @@ export function makeSuggestHandler(d: SuggestDeps) {
     let pass: string | null = null;
     const given = str(b["pass"]);
     if (!(given && (await passValid(given)))) {
+      if (!botTry())
+        return fail("rate_limited", "That is a lot of searches. Try again in a minute.", 429);
       if (!(await timed("bot", d.verifyTurnstile(str(b["turnstile"]), ip)))) {
         return fail("challenge_failed", "Please complete the check and try again.", 400);
       }
@@ -230,9 +276,12 @@ export function makeSuggestHandler(d: SuggestDeps) {
       "cache",
       d.cacheGet(key).catch(() => null),
     );
-    if (cached && isCached(cached)) {
+    if (cached && isCached(cached) && cached.key === key) {
       const take = await timed("db", d.take(visitor, limits, false));
       if (!take.allowed) return refused(take);
+      const me = seen.get(visitor);
+      if (me) me.allowedAt = d.now();
+      else seen.set(visitor, { allowedAt: d.now(), inFlight: 0 });
       return reply(withPass({ suggestions: cached.suggestions, available: true }), 200, {
         outcome: "ok",
         cache: "hit",
@@ -246,10 +295,16 @@ export function makeSuggestHandler(d: SuggestDeps) {
       return mapSuggestions(r.data);
     };
     let suggestions: Suggestion[];
+    const me = seen.get(visitor) ?? { allowedAt: -Infinity, inFlight: 0 };
+    seen.set(visitor, me);
+    const parallel =
+      d.now() >= serialUntil && d.now() - me.allowedAt <= TRUSTED_MS && me.inFlight === 0;
+    me.inFlight += 1;
     try {
-      if (d.now() < serialUntil) {
+      if (!parallel) {
         const take = await timed("db", d.take(visitor, limits, true));
         if (!take.allowed) return refused(take);
+        me.allowedAt = d.now();
         suggestions = await google();
       } else {
         // The database and Google at the same time; Google's answer is dropped if the database refuses.
@@ -260,14 +315,17 @@ export function makeSuggestHandler(d: SuggestDeps) {
           ctrl.abort();
           return refused(take);
         }
+        me.allowedAt = d.now();
         suggestions = await g;
       }
     } catch {
       return reply(withPass({ suggestions: [], available: false }), 200, {
         outcome: "google_error",
       });
+    } finally {
+      me.inFlight -= 1;
     }
-    await d.cacheSet(key, { suggestions }).catch(() => undefined);
+    await d.cacheSet(key, { key, suggestions }).catch(() => undefined);
     return reply(withPass({ suggestions, available: true }), 200, { outcome: "ok", cache: "miss" });
   };
 }

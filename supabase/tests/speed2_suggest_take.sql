@@ -1,5 +1,5 @@
 -- Speed 2 part A: suggest_take, the one database call of POST /api/suggest on kabsi.co. The limits and the Autocomplete
--- cap in one round trip, in profile-snapshot's order and keys; service role only.
+-- cap in one round trip, in profile-snapshot's order and keys; only a call with the route key gets through.
 begin;
 create extension if not exists pgtap with schema extensions;
 select * from no_plan();

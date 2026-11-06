@@ -1,6 +1,6 @@
 // Speed 2 part A: where the suggestion box sends its calls. First POST /api/suggest on the page's own address (no CORS
 // preflight, no Supabase gateway; src/server/suggest.ts). Until that route is set up on Vercel (it answers 503
-// not_configured, or 404 on an older deploy) the box keeps using profile-snapshot's suggest and pass actions as before,
+// not_configured, 404 on an older deploy, or 403 when it does not take the page's origin) the box keeps using profile-snapshot's suggest and pass actions as before,
 // for the rest of the page view. Both paths take the same request and give the same answer.
 import { anonHeaders, supabaseUrl } from "@/lib/supabase-config";
 
@@ -21,7 +21,7 @@ const viaFunction = (body: string, init: RequestInit) =>
   });
 
 async function routeIsOff(res: Response): Promise<boolean> {
-  if (res.status === 404 || res.status === 405) return true;
+  if (res.status === 403 || res.status === 404 || res.status === 405) return true;
   if (res.status !== 503) return false;
   const j = (await res
     .clone()
@@ -44,11 +44,15 @@ export async function postSuggest(
       body,
       ...signal,
     });
-    if (!(await routeIsOff(res))) {
+    if (await routeIsOff(res)) {
+      route = "off";
+    } else if (res.status >= 500) {
+      // The route broke before it could answer (not a "not set up"): this one call goes the old way.
+      return viaFunction(body, signal);
+    } else {
       route = "on";
       return res;
     }
-    route = "off";
   }
   return viaFunction(body, signal);
 }

@@ -174,18 +174,21 @@ describe("Speed 2 part A: /api/suggest", () => {
     expect(res.status).toBe(429);
     expect(JSON.stringify(await res.json())).not.toContain("Seven One");
     expect(r.cache.size).toBe(0);
-    // The database and Google ran at the same time.
-    expect(r.google).toEqual(["seven one"]);
+    // A visitor this instance has not seen allowed goes to the database first: no Google call at all.
+    expect(r.google).toEqual([]);
   });
 
   it("after a refusal the instance asks the database first, so a visitor over the limits costs no Google call", async () => {
     const r = rig();
     const handler = makeSuggestHandler(r.deps);
-    r.setTake({ allowed: false, reason: "rate_limited" });
     await handler(suggest({ query: "abc one" }));
     expect(r.google).toEqual(["abc one"]);
-    await handler(suggest({ query: "abc two" }));
-    expect(r.google).toEqual(["abc one"]);
+    r.setTake({ allowed: false, reason: "rate_limited" });
+    await handler(suggest({ query: "abc two", turnstile: undefined, pass: snapshotPass() }));
+    expect(r.google).toEqual(["abc one", "abc two"]); // in parallel, right after an allowed call
+    // A fresh allowed window is needed again: the next calls ask the database first.
+    await handler(suggest({ query: "abc three", turnstile: undefined, pass: snapshotPass() }));
+    expect(r.google).toEqual(["abc one", "abc two"]);
   });
 
   it("at the day's cap the box becomes a plain search (available false), with the pass kept", async () => {
@@ -299,5 +302,75 @@ describe("Speed 2 part A: /api/suggest", () => {
     expect(
       readFileSync("supabase/functions/_shared/google/places/autocomplete-web.ts", "utf8"),
     ).toContain("places.googleapis.com/v1/places:autocomplete");
+  });
+});
+
+describe("Speed 2 part A: the review's findings (6 Nov)", () => {
+  it("a visitor not allowed lately goes to the database first: a burst costs no Google call", async () => {
+    const r = rig();
+    r.setTake({ allowed: false, reason: "rate_limited" });
+    const h = makeSuggestHandler(r.deps);
+    await Promise.all(["aaa one", "aaa two", "aaa three"].map((q) => h(suggest({ query: q }))));
+    expect(r.google).toEqual([]);
+  });
+
+  it("after an allowed call, the next letter runs the database and Google together", async () => {
+    const r = rig({ holdGoogle: true });
+    const h = makeSuggestHandler(r.deps);
+    r.release();
+    await h(suggest({ query: "bbb one" }));
+    r.setTake({ allowed: false, reason: "rate_limited" });
+    await h(suggest({ query: "bbb two", turnstile: undefined, pass: snapshotPass() }));
+    // The second call started Google before the refusal came back (one uncounted call at most), then the third waits.
+    expect(r.google).toEqual(["bbb one", "bbb two"]);
+    await h(suggest({ query: "bbb three", turnstile: undefined, pass: snapshotPass() }));
+    expect(r.google).toEqual(["bbb one", "bbb two"]);
+  });
+
+  it("a cached entry whose stored key differs is never served", async () => {
+    const r = rig();
+    r.cache.set("XX:seven one", {
+      key: "XX:something else",
+      suggestions: [{ place_id: "ChIJ_planted_1", name: "Planted", address: "" }],
+    });
+    const j = (await (await makeSuggestHandler(r.deps)(suggest())).json()) as {
+      suggestions: { name: string }[];
+    };
+    expect(j.suggestions[0]!.name).toBe("Seven One Salon");
+    expect(r.google).toEqual(["seven one"]);
+  });
+
+  it("at most 10 bot checks a minute per visitor, before Cloudflare is asked", async () => {
+    const r = rig({ turnstile: false });
+    let asked = 0;
+    const verify = r.deps.verifyTurnstile;
+    r.deps.verifyTurnstile = async (t, ip) => {
+      asked++;
+      return verify(t, ip);
+    };
+    const h = makeSuggestHandler(r.deps);
+    const codes: number[] = [];
+    for (let i = 0; i < 12; i++) codes.push((await h(suggest())).status);
+    expect(codes.slice(0, 10).every((c) => c === 400)).toBe(true);
+    expect(codes.slice(10)).toEqual([429, 429]);
+    expect(asked).toBe(10);
+  });
+
+  it("the same host is accepted whatever scheme the edge shows; another host is refused", async () => {
+    const r = rig();
+    const h = makeSuggestHandler(r.deps);
+    const req = (origin: string) =>
+      new Request("http://kabsi.co/api/suggest", {
+        method: "POST",
+        headers: {
+          origin,
+          host: "kabsi.co",
+          "x-forwarded-for": IP,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ action: "warm" }),
+      });
+    expect((await h(req("https://kabsi.co"))).status).toBe(200);
+    expect((await h(req("https://www.kabsi.co"))).status).toBe(403);
   });
 });
