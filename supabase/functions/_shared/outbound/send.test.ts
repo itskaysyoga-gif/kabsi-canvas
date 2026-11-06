@@ -2,7 +2,7 @@
 // example.com data. Nothing here opens a connection.
 import assert from "node:assert/strict";
 import { buildMessage, dataBlock, type Line, quotedPrintable, serverSays, smtpProbe, smtpSend } from "./smtp.ts";
-import { type DueMessage, modeRefusal, sendTick, type SendDeps, type SendSettings } from "./send.ts";
+import { type DueMessage, modeRefusal, sendTick, type SendDeps, type SendSettings, testFast } from "./send.ts";
 import { localParts } from "./rules.ts";
 
 function fakeServer(replies: string[]) {
@@ -121,6 +121,27 @@ Deno.test("the window and the caps", async () => {
   assert.equal((await sendTick(deps({ sentOn: async () => 3 }, { ...OPEN, started_on: "2026-11-08" }).d)).state, "day_full", "week 1: 3 a day");
   assert.equal((await sendTick(deps({ sentOn: async () => 4 }, { ...OPEN, started_on: "2026-11-01" }).d)).state, "sent", "week 2: 5 a day");
   assert.equal((await sendTick(deps({ sentThisMonth: async () => 300 }).d)).state, "month_full");
+});
+
+Deno.test("the test run's setting (30.39 item 12): window and spacing shortened only while locked, in test mode, before its end", async () => {
+  const testMsg = msg({ to_address: "inbox@test.example.com", prospect: { ...msg().prospect, test: true } });
+  const FRI_20 = new Date("2026-11-06T20:00:00Z");
+  const live = { ...TEST, test_fast_until: "2026-11-06T22:00:00Z" };
+  assert.ok(testFast(live, FRI_20));
+  const fast = deps({ now: FRI_20 }, live, [testMsg]);
+  assert.equal((await sendTick(fast.d)).state, "sent", "outside 9:00 to 17:00 while live");
+  assert.ok(fast.log.includes("next:1"), "1 minute apart while live");
+  assert.equal((await sendTick(deps({ now: FRI_20, sentOn: async () => 3 }, live, [testMsg]).d)).state, "day_full", "the day's cap still holds");
+  const ended = deps({ now: new Date("2026-11-06T22:00:01Z") }, live, [testMsg]);
+  assert.equal((await sendTick(ended.d)).sent, 0, "ended: the window holds again");
+  for (const s of [{ ...live, sending_open: true }, { ...live, test_mode: false }, { ...TEST, test_fast_until: null }]) {
+    assert.ok(!testFast(s, FRI_20), JSON.stringify(s));
+  }
+  const open = deps({}, { ...OPEN, test_fast_until: "2026-11-09T12:00:00Z" });
+  assert.equal((await sendTick(open.d)).state, "sent");
+  assert.ok(open.log.includes("next:20"), "never shortened once sending is open");
+  const real = deps({ now: FRI_20 }, live);
+  assert.equal((await sendTick(real.d)).sent, 0, "a real business never goes in test mode");
 });
 
 Deno.test("suppression is checked again right before sending", async () => {

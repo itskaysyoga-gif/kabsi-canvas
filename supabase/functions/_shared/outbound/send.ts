@@ -9,7 +9,16 @@ import { dailyCap, followUpDate, houseStyleOk, inWindow, linksOk, localParts, ne
 export type SendSettings = {
   sending_open: boolean; test_mode: boolean; ramp_week1: number; ramp_week2: number; ramp_after: number; monthly_cap: number;
   started_on: string | null; stopped_reason: string | null; next_send_at: string | null;
+  /** Lane R exception for the part G test run only (30.39 item 12): until this time, and only while sending is locked
+   *  and test mode is on, the 9:00 to 17:00 weekday window is skipped and the spacing is 1 minute. Set only by a lane R
+   *  migration, at most 4 hours ahead; null otherwise. */
+  test_fast_until?: string | null;
 };
+
+/** True only while the test run's shortened window and spacing apply: locked, test mode, and before test_fast_until. */
+export function testFast(s: SendSettings, now: Date): boolean {
+  return !s.sending_open && s.test_mode && !!s.test_fast_until && Date.parse(s.test_fast_until) > now.getTime();
+}
 export type DueMessage = {
   id: string; prospect_id: string; parent_id: string | null; kind: "first" | "follow_up" | "reply"; to_address: string;
   subject: string; body: string; send_after: string | null; in_reply_to: string | null; references_ids: string | null;
@@ -67,6 +76,7 @@ export async function sendTick(deps: SendDeps): Promise<SendResult> {
   if (s.next_send_at && Date.parse(s.next_send_at) > deps.now.getTime()) return { ...r, state: "spacing" };
   await deps.failStale(deps.now);
   await deps.refreshSuppression();
+  const fast = testFast(s, deps.now);
   const due = await deps.due(deps.now, !s.sending_open);
   for (const m of due) {
     const why = modeRefusal(s, m, deps.testRecipients);
@@ -96,12 +106,12 @@ export async function sendTick(deps: SendDeps): Promise<SendResult> {
       continue;
     }
     const tz = m.prospect.time_zone;
-    if (!inWindow(deps.now, tz)) continue;
+    if (!fast && !inWindow(deps.now, tz)) continue;
     const local = localParts(deps.now, tz).date;
     if ((await deps.sentOn(local, tz)) >= dailyCap(s, local)) return { ...r, state: "day_full" };
     if ((await deps.sentThisMonth()) >= s.monthly_cap) return { ...r, state: "month_full" };
 
-    if (!(await deps.reserveSlot(nextGap(deps.random)))) return { ...r, state: "spacing" };
+    if (!(await deps.reserveSlot(fast ? 60_000 : nextGap(deps.random)))) return { ...r, state: "spacing" };
     if (!(await deps.claim(m.id))) continue;
     const messageId = newMessageId();
     const thread = m.kind === "follow_up" ? m.parent!.message_id : m.in_reply_to;
