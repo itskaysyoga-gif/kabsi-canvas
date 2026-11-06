@@ -221,14 +221,16 @@ update public.locations set address = '12 Princes Street, Edinburgh EH2 2AN, UK'
 select lives_ok($$ select private.detect_holidays('00000000-0000-4000-8000-0000000000c1') $$, 'the detector runs for an Edinburgh business');
 select ok(exists(select 1 from public.holiday_prompts where location_id = '00000000-0000-4000-8000-0000000000c1'
                   and holiday_id = '00000000-0000-4000-8000-00000000d007' and state = 'asked'), 'the Scottish holiday tomorrow is asked');
+-- Read before acting as the owner (the table is closed to signed-in users): is a St Andrew's Day within the next 400 days?
+select exists(select 1 from public.holidays where region = 'scotland' and name = 'St Andrew''s Day'
+                and starts_on between (now() at time zone 'Europe/London')::date and (now() at time zone 'Europe/London')::date + 400) as st_andrew_ahead \gset
 select tests.act_as('00000000-0000-4000-8000-0000000000a1');
 select is((select coalesce(every(u ->> 'name' <> 'Test bank holiday'), true)
              from jsonb_array_elements(public.holiday_calendar('00000000-0000-4000-8000-0000000000c1', 400) -> 'upcoming') u), true,
   'an Edinburgh business sees no England and Wales holiday');
 select ok((select bool_or(u ->> 'name' = 'St Andrew''s Day')
              from jsonb_array_elements(public.holiday_calendar('00000000-0000-4000-8000-0000000000c1', 400) -> 'upcoming') u)
-          or not exists(select 1 from public.holidays where region = 'scotland' and name = 'St Andrew''s Day'
-                          and starts_on between (now() at time zone 'Europe/London')::date and (now() at time zone 'Europe/London')::date + 400),
+          or not :'st_andrew_ahead'::boolean,
   'and sees St Andrew''s Day in its calendar');
 reset role;
 update public.locations set address = '221B Baker Street, London NW1 6XE, UK' where id = '00000000-0000-4000-8000-0000000000c1';
