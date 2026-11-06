@@ -167,7 +167,7 @@ export async function emailCheck(o: {
   placeId: string;
   email: string;
   tips: boolean;
-  page: "/google-profile-check" | "/get-started" | "/";
+  page: "/google-profile-check" | "/";
   turnstile: string;
   /** Scan 2 (30.29 item B): the free check's code, so the report sent is the report shown. */
   code?: string | null;
@@ -187,7 +187,7 @@ export async function emailCheck(o: {
 export async function whatsappCheck(o: {
   placeId: string;
   phone: string;
-  page: "/google-profile-check" | "/get-started" | "/";
+  page: "/google-profile-check" | "/";
   turnstile: string;
   code?: string | null;
 }) {

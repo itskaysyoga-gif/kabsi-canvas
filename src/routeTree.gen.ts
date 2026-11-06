@@ -14,7 +14,6 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as FoundingRouteImport } from './routes/founding'
-import { Route as GetStartedRouteImport } from './routes/get-started'
 import { Route as GoogleProfileCheckRouteImport } from './routes/google-profile-check'
 import { Route as GoogleReviewLinkRouteImport } from './routes/google-review-link'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
@@ -88,11 +87,6 @@ const FaqRoute = FaqRouteImport.update({
 const FoundingRoute = FoundingRouteImport.update({
   id: '/founding',
   path: '/founding',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GetStartedRoute = GetStartedRouteImport.update({
-  id: '/get-started',
-  path: '/get-started',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GoogleProfileCheckRoute = GoogleProfileCheckRouteImport.update({
@@ -355,7 +349,6 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/faq': typeof FaqRoute
   '/founding': typeof FoundingRoute
-  '/get-started': typeof GetStartedRoute
   '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -412,7 +405,6 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/faq': typeof FaqRoute
   '/founding': typeof FoundingRoute
-  '/get-started': typeof GetStartedRoute
   '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -469,7 +461,6 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/faq': typeof FaqRoute
   '/founding': typeof FoundingRoute
-  '/get-started': typeof GetStartedRoute
   '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -528,7 +519,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/faq'
     | '/founding'
-    | '/get-started'
     | '/google-profile-check'
     | '/google-review-link'
     | '/how-it-works'
@@ -585,7 +575,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/faq'
     | '/founding'
-    | '/get-started'
     | '/google-profile-check'
     | '/google-review-link'
     | '/how-it-works'
@@ -641,7 +630,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/faq'
     | '/founding'
-    | '/get-started'
     | '/google-profile-check'
     | '/google-review-link'
     | '/how-it-works'
@@ -700,7 +688,6 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   FaqRoute: typeof FaqRoute
   FoundingRoute: typeof FoundingRoute
-  GetStartedRoute: typeof GetStartedRoute
   GoogleProfileCheckRoute: typeof GoogleProfileCheckRoute
   GoogleReviewLinkRoute: typeof GoogleReviewLinkRoute
   HowItWorksRoute: typeof HowItWorksRoute
@@ -767,13 +754,6 @@ declare module '@tanstack/react-router' {
       path: '/founding'
       fullPath: '/founding'
       preLoaderRoute: typeof FoundingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/get-started': {
-      id: '/get-started'
-      path: '/get-started'
-      fullPath: '/get-started'
-      preLoaderRoute: typeof GetStartedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/google-profile-check': {
@@ -1209,7 +1189,6 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   FaqRoute: FaqRoute,
   FoundingRoute: FoundingRoute,
-  GetStartedRoute: GetStartedRoute,
   GoogleProfileCheckRoute: GoogleProfileCheckRoute,
   GoogleReviewLinkRoute: GoogleReviewLinkRoute,
   HowItWorksRoute: HowItWorksRoute,

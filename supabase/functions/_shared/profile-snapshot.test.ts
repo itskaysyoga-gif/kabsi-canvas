@@ -247,12 +247,12 @@ Deno.test("email capture stores the consent text, the choice and the page; the t
   const w = world();
   try {
     await w.call({ action: "check", place_id: PLACE_A });
-    const ticked = await w.call({ action: "email", place_id: PLACE_A, email: " Owner@Example-Cafe.com ", tips: true, consent_text: TIPS_CONSENT_TEXT, page: "/get-started" });
+    const ticked = await w.call({ action: "email", place_id: PLACE_A, email: " Owner@Example-Cafe.com ", tips: true, consent_text: TIPS_CONSENT_TEXT, page: "/" });
     assert.equal(ticked.status, 200);
     const unticked = await w.call({ action: "email", place_id: PLACE_A, email: "other@example-cafe.com", tips: false, consent_text: TIPS_CONSENT_TEXT, page: "/google-profile-check" });
     assert.equal(unticked.status, 200);
     assert.deepEqual(w.saved, [
-      { email: "owner@example-cafe.com", place_id: PLACE_A, tips_opt_in: true, consent_text: "Send me tips on managing my Google profile", page: "/get-started" },
+      { email: "owner@example-cafe.com", place_id: PLACE_A, tips_opt_in: true, consent_text: "Send me tips on managing my Google profile", page: "/" },
       { email: "other@example-cafe.com", place_id: PLACE_A, tips_opt_in: false, consent_text: "Send me tips on managing my Google profile", page: "/google-profile-check" },
     ]);
     assert.equal(w.sent.length, 2);
@@ -264,11 +264,13 @@ Deno.test("email capture stores the consent text, the choice and the page; the t
     for (const bad of [
       { consent_text: "Send me things", page: "/google-profile-check", tips: true, email: "a@example-cafe.com" },
       { consent_text: TIPS_CONSENT_TEXT, page: "/somewhere-else", tips: true, email: "a@example-cafe.com" },
+      // Launch 2 part C: /get-started is gone (a 301 to /scan).
+      { consent_text: TIPS_CONSENT_TEXT, page: "/get-started", tips: true, email: "a@example-cafe.com" },
       { consent_text: TIPS_CONSENT_TEXT, page: "/google-profile-check", tips: "yes", email: "a@example-cafe.com" },
       { consent_text: TIPS_CONSENT_TEXT, page: "/google-profile-check", tips: true, email: "not-an-email" },
     ]) assert.equal((await w.call({ action: "email", place_id: PLACE_A, ...bad })).status, 400);
     assert.equal(w.saved.length, 2);
-    assert.ok(CHECK_PAGES.includes("/") && CHECK_PAGES.includes("/get-started") && CHECK_PAGES.includes("/google-profile-check"));
+    assert.ok(CHECK_PAGES.includes("/") && !CHECK_PAGES.includes("/get-started") && CHECK_PAGES.includes("/google-profile-check"));
   } finally {
     restore();
   }

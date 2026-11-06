@@ -64,6 +64,11 @@
       "statusCode": 301
     },
     {
+      "source": "/get-started",
+      "destination": "/scan",
+      "statusCode": 301
+    },
+    {
       "source": "/partner",
       "destination": "/partners",
       "statusCode": 301

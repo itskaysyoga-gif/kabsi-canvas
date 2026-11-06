@@ -42,7 +42,8 @@ export function normalizePhone(v: string): string | null {
   const t = v.trim().replace(/[\s().-]/g, "");
   return PHONE_RE.test(t) ? t : null;
 }
-export const CHECK_PAGES = ["/", "/google-profile-check", "/get-started"];
+// Launch 2 part C (30.36 item 8): /get-started is gone (a 301 to /scan); the free check sends "/google-profile-check".
+export const CHECK_PAGES = ["/", "/google-profile-check"];
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
 const PLACE_ID_RE = /^[A-Za-z0-9_-]{10,200}$/;
 /** The Autocomplete session token the page makes (a version 4 UUID); the same text is passed to Place Details. */

@@ -22,7 +22,7 @@ export function OnboardingShell({
 }: {
   /** The current stage, 0 to 3; 4 when the four are done. No strip when left out. */
   stage?: number;
-  /** /get-started (before an account) is the free check: stage 1. */
+  /** The free check before an account: stage 1. */
   step?: "check";
   /** The step's help (K-111): the "Need a hand?" chip goes under the step, the same place on every screen. */
   help?: HelpState;

@@ -97,12 +97,19 @@ export function ButtonLink({
   children,
   to,
   hash,
+  search,
   onClick,
-}: CommonProps & { to: string; hash?: string | undefined; onClick?: () => void }) {
+}: CommonProps & {
+  to: string;
+  hash?: string | undefined;
+  search?: Record<string, string> | undefined;
+  onClick?: () => void;
+}) {
   return (
     <Link
       to={to as "/"}
       {...(hash ? { hash } : {})}
+      {...(search ? { search: search as never } : {})}
       onClick={onClick}
       className={cn(buttonClass(variant, size, full), className)}
     >
