@@ -13,7 +13,7 @@ The rules are master plan 30.19 section 5 as changed by 30.39 (R-119), with 30.3
 - A stop (any complaint, or bounces above 3 percent of the last 100 sends) sets `sending_open` false with `stopped_reason` and alerts Rashid; only lane R clears it.
 
 ## Who
-- First country the UK, once the UK messaging decision is made (`open_countries`). Only registered companies that Companies House shows active, with the company number recorded, and an email the business publishes on its own domain.
+- First country the UK, once the UK messaging decision is made (`open_countries`). Only registered companies that Harvey's register shows Active on Companies House's free Basic Company Data file at most 40 days old (30.39 item 12; no Companies House API key), with the company number recorded, and an email the business publishes on its own domain.
 - Salons and barbers first, then the Founding 25 mix. Sources: the business's own website, Companies House, OpenStreetMap (through Harvey). Never Google scraping, Places, the Business Profile API, bought lists or directories.
 - Never anyone suppressed (address, domain and parent domains, sha256 of the lower-cased value, the same rule as Harvey), never a Kabsi customer, applicant or partner, never anyone written to before.
 
@@ -41,4 +41,4 @@ Fewer than 3 replies that lead to a check or a trial in the first 300 emails end
 
 ## Never
 - No claims about rankings, reviews gained or revenue; no industry statistics (plan 2.11, K-53, K-112). No Google password, code or token asked for. Nothing offered for a review.
-- No secret in code, logs or reports. The keys live in Supabase secrets: ZOHO_SMTP_PASSWORD, HARVEY_REPO_TOKEN, COMPANIES_HOUSE_API_KEY (and OUTBOUND_TEST_RECIPIENTS).
+- No secret in code, logs or reports. The keys live in Supabase secrets: ZOHO_SMTP_PASSWORD, HARVEY_REPO_TOKEN (and OUTBOUND_TEST_RECIPIENTS). There is no Companies House key.

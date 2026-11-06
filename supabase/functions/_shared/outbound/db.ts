@@ -1,6 +1,6 @@
 // Outbound's database and outside services for the three outbound functions (Harvey 4A). Service role only. Secrets come
-// from Supabase secrets by name and are never logged: HARVEY_REPO_TOKEN (kabsi-harvey contents), COMPANIES_HOUSE_API_KEY,
-// ZOHO_SMTP_PASSWORD, OUTBOUND_TEST_RECIPIENTS.
+// from Supabase secrets by name and are never logged: HARVEY_REPO_TOKEN (kabsi-harvey contents), ZOHO_SMTP_PASSWORD,
+// OUTBOUND_TEST_RECIPIENTS. There is no Companies House key: the status comes from Harvey's register (30.39 item 12).
 import { admin, internalSecret } from "../kabsi.ts";
 import type { EventRow, Matched } from "./inbox.ts";
 import type { NewDraft, Settings } from "./prepare.ts";
@@ -40,20 +40,6 @@ export async function harveyRegister(): Promise<string> {
   });
   if (!res.ok) throw new Error(`register.csv: HTTP ${res.status}`);
   return await res.text();
-}
-
-/** Companies House public data API: the company's status, or null when it cannot be read. */
-export async function companyStatus(number: string): Promise<string | null> {
-  const key = Deno.env.get("COMPANIES_HOUSE_API_KEY");
-  if (!key || !/^[A-Z0-9]{8}$/.test(number)) return null;
-  const res = await fetch(`https://api.company-information.service.gov.uk/company/${number}`, {
-    headers: { authorization: `Basic ${btoa(`${key}:`)}` },
-  }).catch(() => null);
-  if (!res) return null;
-  if (res.status === 404) return "not_found";
-  if (!res.ok) return null;
-  const j = await res.json().catch(() => null) as { company_status?: string } | null;
-  return j?.company_status ? String(j.company_status).toLowerCase() : null;
 }
 
 export async function eligible(c: { email: string; domain: string; name: string; country: string; company_id: string }) {

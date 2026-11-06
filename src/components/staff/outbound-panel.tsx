@@ -20,6 +20,7 @@ type Prospect = {
   detail_used: string;
   company_number: string | null;
   company_status: string | null;
+  company_status_date: string | null;
   test: boolean;
 };
 type Message = {
@@ -52,7 +53,7 @@ type Lock = {
 };
 
 const PROSPECT =
-  "prospect:outbound_prospects(business_name, city, country, source_page, source_date, detail_used, company_number, company_status, test)";
+  "prospect:outbound_prospects(business_name, city, country, source_page, source_date, detail_used, company_number, company_status, company_status_date, test)";
 
 export async function outboundData() {
   const [lock, msgs, replies] = await Promise.all([
@@ -194,7 +195,11 @@ function Source({ p }: { p: Prospect | null }) {
           <dt className="inline font-bold">Company number: </dt>
           <dd className="inline">
             {p.company_number ?? "none"}
-            {p.company_status ? ` (${p.company_status})` : ""}
+            {p.company_status ? ` (${p.company_status}` : ""}
+            {p.company_status && p.company_status_date
+              ? `, Companies House file of ${fmtDate(p.company_status_date)}`
+              : ""}
+            {p.company_status ? ")" : ""}
           </dd>
         </div>
       </dl>
