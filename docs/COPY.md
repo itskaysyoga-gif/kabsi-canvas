@@ -1783,6 +1783,15 @@ Every new or changed line of Scan 3. The result's lines are in src/lib/scan-word
 - **Settings, Team** (30.36 item 5): invite, role change, remove, cancel invitation and the approval choices show at once. A failed save: "Couldn't save that. It is back as it was. Try again.", after the plain reason when there is one ("This person is already on your team."). A removal that saved: "[email] was removed." The invitation line "Invitation sent to [email]." is unchanged.
 - No visible line changes for the Conversions API (30.36 item 4).
 
+### Part B: the review link tool tells the truth (branch claude/launch2-b, 30.36 item 7)
+
+- **Copy (every page that uses the shared copy field: the review link tool, onboarding's setup link, the team photo link)**: "Copied" only after the copy worked. When it fails the button stays, the link is selected, and the line (announced) is "Press and hold the link to copy it." on a phone, "Press Ctrl+C or Cmd+C to copy it." on a computer.
+- **Test the link** (a secondary action beside Copy link), and under the result: "Check it opens your business. Google may ask customers to sign in before they write a review."
+- **Name on the card** (only when the card cannot print Google's name in full): the field "Name on the card", filled with what the card can print, and "Type the business name in English letters as you want it printed." The confirm card shows that name (or "Your business" while the field is empty); the message reads "Thank you for visiting [name]." or "Thank you for visiting us." while it is empty. No Arabic is shown (R-61).
+- **A card the device cannot draw**: "The card could not be made on this device. Try the PDF, or another browser."
+- **Busy** (this tool only; the free check keeps its own line): "The review link tool is busy right now." then "Try again in a few minutes.", with "Start your free trial" kept. Was "Today's free checks are used up." and the shared line.
+- **The guide google-review-link-and-qr-code**: "get Google's own review link" becomes "get a review link for your Google profile".
+
 ### Part C: one door to sign-up (branch claude/launch2-c, 30.36 item 8)
 
 - **Pricing's plan buttons** and **the guides' "Start free"** keep their words; they now go to Log in and then to setup (/start). A signed-in owner without a business goes to /start, one with a business to the dashboard.

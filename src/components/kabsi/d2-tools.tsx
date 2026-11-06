@@ -1,8 +1,17 @@
 // The free review link and QR code tool (/google-review-link), with the real search and Google's own review link.
-import { Download, MapPin, Printer, QrCode as QrIcon, Search, SearchX, Share2 } from "lucide-react";
+import {
+  Download,
+  ExternalLink,
+  MapPin,
+  Printer,
+  QrCode as QrIcon,
+  Search,
+  SearchX,
+  Share2,
+} from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { cn } from "@/lib/utils";
-import { CTA_TRIAL, FREE_TOOL_BUSY, FREE_TOOL_BUSY_CODES } from "@/lib/site";
+import { CTA_TRIAL, FREE_TOOL_BUSY_CODES } from "@/lib/site";
 import { anonHeaders, supabaseUrl } from "@/lib/supabase-config";
 import { useLazyTurnstile } from "@/components/turnstile";
 import { track } from "@/lib/telemetry";
@@ -12,7 +21,8 @@ import type { FoundBusiness } from "@/lib/profile-check";
 import cafeCounter1600 from "@/assets/photos/cafe-counter-1600.webp";
 import cafeCounter800 from "@/assets/photos/cafe-counter-800.webp";
 import { ScanBox } from "./scan-box";
-import { Banner, Button, ButtonLink, Card, EmptyState } from "./ui";
+import { Banner, Button, ButtonLink, Card, EmptyState, Field, buttonClass } from "./ui";
+import { dropsLetters, hasLetters, printable } from "@/lib/qr-card-name";
 import { Marked, YellowNumber } from "@/components/kabsi/highlight";
 
 /* ---------- Shared pieces ---------- */
@@ -47,6 +57,18 @@ function CheckToo() {
 const RULES_TITLE = "Send it to every customer, the same way.";
 const RULES_TEXT =
   "Do not offer anything in return, and do not ask only happy customers. Those are Google's rules.";
+
+// Launch 2 part B (master plan 30.36 item 7): the lines of this tool that tell the truth about what happened.
+export const REVIEW_TOOL_BUSY = {
+  title: "The review link tool is busy right now.",
+  line: "Try again in a few minutes.",
+} as const;
+export const CARD_FAILED =
+  "The card could not be made on this device. Try the PDF, or another browser.";
+export const TEST_LINE =
+  "Check it opens your business. Google may ask customers to sign in before they write a review.";
+export const NAME_LABEL = "Name on the card";
+export const NAME_HELP = "Type the business name in English letters as you want it printed.";
 
 /** Google's own review link for a place (the same format the review-link function returns). */
 export const reviewUrl = (placeId: string) =>
@@ -120,6 +142,9 @@ export function ReviewLinkTool() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [place, setPlace] = useState<Place | null>(null);
   const [canShare, setCanShare] = useState(false);
+  // The name the card prints. Asked for only when Google's name has letters the card cannot print.
+  const [printName, setPrintName] = useState("");
+  const [cardError, setCardError] = useState<string | null>(null);
   // The bot check loads on the form's first touch, not at page start (Fix 1); the search waits for its token.
   const check = useLazyTurnstile();
   const searching = phase === "searching";
@@ -168,6 +193,8 @@ export function ReviewLinkTool() {
   };
   const choose = (p: Place) => {
     setPlace(p);
+    setPrintName(printable(p.name));
+    setCardError(null);
     setPhase("result");
     track("review_link_created", { source: "review_link_tool" });
   };
@@ -185,31 +212,41 @@ export function ReviewLinkTool() {
     setPhase("empty");
     window.setTimeout(() => document.getElementById("review-search")?.focus(), 0);
   };
+  // A name the card cannot print in full: the owner types the name to print, and every place it shows uses that.
+  const askName = !!place && dropsLetters(place.name);
+  const cardName = place ? (askName ? printName : place.name) : "";
+  const shownName = place ? (askName ? printable(printName) : place.name) : "";
+  const canMake = !!place && hasLetters(cardName);
   const file =
-    (place?.name ?? "")
+    printable(cardName)
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "") || "business";
   const download = async (kind: "png" | "pdf") => {
-    if (!place) return;
-    const q = await import("@/lib/qr-card");
-    const shapes = q.cardShapes(place.name, place.review_url, q.canvasMeasure());
-    if (kind === "png") {
-      const blob = await q.cardPng(shapes);
-      if (blob) q.saveBlob(blob, `review-card-${file}.png`);
-      track("free_tool_used", { source: "review_link_png" });
-    } else {
-      const bytes = q.cardPdf(shapes);
-      q.saveBlob(new Blob([bytes], { type: "application/pdf" }), `review-card-${file}-a6.pdf`);
-      track("free_tool_used", { source: "review_link_print" });
+    if (!place || !canMake) return;
+    setCardError(null);
+    let saved = false;
+    try {
+      const q = await import("@/lib/qr-card");
+      saved = await q.saveCard(
+        kind,
+        cardName,
+        place.review_url,
+        kind === "png" ? `review-card-${file}.png` : `review-card-${file}-a6.pdf`,
+      );
+    } catch {
+      saved = false;
     }
+    // Counted only when the file was made and handed to the browser.
+    if (!saved) return setCardError(CARD_FAILED);
+    track("free_tool_used", { source: kind === "png" ? "review_link_png" : "review_link_print" });
   };
   const share = () => {
     if (!place) return;
     void navigator
       .share({
-        title: place.name,
-        text: `Leave a review for ${place.name} on Google`,
+        title: shownName || "Review us on Google",
+        text: shownName ? `Leave a review for ${shownName} on Google` : "Leave a review on Google",
         url: place.review_url,
       })
       .catch(() => undefined);
@@ -249,8 +286,8 @@ export function ReviewLinkTool() {
           <div>
             {phase === "busy" ? (
               <div className="rounded-panel border border-line bg-surface-1 p-6 sm:p-8">
-                <h2 className="text-h3">Today's free checks are used up.</h2>
-                <p className="mt-3 max-w-xl text-body text-text-2">{FREE_TOOL_BUSY}</p>
+                <h2 className="text-h3">{REVIEW_TOOL_BUSY.title}</h2>
+                <p className="mt-3 max-w-xl text-body text-text-2">{REVIEW_TOOL_BUSY.line}</p>
                 <ButtonLink to="/start" variant="secondary" className="mt-6">
                   {CTA_TRIAL}
                 </ButtonLink>
@@ -263,7 +300,10 @@ export function ReviewLinkTool() {
                 <p id="confirm-h" className="text-small font-bold text-text-2">
                   Your business on Google
                 </p>
-                <p className="mt-1 text-h3 break-words">{place.name}</p>
+                {/* R-61: a name the card cannot print is never shown in its own letters; the typed name stands in. */}
+                <p className="mt-1 text-h3 break-words">
+                  {askName ? shownName || "Your business" : place.name}
+                </p>
                 {place.address && <p className="mt-1 text-body text-text-2">{place.address}</p>}
                 <p className="mt-1 text-label font-semibold text-text-3">
                   <span translate="no">Google Maps</span>
@@ -356,17 +396,46 @@ export function ReviewLinkTool() {
 
             {phase === "result" && place && (
               <div className="mt-6 space-y-6">
-                <CopyField label="Your review link" value={place.review_url} />
+                <div>
+                  <CopyField label="Your review link" value={place.review_url}>
+                    <a
+                      href={place.review_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={buttonClass("tertiary")}
+                    >
+                      <ExternalLink className="size-5" aria-hidden />
+                      Test the link
+                    </a>
+                  </CopyField>
+                  <p className="mt-2 text-small text-text-2">{TEST_LINE}</p>
+                </div>
                 {/* Neutral wording, the same for every customer (master plan 30.16 section 4). */}
                 <CopyField
                   label="A message to send after a visit"
                   copyLabel="Copy message"
-                  value={`Thank you for visiting ${place.name}. If you have a minute, you can leave a review on Google here: ${place.review_url}`}
+                  value={`Thank you for visiting ${shownName || "us"}. If you have a minute, you can leave a review on Google here: ${place.review_url}`}
                 />
+                {askName ? (
+                  <div className="max-w-[22rem]">
+                    <Field
+                      id="card-name"
+                      label={NAME_LABEL}
+                      value={printName}
+                      autoComplete="organization"
+                      onChange={(e) => {
+                        setPrintName(e.target.value);
+                        setCardError(null);
+                      }}
+                    />
+                    <p className="mt-2 text-small text-text-2">{NAME_HELP}</p>
+                  </div>
+                ) : null}
                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   <Button
                     variant="secondary"
                     icon={<Download className="size-5" aria-hidden />}
+                    disabled={!canMake}
                     onClick={() => void download("png")}
                   >
                     Download the card (PNG)
@@ -374,6 +443,7 @@ export function ReviewLinkTool() {
                   <Button
                     variant="secondary"
                     icon={<Printer className="size-5" aria-hidden />}
+                    disabled={!canMake}
                     onClick={() => void download("pdf")}
                   >
                     Download to print (A6 PDF)
@@ -388,6 +458,9 @@ export function ReviewLinkTool() {
                     </Button>
                   )}
                 </div>
+                <p role="status" className={cardError ? "text-small text-text-1" : "sr-only"}>
+                  {cardError ?? ""}
+                </p>
               </div>
             )}
 
@@ -409,8 +482,8 @@ export function ReviewLinkTool() {
 
           <div className="lg:pt-2">
             <BrandedCard
-              business={place?.name ?? "Your business"}
-              link={place?.review_url ?? null}
+              business={place ? (hasLetters(cardName) ? cardName : "") : "Your business"}
+              link={place && hasLetters(cardName) ? place.review_url : null}
             />
           </div>
         </div>
