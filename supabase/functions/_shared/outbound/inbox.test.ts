@@ -61,7 +61,7 @@ Deno.test("bounces and out-of-office replies are recognised", () => {
   assert.ok(looksLikeAutoReply({ "auto-submitted": "auto-replied" }, "Re: x", "hi"));
   assert.ok(looksLikeAutoReply({}, "Out of Office: Re: x", "hi"));
   assert.ok(looksLikeAutoReply({ "x-autoreply": "yes" }, "Re: x", "hi"));
-  assert.ok(looksLikeAutoReply({}, "Re: x", "I am currently out of the office until Monday."));
+  assert.ok(!looksLikeAutoReply({}, "Re: x", "I'm away till Monday but yes please"), "wording alone is a person");
   assert.ok(!looksLikeAutoReply({ "auto-submitted": "no" }, "Re: x", "Yes please"));
 });
 
@@ -116,23 +116,25 @@ const PROSPECT: Matched["prospect"] = { id: "p1", email: "hello@rose.example.com
 const SENT = emailOne({ business: "Rose Lane Salon", kind: "hair salons", city: "Exampleton", detail: "Your site lists your opening hours, and keeping Google's hours the same saves wasted trips." }).body;
 const OB = "<ob.11111111-1111-4111-8111-111111111111@getkabsi.com>";
 
-function run(raw: string, over: Partial<InboxDeps> = {}, prospect = PROSPECT) {
+function run(raw: string | string[], over: Partial<InboxDeps> = {}, prospect = PROSPECT) {
   const log: string[] = [];
   const deps: InboxDeps = {
     seen: async () => false,
     match: async (ids) => (ids.includes(OB) ? { message: { id: "m1", kind: "first", message_id: OB }, prospect, sentBodies: [SENT] } : null),
+    matchBySender: async () => null, self: "rashid@getkabsi.com",
     record: async (e) => void log.push(`event:${e.kind}${e.intent ? `:${e.intent}` : ""}`),
     suppress: async (a, why, d) => void log.push(`suppress:${a}:${why}:${d}`),
     cancelQueue: async (_p, only) => void log.push(`cancel:${only ? "follow_up" : "all"}`),
     setStatus: async (_p, s) => void log.push(`status:${s}`),
     checkStops: async (why) => void log.push(`stops:${why}`),
-    alert: async () => void log.push("alert"),
+    alert: async (key) => void log.push(`alert${/^[0-9a-f]{64}$/.test(key) ? "" : ":badkey"}`),
     freeCheck: async () => "ABC123",
     draftReply: async (d) => void log.push(`draft:${d.to_address}:${linksOk(d.body, "reply")}`),
     harveyHashes: async (h) => void log.push(`harvey:${h.length}`),
     ...over,
   };
-  return handleInbox(deps, [{ uid: 1, parsed: parseMessage(raw), validity: "7" }]).then((r) => ({ r, log }));
+  const raws = Array.isArray(raw) ? raw : [raw];
+  return handleInbox(deps, raws.map((x, i) => ({ uid: i + 1, parsed: parseMessage(x), validity: "7" }))).then((r) => ({ r, log }));
 }
 const reply = (body: string, extra = "") =>
   `From: Amy <amy@rose.example.com>\r\nSubject: Re: Rose Lane Salon's Google profile\r\nMessage-ID: <in1@rose.example.com>\r\nIn-Reply-To: ${OB}\r\n${extra}\r\n${body}\r\n`;
@@ -140,7 +142,7 @@ const reply = (body: string, extra = "") =>
 Deno.test("a person's yes: follow-up cancelled, needs Rashid, alert, the free check, a drafted reply; nothing is sent", async () => {
   const { r, log } = await run(reply(`Yes please\n\nOn Mon Rashid wrote:\n> ${SENT.split("\n\n")[0]}`));
   assert.equal(r.yes, 1);
-  assert.deepEqual(log, ["event:reply:yes", "cancel:follow_up", "status:needs_you", "alert", "draft:amy@rose.example.com:true"]);
+  assert.deepEqual(log, ["cancel:follow_up", "status:needs_you", "draft:amy@rose.example.com:true", "alert", "event:reply:yes"]);
   const body = yesReply("Rose Lane Salon", "ABC123");
   assert.match(body, /kabsi\.co\/scan\/ABC123/);
   assert.match(body, /Drafted with Nora, Kabsi's AI assistant\./);
@@ -151,14 +153,14 @@ Deno.test("a person's yes: follow-up cancelled, needs Rashid, alert, the free ch
 Deno.test("a person's other reply: needs Rashid, alert, no draft; the free check is not run", async () => {
   let checked = false;
   const { log } = await run(reply("What does it cost?"), { freeCheck: async () => { checked = true; return "X1234"; } });
-  assert.deepEqual(log, ["event:reply:other", "cancel:follow_up", "status:needs_you", "alert"]);
+  assert.deepEqual(log, ["cancel:follow_up", "status:needs_you", "alert", "event:reply:other"]);
   assert.equal(checked, false);
 });
 
 Deno.test("an opt-out: the address and the business's own domain suppressed, everything cancelled, nothing sent, Harvey told", async () => {
   const { log } = await run(reply("No thanks"));
-  assert.deepEqual(log, ["event:opt_out", "suppress:hello@rose.example.com:opt_out:true", "suppress:amy@rose.example.com:opt_out:true",
-    "cancel:all", "status:opted_out", "harvey:3"]);
+  assert.deepEqual(log, ["suppress:hello@rose.example.com:opt_out:true", "suppress:amy@rose.example.com:opt_out:true",
+    "cancel:all", "status:opted_out", "event:opt_out", "harvey:3"]);
 });
 
 Deno.test("an out-of-office: recorded and ignored, the schedule stays", async () => {
@@ -169,12 +171,13 @@ Deno.test("an out-of-office: recorded and ignored, the schedule stays", async ()
 Deno.test("a bounce: matched by the returned headers, suppressed, queue cancelled, stop rules checked", async () => {
   const raw = `From: MAILER-DAEMON@mx.example.com\r\nSubject: Undelivered Mail Returned to Sender\r\nMessage-ID: <b1@mx.example.com>\r\nContent-Type: text/plain\r\n\r\nThe message could not be delivered.\r\nMessage-ID: ${OB}\r\n`;
   const { log } = await run(raw);
-  assert.deepEqual(log, ["event:bounce", "suppress:hello@rose.example.com:bounce:false", "cancel:all", "status:bounced", "harvey:1", "stops:bounce"]);
+  assert.deepEqual(log, ["suppress:hello@rose.example.com:bounce:false", "cancel:all", "status:bounced", "event:bounce", "stops:bounce", "harvey:1"]);
 });
 
 Deno.test("a complaint stops sending", async () => {
   const { log } = await run(reply("This is spam. I will report you."));
-  assert.ok(log.includes("event:complaint") && log.includes("stops:complaint") && log.includes("cancel:all"));
+  assert.equal(log[0], "stops:complaint", "the stop comes first");
+  assert.ok(log.includes("event:complaint") && log.includes("cancel:all"));
 });
 
 Deno.test("mail that is not about an Outbound email, or already handled, is left alone", async () => {
@@ -186,5 +189,38 @@ Deno.test("mail that is not about an Outbound email, or already handled, is left
 
 Deno.test("test mode: the fictional business's address is suppressed, never the test inbox; Harvey is not told", async () => {
   const { log } = await run(reply("unsubscribe"), {}, { ...PROSPECT, email: "hello.1@roselanesalon.example.com", email_domain: "roselanesalon.example.com", test: true });
-  assert.deepEqual(log, ["event:opt_out", "suppress:hello.1@roselanesalon.example.com:opt_out:true", "cancel:all", "status:opted_out"]);
+  assert.deepEqual(log, ["suppress:hello.1@roselanesalon.example.com:opt_out:true", "cancel:all", "status:opted_out", "event:opt_out"]);
+});
+
+Deno.test("review: the mailto unsubscribe (no thread headers) is matched by its sender and honoured", async () => {
+  const raw = "From: amy@rose.example.com\r\nSubject: no thanks\r\nMessage-ID: <u1@rose.example.com>\r\n\r\n\r\n";
+  const { log } = await run(raw, { matchBySender: async (a) => (a === "amy@rose.example.com" ? { message: { id: "m1", kind: "first", message_id: OB }, prospect: PROSPECT, sentBodies: [SENT] } : null) });
+  assert.ok(log.includes("event:opt_out") && log.includes("cancel:all"));
+});
+
+Deno.test("review: a failure leaves the message and those after it for the next run", async () => {
+  let n = 0;
+  const { r, log } = await run([reply("Yes please"), reply("Another").replace("<in1@", "<in2@")], {
+    cancelQueue: async () => { if (n++ === 0) throw new Error("db down"); },
+  });
+  assert.equal(r.failed, 1);
+  assert.equal(r.handled_to_uid, null);
+  assert.ok(!log.some((l) => l.startsWith("event:")), "nothing is marked done, so the run repeats it all");
+});
+
+Deno.test("review: delays and success reports are not bounces; ordinary words are not complaints; own mail is skipped", async () => {
+  assert.ok(!looksLikeBounce("MAILER-DAEMON@mx.example.com", "Delivery Status Notification (Delay)", "", "Action: delayed\n"));
+  assert.ok(looksLikeBounce("MAILER-DAEMON@mx.example.com", "Delivery Status Notification (Failure)", "", "Action: failed\n"));
+  for (const t of ["Please check your spam folder", "We get customer complaints about Google", "Smith & Co Solicitors\nYes please"]) {
+    const { log } = await run(reply(t));
+    assert.ok(!log.includes("event:complaint"), t);
+  }
+  const own = await run(`From: rashid@getkabsi.com\r\nSubject: Re: x\r\nMessage-ID: <ob.22222222-2222-4222-8222-222222222222@getkabsi.com>\r\nIn-Reply-To: ${OB}\r\n\r\nHi again.\r\n`);
+  assert.deepEqual(own.log, []);
+});
+
+Deno.test("review: Message-ID headers are read as tokens, never decoded, so no line break reaches a draft", () => {
+  const m = parseMessage("From: a@b.example.com\r\nMessage-ID: =?UTF-8?B?PHhAeT4NCkJjYzogYw==?=\r\nReferences: <r1@x.example> junk\r\n\r\nhi\r\n");
+  assert.equal(m.messageId, "");
+  assert.equal(m.references, "<r1@x.example>");
 });

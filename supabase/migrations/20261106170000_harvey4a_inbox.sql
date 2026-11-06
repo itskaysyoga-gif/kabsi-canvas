@@ -19,3 +19,13 @@ revoke execute on function public.staff_outbound_reply_done(bigint) from public,
 grant execute on function public.staff_outbound_reply_done(bigint) to authenticated;
 
 select cron.schedule('kabsi_outbound_inbox', '5-55/10 * * * *', $$select public.call_internal('outbound-inbox')$$);
+
+-- Review of part E: hashes for kabsi-harvey's suppression list wait here until GitHub has accepted them, so a GitHub
+-- outage never loses one and never delays a stop. Hashes only.
+create table if not exists public.outbound_harvey_queue (
+  hash text primary key check (hash ~ '^[0-9a-f]{64}$'),
+  created_at timestamptz not null default now()
+);
+alter table public.outbound_harvey_queue enable row level security;
+revoke all on public.outbound_harvey_queue from public, anon, authenticated;
+grant select, insert, update, delete on public.outbound_harvey_queue to service_role;

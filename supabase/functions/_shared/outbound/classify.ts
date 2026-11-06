@@ -169,22 +169,32 @@ export function optOutReason(theirText: string, ownWords: string): { rule: strin
 }
 
 // ─── complaints, bounces, auto-replies
+// Whole phrases only: "check your spam folder", "customer complaints" or a firm of solicitors in a signature are not a
+// complaint. Anything here stops all sending, so it is the reply that says Kabsi did wrong.
 const COMPLAINT = [
-  "spam", "report you", "reporting you", "reported you", "harass", "complain", "cease and desist", "lawyer", "solicitor",
-  "attorney", "legal action", "lawsuit", "information commissioner", "the ico", "to the ico", "blacklist", "blocklist",
+  "this is spam", "this was spam", "is spam", "it's spam", "marked as spam", "reported as spam", "report you", "reporting you",
+  "reported you", "report this", "harassment", "harassing", "cease and desist", "legal action", "lawsuit", "my lawyer",
+  "my solicitor", "my solicitors", "my attorney", "our lawyer", "our solicitor", "our solicitors", "information commissioner",
+  "complain to the ico", "complaint to the ico", "report you to the ico", "formal complaint", "unsolicited email", "how did you get my email",
+  "how did you get this email", "gdpr complaint",
 ];
 export const complaintWords = (theirText: string) => {
   const f = flat(theirText);
-  return COMPLAINT.find((p) => new RegExp(`(?<![a-z])${p.replace(/ /g, "\\s+")}`).test(f)) ?? null;
+  return COMPLAINT.find((p) => new RegExp(`(?<![a-z'])${p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/ /g, "\\s+")}(?![a-z])`).test(f)) ?? null;
 };
 
 const BOUNCE_SENDERS = ["mailer-daemon", "postmaster", "mail delivery subsystem", "mail delivery system"];
 const BOUNCE_SUBJECTS = ["delivery status notification", "undeliverable", "returned mail", "delivery failure", "failure notice",
   "could not be delivered", "delivery incomplete", "address not found", "mail delivery failed", "undelivered mail"];
 
-export function looksLikeBounce(from: string, subject: string, contentType: string): boolean {
+/** A failed delivery: a bounce sender or subject, or a delivery report. A report must say "Action: failed"; a delay or a
+ *  success notice is not a bounce. */
+export function looksLikeBounce(from: string, subject: string, contentType: string, raw = ""): boolean {
   const f = String(from ?? "").toLowerCase();
   const s = String(subject ?? "").toLowerCase();
+  const actions = [...String(raw ?? "").matchAll(/^Action:\s*([a-z]+)/gim)].map((m) => m[1].toLowerCase());
+  if (actions.length) return actions.includes("failed");
+  if (/\b(delay|delayed|warning|relayed|delivered:|success)/.test(s)) return false;
   if (/multipart\/report/i.test(contentType) && /report-type="?delivery-status/i.test(contentType)) return true;
   return BOUNCE_SENDERS.some((x) => f.includes(x)) || BOUNCE_SUBJECTS.some((x) => s.includes(x));
 }
@@ -200,8 +210,9 @@ export function looksLikeAutoReply(headers: Record<string, string>, subject: str
   if (auto && auto !== "no") return true;
   if (headers["x-autoreply"] || headers["x-autorespond"] || headers["x-autoreply-from"] || headers["x-mail-autoreply"]) return true;
   if (/^(auto_reply|auto-reply)$/i.test((headers["precedence"] ?? "").trim())) return true;
-  if (OOO_SUBJECT.test(subject ?? "")) return true;
-  return String(ownWords ?? "").length < 1500 && OOO_BODY.test(ownWords ?? "");
+  // The wording alone is not enough: "I'm away till Monday but yes please" is a person. A person's reply that only says
+  // they are away goes to Rashid, which is the safe side (the follow-up is cancelled).
+  return OOO_SUBJECT.test(subject ?? "") && (String(ownWords ?? "").length < 3000 || OOO_BODY.test(ownWords ?? ""));
 }
 
 // ─── a clear yes

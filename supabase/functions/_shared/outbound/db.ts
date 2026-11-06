@@ -213,6 +213,16 @@ export async function match(ids: string[]): Promise<Matched | null> {
   return { message: { id: row.id, kind: row.kind, message_id: row.message_id }, prospect: row.prospect, sentBodies: (sent.data ?? []).map((r) => r.body as string) };
 }
 
+/** The latest message Kabsi sent to this address (a test inbox, or a business's own address). */
+export async function matchBySender(address: string): Promise<Matched | null> {
+  if (!/^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/.test(address)) return null;
+  const { data, error } = await admin().from("outbound_messages").select("message_id").eq("to_address", address.toLowerCase())
+    .eq("status", "sent").order("sent_at", { ascending: false }).limit(1);
+  if (error) throw new Error(`matchBySender: ${error.message}`);
+  const id = (data ?? [])[0]?.message_id as string | undefined;
+  return id ? await match([id]) : null;
+}
+
 export async function record(e: EventRow) {
   const { error } = await admin().from("outbound_events").insert(e);
   if (error && !/duplicate key/.test(error.message)) throw new Error(`record: ${error.message}`);
@@ -243,10 +253,10 @@ export async function checkStops(reason: "complaint" | "bounce") {
 }
 
 /** The staff WhatsApp alert, with no business detail (urgent, staff-alerts.ts). */
-export async function alert() {
+export async function alert(key: string) {
   const { error } = await admin().rpc("ops_emit", {
     p_kind: "outbound_reply", p_channel: "alerts", p_title: "New reply to Kabsi outbound",
-    p_body: "Open kabsi.co/staff/outbound to read it.", p_dedupe: `outbound_reply:${crypto.randomUUID()}`,
+    p_body: "Open kabsi.co/staff/outbound to read it.", p_dedupe: `outbound_reply:${key}`,
   });
   if (error) throw new Error(`alert: ${error.message}`);
 }
@@ -271,34 +281,57 @@ export async function freeCheck(p: Matched["prospect"]): Promise<string | null> 
 }
 
 export async function draftReply(r: { prospect_id: string; to_address: string; subject: string; body: string; in_reply_to: string; references_ids: string }) {
+  const have = await admin().from("outbound_messages").select("id").eq("prospect_id", r.prospect_id).eq("kind", "reply").eq("status", "draft").limit(1);
+  if ((have.data ?? []).length) return;
   const { error } = await admin().from("outbound_messages").insert({ ...r, kind: "reply", status: "draft" });
   if (error) throw new Error(`draftReply: ${error.message}`);
 }
 
-/** Append hashes to kabsi-harvey's kabsi/suppression.txt (contents write on that one repository), so Harvey deletes them
- *  and never adds them again. Hashes only; the commit message carries a count. */
+/** Queue hashes for kabsi-harvey's kabsi/suppression.txt; flushHarvey sends the queue. */
 export async function harveyHashes(hashes: string[]) {
+  const rows = [...new Set(hashes)].filter((h) => /^[0-9a-f]{64}$/.test(h)).map((hash) => ({ hash }));
+  if (!rows.length) return;
+  const { error } = await admin().from("outbound_harvey_queue").upsert(rows, { onConflict: "hash", ignoreDuplicates: true });
+  if (error) throw new Error(`harveyHashes: ${error.message}`);
+}
+
+/** Append the queued hashes to kabsi-harvey's kabsi/suppression.txt (contents write on that one repository), so Harvey
+ *  deletes them and never adds them again. Hashes only; the commit message carries a count. The queue is emptied only
+ *  after GitHub accepted the file; on any doubt the file is left alone and the queue waits for the next run. */
+export async function flushHarvey(): Promise<number> {
   const token = Deno.env.get("HARVEY_REPO_TOKEN");
-  if (!token || !hashes.length) return;
+  if (!token) return 0;
+  const q = await admin().from("outbound_harvey_queue").select("hash").limit(500);
+  if (q.error) throw new Error(`flushHarvey: ${q.error.message}`);
+  const hashes = (q.data ?? []).map((r) => r.hash as string);
+  if (!hashes.length) return 0;
   const url = `https://api.github.com/repos/${HARVEY_REPO}/contents/kabsi/suppression.txt`;
   const headers = { authorization: `Bearer ${token}`, accept: "application/vnd.github+json", "user-agent": "kabsi-outbound" };
-  for (let attempt = 0; attempt < 2; attempt++) {
+  for (let attempt = 0; attempt < 3; attempt++) {
     const got = await fetch(url, { headers });
     if (!got.ok) throw new Error(`suppression.txt: HTTP ${got.status}`);
-    const j = await got.json() as { content: string; sha: string };
-    const text = new TextDecoder().decode(Uint8Array.from(atob(j.content.replace(/\s+/g, "")), (c) => c.charCodeAt(0)));
+    const j = await got.json() as { content?: string; encoding?: string; sha: string; size: number };
+    // Past 1 MB the contents API returns no content: never write the file back from an empty read.
+    if (j.encoding !== "base64" || typeof j.content !== "string") throw new Error("suppression.txt: not readable through the contents API");
+    const bytesIn = Uint8Array.from(atob(j.content.replace(/\s+/g, "")), (c) => c.charCodeAt(0));
+    if (bytesIn.length !== j.size) throw new Error("suppression.txt: size mismatch");
+    const text = new TextDecoder().decode(bytesIn);
     const have = new Set(text.split(/\r?\n/).map((l) => l.split("#")[0].trim().toLowerCase()).filter(Boolean));
-    const add = [...new Set(hashes)].filter((h) => /^[0-9a-f]{64}$/.test(h) && !have.has(h));
-    if (!add.length) return;
-    const next = (text.endsWith("\n") || text === "" ? text : `${text}\n`) + add.join("\n") + "\n";
-    const bytes = new TextEncoder().encode(next);
-    let bin = "";
-    for (const b of bytes) bin += String.fromCharCode(b);
-    const put = await fetch(url, {
-      method: "PUT", headers: { ...headers, "content-type": "application/json" },
-      body: JSON.stringify({ message: `Outbound: ${add.length} coded entr${add.length === 1 ? "y" : "ies"} added`, content: btoa(bin), sha: j.sha }),
-    });
-    if (put.ok) return;
-    if (put.status !== 409) throw new Error(`suppression.txt: HTTP ${put.status}`);
+    const add = hashes.filter((h) => !have.has(h));
+    if (add.length) {
+      const next = (text.endsWith("\n") || text === "" ? text : `${text}\n`) + add.join("\n") + "\n";
+      let bin = "";
+      for (const b of new TextEncoder().encode(next)) bin += String.fromCharCode(b);
+      const put = await fetch(url, {
+        method: "PUT", headers: { ...headers, "content-type": "application/json" },
+        body: JSON.stringify({ message: `Outbound: ${add.length} coded entr${add.length === 1 ? "y" : "ies"} added`, content: btoa(bin), sha: j.sha }),
+      });
+      if (put.status === 409) continue;
+      if (!put.ok) throw new Error(`suppression.txt: HTTP ${put.status}`);
+    }
+    const del = await admin().from("outbound_harvey_queue").delete().in("hash", hashes);
+    if (del.error) throw new Error(`flushHarvey: ${del.error.message}`);
+    return add.length;
   }
+  throw new Error("suppression.txt: changed under us three times");
 }

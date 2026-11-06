@@ -35,13 +35,13 @@ function qpBytes(s: string): Uint8Array {
   return new Uint8Array(out);
 }
 
-export function headersOf(block: string): Record<string, string> {
+export function headersOf(block: string, decode = true): Record<string, string> {
   const h: Record<string, string> = {};
   for (const line of block.replace(/\r\n/g, "\n").replace(/\n[ \t]+/g, " ").split("\n")) {
     const i = line.indexOf(":");
     if (i <= 0) continue;
     const k = line.slice(0, i).trim().toLowerCase();
-    const v = decodeWords(line.slice(i + 1).trim());
+    const v = decode ? decodeWords(line.slice(i + 1).trim()) : line.slice(i + 1).trim();
     h[k] = h[k] ? `${h[k]} ${v}` : v;
   }
   return h;
@@ -88,10 +88,14 @@ function plainText(raw: string, depth = 0): string {
 export function parseMessage(raw: string): Parsed {
   const [head] = split(raw);
   const h = headersOf(head);
+  // Message-IDs are read as written, never decoded, and kept only as <token> lists (no line break can ride in them).
+  const ids = headersOf(head, false);
+  const tokens = (v: string | undefined) => [...String(v ?? "").matchAll(/<[^<>\s]{1,250}>/g)].map((m) => m[0]).join(" ");
   const addr = /<([^<>\s]+@[^<>\s]+)>/.exec(h["from"] ?? "")?.[1] ?? (h["from"] ?? "").trim();
   return {
-    headers: h, from: addr.toLowerCase(), subject: h["subject"] ?? "", messageId: (h["message-id"] ?? "").trim(),
-    inReplyTo: h["in-reply-to"] ?? "", references: h["references"] ?? "", contentType: h["content-type"] ?? "",
+    headers: h, from: addr.toLowerCase().replace(/[\r\n\s]/g, ""), subject: (h["subject"] ?? "").replace(/[\r\n]+/g, " "),
+    messageId: tokens(ids["message-id"]).split(" ")[0] ?? "",
+    inReplyTo: tokens(ids["in-reply-to"]), references: tokens(ids["references"]), contentType: h["content-type"] ?? "",
     text: plainText(raw).replace(/\r\n/g, "\n"), raw,
   };
 }
@@ -133,7 +137,11 @@ export class Imap {
   }
 
   private async fill(): Promise<boolean> {
-    const c = await this.io.read();
+    let t: number | undefined;
+    const c = await Promise.race([
+      this.io.read(),
+      new Promise<never>((_r, reject) => { t = setTimeout(() => reject(new Error("imap: timeout")), 30_000); }),
+    ]).finally(() => clearTimeout(t));
     if (!c) return false;
     const next = new Uint8Array(this.buf.length + c.length);
     next.set(this.buf);
