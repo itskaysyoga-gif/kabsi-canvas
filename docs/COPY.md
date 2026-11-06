@@ -1792,6 +1792,12 @@ Every new or changed line of Scan 3. The result's lines are in src/lib/scan-word
 - **Busy** (this tool only; the free check keeps its own line): "The review link tool is busy right now." then "Try again in a few minutes.", with "Start your free trial" kept. Was "Today's free checks are used up." and the shared line.
 - **The guide google-review-link-and-qr-code**: "get Google's own review link" becomes "get a review link for your Google profile".
 
+### Part C: one door to sign-up (branch claude/launch2-c, 30.36 item 8)
+
+- **Pricing's plan buttons** and **the guides' "Start free"** keep their words; they now go to Log in and then to setup (/start). A signed-in owner without a business goes to /start, one with a business to the dashboard.
+- **/get-started** is gone: its two screens ("Which business is yours?" and "Here's what customers see", with "Save your snapshot and continue") are removed, and the address answers with a 301 to /scan.
+- **Nora on WhatsApp**: her example address is kabsi.co/scan (was kabsi.co/get-started).
+
 ### Part D: holidays by UK nation (branch claude/launch2-d, 30.36 item 9)
 
 - No new line. The holiday question keeps its words ("Your hours for [holiday]", "[holiday] is on [day]. Customers check Google for your hours first, so tell Kabsi what you will do."); a Scottish or Northern Ireland business now gets its own nation's holidays, with GOV.UK's names (for example "St Andrew's Day", "2nd January (substitute day)", "Battle of the Boyne (Orangemen's Day)").

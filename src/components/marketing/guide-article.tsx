@@ -5,6 +5,7 @@
 // closing band with the free check and Start free.
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
+import { useStartFree } from "@/components/auth/use-start-free";
 import { ArrowRight, ArrowUpRight, Check, Clock3 } from "lucide-react";
 import { ScanBox } from "@/components/kabsi/scan-box";
 import { KabsiMark, TrialLine } from "@/components/kabsi/ui";
@@ -226,6 +227,8 @@ function Related({
 
 /** The closing band: the free check again, and Start free for an owner who has seen enough. */
 export function GuideEnd({ slug }: { slug: string }) {
+  // Launch 2 part C (30.36 item 8): one door to sign-up, the same as Pricing's.
+  const door = useStartFree();
   return (
     <section aria-labelledby="guide-end" className="theme-dark border-t border-line bg-band">
       <div className="container-kb section-y">
@@ -239,7 +242,8 @@ export function GuideEnd({ slug }: { slug: string }) {
           <ScanBox id="guide-end-scan" className="mt-8" onStart={cta(slug, "end")} />
           <p className="mt-6 text-body text-text-1">
             <Link
-              to="/get-started"
+              to={door.to}
+              {...(door.search ? { search: door.search } : {})}
               onClick={cta(slug, "start_free")}
               className="inline-flex min-h-11 items-center gap-2 font-bold underline decoration-text-3 underline-offset-4 hover:decoration-text-1"
             >

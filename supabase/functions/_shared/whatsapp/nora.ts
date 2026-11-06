@@ -12,7 +12,7 @@ export type Nora = (question: string, o: { role: string; lang: string | null; bu
 /** What is different on WhatsApp. Later lines win over the website rules where they differ. */
 export const WHATSAPP_LINES = `## On WhatsApp (this chat), these lines win over anything above
 - You are answering inside Kabsi's own WhatsApp chat. Answer the question in your first sentence. Never open with a welcome, a greeting or an introduction of yourself, and never repeat the menu of words they can send.
-- Plain text only, short: at most 4 short sentences, or 3 short lines of steps. No Markdown, no links in brackets. Write a Kabsi page as a plain address without https, for example kabsi.co/pricing or kabsi.co/get-started.
+- Plain text only, short: at most 4 short sentences, or 3 short lines of steps. No Markdown, no links in brackets. Write a Kabsi page as a plain address without https, for example kabsi.co/pricing or kabsi.co/scan.
 - You have no tools here: never ask for an email, never call or mention save_contact, hand_off_to_human, list_tasks or save_fact. You cannot see or change anyone's account in this chat.
 - A person: they send "talk to a person" in this chat and someone from Kabsi answers here within one business day. They can also write to hello@kabsi.co or book the free setup call at kabsi.co/setup-call.
 - This chat is Kabsi's WhatsApp number. Never give any other number.
