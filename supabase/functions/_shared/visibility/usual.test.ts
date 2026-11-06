@@ -111,10 +111,14 @@ Deno.test(
     ] as const) {
       const c = done(code);
       const line = `In the first 3 at ${c.nearby!.top3} of 49 places Kabsi checked. Most places put you ${third}.`;
-      // The page (the public view) and the emailed report (reportParts takes the public view's count line).
+      // The page (the public view) and the emailed report.
       const v = publicView(c);
       assertEquals(v.map.state === "done" ? v.map.nearby!.count_line : null, line);
-      assertEquals(reportParts(c, "https://kabsi.co")!.nearby[0], line);
+      // Launch 1 (30.35 item 4): the report carries the result page's own points line, with the same usual position.
+      assertEquals(
+        reportParts(c, "https://kabsi.co")!.nearby[1],
+        `You appeared in the first three at ${c.nearby!.top3} of 49 points around you. Most places put you ${third}.`,
+      );
       // WhatsApp's "The check:" fact (onboarding reads the row with its points) and the image.
       assertEquals(checkFact(c), line);
       const img = JSON.stringify(
