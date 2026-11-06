@@ -17,7 +17,7 @@ serve(async (req) => {
       reserveSlot: db.reserveSlot, claim: db.claim, suppressed: db.suppressed,
       heardFrom: db.heardFrom, sentOn: db.sentOn, sentThisMonth: () => db.sentThisMonth(),
       deliver: async (to, message, onAccepted) => {
-        const password = Deno.env.get("ZOHO_SMTP_PASSWORD");
+        const password = (Deno.env.get("ZOHO_SMTP_PASSWORD") ?? "").trim();
         if (!password) throw Object.assign(new Error("ZOHO_SMTP_PASSWORD is not set"), { step: "no_password" });
         await smtpSend(await zohoConnect(), { user: db.SENDER.address, password, from: db.SENDER.address, to, message, onAccepted });
       },
