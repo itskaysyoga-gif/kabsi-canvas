@@ -4,7 +4,7 @@ import { FoundingPage } from "@/components/kabsi/d5-founding";
 import { FOUNDING_HERO } from "@/components/kabsi/hero-lines";
 import { FOUNDING_FAQ } from "@/components/kabsi/faq-data";
 import { faqJsonLd } from "@/lib/faq";
-import { pageHead, SERVER_ONLY_LD } from "@/lib/site";
+import { pageHead, serverOnlyLd } from "@/lib/site";
 
 export const Route = createFileRoute("/founding")({
   head: () =>
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/founding")({
       path: "/founding",
       image: "founding",
       crumbs: [{ name: "Founding 25", path: "/founding" }],
-      jsonLd: [import.meta.env.SSR ? faqJsonLd(FOUNDING_FAQ) : SERVER_ONLY_LD],
+      jsonLd: [import.meta.env.SSR ? faqJsonLd(FOUNDING_FAQ) : serverOnlyLd("/founding")],
     }),
   component: () => (
     <SiteShell>

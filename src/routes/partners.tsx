@@ -4,7 +4,7 @@ import { PartnersPage } from "@/components/kabsi/d2-partners";
 import { PARTNERS_HERO } from "@/components/kabsi/hero-lines";
 import { PARTNER_FAQ } from "@/components/kabsi/faq-data";
 import { faqJsonLd } from "@/lib/faq";
-import { pageHead, SERVER_ONLY_LD } from "@/lib/site";
+import { pageHead, serverOnlyLd } from "@/lib/site";
 
 export const Route = createFileRoute("/partners")({
   head: () =>
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/partners")({
       path: "/partners",
       image: "partner",
       crumbs: [{ name: "Partners", path: "/partners" }],
-      jsonLd: [import.meta.env.SSR ? faqJsonLd(PARTNER_FAQ) : SERVER_ONLY_LD],
+      jsonLd: [import.meta.env.SSR ? faqJsonLd(PARTNER_FAQ) : serverOnlyLd("/partners")],
     }),
   component: () => (
     <SiteShell>

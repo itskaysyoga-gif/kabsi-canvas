@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { pageHead, SERVER_ONLY_LD } from "@/lib/site";
+import { pageHead, serverOnlyLd } from "@/lib/site";
 import { faqJsonLd } from "@/lib/faq";
 import { SiteShell } from "@/components/kabsi/site-chrome";
 import { PRICING_HERO } from "@/components/kabsi/hero-lines";
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/pricing")({
       path: "/pricing",
       image: "pricing",
       crumbs: [{ name: "Pricing", path: "/pricing" }],
-      jsonLd: [import.meta.env.SSR ? faqJsonLd(BILLING_FAQ) : SERVER_ONLY_LD],
+      jsonLd: [import.meta.env.SSR ? faqJsonLd(BILLING_FAQ) : serverOnlyLd("/pricing")],
     }),
   component: function Pricing() {
     return (

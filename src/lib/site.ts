@@ -298,11 +298,15 @@ export type ShareImage =
 /**
  * Launch 4 (speed, R-118 item 3): a JSON-LD block that only the server writes. A route's head runs in the shared entry
  * script on every page, so a FAQ list named in a head would ship its whole text to every visitor. Search engines read
- * the server's HTML, so a page writes `import.meta.env.SSR ? faqJsonLd(LIST) : SERVER_ONLY_LD`: the client build drops
- * the list, and the browser keeps the block the server sent (the script is hydrated with an empty body, and React leaves
- * a data script's server text in place).
+ * the server's HTML, so a page writes `import.meta.env.SSR ? faqJsonLd(LIST) : serverOnlyLd(path)`: the client build
+ * drops the list, and the browser keeps the block the server sent (React leaves a data script's server text in place
+ * when it hydrates). After a move inside the site the browser writes a bare node that names the page, so a block left
+ * from the previous page is replaced, never kept under the wrong page.
  */
-export const SERVER_ONLY_LD: Record<string, unknown> = Object.freeze({});
+const SERVER_ONLY = "@kabsiServerOnly";
+export function serverOnlyLd(path: string): Record<string, unknown> {
+  return { [SERVER_ONLY]: path };
+}
 
 export function pageHead(o: {
   title: string;
@@ -356,10 +360,18 @@ export function pageHead(o: {
   return {
     meta,
     links: [{ rel: "canonical", href: url }],
-    scripts: [...(o.jsonLd ?? []), ...(o.crumbs ? [breadcrumbLd(o.crumbs)] : [])].map((data) => ({
-      type: "application/ld+json",
-      children: data === SERVER_ONLY_LD ? "" : JSON.stringify(data),
-    })),
+    scripts: [...(o.jsonLd ?? []), ...(o.crumbs ? [breadcrumbLd(o.crumbs)] : [])].map(
+      (data: Record<string, unknown>) => {
+        const only = data[SERVER_ONLY];
+        return {
+          type: "application/ld+json",
+          children:
+            typeof only === "string"
+              ? JSON.stringify({ "@id": `${SITE_URL}${only === "/" ? "" : only}#faq` })
+              : JSON.stringify(data),
+        };
+      },
+    ),
   };
 }
 
