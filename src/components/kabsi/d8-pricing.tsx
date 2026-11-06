@@ -29,7 +29,7 @@ import { FoundingPriceLine, useFoundingLeft } from "./founding-price";
 import { FOUNDING25_TOTAL } from "./founding-total";
 import { PRICING_HERO } from "./hero-lines";
 import { BILLING_FAQ } from "./faq-data";
-import { useAccountLink } from "@/components/auth/use-account-link";
+import { useStartFree } from "@/components/auth/use-start-free";
 import { Marked } from "@/components/kabsi/highlight";
 import { PHOTOS } from "./photos";
 import { SectionPhoto } from "./section-photo";
@@ -119,7 +119,8 @@ function Cell({ v }: { v: string }) {
 
 export function D8Pricing() {
   // Signed in already (App 4, 30.31 item 1): Start free opens the dashboard, not the find-your-business step.
-  const signedIn = useAccountLink().state === "in";
+  // Launch 2 part C (30.36 item 8): one door to sign-up.
+  const door = useStartFree();
   const periodFlag = useSearchFlag("period");
   const [period, setPeriod] = useState<"monthly" | "yearly">("monthly");
   useEffect(() => {
@@ -215,7 +216,8 @@ export function D8Pricing() {
                   <p className="mt-1 text-label text-text-2">{WORKING_HOURS}</p>
                   <div className="mt-auto pt-6">
                     <ButtonLink
-                      to={signedIn ? "/app" : "/get-started"}
+                      to={door.to}
+                      search={door.search}
                       full
                       variant={pro ? "primary" : "dark"}
                     >
