@@ -36,7 +36,7 @@ update public.outbound_settings set stopped_reason = null, stopped_at = null;
 -- Retention.
 update public.outbound_prospects set last_email_at = now() - interval '91 days', updated_at = now() - interval '91 days'
  where id = '00000000-0000-4000-8000-000000000003';
-update public.outbound_prospects set status = 'interested', last_email_at = now() - interval '200 days', updated_at = now() - interval '200 days'
+update public.outbound_prospects set status = 'answered', interested = true, last_email_at = now() - interval '200 days', updated_at = now() - interval '200 days'
  where id = '00000000-0000-4000-8000-000000000004';
 update public.outbound_prospects set status = 'opted_out', updated_at = now() - interval '2 days' where id = '00000000-0000-4000-8000-000000000005';
 insert into public.outbound_prospects (id, harvey_company_id, country, industry, city, business_name, email, email_domain, source_page,
