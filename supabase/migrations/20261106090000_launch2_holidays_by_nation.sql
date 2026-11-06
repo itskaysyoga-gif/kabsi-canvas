@@ -3,7 +3,8 @@
 --
 -- 1. The Scotland and Northern Ireland rows from today to the end of 2027, read from https://www.gov.uk/bank-holidays.json
 --    on 6 Nov 2026 (as the england-and-wales rows of 20261021240005 were). Substitute days are named as there.
--- 2. private.holiday_region(country, address): GB only. Scotland or Northern Ireland when the address says so; otherwise
+-- 2. private.holiday_region(country, address): GB only. Scotland or Northern Ireland when the address names the nation as
+--    one of its parts (a street such as "Scotland Road, Liverpool" does not count); otherwise
 --    the postcode area (BT is Northern Ireland; AB, DD, DG, EH, FK, G, HS, IV, KA, KW, KY, ML, PA, PH, TD and ZE are
 --    Scotland, except TD12 and TD15, which reach into England and are left to the address: Scottish only when the
 --    address names Scotland, the Scottish Borders or Coldstream); otherwise england-and-wales. The old one-argument
@@ -52,8 +53,9 @@ language sql immutable set search_path = '' as $$
   )
   select case
     when upper(coalesce(p_country, '')) <> 'GB' then null
-    when addr ~ '\mNORTHERN IRELAND\M' then 'northern-ireland'
-    when addr ~ '\mSCOTLAND\M' then 'scotland'
+    -- The nation as a part of its own ("..., Edinburgh, Scotland, UK"), never inside a street name ("Scotland Road").
+    when addr ~ '(^|,)\s*NORTHERN IRELAND\s*(,|$)' then 'northern-ireland'
+    when addr ~ '(^|,)\s*SCOTLAND\s*(,|$)' then 'scotland'
     when area = 'BT' then 'northern-ireland'
     when outward in ('TD12', 'TD15') then
       case when addr ~ '\m(SCOTTISH BORDERS|COLDSTREAM)\M' then 'scotland' else 'england-and-wales' end

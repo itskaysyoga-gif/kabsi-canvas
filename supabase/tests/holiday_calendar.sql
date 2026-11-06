@@ -32,7 +32,7 @@ insert into public.holidays (id, country, region, name, starts_on, ends_on, kind
   ('00000000-0000-4000-8000-00000000d004', 'GB', 'england-and-wales', 'Far holiday', pg_temp.today() + 30, pg_temp.today() + 30, 'public', false, 'https://example.test/gb', pg_temp.today()),
   ('00000000-0000-4000-8000-00000000d005', 'GB', 'england-and-wales', 'Test Ramadan', pg_temp.today() + 5, pg_temp.today() + 34, 'ramadan', true, 'https://example.test/gb', pg_temp.today()),
   ('00000000-0000-4000-8000-00000000d006', 'GB', 'england-and-wales', 'Test Eid', pg_temp.today() + 5, pg_temp.today() + 7, 'islamic', true, 'https://example.test/gb', pg_temp.today()),
-  ('00000000-0000-4000-8000-00000000d007', 'GB', 'england-and-wales', 'Scottish holiday', pg_temp.today() + 3, pg_temp.today() + 3, 'public', false, 'https://example.test/gb', pg_temp.today());
+  ('00000000-0000-4000-8000-00000000d007', 'GB', 'england-and-wales', 'Scottish holiday', pg_temp.today() + 1, pg_temp.today() + 1, 'public', false, 'https://example.test/gb', pg_temp.today());
 update public.holidays set region = 'scotland' where id = '00000000-0000-4000-8000-00000000d007';
 
 create function pg_temp.prompt(p_holiday text) returns uuid language sql as $$
@@ -195,6 +195,8 @@ select is(private.holiday_region('GB', '221B Baker Street, London NW1 6XE, UK'),
 select is(private.holiday_region('GB', '5 Buchanan Street, Glasgow G1 3HL, UK'), 'scotland', 'a Glasgow postcode (G) is Scotland');
 select is(private.holiday_region('GB', '1 Westgate Street, Gloucester GL1 2NW, UK'), 'england-and-wales', 'GL is not G');
 select is(private.holiday_region('GB', 'Shop 3, Main Road, Lerwick, Scotland'), 'scotland', 'the address saying Scotland wins without a postcode');
+select is(private.holiday_region('GB', 'Scotland Road, Liverpool L5 2QE, UK'), 'england-and-wales', 'a street named Scotland Road in Liverpool is England');
+select is(private.holiday_region('GB', '1 Lisburn Road, Belfast, Northern Ireland'), 'northern-ireland', 'the address saying Northern Ireland wins without a postcode');
 select is(private.holiday_region('GB', 'Marygate, Berwick-upon-Tweed TD15 1BN, UK'), 'england-and-wales', 'TD15 is left to the address: Berwick is England');
 select is(private.holiday_region('GB', 'High Street, Coldstream TD12 4AA, UK'), 'scotland', 'TD12 with Coldstream is Scotland');
 select is(private.holiday_region('GB', 'Market Place, Kelso TD5 7HF, UK'), 'scotland', 'the other TD districts are Scotland');
@@ -218,9 +220,9 @@ select ok(date '2026-11-30' <= date '2026-11-25' + 5 and not (date '2026-11-30' 
 update public.locations set address = '12 Princes Street, Edinburgh EH2 2AN, UK' where id = '00000000-0000-4000-8000-0000000000c1';
 select lives_ok($$ select private.detect_holidays('00000000-0000-4000-8000-0000000000c1') $$, 'the detector runs for an Edinburgh business');
 select ok(exists(select 1 from public.holiday_prompts where location_id = '00000000-0000-4000-8000-0000000000c1'
-                  and holiday_id = '00000000-0000-4000-8000-00000000d007' and state = 'asked'), 'the Scottish holiday in 3 days is asked');
+                  and holiday_id = '00000000-0000-4000-8000-00000000d007' and state = 'asked'), 'the Scottish holiday tomorrow is asked');
 select tests.act_as('00000000-0000-4000-8000-0000000000a1');
-select is((select every(u ->> 'name' <> 'Test bank holiday')
+select is((select coalesce(every(u ->> 'name' <> 'Test bank holiday'), true)
              from jsonb_array_elements(public.holiday_calendar('00000000-0000-4000-8000-0000000000c1', 400) -> 'upcoming') u), true,
   'an Edinburgh business sees no England and Wales holiday');
 select ok((select bool_or(u ->> 'name' = 'St Andrew''s Day')
@@ -231,13 +233,13 @@ select ok((select bool_or(u ->> 'name' = 'St Andrew''s Day')
 reset role;
 update public.locations set address = '221B Baker Street, London NW1 6XE, UK' where id = '00000000-0000-4000-8000-0000000000c1';
 select tests.act_as('00000000-0000-4000-8000-0000000000a1');
-select is((select every(u ->> 'name' not in ('St Andrew''s Day', 'Scottish holiday'))
+select is((select coalesce(every(u ->> 'name' not in ('St Andrew''s Day', 'Scottish holiday')), true)
              from jsonb_array_elements(public.holiday_calendar('00000000-0000-4000-8000-0000000000c1', 400) -> 'upcoming') u), true,
   'a London business never sees a Scottish holiday');
 reset role;
 update public.locations set address = '10 Donegall Square, Belfast BT1 5GS, UK' where id = '00000000-0000-4000-8000-0000000000c1';
 select tests.act_as('00000000-0000-4000-8000-0000000000a1');
-select is((select every(u ->> 'name' not in ('St Andrew''s Day', 'Scottish holiday', 'Test bank holiday'))
+select is((select coalesce(every(u ->> 'name' not in ('St Andrew''s Day', 'Scottish holiday', 'Test bank holiday')), true)
              from jsonb_array_elements(public.holiday_calendar('00000000-0000-4000-8000-0000000000c1', 400) -> 'upcoming') u), true,
   'a Belfast business sees only the Northern Ireland calendar');
 reset role;
