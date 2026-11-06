@@ -1,60 +1,44 @@
 ---
 name: "kabsi-outbound"
-description: "Use for Kabsi Outbound (master plan section 13): Nora at Kabsi writes short plain-text emails to US local businesses, Rashid approves each on his phone, and a yes gets a free Google profile check. Covers the Harvey fork, sending rules, limits and the kill-gate."
+description: "Use for Kabsi Outbound (master plan 30.19 section 5 as changed by 30.39, R-119): Kabsi's own plain-text emails to UK registered companies, filled from approved templates, approved by Rashid in one daily batch at kabsi.co/staff/outbound, sent through Zoho as rashid@getkabsi.com, with suppression, stops and the 90-day deletion. Harvey (kabsi-harvey) only builds the list."
 ---
 
 # Kabsi Outbound
 
-Outbound is how Kabsi finds its first paying businesses after the launch gate. The plan is master plan section 13 (docs/KABSI-MASTERPLAN.md) and R-54. Nothing here starts before PROGRESS records that the launch gate (session 21) has passed. Until then this skill is for planning and drafting only: no sending, no scheduled run, no Harvey import.
+The rules are master plan 30.19 section 5 as changed by 30.39 (R-119), with 30.37 and 30.38 for the contact list. Later sections win. The code is in Kabsi itself: tables `outbound_*` (Supabase), the functions `outbound-prepare`, `outbound-send` and `outbound-inbox`, and the staff page kabsi.co/staff/outbound. Harvey (itskaysyoga-gif/kabsi-harvey, private) stays the list builder; its own sending is never switched on.
 
-## Setup (after the launch gate)
-- Private repo itskaysyoga-gif/kabsi-outbound, imported from github.com/ethanplusai/harvey at that time. Never a public repo.
-- A daily scheduled run in claude.ai/code. Nothing runs from Kabsi's Edge Functions.
-- Drafts wait for Rashid's approval on his phone at /staff/outbound. Nothing is sent without it.
-- A separate sending domain on Zoho Mail Lite with SPF, DKIM and DMARC, and two weeks of warm-up before the first real send. Never kabsi.co.
-- Sender name: "Nora at Kabsi".
-- Signature: "Nora, Kabsi's AI assistant. Rashid Abou Hamzy, founder, reads every reply." Add the Facebook and Instagram links from the SOCIAL_LINKS constant (R-59), never typed by hand.
-- Footer on every email: "Kabsi, 451 Harwinton Ave, Torrington, CT 06790" and "Reply 'no thanks' and we will not write again". A reply of "no thanks" in any wording stops all further mail to that address at once, and the address goes on the suppression list.
-
-## Data
-- OpenStreetMap and the business's own website only.
-- Never Kabsi's Google project, the Places key or the Business Profile API (R-54).
-- No scraping of Google, Facebook, Instagram or directories. No bought lists.
-- Keep only what a draft needs: business name, the public business email, one real detail from its own site or its OpenStreetMap entry. Do not store personal data about owners beyond that.
+## The lock
+- `outbound_settings.sending_open` starts false and `test_mode` true. Nothing in code, no RPC and no staff page can open sending: a trigger refuses it to anyone but a lane R migration. Sending opens only when Rashid says start in the lane R chat.
+- In test mode only fictional example.com businesses are drafted, and mail goes only to `OUTBOUND_TEST_RECIPIENTS`.
+- A stop (any complaint, or bounces above 3 percent of the last 100 sends) sets `sending_open` false with `stopped_reason` and alerts Rashid; only lane R clears it.
 
 ## Who
-- US first. Auto repair, salons and barbers, then cafes and restaurants.
-- No UK or EU sole traders without consent. No Lebanon. No Arabic shown (R-61): write in English, or Spanish where the business's own site is in Spanish.
-- No business with an unsubscribe on file, an existing Kabsi account, or a "do not contact" note.
+- First country the UK, once the UK messaging decision is made (`open_countries`). Only registered companies that Companies House shows active, with the company number recorded, and an email the business publishes on its own domain.
+- Salons and barbers first, then the Founding 25 mix. Sources: the business's own website, Companies House, OpenStreetMap (through Harvey). Never Google scraping, Places, the Business Profile API, bought lists or directories.
+- Never anyone suppressed (address, domain and parent domains, sha256 of the lower-cased value, the same rule as Harvey), never a Kabsi customer, applicant or partner, never anyone written to before.
 
-## Email 1
-- Plain text. Under 80 words. No link. No images. No tracking.
-- One real detail about that business, seen on its own site or OpenStreetMap entry. If there is no real detail, do not write the email.
-- It ends with the question: "Want me to run a free check of <business>'s Google profile and send you what I find?"
-- No claims about rankings, reviews gained, revenue, or what Google rewards. No industry statistics (plan 2.11). No mention of anything Kabsi cannot show.
-- Follow the kabsi-copy skill: plain English, no em dashes, en dashes or exclamation marks.
+## The emails (docs/COPY.md section 65, word for word)
+- Plain text, UTF-8, no tracking, no image, no link but kabsi.co and kabsi.co/privacy, a mailto List-Unsubscribe with the subject "no thanks". Sent as Rashid Abou Hamzy <rashid@getkabsi.com> through Zoho (SMTP on 465; IMAP 993 to read). Never Resend, never kabsi.co as the sender.
+- Email 1 and the follow-up are signed "Rashid Abou Hamzy, founder of Kabsi" and "kabsi.co", with the footer of 30.19 section 5. No Facebook or Instagram address and no "Drafted with Nora" in these two (30.39 item 6). The reply to a clear yes is filled from its template (COPY 65), carries the Facebook and Instagram addresses of R-59 and is signed without Nora, because a template wrote it (30.39 item 11).
+- One detail per Email 1, the first that is true on the page read at draft time; none true means no draft. Filled from the templates with no AI call.
+- The follow-up goes on day 4 or 5 in the same thread and is cancelled by any reply, bounce or suppression at that business. No second follow-up.
 
-## A yes
-Within minutes the owner gets the check result, the founding offer (the first 30 paying businesses keep their price while subscribed) and the WhatsApp button (master plan sections 4 and 9). Use the same free check the website runs; it stays inside places_daily_cap, so check the cap before a batch.
+## Approval and timing
+- Rashid approves every email: one batch a day, Approve all after reading, and approving Email 1 approves its follow-up.
+- Ramp: 3 a day in week 1, 5 in week 2, then 10; at most 300 a calendar month; weekdays 9:00 to 17:00 in the recipient's time zone; at least 20 minutes apart.
+- A person's reply is never answered automatically. For a clear yes the free check runs inside places_daily_cap and Rashid's reply is drafted with the personal check link; anything else waits for him with no draft.
 
-## Follow-up
-One follow-up on day 4, shorter than email 1, same plain text, same footer. No second follow-up. No reply means no more mail.
+## Data
+- No reply: deleted 90 days after the last email, its domain coded on the never-contact list (reason contacted). A no or a bounce keeps only the hash. A yes becomes a contact under the privacy page.
+- Opt-outs and bounces also go, as hashes, to kabsi-harvey's `kabsi/suppression.txt`, so Harvey deletes them and never adds them again.
+- Logs, PRs and reports carry counts only, never a business name, address, email or phone. Harvey's dashboard reads the views `outbound_dashboard_counts` and `outbound_dashboard_days` (numbers and dates only).
 
-## Volume and the kill-gate
-- 20 emails a day for two weeks, then 30 a day. Hard stop at 300 approved emails in total.
-- Kill-gate: after 300 approved emails, fewer than 3 replies that lead to a free check or trial means stop and tell Rashid. Do not tune and continue.
-- Stop sending the same day if a complaint, a bounce rate above 2 percent in a day, or a spam placement appears, and report it.
+## Deliverability (30.39 item 8)
+Google Postmaster Tools and Cloudflare DMARC Management for getkabsi.com, a 2048-bit DKIM key, 10 out of 10 at mail-tester.com for Email 1 before the first real send. Never a warm-up service.
 
-## Rules every email keeps
-- Every email is approved by Rashid. The sender is named. The unsubscribe works and is honoured at once.
-- Kabsi's claims rule applies to every line (plan 2.11, K-53, K-112): never "Google partner", "approved by Google", rankings or guaranteed reviews.
-- Never ask for a Google password, code or token. Never offer anything in return for a review.
-- Never write or paste a secret.
+## Kill gate
+Fewer than 3 replies that lead to a check or a trial in the first 300 emails ends Outbound.
 
-## Daily run (what to do)
-1. Read PROGRESS for the sent count, replies and any stop notes.
-2. Find candidates inside the limit, check each against the suppression list, write drafts, and put them in /staff/outbound for approval.
-3. Report: drafts ready, sent so far (of 300), replies, replies that led to a check or trial, bounces, unsubscribes.
-
-## Pipeline table
-Keep one Markdown table in the private repo: business, source, email 1 date, reply, check sent, trial, follow-up date, stage, suppression. Update it every run.
+## Never
+- No claims about rankings, reviews gained or revenue; no industry statistics (plan 2.11, K-53, K-112). No Google password, code or token asked for. Nothing offered for a review.
+- No secret in code, logs or reports. The keys live in Supabase secrets: ZOHO_SMTP_PASSWORD, HARVEY_REPO_TOKEN, COMPANIES_HOUSE_API_KEY (and OUTBOUND_TEST_RECIPIENTS).
