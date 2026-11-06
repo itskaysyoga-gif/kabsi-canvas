@@ -18,6 +18,7 @@ export const READ_RPCS = new Set([
   "coach_checklist",
   "holiday_calendar",
   "whatsapp_status",
+  "whatsapp_owners_on",
   "photo_link_status",
   "my_notification_prefs",
   "google_mode",

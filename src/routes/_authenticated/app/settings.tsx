@@ -335,7 +335,8 @@ function RoutineChannel({ locationId }: { locationId: string }) {
   const failed = WHATSAPP_ON && (stored.isError || prefs.isError);
   if (
     WHATSAPP_ON &&
-    (status.isLoading || stored.isLoading || prefs.isLoading || ownersOn.isLoading) &&
+    // ownersOn is not waited for: an unknown value blocks nothing (whatsappBlock), and it is a timed read.
+    (status.isLoading || stored.isLoading || prefs.isLoading) &&
     !failed
   )
     return null;
