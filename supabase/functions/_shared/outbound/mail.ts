@@ -3,6 +3,7 @@
 // Supabase secrets (ZOHO_SMTP_PASSWORD, the same app password) and is never logged.
 
 import { textOf } from "./rules.ts";
+import { b64, serverSays } from "./smtp.ts";
 
 // ─── MIME
 export type Parsed = {
@@ -128,6 +129,17 @@ export function byteIo(conn: Deno.Conn): ByteIo {
 
 const MAX_MESSAGE = 300_000;
 
+/** An IMAP refusal with the server's own reply text (serverSays: never the password), so a failed login says why. */
+export class ImapError extends Error {
+  step: string;
+  serverText: string;
+  constructor(step: string, serverText = "") {
+    super(`imap: ${step} refused${serverText ? `: ${serverText}` : ""}`);
+    this.step = step;
+    this.serverText = serverText;
+  }
+}
+
 export class Imap {
   private buf = new Uint8Array(0);
   private n = 0;
@@ -169,9 +181,13 @@ export class Imap {
   }
 
   /** Send a command; return the untagged lines (with any literal joined in) and refuse a NO or BAD. */
-  async cmd(text: string, quiet = text): Promise<{ lines: string[]; literals: Uint8Array[] }> {
+  async cmd(text: string, quiet = text, secrets: string[] = []): Promise<{ lines: string[]; literals: Uint8Array[] }> {
     const tag = `a${++this.n}`;
     await this.io.write(`${tag} ${text}\r\n`);
+    return await this.until(tag, quiet.split(" ")[0], secrets);
+  }
+
+  private async until(tag: string, step: string, secrets: string[], onContinue?: () => Promise<void>): Promise<{ lines: string[]; literals: Uint8Array[] }> {
     const lines: string[] = [];
     const literals: Uint8Array[] = [];
     for (;;) {
@@ -181,31 +197,55 @@ export class Imap {
         literals.push(await this.bytes(Number(lit[1])));
         l += await this.line();
       }
+      if (onContinue && l.startsWith("+")) {
+        const go = onContinue;
+        onContinue = undefined; // one continuation only: a second "+" is answered with nothing and the server refuses
+        await go();
+        continue;
+      }
       if (l.startsWith(`${tag} `)) {
-        if (!/^\S+ OK/i.test(l)) throw new Error(`imap: ${quiet.split(" ")[0]} refused`);
+        if (!/^\S+ OK/i.test(l)) throw new ImapError(step, serverSays(l.slice(tag.length + 1), secrets));
         return { lines, literals };
       }
       lines.push(l);
     }
   }
 
-  async greet() {
+  /** The greeting; returns the capabilities it carries, if any ("* OK [CAPABILITY ...]"). */
+  async greet(): Promise<string> {
     const l = await this.line();
-    if (!/^\* (OK|PREAUTH)/i.test(l)) throw new Error("imap: no greeting");
+    if (!/^\* (OK|PREAUTH)/i.test(l)) throw new ImapError("greeting", serverSays(l));
+    return /\[CAPABILITY ([^\]]*)\]/i.exec(l)?.[1] ?? "";
+  }
+
+  /** Logs in. AUTHENTICATE PLAIN when the server offers it (the password travels base64, so no character in it needs
+   *  quoting); otherwise LOGIN with both values as IMAP quoted strings. Refusals carry the server's text, never the
+   *  password. */
+  async login(user: string, password: string, caps = "") {
+    const secrets = [password, `\u0000${user}\u0000${password}`];
+    const c = caps || (await this.cmd("CAPABILITY")).lines.map((l) => /^\* CAPABILITY (.*)$/i.exec(l)?.[1] ?? "").join(" ");
+    if (/\bAUTH=PLAIN\b/i.test(c)) {
+      const tag = `a${++this.n}`;
+      await this.io.write(`${tag} AUTHENTICATE PLAIN\r\n`);
+      await this.until(tag, "AUTHENTICATE", secrets, () => this.io.write(`${b64(`\u0000${user}\u0000${password}`)}\r\n`));
+      return "plain";
+    }
+    if (/\bLOGINDISABLED\b/i.test(c)) throw new ImapError("LOGIN", "the server has LOGIN turned off");
+    await this.cmd(`LOGIN ${quote(user)} ${quote(password)}`, "LOGIN", secrets);
+    return "login";
   }
   close() {
     this.io.close();
   }
 }
 
-const quote = (s: string) => `"${s.replace(/["\\]/g, (c) => `\\${c}`)}"`;
+export const quote = (s: string) => `"${s.replace(/["\\]/g, (c) => `\\${c}`)}"`;
 
 /** New messages since the last UID seen (or the last 2 days on the first run), read only, at most 30 a call. */
 export async function fetchNew(io: ByteIo, o: { user: string; password: string; lastUid: number | null; validity: string | null; since: Date }) {
   const c = new Imap(io);
   try {
-    await c.greet();
-    await c.cmd(`LOGIN ${quote(o.user)} ${quote(o.password)}`, "LOGIN");
+    await c.login(o.user, o.password, await c.greet());
     const sel = await c.cmd("EXAMINE INBOX");
     const validity = sel.lines.map((l) => /UIDVALIDITY (\d+)/i.exec(l)?.[1]).find(Boolean) ?? null;
     const fresh = !o.lastUid || validity !== o.validity;
