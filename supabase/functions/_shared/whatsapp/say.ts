@@ -21,26 +21,35 @@ export const POST_ISSUE: Record<string, string> = {
 export const postIssue = (i: { code: string; text: string }) =>
   i.code === "contact" ? i.text.replace(/^This post /, "").replace(/\.$/, "") : POST_ISSUE[i.code] ?? "breaks one of Google's rules for posts";
 
+/**
+ * Launch 3 part A (30.36 item 8): where a reply sends the reader. Starting or signing up goes to sign-in and then
+ * setup; a reply about a check goes to the saved result when the code is known, otherwise to the free check. The old
+ * kabsi.co/get-started now answers with a 301 to /scan.
+ */
+export const START_URL = "https://kabsi.co/login?next=/start";
+export const SCAN_URL = "https://kabsi.co/scan";
+export const scanResultUrl = (code: string | null | undefined) => (code ? `${SCAN_URL}/${code}` : SCAN_URL);
+
 export const SAY = {
   // 24.8: a chat that arrives without the scan code.
   greeting:
     "Welcome to Kabsi. Did you just scan your business on kabsi.co? Send me your business name or the code from the page and I will pick up from there.",
   scanPicked: (code: string) =>
-    `Thanks, I have your scan ${code}. Your full map comes here as soon as it is ready. Kabsi is free for 14 days, no card: kabsi.co/get-started`,
+    `Thanks, I have your scan ${code}. Your full map comes here as soon as it is ready. Kabsi is free for 14 days, no card. Your saved result: ${scanResultUrl(code)}`,
   scanByName: (name: string) =>
-    `Thanks. I will run the scan for ${name} here as soon as maps are switched on for WhatsApp. Until then you can scan your business at kabsi.co and send me the code from the page.`,
+    `Thanks. I will run the scan for ${name} here as soon as maps are switched on for WhatsApp. Until then you can check your business free at ${scanResultUrl(null)} and send me the code from the page.`,
   mapComing:
     "Your full map is being made. It comes here as soon as it is ready.",
-  partnerCodeNoted: "Welcome to Kabsi. You came through a Kabsi Partner, so your free Pro trial is 30 days, no card. Start here: kabsi.co/get-started",
+  partnerCodeNoted: `Welcome to Kabsi. You came through a Kabsi Partner, so your free Pro trial is 30 days, no card. Start here: ${START_URL}`,
   unknownHelp:
     "I am Nora, Kabsi's assistant. Kabsi looks after your business on Google from WhatsApp: a reply ready for every review, your Google profile kept right, and nothing goes live without your yes.\n\nYou can send: your business name for a free check, \"prices\", \"start free\", \"partner\" or \"talk to a person\".",
   prices:
     "Kabsi is free for 14 days, no card. Then Essentials is 29 US dollars a month and Pro is 59 US dollars a month, with an extra location at 15. The first 30 paying businesses pay 19 or 39 and keep that price while they stay subscribed. Card payments open soon. Details: kabsi.co/pricing",
   // 13b part 2 (judged 25 Oct): only what the facts say is open today; WhatsApp for owners and Partners are not open yet.
-  trial: "Start free here, no card, about 10 minutes: kabsi.co/get-started. The free trial starts once Kabsi can reach your Google profile.",
+  trial: `Start free here, no card, about 10 minutes: ${START_URL}\n\nThe free trial starts once Kabsi can reach your Google profile.`,
   partnerProgram:
     "Kabsi Partners is not open yet. When it opens, a partner earns 25 percent of every payment for as long as the business pays. Read more: kabsi.co/partners",
-  needsAccount: "That needs a Kabsi account for your business. Start free, no card: kabsi.co/get-started",
+  needsAccount: `That needs a Kabsi account for your business. Start free, no card: ${START_URL}`,
 
   // Binding (9.2).
   connected: "Kabsi is connected. Messages for your business will come here. Reply STOP at any time to stop them.",

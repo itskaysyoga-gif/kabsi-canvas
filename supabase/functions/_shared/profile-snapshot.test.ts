@@ -342,7 +342,9 @@ Deno.test("flags: a plain fact and what Kabsi would do, danger before warning be
   assert.equal(flags({ ...strong, review_count: 1 }).some((f) => f.fact === "There is 1 review so far."), true);
   const mail = checkEmail({ esc, appUrl: "https://kabsi.co" }, strong, true);
   assert.doesNotMatch(visibleText(renderEmail(mail, CTX).html) + mail.text + mail.subject, /[\u2013\u2014!]/);
-  assert.match(mail.text, /Start your free trial: https:\/\/kabsi.co\/get-started/);
+  assert.match(mail.text, /Start your free trial: https:\/\/kabsi.co\/login\?next=\/start/);
+  assert.equal(mail.button?.url, "https://kabsi.co/login?next=/start");
+  assert.doesNotMatch(mail.text + mail.button?.url, /get-started/);
   assert.doesNotMatch(mail.text + mail.bodyHtml, /Join early access/);
   // The public-information sentence is the note, said once in the rendered email and not also in the body (P0.8-02b).
   const rendered = renderEmail(mail, CTX);

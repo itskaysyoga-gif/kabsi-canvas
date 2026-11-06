@@ -317,3 +317,16 @@ Deno.test("golive1: 555-0100 to 555-0199 numbers are fictional and always mocked
   for (const p of ["+12125550101", "+12125550199", "+13105550150"]) assert.equal(isFictionalPhone(p), true, p);
   for (const p of ["+12057456874", "+12125550200", "+12125551234", "+447700900123", "+96170000000"]) assert.equal(isFictionalPhone(p), false, p);
 });
+
+Deno.test("Launch 3 part A: starting links sign-in then setup, a check links its saved result, and no reply holds the old address", async () => {
+  const { SAY, START_URL, scanResultUrl } = await import("./say.ts");
+  assert.equal(START_URL, "https://kabsi.co/login?next=/start");
+  assert.equal(scanResultUrl("KAB-7Q4M2X9P"), "https://kabsi.co/scan/KAB-7Q4M2X9P");
+  assert.equal(scanResultUrl(null), "https://kabsi.co/scan");
+  assert.match(SAY.scanPicked("KAB-7Q4M2X9P"), /Your saved result: https:\/\/kabsi\.co\/scan\/KAB-7Q4M2X9P$/);
+  assert.match(SAY.scanByName("Harbour Lane Coffee"), /https:\/\/kabsi\.co\/scan and send me the code/);
+  for (const line of [SAY.partnerCodeNoted, SAY.trial, SAY.needsAccount]) assert.ok(line.includes(START_URL), line);
+  for (const line of [SAY.scanPicked("KAB-7Q4M2X9P"), SAY.scanByName("X"), SAY.partnerCodeNoted, SAY.trial, SAY.needsAccount]) {
+    assert.doesNotMatch(line, /get-started|[–—!]/, line);
+  }
+});

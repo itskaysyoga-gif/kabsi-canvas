@@ -13,7 +13,7 @@ Worth fixing: No phone number is shown on Google.
 Kabsi asks you to confirm it and prepares the change for you to approve.
 
 Kabsi can take care of these. You approve each one.
-Start your free trial: https://kabsi.co/get-started
+Start your free trial: https://kabsi.co/login?next=/start
 
 This check uses public information from Google Maps, as it was when you asked. It is not a score. You asked for tips, so we may send a few. Reply stop at any time.
 
