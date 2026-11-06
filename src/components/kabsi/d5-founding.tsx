@@ -1,5 +1,5 @@
 // Founding 25 (master plan 30.17 section 1, COPY.md "Founding 25"): the banner on Home, Pricing and every industry
-// page, and /founding with the application. The count of places left is the real one (GET programs/founding); while it
+// page, and /founding with the application. The count of places left is the real one (GET /api/founding-count); while it
 // has not loaded, or did not load, no number shows. The application posts to programs/founding (Partners session).
 import { CheckCircle2, Sparkles } from "lucide-react";
 import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
@@ -94,7 +94,7 @@ const GIVE = [
   "A case study, named or anonymous, in your words. You approve the final text.",
 ];
 
-/** The four groups of the 25 places (facts 4.1); the places left come from GET programs/founding. */
+/** The four groups of the 25 places (facts 4.1); the places left come from GET /api/founding-count. */
 const MIX: { group: string; trade: FoundingTrade; cap: number }[] = [
   { group: "Beauty and hair", trade: "beauty_hair", cap: 10 },
   { group: "Food and drink", trade: "food", cap: 5 },

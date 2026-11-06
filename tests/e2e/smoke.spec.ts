@@ -58,6 +58,13 @@ test.describe("smoke @smoke", () => {
     expect(typeof (await r.json()).left).toBe("number");
   });
 
+  // Speed 2 part B: the pages read the count on their own address (no preflight), kept at Vercel's edge.
+  test("the founding count answers on the site's own address", async ({ request }) => {
+    const r = await request.get("/api/founding-count");
+    expect(r.status()).toBe(200);
+    expect(typeof (await r.json()).left).toBe("number");
+  });
+
   test("the go.kabsi.co worker reads its store", async ({ request }) => {
     expect((await request.get("https://go.kabsi.co/_check")).status()).toBe(200);
   });
