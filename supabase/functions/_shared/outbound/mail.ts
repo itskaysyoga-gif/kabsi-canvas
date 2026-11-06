@@ -2,6 +2,8 @@
 // read; BODY.PEEK, so no flag changes) and a small MIME parser for the parts Outbound needs. The app password comes from
 // Supabase secrets (ZOHO_SMTP_PASSWORD, the same app password) and is never logged.
 
+import { withoutBlocks } from "./rules.ts";
+
 // ─── MIME
 export type Parsed = {
   headers: Record<string, string>; from: string; subject: string; messageId: string; inReplyTo: string; references: string;
@@ -79,7 +81,7 @@ function plainText(raw: string, depth = 0): string {
   }
   const text = decodeBody(body, h);
   return type.startsWith("text/html")
-    ? text.replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ").replace(/<br\s*\/?>|<\/(p|div)>/gi, "\n").replace(/<[^>]+>/g, " ").replace(/[ \t]+/g, " ")
+    ? withoutBlocks(text).replace(/<br\s*\/?>|<\/(p|div)>/gi, "\n").replace(/<[^>]+>/g, " ").replace(/[ \t]+/g, " ")
     : text;
 }
 
