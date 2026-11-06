@@ -1,6 +1,7 @@
 // Client for the free Google Profile Check (P0.4-01): the profile-snapshot Edge Function, which holds the Places key,
 // the limits and the cache. Public data only. Every call sends the public anon JWT (D295) and a Turnstile token.
 import { anonHeaders, supabaseUrl } from "@/lib/supabase-config";
+import { postSuggest, wakeSuggestRoute } from "@/lib/suggest-route";
 import type { CoachRow } from "@/lib/coach";
 
 /** The exact words next to the unticked "Send me tips" box. Keep equal to TIPS_CONSENT_TEXT in
@@ -106,23 +107,12 @@ export async function runCheck(placeId: string, turnstile: string, sessionToken?
 /** A new Autocomplete session token (a version 4 UUID). One typing session uses one; picking a place ends it. */
 export const newSessionToken = () => crypto.randomUUID();
 
-let woken = false;
 /**
- * Launch 4 part D: the first touch of a search box wakes the function, once per page. The call carries the same headers
- * as a suggestion, so the browser's one preflight (kept 2 hours) and the function's cold start both happen while the
- * visitor is still typing, not after the third letter. The function answers it at once and spends no Google quota.
+ * Launch 4 part D, Speed 2 part A: the first touch of a search box wakes the suggestion route on kabsi.co (or, until it is
+ * set up, the profile-snapshot function), once per page, so its cold start is paid before the third letter.
  */
 export function wakeSuggestions() {
-  if (woken) return;
-  woken = true;
-  void fetch(`${supabaseUrl}/functions/v1/profile-snapshot`, {
-    method: "POST",
-    headers: { "content-type": "application/json", ...anonHeaders },
-    body: JSON.stringify({ action: "warm" }),
-    keepalive: true,
-  }).catch(() => {
-    woken = false;
-  });
+  wakeSuggestRoute();
 }
 
 export type Suggested = {
@@ -136,7 +126,8 @@ export type Suggested = {
 };
 
 /**
- * Check 2: suggestions while the visitor types, through Kabsi's own function (the Places key never reaches the browser).
+ * Check 2: suggestions while the visitor types, through Kabsi's own server (the Places key never reaches the browser):
+ * Speed 2 part A, POST /api/suggest on kabsi.co, or profile-snapshot until that route is set up (suggest-route.ts).
  * The first call of a typing session carries a Turnstile token; later calls carry the pass it returned. Any failure is
  * `available: false`, never an error on screen.
  */
@@ -150,18 +141,16 @@ export async function suggestBusinesses(
   signal?: AbortSignal,
 ): Promise<Suggested> {
   try {
-    const res = await fetch(`${supabaseUrl}/functions/v1/profile-snapshot`, {
-      method: "POST",
-      headers: { "content-type": "application/json", ...anonHeaders },
-      body: JSON.stringify({
+    const res = await postSuggest(
+      {
         action: "suggest",
         query: o.query,
         session_token: o.sessionToken,
         ...(o.pass ? { pass: o.pass } : {}),
         ...(o.turnstile ? { turnstile: o.turnstile } : {}),
-      }),
-      ...(signal ? { signal } : {}),
-    });
+      },
+      { signal },
+    );
     if (!res.ok) {
       const e = (await res.json().catch(() => ({}))) as { error?: string };
       return {

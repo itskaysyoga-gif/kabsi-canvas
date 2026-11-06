@@ -80,3 +80,13 @@ targetRules = ["generic-api-key"]
 paths = ['''^docs/[^/]+\.md$''']
 regexTarget = "match"
 regexes = ['''ANTHROPIC_API_KEY=\.\.\. ''']
+
+# Speed 2 part A (6 Nov 2026): the route's tests use a made-up Autocomplete session token, a version 4 UUID the browser
+# makes for each typing session (crypto.randomUUID()); it is not a credential. Only that file, only a UUID-shaped TOKEN.
+[[allowlists]]
+description = "Made-up Autocomplete session token (a UUID) in the /api/suggest tests"
+condition = "AND"
+targetRules = ["generic-api-key"]
+paths = ['''^tests/speed2-suggest\.test\.ts$''']
+regexTarget = "match"
+regexes = ['''TOKEN = "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"''']
