@@ -34,6 +34,7 @@ import { Route as AuthenticatedStaffRouteRouteImport } from './routes/_authentic
 import { Route as AuthenticatedStartRouteImport } from './routes/_authenticated/start'
 import { Route as ATokenRouteImport } from './routes/a.$token'
 import { Route as ActivateCodeRouteImport } from './routes/activate.$code'
+import { Route as ApiFoundingCountRouteImport } from './routes/api.founding-count'
 import { Route as ApiGeoRouteImport } from './routes/api.geo'
 import { Route as ApiSuggestRouteImport } from './routes/api.suggest'
 import { Route as BillingDoneRouteImport } from './routes/billing.done'
@@ -188,6 +189,11 @@ const ATokenRoute = ATokenRouteImport.update({
 const ActivateCodeRoute = ActivateCodeRouteImport.update({
   id: '/activate/$code',
   path: '/activate/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiFoundingCountRoute = ApiFoundingCountRouteImport.update({
+  id: '/api/founding-count',
+  path: '/api/founding-count',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiGeoRoute = ApiGeoRouteImport.update({
@@ -375,6 +381,7 @@ export interface FileRoutesByFullPath {
   '/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
+  '/api/founding-count': typeof ApiFoundingCountRoute
   '/api/geo': typeof ApiGeoRoute
   '/api/suggest': typeof ApiSuggestRoute
   '/billing/done': typeof BillingDoneRoute
@@ -430,6 +437,7 @@ export interface FileRoutesByTo {
   '/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
+  '/api/founding-count': typeof ApiFoundingCountRoute
   '/api/geo': typeof ApiGeoRoute
   '/api/suggest': typeof ApiSuggestRoute
   '/billing/done': typeof BillingDoneRoute
@@ -489,6 +497,7 @@ export interface FileRoutesById {
   '/_authenticated/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
+  '/api/founding-count': typeof ApiFoundingCountRoute
   '/api/geo': typeof ApiGeoRoute
   '/api/suggest': typeof ApiSuggestRoute
   '/billing/done': typeof BillingDoneRoute
@@ -548,6 +557,7 @@ export interface FileRouteTypes {
     | '/start'
     | '/a/$token'
     | '/activate/$code'
+    | '/api/founding-count'
     | '/api/geo'
     | '/api/suggest'
     | '/billing/done'
@@ -603,6 +613,7 @@ export interface FileRouteTypes {
     | '/start'
     | '/a/$token'
     | '/activate/$code'
+    | '/api/founding-count'
     | '/api/geo'
     | '/api/suggest'
     | '/billing/done'
@@ -661,6 +672,7 @@ export interface FileRouteTypes {
     | '/_authenticated/start'
     | '/a/$token'
     | '/activate/$code'
+    | '/api/founding-count'
     | '/api/geo'
     | '/api/suggest'
     | '/billing/done'
@@ -717,6 +729,7 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   ATokenRoute: typeof ATokenRoute
   ActivateCodeRoute: typeof ActivateCodeRoute
+  ApiFoundingCountRoute: typeof ApiFoundingCountRoute
   ApiGeoRoute: typeof ApiGeoRoute
   ApiSuggestRoute: typeof ApiSuggestRoute
   BillingDoneRoute: typeof BillingDoneRoute
@@ -907,6 +920,13 @@ declare module '@tanstack/react-router' {
       path: '/activate/$code'
       fullPath: '/activate/$code'
       preLoaderRoute: typeof ActivateCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/founding-count': {
+      id: '/api/founding-count'
+      path: '/api/founding-count'
+      fullPath: '/api/founding-count'
+      preLoaderRoute: typeof ApiFoundingCountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/geo': {
@@ -1226,6 +1246,7 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   ATokenRoute: ATokenRoute,
   ActivateCodeRoute: ActivateCodeRoute,
+  ApiFoundingCountRoute: ApiFoundingCountRoute,
   ApiGeoRoute: ApiGeoRoute,
   ApiSuggestRoute: ApiSuggestRoute,
   BillingDoneRoute: BillingDoneRoute,

@@ -200,9 +200,7 @@ async function stub(page: Page, o: { business: Key; nearby?: "done" | "unavailab
       : json(route, { ...DONE, business: BUSINESSES[current].snapshot.name }),
   );
   await page.route("**/functions/v1/visibility/check/result", (route) => json(route, DONE));
-  await page.route("**/functions/v1/programs/founding", (route) =>
-    json(route, { total: 25, left: 12 }),
-  );
+  await page.route("**/api/founding-count", (route) => json(route, { total: 25, left: 12 }));
   return calls;
 }
 

@@ -50,9 +50,14 @@ const isPlaces = (v: unknown): v is FoundingPlaces =>
   typeof (v as FoundingPlaces).left === "number" &&
   typeof (v as FoundingPlaces).total === "number";
 
+/** Speed 2 part B: a plain same-origin GET (no preflight), answered from Vercel's edge (src/lib/founding-count.ts). */
+export const FOUNDING_COUNT_PATH = "/api/founding-count";
+
 export async function loadFoundingPlaces(): Promise<FoundingPlaces | null> {
   try {
-    const v = await call<unknown>("programs/founding", { method: "GET" });
+    const res = await fetch(FOUNDING_COUNT_PATH);
+    if (!res.ok) return null;
+    const v = (await res.json()) as unknown;
     return isPlaces(v) ? v : null;
   } catch {
     return null;
@@ -68,7 +73,7 @@ export async function loadPartnerPlaces(): Promise<PartnerPlaces | null> {
   }
 }
 
-/** One fetch per page view for all the banners on it (GET programs/founding is cached 5 minutes at the edge). */
+/** One fetch per page view for all the banners on it (GET /api/founding-count, kept 60 seconds at Vercel's edge). */
 let foundingOnce: Promise<FoundingPlaces | null> | null = null;
 export function useFoundingPlaces(): FoundingPlaces | null {
   const [v, setV] = useState<FoundingPlaces | null>(null);
