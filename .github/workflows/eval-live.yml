@@ -9,6 +9,8 @@ name: Eval live (by hand, 27.9)
 # The results and the judge's scores per prompt version are kept as artifacts. Needs the secret ANTHROPIC_API_KEY.
 # Eval 1: two switches. "evaluations" runs parts 1 and 2 (on by default); "injection" also runs the Sec 1 hostile text
 # cases (scripts/sec1/injection-live.ts: at most 30 cases, stopped at its own budget, 0.30 US dollars by default).
+# Launch 1 (master plan 30.35 item 6): "pages_only" runs only Nora's five page-link questions with the real Nora, one at a
+# time, stopped at pages_budget (0.40 US dollars), with no reply evaluation, no judge and no injection cases.
 on:
   workflow_dispatch:
     inputs:
@@ -40,6 +42,14 @@ on:
         description: Budget for the injection cases, US dollars
         required: true
         default: "0.30"
+      pages_only:
+        description: "Launch 1: only Nora's five page-link questions (no replies, no judge, no injection)"
+        type: boolean
+        default: false
+      pages_budget:
+        description: Budget for the page-link questions, US dollars (at most 0.40)
+        required: true
+        default: "0.40"
 
 permissions:
   contents: read
@@ -58,7 +68,7 @@ jobs:
         with:
           node-version: 22
       - name: Replies (the 27.9 cut, judged)
-        if: inputs.evaluations
+        if: inputs.evaluations && !inputs.pages_only
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           REPLY_BUDGET: ${{ inputs.reply_budget }}
@@ -66,15 +76,25 @@ jobs:
         run: bash scripts/eval/gate.sh --cut --judge --budget "$REPLY_BUDGET" --scores "$GITHUB_WORKSPACE/scripts/eval/scores.json" ${REPLY_LANGUAGES:+--languages "$REPLY_LANGUAGES"}
         continue-on-error: true
       - name: Nora (80 questions, judged)
-        if: inputs.evaluations
+        if: inputs.evaluations && !inputs.pages_only
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           NORA_BUDGET: ${{ inputs.nora_budget }}
           NORA_IDS: ${{ inputs.nora_ids }}
         run: node scripts/nora-eval/run-nora-eval.ts --live --with-28 --judge --budget "$NORA_BUDGET" --out nora-eval-result.json --scores scripts/eval/scores.json ${NORA_IDS:+--ids "$NORA_IDS"}
         continue-on-error: true
+      - name: Nora's page-link questions (Launch 1, real Nora, no judge)
+        if: inputs.pages_only
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PAGES_BUDGET: ${{ inputs.pages_budget }}
+        run: |
+          # 30.35 item 6: never above 0.40 US dollars, whatever the input says.
+          budget="$(node -e 'const b = Number(process.argv[1]); console.log(b > 0 && b <= 0.4 ? b : 0.4)' "$PAGES_BUDGET")"
+          node scripts/nora-eval/run-nora-eval.ts --live --pages --concurrency 1 --budget "$budget" --out nora-pages-result.json
+        continue-on-error: true
       - name: Injection cases (Sec 1, real models)
-        if: inputs.injection
+        if: inputs.injection && !inputs.pages_only
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           INJECTION_BUDGET: ${{ inputs.injection_budget }}
@@ -96,6 +116,7 @@ jobs:
           path: |
             eval-result.json
             nora-eval-result.json
+            nora-pages-result.json
             injection-live.txt
             scripts/eval/scores.json
           if-no-files-found: ignore
