@@ -86,8 +86,10 @@ export async function sendTick(deps: SendDeps): Promise<SendResult> {
       r.failed++;
       continue;
     }
-    // The business said no, bounced, or is on the list: nothing more goes to it.
-    if ((await deps.suppressed(m.prospect.email)) || (await deps.suppressed(m.to_address))) {
+    // The business said no, bounced, or is on the list: nothing more goes to it. In test mode the address written to is
+    // Kabsi's own test inbox (a Kabsi user, so always on the list), and the business is the fictional example.com one:
+    // its own address is what is checked, exactly as a real run checks the business it writes to.
+    if ((await deps.suppressed(m.prospect.email)) || (s.sending_open && (await deps.suppressed(m.to_address)))) {
       await deps.markCancelled([m.id], "suppressed");
       r.cancelled++;
       continue;
