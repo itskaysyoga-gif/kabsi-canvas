@@ -15,7 +15,8 @@ const fromSitemap = (
   JSON.parse(readFileSync("src/content/sitemap-pages.json", "utf8")) as { path: string }[]
 ).map((p) => p.path);
 // The sitemap holds what search engines may index; the app's own public doors are listed here.
-const OTHERS = ["/", "/login", "/get-started", "/billing/done"];
+// Launch 2 part C: /get-started is a 301 to /scan (vercel.json), so it is no longer a page of its own.
+const OTHERS = ["/", "/login", "/billing/done"];
 const ROUTES = [...new Set([...OTHERS, ...fromSitemap])].filter(Boolean);
 
 // Issues found by this suite that cannot be fixed in QA 1 (docs/LATER.md lists each). A rule listed here is not failed for that page only;
