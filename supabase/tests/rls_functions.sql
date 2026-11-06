@@ -38,7 +38,7 @@ insert into tested values
   ('my_notification_prefs(uuid)'), ('set_notification_pref(uuid,text,text,text)'), ('list_my_notifications(uuid,integer)'),
   ('mark_notifications_read(uuid,uuid[])'), ('save_signup_attribution(jsonb)'), ('holiday_calendar(uuid,integer)'), ('coach_checklist(uuid)'),
   ('photo_link_create(uuid)'), ('photo_link_revoke(uuid)'), ('photo_link_status(uuid)'), ('set_post_cadence(uuid,integer)'),
-  ('whatsapp_connect_start(text)'), ('whatsapp_status()'), ('whatsapp_set_prefs(boolean,boolean)'), ('whatsapp_disconnect()'), ('whatsapp_staff_code()'),
+  ('whatsapp_connect_start(text)'), ('whatsapp_status()'), ('whatsapp_owners_on()'), ('whatsapp_set_prefs(boolean,boolean)'), ('whatsapp_disconnect()'), ('whatsapp_staff_code()'),
   ('set_protection_autofix(uuid,text,boolean,text)'),
   ('send_manager_steps(uuid,integer)'),
   ('set_onboarding_scenario(uuid,text,text)'), ('scenario_done(uuid)'), ('clear_onboarding_scenario(uuid)'),
@@ -149,6 +149,8 @@ select is(public.is_staff(), false, 'is_staff is false for a non-member');
 select is(public.is_org_member((select owner_org from victim_orgs)), false, 'is_org_member is false for a non-member');
 select is(public.has_location_role('00000000-0000-4000-8000-0000000000c1', array['owner', 'manager', 'staff']), false, 'has_location_role is false for a non-member');
 select is(public.google_mode(), 'mock', 'google_mode returns only the mode, no business data');
+-- Launch 1: one boolean of app_settings, the same for everyone.
+select is(pg_typeof(public.whatsapp_owners_on())::text, 'boolean', 'whatsapp_owners_on returns only a boolean, no business data');
 
 -- Staff RPCs: forbidden for anyone without a staff row.
 select throws_ok($$ select * from public.staff_chat_stats(7) $$, '42501', null, 'staff_chat_stats refuses a non-staff user');

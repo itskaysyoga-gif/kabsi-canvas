@@ -30,6 +30,30 @@ describe("why WhatsApp cannot be chosen", () => {
       fix: null,
     });
   });
+  it("Launch 1: says WhatsApp is paused when it is switched off for owners, and blocks only on a read false", () => {
+    expect(whatsappBlock({ ...base, ownersOn: false })).toEqual({
+      line: "WhatsApp messages from Kabsi are paused for now. Your reports and reminders come by email.",
+      fix: null,
+    });
+    expect(whatsappBlock({ ...base, ownersOn: true })).toBeNull();
+    // Not read yet, or the read failed: nothing is blocked on a guess.
+    expect(whatsappBlock({ ...base, ownersOn: undefined })).toBeNull();
+    // No number at all still says so first.
+    expect(whatsappBlock({ ...base, whatsappOn: false, ownersOn: false })?.line).toBe(
+      "WhatsApp is not open yet. Your reports and reminders come by email.",
+    );
+  });
+  it("Launch 1: a WhatsApp choice reads as Email while owners' WhatsApp is paused", () => {
+    expect(
+      chosenChannel({
+        ...base,
+        ownersOn: false,
+        statusFailed: false,
+        stored: "whatsapp",
+        prefs: [],
+      }),
+    ).toBe("email");
+  });
   it("says to connect it below when there is no opt-in, for none and pending", () => {
     for (const state of ["none", "pending"] as const) {
       const b = whatsappBlock({ ...base, status: { state } });

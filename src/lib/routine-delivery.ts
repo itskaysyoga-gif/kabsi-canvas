@@ -9,6 +9,8 @@ export type WhatsappBlock = { line: string; fix: "connect" | null };
 export type DeliveryInput = {
   /** Kabsi's WhatsApp number is set in the one setting (WHATSAPP_ON). */
   whatsappOn: boolean;
+  /** Launch 1: WhatsApp is switched on for owners (whatsapp_owners_on); undefined while unread or when the read fails. */
+  ownersOn?: boolean | undefined;
   /** The person's WhatsApp opt-in, once read. */
   status: WhatsappStatus | undefined;
   /** The read of the opt-in failed. */
@@ -23,11 +25,17 @@ const freq = (prefs: Pref[], category: string) =>
 
 /** The reason WhatsApp cannot be chosen right now, in one line, or null when it can. */
 export function whatsappBlock(
-  i: Pick<DeliveryInput, "whatsappOn" | "status" | "statusFailed">,
+  i: Pick<DeliveryInput, "whatsappOn" | "ownersOn" | "status" | "statusFailed">,
 ): WhatsappBlock | null {
   if (!i.whatsappOn)
     return {
       line: "WhatsApp is not open yet. Your reports and reminders come by email.",
+      fix: null,
+    };
+  // Launch 1: Kabsi's number exists but WhatsApp is switched off for owners, so nothing would arrive there.
+  if (i.ownersOn === false)
+    return {
+      line: "WhatsApp messages from Kabsi are paused for now. Your reports and reminders come by email.",
       fix: null,
     };
   if (i.statusFailed)
