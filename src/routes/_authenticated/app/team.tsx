@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { ChoiceChips } from "@/components/kabsi/d3-account";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -103,28 +103,51 @@ function TeamManager({ locationId }: { locationId: string }) {
   // Launch 2 part A (30.36 item 5): an invitation, a role change, a removal and an approval choice show at once, like the
   // switches in Settings (Launch 1 part C); the server's answer only confirms it. One save after another; a failure puts
   // the list back as it was and says so.
+  // The last list the server confirmed, and the saves still on their way (each with its own change). A failed save puts
+  // back the confirmed list with the other pending changes on top, so a queued save never brings back a refused one.
+  const confirmed = useRef<Team | null>(null);
+  const pending = useRef<{ n: number; apply: (t: Team) => Team }[]>([]);
+  const seq = useRef(0);
+  type Save = {
+    run: () => Promise<unknown>;
+    apply?: (t: Team) => Team;
+    done?: string;
+    undo?: () => void;
+  };
   const act = useMutation({
     mutationKey: ["team-save", locationId],
     scope: { id: `team-${locationId}` },
-    mutationFn: (v: { run: () => Promise<unknown>; apply?: (t: Team) => Team; done?: string }) =>
-      v.run(),
+    mutationFn: (v: Save) => v.run(),
     onMutate: async (v) => {
       setMessage("");
       await qc.cancelQueries({ queryKey: key });
-      const before = qc.getQueryData<Team>(key);
-      if (before && v.apply) qc.setQueryData<Team>(key, v.apply(before));
-      return { before };
+      const now = qc.getQueryData<Team>(key);
+      if (!pending.current.length) confirmed.current = now ?? null;
+      const n = ++seq.current;
+      const apply = v.apply ?? ((t: Team) => t);
+      pending.current.push({ n, apply });
+      if (now) qc.setQueryData<Team>(key, apply(now));
+      return { n };
     },
-    onSuccess: (_d, v) => {
+    onSuccess: (_d, v, ctx) => {
+      const p = pending.current.find((x) => x.n === ctx?.n);
+      if (p && confirmed.current) confirmed.current = p.apply(confirmed.current);
+      pending.current = pending.current.filter((x) => x.n !== ctx?.n);
       if (v.done) setMessage(v.done);
     },
-    onError: (e: Error, _v, ctx) => {
-      if (ctx?.before) qc.setQueryData(key, ctx.before);
+    onError: (e: Error, v, ctx) => {
+      pending.current = pending.current.filter((x) => x.n !== ctx?.n);
+      if (confirmed.current)
+        qc.setQueryData<Team>(
+          key,
+          pending.current.reduce((t, p) => p.apply(t), confirmed.current),
+        );
+      v.undo?.();
       setMessage(saveError(e));
     },
     onSettled: () => {
       // Read the truth back once the last save is done.
-      if (qc.isMutating({ mutationKey: ["team-save", locationId] }) <= 1) void refresh();
+      if (!pending.current.length) void refresh();
     },
   });
 
@@ -135,6 +158,8 @@ function TeamManager({ locationId }: { locationId: string }) {
     const asRole = role;
     setEmail("");
     act.mutate({
+      // A refused invitation gives the typed address back.
+      undo: () => setEmail((e) => e || address),
       run: () => inviteMember(locationId, address, asRole),
       apply: (t) => withInvite(t, address, asRole),
       done: `Invitation sent to ${address}.`,

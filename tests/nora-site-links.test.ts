@@ -44,6 +44,25 @@ describe("Nora's kabsi.co links are checked against the public page list", () =>
       "Email hello@kabsi.co or visit kabsi.co.",
     );
   });
+  it("catches every form of a kabsi.co address: //, a port, a user part, http, www, a query", () => {
+    for (const raw of [
+      "[admin](//kabsi.co/admin)",
+      "[admin](https://kabsi.co:443/admin)",
+      "[admin](https://x@kabsi.co/admin)",
+      "[admin](http://www.kabsi.co/admin?x=1)",
+      "[admin](/admin#top)",
+    ])
+      expect(siteLinksOnly(`See ${raw}.`, SITE)).toBe("See admin.");
+    expect(siteLinksOnly("See //kabsi.co/admin now.", SITE)).toBe("See kabsi.co now.");
+    expect(siteLinksOnly("See https://kabsi.co:443/admin.", SITE)).toBe("See kabsi.co.");
+    expect(siteLinksOnly("See https://x@kabsi.co/admin.", SITE)).toBe("See kabsi.co.");
+    expect(siteLinksOnly("See https://kabsi.co:443/pricing.", SITE)).toBe(
+      "See https://kabsi.co:443/pricing.",
+    );
+    expect(siteLinksOnly("Links at go.kabsi.co/abc and [mail](mailto:hello@kabsi.co).", SITE)).toBe(
+      "Links at go.kabsi.co/abc and [mail](mailto:hello@kabsi.co).",
+    );
+  });
   it("removes a link inside Markdown and keeps its words", () => {
     expect(siteLinksOnly("There is a [food truck guide](/guides/food-trucks) for you.", SITE)).toBe(
       "There is a food truck guide for you.",

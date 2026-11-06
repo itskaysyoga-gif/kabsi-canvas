@@ -176,4 +176,24 @@ test.describe("Team: changes show at once", () => {
     await expect(page.getByText("lee@roselane.example", { exact: true })).toHaveCount(0);
     await axeClean(page);
   });
+
+  test("two queued saves that both fail go back to what was saved, with one true line", async ({
+    page,
+  }) => {
+    const srv = newSrv({ fail: true, delayMs: 1200 });
+    await open(page, srv);
+    await roleOf(page).getByText("Staff", { exact: true }).click();
+    await page.getByRole("button", { name: "Remove" }).click();
+    await expect(page.getByText("sam@roselane.example", { exact: true })).toHaveCount(0, {
+      timeout: 1000,
+    });
+    await expect.poll(() => srv.calls, { timeout: 10_000 }).toEqual(["role:staff", "remove"]);
+    await expect(page.getByText("sam@roselane.example", { exact: true })).toBeVisible();
+    await expect(roleOf(page).getByRole("radio", { name: "Manager" })).toBeChecked();
+    await expect(
+      page
+        .getByRole("status")
+        .filter({ hasText: "Couldn't save that. It is back as it was. Try again." }),
+    ).toBeVisible();
+  });
 });

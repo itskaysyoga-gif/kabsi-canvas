@@ -52,6 +52,10 @@ async function metaEvent(req: Request, b: ConsentInput): Promise<Response> {
   if (!(await rateLimit(`metaweb:${await sha256Hex(`${clientIp(req)}|${day}`)}`, 60, 3600, { failClosed: true }))) {
     return fail("rate_limited", "Too many requests. Try again later.", 429);
   }
+  // A real visitor sends a handful of these a day; a made-up visitor id cannot be used to flood Meta with conversions.
+  if (!(await rateLimit(`metawebv:${await sha256Hex(`${ev.visitorId}|${day}`)}`, 6, 86400, { failClosed: true }))) {
+    return fail("rate_limited", "Too many requests. Try again later.", 429);
+  }
   try {
     const result = await sendWebCapi(ev, async (visitor) => {
       const { data, error } = await admin().from("consent_records").select("advertising, created_at")
