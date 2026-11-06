@@ -27,17 +27,6 @@ describe("Free Profile Check, status flags and WhatsApp (lane R sync, item D)", 
     expect(CLIENT_WHATSAPP_CONSENT).toContain("will not message me again");
   });
 
-  it("the WhatsApp form is built but shown only when WHATSAPP_NUMBER is set, and the email form is untouched", () => {
-    const src = read("src/components/profile-check/snapshot-result.tsx");
-    expect(src).toMatch(/\{WHATSAPP_ON \? <WhatsappForm[^>]*\/> : null\}/);
-    expect(src).toContain("<EmailForm placeId={s.place_id} page={page} />");
-    expect(src).toContain("Send my check to WhatsApp");
-    expect(src).toContain("Email me this check");
-    // The box starts unticked and the button waits for it.
-    expect(src).toMatch(/useState\(false\);\s*const \[token/);
-    expect(src).toContain("!ok");
-  });
-
   it("the old address opens the one free check (Web 2, 30.16 section 4), and the flags use the warning and danger states", () => {
     const route = read("src/routes/google-profile-check.tsx");
     expect(route).toContain("<FreeCheckStart />");
@@ -48,13 +37,10 @@ describe("Free Profile Check, status flags and WhatsApp (lane R sync, item D)", 
       /x\.tone === "danger"/,
     );
     expect(read("src/components/kabsi/scan-live.tsx")).toContain("mainFinding(s.flags)");
-    const src = read("src/components/profile-check/snapshot-result.tsx");
-    expect(src).toContain('danger: "red", warning: "amber", neutral: "grey"');
   });
 
   it("no fear claim, statistic or score wording on the check screens", () => {
     for (const f of [
-      "src/components/profile-check/snapshot-result.tsx",
       "src/routes/google-profile-check.tsx",
       "supabase/functions/_shared/profile-snapshot.ts",
     ]) {
@@ -71,15 +57,13 @@ describe("Free Profile Check (P0.4-01)", () => {
     expect(CLIENT_CONSENT).toBe("Send me tips on managing my Google profile");
   });
 
-  it("the pages that may send an email request are the three screens that exist", () => {
-    expect(CHECK_PAGES).toEqual(["/", "/google-profile-check", "/get-started"]);
+  it("the pages that may send an email request are the screens that exist (Launch 2: /get-started is gone)", () => {
+    expect(CHECK_PAGES).toEqual(["/", "/google-profile-check"]);
     for (const page of CHECK_PAGES) {
       const route = read(`src/routes/${page === "/" ? "index" : page.slice(1)}.tsx`);
       expect(route).toContain(`createFileRoute("${page}")`);
     }
-    expect(read("src/components/profile-check/snapshot-result.tsx")).toContain(
-      '"/google-profile-check" | "/get-started" | "/"',
-    );
+    expect(read("src/lib/profile-check.ts")).toContain('page: "/google-profile-check" | "/";');
   });
 
   it("the limits are the ones K-100 sets: 3 checks a day, 10 requests a minute", () => {
@@ -138,10 +122,7 @@ describe("Free Profile Check (P0.4-01)", () => {
       'danger: "Needs fixing", warning: "Worth fixing", neutral: "After you connect",',
     );
     for (const f of [
-      "src/components/profile-check/snapshot-result.tsx",
-      "src/components/profile-check/business-finder.tsx",
       "src/routes/google-profile-check.tsx",
-      "src/routes/get-started.tsx",
     ]) {
       const text = read(f);
       expect(text, f).not.toMatch(/[\u2013\u2014]/);
@@ -154,10 +135,7 @@ describe("Free Profile Check (P0.4-01)", () => {
       "supabase/functions/_shared/profile-snapshot.ts",
       "supabase/functions/profile-snapshot/index.ts",
       "src/lib/profile-check.ts",
-      "src/components/profile-check/snapshot-result.tsx",
-      "src/components/profile-check/business-finder.tsx",
       "src/routes/google-profile-check.tsx",
-      "src/routes/get-started.tsx",
     ]) {
       const text = read(f);
       expect(text, f).not.toMatch(/[\u2013\u2014]/);

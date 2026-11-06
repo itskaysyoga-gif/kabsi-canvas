@@ -1783,3 +1783,9 @@ Every new or changed line of Scan 3. The result's lines are in src/lib/scan-word
 - **Settings, Team** (30.36 item 5): invite, role change, remove, cancel invitation and the approval choices show at once. A failed save: "Couldn't save that. It is back as it was. Try again.", after the plain reason when there is one ("This person is already on your team."). A removal that saved: "[email] was removed." The invitation line "Invitation sent to [email]." is unchanged.
 - No visible line changes for the Conversions API (30.36 item 4).
 
+### Part C: one door to sign-up (branch claude/launch2-c, 30.36 item 8)
+
+- **Pricing's plan buttons** and **the guides' "Start free"** keep their words; they now go to Log in and then to setup (/start). A signed-in owner without a business goes to /start, one with a business to the dashboard.
+- **/get-started** is gone: its two screens ("Which business is yours?" and "Here's what customers see", with "Save your snapshot and continue") are removed, and the address answers with a 301 to /scan.
+- **Nora on WhatsApp**: her example address is kabsi.co/scan (was kabsi.co/get-started).
+

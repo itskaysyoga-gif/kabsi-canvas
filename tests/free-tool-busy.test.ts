@@ -33,9 +33,7 @@ describe("the free tools when the day's cap is 0 or used up", () => {
   });
 
   it("are used by the Profile Check and by the review link tool, which no longer show the old wording", () => {
-    const finder = readFileSync("src/components/profile-check/business-finder.tsx", "utf8");
-    expect(finder).toContain("<FreeToolBusy />");
-    expect(finder).not.toMatch(/CTA_PRIMARY|Join early access|Back soon/);
+    // Launch 2 part C: the old business finder went with /get-started; the free check (scan-live.tsx) has its own busy state.
     // Web 2: the review link tool is the design studio's (d2-tools.tsx); it shows the same sentence and the trial button.
     const tool = readFileSync("src/components/kabsi/d2-tools.tsx", "utf8");
     expect(tool).toContain("{FREE_TOOL_BUSY}");

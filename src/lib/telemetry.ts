@@ -367,7 +367,6 @@ export function pageTypeOf(path: string): string {
     scan: "tool_free_check",
     founding: "founding",
     "manager-steps": "manager_steps",
-    "get-started": "get_started",
     "setup-call": "setup_call",
     about: "about",
     security: "security",

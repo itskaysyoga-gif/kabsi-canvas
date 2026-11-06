@@ -335,7 +335,7 @@ export function AssistantWidget({
 
   // No launcher on the login and setup screens. Setup has its own "Need a hand?" chip (P0.4-11), which opens this panel.
   if (path === "/login") return null;
-  const setupScreen = path === "/start" || path === "/get-started";
+  const setupScreen = path === "/start";
 
   return (
     <>
