@@ -1,6 +1,6 @@
 # Hosting
 
-The website and app run on Vercel (team itskaysyoga-5542s-projects, project kabsi-canvas), built from `main` of `itskaysyoga-gif/kabsi-canvas`. Branches named `claude/*` are not built by Vercel (`git.deploymentEnabled` in `vercel.json`), and an `ignoreCommand` skips the build when a commit changes only files under `docs/` or `*.md` files (Vercel's daily deployment limit, 22 Oct 2026). Other branches still get a preview deployment. Edge Functions and the `kabsi-go` Worker are deployed by `.github/workflows/deploy.yml`, not by Vercel.
+The website and app run on Vercel (team itskaysyoga-5542s-projects, project kabsi-canvas), built from `main` of `itskaysyoga-gif/kabsi-canvas`. Branches named `claude/*` are not built by Vercel (`git.deploymentEnabled` in `vercel.json`), and an `ignoreCommand` skips the build when a commit changes only files under `docs/` or `*.md` files (Vercel's daily deployment limit, 22 Oct 2026). Other branches still get a preview deployment. Edge Functions and the `kabsi-go` Worker are deployed by `.github/workflows/deploy.yml`, not by Vercel. Since Launch 2 part F (6 Nov 2026, master plan 30.36 item 11) the site's Vercel Functions run in Frankfurt (`"regions": ["fra1"]` in `vercel.json`), beside the Supabase database; one region is allowed on every Vercel plan.
 
 ## Environment variables
 
