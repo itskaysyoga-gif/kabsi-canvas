@@ -20,17 +20,24 @@ export type DueMessage = {
 export type SendDeps = {
   settings(): Promise<SendSettings>;
   refreshSuppression(): Promise<void>;
-  due(now: Date): Promise<DueMessage[]>;
+  /** Approved, due, unclaimed messages; in test mode only test businesses' (so real ones waiting never block a test). */
+  due(now: Date, testOnly: boolean): Promise<DueMessage[]>;
+  /** Approved messages claimed more than 30 minutes ago and never marked sent: failed, for a person to look at, never re-sent. */
+  failStale(now: Date): Promise<number>;
+  /** Takes the next sending slot atomically (next_send_at moves on by the gap); false when another tick holds it. */
+  reserveSlot(gapMs: number): Promise<boolean>;
+  /** Claims the message (approved and unclaimed to claimed); false when another tick has it. */
+  claim(id: string): Promise<boolean>;
   suppressed(address: string): Promise<boolean>;
   /** Any reply, bounce, opt-out or complaint at this business (the prospect, or any prospect on its domain). */
   heardFrom(prospectId: string, domain: string): Promise<boolean>;
   sentOn(localDate: string, timeZone: string): Promise<number>;
   sentThisMonth(): Promise<number>;
-  deliver(to: string, message: string): Promise<void>;
+  /** Sends; `onAccepted` runs the moment the server accepts the message. */
+  deliver(to: string, message: string, onAccepted: () => Promise<void>): Promise<void>;
   markSent(m: DueMessage, messageId: string, at: Date, followUpAt: Date | null): Promise<void>;
   markCancelled(ids: string[], why: string): Promise<void>;
   markFailed(id: string, why: string): Promise<void>;
-  setNextSendAt(at: Date): Promise<void>;
   testRecipients: string[];
   sender: { name: string; address: string };
   now: Date;
@@ -58,8 +65,9 @@ export async function sendTick(deps: SendDeps): Promise<SendResult> {
   if (s.stopped_reason) return { ...r, state: "stopped" };
   if (!s.sending_open && !s.test_mode) return { ...r, state: "locked" };
   if (s.next_send_at && Date.parse(s.next_send_at) > deps.now.getTime()) return { ...r, state: "spacing" };
+  await deps.failStale(deps.now);
   await deps.refreshSuppression();
-  const due = await deps.due(deps.now);
+  const due = await deps.due(deps.now, !s.sending_open);
   for (const m of due) {
     const why = modeRefusal(s, m, deps.testRecipients);
     if (why === "real_business_in_test_mode") continue; // waits, approved, until lane R opens sending
@@ -93,25 +101,44 @@ export async function sendTick(deps: SendDeps): Promise<SendResult> {
     if ((await deps.sentOn(local, tz)) >= dailyCap(s, local)) return { ...r, state: "day_full" };
     if ((await deps.sentThisMonth()) >= s.monthly_cap) return { ...r, state: "month_full" };
 
+    if (!(await deps.reserveSlot(nextGap(deps.random)))) return { ...r, state: "spacing" };
+    if (!(await deps.claim(m.id))) continue;
     const messageId = newMessageId();
     const thread = m.kind === "follow_up" ? m.parent!.message_id : m.in_reply_to;
     const refs = m.kind === "follow_up" ? m.parent!.message_id : m.references_ids;
-    const message = buildMessage({
-      from: deps.sender, to: m.to_address, subject: m.subject, body: m.body, messageId, date: deps.now,
-      inReplyTo: thread, references: refs,
-    });
+    let message: string;
     try {
-      await deps.deliver(m.to_address, message);
+      message = buildMessage({
+        from: deps.sender, to: m.to_address, subject: m.subject, body: m.body, messageId, date: deps.now,
+        inReplyTo: thread, references: refs,
+      });
+    } catch {
+      await deps.markFailed(m.id, "header");
+      r.failed++;
+      continue;
+    }
+    const followAt = m.kind === "first" ? followUpDate(deps.now, tz, deps.random) : null;
+    let accepted = false;
+    try {
+      await deps.deliver(m.to_address, message, async () => {
+        accepted = true;
+        await deps.markSent(m, messageId, deps.now, followAt);
+      });
     } catch (e) {
+      if (accepted) {
+        r.sent++;
+        return { ...r, state: "sent" }; // the server took it; only the goodbye failed
+      }
       const step = e && typeof e === "object" && "step" in e ? String((e as { step: string }).step) : "connect";
       await deps.markFailed(m.id, `smtp_${step}`);
       r.failed++;
-      await deps.setNextSendAt(new Date(deps.now.getTime() + nextGap(deps.random)));
       return { ...r, state: "failed" };
     }
-    const followAt = m.kind === "first" ? followUpDate(deps.now, tz, deps.random) : null;
-    await deps.markSent(m, messageId, deps.now, followAt);
-    await deps.setNextSendAt(new Date(deps.now.getTime() + nextGap(deps.random)));
+    if (!accepted) {
+      await deps.markFailed(m.id, "smtp_not_accepted");
+      r.failed++;
+      return { ...r, state: "failed" };
+    }
     r.sent++;
     return { ...r, state: "sent" };
   }
