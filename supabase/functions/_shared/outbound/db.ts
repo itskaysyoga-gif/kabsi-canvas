@@ -1,7 +1,8 @@
 // Outbound's database and outside services for the three outbound functions (Harvey 4A). Service role only. Secrets come
 // from Supabase secrets by name and are never logged: HARVEY_REPO_TOKEN (kabsi-harvey contents), COMPANIES_HOUSE_API_KEY,
 // ZOHO_SMTP_PASSWORD, OUTBOUND_TEST_RECIPIENTS.
-import { admin } from "../kabsi.ts";
+import { admin, internalSecret } from "../kabsi.ts";
+import type { EventRow, Matched } from "./inbox.ts";
 import type { NewDraft, Settings } from "./prepare.ts";
 import type { DueMessage } from "./send.ts";
 
@@ -179,4 +180,158 @@ export async function claim(id: string): Promise<boolean> {
     .eq("id", id).eq("status", "approved").is("claimed_at", null).select("id");
   if (error) throw new Error(`claim: ${error.message}`);
   return (data ?? []).length === 1;
+}
+
+// ─── outbound-inbox (part E)
+
+export async function inboxState(): Promise<{ inbox_last_uid: number | null; inbox_uid_validity: string | null }> {
+  const { data, error } = await admin().from("outbound_settings").select("inbox_last_uid, inbox_uid_validity").single();
+  if (error) throw new Error(`inboxState: ${error.message}`);
+  return data as { inbox_last_uid: number | null; inbox_uid_validity: string | null };
+}
+
+export async function saveInboxState(lastUid: number | null, validity: string | null) {
+  const { error } = await admin().from("outbound_settings").update({ inbox_last_uid: lastUid, inbox_uid_validity: validity }).eq("id", true);
+  if (error) throw new Error(`saveInboxState: ${error.message}`);
+}
+
+export async function seen(inboundId: string): Promise<boolean> {
+  const { data, error } = await admin().from("outbound_events").select("id").eq("inbound_id", inboundId).limit(1);
+  if (error) throw new Error(`seen: ${error.message}`);
+  return (data ?? []).length > 0;
+}
+
+/** The sent message one of these Message-IDs names, its business, and everything Kabsi sent that business. */
+export async function match(ids: string[]): Promise<Matched | null> {
+  const { data, error } = await admin().from("outbound_messages")
+    .select("id, kind, message_id, prospect:outbound_prospects(id, email, email_domain, business_name, industry, city, country, test)")
+    .in("message_id", ids).eq("status", "sent").limit(1);
+  if (error) throw new Error(`match: ${error.message}`);
+  const row = (data ?? [])[0] as unknown as { id: string; kind: string; message_id: string; prospect: Matched["prospect"] } | undefined;
+  if (!row?.prospect) return null;
+  const sent = await admin().from("outbound_messages").select("body").eq("prospect_id", row.prospect.id).eq("status", "sent");
+  return { message: { id: row.id, kind: row.kind, message_id: row.message_id }, prospect: row.prospect, sentBodies: (sent.data ?? []).map((r) => r.body as string) };
+}
+
+/** The latest message Kabsi sent to this address (a test inbox, or a business's own address). */
+export async function matchBySender(address: string): Promise<Matched | null> {
+  if (!/^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/.test(address)) return null;
+  const { data, error } = await admin().from("outbound_messages").select("message_id").eq("to_address", address.toLowerCase())
+    .eq("status", "sent").order("sent_at", { ascending: false }).limit(1);
+  if (error) throw new Error(`matchBySender: ${error.message}`);
+  const id = (data ?? [])[0]?.message_id as string | undefined;
+  return id ? await match([id]) : null;
+}
+
+export async function record(e: EventRow) {
+  const { error } = await admin().from("outbound_events").insert(e);
+  if (error && !/duplicate key/.test(error.message)) throw new Error(`record: ${error.message}`);
+}
+
+export async function suppress(address: string, reason: string, domain: boolean) {
+  const { error } = await admin().rpc("outbound_suppress", { p_address: address, p_reason: reason, p_domain: domain });
+  if (error) throw new Error(`suppress: ${error.message}`);
+}
+
+export async function cancelQueue(prospectId: string, onlyFollowUp: boolean) {
+  let q = admin().from("outbound_messages").update({ status: "cancelled", error: "heard_from_business" }).eq("prospect_id", prospectId)
+    .in("status", ["draft", "approved"]).neq("kind", "reply");
+  if (onlyFollowUp) q = q.eq("kind", "follow_up");
+  const { error } = await q;
+  if (error) throw new Error(`cancelQueue: ${error.message}`);
+}
+
+export async function setStatus(prospectId: string, status: string, interested?: boolean) {
+  const { error } = await admin().from("outbound_prospects")
+    .update({ status, updated_at: new Date().toISOString(), ...(interested ? { interested: true } : {}) }).eq("id", prospectId);
+  if (error) throw new Error(`setStatus: ${error.message}`);
+}
+
+export async function checkStops(reason: "complaint" | "bounce") {
+  const { error } = await admin().rpc("outbound_check_stops", { p_reason: reason });
+  if (error) throw new Error(`checkStops: ${error.message}`);
+}
+
+/** The staff WhatsApp alert, with no business detail (urgent, staff-alerts.ts). */
+export async function alert(key: string) {
+  const { error } = await admin().rpc("ops_emit", {
+    p_kind: "outbound_reply", p_channel: "alerts", p_title: "New reply to Kabsi outbound",
+    p_body: "Open kabsi.co/staff/outbound to read it.", p_dedupe: `outbound_reply:${key}`,
+  });
+  if (error) throw new Error(`alert: ${error.message}`);
+}
+
+/** The free check of a business that said yes, inside places_daily_cap. Test businesses never spend: a fixed test code. */
+export async function freeCheck(p: Matched["prospect"]): Promise<string | null> {
+  if (p.test) return "TESTCHECK";
+  const day = new Date().toISOString().slice(0, 10);
+  const cap = await admin().from("app_settings").select("value").eq("key", "places_daily_cap").maybeSingle();
+  const used = await admin().from("places_usage").select("calls").eq("day", day);
+  const limit = Number(cap.data?.value ?? 0);
+  if (!(limit > 0) || (used.data ?? []).some((r) => Number(r.calls) >= limit)) return null;
+  const secret = await internalSecret();
+  if (!secret) return null;
+  const { data, error } = await admin().functions.invoke("visibility/check", {
+    body: { name: p.business_name, country: p.country, city: p.city, term: p.industry },
+    headers: { "x-cron-secret": secret },
+  });
+  if (error) return null;
+  const code = (data as { code?: string } | null)?.code;
+  return typeof code === "string" ? code : null;
+}
+
+export async function draftReply(r: { prospect_id: string; to_address: string; subject: string; body: string; in_reply_to: string; references_ids: string }) {
+  const have = await admin().from("outbound_messages").select("id").eq("prospect_id", r.prospect_id).eq("kind", "reply").eq("status", "draft").limit(1);
+  if ((have.data ?? []).length) return;
+  const { error } = await admin().from("outbound_messages").insert({ ...r, kind: "reply", status: "draft" });
+  if (error) throw new Error(`draftReply: ${error.message}`);
+}
+
+/** Queue hashes for kabsi-harvey's kabsi/suppression.txt; flushHarvey sends the queue. */
+export async function harveyHashes(hashes: string[]) {
+  const rows = [...new Set(hashes)].filter((h) => /^[0-9a-f]{64}$/.test(h)).map((hash) => ({ hash }));
+  if (!rows.length) return;
+  const { error } = await admin().from("outbound_harvey_queue").upsert(rows, { onConflict: "hash", ignoreDuplicates: true });
+  if (error) throw new Error(`harveyHashes: ${error.message}`);
+}
+
+/** Append the queued hashes to kabsi-harvey's kabsi/suppression.txt (contents write on that one repository), so Harvey
+ *  deletes them and never adds them again. Hashes only; the commit message carries a count. The queue is emptied only
+ *  after GitHub accepted the file; on any doubt the file is left alone and the queue waits for the next run. */
+export async function flushHarvey(): Promise<number> {
+  const token = Deno.env.get("HARVEY_REPO_TOKEN");
+  if (!token) return 0;
+  const q = await admin().from("outbound_harvey_queue").select("hash").limit(500);
+  if (q.error) throw new Error(`flushHarvey: ${q.error.message}`);
+  const hashes = (q.data ?? []).map((r) => r.hash as string);
+  if (!hashes.length) return 0;
+  const url = `https://api.github.com/repos/${HARVEY_REPO}/contents/kabsi/suppression.txt`;
+  const headers = { authorization: `Bearer ${token}`, accept: "application/vnd.github+json", "user-agent": "kabsi-outbound" };
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const got = await fetch(url, { headers });
+    if (!got.ok) throw new Error(`suppression.txt: HTTP ${got.status}`);
+    const j = await got.json() as { content?: string; encoding?: string; sha: string; size: number };
+    // Past 1 MB the contents API returns no content: never write the file back from an empty read.
+    if (j.encoding !== "base64" || typeof j.content !== "string") throw new Error("suppression.txt: not readable through the contents API");
+    const bytesIn = Uint8Array.from(atob(j.content.replace(/\s+/g, "")), (c) => c.charCodeAt(0));
+    if (bytesIn.length !== j.size) throw new Error("suppression.txt: size mismatch");
+    const text = new TextDecoder().decode(bytesIn);
+    const have = new Set(text.split(/\r?\n/).map((l) => l.split("#")[0].trim().toLowerCase()).filter(Boolean));
+    const add = hashes.filter((h) => !have.has(h));
+    if (add.length) {
+      const next = (text.endsWith("\n") || text === "" ? text : `${text}\n`) + add.join("\n") + "\n";
+      let bin = "";
+      for (const b of new TextEncoder().encode(next)) bin += String.fromCharCode(b);
+      const put = await fetch(url, {
+        method: "PUT", headers: { ...headers, "content-type": "application/json" },
+        body: JSON.stringify({ message: `Outbound: ${add.length} coded entr${add.length === 1 ? "y" : "ies"} added`, content: btoa(bin), sha: j.sha }),
+      });
+      if (put.status === 409) continue;
+      if (!put.ok) throw new Error(`suppression.txt: HTTP ${put.status}`);
+    }
+    const del = await admin().from("outbound_harvey_queue").delete().in("hash", hashes);
+    if (del.error) throw new Error(`flushHarvey: ${del.error.message}`);
+    return add.length;
+  }
+  throw new Error("suppression.txt: changed under us three times");
 }

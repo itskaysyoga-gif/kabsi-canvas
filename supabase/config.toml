@@ -71,3 +71,5 @@ verify_jwt = true
 verify_jwt = false
 [functions.outbound-send]     # Outbound sending (Harvey 4A, 30.39): pg_cron calls it with x-cron-secret and no JWT; the secret, the lock, the test addresses and every sending rule are checked in code
 verify_jwt = false
+[functions.outbound-inbox]    # Outbound replies (Harvey 4A, 30.39): pg_cron calls it with x-cron-secret and no JWT; the secret is checked in code; it reads the mailbox read only and never answers a person
+verify_jwt = false

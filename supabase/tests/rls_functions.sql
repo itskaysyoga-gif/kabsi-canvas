@@ -51,7 +51,7 @@ insert into tested values
   ('staff_set_google_writes(boolean,text)'), ('staff_founding_matches(uuid)'), ('staff_operations()'),
   ('staff_evidence_add(uuid,text,date,text,text,text)'), ('staff_evidence_delete(uuid)'), ('staff_activation()'), ('staff_validation()'),
   ('staff_today()'), ('staff_outbound_approve(uuid)'), ('staff_outbound_approve_all(uuid[])'),
-  ('staff_outbound_edit(uuid,text,text)'), ('staff_outbound_skip(uuid)');
+  ('staff_outbound_edit(uuid,text,text)'), ('staff_outbound_skip(uuid)'), ('staff_outbound_reply_done(bigint)');
 
 select is(
   (select coalesce(array_agg(p.oid::regprocedure::text order by 1), '{}') from pg_proc p
@@ -203,6 +203,7 @@ select throws_ok($$ select public.staff_outbound_approve('00000000-0000-4000-800
 select throws_ok($$ select public.staff_outbound_approve_all(array['00000000-0000-4000-8000-0000000000d8']::uuid[]) $$, '42501', null, 'staff_outbound_approve_all refuses a non-staff user');
 select throws_ok($$ select public.staff_outbound_edit('00000000-0000-4000-8000-0000000000d8', 'A subject', 'A body long enough here') $$, '42501', null, 'staff_outbound_edit refuses a non-staff user');
 select throws_ok($$ select public.staff_outbound_skip('00000000-0000-4000-8000-0000000000d8') $$, '42501', null, 'staff_outbound_skip refuses a non-staff user');
+select throws_ok($$ select public.staff_outbound_reply_done(1) $$, '42501', null, 'staff_outbound_reply_done refuses a non-staff user');
 select throws_ok($$ select public.staff_system_health() $$, '42501', null, 'staff_system_health refuses a non-staff user');
 select throws_ok($$ select public.staff_job_retry(1) $$, '42501', null, 'staff_job_retry refuses a non-staff user');
 select throws_ok($$ select public.staff_job_cancel(1) $$, '42501', null, 'staff_job_cancel refuses a non-staff user');
