@@ -30,7 +30,7 @@ export const Route = createFileRoute("/privacy")({
   component: Page,
 });
 
-const UPDATED = "28 October 2026";
+const UPDATED = "6 November 2026";
 
 // K-113.6, word for word. Set as raw HTML so the apostrophe stays a plain ' in the page source.
 const LIMITED_USE =
@@ -706,7 +706,31 @@ function Page() {
       </section>
 
       <section>
-        <h2>15. Changes</h2>
+        <h2>15. Businesses on Kabsi's contact list</h2>
+        <p>
+          {OPERATOR_NAME} runs Kabsi and keeps a list of local businesses, so Kabsi can tell suitable
+          ones about its service later. For each business the list holds its name, kind of business,
+          address, phone number, website and an email address the business publishes itself. It comes
+          from OpenStreetMap and from the business's own website. Kabsi keeps no names of owners or
+          staff.
+        </p>
+        <p>
+          The lawful basis is legitimate interests: telling businesses about a service that may help
+          them. No message has been sent, and none is sent without a further check of the law in the
+          country where the business is. Kabsi checks each business again at least every six months
+          and marks one that has closed. The list is held privately and is
+          never sold or shared.
+        </p>
+        <p>
+          Any business can ask to be removed or never to be contacted. Write to {CONTACT_EMAIL} and
+          Kabsi acts within 30 days. A business that asks never to be contacted goes on a list that
+          stops it being added again. You can also ask what Kabsi holds about your business, object to
+          Kabsi holding it, or complain to the data protection authority where you are.
+        </p>
+      </section>
+
+      <section>
+        <h2>16. Changes</h2>
         <p>
           If we change this policy in a way that matters, we email account holders before the change
           applies. The date at the top shows the latest version.
