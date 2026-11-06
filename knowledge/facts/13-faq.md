@@ -255,7 +255,7 @@ Kabsi checks about once an hour once connected, and emails you when a detail cha
 Tap "Google is right". Google's value becomes your approved version.
 
 **Why does Kabsi sometimes recommend "Google is right"?**
-Google removes things from business names that break its naming rules: a web address, a city or area, a slogan or extra keywords. When that is what Google removed (for example "Yawmiyati.com" to "Yawmiyati"), Kabsi recommends "Google is right" and says why: business names on Google can't include them, and putting them back can lead to a suspension. "Keep my information" is still there, with that warning.
+Google removes things from business names that break its naming rules: a web address, a city or area, a slogan or extra keywords. When that is what Google removed (for example "Rosa Bakery.com" to "Rosa Bakery"), Kabsi recommends "Google is right" and says why: business names on Google can't include them, and putting them back can lead to a suspension. "Keep my information" is still there, with that warning.
 
 **Why do I have to sign in for some changes?**
 Your business name, address, main category, open status and map pin can make Google ask you to verify your business again when they change. Kabsi asks you to sign in to choose these (an email link alone is not enough; the email page asks you to sign in and brings you back), only the owner can choose, and Kabsi says "Changing this can make Google ask you to verify your business again." Kabsi also sends at most one of these details back to Google at a time, at least 7 days apart; a second one inside the 7 days waits, and Kabsi says the date it can go.
