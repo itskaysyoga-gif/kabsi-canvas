@@ -177,3 +177,12 @@ Deno.test("robots.txt wildcards and end anchors, without building a pattern from
   assert.ok(!robotsAllows("User-agent: *\nDisallow: /team/*/private", "/team/a/private/x"));
   assert.ok(robotsAllows("User-agent: *\nDisallow: /(.*)+$", "/contact"), "a rule is text, never a pattern");
 });
+
+Deno.test("a hostile page is examined in linear time", () => {
+  const t = Date.now();
+  for (const page of ["<".repeat(300_000), "href=".repeat(60_000), "<script src".repeat(30_000), "© ".repeat(150_000)]) {
+    pickDetail(page, NOW);
+    emailOnPage(page, "hello@rose.example.com");
+  }
+  assert.ok(Date.now() - t < 3000, `took ${Date.now() - t} ms`);
+});
