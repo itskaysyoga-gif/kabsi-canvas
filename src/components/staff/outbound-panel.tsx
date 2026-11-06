@@ -420,10 +420,26 @@ function ReplyCard({ r, draft }: { r: Reply; draft: Message | null }) {
           )}
         </div>
       ) : (
-        <p className="mt-3 text-small text-text-2">
-          No answer is prepared. Kabsi drafts one only for a clear yes. Answer from
-          rashid@getkabsi.com.
-        </p>
+        <>
+          <p className="mt-3 text-small text-text-2">
+            No answer is prepared. Kabsi drafts one only for a clear yes. Answer from
+            rashid@getkabsi.com, then tap Done.
+          </p>
+          <Button
+            className="mt-2"
+            variant="outline"
+            disabled={a.busy}
+            onClick={() =>
+              void a.run(
+                "staff_outbound_reply_done",
+                { p_event_id: r.id },
+                "Couldn't save. Try again.",
+              )
+            }
+          >
+            Done
+          </Button>
+        </>
       )}
       {a.err ? (
         <p className="mt-2 text-small text-bad" role="alert">

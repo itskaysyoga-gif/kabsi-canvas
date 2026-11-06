@@ -28,6 +28,8 @@ const URGENT = new Set([
   "places_80", "places_cap", "ai_global_cap",
   // AI Visibility (V2, 27.10): the monthly provider cap at 80 percent and at the cap
   "ai_visibility_80", "ai_visibility_cap",
+  // Outbound (Harvey 4A, 30.39): a person replied (no business detail in the alert), or sending stopped
+  "outbound_reply", "outbound_stop",
   // the nightly smoke test, the backup
   "smoke_failed", "backup_failed",
 ]);
