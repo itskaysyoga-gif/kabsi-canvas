@@ -176,11 +176,12 @@ export function checkEmail(d: Pick<Deps, "esc" | "appUrl">, s: Snapshot, tips: b
   const para = (t: string) => `<p style="margin:0 0 12px 0;">${d.esc(t)}</p>`;
   const extraHtml = extra === undefined ? "" : x
     ? (x.nearby.length ? `<p style="margin:16px 0 8px 0;"><strong>Where you come up nearby</strong></p>${x.nearby.map(para).join("")}` : "") +
-      (x.ai.length ? `<p style="margin:16px 0 8px 0;"><strong>An answer customers might see</strong></p>${x.ai.map(para).join("")}` : "") +
+      // The AI part opens with its own question, "Did ChatGPT name your business?", as the page's heading does.
+      (x.ai.length ? `<p style="margin:16px 0 8px 0;"><strong>${d.esc(x.ai[0])}</strong></p>${x.ai.slice(1).map(para).join("")}` : "") +
       `<p style="margin:16px 0 0 0;"><a href="${d.esc(x.link)}">${d.esc(x.link.replace(/^https?:\/\//, ""))}</a></p>`
     : `<p style="margin:16px 0 0 0;">${d.esc(NOT_PART)}</p>`;
   const extraText = extra === undefined ? [] : x
-    ? [...(x.nearby.length ? ["Where you come up nearby", ...x.nearby, ""] : []), ...(x.ai.length ? ["An answer customers might see", ...x.ai, ""] : []), x.link, ""]
+    ? [...(x.nearby.length ? ["Where you come up nearby", ...x.nearby, ""] : []), ...(x.ai.length ? [...x.ai, ""] : []), x.link, ""]
     : [NOT_PART, ""];
   const content = {
     preheader: "What customers see on Google, and what needs fixing.",
@@ -209,13 +210,24 @@ export function whatsappParams(s: Snapshot, extra?: Extra | "none"): [string, st
   const line = todo.length
     ? `${todo.length === 1 ? "1 thing to look at" : `${todo.length} things to look at`}: ${todo.join(" ")}`
     : "Nothing needs fixing in what Google shows the public.";
-  // Scan 2 (30.29 item B): with a finished free check, the count line, the AI line and the link follow the profile line,
-  // within 900 characters; the profile line is cut first so the link always fits.
-  const one = (t: string) => t.replace(/\s+/g, " ").trim();
+  // Launch 1 (30.35 item 4): with a finished free check, the result page's words follow the profile line: the nearby
+  // lead, the points line with the usual position, "Did ChatGPT name your business?" with the answer, the question, the
+  // model and the date, then the link. Within 900 characters: the profile line is cut first, then the question, so the
+  // nearby lines, the answer and the link always fit. A line without an end mark gets a full stop.
+  const one = (t: string) => {
+    const x = t.replace(/\s+/g, " ").trim();
+    return /[.?]$/.test(x) ? x : `${x}.`;
+  };
   // A code whose check never finished says so, like the email.
-  const tail = extra === "none" ? NOT_PART : extra
-    ? [extra.nearby[0], extra.ai.find((l) => l.startsWith("ChatGPT")), extra.link.replace(/^https?:\/\//, "")].filter((t): t is string => !!t).map(one).join(" ")
-    : "";
+  let tail = "";
+  if (extra === "none") tail = NOT_PART;
+  else if (extra) {
+    const link = extra.link.replace(/^https?:\/\//, "");
+    const parts = (ai: string[]) => [...extra.nearby, ...ai].filter((t) => !!t).map(one).concat(link).join(" ");
+    tail = parts(extra.ai);
+    // Too long with the question (an unusually long one): drop the question line, keep the verdict, model and date.
+    if (tail.length > 860) tail = parts(extra.ai.filter((l) => !l.startsWith("Question: ")));
+  }
   const room = tail ? 900 - tail.length - 1 : 900;
   const head = line.length > room ? `${line.slice(0, Math.max(0, room - 1)).trimEnd()}…` : line;
   return [ownName(s.name).slice(0, 120), (tail ? `${head} ${tail}` : head).slice(0, 900)];

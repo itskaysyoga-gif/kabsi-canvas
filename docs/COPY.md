@@ -1751,3 +1751,11 @@ Every new or changed line of Scan 3. The result's lines are in src/lib/scan-word
 - **Related**: nail salons, lash and brow studios, hair salons, spas and massage, medical and aesthetic clinics, barbershops. Guides: photos, replying to reviews, categories.
 - **Share image**: public/og/industries/beauty-salon.jpg, alt "Kabsi. Your beauty salon, ready for its close up."
 - **Free check search**: "beauty salon" for the UK and the UAE (migration 20261105200756, source lane_r_approved).
+
+### Part B: the report follows the page (branch claude/launch1-b, 30.35 item 4)
+
+*The words are the page's own, from supabase/functions/_shared/visibility/scan-words.ts (src/lib/scan-words.ts re-exports it). tests/launch1-report.test.ts holds them.*
+
+- **Email, after the Google part**: "Where you come up nearby" then "When someone searches for '[term]' near you, you appear [4th] in this Google Maps check." and "You appeared in the first three at [n] of 49 points around you. Most places put you [4th]."; then the heading "Did ChatGPT name your business?" with the answer line ("Yes. ChatGPT named your business.", "No. It named [A and B], which Google Maps shows near you.", "No. ChatGPT did not name your business in this answer." or the "Not clear from this answer ..." line), "Question: '[question]'", "Model: ChatGPT ([model])", "Asked on [date]"; then the link kabsi.co/scan/[code]. Replaced: the count line "In the first 3 at ...", the three nearby places and the heading "An answer customers might see".
+- **WhatsApp** (the approved template, its two parameters unchanged in shape, one line, at most 900 characters): the profile line, then the same lines in the same order joined by spaces, each ending with a full stop, then the link. When too long, the profile line is cut first, then the question line.
+- A part the check does not hold is left out. A check that never finished: "The nearby search and the AI answer were not part of this check." (unchanged).
