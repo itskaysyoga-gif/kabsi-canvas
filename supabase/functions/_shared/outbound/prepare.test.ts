@@ -186,3 +186,8 @@ Deno.test("a hostile page is examined in linear time", () => {
   }
   assert.ok(Date.now() - t < 3000, `took ${Date.now() - t} ms`);
 });
+
+Deno.test("entities are decoded once: &amp;#64; is not an @", () => {
+  assert.ok(!emailOnPage("<p>hello&amp;#64;rose.example.com</p>", "hello@rose.example.com"));
+  assert.ok(emailOnPage("<p>hello&#64;rose.example.com</p>", "hello@rose.example.com"));
+});
