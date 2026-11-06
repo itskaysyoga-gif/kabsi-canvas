@@ -1860,14 +1860,17 @@ Footer: "Why you got this: your business email is on your website. Reply 'no tha
 "Hi again. Happy to run that free check of <business>'s Google profile if useful. A yes is enough, and if not, no worries."
 then the same signature and footer.
 
-**Rashid's reply to a clear yes** (drafted for him by outbound-inbox, never sent without his Send; Decisions to confirm for lane R):
+**Rashid's reply to a clear yes** (drafted for him by outbound-inbox from this template, never sent without his Send; lane R, 6 Nov 2026, word for word; no "Drafted with Nora", because a template wrote it):
 
 "Hi <business> team,
-Thanks for the yes. Here is the free check of <business>'s Google profile: kabsi.co/scan/<code>
-We're taking 25 founding businesses, with three months of Pro free. If you would like one of the places, reply here and I will set it up with you.
-Rashid Abou Hamzy, founder of Kabsi. Drafted with Nora, Kabsi's AI assistant.
-kabsi.co
-Facebook: <SOCIAL_LINKS Facebook>
-Instagram: <SOCIAL_LINKS Instagram>"
 
-**The staff page kabsi.co/staff/outbound** (Harvey 4A part C): H1 "Emails waiting for your yes" (highlight on "your yes"); line "The day's drafts with their sources, the replies that need you, and whether sending is locked." Panels: "Sending" (one of: "Sending is locked. Test mode: only the test addresses receive mail." / "Sending is locked. Nothing is prepared or sent." / "Sending is open since <date>. Only what you approve is sent." / "Stopped on <date>: <reason>. Only lane R reopens it.", then "Approved and waiting to send: <n>."), "Today's drafts" (each with Source page, Read on, Detail, Company number; buttons Approve, Edit, Edit follow-up, Skip; at the end "Read every draft above first. This approves the <n> shown and their follow-ups." and "Approve all <n>"), "Replies" (each reply with "Your answer, ready to send" and Send, Edit, Skip, or "No answer is prepared. Kabsi drafts one only for a clear yes. Answer from rashid@getkabsi.com."). There is no control that opens sending.
+Thanks. Here is the free check of <business>'s Google profile: kabsi.co/scan/<code>
+
+We're taking 25 founding businesses, with three months of Pro free. If you'd like one of the places, apply at kabsi.co/founding, or reply here and I'll help.
+
+Rashid Abou Hamzy, founder of Kabsi
+kabsi.co
+Facebook: <R-59 address>
+Instagram: <R-59 address>"
+
+**The staff page kabsi.co/staff/outbound** (Harvey 4A part C): H1 "Emails waiting for your yes" (highlight on "your yes"); line "The day's drafts with their sources, the replies that need you, and whether sending is locked." Panels: "Sending" (one of: "Sending is locked. Test mode: only the test addresses receive mail." / "Sending is locked. Nothing is prepared or sent." / "Sending is open since <date>. Only what you approve is sent." / "Stopped on <date>: <reason>. Only lane R reopens it.", then "Approved and waiting to send: <n>."), "Today's drafts" (each with Source page, Read on, Detail, Company number; buttons Approve, Edit, Edit follow-up, Skip; at the end "Read every draft above first. This approves the <n> shown and their follow-ups." and "Approve all <n>"), "Replies" (each reply with "Your answer, ready to send" and Send, Edit, Skip, or "No answer is prepared. Kabsi drafts one only for a clear yes. Answer from rashid@getkabsi.com, then tap Done." with a Done button). There is no control that opens sending.
