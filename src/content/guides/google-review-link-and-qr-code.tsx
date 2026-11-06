@@ -179,12 +179,13 @@ export const guide: GuideDoc = {
       <>
         <p>
           The <SiteRef to="/google-review-link">free review link and QR tool</SiteRef> works without
-          signing in: search your business name and city to get Google's own review link, a QR code
-          image and a printable counter card, from any phone. Inside Kabsi, Get reviews gives you a
-          short link and a QR code, free for every business, that open your Google review page by
-          default; you can set a link to show a short Kabsi page first (kabsi.co/review/CODE), with
-          the Google review button first and large. Get reviews shows how often each link was
-          opened. An open is not a review: Google decides which reviews appear.
+          signing in: search your business name and city to get a review link for your Google
+          profile, a QR code image and a printable counter card, from any phone. Inside Kabsi, Get
+          reviews gives you a short link and a QR code, free for every business, that open your
+          Google review page by default; you can set a link to show a short Kabsi page first
+          (kabsi.co/review/CODE), with the Google review button first and large. Get reviews shows
+          how often each link was opened. An open is not a review: Google decides which reviews
+          appear.
         </p>
         <p>
           Send review link opens a staff member's own WhatsApp with the same message for every

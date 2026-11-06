@@ -173,54 +173,85 @@ export function SearchingSteps({
 
 /* ---------- Copy field ---------- */
 
+// Launch 2 part B (master plan 30.36 item 7): "Copied" only after the copy really worked. When the browser refuses it, the
+// button stays, the link is selected for the visitor, and one line (announced) says how to copy it by hand on this device.
+export const COPY_FAILED = {
+  phone: "Press and hold the link to copy it.",
+  computer: "Press Ctrl+C or Cmd+C to copy it.",
+} as const;
+export function copyFailedLine(coarsePointer: boolean): string {
+  return coarsePointer ? COPY_FAILED.phone : COPY_FAILED.computer;
+}
+
 export function CopyField({
   label,
   value,
   copyLabel = "Copy link",
   className,
+  children,
 }: {
   label: string;
   value: string;
   copyLabel?: string;
   className?: string | undefined;
+  /** A second action beside Copy (the review link tool's Test the link). */
+  children?: ReactNode;
 }) {
-  const [copied, setCopied] = useState(false);
+  const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
   const timer = useRef<number | undefined>(undefined);
+  const text = useRef<HTMLParagraphElement>(null);
   useEffect(() => () => window.clearTimeout(timer.current), []);
   const copy = async () => {
+    window.clearTimeout(timer.current);
     try {
+      if (!navigator.clipboard?.writeText) throw new Error("no clipboard");
       await navigator.clipboard.writeText(value);
     } catch {
-      /* clipboard blocked: the text is selectable below */
+      // Select the link so the visitor can copy it themselves.
+      try {
+        const sel = window.getSelection();
+        if (sel && text.current) sel.selectAllChildren(text.current);
+      } catch {
+        /* nothing more to do */
+      }
+      setState("failed");
+      return;
     }
-    setCopied(true);
-    window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setCopied(false), 2000);
+    setState("copied");
+    timer.current = window.setTimeout(() => setState("idle"), 2000);
   };
+  const coarse =
+    typeof window !== "undefined" && typeof window.matchMedia === "function"
+      ? window.matchMedia("(pointer: coarse)").matches
+      : false;
   return (
     <div className={className}>
       <p className="mb-2 text-small font-bold text-text-1">{label}</p>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <p className="min-h-13 min-w-0 flex-1 select-all break-all rounded-input border border-stroke bg-surface-2 px-4 py-3.5 text-small text-text-1">
+        <p
+          ref={text}
+          className="min-h-13 min-w-0 flex-1 select-all break-all rounded-input border border-stroke bg-surface-2 px-4 py-3.5 text-small text-text-1"
+        >
           {value}
         </p>
         <Button
           variant="secondary"
           onClick={copy}
           icon={
-            copied ? (
+            state === "copied" ? (
               <Check className="size-5" aria-hidden />
             ) : (
               <Copy className="size-5" aria-hidden />
             )
           }
         >
-          {copied ? "Copied" : copyLabel}
+          {state === "copied" ? "Copied" : copyLabel}
         </Button>
+        {children}
       </div>
-      <span role="status" className="sr-only">
-        {copied ? "Copied" : ""}
-      </span>
+      <p role="status" className={state === "failed" ? "mt-2 text-small text-text-1" : "sr-only"}>
+        {state === "copied" ? "Copied" : state === "failed" ? copyFailedLine(coarse) : ""}
+      </p>
     </div>
   );
 }

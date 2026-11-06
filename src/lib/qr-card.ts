@@ -3,6 +3,7 @@
 // for a rating. One layout in PDF points (A6, 105 by 148 mm) drawn three ways: SVG on the page, PNG to download and a
 // printable A6 PDF, so the three always match. Loaded only where a card shows.
 import { qrMatrix } from "@/lib/qr";
+import { hasLetters, printable } from "@/lib/qr-card-name";
 
 export const CARD_LINE = "Scan to review us on Google";
 export const CARD_FOOT = "kabsi.co";
@@ -34,14 +35,8 @@ export type Measure = (text: string, size: number, bold: boolean) => number;
 export const estimate: Measure = (t, size, bold) => t.length * size * (bold ? 0.58 : 0.52);
 
 /** Text the card can print: Latin-1 only (the PDF's standard fonts), nothing else. */
-export const printable = (t: string) =>
-  t
-    .normalize("NFC")
-    .replace(/[‘’]/g, "'")
-    .replace(/[“”]/g, '"')
-    .replace(/[^\x20-\x7e\xa0-\xff]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+// printable, dropsLetters and hasLetters live in qr-card-name.ts, so the tool can ask for a name without loading this file.
+export { dropsLetters, hasLetters, printable } from "@/lib/qr-card-name";
 
 /** Up to two centred lines for the name, shrinking from 22 to 16 points before it is cut. */
 function nameLines(
@@ -89,6 +84,7 @@ const inFinder = (r: number, c: number, n: number) =>
 export function cardShapes(business: string, link: string, measure: Measure = estimate): Shape[] {
   const { w: W, h: H } = A6;
   const out: Shape[] = [{ kind: "rect", x: 0, y: 0, w: W, h: H, r: 0, fill: WHITE }];
+  // An empty name is only the preview before a business is chosen (the downloads wait for a name with letters).
   const name = printable(business) || "Your business";
   const { lines, size } = nameLines(name, W - 48, measure);
   let y = 46;
@@ -313,4 +309,36 @@ export function saveBlob(blob: Blob, filename: string) {
   a.download = filename;
   a.click();
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export type CardKind = "png" | "pdf";
+/**
+ * Makes the card file and starts its download. True only when the file was made and handed to the browser; false when
+ * this device could not draw it (cardPng gave nothing) or anything threw. The caller counts the download only on true.
+ */
+export async function saveCard(
+  kind: CardKind,
+  business: string,
+  link: string,
+  filename: string,
+  deps: {
+    measure?: Measure;
+    png?: (shapes: Shape[]) => Promise<Blob | null>;
+    pdf?: (shapes: Shape[]) => Uint8Array<ArrayBuffer>;
+    save?: (blob: Blob, filename: string) => void;
+  } = {},
+): Promise<boolean> {
+  try {
+    if (!hasLetters(business)) return false;
+    const shapes = cardShapes(business, link, deps.measure ?? canvasMeasure());
+    const blob =
+      kind === "png"
+        ? await (deps.png ?? cardPng)(shapes)
+        : new Blob([(deps.pdf ?? cardPdf)(shapes)], { type: "application/pdf" });
+    if (!blob || blob.size === 0) return false;
+    (deps.save ?? saveBlob)(blob, filename);
+    return true;
+  } catch {
+    return false;
+  }
 }
