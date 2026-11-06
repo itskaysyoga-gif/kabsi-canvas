@@ -12,9 +12,9 @@
 // - the bot check: a Turnstile token once, then the same signed 15 minute pass (same format, same secret, same visitor
 //   hash, so a pass from either path is good on the other);
 // - the per-visitor limits (20 a minute, 120 an hour, 60 a day) and places_take('autocomplete') against the same daily
-//   cap, in one database round trip: public.suggest_take, run over Supabase's pooler as the role suggest_route, which
-//   can run that one function and nothing else (Vercel env SUGGEST_DB_URL; its password was made by the database and
-//   is kept in Vault). The route holds no service key (Sec 1).
+//   cap, in one database round trip: public.suggest_take, reached with the public key and this route's own key (Vercel
+//   env SUGGEST_ROUTE_KEY, made by the database and kept in Vault), which opens that one function only. The route
+//   holds no service key (Sec 1).
 // The database call and the Google call run at the same time only for a visitor this instance saw allowed in the last
 // 30 seconds with none of their calls in flight (the typing session's later letters); Google's answer is then dropped
 // if the database refuses. Every other call asks the database first, so a burst, a fresh instance or a day at the cap
@@ -46,7 +46,7 @@ export type Cached = { key: string; suggestions: Suggestion[] };
 
 export type SuggestDeps = {
   env: (name: string) => string | undefined;
-  /** public.suggest_take as the role suggest_route. Fails closed: an error is { allowed: false, reason: "error" }. */
+  /** public.suggest_take with the route key. Fails closed: an error is { allowed: false, reason: "error" }. */
   take: (
     visitor: string,
     limits: [number | null, number | null, number | null],
@@ -185,7 +185,7 @@ export function makeSuggestHandler(d: SuggestDeps) {
 
     const placesKey = d.env("PLACES_API_KEY");
     const secret = d.env("TURNSTILE_SECRET_KEY");
-    const configured = !!placesKey && !!secret && !!d.env("SUGGEST_DB_URL");
+    const configured = !!placesKey && !!secret && !!d.env("SUGGEST_ROUTE_KEY");
     // The box's first touch wakes this function; it also tells the page whether to use this route at all.
     if (action === "warm") return reply({ ok: true, configured }, 200, { outcome: "warm" });
     // Until the three server values are set on Vercel, the page keeps using profile-snapshot (it reads this answer).

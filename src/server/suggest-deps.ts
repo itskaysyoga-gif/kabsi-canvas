@@ -1,13 +1,11 @@
 // The production wiring of POST /api/suggest (src/server/suggest.ts): the database, Google, Turnstile and the two caches.
 // Server only (src/server is never bundled for the browser). The three secrets are read from Vercel's environment at
-// call time and never logged: PLACES_API_KEY, TURNSTILE_SECRET_KEY and SUGGEST_DB_URL (Supabase's transaction pooler,
-// signed in as the role suggest_route, whose password the database made and keeps in Vault; the role can run
-// public.suggest_take only, and no service key is ever on Vercel).
+// call time and never logged: PLACES_API_KEY, TURNSTILE_SECRET_KEY and SUGGEST_ROUTE_KEY (the key the database made for
+// this route, which opens public.suggest_take only; no service key is ever on Vercel).
 import { createHash } from "node:crypto";
 import { getCache } from "@vercel/functions";
 import { autocompleteWeb } from "../../supabase/functions/_shared/google/places/autocomplete-web.ts";
-import postgres from "postgres";
-import { supabaseUrl } from "../lib/supabase-config";
+import { supabasePublishableKey, supabaseUrl } from "../lib/supabase-config";
 import { CACHE_SECONDS, type Cached, type SuggestDeps, type Take } from "./suggest";
 
 const env = (name: string) => {
@@ -15,42 +13,34 @@ const env = (name: string) => {
   return v && v.trim() ? v.trim() : undefined;
 };
 
-// One small pool per instance, made on first use. Supabase's transaction pooler (port 6543) takes no prepared
-// statements, so prepare is off. The role can run public.suggest_take and nothing else.
-let pool: postgres.Sql | null = null;
-function db(): postgres.Sql | null {
-  const url = env("SUGGEST_DB_URL");
-  if (!url) return null;
-  pool ??= postgres(url, {
-    prepare: false,
-    max: 4,
-    idle_timeout: 30,
-    connect_timeout: 3,
-    ssl: "require",
-    // Nothing from the connection (its address or role) is logged by the driver.
-    onnotice: () => undefined,
-  });
-  return pool;
-}
-
 async function take(
   visitor: string,
   limits: [number | null, number | null, number | null],
   places: boolean,
 ): Promise<Take> {
-  const sql = db();
-  if (!sql) return { allowed: false, reason: "error" };
+  const routeKey = env("SUGGEST_ROUTE_KEY");
+  if (!routeKey) return { allowed: false, reason: "error" };
+  // The public key gets the call to PostgREST; the route key inside the body is what lets it through.
+  const headers: Record<string, string> = {
+    "content-type": "application/json",
+    apikey: supabasePublishableKey,
+  };
   try {
-    // The connect and the server each have their own limit; this one covers a stalled connection (review of 6 Nov).
-    const stalled = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("db_timeout")), 3000),
-    );
-    const rows = await Promise.race([
-      sql<{ r: { allowed?: unknown; reason?: unknown } }[]>`
-      select public.suggest_take(${visitor}, ${limits[0]}::integer, ${limits[1]}::integer, ${limits[2]}::integer, ${places}) as r`,
-      stalled,
-    ]);
-    const j = rows[0]?.r ?? {};
+    const res = await fetch(`${supabaseUrl}/rest/v1/rpc/suggest_take`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        p_key: routeKey,
+        p_visitor: visitor,
+        p_per_minute: limits[0],
+        p_per_hour: limits[1],
+        p_per_day: limits[2],
+        p_places: places,
+      }),
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) return { allowed: false, reason: "error" };
+    const j = (await res.json()) as { allowed?: unknown; reason?: unknown };
     if (j.allowed === true) return { allowed: true };
     return {
       allowed: false,
