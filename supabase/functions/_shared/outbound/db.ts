@@ -3,6 +3,7 @@
 // ZOHO_SMTP_PASSWORD, OUTBOUND_TEST_RECIPIENTS.
 import { admin } from "../kabsi.ts";
 import type { NewDraft, Settings } from "./prepare.ts";
+import type { DueMessage } from "./send.ts";
 
 export const HARVEY_REPO = "itskaysyoga-gif/kabsi-harvey";
 export const SENDER = { name: "Rashid Abou Hamzy", address: "rashid@getkabsi.com" };
@@ -96,4 +97,86 @@ export async function insertDraft(d: NewDraft) {
     await db.from("outbound_prospects").delete().eq("id", p.data.id);
     throw new Error(`insert follow-up: ${follow.error.message}`);
   }
+}
+
+// ─── outbound-send (part D)
+
+/** Approved messages that are due, replies first, oldest first, with their business and their Email 1. */
+export async function due(now: Date, testOnly: boolean): Promise<DueMessage[]> {
+  let q = admin().from("outbound_messages")
+    .select("id, prospect_id, parent_id, kind, to_address, subject, body, send_after, in_reply_to, references_ids, prospect:outbound_prospects!inner(email, email_domain, time_zone, test, status), parent:outbound_messages!parent_id(status, message_id, sent_at)")
+    .eq("status", "approved").is("claimed_at", null).lte("send_after", now.toISOString());
+  if (testOnly) q = q.eq("prospect.test", true);
+  const { data, error } = await q.order("send_after").limit(20);
+  if (error) throw new Error(`due: ${error.message}`);
+  const rows = (data ?? []) as unknown as DueMessage[];
+  return [...rows.filter((m) => m.kind === "reply"), ...rows.filter((m) => m.kind !== "reply")];
+}
+
+export async function heardFrom(prospectId: string, domain: string): Promise<boolean> {
+  const own = await admin().from("outbound_events").select("id").eq("prospect_id", prospectId)
+    .in("kind", ["reply", "bounce", "opt_out", "complaint"]).limit(1);
+  if (own.error) throw new Error(`heardFrom: ${own.error.message}`);
+  if ((own.data ?? []).length) return true;
+  const same = await admin().from("outbound_prospects").select("id").eq("email_domain", domain).neq("id", prospectId)
+    .in("status", ["needs_you", "answered", "interested", "opted_out", "bounced"]).limit(1);
+  if (same.error) throw new Error(`heardFrom: ${same.error.message}`);
+  return (same.data ?? []).length > 0;
+}
+
+/** Messages sent on a local date in a time zone. */
+export async function sentOn(localDate: string, timeZone: string): Promise<number> {
+  const from = new Date(Date.parse(`${localDate}T00:00:00Z`) - 14 * 3600_000).toISOString();
+  const to = new Date(Date.parse(`${localDate}T00:00:00Z`) + 38 * 3600_000).toISOString();
+  const { data, error } = await admin().from("outbound_messages").select("sent_at").eq("status", "sent").gte("sent_at", from).lt("sent_at", to);
+  if (error) throw new Error(`sentOn: ${error.message}`);
+  const f = new Intl.DateTimeFormat("en-CA", { timeZone });
+  return (data ?? []).filter((r) => f.format(new Date(r.sent_at as string)) === localDate).length;
+}
+
+export async function markSent(m: DueMessage, messageId: string, at: Date, followUpAt: Date | null) {
+  const db = admin();
+  const u = await db.from("outbound_messages").update({
+    status: "sent", sent_at: at.toISOString(), message_id: messageId,
+    in_reply_to: m.kind === "follow_up" ? m.parent?.message_id ?? null : m.in_reply_to,
+    references_ids: m.kind === "follow_up" ? m.parent?.message_id ?? null : m.references_ids,
+  }).eq("id", m.id).eq("status", "approved");
+  if (u.error) throw new Error(`markSent: ${u.error.message}`);
+  const status = m.kind === "first" ? "written" : undefined;
+  await db.from("outbound_prospects").update({ last_email_at: at.toISOString(), ...(status ? { status } : {}), updated_at: at.toISOString() })
+    .eq("id", m.prospect_id);
+  if (followUpAt) {
+    await db.from("outbound_messages").update({ send_after: followUpAt.toISOString() }).eq("parent_id", m.id).eq("kind", "follow_up");
+  }
+}
+
+export async function markCancelled(ids: string[], why: string) {
+  if (!ids.length) return;
+  const { error } = await admin().from("outbound_messages").update({ status: "cancelled", error: why }).in("id", ids).in("status", ["draft", "approved"]);
+  if (error) throw new Error(`markCancelled: ${error.message}`);
+}
+
+export async function markFailed(id: string, why: string) {
+  const { error } = await admin().from("outbound_messages").update({ status: "failed", error: why.slice(0, 300) }).eq("id", id);
+  if (error) throw new Error(`markFailed: ${error.message}`);
+}
+
+export async function failStale(now: Date): Promise<number> {
+  const { data, error } = await admin().from("outbound_messages").update({ status: "failed", error: "delivery_unknown" })
+    .eq("status", "approved").not("claimed_at", "is", null).lt("claimed_at", new Date(now.getTime() - 30 * 60_000).toISOString()).select("id");
+  if (error) throw new Error(`failStale: ${error.message}`);
+  return (data ?? []).length;
+}
+
+export async function reserveSlot(gapMs: number): Promise<boolean> {
+  const { data, error } = await admin().rpc("outbound_reserve_slot", { p_gap_seconds: Math.round(gapMs / 1000) });
+  if (error) throw new Error(`reserveSlot: ${error.message}`);
+  return data === true;
+}
+
+export async function claim(id: string): Promise<boolean> {
+  const { data, error } = await admin().from("outbound_messages").update({ claimed_at: new Date().toISOString() })
+    .eq("id", id).eq("status", "approved").is("claimed_at", null).select("id");
+  if (error) throw new Error(`claim: ${error.message}`);
+  return (data ?? []).length === 1;
 }
