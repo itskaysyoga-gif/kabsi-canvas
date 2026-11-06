@@ -144,6 +144,16 @@ Deno.test("the test run's setting (30.39 item 12): window and spacing shortened 
   assert.equal((await sendTick(real.d)).sent, 0, "a real business never goes in test mode");
 });
 
+Deno.test("test mode: the test inbox is a Kabsi user and on the list, so suppression reads the test business's own address", async () => {
+  const testMsg = msg({ to_address: "inbox@test.example.com", prospect: { ...msg().prospect, test: true } });
+  const inboxListed = deps({ suppressed: async (a) => a === "inbox@test.example.com" }, TEST, [testMsg]);
+  assert.equal((await sendTick(inboxListed.d)).state, "sent", "the test inbox being a Kabsi user does not cancel a test email");
+  const bizListed = deps({ suppressed: async (a) => a.endsWith("@rose.example.com") }, TEST, [testMsg]);
+  assert.equal((await sendTick(bizListed.d)).cancelled, 1, "a test business that said no is still never written to");
+  const open = deps({ suppressed: async (a) => a === "other@elsewhere.example.com" }, OPEN, [msg({ kind: "reply", to_address: "other@elsewhere.example.com" })]);
+  assert.equal((await sendTick(open.d)).cancelled, 1, "open: the address written to is checked too");
+});
+
 Deno.test("suppression is checked again right before sending", async () => {
   const { d, log } = deps({ suppressed: async (a) => a.endsWith("@rose.example.com") });
   assert.equal((await sendTick(d)).cancelled, 1);
