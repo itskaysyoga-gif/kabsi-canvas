@@ -43,7 +43,7 @@ const READ_TIMEOUT_MS = 30_000;
 
 /** A line, or an error after 30 seconds: a silent server never holds the function until the runtime kills it. */
 async function readLine(io: Line): Promise<string | null> {
-  let t: number | undefined;
+  let t: ReturnType<typeof setTimeout> | undefined;
   try {
     return await Promise.race([
       io.readLine(),
