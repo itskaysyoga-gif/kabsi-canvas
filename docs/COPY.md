@@ -1831,3 +1831,41 @@ Every new or changed line of Scan 3. The result's lines are in src/lib/scan-word
 - Third paragraph now opens: "If you ask us to remove your business or never contact it, we do so within 30 days and keep only a coded form of the address, so we never write to it. Write to hello@kabsi.co." It replaces "Any business can ask to be removed or never to be contacted. Write to hello@kabsi.co and Kabsi acts within 30 days. A business that asks never to be contacted goes on a list that stops it being added again.", which the new sentence covers, so the section stays under 220 words (209). The rights line after it is unchanged.
 - Facts 11 says the same (the contact list bullet and the retention table row).
 
+
+## 65. Outbound emails (6 Nov 2026, master plan 30.39, R-119)
+
+Plain text only, sent as Rashid Abou Hamzy <rashid@getkabsi.com>. Filled from these templates by outbound-prepare with no AI call (`supabase/functions/_shared/outbound/rules.ts`, tested word for word). Email 1 and the follow-up carry no Facebook or Instagram address and no "Drafted with Nora" (30.39 item 6); R-59 holds everywhere else. Paragraphs are separated by one blank line.
+
+**Email 1.** Subject: "<business>'s Google profile"
+
+"Hi <business> team,
+I came across <business> looking at <kind> in <city>. <detail sentence>
+I run Kabsi. It prepares your Google review replies, posts and opening hours, and you approve each one on WhatsApp before anything goes live. We're taking 25 founding businesses, with three months of Pro free.
+Want me to run a free check of <business>'s Google profile and send you what I find?
+Rashid Abou Hamzy, founder of Kabsi
+kabsi.co"
+
+Footer: "Why you got this: your business email is on your website. Reply 'no thanks' and I will not write again. How Kabsi handles data: kabsi.co/privacy"
+
+**Detail sentences**, the first that is true on the page read at draft time; none true means no draft:
+- A booking system named: "I saw you take bookings through <system>, so customers find you online already."
+- Hours on the site: "Your site lists your opening hours, and keeping Google's hours the same saves wasted trips."
+- Instagram linked: "Your Instagram shows the work, and the same photos could do well on your Google profile."
+- The site updated this year or last: "Your site looks recently updated, so your Google profile is the next place customers check."
+
+**<kind>**, from Harvey's industry: hair salons, barbers, beauty salons and spas, nail salons, restaurants, cafes, clinics, car repair garages, dentists, gyms, vets, physiotherapists.
+
+**Follow-up**, day 4 or 5, same thread. Subject: "Re: <business>'s Google profile"
+
+"Hi again. Happy to run that free check of <business>'s Google profile if useful. A yes is enough, and if not, no worries."
+then the same signature and footer.
+
+**Rashid's reply to a clear yes** (drafted for him by outbound-inbox, never sent without his Send; Decisions to confirm for lane R):
+
+"Hi <business> team,
+Thanks for the yes. Here is the free check of <business>'s Google profile: kabsi.co/scan/<code>
+We're taking 25 founding businesses, with three months of Pro free. If you would like one of the places, reply here and I will set it up with you.
+Rashid Abou Hamzy, founder of Kabsi. Drafted with Nora, Kabsi's AI assistant.
+kabsi.co
+Facebook: <SOCIAL_LINKS Facebook>
+Instagram: <SOCIAL_LINKS Instagram>"
