@@ -97,22 +97,50 @@ export function linksOk(body: string, kind: "first" | "follow_up" | "reply"): bo
 // ─── the detail sentence (docs/COPY.md "Outbound emails"): the first that is true on the page read at draft time
 export type Detail = { kind: "booking" | "hours" | "instagram" | "updated"; sentence: string };
 
-const BOOKING_SYSTEMS: [RegExp, string][] = [
-  [/fresha\.com|shedul\.com/i, "Fresha"], [/booksy\.com/i, "Booksy"], [/treatwell\./i, "Treatwell"],
-  [/squareup\.com\/appointments|square\.site\/book|book\.squareup/i, "Square Appointments"], [/vagaro\.com/i, "Vagaro"],
-  [/gettimely\.com|bookings\.gettimely/i, "Timely"], [/phorest\.com/i, "Phorest"], [/simplybook\.(me|it)/i, "SimplyBook.me"],
-  [/setmore\.com/i, "Setmore"], [/acuityscheduling\.com|as\.me\//i, "Acuity Scheduling"], [/calendly\.com/i, "Calendly"],
-  [/glossgenius\.com/i, "GlossGenius"], [/mindbodyonline\.com|mindbody\.io/i, "Mindbody"], [/zenoti\.com/i, "Zenoti"],
-  [/salonized\.com/i, "Salonized"], [/styleseat\.com/i, "StyleSeat"], [/boulevard\.io|joinblvd\.com/i, "Boulevard"],
-  [/opentable\.(com|co\.uk)/i, "OpenTable"], [/resdiary\.com/i, "ResDiary"], [/sevenrooms\.com/i, "SevenRooms"],
-  [/dentally\.(co|com)/i, "Dentally"], [/cliniko\.com/i, "Cliniko"], [/jane\.app/i, "Jane"],
+// The page is examined with plain string searches and short bounded patterns only: no pattern here can slow down on any
+// page, however it is written (CodeQL, polynomial ReDoS). At most the first 300 KB are read.
+const MAX_EXAMINED = 300_000;
+const cap = (html: string) => String(html ?? "").slice(0, MAX_EXAMINED);
+
+const BOOKING_SYSTEMS: [string[], string][] = [
+  [["fresha.com", "shedul.com"], "Fresha"], [["booksy.com"], "Booksy"], [["treatwell."], "Treatwell"],
+  [["squareup.com/appointments", "square.site/book", "book.squareup"], "Square Appointments"], [["vagaro.com"], "Vagaro"],
+  [["gettimely.com"], "Timely"], [["phorest.com"], "Phorest"], [["simplybook.me", "simplybook.it"], "SimplyBook.me"],
+  [["setmore.com"], "Setmore"], [["acuityscheduling.com"], "Acuity Scheduling"], [["calendly.com"], "Calendly"],
+  [["glossgenius.com"], "GlossGenius"], [["mindbodyonline.com", "mindbody.io"], "Mindbody"], [["zenoti.com"], "Zenoti"],
+  [["salonized.com"], "Salonized"], [["styleseat.com"], "StyleSeat"], [["boulevard.io", "joinblvd.com"], "Boulevard"],
+  [["opentable.com", "opentable.co.uk"], "OpenTable"], [["resdiary.com"], "ResDiary"], [["sevenrooms.com"], "SevenRooms"],
+  [["dentally.co", "dentally.com"], "Dentally"], [["cliniko.com"], "Cliniko"], [["jane.app"], "Jane"],
 ];
-const BOOKING_LINK = /href\s*=\s*["']?([^"'\s>]+)/gi;
+
+/** The values of href and src attributes, found by scanning, not by a pattern over the whole page. */
+function linkValues(html: string): string[] {
+  const low = cap(html).toLowerCase();
+  const out: string[] = [];
+  for (const attr of ["href", "src"]) {
+    let at = 0;
+    for (;;) {
+      const i = low.indexOf(attr, at);
+      if (i < 0) break;
+      at = i + attr.length;
+      let k = at;
+      while (low[k] === " " || low[k] === "\t" || low[k] === "\n") k++;
+      if (low[k] !== "=") continue;
+      k++;
+      while (low[k] === " " || low[k] === "\t" || low[k] === "\n") k++;
+      const q = low[k] === '"' || low[k] === "'" ? low[k++] : "";
+      let e = k;
+      while (e < low.length && e - k < 500 && (q ? low[e] !== q : !" \t\n>".includes(low[e]))) e++;
+      out.push(low.slice(k, e));
+      at = e;
+    }
+  }
+  return out;
+}
 
 export function bookingSystem(html: string): string | null {
-  const hrefs = [...String(html ?? "").matchAll(BOOKING_LINK)].map((m) => m[1]).join(" ");
-  const scripts = [...String(html ?? "").matchAll(/<(?:script|iframe)[^>]+src\s*=\s*["']?([^"'\s>]+)/gi)].map((m) => m[1]).join(" ");
-  for (const [re, name] of BOOKING_SYSTEMS) if (re.test(hrefs) || re.test(scripts)) return name;
+  const links = linkValues(html);
+  for (const [hosts, name] of BOOKING_SYSTEMS) if (links.some((l) => hosts.some((h) => l.includes(h)))) return name;
   return null;
 }
 
@@ -145,31 +173,47 @@ export function withoutBlocks(html: string): string {
   }
 }
 
+/** The page as text: tags dropped by a scan, a few entities decoded. Linear in the page's length. */
 export function textOf(html: string): string {
-  return withoutBlocks(html)
-    .replace(/<br\s*\/?>|<\/(p|div|li|tr|h\d)>/gi, "\n")
-    .replace(/<[^>]+>/g, " ")
+  const src = withoutBlocks(cap(html));
+  let out = "";
+  let inTag = false;
+  let tag = "";
+  for (const c of src) {
+    if (inTag) {
+      if (c === ">") {
+        inTag = false;
+        out += /^\/?(br|p|div|li|tr|h\d)\b/i.test(tag.slice(0, 6)) ? "\n" : " ";
+        tag = "";
+      } else if (tag.length < 6) tag += c;
+    } else if (c === "<") inTag = true;
+    else out += c;
+  }
+  return out
     .replace(/&nbsp;/gi, " ").replace(/&amp;/gi, "&").replace(/&#64;|&commat;/gi, "@").replace(/&#46;/g, ".")
     .replace(/[ \t\r\f\v]+/g, " ");
 }
 
 export function hasHours(html: string): boolean {
-  if (/"openingHours(Specification)?"\s*:/i.test(html)) return true;
+  if (/"openinghours(specification)?"/.test(cap(html).toLowerCase())) return true;
   return HOURS_RE.test(textOf(html));
 }
 
 export function instagramLinked(html: string): boolean {
-  return /href\s*=\s*["']?https?:\/\/(?:www\.)?instagram\.com\/(?!p\/|explore|accounts|kabsi\.co)[a-z0-9_.]{2,30}\/?["'\s>?]/i.test(html);
+  return linkValues(html).some((l) => {
+    const m = /^https?:\/\/(?:www\.)?instagram\.com\/([a-z0-9_.]{2,30})\/?(?:[?#].*)?$/.exec(l.slice(0, 200));
+    return !!m && !["p", "explore", "accounts", "kabsi.co", "reel", "stories"].includes(m[1]);
+  });
 }
 
 /** The site says it changed this year or last: a copyright year, or a dateModified in its structured data. */
 export function updatedRecently(html: string, today: Date): boolean {
   const y = today.getUTCFullYear();
   const years: number[] = [];
-  for (const m of String(html ?? "").matchAll(/(?:©|&copy;|copyright)\s*(?:[^<\n]{0,20}?)(20\d\d)(?:\s*[-–]\s*(20\d\d))?/gi)) {
+  for (const m of cap(html).matchAll(/(?:©|&copy;|copyright)[^<\n0-9]{0,20}(20\d\d)(?: ?[-\u2013] ?(20\d\d))?/gi)) {
     years.push(Number(m[2] ?? m[1]));
   }
-  for (const m of String(html ?? "").matchAll(/"dateModified"\s*:\s*"(20\d\d)-/g)) years.push(Number(m[1]));
+  for (const m of cap(html).matchAll(/"dateModified": ?"(20\d\d)-/g)) years.push(Number(m[1]));
   return years.some((x) => x === y || x === y - 1);
 }
 
@@ -194,7 +238,7 @@ export function pickDetail(html: string, today: Date): Detail | null {
 export function emailOnPage(html: string, email: string): boolean {
   const e = String(email ?? "").trim().toLowerCase();
   if (!e) return false;
-  const raw = String(html ?? "").toLowerCase();
+  const raw = cap(html).toLowerCase();
   if (raw.includes(`mailto:${e}`)) return true;
   return textOf(raw).toLowerCase().includes(e);
 }
