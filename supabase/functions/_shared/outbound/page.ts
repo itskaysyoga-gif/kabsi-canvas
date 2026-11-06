@@ -31,8 +31,7 @@ export function robotsAllows(robots: string, path: string, agent = "kabsioutboun
   if (!mine) return true;
   let best: { allow: boolean; len: number } | null = null;
   for (const r of mine.rules) {
-    const re = new RegExp("^" + r.path.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*").replace(/\\\$$/, "$"));
-    if (re.test(path) && (!best || r.path.length > best.len || (r.path.length === best.len && r.allow))) {
+    if (ruleMatches(r.path, path) && (!best || r.path.length > best.len || (r.path.length === best.len && r.allow))) {
       best = { allow: r.allow, len: r.path.length };
     }
   }
@@ -59,6 +58,23 @@ async function capped(res: Response): Promise<string> {
     at += part.length;
   }
   return new TextDecoder("utf-8", { fatal: false }).decode(all);
+}
+
+/** A robots.txt path rule: a prefix, where * matches anything and a final $ anchors the end. No regular expression is
+ *  built from the file. */
+export function ruleMatches(rule: string, path: string): boolean {
+  const anchored = rule.endsWith("$");
+  const parts = (anchored ? rule.slice(0, -1) : rule).split("*");
+  if (!path.startsWith(parts[0])) return false;
+  let at = parts[0].length;
+  for (let i = 1; i < parts.length; i++) {
+    const k = path.indexOf(parts[i], at);
+    if (k < 0) return false;
+    at = k + parts[i].length;
+  }
+  if (!anchored) return true;
+  const last = parts[parts.length - 1];
+  return parts.length === 1 ? path === parts[0] : path.endsWith(last) && path.length - last.length >= at - last.length;
 }
 
 export type Fetcher = (url: string, init: RequestInit) => Promise<Response>;

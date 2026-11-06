@@ -117,8 +117,9 @@ export function bookingSystem(html: string): string | null {
 }
 
 const DAY = "(?:mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)(?:day|nesday|sday|urday)?";
-const TIME = "(?:[01]?\\d|2[0-3])(?:[:.][0-5]\\d)?\\s*(?:am|pm)?";
-const HOURS_RE = new RegExp(`\\b${DAY}\\b[^\\n<]{0,40}?\\b${TIME}\\s*(?:-|to|until|till|–)\\s*${TIME}`, "i");
+// No two optional spaces side by side, so the pattern stays linear on any page.
+const TIME = "(?:[01]?\\d|2[0-3])(?:[:.][0-5]\\d)?(?: ?(?:am|pm))?";
+const HOURS_RE = new RegExp(`\\b${DAY}\\b[^\\n<]{0,40}?\\b${TIME} ?(?:-|to|until|till|\u2013) ?${TIME}`, "i");
 
 /** The page without its script, style and noscript blocks: a plain scan, not a pattern. The text is only searched for
  *  the address and the detail, never shown or stored. */
