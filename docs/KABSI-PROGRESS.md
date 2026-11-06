@@ -1,21 +1,19 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 6 Nov 2026, Launch 3. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 6 Nov 2026, Launch 4. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
 Files named in this list are in `docs/progress/archive/`.
 
-- Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati; the first real reply was published and verified; the post removal was verified on Google (23 Oct). kabsi.co runs on Vercel; Creem is the only payment route (test mode, not open). Evidence: `docs/progress/archive/evidence.md` and `where-things-stand.md`.
+- Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati (first real reply and post removal verified, 23 Oct). kabsi.co on Vercel; Creem the only payment route (test mode). Evidence: `evidence.md`, `where-things-stand.md`.
 - Web 2, V4, UX 1, Email 1, Sec 1 and 2, WhatsApp 2, Billing 2, Price 1 and Web 3 (26 to 30 Oct): detail in the dated files in `docs/progress/archive/`.
 - Go live 1 (5 Nov 2026, 30.28, R-108): WhatsApp for owners, the nearby check and the AI answer are on; card payments stay closed. Detail: `2026-11-05-golive1.md`.
 - 5 Nov 2026: Scan 2, Copy 3, App 4, Guides 4, Fix 3, Industries 2 and 3, Style 1, App 5 (PRs 369 to 408). Detail: the dated `2026-11-05-*.md` files.
-- App 6 (30.34 item 5, PRs 414, 415): Settings' delivery choice saves in one call and shows at once. `2026-11-05-app6.md`.
-- Scan 3 (30.34, R-114, PRs 409 to 419): one bot check per search session; progressive free check; review link tool with an A6 QR card. `2026-11-05-scan3.md`.
-- Site 2 (PRs 410, 412, 413, 416, 417): header, footer, WhatsApp marks, photos, About, Beauty salon. `2026-11-05-site2.md`.
-- Launch 1 (30.35, R-115, PRs 422 to 427): About without the test business's name; Settings answers at once; Nora's page-link eval; the readiness check in `docs/launch1/readiness.md`. `2026-11-06-launch1.md`.
-- Launch 2 (30.36, R-116, PRs 429 to 435): Nora's link filter, server copies of Lead and FreeScanCompleted, Team saves at once, one door to sign-up (/get-started 301 to /scan), holidays by UK nation, Functions in fra1. `2026-11-06-launch2.md`.
+- 5 Nov 2026, App 6, Scan 3 and Site 2 (PRs 409 to 419): Settings saves at once; one bot check per search session, the progressive free check and the review link tool; header, footer, photos, About. `2026-11-05-app6.md`, `-scan3.md`, `-site2.md`.
+- Launch 1 and 2 (30.35, 30.36, PRs 422 to 435): About without the test business's name; readiness check `docs/launch1/readiness.md`; Nora's link filter; server copies of Lead and FreeScanCompleted; one door to sign-up; UK holidays by nation; Functions in fra1. `2026-11-06-launch1.md`, `-launch2.md`.
 - Launch 3 (30.37, R-117, PRs 437 to 440): plan 30.37 and R-117; WhatsApp replies and the free check email link `/login?next=/start` or `/scan/<code>`; /privacy section 15 for businesses on Kabsi's contact list; the QA owner runs pass live. `2026-11-06-launch3.md`.
+- Launch 4 (30.38, R-118, PRs 442 to 448): the live speed gate passes again (Home 206 KB, LCP 2.42 s; Pricing 221 KB; /scan 231 KB), public pages kept at Vercel's edge; /privacy section 15 says how long a contact list entry is kept; suggestions on /scan wake the function on the first touch; the Conversions API reads the dataset id as digits. `2026-11-06-launch4.md`.
 - No customer is live yet. Before the first Meta ad (30.35 item 5): the DataForSEO top-up, Vercel Pro and the open lines of `docs/launch1/readiness.md`. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -50,12 +48,12 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - UX 1: after the deploy, `POST /visibility/terms` once (two DataForSEO calls, about 0.15 USD) and the read-back in the UX 1 archive file.
 - V1: a free Geoapify key, saved as the Supabase secret GEOAPIFY_API_KEY (clicks in `docs/progress/archive/2026-10-25-v1-visibility-map.md`); until then maps draw on a plain ground. DataForSEO top-up (50 US dollars) before the first Meta ad (30.28; the balance read 0.31 after Scan 2 on 5 Nov); Gemini stays off.
 - Scan 2: on a phone, send one real free check report to your email and check it matches the page (steps in `2026-11-05-scan2.md`; the session could not pass Turnstile).
-- Scan 3: on a phone at kabsi.co/scan, type a business name and see suggestions; on /google-review-link download the A6 PDF and scan the printed code.
+- Scan 3: on /google-review-link download the A6 PDF and scan the printed code (the suggestions check is Launch 4's below).
 - Sentry (30.33 item 4): Settings, Subscription, set a pay-as-you-go budget of 5 US dollars for errors, so errors are not dropped before 30 Nov.
 - App 5: may qa-staff@test.local be staff, for live staff runs? (LATER row)
-- Launch 1: on a phone, type a business at kabsi.co/scan and see suggestions; send one Founding 25 application named "QA Launch 1 test" (a session removes the row).
+- Launch 1: send one Founding 25 application named "QA Launch 1 test" (a session removes the row).
 - Launch 2: to see the Lead and FreeScanCompleted pairs in Meta's Test events, add the Supabase secret META_TEST_EVENT_CODE (and META_CAPI_TOKEN if unset), accept ads on kabsi.co/scan and finish a check; remove the code afterwards.
-- Launch 3: read /privacy section 15 and say how long an entry is kept (LATER row, UK GDPR article 14 asks for it). Two WhatsApp lines changed address only; the approved templates hold no link.
+- Launch 4: correct the Supabase secret META_PIXEL_ID to the digits 2179603053433551 (it held "ID " first; the code reads digits only anyway), then do one free check at kabsi.co/scan with ads accepted; a session reads the consent function's log for `meta_capi_web` with `ok: true`. On a phone at kabsi.co/scan, type 3 letters; a session reads the suggestion timings.
 
 ## Open After merge checks and findings
 
@@ -66,8 +64,8 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 6 Nov 2026, Launch 4: PRs 442 to 448. `2026-11-06-launch4.md`.
 - 6 Nov 2026, Launch 3: PRs 437 to 440. `2026-11-06-launch3.md`.
-- 6 Nov 2026, Launch 2: PRs 429 to 435. `2026-11-06-launch2.md`.
 
 ## How a session updates this page
 
