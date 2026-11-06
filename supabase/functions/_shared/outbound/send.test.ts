@@ -67,13 +67,14 @@ function msg(over: Partial<DueMessage> = {}): DueMessage {
 function deps(over: Partial<SendDeps> = {}, settings = OPEN, due: DueMessage[] = [msg()]) {
   const log: string[] = [];
   const d: SendDeps = {
-    settings: async () => settings, refreshSuppression: async () => void log.push("refresh"), due: async () => due,
+    settings: async () => settings, refreshSuppression: async () => void log.push("refresh"),
+    due: async (_n, testOnly) => (testOnly ? due.filter((m) => m.prospect.test) : due), failStale: async () => 0,
+    reserveSlot: async (gap) => (log.push(`next:${Math.round(gap / 60000)}`), true), claim: async () => true,
     suppressed: async () => false, heardFrom: async () => false, sentOn: async () => 0, sentThisMonth: async () => 0,
-    deliver: async (to) => void log.push(`deliver:${to}`),
+    deliver: async (to, _m, accepted) => { log.push(`deliver:${to}`); await accepted(); },
     markSent: async (m, _id, _at, f) => void log.push(`sent:${m.id}:${f ? localParts(f, "Europe/London").date : "none"}`),
     markCancelled: async (ids, why) => void log.push(`cancel:${ids.join(",")}:${why}`),
     markFailed: async (id, why) => void log.push(`failed:${id}:${why}`),
-    setNextSendAt: async (at) => void log.push(`next:${Math.round((at.getTime() - MON_10.getTime()) / 60000)}`),
     testRecipients: ["inbox@test.example.com"], sender: { name: "Rashid Abou Hamzy", address: "rashid@getkabsi.com" },
     now: MON_10, random: () => 0, ...over,
   };
@@ -83,7 +84,7 @@ function deps(over: Partial<SendDeps> = {}, settings = OPEN, due: DueMessage[] =
 Deno.test("open: one message per tick, the follow-up dated day 4 or 5, the next send at least 20 minutes later", async () => {
   const { d, log } = deps();
   assert.equal((await sendTick(d)).state, "sent");
-  assert.deepEqual(log.filter((l) => !l.startsWith("refresh")), ["deliver:hello@rose.example.com", "sent:m1:2026-11-13", "next:20"]);
+  assert.deepEqual(log.filter((l) => !l.startsWith("refresh")), ["next:20", "deliver:hello@rose.example.com", "sent:m1:2026-11-13"]);
 });
 
 Deno.test("locked: nothing is read or sent; a stop wins over everything; spacing holds", async () => {
@@ -103,6 +104,8 @@ Deno.test("test mode: only a test business to a test address; a real business wa
   const b = deps({}, TEST, [msg()]);
   assert.equal((await sendTick(b.d)).sent, 0);
   assert.ok(!b.log.some((l) => l.startsWith("deliver") || l.startsWith("failed")), "a real business is never sent in test mode and stays approved");
+  const many = deps({}, TEST, [...Array.from({ length: 25 }, (_, i) => msg({ id: `r${i}` })), { ...testMsg, id: "t1" }]);
+  assert.equal((await sendTick(many.d)).sent, 1, "real businesses waiting never block a test message");
   const c = deps({}, TEST, [msg({ to_address: "someone@else.example.com", prospect: { ...msg().prospect, test: true } })]);
   await sendTick(c.d);
   assert.ok(c.log.includes("failed:m1:not_a_test_recipient"));
@@ -131,7 +134,7 @@ Deno.test("the follow-up: same thread, only after Email 1 is sent, cancelled by 
   const f = msg({ id: "m2", kind: "follow_up", parent_id: "m1", subject: "Re: Rose Lane Salon's Google profile",
     parent: { status: "sent", message_id: "<ob.0@getkabsi.com>", sent_at: "2026-11-05T10:00:00Z" } });
   let sentMessage = "";
-  const a = deps({ deliver: async (_t, m) => void (sentMessage = m) }, OPEN, [f]);
+  const a = deps({ deliver: async (_t, m, ok) => { sentMessage = m; await ok(); } }, OPEN, [f]);
   assert.equal((await sendTick(a.d)).state, "sent");
   assert.match(sentMessage, /\r\nIn-Reply-To: <ob\.0@getkabsi\.com>\r\n/);
   assert.ok(a.log.includes("sent:m2:none"));
@@ -140,6 +143,28 @@ Deno.test("the follow-up: same thread, only after Email 1 is sent, cancelled by 
   assert.ok(b.log.includes("cancel:m2:heard_from_business"));
   const c = deps({}, OPEN, [{ ...f, parent: { status: "approved", message_id: null, sent_at: null } }]);
   assert.equal((await sendTick(c.d)).sent, 0, "never before Email 1");
+});
+
+Deno.test("a message is claimed before it is sent; the slot is atomic; accepted counts as sent even if the goodbye fails", async () => {
+  const taken = deps({ claim: async () => false });
+  assert.equal((await sendTick(taken.d)).sent, 0);
+  assert.ok(!taken.log.some((l) => l.startsWith("deliver")), "another tick has it");
+  const busy = deps({ reserveSlot: async () => false });
+  assert.equal((await sendTick(busy.d)).state, "spacing");
+  const quit = deps({ deliver: async (_t, _m, ok) => { await ok(); throw Object.assign(new Error("quit"), { step: "timeout" }); } });
+  assert.equal((await sendTick(quit.d)).state, "sent");
+  assert.ok(!quit.log.some((l) => l.startsWith("failed")));
+  const silent = deps({ deliver: async () => { throw Object.assign(new Error("timeout"), { step: "timeout" }); } });
+  assert.equal((await sendTick(silent.d)).state, "failed");
+  assert.ok(silent.log.includes("failed:m1:smtp_timeout"), "never accepted: failed, never re-sent by itself");
+});
+
+Deno.test("no header can carry a line break: Message-IDs are kept as tokens only", () => {
+  const m = buildMessage({ from: { name: "Rashid Abou Hamzy", address: "rashid@getkabsi.com" }, to: "a@b.example.com", subject: "Re: x\r\nBcc: c@d.example.com",
+    body: "Hi", messageId: "<ob.1@getkabsi.com>", date: new Date(), inReplyTo: "<x@y.example>\r\nContent-Type: text/html", references: "<x@y.example> junk <z@y.example>" });
+  assert.ok(!/\r\nBcc:|\r\nContent-Type: text\/html/.test(m));
+  assert.match(m, /\r\nIn-Reply-To: <x@y\.example>\r\n/);
+  assert.match(m, /\r\nReferences: <x@y\.example> <z@y\.example>\r\n/);
 });
 
 Deno.test("links and house style are checked again; a failed delivery is recorded with its step only", async () => {
