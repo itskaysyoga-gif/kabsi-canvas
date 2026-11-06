@@ -435,6 +435,7 @@ const STAFF_ICON: Record<StaffPageId, LucideIcon> = {
   businesses: Store,
   conversations: MessageCircle,
   programs: Award,
+  outbound: Mail,
   system: Activity,
   costs: Wallet,
   settings: Settings,

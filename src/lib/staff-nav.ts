@@ -3,7 +3,14 @@
 // that used to stack on the one /staff page sits whole on one of these pages, with the same queries and actions.
 
 export type StaffPageId =
-  "today" | "businesses" | "conversations" | "programs" | "system" | "costs" | "settings";
+  | "today"
+  | "businesses"
+  | "conversations"
+  | "programs"
+  | "outbound"
+  | "system"
+  | "costs"
+  | "settings";
 
 export type StaffPage = {
   id: StaffPageId;
@@ -62,6 +69,17 @@ export const STAFF_PAGES: Record<StaffPageId, StaffPage> = {
     purpose: "Applications to decide, the start checklist, partners and their payouts.",
     tab: "Programs",
   },
+  outbound: {
+    id: "outbound",
+    label: "Outbound",
+    short: "Outbound",
+    to: "/staff/outbound",
+    title: "Emails waiting for your yes",
+    mark: "your yes",
+    purpose:
+      "The day's drafts with their sources, the replies that need you, and whether sending is locked.",
+    tab: "Outbound",
+  },
   system: {
     id: "system",
     label: "System",
@@ -100,12 +118,13 @@ export const STAFF_MENU: StaffPageId[] = [
   "businesses",
   "conversations",
   "programs",
+  "outbound",
   "system",
   "costs",
   "settings",
 ];
 
-/** The phone bar holds five, as the owners' app does; Costs and Settings are in the phone's staff menu. */
+/** The phone bar holds five, as the owners' app does; Outbound, Costs and Settings are in the phone's staff menu. */
 export const STAFF_BAR: StaffPageId[] = [
   "today",
   "businesses",
@@ -113,7 +132,7 @@ export const STAFF_BAR: StaffPageId[] = [
   "programs",
   "system",
 ];
-export const STAFF_MORE: StaffPageId[] = ["costs", "settings"];
+export const STAFF_MORE: StaffPageId[] = ["outbound", "costs", "settings"];
 
 const clean = (p: string) => (p.length > 1 ? p.replace(/\/+$/, "") : p);
 
