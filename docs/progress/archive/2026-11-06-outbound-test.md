@@ -50,7 +50,7 @@ Timeline (UTC, 6 Nov), every step a lane R migration in `supabase/migrations/` o
 | 20:42 | From Rashid's Gmail: an out-of-office ("Automatic reply:" subject) on thread A, "Yes please" on thread B | Gmail message ids in the session |
 | 20:45 | outbound-inbox: `matched 2, auto_replies 1, replies 1, yes 1, failed 0` | A: event auto_reply, follow-up still approved (schedule kept). B: follow-up cancelled `heard_from_business`, status needs_you, interested, the reply to a yes drafted (test code), alert "New reply to Kabsi outbound" queued 20:45:04 and taken by the WhatsApp tick 20:45:07 |
 | 20:47 | "No thanks." on thread A | |
-| 20:55 | outbound-inbox: `matched 1, opt_outs 1, failed 0, harvey_added 0` | A: status opted_out, its address and domain suppressed, follow-up cancelled. No hash to kabsi-harvey: by design a test business never reaches Harvey's list (`if (!p.test)`); the real path is covered by the inbox tests |
+| 20:55 | outbound-inbox: `matched 1, opt_outs 1, failed 0, harvey_added 0` | A: status opted_out, its address and domain suppressed, follow-up cancelled. No hash to kabsi-harvey: by design a test business never reaches Harvey's list (inbox.ts skips test businesses); the real path is covered by the inbox tests |
 | 20:56 | Views read back, then cleared (`20261106205636`) | Before: sent 3, replied 1, interested 1, opted_out 1, approved_queued 2, reply_rate 33.3; days: 6 Nov sent 3, replies 1. After: every count 0, no day rows, 0 prospects, messages, events; suppressed 12 (Kabsi's own users); lock `(f,t,,,)` |
 
 ### Deliverability
