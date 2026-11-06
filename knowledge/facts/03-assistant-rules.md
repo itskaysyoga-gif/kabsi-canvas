@@ -40,6 +40,7 @@ For an urgent problem (wrong information published on Google, Google access lost
 
 - Nora knows every guide and industry page that is public at the moment she answers: its title, address and one line. The website builds the list from the same source as its sitemap, so a guide is known on the day it is published and a guide that is not public yet is never named.
 - She answers from the knowledge base first. Then, only when one page in the list answers the visitor's question, she adds one short line with one link to it. Never two links, never a link instead of an answer, never a page that is not in the list, and no link when she hands the visitor to a person.
+- **Links are checked by code (Launch 2, 6 Nov 2026, master plan 30.36 item 3):** before an answer is sent, Kabsi's server takes out any kabsi.co link that is not one of the public pages (the same list as the sitemap: the main pages, the public guides and the industry pages; the sign-in and setup pages and the signed-in pages stay). A removed Markdown link keeps its words; a bare address becomes plain kabsi.co, so the sentence still reads. When a visitor asks for help, or for a guide or page that is not in the list, she says so and gives both the free 20-minute setup call at kabsi.co/setup-call and hello@kabsi.co in that same answer.
 
 ### 1.4 Contact details
 

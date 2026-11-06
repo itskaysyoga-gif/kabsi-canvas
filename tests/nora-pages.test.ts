@@ -204,7 +204,9 @@ describe("Nora's rules", () => {
     const fn = readFileSync("supabase/functions/assistant/index.ts", "utf8");
     expect(fn).toContain("/nora-pages.json");
     expect(fn).toContain("relevantPages(text, pages)");
-    expect(fn.match(/pageLinksOnly\(knownLinksOnly\(texts, kb\), pages\)/g)).toHaveLength(2);
+    expect(fn.match(/finalLinks\(knownLinksOnly\(texts, kb\), pages, sitePaths\)/g)).toHaveLength(
+      2,
+    );
   });
 });
 

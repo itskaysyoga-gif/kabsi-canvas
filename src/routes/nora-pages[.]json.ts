@@ -7,13 +7,18 @@ export const Route = createFileRoute("/nora-pages.json")({
   server: {
     handlers: {
       GET: async () => {
-        const [{ ALL_GUIDES }, { cacheSeconds }, { publicPages }] = await Promise.all([
-          import("@/content/guides"),
-          import("@/content/guides/schedule"),
-          import("@/lib/public-pages"),
-        ]);
+        const [{ ALL_GUIDES }, { cacheSeconds }, { publicPages }, { SITEMAP_PAGES }] =
+          await Promise.all([
+            import("@/content/guides"),
+            import("@/content/guides/schedule"),
+            import("@/lib/public-pages"),
+            import("@/lib/sitemap"),
+          ]);
         const now = new Date();
-        return new Response(JSON.stringify({ pages: await publicPages(now) }), {
+        const pages = await publicPages(now);
+        // Launch 2 part A (30.36 item 3): the sitemap's own pages too, so Nora's filter checks every kabsi.co link.
+        const paths = [...SITEMAP_PAGES.map((p) => p.path), ...pages.map((p) => p.path)];
+        return new Response(JSON.stringify({ pages, paths }), {
           headers: {
             "content-type": "application/json; charset=utf-8",
             "cache-control": `public, max-age=0, s-maxage=${cacheSeconds(ALL_GUIDES, now, 60)}`,

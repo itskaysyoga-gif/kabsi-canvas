@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { ChoiceChips } from "@/components/kabsi/d3-account";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -17,7 +17,14 @@ import {
   ROLE_HINT,
   ROLE_LABEL,
   setMemberRole,
+  PENDING,
+  saveError,
   setPolicy,
+  withInvite,
+  withoutInvite,
+  withoutMember,
+  withPolicy,
+  withRole,
   type ApprovalKind,
   type Role,
   type Team,
@@ -91,22 +98,71 @@ function TeamManager({ locationId }: { locationId: string }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"manager" | "staff">("manager");
   const [message, setMessage] = useState("");
-  const refresh = () => qc.invalidateQueries({ queryKey: ["team", locationId] });
+  const key = ["team", locationId];
+  const refresh = () => qc.invalidateQueries({ queryKey: key });
+  // Launch 2 part A (30.36 item 5): an invitation, a role change, a removal and an approval choice show at once, like the
+  // switches in Settings (Launch 1 part C); the server's answer only confirms it. One save after another; a failure puts
+  // the list back as it was and says so.
+  // The last list the server confirmed, and the saves still on their way (each with its own change). A failed save puts
+  // back the confirmed list with the other pending changes on top, so a queued save never brings back a refused one.
+  const confirmed = useRef<Team | null>(null);
+  const pending = useRef<{ n: number; apply: (t: Team) => Team }[]>([]);
+  const seq = useRef(0);
+  type Save = {
+    run: () => Promise<unknown>;
+    apply?: (t: Team) => Team;
+    done?: string;
+    undo?: () => void;
+  };
   const act = useMutation({
-    mutationFn: (fn: () => Promise<unknown>) => fn(),
-    onMutate: () => setMessage(""),
-    onSuccess: () => refresh(),
-    onError: (e: Error) => setMessage(e.message),
+    mutationKey: ["team-save", locationId],
+    scope: { id: `team-${locationId}` },
+    mutationFn: (v: Save) => v.run(),
+    onMutate: async (v) => {
+      setMessage("");
+      await qc.cancelQueries({ queryKey: key });
+      const now = qc.getQueryData<Team>(key);
+      if (!pending.current.length) confirmed.current = now ?? null;
+      const n = ++seq.current;
+      const apply = v.apply ?? ((t: Team) => t);
+      pending.current.push({ n, apply });
+      if (now) qc.setQueryData<Team>(key, apply(now));
+      return { n };
+    },
+    onSuccess: (_d, v, ctx) => {
+      const p = pending.current.find((x) => x.n === ctx?.n);
+      if (p && confirmed.current) confirmed.current = p.apply(confirmed.current);
+      pending.current = pending.current.filter((x) => x.n !== ctx?.n);
+      if (v.done) setMessage(v.done);
+    },
+    onError: (e: Error, v, ctx) => {
+      pending.current = pending.current.filter((x) => x.n !== ctx?.n);
+      if (confirmed.current)
+        qc.setQueryData<Team>(
+          key,
+          pending.current.reduce((t, p) => p.apply(t), confirmed.current),
+        );
+      v.undo?.();
+      setMessage(saveError(e));
+    },
+    onSettled: () => {
+      // Read the truth back once the last save is done.
+      if (!pending.current.length) void refresh();
+    },
   });
 
   function invite(e: FormEvent) {
     e.preventDefault();
     const address = email.trim().toLowerCase();
     if (!EMAIL_RE.test(address)) return setMessage("Enter a valid email address.");
-    act.mutate(async () => {
-      await inviteMember(locationId, address, role);
-      setEmail("");
-      setMessage(`Invitation sent to ${address}.`);
+    const asRole = role;
+    setEmail("");
+    act.mutate({
+      // A refused invitation gives the typed address back.
+      undo: () => setEmail((e) => e || address),
+      run: () => inviteMember(locationId, address, asRole),
+      apply: (t) => withInvite(t, address, asRole),
+      done: `Invitation sent to ${address}.`,
     });
   }
 
@@ -154,18 +210,25 @@ function TeamManager({ locationId }: { locationId: string }) {
                     label: ROLE_LABEL[r],
                   }))}
                   value={m.role}
-                  disabled={act.isPending}
                   onChange={(v) => {
                     const next = v as Role;
-                    act.mutate(() => setMemberRole(locationId, m.user_id, next));
+                    act.mutate({
+                      run: () => setMemberRole(locationId, m.user_id, next),
+                      apply: (t) => withRole(t, m.user_id, next),
+                    });
                   }}
                 />
                 {!m.you ? (
                   <Button
                     size="md"
                     variant="quiet"
-                    disabled={act.isPending}
-                    onClick={() => act.mutate(() => removeMember(locationId, m.user_id))}
+                    onClick={() =>
+                      act.mutate({
+                        run: () => removeMember(locationId, m.user_id),
+                        apply: (t) => withoutMember(t, m.user_id),
+                        done: `${m.email} was removed.`,
+                      })
+                    }
                   >
                     Remove
                   </Button>
@@ -194,8 +257,13 @@ function TeamManager({ locationId }: { locationId: string }) {
                 size="md"
                 variant="tertiary"
                 className="col-start-2 justify-self-start sm:col-start-3"
-                disabled={act.isPending}
-                onClick={() => act.mutate(() => cancelInvite(i.id))}
+                disabled={i.id.startsWith(PENDING)}
+                onClick={() =>
+                  act.mutate({
+                    run: () => cancelInvite(i.id),
+                    apply: (t) => withoutInvite(t, i.id),
+                  })
+                }
               >
                 Cancel invitation
               </Button>
@@ -234,7 +302,6 @@ function TeamManager({ locationId }: { locationId: string }) {
             <Button
               type="submit"
               size="md"
-              loading={act.isPending}
               icon={<UserPlus className="size-4" aria-hidden />}
               data-main-cta
             >
@@ -256,11 +323,15 @@ function TeamManager({ locationId }: { locationId: string }) {
           value={current}
           onChange={(v) => {
             const on = v === "managers";
-            act.mutate(async () => {
-              for (const k of KINDS) {
-                const managersToo = t.policies[k] === "owner_and_managers";
-                if (managersToo !== on) await setPolicy(locationId, k, on);
-              }
+            const was = t.policies;
+            act.mutate({
+              run: async () => {
+                for (const k of KINDS) {
+                  const managersToo = was[k] === "owner_and_managers";
+                  if (managersToo !== on) await setPolicy(locationId, k, on);
+                }
+              },
+              apply: (x) => withPolicy(x, KINDS, on),
             });
           }}
           options={[
@@ -293,8 +364,12 @@ function TeamManager({ locationId }: { locationId: string }) {
                   label={KIND_LABEL[k]}
                   description={p === "owner_and_managers" ? "You and managers" : "Only you"}
                   checked={p === "owner_and_managers"}
-                  disabled={act.isPending}
-                  onChange={(on) => act.mutate(() => setPolicy(locationId, k, on))}
+                  onChange={(on) =>
+                    act.mutate({
+                      run: () => setPolicy(locationId, k, on),
+                      apply: (x) => withPolicy(x, [k], on),
+                    })
+                  }
                 />
               );
             })}
