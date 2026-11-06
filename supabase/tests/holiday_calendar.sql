@@ -187,6 +187,62 @@ select tests.act_as('00000000-0000-4000-8000-0000000000b1');
 select throws_ok($$ select public.holiday_calendar('00000000-0000-4000-8000-0000000000c1', 60) $$, '42501', null, 'a stranger cannot');
 reset role;
 
+-- Launch 2 part D (30.36 item 9): the UK nation comes from the business's Google address ------------------------------------
+
+select is(private.holiday_region('GB', '12 Princes Street, Edinburgh EH2 2AN, UK'), 'scotland', 'an Edinburgh address is Scotland');
+select is(private.holiday_region('GB', '10 Donegall Square, Belfast BT1 5GS, UK'), 'northern-ireland', 'a Belfast address is Northern Ireland');
+select is(private.holiday_region('GB', '221B Baker Street, London NW1 6XE, UK'), 'england-and-wales', 'a London address is England and Wales');
+select is(private.holiday_region('GB', '5 Buchanan Street, Glasgow G1 3HL, UK'), 'scotland', 'a Glasgow postcode (G) is Scotland');
+select is(private.holiday_region('GB', '1 Westgate Street, Gloucester GL1 2NW, UK'), 'england-and-wales', 'GL is not G');
+select is(private.holiday_region('GB', 'Shop 3, Main Road, Lerwick, Scotland'), 'scotland', 'the address saying Scotland wins without a postcode');
+select is(private.holiday_region('GB', 'Marygate, Berwick-upon-Tweed TD15 1BN, UK'), 'england-and-wales', 'TD15 is left to the address: Berwick is England');
+select is(private.holiday_region('GB', 'High Street, Coldstream TD12 4AA, UK'), 'scotland', 'TD12 with Coldstream is Scotland');
+select is(private.holiday_region('GB', 'Market Place, Kelso TD5 7HF, UK'), 'scotland', 'the other TD districts are Scotland');
+select is(private.holiday_region('GB', null), 'england-and-wales', 'no address: England and Wales, as before');
+select is(private.holiday_region('GB'), 'england-and-wales', 'the old one-argument form still answers for its callers');
+select is(private.holiday_region('AE', 'Al Wasl Road, Dubai'), null, 'outside the UK there is no region');
+select ok(not has_function_privilege('authenticated', 'private.holiday_region(text,text)', 'execute')
+      and not has_function_privilege('anon', 'private.holiday_region(text,text)', 'execute'), 'the region reader is not for the browser');
+
+-- The GOV.UK rows: Scotland and Northern Ireland to the end of 2027, verified, with St Andrew's Day and the Twelfth.
+select is((select count(*)::int from public.holidays where country = 'GB' and region = 'scotland' and source = 'https://www.gov.uk/bank-holidays'
+            and verified_on is not null and starts_on between '2026-11-06' and '2027-12-31'), 12, 'twelve Scottish bank holidays to the end of 2027');
+select is((select count(*)::int from public.holidays where country = 'GB' and region = 'northern-ireland' and source = 'https://www.gov.uk/bank-holidays'
+            and verified_on is not null and starts_on between '2026-11-06' and '2027-12-31'), 12, 'twelve Northern Ireland bank holidays to the end of 2027');
+select ok(exists(select 1 from public.holidays where region = 'scotland' and name = 'St Andrew''s Day' and starts_on = '2026-11-30'), 'St Andrew''s Day 2026 is there');
+select ok(exists(select 1 from public.holidays where region = 'northern-ireland' and starts_on = '2027-07-12'), 'the Twelfth 2027 is there');
+-- The detector asks from five days before: St Andrew's Day (30 Nov 2026) is asked from 25 Nov, not on 24 Nov.
+select ok(date '2026-11-30' <= date '2026-11-25' + 5 and not (date '2026-11-30' <= date '2026-11-24' + 5), 'asked on 25 Nov, not before');
+
+-- An Edinburgh business is asked the Scottish holiday and sees the Scottish calendar; a London one does not.
+update public.locations set address = '12 Princes Street, Edinburgh EH2 2AN, UK' where id = '00000000-0000-4000-8000-0000000000c1';
+select lives_ok($$ select private.detect_holidays('00000000-0000-4000-8000-0000000000c1') $$, 'the detector runs for an Edinburgh business');
+select ok(exists(select 1 from public.holiday_prompts where location_id = '00000000-0000-4000-8000-0000000000c1'
+                  and holiday_id = '00000000-0000-4000-8000-00000000d007' and state = 'asked'), 'the Scottish holiday in 3 days is asked');
+select tests.act_as('00000000-0000-4000-8000-0000000000a1');
+select is((select every(u ->> 'name' <> 'Test bank holiday')
+             from jsonb_array_elements(public.holiday_calendar('00000000-0000-4000-8000-0000000000c1', 400) -> 'upcoming') u), true,
+  'an Edinburgh business sees no England and Wales holiday');
+select ok((select bool_or(u ->> 'name' = 'St Andrew''s Day')
+             from jsonb_array_elements(public.holiday_calendar('00000000-0000-4000-8000-0000000000c1', 400) -> 'upcoming') u)
+          or not exists(select 1 from public.holidays where region = 'scotland' and name = 'St Andrew''s Day'
+                          and starts_on between (now() at time zone 'Europe/London')::date and (now() at time zone 'Europe/London')::date + 400),
+  'and sees St Andrew''s Day in its calendar');
+reset role;
+update public.locations set address = '221B Baker Street, London NW1 6XE, UK' where id = '00000000-0000-4000-8000-0000000000c1';
+select tests.act_as('00000000-0000-4000-8000-0000000000a1');
+select is((select every(u ->> 'name' not in ('St Andrew''s Day', 'Scottish holiday'))
+             from jsonb_array_elements(public.holiday_calendar('00000000-0000-4000-8000-0000000000c1', 400) -> 'upcoming') u), true,
+  'a London business never sees a Scottish holiday');
+reset role;
+update public.locations set address = '10 Donegall Square, Belfast BT1 5GS, UK' where id = '00000000-0000-4000-8000-0000000000c1';
+select tests.act_as('00000000-0000-4000-8000-0000000000a1');
+select is((select every(u ->> 'name' not in ('St Andrew''s Day', 'Scottish holiday', 'Test bank holiday'))
+             from jsonb_array_elements(public.holiday_calendar('00000000-0000-4000-8000-0000000000c1', 400) -> 'upcoming') u), true,
+  'a Belfast business sees only the Northern Ireland calendar');
+reset role;
+update public.locations set address = null where id = '00000000-0000-4000-8000-0000000000c1';
+
 -- A business that cannot be asked (not active, disconnected, concierge, no country) closes the questions ------------------------------
 
 update public.locations set status = 'paused' where id = '00000000-0000-4000-8000-0000000000c1';
