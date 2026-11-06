@@ -256,6 +256,9 @@ export function makeHandler(d: Deps) {
 
     const b = (await req.json().catch(() => ({}))) as Record<string, unknown>;
     const str = (v: unknown) => (typeof v === "string" ? v : "");
+    // Launch 4 part D: the box's first touch wakes the function (and the browser keeps the preflight's answer for 2 hours),
+    // so the first suggestion pays no cold start. Answered at once: no limit, no bot check, no database, no Google call.
+    if (str(b.action) === "warm") return reply({ ok: true });
     const ip = d.ip(req);
     const visitor = (await d.sha256Hex(`${d.env("SUPABASE_URL")}:${d.today()}:${ip}`)).slice(0, 24);
 

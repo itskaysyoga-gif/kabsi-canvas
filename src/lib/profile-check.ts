@@ -106,6 +106,25 @@ export async function runCheck(placeId: string, turnstile: string, sessionToken?
 /** A new Autocomplete session token (a version 4 UUID). One typing session uses one; picking a place ends it. */
 export const newSessionToken = () => crypto.randomUUID();
 
+let woken = false;
+/**
+ * Launch 4 part D: the first touch of a search box wakes the function, once per page. The call carries the same headers
+ * as a suggestion, so the browser's one preflight (kept 2 hours) and the function's cold start both happen while the
+ * visitor is still typing, not after the third letter. The function answers it at once and spends no Google quota.
+ */
+export function wakeSuggestions() {
+  if (woken) return;
+  woken = true;
+  void fetch(`${supabaseUrl}/functions/v1/profile-snapshot`, {
+    method: "POST",
+    headers: { "content-type": "application/json", ...anonHeaders },
+    body: JSON.stringify({ action: "warm" }),
+    keepalive: true,
+  }).catch(() => {
+    woken = false;
+  });
+}
+
 export type Suggested = {
   suggestions: FoundBusiness[];
   /** False when the server will not suggest (the daily cap, a limit, a Google error): the box becomes a plain search. */
