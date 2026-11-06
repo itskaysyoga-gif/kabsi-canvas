@@ -1782,6 +1782,7 @@ Every new or changed line of Scan 3. The result's lines are in src/lib/scan-word
 - **Nora** (her rules, 30.36 item 3): "When the visitor asks for help, or asks for a guide or page that is not in the list, say so plainly and, in that same reply, give both ways to reach a person, copied from the knowledge base: the free 20-minute setup call at kabsi.co/setup-call and hello@kabsi.co, where a person answers." A kabsi.co link that is not a public page is taken out by code: a Markdown link keeps its words, a bare address becomes "kabsi.co".
 - **Settings, Team** (30.36 item 5): invite, role change, remove, cancel invitation and the approval choices show at once. A failed save: "Couldn't save that. It is back as it was. Try again.", after the plain reason when there is one ("This person is already on your team."). A removal that saved: "[email] was removed." The invitation line "Invitation sent to [email]." is unchanged.
 - No visible line changes for the Conversions API (30.36 item 4).
+
 ### Part B: the review link tool tells the truth (branch claude/launch2-b, 30.36 item 7)
 
 - **Copy (every page that uses the shared copy field: the review link tool, onboarding's setup link, the team photo link)**: "Copied" only after the copy worked. When it fails the button stays, the link is selected, and the line (announced) is "Press and hold the link to copy it." on a phone, "Press Ctrl+C or Cmd+C to copy it." on a computer.
