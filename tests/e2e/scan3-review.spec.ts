@@ -8,7 +8,7 @@ import { join } from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page, type Route } from "@playwright/test";
 
-const SHOTS = "docs/scan3";
+const SHOTS = "test-results/scan3";
 const PASS = `${Math.floor(Date.now() / 1000) + 900}.stubsignature`;
 const JSQR = readFileSync("node_modules/jsqr/dist/jsQR.js", "utf8");
 const BUSINESSES = [

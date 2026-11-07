@@ -6,7 +6,7 @@ import { readFileSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page, type Route } from "@playwright/test";
 
-const SHOTS = "docs/scan3";
+const SHOTS = "test-results/scan3";
 const DONE = JSON.parse(
   readFileSync("tests/fixtures/scan3/free-check-done.json", "utf8"),
 ) as Record<string, unknown>;

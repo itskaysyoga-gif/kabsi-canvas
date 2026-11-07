@@ -1,7 +1,7 @@
 // Launch 2 part B (master plan 30.36 item 7): the free review link tool tells the truth. Copied only when the copy worked;
 // a name the card cannot print asks for the name to print, and the downloads wait for it; a download counts only when the
 // file was made; the tool's own busy screen; Test the link. One PNG and one PDF from a typed name are decoded (jsQR, and
-// pdftoppm for the PDF). All calls stubbed; nothing reaches Google. Screenshots go to docs/launch2/ (after-*).
+// pdftoppm for the PDF). All calls stubbed; nothing reaches Google. Screenshots go to test-results/launch2/ (after-*, not committed).
 // Run against a local build: KABSI_BASE_URL=http://localhost:4173 npx playwright test tests/e2e/launch2-review.spec.ts
 import { execFileSync } from "node:child_process";
 import {
@@ -19,7 +19,7 @@ import { expect, test, type Page, type Route } from "@playwright/test";
 import { noBanner } from "./helpers/page";
 
 const JSQR = readFileSync("node_modules/jsqr/dist/jsQR.js", "utf8");
-const SHOTS = "docs/launch2";
+const SHOTS = "test-results/launch2";
 const PASS = `${Math.floor(Date.now() / 1000) + 900}.stubsignature`;
 const AR = "مطعم البيت"; // a business named in Arabic letters, never shown (R-61)
 const BUSINESSES = [
