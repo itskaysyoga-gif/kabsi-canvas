@@ -16,10 +16,7 @@ type AuditOverview = {
 export const Route = createFileRoute("/audit-overview")({
   ssr: false,
   head: () => ({
-    meta: [
-      { title: "Audit overview | Kabsi" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
+    meta: [{ title: "Audit overview | Kabsi" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   component: AuditOverviewPage,
 });
@@ -86,8 +83,8 @@ function AuditOverviewPage() {
         <section className="mt-12 max-w-3xl">
           <h1 className="font-display text-h2 font-bold">Read-only audit overview</h1>
           <p className="mt-4 text-lead text-text-2">
-            Actual aggregate figures with personal details hidden. No messages, posts,
-            approvals, bills or settings can be changed here.
+            Actual aggregate figures with personal details hidden. No messages, posts, approvals,
+            bills or settings can be changed here.
           </p>
         </section>
         {checking ? (
@@ -110,9 +107,7 @@ function AuditOverviewPage() {
               ].map(([label, value]) => (
                 <div key={label} className="rounded-card border border-line bg-surface-1 p-6">
                   <p className="text-small text-text-2">{label}</p>
-                  <p className="mt-2 font-display text-h2 font-bold tabular-nums">
-                    {value}
-                  </p>
+                  <p className="mt-2 font-display text-h2 font-bold tabular-nums">{value}</p>
                 </div>
               ))}
             </section>
@@ -121,7 +116,10 @@ function AuditOverviewPage() {
                 <h2 className="font-display text-h3 font-bold">Business categories</h2>
                 <ul className="mt-4 divide-y divide-line">
                   {result.categories.map((group, index) => (
-                    <li key={group.category ?? index} className="flex justify-between gap-3 py-3 text-body">
+                    <li
+                      key={group.category ?? index}
+                      className="flex justify-between gap-3 py-3 text-body"
+                    >
                       <span>{group.category ?? "Other"}</span>
                       <span className="font-bold tabular-nums">{group.count}</span>
                     </li>
@@ -132,7 +130,10 @@ function AuditOverviewPage() {
                 <h2 className="font-display text-h3 font-bold">Current statuses</h2>
                 <ul className="mt-4 divide-y divide-line">
                   {result.status.map((group, index) => (
-                    <li key={group.status ?? index} className="flex justify-between gap-3 py-3 text-body">
+                    <li
+                      key={group.status ?? index}
+                      className="flex justify-between gap-3 py-3 text-body"
+                    >
                       <span>{group.status ?? "Unknown"}</span>
                       <span className="font-bold tabular-nums">{group.count}</span>
                     </li>
@@ -141,9 +142,9 @@ function AuditOverviewPage() {
               </div>
             </section>
             <p className="mt-8 max-w-3xl text-small text-text-2">
-              The full staff workspace is not available to this audit identity.
-              Its detailed screens stay protected until server-side masking and
-              write restrictions have been independently verified.
+              The full staff workspace is not available to this audit identity. Its detailed screens
+              stay protected until server-side masking and write restrictions have been
+              independently verified.
             </p>
           </>
         ) : null}
