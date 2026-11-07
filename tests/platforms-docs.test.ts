@@ -29,7 +29,7 @@ describe("the secrets list (docs/SECRETS.md)", () => {
       }
     }
     // Bindings and variables of the Worker that are not secrets, and names Supabase sets itself.
-    for (const skip of ["STICKERS", "APP_ORIGIN", "TAP_FUNCTION_URL", "DENO_DEPLOYMENT_ID"])
+    for (const skip of ["STICKERS", "VISITOR_LIMIT", "APP_ORIGIN", "TAP_FUNCTION_URL", "DENO_DEPLOYMENT_ID"])
       names.delete(skip);
     expect(names.size).toBeGreaterThan(10);
     const missing = [...names].filter((n) => !inventory.includes(n));
