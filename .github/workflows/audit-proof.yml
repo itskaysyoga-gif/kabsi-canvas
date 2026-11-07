@@ -19,6 +19,11 @@ jobs:
           node-version: "24"
       - name: Install dependencies
         run: npm ci --registry=https://registry.npmjs.org --legacy-peer-deps
+      - name: Print formatted synthetic test for review
+        run: |
+          printf 'R123_FORMAT_HEX='
+          npx prettier scripts/audit-proof.mjs | od -An -tx1 | tr -d ' \\n'
+          printf '\\n'
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Start Vite with synthetic backend
