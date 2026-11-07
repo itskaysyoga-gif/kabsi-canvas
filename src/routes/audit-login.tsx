@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 
 const ENDED = "This access has ended.";
 const SIGN_IN_ERROR = "Unable to sign in. Check the details and try again.";
+const AUDIT_ENDED_MARKER = "kabsi_audit_ended";
 
 export const Route = createFileRoute("/audit-login")({
   ssr: false,
@@ -20,7 +21,12 @@ function AuditLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(() => {
+    if (typeof window === "undefined") return "";
+    const ended = window.sessionStorage.getItem(AUDIT_ENDED_MARKER) === "1";
+    if (ended) window.sessionStorage.removeItem(AUDIT_ENDED_MARKER);
+    return ended ? ENDED : "";
+  });
   const { area, widget, take } = useLazyTurnstile();
 
   useEffect(() => {
