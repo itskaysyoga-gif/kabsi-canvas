@@ -5,8 +5,15 @@ name: Smoke (nightly, production)
 # On failure, when the secret QA_SMOKE_TOKEN is set (GitHub, Settings, Secrets and variables, Actions; the same value as the Vault
 # secret qa_smoke_token), it calls POST /whatsapp/qa/alert, which makes one ops event and a WhatsApp message to the staff phones.
 # Setup steps for Rashid: docs/testing.md, "The nightly smoke test".
+# Ready 2 part B: "force_failure" (by hand only) fails the run on purpose before any test, to prove the alert reaches the
+# staff phones. The alert then says "alert drill (forced failure)" and nothing about any business.
 on:
   workflow_dispatch:
+    inputs:
+      force_failure:
+        description: "Alert drill: fail on purpose so the staff WhatsApp alert is sent"
+        type: boolean
+        default: false
   schedule:
     - cron: "30 3 * * *"
 
@@ -27,6 +34,11 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
+      - name: Forced failure (alert drill, by hand only)
+        if: inputs.force_failure
+        run: |
+          echo "Alert drill: this run fails on purpose (force_failure), so the staff alert step runs."
+          exit 1
       - name: Install
         run: npm ci --registry=https://registry.npmjs.org --legacy-peer-deps --no-audit --no-fund
       - name: Install the browser
@@ -41,9 +53,11 @@ jobs:
         if: failure()
         env:
           QA_SMOKE_TOKEN: ${{ secrets.QA_SMOKE_TOKEN }}
+          FORCED: ${{ inputs.force_failure && 'true' || 'false' }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ -z "$QA_SMOKE_TOKEN" ]; then echo "QA_SMOKE_TOKEN is not set: no WhatsApp alert (docs/testing.md)"; exit 0; fi
+          if [ "$FORCED" = "true" ]; then failed="alert drill (forced failure)"; else
           failed=$(node -e '
             try {
               const r = JSON.parse(require("fs").readFileSync("smoke-result.json", "utf8"));
@@ -53,7 +67,8 @@ jobs:
               console.log(out.slice(0, 3).join("; ") || "see the run");
             } catch { console.log("see the run"); }
           ')
-          curl -sS -m 30 -X POST "https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/whatsapp/qa/alert" \
+          fi
+          curl -sS --fail-with-body -w "\nHTTP %{http_code}\n" -m 30 -X POST "https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/whatsapp/qa/alert" \
             -H "x-smoke-token: $QA_SMOKE_TOKEN" -H "content-type: application/json" \
             -d "$(node -e 'console.log(JSON.stringify({summary: process.argv[1], run: process.argv[2]}))' "$failed" "$RUN_URL")"
       - name: Keep the report
