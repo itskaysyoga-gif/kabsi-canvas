@@ -1,7 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "tanstack-start",
-  "regions": ["fra1"],
+  "regions": [
+    "fra1"
+  ],
   "installCommand": "npm ci --registry=https://registry.npmjs.org --legacy-peer-deps --no-audit --no-fund",
   "buildCommand": "node scripts/check-env.mjs && npm run build && node scripts/sentry-sourcemaps.mjs",
   "git": {
@@ -377,6 +379,23 @@
         {
           "key": "X-Robots-Tag",
           "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/audit-login",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
         }
       ]
     }
