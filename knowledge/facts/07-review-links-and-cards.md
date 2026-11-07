@@ -52,6 +52,7 @@ Good to know:
 - Writing Google's own review link instead works, but Kabsi can't count opens or switch it off.
 - **Add a Kabsi card** is for Kabsi card codes only, not tags you wrote yourself.
 - NFC doesn't work through metal.
+- A review link answers about 30 opens a minute from one phone or one Wi-Fi network. Above that it asks the person to try again in a minute, so nobody can guess link codes quickly. A real customer opens it once.
 
 ### 5.5 Where to put cards and QR codes
 
