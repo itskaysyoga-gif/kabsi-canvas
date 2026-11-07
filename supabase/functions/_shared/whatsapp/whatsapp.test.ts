@@ -242,3 +242,42 @@ Deno.test("R-123: an old queued demo message is discarded before a digest can fo
   assert.deepEqual(marked, [{ ids: [1], state: "dropped" }]);
   assert.deepEqual(sent, []);
 });
+
+Deno.test("R-123: a missing outbox guard fails closed before any provider or queue call", async () => {
+  const unexpected: string[] = [];
+  const sent: { to: string; kind: string; body: string }[] = [];
+  const reject = () => { unexpected.push("unexpected"); throw new Error("would_call_provider"); };
+  const oldRow = {
+    id: 21, phone: "+15551234567", user_id: "fake", location_id: "demo-location",
+    kind: "review_alert", body: "Only demo", buttons: [], template: null,
+    urgent: false, state: "queued", due_at: "2026-11-07T12:00:00Z", attempts: 0,
+  };
+  const marked: { id: number; state: string }[] = [];
+  const out: Out = {
+    db: {
+      // No isDemo implementation: all location-bearing messages must be refused.
+      state: async () => reject(),
+      add: async () => reject(),
+      mark: async (ids, state) => { for (const id of ids) marked.push({ id, state }); },
+      claim: async () => [oldRow],
+      get: async () => reject(),
+      release: async () => reject(),
+      setQuestion: async () => reject(),
+    },
+    live: mockSender(sent),
+    mock: mockSender(sent),
+    now: () => new Date("2026-11-07T12:00:00Z"),
+  };
+  assert.equal(
+    await queueWhatsapp(out, { phone: "+15551234567", userId: "fake", locationId: "demo-location", kind: "review_alert", body: "Demo only" }),
+    "demo_no_external_send",
+  );
+  assert.equal(
+    await replyWhatsapp(out, {} as never, "+15551234567", "Demo only", [], { locationId: "demo-location" }),
+    "demo_no_external_send",
+  );
+  assert.deepEqual(await flushWhatsapp(out), { demo_no_external_send: 1 });
+  assert.deepEqual(marked, [{ id: 21, state: "dropped" }]);
+  assert.deepEqual(unexpected, []);
+  assert.deepEqual(sent, []);
+});
