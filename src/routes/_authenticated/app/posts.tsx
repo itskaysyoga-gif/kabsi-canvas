@@ -133,7 +133,7 @@ function PostsPage() {
               posts and updates, and asks for your yes on each one.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              {WHATSAPP_ON ? (
+              {WHATSAPP_ON && !loc?.is_demo ? (
                 <WhatsAppLink label="Answer on WhatsApp" size="md" />
               ) : (
                 <a href="#write-post" className={buttonClass("secondary", "md")}>
