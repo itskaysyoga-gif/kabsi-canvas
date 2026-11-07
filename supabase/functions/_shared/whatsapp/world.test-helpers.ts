@@ -462,6 +462,8 @@ export class World {
   outDb(): OutDb {
     const w = this;
     return {
+      // Every business in this scripted world is non-demo. Guard is mandatory in production.
+      isDemo: async () => false,
       async state(phone): Promise<SendState> {
         const c = w.conv.get(phone);
         const roles = w.roles(phone);
