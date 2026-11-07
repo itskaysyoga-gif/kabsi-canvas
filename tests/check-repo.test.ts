@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 // @ts-expect-error plain JavaScript module without types
-import { checkMigrations, checkSkills, checkWorkflows } from "../scripts/check-repo.mjs";
+import { checkFiles, checkMigrations, checkSkills, checkWorkflows, MAX_BYTES } from "../scripts/check-repo.mjs";
 
 const tmp = () => mkdtempSync(join(tmpdir(), "check-repo-"));
 
@@ -63,5 +63,33 @@ describe("check-repo", () => {
     const problems: string[] = checkWorkflows(d);
     expect(problems).toHaveLength(2);
     expect(problems[0]).toContain("a.yml:5");
+  });
+
+  // Clean 2 (7 Nov 2026): the repository stays small; a screenshot, PDF, video or zip belongs only in the named folders.
+  it("rejects an image, PDF, video or zip outside the allowed folders, and a file over 1 MB", () => {
+    const f = (path: string, size = 100) => ({ path, size });
+    const problems: string[] = checkFiles([
+      f("docs/app9/after-390.png"),
+      f("docs/scan3/card.PDF"),
+      f("scripts/demo.mp4"),
+      f("shots/archive.zip"),
+      f("src/assets/video/clip.mp4"),
+      f("public/og/home.webp"),
+      f("tests/e2e/baseline/m390/public.spec.ts/home.png"),
+      f("docs/email-previews/logo.png"),
+      f("tests/fixtures/photos/small.png"),
+      f("docs/notes.md", MAX_BYTES),
+      f("docs/big.md", MAX_BYTES + 1),
+      f("supabase/functions/_shared/review-graphic/assets.ts", MAX_BYTES + 400_000),
+    ]);
+    expect(problems).toHaveLength(5);
+    expect(problems.filter((p) => p.includes("may only be committed")).map((p) => p.split(":")[0])).toEqual([
+      "docs/app9/after-390.png",
+      "docs/scan3/card.PDF",
+      "scripts/demo.mp4",
+      "shots/archive.zip",
+    ]);
+    expect(problems.some((p) => p.startsWith("docs/big.md") && p.includes("1 MB"))).toBe(true);
+    expect(problems.some((p) => p.startsWith("docs/notes.md"))).toBe(false);
   });
 });
