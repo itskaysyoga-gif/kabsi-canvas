@@ -4,6 +4,9 @@ import { KabsiMark, Button } from "@/components/kabsi/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { supabase } from "@/lib/supabase";
 
+const AUDIT_ENDED_MARKER = "kabsi_audit_ended";
+const AUDIT_EXPIRES_AT = Date.parse("2026-11-14T23:59:00Z");
+
 type Group = { category?: string; status?: string; count: number };
 type AuditOverview = {
   locations: number;
@@ -40,10 +43,13 @@ function AuditOverviewPage() {
         "audit_login_allowed" as never,
       );
       if (!alive) return;
-      if (accessError || allowed !== true) {
+      if (Date.now() >= AUDIT_EXPIRES_AT || accessError || allowed !== true) {
         setResult(null);
         setProblem("This access has ended.");
+        setChecking(false);
+        window.sessionStorage.setItem(AUDIT_ENDED_MARKER, "1");
         await signOut({ quiet: true });
+        router.history.replace("/audit-login");
         return;
       }
       const { data, error } = await supabase.rpc("audit_staff_overview" as never);
@@ -62,9 +68,19 @@ function AuditOverviewPage() {
     // Recheck frequently. All data comes from the masked server function,
     // which checks the expiry on every request.
     const timer = window.setInterval(() => void check(), 30_000);
+    const expiryTimer = window.setTimeout(
+      () => void check(),
+      Math.max(0, AUDIT_EXPIRES_AT - Date.now() + 50),
+    );
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void check();
+    };
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
       alive = false;
       window.clearInterval(timer);
+      window.clearTimeout(expiryTimer);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, [loading, user, router, signOut]);
 
