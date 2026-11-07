@@ -46,7 +46,7 @@ const doneState = (sender: Sender) => (sender.live ? "sent" : "mock_sent");
 
 /** An answer inside the window the person just opened. Recorded after it went, so the person never waits on the log. */
 export async function reply(o: Out, s: SendState, phone: string, body: string, buttons?: Button[], meta: { userId?: string | null; locationId?: string | null } = {}): Promise<string> {
-  if (meta.locationId && o.db.isDemo && await o.db.isDemo(meta.locationId)) return "demo_no_external_send";
+  if (meta.locationId && (!o.db.isDemo || await o.db.isDemo(meta.locationId))) return "demo_no_external_send";
   const sender = senderFor(o, s);
   let providerId: string | null = null;
   let state = doneState(sender);
@@ -65,7 +65,7 @@ export async function reply(o: Out, s: SendState, phone: string, body: string, b
 
 /** A message Kabsi starts: queued once (by its dedupe key), sent now if the rules allow, else when they do. */
 export async function notify(o: Out, r: NewRow): Promise<string> {
-  if (r.locationId && o.db.isDemo && await o.db.isDemo(r.locationId)) return "demo_no_external_send";
+  if (r.locationId && (!o.db.isDemo || await o.db.isDemo(r.locationId))) return "demo_no_external_send";
   // Queued a few minutes ahead, so the tick never sends it while this call does; if this call dies, the tick sends it.
   const id = await o.db.add({ ...r, dueAt: new Date(o.now().getTime() + 5 * 60_000) });
   if (!id) return "duplicate";
@@ -96,7 +96,7 @@ async function sendBody(o: Out, sender: Sender, row: OutRow) {
 /** One row: inside the window as written; outside it only its template; without a template it waits for the person. */
 async function sendRow(o: Out, s: SendState, row: OutRow): Promise<string> {
   // Also block old queued rows when the due-job wakes, before a provider call.
-  if (row.location_id && o.db.isDemo && await o.db.isDemo(row.location_id)) {
+  if (row.location_id && (!o.db.isDemo || await o.db.isDemo(row.location_id))) {
     await o.db.mark([row.id], "dropped", { error: "demo_no_external_send" });
     return "demo_no_external_send";
   }
@@ -134,7 +134,7 @@ export async function flush(o: Out, limit = 50): Promise<Record<string, number>>
   // Filter first, before batching. A digest must never contain a demo row
   // alongside a real business's message to the same recipient.
   for (const r of rows) {
-    if (r.location_id && o.db.isDemo && await o.db.isDemo(r.location_id)) {
+    if (r.location_id && (!o.db.isDemo || await o.db.isDemo(r.location_id))) {
       await o.db.mark([r.id], "dropped", { error: "demo_no_external_send" });
       count("demo_no_external_send");
       continue;
