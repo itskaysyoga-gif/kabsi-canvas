@@ -119,6 +119,14 @@ SQL
     fi
   done < <(jq -r '.files["db.dump"].row_counts | to_entries[] | "\(.key)\t\(.value)"' "$W/get/manifest.json")
   say "  $TABLES tables checked, $BAD_TABLES wrong"
+  # Ready 2 part E: the main tables, by name, with both numbers (counts only, never row content).
+  for name in auth.users public.organizations public.locations public.location_members public.subscriptions \
+              public.reviews public.publications public.tasks public.knowledge_facts public.emails public.cards \
+              public.whatsapp_messages public.jobs public.audit_events storage.objects; do
+    want="$(jq -r --arg n "$name" '.files["db.dump"].row_counts[$n] // "none"' "$W/get/manifest.json")"
+    got="$(awk -F'\t' -v n="$name" '$1 == n {print $2}' "$W/restored-counts.tsv")"
+    say "  main table $name: manifest $want, restored ${got:-none}"
+  done
   [ "$TABLES" -gt 10 ] || fail "the manifest holds only $TABLES tables"
   [ "$BAD_TABLES" -eq 0 ] || fail "$BAD_TABLES tables do not have the rows the manifest counted"
 elif [ -n "$SET" ]; then
