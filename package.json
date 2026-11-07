@@ -20,7 +20,8 @@
     "eval:nora": "node scripts/nora-eval/run-nora-eval.ts",
     "format": "prettier --write .",
     "e2e": "playwright test",
-    "e2e:smoke": "playwright test tests/e2e/smoke.spec.ts --project=m390"
+    "e2e:smoke": "playwright test tests/e2e/smoke.spec.ts --project=m390",
+    "pretypecheck": "node scripts/generate-route-types.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"
