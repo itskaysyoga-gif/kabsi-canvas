@@ -79,8 +79,15 @@ export function checkWorkflows(dir) {
 }
 
 // Clean 2: the folders that may hold binary media, the size limit and the one file over it.
-export const MEDIA_RE = /\.(png|jpe?g|gif|webp|avif|svg|ico|bmp|tiff?|heic|pdf|mp4|m4v|mov|webm|mkv|avi|zip|gz|tgz|7z|rar)$/i;
-export const MEDIA_DIRS = ["src/assets/", "public/", "tests/e2e/baseline/", "tests/fixtures/", "docs/email-previews/"];
+export const MEDIA_RE =
+  /\.(png|jpe?g|gif|webp|avif|svg|ico|bmp|tiff?|heic|pdf|mp4|m4v|mov|webm|mkv|avi|zip|gz|tgz|7z|rar)$/i;
+export const MEDIA_DIRS = [
+  "src/assets/",
+  "public/",
+  "tests/e2e/baseline/",
+  "tests/fixtures/",
+  "docs/email-previews/",
+];
 export const MAX_BYTES = 1024 * 1024;
 // Generated font data for the review graphic (supabase/functions/_shared/review-graphic); source code, not media.
 export const SIZE_EXCEPTIONS = ["supabase/functions/_shared/review-graphic/assets.ts"];
@@ -100,10 +107,16 @@ export function checkFiles(files) {
 }
 
 export function trackedFiles(root) {
-  const names = execFileSync("git", ["ls-files", "-z"], { cwd: root, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 })
+  const names = execFileSync("git", ["ls-files", "-z"], {
+    cwd: root,
+    encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
+  })
     .split("\0")
     .filter(Boolean);
-  return names.filter((p) => existsSync(join(root, p))).map((p) => ({ path: p, size: statSync(join(root, p)).size }));
+  return names
+    .filter((p) => existsSync(join(root, p)))
+    .map((p) => ({ path: p, size: statSync(join(root, p)).size }));
 }
 
 export function checkLockfile(root) {
@@ -125,5 +138,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     for (const p of problems) console.error(p);
     process.exit(1);
   }
-  console.log("Repo checks passed: migration names, skills, pinned actions, lockfile, file types and sizes.");
+  console.log(
+    "Repo checks passed: migration names, skills, pinned actions, lockfile, file types and sizes.",
+  );
 }

@@ -4,7 +4,13 @@ import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 // @ts-expect-error plain JavaScript module without types
-import { checkFiles, checkMigrations, checkSkills, checkWorkflows, MAX_BYTES } from "../scripts/check-repo.mjs";
+import {
+  checkFiles,
+  checkMigrations,
+  checkSkills,
+  checkWorkflows,
+  MAX_BYTES,
+} from "../scripts/check-repo.mjs";
 
 const tmp = () => mkdtempSync(join(tmpdir(), "check-repo-"));
 
@@ -83,7 +89,9 @@ describe("check-repo", () => {
       f("supabase/functions/_shared/review-graphic/assets.ts", MAX_BYTES + 400_000),
     ]);
     expect(problems).toHaveLength(5);
-    expect(problems.filter((p) => p.includes("may only be committed")).map((p) => p.split(":")[0])).toEqual([
+    expect(
+      problems.filter((p) => p.includes("may only be committed")).map((p) => p.split(":")[0]),
+    ).toEqual([
       "docs/app9/after-390.png",
       "docs/scan3/card.PDF",
       "scripts/demo.mp4",
