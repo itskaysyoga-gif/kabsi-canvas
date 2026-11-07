@@ -93,6 +93,7 @@ function guarded(live: Sender, mock: Sender): Sender {
 }
 
 export const outDb: OutDb = {
+  isDemo: (locationId) => db.isDemo!(locationId),
   // Go live 1 (30.28): a fictional test number never gets a live send, whatever the setting says.
   state: async (phone) => {
     const s = await rpc<SendState>("whatsapp_send_state", { p_phone: phone });
