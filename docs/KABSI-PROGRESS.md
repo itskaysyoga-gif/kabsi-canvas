@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 6 Nov 2026, Outbound test. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 7 Nov 2026, Outbound polish. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -13,7 +13,7 @@ Files named in this list are in `docs/progress/archive/`.
 - 5 Nov 2026, App 6, Scan 3 and Site 2 (PRs 409 to 419): Settings saves at once; one bot check per search session, the progressive free check and the review link tool; header, footer, photos, About. `2026-11-05-app6.md`, `-scan3.md`, `-site2.md`.
 - Launch 1 to 4 (30.35 to 30.38, PRs 422 to 448): About and the readiness check, Nora's link filter, server copies of Lead and FreeScanCompleted, one door to sign-up, UK holidays by nation, Functions in fra1, /privacy section 15, the live speed gate passing (Home 206 KB, Pricing 221 KB, /scan 231 KB). `2026-11-06-launch1.md` to `-launch4.md`.
 - Speed 2 (PRs 452 to 460, approved by lane R): tagged ad clicks and the founding count from Vercel's edge; suggestions through `/api/suggest` (no cache of Google's lists, Places terms). `2026-11-06-speed2.md`.
-- Harvey 4A (30.39): Outbound in Kabsi, locked. Outbound test (PRs 464 to 468): inbox login fixed, Companies House from Harvey's register (30.39 item 12), the part G test run passed end to end and was cleared; still locked, no business written to. `2026-11-06-outbound-test.md`.
+- Harvey 4A (30.39): Outbound in Kabsi, locked, no business written to. Outbound test (PRs 464 to 468): inbox login, Companies House from Harvey's register, the part G run. Record corrected 7 Nov: Gmail put both test emails in Spam (Rashid moved them to the inbox, 22:38 Beirut); mail-tester 9.2, only the domain's age. Outbound polish: a name ending in s takes an apostrophe only; new gate 30.39 item 13. `2026-11-06-outbound-test.md`.
 - No customer is live yet. Before the first Meta ad (30.35 item 5): the DataForSEO top-up, Vercel Pro and the open lines of `docs/launch1/readiness.md`. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -53,9 +53,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - App 5: may qa-staff@test.local be staff, for live staff runs? (LATER row)
 - Launch 1: send one Founding 25 application named "QA Launch 1 test" (a session removes the row).
 - Launch 2: to see the Lead and FreeScanCompleted pairs in Meta's Test events, add the Supabase secret META_TEST_EVENT_CODE (and META_CAPI_TOKEN if unset), accept ads on kabsi.co/scan and finish a check; remove the code afterwards.
-- Launch 4: correct the Supabase secret META_PIXEL_ID to the digits 2179603053433551 (it held "ID " first; the code reads digits only anyway), then do one free check at kabsi.co/scan with ads accepted; a session reads the consent function's log for `meta_capi_web` with `ok: true`.
-- Speed 2: the three Vercel values are set (read back 16:08 UTC, `/api/suggest` warm says configured true). Left: one phone check, 3 letters at kabsi.co/scan and kabsi.co/founding; a session reads the timings within the hour (Vercel keeps logs 1 hour).
-- Outbound test: delete the Supabase secret COMPANIES_HOUSE_API_KEY if set (no longer used); confirm the staff phone got "New reply to Kabsi outbound" at 20:45 UTC on 6 Nov; mail-tester again after 20 Nov (9.2 now, the new-domain rule only).
+- Launch 4: correct the Supabase secret META_PIXEL_ID to the digits 2179603053433551, then do one free check at kabsi.co/scan with ads accepted; a session reads the consent function's log for `meta_capi_web` with `ok: true`.
+- Speed 2: the three Vercel values are set. Left: one phone check, 3 letters at kabsi.co/scan and kabsi.co/founding; a session reads the timings within the hour (Vercel keeps logs 1 hour).
+- Outbound test: delete the Supabase secret COMPANIES_HOUSE_API_KEY if set (no longer used); confirm the staff phone got "New reply to Kabsi outbound" at 20:45 UTC on 6 Nov; before you say start, the placement test of 30.39 item 13 (LATER row).
 
 ## Open After merge checks and findings
 
@@ -65,6 +65,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 7 Nov 2026, Outbound polish. `2026-11-06-outbound-test.md`.
 - 6 Nov 2026, Outbound test: PRs 464 to 468. `2026-11-06-outbound-test.md`.
 - 6 Nov 2026, Harvey 4A: PRs 450 to 462. `2026-11-06-harvey4a.md`.
 

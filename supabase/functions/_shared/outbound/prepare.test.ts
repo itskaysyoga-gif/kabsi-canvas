@@ -7,7 +7,7 @@ import { robotsAllows } from "./page.ts";
 import { COMPANY_FILE_MAX_DAYS, companyRefusal, ordered, parseCsv, rowRefusal, toCandidate } from "./register.ts";
 import {
   dailyCap, emailOne, emailOnPage, followUp, followUpDate, houseStyleOk, inWindow, isSuppressed, keysOf, linksOk, localParts,
-  nameOk, ownDomain, pickDetail, sha,
+  nameOk, ownDomain, pickDetail, possessive, sha,
 } from "./rules.ts";
 
 const NOW = new Date("2026-11-06T05:00:00Z"); // a Friday
@@ -232,4 +232,27 @@ Deno.test("a hostile page is examined in linear time", () => {
 Deno.test("entities are decoded once: &amp;#64; is not an @", () => {
   assert.ok(!emailOnPage("<p>hello&amp;#64;rose.example.com</p>", "hello@rose.example.com"));
   assert.ok(emailOnPage("<p>hello&#64;rose.example.com</p>", "hello@rose.example.com"));
+});
+
+Deno.test("the possessive: a name ending in s takes only an apostrophe, in every subject and body", () => {
+  assert.equal(possessive("Rose Lane Salon"), "Rose Lane Salon's");
+  assert.equal(possessive("Harbor Barbers"), "Harbor Barbers'");
+  assert.equal(possessive("Maple Nails"), "Maple Nails'");
+  assert.equal(possessive("Moss"), "Moss'", "a name ending in ss");
+  assert.equal(possessive("Harbor Barbers'"), "Harbor Barbers'", "an apostrophe already there is kept, never doubled");
+  assert.equal(possessive("Harbor Barbers\u2019"), "Harbor Barbers\u2019", "a curly apostrophe is kept too");
+  assert.equal(possessive("Rose Lane Salon "), "Rose Lane Salon's", "trailing space is dropped");
+  for (const [name, own] of [["Harbor Barbers", "Harbor Barbers'"], ["Moss", "Moss'"], ["Maple Nails'", "Maple Nails'"], ["Rose Lane Salon", "Rose Lane Salon's"]]) {
+    const one = emailOne({ business: name, kind: "barbers", city: "Exampleton", detail: "Your site lists your opening hours, and keeping Google's hours the same saves wasted trips." });
+    const two = followUp({ business: name });
+    assert.equal(one.subject, `${own} Google profile`);
+    assert.ok(one.body.includes(`Want me to run a free check of ${own} Google profile and send you what I find?`));
+    assert.equal(two.subject, `Re: ${own} Google profile`);
+    assert.ok(two.body.startsWith(`Hi again. Happy to run that free check of ${own} Google profile if useful.`));
+    for (const t of [one.subject, one.body, two.subject, two.body]) {
+      assert.ok(!/s's |''/.test(t), "no s's and no doubled apostrophe");
+      assert.ok(houseStyleOk(t), "no dashes or exclamation marks");
+    }
+    assert.ok(linksOk(one.body, "first") && linksOk(two.body, "follow_up"));
+  }
 });

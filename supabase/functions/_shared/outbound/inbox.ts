@@ -9,7 +9,7 @@
 // Nothing is ever answered automatically. Opt-outs and bounces also go, as hashes, to kabsi-harvey's suppression list.
 import { clearYes, complaintWords, looksLikeAutoReply, looksLikeBounce, looksLikeFeedbackReport, optOutReason, OurText, stripQuoted } from "./classify.ts";
 import { ourIds, type Parsed } from "./mail.ts";
-import { domainOf, houseStyleOk, isFreeMail, sha } from "./rules.ts";
+import { domainOf, houseStyleOk, isFreeMail, possessive, sha } from "./rules.ts";
 import { SOCIAL_LINKS } from "../social-links.ts";
 
 export type Matched = {
@@ -55,7 +55,7 @@ export function yesReply(business: string, code: string): string {
   // Lane R, 6 Nov 2026 (30.39 item 11): word for word; a template wrote it, so it is signed without Nora.
   return [
     `Hi ${business} team,`,
-    `Thanks. Here is the free check of ${business}'s Google profile: kabsi.co/scan/${code}`,
+    `Thanks. Here is the free check of ${possessive(business)} Google profile: kabsi.co/scan/${code}`,
     "We're taking 25 founding businesses, with three months of Pro free. If you'd like one of the places, apply at kabsi.co/founding, or reply here and I'll help.",
     `Rashid Abou Hamzy, founder of Kabsi\nkabsi.co\nFacebook: ${fb}\nInstagram: ${ig}`,
   ].join("\n\n");

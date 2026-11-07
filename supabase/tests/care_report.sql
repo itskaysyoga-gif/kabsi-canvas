@@ -101,7 +101,9 @@ select is(pg_temp.inputs() -> 'plan', '[]'::jsonb, 'a business without a plan ha
 -- Google's numbers leave a copy after 30 days ---------------------------------------------------------------------------------------------------------------
 insert into public.weekly_reports (location_id, week_of, data, created_at) values
   ('00000000-0000-4000-8000-0000000000c1', current_date - 40, '{"care": {"things": 3}, "activity": {"calls": {"this": 4}}, "terms": {"items": []}, "rating": 4.5}', now() - interval '40 days'),
-  ('00000000-0000-4000-8000-0000000000c1', current_date - 3, '{"care": {"things": 5}, "activity": {"calls": {"this": 7}}, "terms": {"items": []}}', now() - interval '3 days');
+  ('00000000-0000-4000-8000-0000000000c1', current_date - 3, '{"care": {"things": 5}, "activity": {"calls": {"this": 7}}, "terms": {"items": []}}', now() - interval '3 days')
+-- _fixtures.psql holds a report for 2026-09-28, which current_date - 40 equals on 7 Nov 2026: replace a week that is already there.
+on conflict (location_id, week_of) do update set data = excluded.data, created_at = excluded.created_at;
 select is(public.clear_old_report_numbers(), 1, 'one old copy is cleaned');
 select is((select data from public.weekly_reports where location_id = '00000000-0000-4000-8000-0000000000c1' and week_of = current_date - 40),
   '{"care": {"things": 3}, "rating": 4.5}'::jsonb, 'it keeps Kabsi''s counts and drops Google''s numbers');

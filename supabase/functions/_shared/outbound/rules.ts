@@ -251,15 +251,23 @@ export const FOOTER =
 
 export type Draft = { subject: string; body: string };
 
+/** The possessive of a business name (docs/COPY.md section 65): a name ending in s takes only an apostrophe ("Harbor
+ *  Barbers'", "Maple Nails'", "Moss'"), a name already ending in an apostrophe is left as it is, any other name takes 's. */
+export function possessive(name: string): string {
+  const n = String(name ?? "").trim();
+  if (/['\u2019]$/.test(n)) return n;
+  return /s$/i.test(n) ? `${n}'` : `${n}'s`;
+}
+
 export function emailOne(p: { business: string; kind: string; city: string; detail: string }): Draft {
   const b = p.business;
   return {
-    subject: `${b}'s Google profile`,
+    subject: `${possessive(b)} Google profile`,
     body: [
       `Hi ${b} team,`,
       `I came across ${b} looking at ${p.kind} in ${p.city}. ${p.detail}`,
       "I run Kabsi. It prepares your Google review replies, posts and opening hours, and you approve each one on WhatsApp before anything goes live. We're taking 25 founding businesses, with three months of Pro free.",
-      `Want me to run a free check of ${b}'s Google profile and send you what I find?`,
+      `Want me to run a free check of ${possessive(b)} Google profile and send you what I find?`,
       SIGNATURE,
       FOOTER,
     ].join("\n\n"),
@@ -268,9 +276,9 @@ export function emailOne(p: { business: string; kind: string; city: string; deta
 
 export function followUp(p: { business: string }): Draft {
   return {
-    subject: `Re: ${p.business}'s Google profile`,
+    subject: `Re: ${possessive(p.business)} Google profile`,
     body: [
-      `Hi again. Happy to run that free check of ${p.business}'s Google profile if useful. A yes is enough, and if not, no worries.`,
+      `Hi again. Happy to run that free check of ${possessive(p.business)} Google profile if useful. A yes is enough, and if not, no worries.`,
       SIGNATURE,
       FOOTER,
     ].join("\n\n"),

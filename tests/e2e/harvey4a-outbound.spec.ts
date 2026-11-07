@@ -43,7 +43,7 @@ const reply = {
   id: 7,
   prospect_id: "p2",
   intent: "yes",
-  reply_subject: "Re: Harbor Barbers's Google profile",
+  reply_subject: "Re: Harbor Barbers' Google profile",
   reply_text: "Yes please",
   received_at: "2026-11-06T12:00:00Z",
   prospect: { ...P, business_name: "Harbor Barbers" },
@@ -53,7 +53,7 @@ const answer = {
   id: "33333333-3333-4333-8333-333333333333",
   prospect_id: "p2",
   kind: "reply",
-  subject: "Re: Harbor Barbers's Google profile",
+  subject: "Re: Harbor Barbers' Google profile",
   body: "Hi Harbor Barbers team,\n\nThanks for the yes. Here is the free check: kabsi.co/scan/TESTCHECK",
   prospect: reply.prospect,
 };
