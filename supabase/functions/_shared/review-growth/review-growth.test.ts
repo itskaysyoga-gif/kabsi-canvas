@@ -150,7 +150,7 @@ Deno.test("the sensitive alert goes through the one sender with no Approve butto
   const ctx = { db: {} as never, sender: {} as never, on: true, phoneNumberId: "1", appUrl: "https://kabsi.co", out: w.out(),
     remember: async (u: string, r: string) => { w.calls.push(`remember:${u}:${r}`); } };
   // The fake db the sender needs: may send, record.
-  (ctx as { db: unknown }).db = { maySend: async () => ({ ok: true, phone: PHONES.owner, in_window: true, review_alerts: true, digest: false }), record: async () => null };
+  (ctx as { db: unknown }).db = { isDemo: async () => false, maySend: async () => ({ ok: true, phone: PHONES.owner, in_window: true, review_alerts: true, digest: false }), record: async () => null };
   w.conversation(PHONES.owner).window_expires_at = new Date(w.now + 3600_000).toISOString();
   const r = await sendSensitiveAlert(ctx as never, [USERS.owner], { reviewId: "r1", locationId: BIZ.harbour, business: "Harbour Lane Coffee", stars: 1, reviewer: "Sam", regulated: null });
   assertEquals(Object.keys(r), [USERS.owner]);
