@@ -7,6 +7,7 @@
 //   ... --max 10          run at most 10 cases (default: every case, at most 30)
 //   ... --budget 0.30     stop starting cases that would pass this many US dollars (default 0.30)
 //   ... --dry             print the cases and the cost estimate, call nothing
+//   ... --ids R4,R5       run only these cases, in the order given (Ready 2 part F: the 13 reviews Eval 1 left)
 //
 // Refuses to run without ANTHROPIC_API_KEY. Eval 1 order: the WhatsApp router first, then Nora, then reviews, because the
 // reply evaluation (scripts/eval, 30 injection cases) already sends hostile reviews to the real models. A case starts only
@@ -45,9 +46,20 @@ const flag = (name: string) => {
 const max = Math.min(Number(flag("--max") ?? LIVE_CASES.length), MAX_CALLS);
 const dry = args.includes("--dry");
 const ORDER: Record<LiveCase["surface"], number> = { router: 0, nora: 1, review: 2 };
-const cases = [...LIVE_CASES]
-  .sort((a, b) => ORDER[a.surface] - ORDER[b.surface])
-  .slice(0, Math.min(max, 30));
+const ids = (flag("--ids") ?? "")
+  .split(",")
+  .map((x) => x.trim().toUpperCase())
+  .filter(Boolean);
+const unknown = ids.filter((id) => !LIVE_CASES.some((c) => c.id === id));
+if (unknown.length) {
+  console.error(`--ids names cases that do not exist: ${unknown.join(", ")}. Nothing was run.`);
+  Deno.exit(2);
+}
+const cases = (
+  ids.length
+    ? ids.map((id) => LIVE_CASES.find((c) => c.id === id)!)
+    : [...LIVE_CASES].sort((a, b) => ORDER[a.surface] - ORDER[b.surface])
+).slice(0, Math.min(max, 30));
 // A budget that is not a number between 0 and 1 dollar is refused (it would never stop the run).
 const budgetUsd = Number(flag("--budget") ?? "0.30");
 if (!(budgetUsd > 0 && budgetUsd <= 1)) {

@@ -42,6 +42,10 @@ on:
         description: Budget for the injection cases, US dollars
         required: true
         default: "0.30"
+      injection_ids:
+        description: "Ready 2: only these injection cases, for example R4,R5 (empty: the usual order)"
+        required: false
+        default: ""
       pages_only:
         description: "Launch 1: only Nora's five page-link questions (no replies, no judge, no injection)"
         type: boolean
@@ -98,6 +102,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           INJECTION_BUDGET: ${{ inputs.injection_budget }}
+          INJECTION_IDS: ${{ inputs.injection_ids }}
         run: |
           scratch="$(mktemp -d)"
           mkdir -p "$scratch/supabase/functions" "$scratch/scripts/sec1" "$scratch/knowledge"
@@ -106,7 +111,7 @@ jobs:
           cp knowledge/kabsi-facts.md "$scratch/knowledge/"
           echo '{"nodeModulesDir":"auto"}' > "$scratch/deno.json"
           cd "$scratch"
-          deno run --allow-env --allow-read --allow-net scripts/sec1/injection-live.ts --budget "$INJECTION_BUDGET" | tee "$GITHUB_WORKSPACE/injection-live.txt"
+          deno run --allow-env --allow-read --allow-net scripts/sec1/injection-live.ts --budget "$INJECTION_BUDGET" ${INJECTION_IDS:+--ids "$INJECTION_IDS"} | tee "$GITHUB_WORKSPACE/injection-live.txt"
         continue-on-error: true
       - name: Keep the results
         if: always()
