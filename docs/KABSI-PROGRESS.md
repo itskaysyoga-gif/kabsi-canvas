@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 7 Nov 2026, Outbound polish. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 7 Nov 2026, Clean 2. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -32,6 +32,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Open for Rashid (as last recorded; the full table is `docs/progress/archive/steps-only-rashid-can-do.md`)
 
+- The lane R checklist of 7 Nov is Rashid's project doc `claude/kabsi-whats-left-2026-11-07.md` (not in this repository). In four lines: card payments stay closed until Creem's live setup; the first Meta ad waits for the DataForSEO top-up, Vercel Pro and the open lines of `docs/launch1/readiness.md`; the first paying business waits for Kapso Pro and the rest of 30.19 section 6; the dates that matter are the end of the promotional AI credit on 17 Nov and the Sentry budget before 30 Nov.
 - Done 25 Oct: Clean 1 drops, the Places purge, Resend webhook, R2, backups, Pub/Sub, WHATSAPP_LIVE (`2026-11-05-golive1.md`).
 - Phone test (13b part 1): passed 25 Oct (ladder above). 13b part 2: send START from the staff phone (it is stopped); delete the Supabase secrets SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET and the Supabase SENTRY_AUTH_TOKEN; run `supabase/manual/20261025_drop_slack_leftovers.sql` (expect `0 | 0 | 0 | 0`); remove the Kabsi app from Slack when you like.
 - Sec 2: the backup secret, unused secrets, two-step logins (`docs/security/secrets-and-accounts.md`); the retention switch (`supabase/data/20261027_sec2_retention_on.sql`); the go.kabsi.co rate limit.
@@ -41,7 +42,6 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - Hosting (30.25 item 1): Supabase stays on Free until 10 paying businesses or 60 percent of any Free limit, then Pro. Vercel Pro (its free trial first) before paid ads or payments open.
 - Price 1: before plans open, the test-mode checkout on both price families (LATER row: `founding_places_test` 0 for the list price, then back to 30). The live list products are made by the setup action at going live.
 - Creem (session 10): send one test event from Creem's dashboard to the webhook (expect 200 and one `billing_events` row), add the product bundle, mark Yawmiyati's organisation `billing_test` if you want to try the paid buttons. Hussein only at going live (verification, payout). Exact steps: `docs/progress/archive/2026-10-25-session-10-creem.md`.
-- A lawyer reads /terms, /privacy and the partner terms (master plan 29.8).
 - Master plan 19.6: two-step verification everywhere, recovery codes offline, the second Kabsi Google account.
 - Growth 1: the Meta and Speed Insights steps in docs/EVENTS.md (last section).
 - Check 2: on a phone, pick 3 businesses at kabsi.co/scan, then read today's `places_usage` (autocomplete above 0, details 3 or more); add a Google Cloud quota alert for Places Autocomplete.
@@ -52,10 +52,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - Sentry (30.33 item 4): Settings, Subscription, set a pay-as-you-go budget of 5 US dollars for errors, so errors are not dropped before 30 Nov.
 - App 5: may qa-staff@test.local be staff, for live staff runs? (LATER row)
 - Launch 1: send one Founding 25 application named "QA Launch 1 test" (a session removes the row).
-- Launch 2: to see the Lead and FreeScanCompleted pairs in Meta's Test events, add the Supabase secret META_TEST_EVENT_CODE (and META_CAPI_TOKEN if unset), accept ads on kabsi.co/scan and finish a check; remove the code afterwards.
-- Launch 4: correct the Supabase secret META_PIXEL_ID to the digits 2179603053433551, then do one free check at kabsi.co/scan with ads accepted; a session reads the consent function's log for `meta_capi_web` with `ok: true`.
-- Speed 2: the three Vercel values are set. Left: one phone check, 3 letters at kabsi.co/scan and kabsi.co/founding; a session reads the timings within the hour (Vercel keeps logs 1 hour).
-- Outbound test: delete the Supabase secret COMPANIES_HOUSE_API_KEY if set (no longer used); confirm the staff phone got "New reply to Kabsi outbound" at 20:45 UTC on 6 Nov; before you say start, the placement test of 30.39 item 13 (LATER row).
+- Outbound: before you say start, the placement test of 30.39 item 13 (LATER row).
 
 ## Open After merge checks and findings
 
@@ -65,9 +62,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 7 Nov 2026, Clean 2: repository size (PR 470), one possessive helper (PR 471), this page. `2026-11-07-clean2.md`.
 - 7 Nov 2026, Outbound polish. `2026-11-06-outbound-test.md`.
 - 6 Nov 2026, Outbound test: PRs 464 to 468. `2026-11-06-outbound-test.md`.
-- 6 Nov 2026, Harvey 4A: PRs 450 to 462. `2026-11-06-harvey4a.md`.
 
 ## How a session updates this page
 
