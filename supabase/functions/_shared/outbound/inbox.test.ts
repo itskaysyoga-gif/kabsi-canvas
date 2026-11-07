@@ -284,3 +284,13 @@ Deno.test("review: Message-ID headers are read as tokens, never decoded, so no l
   assert.equal(m.messageId, "");
   assert.equal(m.references, "<r1@x.example>");
 });
+
+Deno.test("the reply to a yes uses the possessive: Harbor Barbers', Moss', Maple Nails' and an apostrophe already there", () => {
+  for (const [name, own] of [["Harbor Barbers", "Harbor Barbers'"], ["Moss", "Moss'"], ["Maple Nails'", "Maple Nails'"], ["Rose Lane Salon", "Rose Lane Salon's"]]) {
+    const body = yesReply(name, "ABC123");
+    assert.ok(body.includes(`Thanks. Here is the free check of ${own} Google profile: kabsi.co/scan/ABC123`));
+    assert.ok(body.startsWith(`Hi ${name} team,`));
+    assert.ok(!/s's |''/.test(body));
+    assert.ok(!/[–—!]/.test(body));
+  }
+});

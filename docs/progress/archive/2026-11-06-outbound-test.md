@@ -55,9 +55,11 @@ Timeline (UTC, 6 Nov), every step a lane R migration in `supabase/migrations/` o
 
 ### Deliverability
 
+- Correction, 7 Nov 2026 (lane R): on 6 Nov Gmail placed both test emails in the Spam folder of the test inbox (Rashid's screenshot, 22:38 Beirut, which is 20:38 UTC). Rashid moved them to the inbox, which is where this session later found them through the connector, so the record above that read as if they had landed in the inbox is wrong. mail-tester read 9.2 of 10, and the only deduction was the domain's age. The placement gate that follows from this is master plan 30.39 item 13.
+- Also from the live run: the subject sent, "Harbor Barbers's Google profile", used 's after a name ending in s. Fixed in Outbound polish (7 Nov): the possessive is Harbor Barbers' Google profile (docs/COPY.md section 65).
 - Gmail, Authentication-Results on the 20:10 Email 1: `dkim=pass header.i=@getkabsi.com header.s=zmail2`, `spf=pass` (165.173.182.12, sender5-op-o12.zoho.com), `dmarc=pass (p=NONE)`.
 - DKIM: the signing selector `zmail2` is a 2048-bit key (read from DNS). The older `zmail` record is 1024-bit and is not the one signing.
-- mail-tester.com, Email 1 (subject "Harbor Barbers's Google profile"): **9.2 of 10**. SpamAssassin -0.8, almost all `FROM_FMBLA_NEWDOM14` (-0.999, the From domain registered 7 to 14 days ago); `SPF_HELO_NONE` -0.001. DKIM valid from the author's domain, SPF pass, plain text, no image, no shortener, List-Unsubscribe present, not blocklisted. Nothing in the email or the settings can lift the new-domain rule; it lapses as getkabsi.com ages. A fresh test after 20 Nov should read 10 (LATER row).
+- mail-tester.com, Email 1 (subject "Harbor Barbers's Google profile"): **9.2 of 10**. SpamAssassin -0.8, almost all `FROM_FMBLA_NEWDOM14` (-0.999, the From domain registered 7 to 14 days ago); `SPF_HELO_NONE` -0.001. DKIM valid from the author's domain, SPF pass, plain text, no image, no shortener, List-Unsubscribe present, not blocklisted. Nothing in the email or the settings can lift the new-domain rule; it lapses as getkabsi.com ages. A fresh test after 20 Nov should read higher (LATER row); the gate of 30.39 item 13 asks for at least 9.5 and an inbox placement test.
 
 ## Tests run
 
@@ -71,6 +73,8 @@ Timeline (UTC, 6 Nov), every step a lane R migration in `supabase/migrations/` o
 ## Moved from PROGRESS (to keep it under 10 KB, word for word)
 
 - Session 19 rest closed the session 18 items: the post Undo test passed on 25 Oct (P0.7-05b, undone 3.7 seconds after approval, never sent to Google); Pub/Sub is registered live and a forged push gets 401 (P0.7-03); the push from a real review is still to be seen.
+
+- Trimmed from PROGRESS on 7 Nov to keep it under 10 KB, word for word: Launch 4 (it held "ID " first; the code reads digits only anyway); Speed 2 (read back 16:08 UTC, `/api/suggest` warm says configured true); Scan 2 (the session could not pass Turnstile).
 
 ## Known limits
 
