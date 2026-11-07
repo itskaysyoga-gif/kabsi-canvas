@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import { alertButtons, excerpt, firstName, fresh, parseWebhook, reviewAlertBody, verifySignature } from "./channel.ts";
 import { type Ctx, type Db, deliver, type MaySend, mockSender, sendProtectionAlert, sendReviewAlert } from "./deliver.ts";
 import { senderMode } from "./kapso.ts";
+import { notify as queueWhatsapp, reply as replyWhatsapp, type Out } from "./outbox.ts";
 import { ref } from "./templates.ts";
 
 const enc = (s: string) => new TextEncoder().encode(s);
@@ -177,4 +178,38 @@ Deno.test("R-123: a missing location guard refuses an external send", async () =
   });
   assert.equal(status, "demo_no_external_send");
   assert.deepEqual(f.log, []);
+});
+
+Deno.test("R-123: the central WhatsApp outbox never sends or queues demo messages", async () => {
+  const calls: string[] = [];
+  const deny = () => { calls.push("unexpected"); throw new Error("external_action"); };
+  const out: Out = {
+    db: {
+      isDemo: async () => true,
+      state: async () => deny(),
+      add: async () => deny(),
+      mark: async () => deny(),
+      claim: async () => deny(),
+      get: async () => deny(),
+      release: async () => deny(),
+      setQuestion: async () => deny(),
+    },
+    live: mockSender([]),
+    mock: mockSender([]),
+    now: () => new Date("2026-11-07T12:00:00Z"),
+  };
+  assert.equal(
+    await queueWhatsapp(out, {
+      phone: "+15551234567", userId: "fake", locationId: "demo-location",
+      kind: "review_alert", body: "Demo only",
+    }),
+    "demo_no_external_send",
+  );
+  assert.equal(
+    await replyWhatsapp(out, {} as never, "+15551234567", "Demo only", [], {
+      locationId: "demo-location",
+    }),
+    "demo_no_external_send",
+  );
+  assert.deepEqual(calls, [], "no database queue or provider send was attempted");
 });
