@@ -14,7 +14,7 @@ insert into tested values
   ('cancel_location_deletion(uuid)'), ('choose_plan(uuid,text)'),
   ('confirm_business_details(uuid,jsonb)'), ('entitlements(uuid,uuid)'), ('create_review_link(uuid,text)'),
   ('google_mode()'), ('handle_review_offline(uuid)'),
-  ('has_location_role(uuid,text[])'), ('is_member(uuid)'), ('photo_sig(gbp_posts)'), ('is_org_member(uuid,text[])'), ('is_staff()'),
+  ('has_location_role(uuid,text[])'), ('audit_login_allowed()'), ('is_member(uuid)'), ('photo_sig(gbp_posts)'), ('is_org_member(uuid,text[])'), ('is_staff()'),
   ('plan_summary(uuid)'),
   ('rename_card(text,text)'), ('set_review_link_mode(text,text)'), ('feature_access(uuid)'), ('start_review_report(uuid,text,text[])'), ('advance_review_report(uuid,text)'), ('list_review_reports(uuid)'),
   ('list_tasks(uuid)'), ('task_action(uuid,text)'), ('approve_backlog(uuid,jsonb)'),
