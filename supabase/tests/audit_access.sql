@@ -42,7 +42,8 @@ select throws_ok($$ select public.staff_job_retry(1) $$,
 reset role;
 
 update private.audit_access
-set expires_at = now() - interval '1 second'
+set expires_at = now() - interval '1 second',
+    created_at = now() - interval '1 day'
 where user_id = '00000000-0000-4000-8000-0000000000c9';
 select ok(not private.is_auditor(), 'an expired auditor is denied immediately');
 
