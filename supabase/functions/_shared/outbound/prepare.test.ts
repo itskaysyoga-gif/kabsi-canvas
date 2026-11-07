@@ -7,8 +7,9 @@ import { robotsAllows } from "./page.ts";
 import { COMPANY_FILE_MAX_DAYS, companyRefusal, ordered, parseCsv, rowRefusal, toCandidate } from "./register.ts";
 import {
   dailyCap, emailOne, emailOnPage, followUp, followUpDate, houseStyleOk, inWindow, isSuppressed, keysOf, linksOk, localParts,
-  nameOk, ownDomain, pickDetail, possessive, sha,
+  nameOk, ownDomain, pickDetail, sha,
 } from "./rules.ts";
+import { possessive } from "../possessive.ts";
 
 const NOW = new Date("2026-11-06T05:00:00Z"); // a Friday
 
