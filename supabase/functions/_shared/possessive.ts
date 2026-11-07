@@ -8,3 +8,9 @@ export function possessive(name: string): string {
   if (/['\u2019]$/.test(n)) return n;
   return /s$/i.test(n) ? `${n}'` : `${n}'s`;
 }
+
+/** Only the ending of possessive(): "'s", "'" or "" (the name already ends in an apostrophe). For html that bolds the name and
+ *  puts the ending after it: `<strong>${esc(name)}</strong>${possessiveSuffix(name)}`. The ending is safe to write as it is. */
+export function possessiveSuffix(name: string): string {
+  return possessive(name).slice(String(name ?? "").trim().length);
+}

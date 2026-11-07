@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { staffPlanLine } from "./billing-lines.ts";
 import { accessChangeEmail } from "./disconnect.ts";
 import { accessWorks } from "./email/account-copy.ts";
-import { possessive } from "./possessive.ts";
+import { possessive, possessiveSuffix } from "./possessive.ts";
 import { findingTask } from "./visibility/ai/accuracy-words.ts";
 
 const CASES: [string, string][] = [
@@ -24,11 +24,19 @@ Deno.test("possessive: s and ss take an apostrophe only, an apostrophe already t
   assert.equal(possessive("ABC Cleaners"), "ABC Cleaners'", "upper case s");
 });
 
+Deno.test("possessiveSuffix is the ending alone", () => {
+  for (const [name, want] of CASES) assert.equal(`${name.trim()}${possessiveSuffix(name)}`, want, name);
+  assert.equal(possessiveSuffix("Moss"), "'");
+  assert.equal(possessiveSuffix("Rose"), "'s");
+  assert.equal(possessiveSuffix("Moss'"), "");
+});
+
 Deno.test("the disconnect notice writes the possessive in its html and its text", () => {
   for (const [name, own] of CASES.slice(0, 6)) {
     const m = accessChangeEmail({ change: "removed", name, at: "2026-10-09T10:00:00.000Z" }, "https://kabsi.co");
     assert.ok(m.text.includes(`access to ${own} Google profile.`), `${name}: ${m.text.slice(0, 120)}`);
-    assert.ok(m.bodyHtml.includes(`<strong>${own.replaceAll("'", "&#39;")}</strong> Google profile.`) || m.bodyHtml.includes(`<strong>${own}</strong> Google profile.`), name);
+    assert.ok(m.bodyHtml.includes(`${possessiveSuffix(name)} Google profile.`), name);
+    assert.ok(!/s's |''/.test(m.bodyHtml.replace(/<[^>]*>/g, "")), name);
     assert.ok(!/s's |''/.test(m.text));
   }
 });
