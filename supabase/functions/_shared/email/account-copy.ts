@@ -6,6 +6,7 @@
 import { card, esc, KABSI_GROUP_ID, label, para, ticks, WHATSAPP_URL } from "../email-layout.ts";
 import { CARD_PAYMENTS_COMING, FOUNDING_SENTENCE, PLAN_PRICES } from "./lifecycle-copy.ts";
 import type { EmailContent } from "./template.ts";
+import { possessive } from "../possessive.ts";
 import { TOKENS } from "./tokens.ts";
 
 /** "5 November" in the business's time zone (COPY.md writes dates without the year when it is this year's). */
@@ -73,14 +74,14 @@ export function accessWorks(o: { business: string; when?: string; nextStep?: str
   return {
     subject: `Kabsi can now look after ${o.business}`, title: "Access works.",
     preheader: o.trialEnd ? `Your free trial ends on ${dayMonth(o.trialEnd, tz)}. Your first task comes next.` : "Kabsi now has Manager access. Your first task comes next.",
-    bodyHtml: para(`${o.when ? `What changed: on ${esc(o.when)} Kabsi accepted your invitation and became a Manager of` : "Kabsi now has Manager access to"} <strong>${esc(o.business)}</strong>${o.when ? "'s Google profile" : ""}, through the Kabsi Clients group. You stay the owner. Nothing has been published.`)
+    bodyHtml: para(`${o.when ? `What changed: on ${esc(o.when)} Kabsi accepted your invitation and became a Manager of` : "Kabsi now has Manager access to"} ${o.when ? `<strong>${esc(possessive(o.business))}</strong> Google profile` : `<strong>${esc(o.business)}</strong>`}, through the Kabsi Clients group. You stay the owner. Nothing has been published.`)
       + (trial ? card({ label: "Your free trial", html: esc(trial) }) : "")
       + card({ label: o.nextStep ? "What happens next" : "Your first task", html: esc(task) })
       + para(`What it lets Kabsi do: read your reviews and profile, and publish only what you approve. How to remove Kabsi at any time: in Kabsi open Settings, then Disconnect Kabsi from Google. Or ${esc(o.removeSteps)}`, { muted: true })
       + para(`${esc(o.freeLine)} <a href="${esc(o.helpUrl)}" class="kb-t2" style="color:inherit;text-decoration:underline;">Google's guide to working with a third party</a>.`, { muted: true }),
     button: { label: o.nextStep ? "Open Kabsi" : "See your first task", url: `${appUrl}/app` },
     note: "This is Kabsi's own notice of a change to your Google access. Google may send its own email too.",
-    text: `${o.when ? `What changed: on ${o.when} Kabsi accepted your invitation and became a Manager of ${o.business}'s Google profile` : `Kabsi now has Manager access to ${o.business}`}, through the Kabsi Clients group. You stay the owner. Nothing has been published.\n\n${trial ? `Your free trial: ${trial}\n\n` : ""}${o.nextStep ? "What happens next" : "Your first task"}: ${task}\n\nWhat it lets Kabsi do: read your reviews and profile, and publish only what you approve. How to remove Kabsi at any time: in Kabsi open Settings, then Disconnect Kabsi from Google. Or ${o.removeSteps}\n\n${o.freeLine} Google's guide to working with a third party: ${o.helpUrl}`,
+    text: `${o.when ? `What changed: on ${o.when} Kabsi accepted your invitation and became a Manager of ${possessive(o.business)} Google profile` : `Kabsi now has Manager access to ${o.business}`}, through the Kabsi Clients group. You stay the owner. Nothing has been published.\n\n${trial ? `Your free trial: ${trial}\n\n` : ""}${o.nextStep ? "What happens next" : "Your first task"}: ${task}\n\nWhat it lets Kabsi do: read your reviews and profile, and publish only what you approve. How to remove Kabsi at any time: in Kabsi open Settings, then Disconnect Kabsi from Google. Or ${o.removeSteps}\n\n${o.freeLine} Google's guide to working with a third party: ${o.helpUrl}`,
   };
 }
 

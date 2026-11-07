@@ -1,5 +1,7 @@
-// AI Answers 1, the words (docs/COPY.md 37): the Home item, its weekly report line and where the owner acts. No imports,
-// so the signed-in website's report (src/components/report/work-receipt.tsx, through results-report/receipt.ts) can use it.
+// AI Answers 1, the words (docs/COPY.md 37): the Home item, its weekly report line and where the owner acts. Its only import is
+// the pure possessive helper, so the signed-in website's report (src/components/report/work-receipt.tsx, through results-report/receipt.ts) can use it.
+import { possessive } from "../../possessive.ts";
+
 export type FactKey = "hours" | "phone" | "address" | "website" | "services" | "price";
 export type Detail = "closing_time" | "opening_time" | "closed_day" | "open_day" | FactKey;
 export type Finding = {
@@ -33,7 +35,7 @@ export function findingTask(f: Finding, tz = "UTC") {
   const sentence = clip(f.sentence.replace(/\s+/g, " ").trim(), 220);
   const why = clip(`${who} was asked "${clip(f.question, 120)}" on ${when}. It said: "${sentence}" Kabsi has: ${clip(f.kabsi, 120)}.`, 500);
   return {
-    title: `${who}'s answer gives ${PLURAL.has(f.detail) ? "different" : "a different"} ${FACT_WORD[f.detail]} for your business`,
+    title: `${possessive(who)} answer gives ${PLURAL.has(f.detail) ? "different" : "a different"} ${FACT_WORD[f.detail]} for your business`,
     why,
     recommendation: ACCURACY_ACTION,
     evidence: { fact: f.fact, detail: f.detail, assistant: f.assistant, question: f.question, asked_at: f.asked_at, sentence: f.sentence, kabsi: f.kabsi, label: ACCURACY_LABEL },

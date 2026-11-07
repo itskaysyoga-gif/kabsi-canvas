@@ -9,7 +9,8 @@
 // Nothing is ever answered automatically. Opt-outs and bounces also go, as hashes, to kabsi-harvey's suppression list.
 import { clearYes, complaintWords, looksLikeAutoReply, looksLikeBounce, looksLikeFeedbackReport, optOutReason, OurText, stripQuoted } from "./classify.ts";
 import { ourIds, type Parsed } from "./mail.ts";
-import { domainOf, houseStyleOk, isFreeMail, possessive, sha } from "./rules.ts";
+import { possessive } from "../possessive.ts";
+import { domainOf, houseStyleOk, isFreeMail, sha } from "./rules.ts";
 import { SOCIAL_LINKS } from "../social-links.ts";
 
 export type Matched = {
