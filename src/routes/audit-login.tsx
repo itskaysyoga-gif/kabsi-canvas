@@ -38,7 +38,7 @@ function AuditLogin() {
         if (current) setMessage(ENDED);
         return;
       }
-      router.history.replace("/staff");
+      router.history.replace("/audit-overview");
     })();
     return () => {
       current = false;
@@ -74,7 +74,7 @@ function AuditLogin() {
         setMessage(ENDED);
         return;
       }
-      router.history.replace("/staff");
+      router.history.replace("/audit-overview");
     } catch {
       await supabase.auth.signOut();
       setMessage("We could not verify this access. Try again.");
