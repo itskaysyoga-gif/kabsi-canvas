@@ -1,5 +1,5 @@
 // kabsi-go: the card Worker on go.kabsi.co (SPEC §7, D212, D213, D227, D231).
-// Deployed on its own (never by the app's GitHub build). Bindings: KV `STICKERS`.
+// Deployed on its own (never by the app's GitHub build). Bindings: KV `STICKERS`, rate limit `VISITOR_LIMIT`.
 // Vars: TAP_FUNCTION_URL, APP_ORIGIN. Secret: TAP_SECRET.
 //   GET /{CODE}      NFC tap  → 302 to the business's Google review page (or its Kabsi page, see below)
 //   GET /{CODE}?s=q  QR scan  → same, logged as source=qr
@@ -12,6 +12,8 @@
 // wrangler.jsonc). Over it the answer is 429 with Retry-After 60, before KV or the database is read. A real customer taps
 // once; 30 a minute leaves room for a shop's guests behind one Wi-Fi address. The count is Cloudflare's, in memory, per
 // location, approximate; if the binding is missing or fails, the tap goes through (a card must never break).
+
+import { visitorKey } from "./visitor.js";
 
 const CODE_RE = /^[2-9A-HJKMNP-Z]{6}$/;
 const BOT_RE = /bot|crawl|spider|slurp|facebookexternalhit|whatsapp|telegram|preview|curl|wget|python|headless/i;
@@ -63,7 +65,7 @@ async function overLimit(request, env) {
   const ip = request.headers.get("cf-connecting-ip");
   if (!ip || !env.VISITOR_LIMIT) return false;
   try {
-    const { success } = await env.VISITOR_LIMIT.limit({ key: `v:${ip}` });
+    const { success } = await env.VISITOR_LIMIT.limit({ key: `v:${visitorKey(ip)}` });
     return success === false;
   } catch {
     return false;

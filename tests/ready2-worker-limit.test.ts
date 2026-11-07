@@ -5,6 +5,8 @@ import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 // @ts-expect-error the Worker is plain JavaScript
 import worker from "../workers/kabsi-go/src/index.js";
+// @ts-expect-error the Worker is plain JavaScript
+import { visitorKey } from "../workers/kabsi-go/src/visitor.js";
 
 const ctx = { waitUntil: vi.fn() };
 const req = (path: string, ip: string | null = "203.0.113.7") =>
@@ -83,13 +85,24 @@ describe("go.kabsi.co rate limit per visitor", () => {
     ).toBe(302);
   });
 
+  it("counts an IPv6 visitor by its /64, an IPv4 visitor by its address", () => {
+    expect(visitorKey("203.0.113.7")).toBe("203.0.113.7");
+    expect(visitorKey("2001:db8:aa:bb:1:2:3:4")).toBe("2001:db8:aa:bb::/64");
+    expect(visitorKey("2001:0db8:00aa:00bb:ffff::1")).toBe("2001:db8:aa:bb::/64");
+    expect(visitorKey("2001:db8::1")).toBe("2001:db8:0:0::/64");
+  });
+
   it("the binding in wrangler.jsonc is 30 a minute", () => {
-    const cfg = readFileSync(
+    const raw = readFileSync(
       new URL("../workers/kabsi-go/wrangler.jsonc", import.meta.url),
       "utf8",
     );
-    expect(cfg).toMatch(
-      /"name": "VISITOR_LIMIT", "type": "ratelimit", "namespace_id": "4301", "simple": \{ "limit": 30, "period": 60 \}/,
-    );
+    const cfg = JSON.parse(raw.replace(/^\s*\/\/.*$/gm, "").replace(/,(\s*[}\]])/g, "$1"));
+    const b = cfg.unsafe.bindings.find((x: { name: string }) => x.name === "VISITOR_LIMIT");
+    expect(b).toMatchObject({
+      type: "ratelimit",
+      namespace_id: "4301",
+      simple: { limit: 30, period: 60 },
+    });
   });
 });
