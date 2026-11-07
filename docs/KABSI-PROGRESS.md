@@ -9,7 +9,7 @@ Files named in this list are in `docs/progress/archive/`.
 - Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati (first real reply and post removal verified, 23 Oct). kabsi.co on Vercel; Creem the only payment route (test mode). Evidence: `evidence.md`, `where-things-stand.md`.
 - 26 to 30 Oct (Web 2 to Web 3): the dated files in `docs/progress/archive/`.
 - Go live 1 (5 Nov, R-108): WhatsApp for owners, the nearby check and the AI answer are on; card payments stay closed. Detail: `2026-11-05-golive1.md`.
-- 5 Nov 2026: Scan 2, Copy 3, App 4, Guides 4, Fix 3, Industries 2 and 3, Style 1, App 5 (PRs 369 to 408). Detail: the dated `2026-11-05-*.md` files.
+- 5 Nov: Scan 2, Copy 3, App 4, Guides 4, Fix 3, Industries 2 and 3, Style 1, App 5. Detail: `2026-11-05-*.md`.
 - 5 Nov 2026, App 6, Scan 3 and Site 2 (PRs 409 to 419): Settings saves at once; one bot check per search session, the progressive free check and the review link tool; header, footer, photos, About. `2026-11-05-app6.md`, `-scan3.md`, `-site2.md`.
 - Launch 1 to 4 (30.35 to 30.38, PRs 422 to 448): About and the readiness check, Nora's link filter, server copies of Lead and FreeScanCompleted, one door to sign-up, UK holidays by nation, Functions in fra1, /privacy section 15, the live speed gate passing (Home 206 KB, Pricing 221 KB, /scan 231 KB). `2026-11-06-launch1.md` to `-launch4.md`.
 - Speed 2 (PRs 452 to 460, approved by lane R): tagged ad clicks and the founding count from Vercel's edge; suggestions through `/api/suggest` (no cache of Google's lists, Places terms). `2026-11-06-speed2.md`.
@@ -34,7 +34,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Open for Rashid (as last recorded; the full table is `docs/progress/archive/steps-only-rashid-can-do.md`)
 
-- The lane R checklist of 7 Nov is Rashid's project doc `claude/kabsi-whats-left-2026-11-07.md` (not in this repository). In four lines: card payments stay closed until Creem's live setup; the first Meta ad waits for the DataForSEO top-up, Vercel Pro and the open lines of `docs/launch1/readiness.md`; the first paying business waits for Kapso Pro and the rest of 30.19 section 6; the dates that matter are the end of the promotional AI credit on 17 Nov and the Sentry budget before 30 Nov.
+- The 7 Nov lane R checklist (`claude/kabsi-whats-left-2026-11-07.md`) says: card payments stay closed until Creem's live setup; the first Meta ad waits for the DataForSEO top-up, Vercel Pro and the open lines of `docs/launch1/readiness.md`; the first paying business waits for Kapso Pro and the rest of 30.19 section 6; the dates that matter are the end of the promotional AI credit on 17 Nov and the Sentry budget before 30 Nov.
 - Done 25 Oct: Clean 1 drops, the Places purge, Resend webhook, R2, backups, Pub/Sub, WHATSAPP_LIVE (`2026-11-05-golive1.md`).
 - Phone test (13b part 1): passed 25 Oct (ladder above). 13b part 2: send START from the staff phone (it is stopped); delete the Supabase secrets SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET and the Supabase SENTRY_AUTH_TOKEN; run `supabase/manual/20261025_drop_slack_leftovers.sql` (expect `0 | 0 | 0 | 0`); remove the Kabsi app from Slack when you like.
 - Sec 2: the backup secret, unused secrets, two-step logins (`docs/security/secrets-and-accounts.md`); the retention switch (`supabase/data/20261027_sec2_retention_on.sql`).
