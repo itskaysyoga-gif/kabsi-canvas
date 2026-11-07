@@ -36,7 +36,7 @@ Deno.test("the disconnect notice writes the possessive in its html and its text"
     const m = accessChangeEmail({ change: "removed", name, at: "2026-10-09T10:00:00.000Z" }, "https://kabsi.co");
     assert.ok(m.text.includes(`access to ${own} Google profile.`), `${name}: ${m.text.slice(0, 120)}`);
     assert.ok(m.bodyHtml.includes(`${possessiveSuffix(name)} Google profile.`), name);
-    assert.ok(!/s's |''/.test(m.bodyHtml.replace(/<[^>]*>/g, "")), name);
+    assert.ok(!/s's |''/.test(m.bodyHtml), name);
     assert.ok(!/s's |''/.test(m.text));
   }
 });
