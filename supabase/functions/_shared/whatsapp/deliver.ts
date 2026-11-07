@@ -30,6 +30,8 @@ export type MaySend =
   | { ok: true; phone: string; in_window: boolean; review_alerts: boolean; digest: boolean };
 
 export type Db = {
+  /** A demo location must not send any message to an outside provider. */
+  isDemo?: (locationId: string) => Promise<boolean>;
   maySend(userId: string): Promise<MaySend>;
   record(r: { userId: string | null; locationId: string | null; kind: string; state: string; providerId?: string | null; template?: string | null; error?: string | null; dedupe?: string | null }): Promise<string | null>;
   inbound(phone: string, providerId: string, kind: string): Promise<{ duplicate: boolean; known?: boolean; user_id?: string | null; state?: string | null }>;
@@ -58,6 +60,11 @@ export async function deliver(ctx: Ctx, o: Outgoing): Promise<string> {
   const rec = (state: string, extra: { providerId?: string; template?: string | null; error?: string } = {}) =>
     ctx.db.record({ userId: o.userId, locationId: o.locationId, kind: o.kind, state, dedupe: o.dedupe ?? null, ...extra }).then(() => state);
   if (!ctx.on) return "off";
+  if (o.locationId) {
+    // R-123: stop before opt-in checks, outbox, sender or any provider call.
+    // Production db.ts always supplies isDemo. Fail closed if it is absent.
+    if (!ctx.db.isDemo || await ctx.db.isDemo(o.locationId)) return "demo_no_external_send";
+  }
   const may = await ctx.db.maySend(o.userId);
   if (!may.ok) return rec("refused", { error: may.reason });
   if (o.alert === "review" && !may.review_alerts) return "off_for_alerts";
