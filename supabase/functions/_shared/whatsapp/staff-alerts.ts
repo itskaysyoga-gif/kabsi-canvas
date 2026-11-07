@@ -30,8 +30,10 @@ const URGENT = new Set([
   "ai_visibility_80", "ai_visibility_cap",
   // Outbound (Harvey 4A, 30.39): a person replied (no business detail in the alert), or sending stopped
   "outbound_reply", "outbound_stop",
-  // the nightly smoke test, the backup
-  "smoke_failed", "backup_failed",
+  // the backup. Ready 2 part B: not "smoke_failed". POST /whatsapp/qa/alert already tells the staff phones at once, with
+  // the run's address; sending its ops event here as well made two messages for one failure (drill of 7 Nov 2026, 30.25
+  // item 5). The event is still counted in the morning digest.
+  "backup_failed",
 ]);
 /** About the number itself: email only (9.9). */
 const NUMBER_ONLY = /^whatsapp_number/;

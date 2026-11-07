@@ -10,11 +10,13 @@ const S: Summary = {
 };
 
 Deno.test("urgent events go at once, number events by email only, the rest wait for the digest", () => {
-  for (const k of ["jobs_silent", "access_lost", "google_needs_action", "publication_failed", "billing_alert", "payment", "whatsapp_handoff", "places_80", "places_cap", "ai_global_cap", "smoke_failed", "backup_failed"]) {
+  for (const k of ["jobs_silent", "access_lost", "google_needs_action", "publication_failed", "billing_alert", "payment", "whatsapp_handoff", "places_80", "places_cap", "ai_global_cap", "backup_failed"]) {
     assert.equal(routeOf({ kind: k }), "urgent", k);
   }
   assert.equal(routeOf({ kind: "whatsapp_number" }), "email_only");
   for (const k of ["signup", "business_new", "chat_started", "advisor_finding", "digest"]) assert.equal(routeOf({ kind: k }), "digest", k);
+  // Ready 2 part B: the smoke alert route already sends its one message; the tick must not send the event again.
+  assert.equal(routeOf({ kind: "smoke_failed" }), "digest");
 });
 
 Deno.test("Slack-era titles become plain WhatsApp words in the house style", () => {
