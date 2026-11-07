@@ -89,6 +89,25 @@ const base = {
       approve_high_risk: role(c.state) === "owner",
     }),
     is_staff: (c) => c.state === "staff-admin",
+    // R-123: synthetic audit summary, never a live Auth session or actual customer record.
+    audit_login_allowed: (c) => c.state === "audit",
+    audit_staff_overview: (c) =>
+      c.state === "audit"
+        ? {
+            locations: 3,
+            active_locations: 2,
+            demo_locations: 2,
+            categories: [
+              { category: "Coffee shop", count: 1 },
+              { category: "Hair salon", count: 1 },
+              { category: "Bakery", count: 1 },
+            ],
+            status: [
+              { status: "active", count: 2 },
+              { status: "onboarding", count: 1 },
+            ],
+          }
+        : undefined,
     entitlements: (c) => ({
       organization_id: ORG_ID,
       state: c.state === "paid" ? "active" : "trial",
