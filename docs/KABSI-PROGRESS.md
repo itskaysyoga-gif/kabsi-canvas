@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 7 Nov 2026, Ready 2. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 7 Nov 2026, R-123 foundation. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -8,7 +8,7 @@ Files named in this list are in `docs/progress/archive/`.
 
 - Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati (first real reply and post removal verified, 23 Oct). kabsi.co on Vercel; Creem the only payment route (test mode). Evidence: `evidence.md`, `where-things-stand.md`.
 - 26 to 30 Oct (Web 2 to Web 3): the dated files in `docs/progress/archive/`.
-- Go live 1 (5 Nov 2026, 30.28, R-108): WhatsApp for owners, the nearby check and the AI answer are on; card payments stay closed. Detail: `2026-11-05-golive1.md`.
+- Go live 1 (5 Nov, R-108): WhatsApp for owners, the nearby check and the AI answer are on; card payments stay closed. Detail: `2026-11-05-golive1.md`.
 - 5 Nov 2026: Scan 2, Copy 3, App 4, Guides 4, Fix 3, Industries 2 and 3, Style 1, App 5 (PRs 369 to 408). Detail: the dated `2026-11-05-*.md` files.
 - 5 Nov 2026, App 6, Scan 3 and Site 2 (PRs 409 to 419): Settings saves at once; one bot check per search session, the progressive free check and the review link tool; header, footer, photos, About. `2026-11-05-app6.md`, `-scan3.md`, `-site2.md`.
 - Launch 1 to 4 (30.35 to 30.38, PRs 422 to 448): About and the readiness check, Nora's link filter, server copies of Lead and FreeScanCompleted, one door to sign-up, UK holidays by nation, Functions in fra1, /privacy section 15, the live speed gate passing (Home 206 KB, Pricing 221 KB, /scan 231 KB). `2026-11-06-launch1.md` to `-launch4.md`.
@@ -16,7 +16,7 @@ Files named in this list are in `docs/progress/archive/`.
 - Harvey 4A (30.39): Outbound in Kabsi, locked, no business written to. Outbound test (PRs 464 to 468): inbox login, Companies House from Harvey's register, the part G run. Record corrected 7 Nov: Gmail put both test emails in Spam (Rashid moved them to the inbox, 22:38 Beirut); mail-tester 9.2, only the domain's age. Outbound polish: a name ending in s takes an apostrophe only; new gate 30.39 item 13. `2026-11-06-outbound-test.md`.
 - No customer is live yet. Before the first Meta ad (30.35 item 5): the DataForSEO top-up, Vercel Pro and the open lines of `docs/launch1/readiness.md`. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
-- R-123 (7 Nov): restricted auditor foundation in DB; no staff access. PR 479 draft. `2026-11-07-audit-access.md`.
+- R-123 (7 Nov): restricted auditor foundation in DB; no staff access. Draft PRs 479 to 484. `2026-11-07-audit-access.md`.
 
 ## WhatsApp ladder (master plan 25.5)
 
@@ -65,7 +65,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 7 Nov 2026, R-123 audit access: restricted foundation only, PR 479 open. `2026-11-07-audit-access.md`.
+- 7 Nov 2026, R-123 audit access: six unmerged draft PRs, no live reviewer access. `2026-11-07-audit-access.md`.
 
 ## How a session updates this page
 
