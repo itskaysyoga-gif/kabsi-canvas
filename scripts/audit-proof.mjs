@@ -110,6 +110,19 @@ try {
     assert.equal(await page.getByText("Hair salon").count(), 0, "private overview remains after sign-out");
     assert.deepEqual(pageErrors, [], width + ": browser errors after expiry");
     await page.screenshot({ path: `${output}/audit-ended-${width}.png`, fullPage: true });
+
+    // Test the dedicated password form with invented credentials and a mock
+    // Turnstile response. The real auditor's password is never used or logged.
+    expired = false;
+    await page.getByLabel("Email").fill("synthetic-reviewer@example.invalid");
+    await page.getByLabel("Password").fill("fictional-qa-password");
+    await page.getByRole("button", { name: "Sign in", exact: true }).click();
+    await page.getByRole("heading", { name: "Read-only audit overview" }).waitFor({
+      timeout: 15_000,
+    });
+    await page.getByText("Hair salon").waitFor({ timeout: 15_000 });
+    assert.deepEqual(pageErrors, [], width + ": browser errors after synthetic password sign-in");
+    await page.screenshot({ path: `${output}/audit-sign-in-${width}.png`, fullPage: true });
     await context.close();
     console.log("PASS synthetic masked read, no writes, viewport, expiry at " + width + " px");
   }
