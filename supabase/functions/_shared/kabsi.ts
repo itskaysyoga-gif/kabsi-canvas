@@ -183,8 +183,11 @@ export async function sendEmail(o: {
   unsubscribeUrl?: string | null; stream?: Stream;
 }) {
   const db = admin();
-  // Demo workspace (P0.1-06, R-17): a demo business only ever emails the demo login. Nothing else is written or sent.
+  // R-123: a demo action never creates mail or reaches Resend, even for a QA recipient.
   if (o.locationId) {
+    const { data: loc, error: le } = await db.from("locations").select("is_demo").eq("id", o.locationId).maybeSingle();
+    if (le || !loc) throw le ?? new Error("unknown_business");
+    if (loc.is_demo) return { skipped: "demo" };
     const { data: allowed, error: ae } = await db.rpc("email_allowed_for_location", { p_location: o.locationId, p_to: o.to });
     if (ae) throw ae;
     if (allowed === false) return { skipped: "demo" };
