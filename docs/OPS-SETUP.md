@@ -98,14 +98,25 @@ Sentry emails alert rules to members of the organisation, so hello@kabsi.co must
    "Send a notification for high priority issues" (projects kabsi-web, kabsi-edge, kabsi-go) to email that member, and you
    can remove the personal Gmail member. Urgent alerts also go to staff WhatsApp once session 13b part 2 is built.
 
-## 7. Branch protection on main (master plan 26.6)
+## 7. Branch protection on main (master plan 26.6; Ready 2 part A, 7 Nov 2026)
 
-1. GitHub, **Settings**, **Rules**, **Rulesets**, **New ruleset**, **New branch ruleset**. Name: `main`. Enforcement: **Active**.
-2. Target branches: **Add target**, **Include by pattern**, `main`.
-3. Switch on: **Restrict deletions**, **Block force pushes**, **Require a pull request before merging** (set **Required
-   approvals** to `0`: no human review is required), and **Require status checks to pass**.
-4. Under status checks, **Add checks**, and add each of these (they appear in the list once they have run on a pull
-   request; this pull request ran them):
+The ruleset `protect-main` exists but is **Disabled**: it required a check named "CI / App", which no job reports, so it
+blocked every merge. The file `docs/runbooks/protect-main.ruleset.json` is the replacement. It blocks force pushes and
+deletion of main, needs a pull request with no human review, allows merge commits only, and requires the eight merge-gate
+jobs of ci.yml by their exact names (a test, `tests/ready2-ruleset.test.ts`, fails if a job is renamed without this file).
+Lighthouse CI is report only and is not required. The bypass list is empty, and "up to date with main" is off, so a
+session still merges its own pull request once ci.yml is green.
+
+Rashid, on a computer (about 2 minutes):
+
+1. github.com/itskaysyoga-gif/kabsi-canvas, **Settings**, **Rules**, **Rulesets**. Click `protect-main`, scroll to the
+   bottom, **Delete ruleset**, confirm. (It is disabled, so nothing changes yet.)
+2. Back on **Rulesets**: the **New ruleset** button's arrow, **Import a ruleset**. Choose the file
+   `protect-main.ruleset.json` (download it from the repository: docs/runbooks, the file, **Download raw file**).
+3. Check the form shows: Enforcement status **Active**; Target **Default branch**; **Restrict deletions** on; **Require a
+   pull request before merging** on with **Required approvals** 0 and allowed merge method **Merge**; **Require status
+   checks to pass** on with the eight checks below and **Require branches to be up to date** off; **Block force pushes**
+   on; Bypass list empty. **Create**.
    - App (typecheck, lint, anon JWT guard, tests, build)
    - Edge Functions and Worker (deno check, Deno tests)
    - Prompt gate (evaluation set)
@@ -113,12 +124,16 @@ Sentry emails alert rules to members of the organisation, so hello@kabsi.co must
    - Secret scan (gitleaks, this pull request's commits)
    - Database (pgTAP on a local Supabase stack)
    - Dependency review
-5. Leave **Require branches to be up to date** off (parallel sessions merge main into their own branch before merging).
-   Do not add Lighthouse CI: it is report only until Web 2. Leave the bypass list empty.
-6. **Create**. Check: open a small pull request with a deliberately failing test and see the merge button stay grey. A build
-   session merges its own pull request once the checks are green, as before.
-7. Also, **Settings**, **Code security**: **Dependency graph** on (the Dependency review check needs it), **Dependabot
-   alerts** and **Dependabot security updates** on (done), **Secret Protection** with **Push protection** on (still open).
+   - Speed gate (Home, Pricing and /scan at 390 px)
+4. Tell the next session "protect-main is on". It checks it on its own pull request: while the checks run the pull
+   request reads `mergeable_state: blocked`, and once they are green it reads `clean` and the session merges it.
+
+If the import button is missing, the same settings by hand: **New ruleset**, **New branch ruleset**, name `protect-main`,
+the settings of step 3, and under status checks **Add checks** with each of the eight names (they are offered once they
+have run on a pull request). If a rule ever blocks an urgent fix, fix the cause; do not switch the ruleset off.
+
+Also, **Settings**, **Code security**: **Dependency graph** on (the Dependency review check needs it), **Dependabot alerts**
+and **Dependabot security updates** on (done), **Secret Protection** with **Push protection** on (still open).
 
 ## 8. For the email inbox test (30.4)
 
