@@ -1,6 +1,9 @@
-// Keep route types current before TypeScript checks without hand-editing routeTree.gen.ts.
-// The router plugin depends on this pinned generator package.
-import { Generator, getConfig } from "@tanstack/router-generator";
+// Initialize Kabsi's actual TanStack Start Vite plugin for route generation.
+// The server never listens: config initialization generates routeTree.gen.ts.
+import { createServer } from "vite";
 
-const root = process.cwd();
-await new Generator({ config: getConfig({}, root), root }).run();
+const vite = await createServer({
+  logLevel: "error",
+  server: { middlewareMode: true },
+});
+await vite.close();
