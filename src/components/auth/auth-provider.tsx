@@ -155,8 +155,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!loading) identify(userId);
     // Where a new account came from, saved on the server once (P0.6-02).
-    if (!loading && userId) void saveSignupAttribution(userId);
-  }, [loading, userId]);
+    // A temporary reviewer must not create attribution or update locations on audit pages.
+    // The database separately rejects an auditor even on other routes.
+    if (!loading && userId && !/^\/audit-(?:login|overview)(?:\/|$)/.test(pathname))
+      void saveSignupAttribution(userId);
+  }, [loading, userId, pathname]);
 
   // How long a sign-in lasts (App 4, 30.31 item 2): 30 days after the last visit for an owner, 12 hours after the last
   // staff page visit on staff pages for staff (idle.ts). Judged as soon as the session is read, before this visit is
