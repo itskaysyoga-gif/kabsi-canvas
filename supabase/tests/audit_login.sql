@@ -28,7 +28,7 @@ reset role;
 select tests.act_as('00000000-0000-4000-8000-0000000000c8');
 select is(public.audit_login_allowed(), true, 'a currently authorized auditor may sign in');
 reset role;
-update private.audit_access set expires_at = now() - interval '1 minute'
+update private.audit_access set expires_at = now() - interval '1 minute', created_at = now() - interval '2 days'
   where user_id = '00000000-0000-4000-8000-0000000000c8';
 
 select tests.act_as('00000000-0000-4000-8000-0000000000c8');
