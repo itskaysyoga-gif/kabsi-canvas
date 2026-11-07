@@ -32,6 +32,15 @@ describe("protect-main ruleset", () => {
     const pr = rule("pull_request").parameters;
     expect(pr.required_approving_review_count).toBe(0);
     expect(pr.allowed_merge_methods).toEqual(["merge"]);
+    // The import refuses a pull_request rule without these four.
+    for (const k of [
+      "dismiss_stale_reviews_on_push",
+      "require_code_owner_review",
+      "require_last_push_approval",
+      "required_review_thread_resolution",
+    ])
+      expect(pr[k]).toBe(false);
+    expect(ruleset.conditions.ref_name.exclude).toEqual([]);
   });
 
   it("requires every ci.yml job except the report-only Lighthouse run, by its exact name", () => {
@@ -41,6 +50,9 @@ describe("protect-main ruleset", () => {
     const gate = ciJobs().filter((n) => !/report only/i.test(n));
     expect(gate.length).toBeGreaterThanOrEqual(8);
     expect([...required].sort()).toEqual([...gate].sort());
+    // Only GitHub Actions (app 15368) may report them, so no other app can turn a check green.
+    for (const c of rule("required_status_checks").parameters.required_status_checks)
+      expect(c.integration_id).toBe(15368);
     expect(rule("required_status_checks").parameters.strict_required_status_checks_policy).toBe(
       false,
     );

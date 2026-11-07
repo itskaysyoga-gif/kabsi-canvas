@@ -29,14 +29,14 @@
         "strict_required_status_checks_policy": false,
         "do_not_enforce_on_create": false,
         "required_status_checks": [
-          { "context": "App (typecheck, lint, anon JWT guard, tests, build)" },
-          { "context": "Edge Functions and Worker (deno check, Deno tests)" },
-          { "context": "Prompt gate (evaluation set)" },
-          { "context": "Nora gate (60 questions)" },
-          { "context": "Secret scan (gitleaks, this pull request's commits)" },
-          { "context": "Database (pgTAP on a local Supabase stack)" },
-          { "context": "Dependency review" },
-          { "context": "Speed gate (Home, Pricing and /scan at 390 px)" }
+          { "context": "App (typecheck, lint, anon JWT guard, tests, build)", "integration_id": 15368 },
+          { "context": "Edge Functions and Worker (deno check, Deno tests)", "integration_id": 15368 },
+          { "context": "Prompt gate (evaluation set)", "integration_id": 15368 },
+          { "context": "Nora gate (60 questions)", "integration_id": 15368 },
+          { "context": "Secret scan (gitleaks, this pull request's commits)", "integration_id": 15368 },
+          { "context": "Database (pgTAP on a local Supabase stack)", "integration_id": 15368 },
+          { "context": "Dependency review", "integration_id": 15368 },
+          { "context": "Speed gate (Home, Pricing and /scan at 390 px)", "integration_id": 15368 }
         ]
       }
     }

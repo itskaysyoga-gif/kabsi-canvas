@@ -104,7 +104,7 @@ The ruleset `protect-main` exists but is **Disabled**: it required a check named
 blocked every merge. The file `docs/runbooks/protect-main.ruleset.json` is the replacement. It blocks force pushes and
 deletion of main, needs a pull request with no human review, allows merge commits only, and requires the eight merge-gate
 jobs of ci.yml by their exact names (a test, `tests/ready2-ruleset.test.ts`, fails if a job is renamed without this file).
-Lighthouse CI is report only and is not required. The bypass list is empty, and "up to date with main" is off, so a
+Each check must come from GitHub Actions, so no other app can turn it green. Lighthouse CI is report only and is not required. The bypass list is empty, and "up to date with main" is off, so a
 session still merges its own pull request once ci.yml is green.
 
 Rashid, on a computer (about 2 minutes):
