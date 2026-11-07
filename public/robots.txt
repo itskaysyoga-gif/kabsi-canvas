@@ -9,6 +9,7 @@ Disallow: /design
 Disallow: /start
 Disallow: /login
 Disallow: /audit-login
+Disallow: /audit-overview
 Disallow: /a/
 Disallow: /activate/
 Disallow: /scan/
@@ -27,6 +28,7 @@ Disallow: /design
 Disallow: /start
 Disallow: /login
 Disallow: /audit-login
+Disallow: /audit-overview
 Disallow: /a/
 Disallow: /activate/
 Disallow: /scan/
