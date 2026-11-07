@@ -20,7 +20,11 @@ try {
       timezoneId: "UTC",
     });
     await context.addInitScript(([key, session]) => {
-      window.localStorage.setItem(key, JSON.stringify(session));
+      // A navigation after sign-out must not resurrect this synthetic identity.
+      if (!window.sessionStorage.getItem("kabsi_audit_fixture_seeded")) {
+        window.localStorage.setItem(key, JSON.stringify(session));
+        window.sessionStorage.setItem("kabsi_audit_fixture_seeded", "1");
+      }
       window.localStorage.setItem(
         "kabsi_consent",
         JSON.stringify({
