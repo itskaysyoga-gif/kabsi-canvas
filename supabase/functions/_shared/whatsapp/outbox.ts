@@ -129,9 +129,18 @@ async function sendRow(o: Out, s: SendState, row: OutRow): Promise<string> {
 export async function flush(o: Out, limit = 50): Promise<Record<string, number>> {
   const rows = await o.db.claim(limit);
   const byPhone = new Map<string, OutRow[]>();
-  for (const r of rows) byPhone.set(r.phone, [...(byPhone.get(r.phone) ?? []), r]);
   const out: Record<string, number> = {};
   const count = (k: string) => (out[k] = (out[k] ?? 0) + 1);
+  // Filter first, before batching. A digest must never contain a demo row
+  // alongside a real business's message to the same recipient.
+  for (const r of rows) {
+    if (r.location_id && o.db.isDemo && await o.db.isDemo(r.location_id)) {
+      await o.db.mark([r.id], "dropped", { error: "demo_no_external_send" });
+      count("demo_no_external_send");
+      continue;
+    }
+    byPhone.set(r.phone, [...(byPhone.get(r.phone) ?? []), r]);
+  }
   for (const [phone, list] of byPhone) {
     const s = await o.db.state(phone);
     for (const r of list.filter((x) => x.urgent)) count(await sendRow(o, s, r));
