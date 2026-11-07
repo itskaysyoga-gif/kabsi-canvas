@@ -1,5 +1,5 @@
 // kabsi-go: the card Worker on go.kabsi.co (SPEC §7, D212, D213, D227, D231).
-// Deployed on its own (never by the app's GitHub build). Bindings: KV `STICKERS`.
+// Deployed on its own (never by the app's GitHub build). Bindings: KV `STICKERS`, rate limit `VISITOR_LIMIT`.
 // Vars: TAP_FUNCTION_URL, APP_ORIGIN. Secret: TAP_SECRET.
 //   GET /{CODE}      NFC tap  → 302 to the business's Google review page (or its Kabsi page, see below)
 //   GET /{CODE}?s=q  QR scan  → same, logged as source=qr
@@ -8,6 +8,12 @@
 // A link goes straight to Google (the default, so every printed QR code keeps working) or, when the owner switched
 // that link to the page (P0.8-05, K-132), to https://kabsi.co/review/{CODE}: the same page for every visitor, the
 // Google button first. Either way there is no rating screen and no routing (D212). No IP is stored.
+// Ready 2 part C: every path except the root and /_check counts against VISITOR_LIMIT (30 a minute per address, binding in
+// wrangler.jsonc). Over it the answer is 429 with Retry-After 60, before KV or the database is read. A real customer taps
+// once; 30 a minute leaves room for a shop's guests behind one Wi-Fi address. The count is Cloudflare's, in memory, per
+// location, approximate; if the binding is missing or fails, the tap goes through (a card must never break).
+
+import { visitorKey } from "./visitor.js";
 
 const CODE_RE = /^[2-9A-HJKMNP-Z]{6}$/;
 const BOT_RE = /bot|crawl|spider|slurp|facebookexternalhit|whatsapp|telegram|preview|curl|wget|python|headless/i;
@@ -24,6 +30,13 @@ export default {
     // P0.6-08 (K-118): the uptime monitor's check. 200 when the Worker runs and its KV table can be read, 503 when it
     // cannot. "_check" is not a card code (codes are six characters), so no card is affected.
     if (path === "_check") return check(env);
+
+    if (await overLimit(request, env)) {
+      return new Response("Too many requests. Please try again in a minute.", {
+        status: 429,
+        headers: { "retry-after": "60", "cache-control": "no-store", "content-type": "text/plain" },
+      });
+    }
 
     const code = path.toUpperCase();
     if (!CODE_RE.test(code)) return Response.redirect(`${app}/`, 302);
@@ -47,6 +60,17 @@ export default {
     return Response.redirect(`${app}/activate/${code}`, 302); // unknown or not linked yet
   },
 };
+
+async function overLimit(request, env) {
+  const ip = request.headers.get("cf-connecting-ip");
+  if (!ip || !env.VISITOR_LIMIT) return false;
+  try {
+    const { success } = await env.VISITOR_LIMIT.limit({ key: `v:${visitorKey(ip)}` });
+    return success === false;
+  } catch {
+    return false;
+  }
+}
 
 async function check(env) {
   const headers = { "cache-control": "no-store", "content-type": "text/plain" };

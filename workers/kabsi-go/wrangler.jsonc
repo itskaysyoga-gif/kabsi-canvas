@@ -5,6 +5,12 @@
   "compatibility_date": "2026-09-25",
   "routes": [{ "pattern": "go.kabsi.co", "custom_domain": true }],
   "kv_namespaces": [{ "binding": "STICKERS", "id": "d897cbaa4ff34c8bab5e6923b3c41542" }],
+  // Ready 2 part C (master plan 30.19 section 6): a rate limit per visitor. 30 requests a minute from one address, counted
+  // by Cloudflare in memory at each location (approximate, nothing stored by Kabsi). The deploy pins Wrangler 3.114, which
+  // reads the binding only as an "unsafe" one; the stable "ratelimits" key needs Wrangler 4.36 or later.
+  "unsafe": {
+    "bindings": [{ "name": "VISITOR_LIMIT", "type": "ratelimit", "namespace_id": "4301", "simple": { "limit": 30, "period": 60 } }]
+  },
   "vars": {
     "APP_ORIGIN": "https://kabsi.co",
     "TAP_FUNCTION_URL": "https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/tap"
