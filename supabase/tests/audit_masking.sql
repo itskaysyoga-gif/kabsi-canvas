@@ -20,6 +20,22 @@ select is(
   (private.audit_mask_json('{"category":"Hair salon","count":12,"status":"active"}'::jsonb)->>'count')::integer,
   12, 'counts stay real');
 
+select is(
+  private.audit_mask_json('{"count":12,"phone":447712345678,"account_id":12345}'::jsonb)->>'phone',
+  '[hidden]', 'numeric phone numbers are not mistaken for safe counts');
+
+select is(
+  private.audit_mask_json('{"count":12,"phone":447712345678,"account_id":12345}'::jsonb)->>'account_id',
+  '[hidden]', 'numeric account identifiers stay private');
+
+select is(
+  private.audit_mask_json('[447712345678]'::jsonb)->>0,
+  '[hidden]', 'numeric scalars inside arrays are also masked');
+
+select is(
+  private.audit_mask_json('{"is_private":true}'::jsonb)->>'is_private',
+  '[hidden]', 'unknown boolean flags are not revealed');
+
 select ok(
   not has_function_privilege('anon','public.audit_staff_overview()','execute'),
   'unauthenticated callers cannot reach audit reads');
