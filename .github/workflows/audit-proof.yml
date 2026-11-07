@@ -1,0 +1,42 @@
+name: R-123 synthetic auditor browser proof
+on:
+  push:
+    branches: ["claude/audit-g"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    name: R-123 390 and 1440 Playwright without private credentials
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24"
+      - name: Install dependencies
+        run: npm ci --registry=https://registry.npmjs.org --legacy-peer-deps
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start Vite with synthetic backend
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 5173 > /tmp/kabsi-audit-vite.log 2>&1 &
+      - name: Run synthetic auditor proof
+        env:
+          BASE: http://127.0.0.1:5173
+        run: |
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:5173/audit-overview > /dev/null; then break; fi
+            sleep 2
+          done
+          node scripts/audit-proof.mjs
+      - name: Upload synthetic screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: r123-audit-synthetic-390-1440
+          path: artifacts/audit-proof/*.png
+          if-no-files-found: ignore
