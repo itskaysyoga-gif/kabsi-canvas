@@ -42,6 +42,10 @@ begin
   using public.locations l
   where m.user_id = v_id and m.location_id = l.id and l.is_demo;
 
+  delete from public.organization_members m
+  using public.organizations o
+  where m.organization_id = o.id and o.is_demo and m.user_id = v_id;
+
   delete from public.staff where user_id = v_id and role = 'auditor';
   delete from private.audit_access where user_id = v_id;
   delete from auth.users where id = v_id;
@@ -52,7 +56,8 @@ select
   (select count(*) from auth.users where id in (select id from audit_cleanup_target)) as auth_users_remaining,
   (select count(*) from public.staff where user_id in (select id from audit_cleanup_target)) as staff_rows_remaining,
   (select count(*) from private.audit_access where user_id in (select id from audit_cleanup_target)) as grants_remaining,
-  (select count(*) from public.location_members where user_id in (select id from audit_cleanup_target)) as owner_rows_remaining;
+  (select count(*) from public.location_members where user_id in (select id from audit_cleanup_target)) as location_owner_rows_remaining,
+  (select count(*) from public.organization_members where user_id in (select id from audit_cleanup_target)) as org_owner_rows_remaining;
 
--- Expected: all four counts are 0. If not, ROLLBACK instead of COMMIT.
+-- Expected: all five counts are 0. If not, ROLLBACK instead of COMMIT.
 commit;
