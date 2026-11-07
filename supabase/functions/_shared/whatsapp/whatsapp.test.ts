@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { alertButtons, excerpt, firstName, fresh, parseWebhook, reviewAlertBody, verifySignature } from "./channel.ts";
 import { type Ctx, type Db, deliver, type MaySend, mockSender, sendProtectionAlert, sendReviewAlert } from "./deliver.ts";
 import { senderMode } from "./kapso.ts";
-import { notify as queueWhatsapp, reply as replyWhatsapp, type Out } from "./outbox.ts";
+import { flush as flushWhatsapp, notify as queueWhatsapp, reply as replyWhatsapp, type Out } from "./outbox.ts";
 import { ref } from "./templates.ts";
 
 const enc = (s: string) => new TextEncoder().encode(s);
@@ -212,4 +212,33 @@ Deno.test("R-123: the central WhatsApp outbox never sends or queues demo message
     "demo_no_external_send",
   );
   assert.deepEqual(calls, [], "no database queue or provider send was attempted");
+});
+
+Deno.test("R-123: an old queued demo message is discarded before a digest can form", async () => {
+  const marked: { ids: number[]; state: string }[] = [];
+  const sent: string[] = [];
+  const demo = {
+    id: 1, phone: "+15551234567", user_id: "fake", location_id: "demo-location",
+    kind: "review_alert", body: "Only for demo", buttons: [], template: null,
+    urgent: false, state: "queued", due_at: "2026-11-07T12:00:00Z", attempts: 0,
+  };
+  const out: Out = {
+    db: {
+      isDemo: async () => true,
+      state: async () => { sent.push("state"); throw new Error("unexpected"); },
+      add: async () => { sent.push("add"); return null; },
+      mark: async (ids, state) => { marked.push({ ids, state }); },
+      claim: async () => [demo],
+      get: async () => [],
+      release: async () => 0,
+      setQuestion: async () => {},
+    },
+    live: mockSender([]),
+    mock: mockSender([]),
+    now: () => new Date("2026-11-07T12:00:00Z"),
+  };
+  const result = await flushWhatsapp(out);
+  assert.deepEqual(result, { demo_no_external_send: 1 });
+  assert.deepEqual(marked, [{ ids: [1], state: "dropped" }]);
+  assert.deepEqual(sent, []);
 });
