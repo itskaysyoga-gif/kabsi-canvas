@@ -63,9 +63,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 7 Nov 2026, Demo pack (R-125): both demo businesses complete, screenshot pack for the dashboard review. `2026-11-07-demo-pack.md`.
 - 7 Nov 2026, Ready 2 (go-live safety): PRs 473 to 478. `2026-11-07-ready2.md`.
 - 7 Nov 2026, Clean 2: repository size (PR 470), one possessive helper (PR 471), this page. `2026-11-07-clean2.md`.
-- 7 Nov 2026, Outbound polish. `2026-11-06-outbound-test.md`.
 
 ## How a session updates this page
 
