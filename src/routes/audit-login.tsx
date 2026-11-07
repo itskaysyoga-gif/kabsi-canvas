@@ -10,10 +10,7 @@ const SIGN_IN_ERROR = "Unable to sign in. Check the details and try again.";
 export const Route = createFileRoute("/audit-login")({
   ssr: false,
   head: () => ({
-    meta: [
-      { title: "Audit sign in | Kabsi" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
+    meta: [{ title: "Audit sign in | Kabsi" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   component: AuditLogin,
 });
@@ -29,7 +26,10 @@ function AuditLogin() {
   useEffect(() => {
     let current = true;
     void (async () => {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
       if (!current || sessionError || !session) return;
       const { data, error } = await supabase.rpc("audit_login_allowed" as never);
       if (!current) return;
@@ -40,7 +40,9 @@ function AuditLogin() {
       }
       router.history.replace("/staff");
     })();
-    return () => { current = false; };
+    return () => {
+      current = false;
+    };
   }, [router]);
 
   async function signIn(event: FormEvent<HTMLFormElement>) {
@@ -94,22 +96,44 @@ function AuditLogin() {
         </p>
         <form ref={area} onSubmit={(event) => void signIn(event)} className="mt-8 space-y-5">
           <div>
-            <label htmlFor="audit-email" className="block text-small font-bold">Email</label>
-            <input id="audit-email" type="email" name="email" autoComplete="username"
-              required value={email} onChange={(event) => setEmail(event.target.value)}
+            <label htmlFor="audit-email" className="block text-small font-bold">
+              Email
+            </label>
+            <input
+              id="audit-email"
+              type="email"
+              name="email"
+              autoComplete="username"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
               className="mt-2 h-12 w-full rounded-inner border border-line-strong bg-surface-1 px-4 text-body text-text-1 focus-visible:outline-2 focus-visible:outline-focus"
             />
           </div>
           <div>
-            <label htmlFor="audit-password" className="block text-small font-bold">Password</label>
-            <input id="audit-password" type="password" name="password" autoComplete="current-password"
-              required value={password} onChange={(event) => setPassword(event.target.value)}
+            <label htmlFor="audit-password" className="block text-small font-bold">
+              Password
+            </label>
+            <input
+              id="audit-password"
+              type="password"
+              name="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
               className="mt-2 h-12 w-full rounded-inner border border-line-strong bg-surface-1 px-4 text-body text-text-1 focus-visible:outline-2 focus-visible:outline-focus"
             />
           </div>
           {widget}
-          {message ? <p className="text-small font-semibold text-bad" role="alert">{message}</p> : null}
-          <Button type="submit" full loading={busy}>Sign in</Button>
+          {message ? (
+            <p className="text-small font-semibold text-bad" role="alert">
+              {message}
+            </p>
+          ) : null}
+          <Button type="submit" full loading={busy}>
+            Sign in
+          </Button>
         </form>
       </section>
     </main>
