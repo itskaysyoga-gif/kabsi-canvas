@@ -16,10 +16,16 @@ select u.id,
       join public.locations l on l.id=m.location_id
       where m.user_id=u.id and m.role='owner' and not l.is_demo
     ) then 'admin_owner'
-    when u.email like '%@test.local' and exists (
+    when not exists (
+      select 1 from public.staff s where s.user_id=u.id
+    ) and exists (
       select 1 from public.location_members m
       join public.locations l on l.id=m.location_id
       where m.user_id=u.id and m.role='owner' and l.is_demo
+    ) and not exists (
+      select 1 from public.location_members m
+      join public.locations l on l.id=m.location_id
+      where m.user_id=u.id and not l.is_demo
     ) then 'qa_demo_owner'
     else 'not_approved_for_retirement'
   end as account_class
