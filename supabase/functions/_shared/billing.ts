@@ -5,6 +5,7 @@
 import { admin, APP_URL, captureError, jobLog, log } from "./kabsi.ts";
 import { notify as notifyEmail } from "./notify.ts";
 import { esc } from "./email-layout.ts";
+import { staffPlanLine } from "./billing-lines.ts";
 import type { EmailContent } from "./email/template.ts";
 import { paymentFailed, planCancelled } from "./email/account-copy.ts";
 import { outDb } from "./whatsapp/db.ts";
@@ -123,8 +124,7 @@ export async function applyEvent(eventKey: string): Promise<string> {
       if (existing && ((effect.paid && !wasPaying && existing.state === "active") || effect.message === "scheduled_cancel" || effect.message === "ended")) {
         const business = await businessName(org);
         const test = existing.mode === "live" ? "" : " (test mode)";
-        const what = effect.paid ? `New paying customer: ${business} on ${existing.plan === "essentials" ? "Essentials" : "Pro"}`
-          : effect.message === "ended" ? `${business}'s plan has ended` : `${business} cancelled; the plan ends on ${existing.current_period_end ? longDate(existing.current_period_end) : "its renewal date"}`;
+        const what = staffPlanLine({ paid: effect.paid, message: effect.message ?? null, business, plan: existing.plan, endDate: existing.current_period_end ? longDate(existing.current_period_end) : null });
         await staffAlert(`${what}${test}`, `${effect.paid ? "paid" : effect.message}:${e.id}`).catch((x) => captureError("billing", x, { step: "staff_alert" }));
       }
     }

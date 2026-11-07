@@ -1,6 +1,7 @@
 // Outbound's rules in one pure file (Harvey 4A, master plan 30.39, R-119): the suppression hash (the same rule as
 // kabsi-harvey's harvey/kabsi_suppression.py), the templates of docs/COPY.md "Outbound emails" word for word, the detail
 // sentences, the link and house style checks, the ramp and the sending window. No network, no database.
+import { possessive } from "../possessive.ts";
 
 /** sha256 hex of the trimmed, lower-cased text (kabsi_suppression.sha). */
 export async function sha(value: string): Promise<string> {
@@ -250,14 +251,6 @@ export const FOOTER =
   "Why you got this: your business email is on your website. Reply 'no thanks' and I will not write again. How Kabsi handles data: kabsi.co/privacy";
 
 export type Draft = { subject: string; body: string };
-
-/** The possessive of a business name (docs/COPY.md section 65): a name ending in s takes only an apostrophe ("Harbor
- *  Barbers'", "Maple Nails'", "Moss'"), a name already ending in an apostrophe is left as it is, any other name takes 's. */
-export function possessive(name: string): string {
-  const n = String(name ?? "").trim();
-  if (/['\u2019]$/.test(n)) return n;
-  return /s$/i.test(n) ? `${n}'` : `${n}'s`;
-}
 
 export function emailOne(p: { business: string; kind: string; city: string; detail: string }): Draft {
   const b = p.business;
