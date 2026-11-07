@@ -475,11 +475,21 @@ export async function startCheckout(org: string, userId: string | null, email: s
   return c.checkout_url;
 }
 
+// R-123: this check also guards WhatsApp billing flows that bypass the owner HTTP route.
+async function assertNotDemoOrg(org: string): Promise<void> {
+  const { data, error } = await admin().from("organizations").select("is_demo").eq("id", org).maybeSingle();
+  if (error) throw error;
+  if (!data) throw new BillingError("no_business", "That business was not found.");
+  if (data.is_demo) throw new BillingError("demo_only", "Demo businesses cannot contact the payment service.");
+}
+
 export async function portal(org: string): Promise<string> {
+  await assertNotDemoOrg(org);
   return await portalFor({ organization_id: org, provider_customer_id: null });
 }
 
 async function mustRun(org: string): Promise<SubRow> {
+  await assertNotDemoOrg(org);
   const s = await currentSub(org);
   if (!s?.provider_subscription_id) throw new BillingError("no_plan", "There is no paid plan to change.");
   return s;
