@@ -32,3 +32,32 @@ Lane R approved a temporary, read-only, privacy-masked audit for ChatGPT. The fi
 ## Recovery
 
 Because this migration is additive for data and roles, rollback should preserve `private.audit_access` and deny audit access by expiring its row, not by dropping the live table. The final deletion of the user and its rows belongs in Rashid's separately reviewed SQL file.
+
+
+## Subsequent restricted parts, 7 Nov 2026
+
+All listed pull requests are drafts, unmerged, and not verified in the owner dashboard.
+
+| Part | Pull request | Verified SQL or code | Not yet verified |
+|---|---|---|---|
+| A | #479 | Auditor role, private expiry grant; catalog enumerator over all volatile SECURITY DEFINER staff functions | Complete independent review of every staff and Edge write; end-to-end UI |
+| B | #483 | Private recursive JSON sanitizer; limited audit totals and categories RPC; synthetic SQL redaction read-back | Existing staff panels have not been converted to masked server reads |
+| C | #484 | Proposed server guards in WhatsApp delivery and outbox, email send, owner billing; queued-digest filter and Deno tests | Not deployed; no audit demo memberships added; missing salon photo fixture and visibility fixtures |
+| D | #480 | Password route, Turnstile token, fresh access RPC, robots noindex and private path | Not deployed; CAPTCHA and real browser session untested; /staff gate intentionally denies auditor |
+| E | #481 | Cron job active in UTC; fixed UTC expiry, ban and both location and organization demo memberships removed | Actual scheduled expiry cannot be proved until the time; manual final deletion not run |
+| F | #482 | Classified three password accounts without address or hash exposure | Two non-audit password credentials not cleared; operator-owned SQL prepared |
+
+The live Supabase migration versions are `20261107163133`, `20261107163747`, `20261107164310`, `20261107165741`, and `20261107170650`, in that order of application. The cron job `kabsi_audit_expiry` is active; a SELECT read-back confirmed it is set for 23:59 UTC on 14 November. These are not proof of a deployed website.
+
+`supabase/data/20261107_audit_demo_workspaces.sql` is a staged insert-only data file; it has not been executed, because external-side-effect coverage is not complete. It will be unsafe to activate full auditor ownership before an independent security review confirms no real Google, WhatsApp, Resend or Creem calls can occur from a demo action.
+
+**No part has merged.** GitHub Actions CI runs the normal npm/Edge/pgTAP/390 px speed gate on each draft PR. An authenticated QA Playwright browser run at 390 px and 1440 px has not been executed. No reviewer password was accessed or used.
+
+### Manual files for Rashid
+
+- `supabase/manual/20261107_clear_unused_passwords.sql`: checks roles and accounts, then clears only the two unexpected password credentials. Expected read-back: non-audit count 0, auditor count 1. Not executed.
+- `supabase/manual/20261107_audit_final_delete.sql`: review after expiry, delete only the temporary identity with checks for unexpected memberships. Expected read-back: all five counts 0. Not executed.
+
+### Security release gate
+
+Before moving any draft PR into main, complete the existing staff RPC and RLS masking, explicit all-staff Edge write denial, all-demo outbound coverage, full-page dummy data, and 390 px and 1440 px QA sign-in Playwright tests. Have a fresh independent reviewer of the A, B and D diffs; merge current main into each branch and wait for green CI again. Do not silently downgrade these requirements.
