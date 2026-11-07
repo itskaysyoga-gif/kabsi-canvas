@@ -46,3 +46,7 @@ tests/e2e/.auth/
 
 # Screenshot checks (scripts/shots.mjs)
 shots/
+
+# QA 2 crawl and nightly outputs (artifacts in CI, never committed)
+qa2-out/
+nightly-out/

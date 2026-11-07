@@ -4,7 +4,11 @@
 //      every entry in skills-lock.json has its folder;
 //   3. every GitHub Action in .github/workflows is pinned to a full 40 character commit SHA (a version comment is welcome);
 //   4. package-lock.json is committed (CI and Vercel install with npm ci).
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+//   5. repository size (Clean 2, 7 Nov 2026): an image, PDF, video or zip is tracked only under src/assets, public, tests/e2e/baseline
+//      (the Playwright snapshots), tests/fixtures (inputs a test reads) and docs/email-previews, and no tracked file is over 1 MB
+//      (one named exception, below). Session screenshots go to test-results/ or shots/, which are not committed.
+import { execFileSync } from "node:child_process";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -74,6 +78,47 @@ export function checkWorkflows(dir) {
   return problems;
 }
 
+// Clean 2: the folders that may hold binary media, the size limit and the one file over it.
+export const MEDIA_RE =
+  /\.(png|jpe?g|gif|webp|avif|svg|ico|bmp|tiff?|heic|pdf|mp4|m4v|mov|webm|mkv|avi|zip|gz|tgz|7z|rar)$/i;
+export const MEDIA_DIRS = [
+  "src/assets/",
+  "public/",
+  "tests/e2e/baseline/",
+  "tests/fixtures/",
+  "docs/email-previews/",
+];
+export const MAX_BYTES = 1024 * 1024;
+// Generated font data for the review graphic (supabase/functions/_shared/review-graphic); source code, not media.
+export const SIZE_EXCEPTIONS = ["supabase/functions/_shared/review-graphic/assets.ts"];
+
+// files: [{ path, size }] with forward slashes, relative to the repository root.
+export function checkFiles(files) {
+  const problems = [];
+  for (const { path, size } of files) {
+    if (MEDIA_RE.test(path) && !MEDIA_DIRS.some((d) => path.startsWith(d)))
+      problems.push(
+        `${path}: images, PDFs, videos and zips may only be committed under ${MEDIA_DIRS.join(", ")}; write session screenshots to test-results/ or shots/ (not committed)`,
+      );
+    if (size > MAX_BYTES && !SIZE_EXCEPTIONS.includes(path))
+      problems.push(`${path}: ${size} bytes is over the 1 MB limit for one file`);
+  }
+  return problems;
+}
+
+export function trackedFiles(root) {
+  const names = execFileSync("git", ["ls-files", "-z"], {
+    cwd: root,
+    encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
+  })
+    .split("\0")
+    .filter(Boolean);
+  return names
+    .filter((p) => existsSync(join(root, p)))
+    .map((p) => ({ path: p, size: statSync(join(root, p)).size }));
+}
+
 export function checkLockfile(root) {
   return existsSync(join(root, "package-lock.json"))
     ? []
@@ -87,10 +132,13 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     ...checkSkills(join(root, ".claude/skills"), join(root, "skills-lock.json")),
     ...checkWorkflows(join(root, ".github/workflows")),
     ...checkLockfile(root),
+    ...checkFiles(trackedFiles(root)),
   ];
   if (problems.length) {
     for (const p of problems) console.error(p);
     process.exit(1);
   }
-  console.log("Repo checks passed: migration names, skills, pinned actions, lockfile.");
+  console.log(
+    "Repo checks passed: migration names, skills, pinned actions, lockfile, file types and sizes.",
+  );
 }
