@@ -69,9 +69,10 @@ async function owner(req: Request): Promise<Response> {
   if (!user) return fail("unauthorized", "Please sign in again.", 401);
   const b = await req.json().catch(() => ({})) as OwnerBody;
   if (!b.location_id || !/^[0-9a-f-]{36}$/i.test(b.location_id)) return fail("bad_request", "Which business?");
-  const { data: loc } = await admin().from("locations").select("organization_id").eq("id", b.location_id).maybeSingle();
+  const { data: loc } = await admin().from("locations").select("organization_id, is_demo").eq("id", b.location_id).maybeSingle();
   const org = loc?.organization_id as string | undefined;
   if (!org) return fail("not_found", "That business was not found.", 404);
+  if (loc?.is_demo) return fail("demo_only", "Demo businesses cannot contact the payment service.", 403);
   // Only the owner changes the plan and billing (9.3).
   const { data: m } = await admin().from("organization_members").select("role").eq("organization_id", org).eq("user_id", user.id).maybeSingle();
   if (m?.role !== "owner") return fail("owner_only", "Only the owner can change the plan and billing.", 403);
