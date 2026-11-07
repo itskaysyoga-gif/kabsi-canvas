@@ -7,6 +7,7 @@ const PRIVATE_PATHS = [
   /^\/start(\/|$)/,
   /^\/login(\/|$)/,
   /^\/audit-login(\/|$)/,
+  /^\/audit-overview(\/|$)/,
   /^\/a\//,
   /^\/activate\//,
 ];
