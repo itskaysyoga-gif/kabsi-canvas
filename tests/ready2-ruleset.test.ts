@@ -41,6 +41,8 @@ describe("protect-main ruleset", () => {
     const gate = ciJobs().filter((n) => !/report only/i.test(n));
     expect(gate.length).toBeGreaterThanOrEqual(8);
     expect([...required].sort()).toEqual([...gate].sort());
-    expect(rule("required_status_checks").parameters.strict_required_status_checks_policy).toBe(false);
+    expect(rule("required_status_checks").parameters.strict_required_status_checks_policy).toBe(
+      false,
+    );
   });
 });
