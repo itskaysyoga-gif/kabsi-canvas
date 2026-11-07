@@ -19,24 +19,27 @@ try {
       reducedMotion: "reduce",
       timezoneId: "UTC",
     });
-    await context.addInitScript(([key, session]) => {
-      // A navigation after sign-out must not resurrect this synthetic identity.
-      if (!window.sessionStorage.getItem("kabsi_audit_fixture_seeded")) {
-        window.localStorage.setItem(key, JSON.stringify(session));
-        window.sessionStorage.setItem("kabsi_audit_fixture_seeded", "1");
-      }
-      window.localStorage.setItem(
-        "kabsi_consent",
-        JSON.stringify({
-          version: "2026-10-25",
-          visitor: "synthetic-audit-proof",
-          analytics: false,
-          advertising: false,
-          at: new Date().toISOString(),
-        }),
-      );
-    }, [STORAGE_KEY, SESSION]);
-    await context.route("**/*", async route => {
+    await context.addInitScript(
+      ([key, session]) => {
+        // A navigation after sign-out must not resurrect this synthetic identity.
+        if (!window.sessionStorage.getItem("kabsi_audit_fixture_seeded")) {
+          window.localStorage.setItem(key, JSON.stringify(session));
+          window.sessionStorage.setItem("kabsi_audit_fixture_seeded", "1");
+        }
+        window.localStorage.setItem(
+          "kabsi_consent",
+          JSON.stringify({
+            version: "2026-10-25",
+            visitor: "synthetic-audit-proof",
+            analytics: false,
+            advertising: false,
+            at: new Date().toISOString(),
+          }),
+        );
+      },
+      [STORAGE_KEY, SESSION],
+    );
+    await context.route("**/*", async (route) => {
       const request = route.request();
       const url = new URL(request.url());
       if (url.host === new URL(base).host) return route.continue();
@@ -49,29 +52,46 @@ try {
             body: "false",
           });
         }
-        const result = answer(request.method(), request.url(), request.headers(), request.postData(), "audit");
+        const result = answer(
+          request.method(),
+          request.url(),
+          request.headers(),
+          request.postData(),
+          "audit",
+        );
         if (result.missing) unexpected.push("Missing fixture: " + result.missing);
-        if (request.method() !== "GET" && request.method() !== "HEAD" &&
-            url.pathname.startsWith("/rest/v1/") &&
-            !url.pathname.startsWith("/rest/v1/rpc/")) {
+        if (
+          request.method() !== "GET" &&
+          request.method() !== "HEAD" &&
+          url.pathname.startsWith("/rest/v1/") &&
+          !url.pathname.startsWith("/rest/v1/rpc/")
+        ) {
           unexpected.push("Unexpected database write: " + url.pathname);
           return route.abort();
         }
-        if (url.pathname.startsWith("/rest/v1/rpc/") &&
-            !["audit_login_allowed", "audit_staff_overview", "is_staff"].includes(url.pathname.split("/").at(-1))) {
+        if (
+          url.pathname.startsWith("/rest/v1/rpc/") &&
+          !["audit_login_allowed", "audit_staff_overview", "is_staff"].includes(
+            url.pathname.split("/").at(-1),
+          )
+        ) {
           unexpected.push("Unexpected RPC call: " + url.pathname);
           return route.abort();
         }
         return route.fulfill({
           status: result.status ?? 200,
           contentType: "application/json",
-          headers: { "access-control-allow-origin": "*", "access-control-expose-headers": "content-range" },
+          headers: {
+            "access-control-allow-origin": "*",
+            "access-control-expose-headers": "content-range",
+          },
           body: result.body === undefined ? "" : JSON.stringify(result.body),
         });
       }
       if (url.hostname === "challenges.cloudflare.com") {
         return route.fulfill({
-          status: 200, contentType: "text/javascript",
+          status: 200,
+          contentType: "text/javascript",
           body: 'window.turnstile={render:(el,o)=>{o.callback("synthetic");return "w"},reset:()=>{},remove:()=>{},getResponse:()=>"synthetic"};',
         });
       }
@@ -81,16 +101,31 @@ try {
 
     const page = await context.newPage();
     const pageErrors = [];
-    page.on("pageerror", error => pageErrors.push(error.message));
+    page.on("pageerror", (error) => pageErrors.push(error.message));
     await page.goto(base + "/audit-overview", { waitUntil: "domcontentloaded" });
     await page.getByRole("heading", { name: "Read-only audit overview" }).waitFor();
     await page.getByText("Hair salon").waitFor({ timeout: 15_000 });
     const body = await page.locator("body").innerText();
-    for (const expected of ["Businesses", "Active businesses", "Example businesses", "Coffee shop", "Hair salon"]) {
+    for (const expected of [
+      "Businesses",
+      "Active businesses",
+      "Example businesses",
+      "Coffee shop",
+      "Hair salon",
+    ]) {
       assert.ok(body.includes(expected), width + ": missing " + expected);
     }
-    assert.ok(!/alice@example|sam person|12 example lane|\+44 7123/i.test(body), "synthetic PII must never appear");
-    for (const forbidden of ["Approve", "Publish", "Send message", "Delete business", "Change plan"]) {
+    assert.ok(
+      !/alice@example|sam person|12 example lane|\+44 7123/i.test(body),
+      "synthetic PII must never appear",
+    );
+    for (const forbidden of [
+      "Approve",
+      "Publish",
+      "Send message",
+      "Delete business",
+      "Change plan",
+    ]) {
       assert.equal(await page.getByRole("button", { name: forbidden, exact: true }).count(), 0);
     }
     assert.equal(await page.getByRole("button", { name: "Sign out" }).count(), 1);
@@ -106,8 +141,15 @@ try {
     expired = true;
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.getByRole("alert").getByText("This access has ended.").waitFor({ timeout: 15_000 });
-    assert.ok(page.url().includes("/audit-login"), width + ": expired session did not leave overview");
-    assert.equal(await page.getByText("Hair salon").count(), 0, "private overview remains after sign-out");
+    assert.ok(
+      page.url().includes("/audit-login"),
+      width + ": expired session did not leave overview",
+    );
+    assert.equal(
+      await page.getByText("Hair salon").count(),
+      0,
+      "private overview remains after sign-out",
+    );
     assert.deepEqual(pageErrors, [], width + ": browser errors after expiry");
     await page.screenshot({ path: `${output}/audit-ended-${width}.png`, fullPage: true });
 
