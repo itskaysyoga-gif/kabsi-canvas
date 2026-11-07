@@ -76,12 +76,13 @@ Deno.test("the live sender is off unless the switch, the number, the key and the
 
 // ─── The flow with a fake database.
 type Row = { kind: string; state: string; error?: string | null; template?: string | null };
-function fakeCtx(o: { may?: MaySend; on?: boolean; template?: string | null; approve?: Awaited<ReturnType<Db["approve"]>> } = {}) {
+function fakeCtx(o: { may?: MaySend; on?: boolean; template?: string | null; demo?: boolean; approve?: Awaited<ReturnType<Db["approve"]>> } = {}) {
   const records: Row[] = [];
   const calls: string[] = [];
   const seen = new Set<string>();
   const log: { to: string; kind: string; body: string }[] = [];
   const db: Db = {
+    isDemo: async () => o.demo === true,
     maySend: async () => o.may ?? { ok: true, phone: "+15551234567", in_window: true, review_alerts: true, digest: false },
     record: async (r) => (records.push({ kind: r.kind, state: r.state, error: r.error, template: r.template }), "id"),
     inbound: async (phone, id) => {
@@ -156,4 +157,24 @@ Deno.test("P0.8-04: a Protection change offers Put it back on WhatsApp, never fo
     assert.equal(id.log[0].kind, "text", `${label}: no button`);
     assert.deepEqual(id.calls, [], `${label}: no button token`);
   }
+});
+
+Deno.test("R-123: a demo location never reaches the WhatsApp sender or outbox", async () => {
+  const f = fakeCtx({ demo: true });
+  const status = await deliver(f.ctx, {
+    userId: "u1", locationId: "demo-location", kind: "review_alert", body: "Fictional demo work",
+  });
+  assert.equal(status, "demo_no_external_send");
+  assert.deepEqual(f.log, []);
+  assert.deepEqual(f.records, []);
+});
+
+Deno.test("R-123: a missing location guard refuses an external send", async () => {
+  const f = fakeCtx();
+  const ctx: Ctx = { ...f.ctx, db: { ...f.ctx.db, isDemo: undefined } };
+  const status = await deliver(ctx, {
+    userId: "u1", locationId: "demo-location", kind: "review_alert", body: "Fictional demo work",
+  });
+  assert.equal(status, "demo_no_external_send");
+  assert.deepEqual(f.log, []);
 });
