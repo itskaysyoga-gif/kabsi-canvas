@@ -70,10 +70,12 @@ declare
   v_prompt uuid;
 begin
   select id into v_owner from auth.users where lower(email) = public.demo_login_email();
-  if v_owner is null then raise exception 'demo login missing'; end if;
-  if not exists (select 1 from auth.users where id = v_qa) then raise exception 'qa-demo@test.local missing'; end if;
-  if (select count(*) from public.locations where is_demo and id in (v_cafe, v_salon)) <> 2 then
-    raise exception 'the two demo businesses are missing';
+  -- A database without the demo workspace (a fresh local stack, CI) has nothing to seed: the migration does nothing there.
+  -- (Production had the workspace, so the version applied on 7 Nov 2026 ran in full; this guard is the only difference.)
+  if v_owner is null or not exists (select 1 from auth.users where id = v_qa)
+     or (select count(*) from public.locations where is_demo and id in (v_cafe, v_salon)) <> 2 then
+    raise notice 'demo pack skipped: the demo workspace is not in this database';
+    return;
   end if;
 
   -- 1. The QA demo owner works on both businesses -----------------------------------------------------------------
