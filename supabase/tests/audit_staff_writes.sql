@@ -61,7 +61,7 @@ end;
 $audit_write_checks$;
 reset role;
 
-select cmp_ok((select count(*) from audit_write_results), '>=', 30,
+select cmp_ok((select count(*) from audit_write_results), '>=', 30::bigint,
   'the catalog found at least thirty writable or outbound-capable staff functions');
 select is(
   (select count(*) from audit_write_results where not was_refused),
