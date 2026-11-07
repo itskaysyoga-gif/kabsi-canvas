@@ -171,7 +171,13 @@ function PhotosPage() {
                     />
                   </div>
                 </div>
-                {role !== "staff" ? <WhatsAppLink label="Send a photo" size="md" /> : null}
+                {role !== "staff" && !loc?.is_demo ? (
+                  <WhatsAppLink label="Send a photo" size="md" />
+                ) : loc?.is_demo ? (
+                  <p className="text-small text-text-2">
+                    Demo businesses keep photo actions inside Kabsi.
+                  </p>
+                ) : null}
               </div>
               <div className="mt-5 grid grid-cols-2 gap-3 border-t border-line pt-5">
                 <UploadButton
