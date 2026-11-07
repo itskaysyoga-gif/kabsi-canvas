@@ -16,7 +16,7 @@ Files named in this list are in `docs/progress/archive/`.
 - Harvey 4A (30.39): Outbound in Kabsi, locked, no business written to. Outbound test (PRs 464 to 468): inbox login, Companies House from Harvey's register, the part G run. Record corrected 7 Nov: Gmail put both test emails in Spam (Rashid moved them to the inbox, 22:38 Beirut); mail-tester 9.2, only the domain's age. Outbound polish: a name ending in s takes an apostrophe only; new gate 30.39 item 13. `2026-11-06-outbound-test.md`.
 - No customer is live yet. Before the first Meta ad (30.35 item 5): the DataForSEO top-up, Vercel Pro and the open lines of `docs/launch1/readiness.md`. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
-- R-123 audit access (7 Nov): part A foundation is applied with no staff read permissions. PR 479 remains draft for security review and remaining R-123 work. Detail: `2026-11-07-audit-access.md`.
+- R-123 (7 Nov): restricted auditor foundation in DB; no staff access. PR 479 draft. `2026-11-07-audit-access.md`.
 
 ## WhatsApp ladder (master plan 25.5)
 
@@ -66,9 +66,6 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 ## Recent entries (newest first)
 
 - 7 Nov 2026, R-123 audit access: restricted foundation only, PR 479 open. `2026-11-07-audit-access.md`.
-- 7 Nov 2026, Ready 2 (go-live safety): PRs 473 to 478. `2026-11-07-ready2.md`.
-- 7 Nov 2026, Clean 2: repository size (PR 470), one possessive helper (PR 471), this page. `2026-11-07-clean2.md`.
-- 7 Nov 2026, Outbound polish. `2026-11-06-outbound-test.md`.
 
 ## How a session updates this page
 
