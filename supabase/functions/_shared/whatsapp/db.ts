@@ -32,6 +32,11 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
 }
 
 export const db: Db = {
+  async isDemo(locationId) {
+    const { data, error } = await admin().from("locations").select("is_demo").eq("id", locationId).maybeSingle();
+    if (error || !data) throw error ?? new Error("unknown_business");
+    return data.is_demo === true;
+  },
   maySend: (u) => rpc<MaySend>("whatsapp_may_send", { p_user: u }),
   record: (r) => rpc<string | null>("whatsapp_record", {
     p_user: r.userId, p_location: r.locationId, p_kind: r.kind, p_state: r.state, p_provider_id: r.providerId ?? null,
