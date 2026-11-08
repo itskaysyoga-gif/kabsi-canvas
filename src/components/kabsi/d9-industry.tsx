@@ -127,7 +127,7 @@ function TradeHero({ industry: i }: { industry: Industry }) {
           </h1>
           <p className="mt-4 max-w-[34rem] text-lead text-text-2 sm:mt-5">{p.line}</p>
           <div className="relative z-10 mt-5 max-w-[34rem] sm:mt-7">
-            <ScanBox id="hero-scan" keyword={i.keyword} industry={i.slug} />
+            <ScanBox id="hero-scan" keyword={i.keyword} industry={i.slug} trialSeparate />
           </div>
         </div>
         <figure className="relative">
@@ -604,7 +604,7 @@ export function ForIndex() {
             </h1>
             <p className="mt-4 text-lead text-text-2 sm:mt-5">{FOR_HERO.line}</p>
             <div className="relative z-10 mt-5 sm:mt-7">
-              <ScanBox id="hero-scan" />
+              <ScanBox id="hero-scan" trialSeparate />
             </div>
           </div>
           <ForCollage all={all} />
@@ -689,7 +689,7 @@ export function ForIndex() {
             <p className="mt-3 text-lead text-text-2">
               Kabsi works for any local business with a Google profile.
             </p>
-            <ScanBox id="closing-scan" className="mt-6" />
+            <ScanBox id="closing-scan" className="mt-6" trialSeparate />
           </div>
         </div>
       </section>

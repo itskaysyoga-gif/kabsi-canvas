@@ -141,7 +141,7 @@ export function FreeCheckFrame({
 export function FreeCheckStart() {
   return (
     <FreeCheckFrame photo>
-      <ScanBox id="check-scan" className="max-w-xl" />
+      <ScanBox id="check-scan" className="max-w-xl" trialSeparate />
     </FreeCheckFrame>
   );
 }

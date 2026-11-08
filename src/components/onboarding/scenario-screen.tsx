@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { ArrowLeft, ExternalLink } from "lucide-react";
-import { BookingLink } from "@/components/shared/booking-link";
+import { BookingHelper, BookingLink } from "@/components/shared/booking-link";
 import { ReadyMessage } from "@/components/onboarding/ready-message";
 import { StepClip } from "@/components/onboarding/step-clip";
 import { Button, buttonClass } from "@/components/kabsi/ui";
@@ -165,6 +165,7 @@ export function ScenarioScreen({
           Book a free {SETUP_CALL_MINUTES}-minute setup call
         </BookingLink>
         .
+        <BookingHelper className="mt-1" />
       </p>
     </div>
   );

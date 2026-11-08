@@ -89,11 +89,11 @@ export function renewalReminder(stage: RenewalStage, business: string, planLabel
 // ─── the week ─────────────────────────────────────────────────────────────────────────────────────────────────
 
 /** The Monday weekly report (30.18 section 3): the body is the visual work receipt of report-body.ts. */
-export function weeklyReport(business: string, o: { dates: string; preheader: string; button?: { label: string; path: string } }, html: string, text: string, appUrl: string): EmailContent {
+export function weeklyReport(business: string, o: { dates: string; preheader: string; subject?: string; button?: { label: string; path: string } }, html: string, text: string, appUrl: string): EmailContent {
   const report = `${appUrl}/app/report`;
   const main = o.button && o.button.path !== "/app/report" ? { label: o.button.label, url: `${appUrl}${o.button.path}` } : { label: "Open your report", url: report };
   return {
-    subject: `${business}: your weekly report for ${o.dates}`, preheader: o.preheader, title: `Your weekly report, ${o.dates}`,
+    subject: o.subject ?? `${business}: your weekly report for ${o.dates}`, preheader: o.preheader, title: `Your weekly report, ${o.dates}`,
     bodyHtml: html, button: main, ...(main.url !== report ? { links: [{ label: "Open your report", url: report }] } : {}), text,
   };
 }

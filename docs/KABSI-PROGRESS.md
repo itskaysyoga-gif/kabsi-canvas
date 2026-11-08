@@ -64,7 +64,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 ## Recent entries (newest first)
 
 - 8 Nov 2026, Fixes B (R-126, PR 488): examples by trade, Prepared before Google is read, Reports lead, Home counts. `2026-11-08-fixes-b.md`.
-- 7 Nov 2026, Audit close (R-125): audit account cancelled; Rashid runs `supabase/manual/20261107_audit_close_drops.sql` (expect 0s, `password_accounts` 1) and deletes the nine audit branches. `2026-11-07-audit-close.md`, `2026-11-07-demo-pack.md`.
+- 8 Nov 2026, Fixes A (R-126, R-127, 30.41): the audit's lines, owner WhatsApp no longer called coming in the facts, the weekly report email, five LATER rows. `2026-11-08-fixes-a.md`.
 
 ## How a session updates this page
 

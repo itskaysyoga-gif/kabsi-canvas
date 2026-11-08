@@ -53,6 +53,8 @@ const OWN_SUBJECTS: Record<string, string> = {
   life_first_reply_approved: "Your first reply is live on Google",
   life_trial_day11: "Your Kabsi trial ends on 15 October",
   receipt: "Receipt: Kabsi Pro, monthly",
+  // R-126 (EMAIL-01): the weekly report subject counts the work and leaves out a part that is zero.
+  weekly_report: "Your Kabsi week: 4 replies, 1 post, 4 profile changes",
   payment_failed: "Your payment for Kabsi did not go through",
   plan_cancelled: "Your Kabsi plan is cancelled",
   profile_check: "Rose Lane Salon: your Google Profile Check",
@@ -67,7 +69,7 @@ Deno.test("a business email puts the business name first in the subject (K-102),
   assert.ok(subjects.includes("Rose Lane Salon: one step left in your setup"));
   assert.ok(subjects.includes("Rose Lane Salon: a reply is ready for your yes"));
   assert.ok(subjects.includes("Rose Lane Salon: Kabsi's Google access stopped working"));
-  assert.ok(subjects.includes("Rose Lane Salon: your weekly report for 19 to 25 October"));
+  assert.ok(subjects.includes("Your Kabsi week: 4 replies, 1 post, 4 profile changes"));
 });
 
 Deno.test("every email has a preview line and a plain-text version with its button address and the footer", () => {
@@ -170,7 +172,7 @@ Deno.test("P0.8-02: no email keeps the old Weekly Care Report subject or the old
     assert.doesNotMatch(all, /will be deleted from Kabsi/, c.kind);
   }
   // 30.18 section 3: the Monday email is the weekly report; "Weekly Care Report" is retired everywhere.
-  assert.equal(catalog().find((c) => c.kind === "weekly_report")!.content.subject, "Rose Lane Salon: your weekly report for 19 to 25 October");
+  assert.equal(catalog().find((c) => c.kind === "weekly_report")!.content.subject, "Your Kabsi week: 4 replies, 1 post, 4 profile changes");
   for (const c of catalog()) {
     const { html, text } = render(c);
     assert.doesNotMatch(`${c.content.subject}\n${text}\n${html}`, /Weekly Care Report/, c.kind);
