@@ -31,7 +31,7 @@ export const PLANS: {
     yearly: PLAN_PRICES.essentialsYearly,
     foundingMonthly: FOUNDING_PRICES.essentialsMonthly,
     foundingYearly: FOUNDING_PRICES.essentialsYearly,
-    line: "For one business that wants its Google work done and its details kept right.",
+    line: "For an owner who wants every review answered, the profile kept right and 2 posts a month made ready.",
     work: [
       "A reply ready for every new review",
       "Your details checked every day, with an alert when something changes",
@@ -55,7 +55,7 @@ export const PLANS: {
     yearly: PLAN_PRICES.proYearly,
     foundingMonthly: FOUNDING_PRICES.proMonthly,
     foundingYearly: FOUNDING_PRICES.proYearly,
-    line: "For a business that wants weekly posts and a team that approves.",
+    line: "For a busier business: a post every week, menu and offers kept current, and a team that approves.",
     lead: "Everything in Essentials, and:",
     work: [
       "A post every week, with your menu and offers kept current",

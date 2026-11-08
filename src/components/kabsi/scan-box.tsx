@@ -2,7 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { cn } from "@/lib/utils";
-import { MAIN_CTA, SCAN_LINE } from "@/lib/site";
+import { MAIN_CTA, SCAN_LINE, TRIAL_SEPARATE_LINE } from "@/lib/site";
 import { BusinessCombobox } from "./business-combobox";
 import { Button } from "./ui";
 import type { FoundBusiness } from "@/lib/profile-check";
@@ -18,6 +18,7 @@ export function ScanBox({
   keyword,
   industry,
   note,
+  trialSeparate,
   onStart,
 }: {
   /** Kept for older callers: the line under the box is always the free check line. */
@@ -31,6 +32,8 @@ export function ScanBox({
   industry?: string | undefined;
   /** Replaces the line under the box. */
   note?: string | undefined;
+  /** R-126 (COPY-02): adds "The 14-day free trial is separate. ..." under the free check line. On Home, /scan and the /for pages. */
+  trialSeparate?: boolean | undefined;
   /** Guides 3: called once when the visitor starts the check from this box (the guide's own click event). */
   onStart?: (() => void) | undefined;
 }) {
@@ -44,6 +47,7 @@ export function ScanBox({
         onStart={onStart}
       />
       <p className="mt-3 text-small text-text-2">{note ?? SCAN_LINE}</p>
+      {trialSeparate && <p className="mt-1 text-small text-text-2">{TRIAL_SEPARATE_LINE}</p>}
     </div>
   );
 }

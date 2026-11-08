@@ -195,6 +195,7 @@ function NotFound({
         keyword={keyword ?? undefined}
         industry={industry ?? undefined}
         className="mt-5"
+        trialSeparate
       />
     </div>
   );
@@ -232,6 +233,7 @@ export function FreeCheckAgain({
           keyword={keyword ?? undefined}
           industry={industry ?? undefined}
           className="mt-5"
+          trialSeparate
         />
       </div>
     </FreeCheckFrame>

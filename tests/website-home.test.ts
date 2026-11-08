@@ -127,7 +127,7 @@ describe("the lines of master plan 30.15 and 30.17", () => {
   it("are the brand line, the main button, the scan and trial lines", () => {
     expect(BRAND_LINE).toBe("Your business on Google. Taken care of.");
     expect(MAIN_CTA).toBe("Check my business free");
-    expect(SCAN_LINE).toBe("Free check. No Google access needed. Takes about 10 seconds.");
+    expect(SCAN_LINE).toBe("Free check. No account and no Google access needed.");
     expect(TRIAL_LINE).toBe("Free for 14 days once Kabsi is connected. No card.");
     // Design 9 (Web 5 part B): the H1 is the brand line itself, "Taken care of." on the yellow bar; the meta description
     // stays Polish 2's line (HOME_LINE), the visible hero line is Design 9's.
