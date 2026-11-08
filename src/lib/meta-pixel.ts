@@ -9,7 +9,12 @@
 // through the Conversions API (supabase/functions/_shared/meta-capi.ts), because sign-up and paying happen on private
 // pages. Every browser event carries an event_id, so Meta can match it with a server event of the same id. Lead and
 // FreeScanCompleted also have a server copy with that id (Launch 2, serverCopy below).
-import { advertisingAllowed, liveChoice, runWhenAdvertisingAllowed } from "@/lib/consent";
+import {
+  advertisingAllowed,
+  liveChoice,
+  onConsentChange,
+  runWhenAdvertisingAllowed,
+} from "@/lib/consent";
 import { anonHeaders, supabaseUrl } from "@/lib/supabase-config";
 import { isPrivatePath } from "@/lib/private-paths";
 import { afterPaint } from "@/lib/after-paint";
@@ -177,10 +182,38 @@ function pageEvents(path: string) {
   if (vc) send("track", "ViewContent", vc);
 }
 
+// Live check 8 Nov 2026 (R-126): Meta's two first-party cookies stayed in the browser after a visitor withdrew the yes. The
+// Pixel sends nothing after a no (send() asks first), but the cookies are removed too. Facebook's own cookie on
+// facebook.com is Meta's and cannot be reached from this page.
+export function clearMetaCookies() {
+  if (typeof document === "undefined" || typeof location === "undefined") return;
+  const labels = location.hostname.split(".");
+  const domains = [
+    "",
+    ...labels.slice(0, -1).map((_, i) => `; domain=${labels.slice(i).join(".")}`),
+  ];
+  for (const name of ["_fbp", "_fbc"])
+    for (const d of domains)
+      try {
+        document.cookie = `${name}=; Max-Age=0; path=/${d}`;
+      } catch {
+        /* cookies blocked */
+      }
+}
+let withdrawalWatched = false;
+function watchWithdrawal() {
+  if (withdrawalWatched) return;
+  withdrawalWatched = true;
+  onConsentChange(() => {
+    if (!advertisingAllowed()) clearMetaCookies();
+  });
+}
+
 // Called on every page view from the root component. The first allowed public page loads the Pixel, at once or the
 // moment the visitor's choice allows it.
 export function pixelPageView(path: string) {
   if (typeof window === "undefined" || !PIXEL_ID) return;
+  watchWithdrawal();
   currentPath = path;
   if (!pixelAllowedOn(path)) return;
   if (advertisingAllowed()) return pageEvents(path);
