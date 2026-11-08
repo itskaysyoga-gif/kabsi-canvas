@@ -169,8 +169,9 @@ create index customer_requests_due_idx on public.customer_requests (location_id,
 create index customer_requests_follow_up_idx on public.customer_requests (location_id, follow_up_user_id)
   where follow_up_user_id is not null;
 create index customer_requests_intake_idx on public.customer_requests (location_id, intake_id) where intake_id is not null;
+-- A voided conversion (an Undo) keeps its link for history and does not stop the enquiry being converted again.
 create unique index customer_requests_converted_uniq on public.customer_requests (location_id, converted_from_request_id)
-  where converted_from_request_id is not null;
+  where converted_from_request_id is not null and outcome is distinct from 'voided';
 create unique index customer_requests_external_uniq on public.customer_requests (location_id, external_system, external_id)
   where external_system is not null;
 comment on table public.customer_requests is
