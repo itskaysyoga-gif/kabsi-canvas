@@ -7,7 +7,7 @@ Version 1 was written on 4 Oct 2026 from the six source documents in `docs/sourc
 1. Guardrails (digest here; full text in the archive)
 2. Rules for every build chat (here, in full)
 3. Sources and precedence (here, in full)
-4. Review decisions R-01 to R-119 (table with status here; full text in the archive)
+4. Review decisions R-01 to R-119 and R-134 to R-139 (table with status here; full text in the archive and, from R-120, in master plan 30.40 and later)
 7. Order of work (here, short; the full section and the task cards are in the archive)
 8. Where everything went
 
@@ -186,7 +186,7 @@ Not a source of truth any more: `docs/KABSI-SPEC.md`, `docs/KABSI-STATE.md`, `do
 
 Added on 24 Oct 2026: the master plan (`docs/KABSI-MASTERPLAN.md`) sits above items 2 to 5 for everything it covers, with its later sections winning over its earlier ones.
 
-## 4. Review decisions (R-01 to R-119)
+## 4. Review decisions (R-01 to R-119, and R-134 to R-139)
 
 One line per decision. The full text, with what each one changes and why, is `docs/plan/archive/sec-04-review-decisions.md`. **Status (master plan 25.6, from R-55):** Approved, Building, Merged, Verified live or Retired. A row moves only with evidence (a pull request number, a check, a live response); a merged pull request or a passing mock test is never called live. Rows before R-55 were settled before the column existed. Later decisions override earlier ones where they differ: R-119 over R-118 over R-117 over R-116 over R-115 over R-114 over R-113 over R-112 over R-111 over R-110 over R-109 over R-108 over R-107 over R-106 over R-105 over R-104 over R-103 over R-102 over R-101 over R-100 over R-99 over R-98 over R-97 over R-96 over R-95 over R-94 over R-93 over R-92 over R-91 over R-90 over R-89 over R-88 over R-75 to R-87 over everything older. A new decision is added to the full table first, then to this index, in the same pull request.
 
@@ -313,6 +313,12 @@ One line per decision. The full text, with what each one changes and why, is `do
 | R-117 | **Lane R decisions of 6 Nov 2026, late morning (master plan 30.37).** Launch 2 approved; Outbound's mailbox live on Zoho Mail Lite (SPF, DKIM, DMARC pass), getkabsi.com silent; no daily warm-up target, DMARC p=quarantine on day 30 if clean, Harvey's own slow start once sending opens (3, 5, then 10 a day, 300 a month); Harvey collects in 13 countries, messaging off in every country; the order before any message (card payments, UK messaging decision, Harvey 4 sending tested on own addresses, Rashid approves every email); a privacy notice for the contact list now (UK GDPR article 14) with an objection route to the suppression list; Harvey's dashboard is a private artifact (full text in the archive) | Approved (items 4 to 7 are Harvey's and later sessions'; item 6 is Launch 3 part B) |
 | R-118 | **Lane R decisions of 6 Nov 2026, midday (master plan 30.38).** Launch 3 and Harvey Next approved; the contact list's retention (24 months, or 90 days after the business closes; removal within 30 days, then only a one-way coded address); the live speed gate passes on three main pushes in a row before the first Meta ad | Building (item 2 live, PR 446; item 3: Lighthouse live passed on three main pushes in a row, runs 42211064382, 42213115865, 42214929568, PR 445) |
 | R-119 | **Lane R decisions of 6 Nov 2026, afternoon (master plan 30.39).** Harvey Retain and Launch 4 approved; retention widened (never-contact list after 90 days, a removal on the own domain covers the business); never Resend for Outbound, Zoho only; Outbound lives in Kabsi (Supabase, /staff/outbound), Harvey stays the list builder; Rashid approves every email in one daily batch; signature without social links in Email 1 and its follow-up; ramp 3, 5, then 10 a day, 300 a month; deliverability checks; Harvey's dashboard reads the counts views; /scan suggestions move to same-origin routes (Speed 2); item 12: no Companies House API key, outbound-prepare reads company_status and its file date from Harvey's register (Basic Company Data file, Open Government Licence) and accepts a UK business only when Active on a file at most 40 days old; item 13 (7 Nov): the placement gate, within 3 days of the start Email 1 must land in the inbox of one Gmail and one Outlook address that never wrote to getkabsi.com and mail-tester must read at least 9.5 of 10, or sending waits and lane R decides | Approved |
+| R-134 | **Lane R decisions of 8 Nov 2026, KABSI 3.0 (master plan 30.43).** Direction approved at 19:29: industry-neutral and WhatsApp-first with a request book; independent hair, barber and beauty businesses and non-medical spas in the UAE and UK are the first commercial focus, not the exclusive market; trades and garages next; clinics Google care only; nothing public changes and the assistant is not advertised until it is live for real owners | Approved |
+| R-135 | A small core and one shared workflow: eight service-only tables, one requests table with three kinds, one timeline, six write functions, packs supply only words and fields; requested, staff-confirmed and customer-confirmed stay separate facts; an enquiry converts by linking a new appointment (docs/kabsi-3/build-decisions.md) | Building (core schema PR 504 and write functions PR 505 merged, dark; packs, tools and extraction not built) |
+| R-136 | The build order and six gates, the 30-day pilot scorecard instead of a 3-of-10 gate, the website designed early and public only at Gate 5, every session after RB-0 needs Rashid's go (docs/kabsi-3/build-plan.md) | Approved |
+| R-137 | No customer merging before the pilot: a phone or name only suggests a match; vehicles and other assets wait; follow-ups stay columns on the request | Approved |
+| R-138 | Kapso's 30-day window and Supabase Pro before the first real customer record; changes 30.22 item 7 and the Supabase line of 30.25 item 1 for that case only | Approved |
+| R-139 | PR C is split into RB-C1 (read, proposal and name search functions) and RB-C2 (packs, normalizers, six tools, reply rules); PR D is RB-D (extraction and the 150-case eval) | Approved |
 
 ## 7. Order of work (R-84; master plan 27.11, 28.4, 29.8)
 
@@ -329,6 +335,8 @@ Parallel rules: at most 2 Opus sessions at once; two sessions never touch the sa
 9. **Wave E:** UX 1 (Sonnet), Sec 1 (Opus), the 20c audit (Sonnet), the 21 launch gate (Opus).
 10. **Partners:** PA1 (Opus, after session 10), PA2 (Sonnet, after 13b part 1's live test and PA1), PA3 (Sonnet, after Web 2).
 11. **After launch:** Outbound, FD1 Front Desk pilot (Opus), Click-to-WhatsApp ads. L2 to L4 (Meta account fixes and /meta page, What customers say, the order button) wait for their gates.
+
+12. **KABSI 3.0, the request book** (R-134 to R-139, master plan 30.43): the build order, the six gates and the sessions RB-0 to RB-K, W-1 to W-4 and the later capabilities are in `docs/kabsi-3/build-plan.md`; the design is in `docs/kabsi-3/`. Every session after RB-0 needs Rashid's go.
 
 The task cards (what each card does, its "Done when" checks and its prompt) are in the archive files listed in section 8. A session reads the cards its task names, not the whole archive.
 
