@@ -7,51 +7,12 @@ select * from no_plan();
 
 \ir _fixtures.psql
 
+-- Definer review (R-126): the list is the reviewed allowlist in _definer_allowlist.psql (one place, with a reason and a
+-- caller per line); every authenticated line needs a non-member test below.
+\ir _definer_allowlist.psql
 create temp table tested (sig text primary key);
 grant select on tested to authenticated;
-insert into tested values
-  ('activate_card(text,uuid,text)'), ('activity_feed(uuid,integer)'), ('add_photo(uuid,text)'),
-  ('cancel_location_deletion(uuid)'), ('choose_plan(uuid,text)'),
-  ('confirm_business_details(uuid,jsonb)'), ('entitlements(uuid,uuid)'), ('create_review_link(uuid,text)'),
-  ('google_mode()'), ('handle_review_offline(uuid)'),
-  ('has_location_role(uuid,text[])'), ('is_member(uuid)'), ('photo_sig(gbp_posts)'), ('is_org_member(uuid,text[])'), ('is_staff()'),
-  ('plan_summary(uuid)'),
-  ('rename_card(text,text)'), ('set_review_link_mode(text,text)'), ('feature_access(uuid)'), ('start_review_report(uuid,text,text[])'), ('advance_review_report(uuid,text)'), ('list_review_reports(uuid)'),
-  ('list_tasks(uuid)'), ('task_action(uuid,text)'), ('approve_backlog(uuid,jsonb)'),
-  ('can_see(uuid,text)'), ('my_access(uuid)'), ('set_approval_policy(uuid,text,text,text)'), ('invite_team_member(uuid,text,text)'),
-  ('cancel_team_invite(uuid)'), ('claim_team_invites()'), ('set_member_role(uuid,uuid,text)'), ('list_team(uuid)'), ('remove_member(uuid,uuid)'),
-  ('request_disconnect(uuid)'), ('request_location_deletion(uuid)'), ('save_consent(uuid,text)'), ('set_auto_posts(uuid,boolean)'),
-  ('set_card_active(text,boolean)'), ('set_onboarding_step(uuid,text)'), ('skip_review(uuid)'),
-  ('staff_chat_stats(integer)'), ('staff_complete_followup(uuid,text)'), ('staff_chats(text,text,text,text,integer,integer)'),
-  ('staff_concierge_add_review(uuid,integer,text,text,date,boolean)'), ('staff_concierge_cancel_task(uuid,text,text)'),
-  ('staff_concierge_claim_task(uuid)'), ('staff_concierge_convert(uuid)'),
-  ('staff_concierge_mark_posted(uuid)'),
-  ('staff_concierge_queue()'), ('staff_concierge_task_done(uuid,text)'), ('staff_contacts(integer)'),
-  ('staff_grant_trial(uuid,integer)'), ('staff_job_health()'),
-  ('staff_system_health()'), ('staff_job_retry(bigint)'), ('staff_job_cancel(bigint)'), ('staff_business_diagnostics(uuid)'),
-  ('staff_mock_listing_edit(uuid,text,text)'), ('staff_mock_review(uuid,integer,text,text)'),
-  ('staff_set_concierge(uuid,boolean)'),
-  ('start_location(text,text,text,text,text)'),
-  ('save_fact(uuid,text,jsonb,uuid)'), ('confirm_fact(uuid)'), ('reject_fact(uuid)'), ('remove_fact(uuid)'),
-  ('answer_knowledge_confirm(uuid,text)'), ('answer_style_offer(uuid,boolean)'),
-  ('update_notification_settings(uuid,text[],smallint,text,integer)'),
-  ('my_notification_prefs(uuid)'), ('set_notification_pref(uuid,text,text,text)'), ('list_my_notifications(uuid,integer)'),
-  ('mark_notifications_read(uuid,uuid[])'), ('save_signup_attribution(jsonb)'), ('holiday_calendar(uuid,integer)'), ('coach_checklist(uuid)'),
-  ('photo_link_create(uuid)'), ('photo_link_revoke(uuid)'), ('photo_link_status(uuid)'), ('set_post_cadence(uuid,integer)'),
-  ('whatsapp_connect_start(text)'), ('whatsapp_status()'), ('whatsapp_owners_on()'), ('whatsapp_set_prefs(boolean,boolean)'), ('whatsapp_disconnect()'), ('whatsapp_staff_code()'),
-  ('set_protection_autofix(uuid,text,boolean,text)'),
-  ('send_manager_steps(uuid,integer)'),
-  ('set_onboarding_scenario(uuid,text,text)'), ('scenario_done(uuid)'), ('clear_onboarding_scenario(uuid)'),
-  ('staff_founding_decide(uuid,text,text)'), ('staff_founding_link(uuid,uuid)'), ('staff_founding_overview()'),
-  ('staff_partner_decide(uuid,text,text,text)'), ('staff_partner_payout_details(uuid,text,text)'), ('staff_partners_overview()'),
-  ('staff_payouts_approve(date)'), ('staff_payout_sent(uuid,text)'), ('staff_payout_run(date)'),
-  ('onboarding_status(uuid)'), ('confirm_business(uuid)'), ('staff_founding_checklist(uuid)'), ('staff_founding_check(uuid,text,boolean,text)'), ('claim_free_check(uuid,text)'),
-  ('save_ai_prompt(uuid,text,uuid)'), ('remove_ai_prompt(uuid)'),
-  ('set_routine_channel(text)'), ('set_routine_delivery(uuid,text)'), ('my_setup_link_emailed(uuid)'),
-  ('staff_set_google_writes(boolean,text)'), ('staff_founding_matches(uuid)'), ('staff_operations()'),
-  ('staff_evidence_add(uuid,text,date,text,text,text)'), ('staff_evidence_delete(uuid)'), ('staff_activation()'), ('staff_validation()'),
-  ('staff_today()'), ('staff_outbound_approve(uuid)'), ('staff_outbound_approve_all(uuid[])'),
-  ('staff_outbound_edit(uuid,text,text)'), ('staff_outbound_skip(uuid)'), ('staff_outbound_reply_done(bigint)');
+insert into tested select sig from definer_allowlist where role = 'authenticated';
 
 select is(
   (select coalesce(array_agg(p.oid::regprocedure::text order by 1), '{}') from pg_proc p
@@ -167,14 +128,14 @@ select throws_ok($$ select public.staff_concierge_convert('00000000-0000-4000-80
 select throws_ok($$ select public.staff_concierge_mark_posted('00000000-0000-4000-8000-0000000000f2') $$, '42501', null, 'staff_concierge_mark_posted refuses a non-staff user');
 select throws_ok($$ select public.staff_concierge_queue() $$, '42501', null, 'staff_concierge_queue refuses a non-staff user');
 select throws_ok($$ select public.staff_concierge_task_done('00000000-0000-4000-8000-0000000000f2', 'x') $$, '42501', null, 'staff_concierge_task_done refuses a non-staff user');
-select throws_ok($$ select * from public.staff_contacts(10) $$, '42501', null, 'staff_contacts refuses a non-staff user');
+select ok(not has_function_privilege('authenticated', 'public.staff_contacts(integer)', 'execute'), 'staff_contacts is closed to the browser (definer review, 8 Nov)');
 select throws_ok($$ select public.staff_grant_trial('00000000-0000-4000-8000-0000000000c1', 7) $$, '42501', null, 'staff_grant_trial refuses a non-staff user');
 -- Partners session: the Founding 25 and Kabsi Partners staff functions.
 select throws_ok($$ select public.staff_founding_decide('00000000-0000-4000-8000-0000000000c1', 'accepted') $$, '42501', null, 'staff_founding_decide refuses a non-staff user');
 select throws_ok($$ select public.staff_founding_link('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'staff_founding_link refuses a non-staff user');
 select throws_ok($$ select public.staff_founding_overview() $$, '42501', null, 'staff_founding_overview refuses a non-staff user');
 -- Sec 1: the Founding 25 owner match and the Google writes stop switch are for Kabsi staff admins only.
-select throws_ok($$ select public.staff_founding_matches('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'staff_founding_matches refuses a non-staff user');
+select ok(not has_function_privilege('authenticated', 'public.staff_founding_matches(uuid)', 'execute'), 'staff_founding_matches is closed to the browser (its staff admin check is tested in sec1_roles_approvals.sql)');
 select throws_ok($$ select public.staff_set_google_writes(true, 'stranger tries') $$, '42501', null, 'staff_set_google_writes refuses a non-staff user');
 -- V4: onboarding and the founder-assisted checklist.
 select throws_ok($$ select public.staff_founding_checklist('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'staff_founding_checklist refuses a non-staff user');
