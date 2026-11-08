@@ -322,7 +322,7 @@ Essentials is $29 a month or $290 a year. Pro is $59 a month or $590 a year. Ext
 Yes. 14 days, no card. It starts when Kabsi's access to your Google profile works.
 
 **Is there a free plan?**
-Yes. Free is your review link, a QR code, a printable counter card from the free review link tool and a message to share. The branded counter card and table tent PDFs come with the plans. The free part keeps working for as long as Kabsi operates.
+No. There are two plans, Essentials and Pro, and a 14-day Pro trial with no card. Without a plan a business keeps, free, its review link, a QR code, a printable counter card from the free review link tool and a message to share. The branded counter card and table tent PDFs come with the plans. The free part keeps working for as long as Kabsi operates.
 
 **Are prices the same in every country?**
 Yes, in US dollars.
@@ -442,3 +442,31 @@ Delete your business in Settings, and ask by email to delete your login too.
 
 ---
 
+### Questions owners in the UAE and the UK ask (credit sprint, 8 Nov 2026)
+
+**Can I pay in dirhams or pounds?**
+No. Prices are in US dollars only, and Kabsi shows no converted price. A card in dirhams or pounds is charged in US dollars; the card's bank converts it at its own rate and may add its own fee. Card payments are not open yet.
+
+**Is VAT added in the UAE or the UK?**
+Prices are plus tax where it applies. Creem, the merchant of record, works out any sales tax or VAT at its checkout; Kabsi does not set the rate. For what an invoice must show for your company, write to hello@kabsi.co before you pay.
+
+**Does the founding price cover my second branch?**
+No. The founding price is for the plan. An extra location has one price for everyone, $15 a month or $150 a year, founding place or not.
+
+**Can I pay with Apple Pay, or in instalments with Tabby?**
+Kabsi takes cards only, through Creem's checkout, and offers no pay-later plans. Whether a wallet such as Apple Pay shows depends on Creem's checkout; ask hello@kabsi.co if you need to know before you pay.
+
+**Does WhatsApp work with WhatsApp Business?**
+Yes. Kabsi messages the phone number you opted in with, so the messages arrive in whichever WhatsApp app uses that number, WhatsApp or WhatsApp Business.
+
+**Can my manager approve on WhatsApp while I am away, for example over Eid?**
+Yes. A manager who has opted in their own phone can approve, undo and edit drafts on WhatsApp, as the owner can. Billing stays with the owner.
+
+**Can I pause my plan while we close for a season?**
+There is no pause. Cancel on the Plan page or on WhatsApp and the plan runs to the end of the period you paid for; choose a plan again when you reopen. A founding price is kept only while the subscription stays paid. For the weeks you are closed, set Closed for a while under Hours.
+
+**Does Kabsi know UAE National Day and Eid?**
+Yes. Kabsi asks about UAE public holidays from the official UAE list: National Day is 2 and 3 December. Eid and the other Islamic holidays follow the moon, so their dates are estimates until they are announced. Kabsi asks five days before and never assumes your hours.
+
+**Which data law does Kabsi follow, UK GDPR or the UAE's?**
+The privacy page (kabsi.co/privacy) says what Kabsi keeps, for how long, where it is processed, and how to see, correct or delete it. For a question about a specific law, write to hello@kabsi.co.
