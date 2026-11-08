@@ -105,7 +105,9 @@ export const googleChecked = (c: Pick<Coach, "source">) => c.source === "live";
 /** The counter above the checklist: "<n> of 8 done", or "<n> of 8 prepared. Google check pending." before the read-back. */
 export function coachCounter(rows: Pick<CoachRow, "status">[], checked: boolean): string {
   const n = rows.filter((r) => r.status === "done").length;
-  return checked ? `${n} of ${rows.length} done` : `${n} of ${rows.length} prepared. Google check pending.`;
+  return checked
+    ? `${n} of ${rows.length} done`
+    : `${n} of ${rows.length} prepared. Google check pending.`;
 }
 
 /** What the checklist adds to a row, in words: a number Kabsi read, or what the row waits for. */

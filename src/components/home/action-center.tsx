@@ -58,7 +58,8 @@ export function ActionCenter({ loc, access }: { loc: Location; access: Access })
   const details = useQuery({
     // The details of the folded items load too, so "See all" opens at once.
     queryKey: ["card-details", loc.id, [...yes, ...waiting].map((t) => t.id).join(",")],
-    queryFn: () => loadCardDetails([...new Map([...yes, ...waiting].map((t) => [t.id, t])).values()]),
+    queryFn: () =>
+      loadCardDetails([...new Map([...yes, ...waiting].map((t) => [t.id, t])).values()]),
     enabled: yes.length > 0,
   });
   const choice = role === "owner" ? planChoice(ent.data ?? null) : null;
@@ -191,16 +192,16 @@ function HomeCounts({
         <span className="block text-small text-text-2">Needs your yes</span>
       </div>
       <div className={tile}>
-        <span
-          className={"block font-display text-h3 font-bold" + (urgent > 0 ? " text-bad" : "")}
-        >
+        <span className={"block font-display text-h3 font-bold" + (urgent > 0 ? " text-bad" : "")}>
           {urgent}
         </span>
         <span className="block text-small text-text-2">Urgent</span>
       </div>
       <Link
         to="/app/report"
-        className={tile + " hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2"}
+        className={
+          tile + " hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2"
+        }
         aria-label={`Done this week ${done}, open the latest report`}
       >
         <span className="block font-display text-h3 font-bold">{q.isLoading ? "" : done}</span>

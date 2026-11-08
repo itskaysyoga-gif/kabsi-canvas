@@ -98,19 +98,28 @@ const ids = (ts: Task[]) => ts.map((t) => t.id);
 
 describe("Home waiting items (DSH-05, DSH-08)", () => {
   it("shows the first three in the current order and folds the rest", () => {
-    const v = waitingView([1, 2, 3, 4, 5].map((n) => T(n)), false);
+    const v = waitingView(
+      [1, 2, 3, 4, 5].map((n) => T(n)),
+      false,
+    );
     expect(FOLD).toBe(3);
     expect(ids(v.shown)).toEqual(["t1", "t2", "t3"]);
     expect(v).toMatchObject({ total: 5, urgent: 0, folded: true });
   });
 
   it("'See all' shows the rest in place, in the same order", () => {
-    const v = waitingView([1, 2, 3, 4, 5].map((n) => T(n)), true);
+    const v = waitingView(
+      [1, 2, 3, 4, 5].map((n) => T(n)),
+      true,
+    );
     expect(ids(v.shown)).toEqual(["t1", "t2", "t3", "t4", "t5"]);
   });
 
   it("has no fold with three or fewer", () => {
-    const v = waitingView([1, 2, 3].map((n) => T(n)), false);
+    const v = waitingView(
+      [1, 2, 3].map((n) => T(n)),
+      false,
+    );
     expect(v.folded).toBe(false);
     expect(ids(v.shown)).toEqual(["t1", "t2", "t3"]);
   });

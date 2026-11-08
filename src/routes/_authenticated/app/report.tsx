@@ -59,7 +59,11 @@ const dates = (r: ReportData) => dateRange(r.period);
 function useReportsLead(locationId: string | undefined) {
   const on = WHATSAPP_ON && !!locationId;
   const status = useQuery({ queryKey: ["whatsapp-status"], queryFn: whatsappStatus, enabled: on });
-  const stored = useQuery({ queryKey: ["routine-channel"], queryFn: loadRoutineChannel, enabled: on });
+  const stored = useQuery({
+    queryKey: ["routine-channel"],
+    queryFn: loadRoutineChannel,
+    enabled: on,
+  });
   const prefs = useQuery({
     queryKey: ["notification-prefs", locationId],
     queryFn: () => loadPrefs(locationId!),

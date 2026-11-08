@@ -49,7 +49,8 @@ describe("example search terms by trade", () => {
       seen.add(key);
       if (t === "cafe") continue;
       const cafe = new Set(EXAMPLE_TERMS_BY_TRADE.cafe.map((r) => r.searchKeyword));
-      for (const r of EXAMPLE_TERMS_BY_TRADE[t]) expect(cafe.has(r.searchKeyword!), `${t}: ${r.searchKeyword}`).toBe(false);
+      for (const r of EXAMPLE_TERMS_BY_TRADE[t])
+        expect(cafe.has(r.searchKeyword!), `${t}: ${r.searchKeyword}`).toBe(false);
     }
   });
 
