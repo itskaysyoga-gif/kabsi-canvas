@@ -62,7 +62,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 8 Nov 2026, Fixes B (R-126, PR 488): examples by trade, Prepared before Google is read, Reports lead, Home counts. `2026-11-08-fixes-b.md`.
+- 8 Nov 2026, Fixes B (R-126, PRs 488, 491): examples by trade, Prepared before Google is read, Reports lead, Home counts. `2026-11-08-fixes-b.md`.
 - 8 Nov 2026, Definer review (R-126): three unused definer functions and `action_tokens` closed to the browser; allowlist test; 59 no-policy tables service-only. `2026-11-08-definer-review.md`.
 - 8 Nov 2026, Fixes A (R-126, R-127, 30.41): the audit's lines, owner WhatsApp no longer called coming in the facts, the weekly report email, five LATER rows. `2026-11-08-fixes-a.md`.
 
