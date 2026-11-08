@@ -51,3 +51,13 @@ Decision under R-129: kept. The judge score rose (4.72 to 4.78 on the same 284 c
 Lab pass first (kabsi-reply-lab, this session as the model, no credit): the six cases that failed or scored lowest under v3 (I-017, I-024, S-079, S-028, S-110, S-071) were rewritten under v4 and passed every rule; v3 broke a rule on three of them.
 
 Prompt gate: reply.v4 is its own pull request. The CI Prompt gate fails a prompt change while EVAL_LIVE is false (by design, LATER row of Eval 1), so it waits for lane R with runs 2 and 3 as its evidence and its promptsHash in scores.json.
+
+## D. Guides and trade pages
+
+Every trade the task named already had a /for page (nail salon, beauty salon, spa and massage, medical and aesthetic clinic, lash and brow studio, tattoo studio, physiotherapy), so none was added. Added: 8 guides for UAE and UK salon and barber owners, published one a week from 16 Nov 2026 (30.32 item 2), and industry notes 7.17 to 7.20 (nail salons, spas and massage, medical and aesthetic clinics, physiotherapy) in facts 09.
+
+| Run | What | Judged | accurate | helpful | honest | style | overall |
+|---|---|---|---|---|---|---|---|
+| 4 | 8 guides and 4 industry notes against the facts | 12 of 12 | 5 | 5 | 5 | 5 | 5 |
+
+Nothing was flagged, so nothing was fixed after the judge. A fresh read of the sources found the published holiday guide's Kabsi box out of date (Scotland and Northern Ireland are asked since 6 Nov); fixed. The hair salon checklist's booking-link step stays a LATER row.
