@@ -35,7 +35,7 @@ describe("weekly report subject", () => {
   });
   it("has no dash and no exclamation mark", () => {
     for (const s of [weekSubject([chip("replies", 3)], 1), weekSubject([], 0)])
-      expect(s).not.toMatch(/[!–—]/);
+      expect(s).not.toMatch(new RegExp("[\\u2013\\u2014!]"));
   });
 });
 

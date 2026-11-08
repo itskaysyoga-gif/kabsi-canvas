@@ -54,6 +54,6 @@ describe("Fixes A lines", () => {
       BOOKING_EMAIL_LABEL,
       BOOKING_EMAIL_HELPER,
     ])
-      expect(s).not.toMatch(/[!–—]/);
+      expect(s).not.toMatch(new RegExp("[\\u2013\\u2014!]"));
   });
 });
