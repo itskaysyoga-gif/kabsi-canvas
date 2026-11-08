@@ -34,15 +34,27 @@ begin
   end if;
 end $$;
 
+-- While real data is refused, an external reference is a labelled fiction, so a real phone or email cannot go in here either.
+create function private.rb_external_ok(c jsonb) returns boolean
+language sql immutable set search_path = '' as $$
+  select c ->> 'external_id' is null or c ->> 'external_id' ~ '^fictional-[a-z0-9-]{1,60}$'
+$$;
+
+-- An Undo leaves its reference free, as a voided conversion does.
+drop index public.customer_requests_external_uniq;
+create unique index customer_requests_external_uniq on public.customer_requests (location_id, external_system, external_id)
+  where external_system is not null and outcome is distinct from 'voided';
+
 -- The first result for this key, or a refusal if the key was used with other input, or null when the key is new.
-create function private.rb_replay(p_location uuid, p_key text, p_tool text, p_input jsonb, out result jsonb, out input_hash text)
+create function private.rb_replay(p_location uuid, p_actor uuid, p_key text, p_tool text, p_input jsonb, out result jsonb, out input_hash text)
 language plpgsql set search_path = '' as $$
 declare v record;
 begin
   if p_key is null or length(p_key) not between 1 and 200 then
     result := private.rb_refuse('invalid_key'); return;
   end if;
-  input_hash := encode(sha256(convert_to(p_tool || ':' || p_input::text, 'UTF8')), 'hex');
+  -- The actor is part of the input: one person's key can never replay another person's result.
+  input_hash := encode(sha256(convert_to(p_tool || ':' || p_actor::text || ':' || p_input::text, 'UTF8')), 'hex');
   perform pg_advisory_xact_lock(hashtextextended(p_location::text || ':' || p_key, 0));
   select t.input_hash as h, t.result as r into v from public.tool_executions t
    where t.location_id = p_location and t.idempotency_key = p_key;
@@ -137,7 +149,8 @@ begin
   if c ? 'customer_name' then
     update public.customers k set display_name = c ->> 'customer_name', updated_at = now()
       from public.customer_requests q
-     where q.id = p_request and q.location_id = p_location and k.id = q.customer_id and k.location_id = p_location;
+     where q.id = p_request and q.location_id = p_location and k.id = q.customer_id and k.location_id = p_location
+       and k.erased_at is null;
   end if;
   update public.customer_requests q set
     summary = case when c ? 'summary' then c ->> 'summary' else q.summary end,
@@ -190,9 +203,10 @@ begin
   if p_input is null or jsonb_typeof(p_input) <> 'object' then return private.rb_refuse('invalid_input'); end if;
   select k into v_unknown from jsonb_object_keys(p_input) k where k <> all (v_allowed) limit 1;
   if v_unknown is not null then return private.rb_refuse('unknown_field', jsonb_build_object('field', v_unknown)); end if;
-  p := private.rb_replay(p_location, p_key, 'request_create', p_input);
+  p := private.rb_replay(p_location, p_actor, p_key, 'request_create', p_input);
   if p.result is not null then return p.result; end if;
 
+  if not private.rb_external_ok(p_input) then return private.rb_refuse('real_data_refused'); end if;
   v_kind := p_input ->> 'kind';
   v_status := case v_kind when 'enquiry' then 'new' when 'appointment' then 'requested' when 'job' then 'waiting' end;
   if v_status is null then return private.rb_refuse('invalid_field', '{"field": "kind"}'); end if;
@@ -246,8 +260,7 @@ begin
     when check_violation then
       if sqlerrm like 'request_book: real customer%' then return private.rb_refuse('real_data_refused'); end if;
       return private.rb_refuse('invalid_field');
-    when not_null_violation or foreign_key_violation or unique_violation or invalid_datetime_format or datetime_field_overflow
-      or invalid_text_representation or invalid_parameter_value then
+    when integrity_constraint_violation or data_exception then
       return private.rb_refuse('invalid_field');
   end;
 
@@ -263,7 +276,7 @@ declare g record; p record; r public.customer_requests; rule record; v_activity 
 begin
   g := private.rb_gate(p_location, p_actor);
   if g.reason is not null then return private.rb_refuse(g.reason); end if;
-  p := private.rb_replay(p_location, p_key, 'request_set_status',
+  p := private.rb_replay(p_location, p_actor, p_key, 'request_set_status',
     jsonb_build_object('request', p_request, 'version', p_expected_version, 'to', p_to_status, 'outcome', p_outcome, 'ack', p_acknowledged));
   if p.result is not null then return p.result; end if;
   select * into r from public.customer_requests q where q.id = p_request and q.location_id = p_location for update;
@@ -323,7 +336,7 @@ begin
   g := private.rb_gate(p_location, p_actor);
   if g.reason is not null then return private.rb_refuse(g.reason); end if;
   if p_party is null or p_party not in ('staff', 'customer') or p_confirmed is null then return private.rb_refuse('invalid_input'); end if;
-  p := private.rb_replay(p_location, p_key, 'request_set_confirmation',
+  p := private.rb_replay(p_location, p_actor, p_key, 'request_set_confirmation',
     jsonb_build_object('request', p_request, 'version', p_expected_version, 'party', p_party, 'confirmed', p_confirmed));
   if p.result is not null then return p.result; end if;
   select * into r from public.customer_requests q where q.id = p_request and q.location_id = p_location for update;
@@ -359,7 +372,7 @@ create function public.request_correct(p_location uuid, p_actor uuid, p_key text
 returns jsonb language plpgsql security definer set search_path = '' as $$
 declare
   g record; p record; r public.customer_requests; v_activity uuid; v_unknown text; v_field text; v_flags text[] := '{}'; v_old jsonb;
-  v_name text; c jsonb := '{}'; v_cur jsonb;
+  v_name text; v_erased timestamptz; c jsonb := '{}'; v_cur jsonb;
   v_allowed text[] := array['summary', 'requested_window_text', 'starts_at', 'ends_at', 'next_action', 'next_action_due_at',
     'follow_up_user_id', 'origin_channel', 'external_system', 'external_id', 'details', 'customer_name'];
   v_any_role text[] := array['next_action', 'next_action_due_at', 'follow_up_user_id'];
@@ -372,7 +385,7 @@ begin
   if g.actor_role = 'staff' and exists (select 1 from jsonb_object_keys(p_changes) k where k <> all (v_any_role)) then
     return private.rb_refuse('forbidden');
   end if;
-  p := private.rb_replay(p_location, p_key, 'request_correct',
+  p := private.rb_replay(p_location, p_actor, p_key, 'request_correct',
     jsonb_build_object('request', p_request, 'version', p_expected_version, 'changes', p_changes));
   if p.result is not null then return p.result; end if;
   select * into r from public.customer_requests q where q.id = p_request and q.location_id = p_location for update;
@@ -381,7 +394,11 @@ begin
     return private.rb_refuse('version_conflict', jsonb_build_object('row_version', r.row_version));
   end if;
   if r.status = 'closed' then return private.rb_refuse('closed'); end if;
-  select k.display_name into v_name from public.customers k where k.id = r.customer_id and k.location_id = p_location;
+  if not private.rb_external_ok(p_changes) then return private.rb_refuse('real_data_refused'); end if;
+  -- The name is shared by every request of this customer, so its row is locked as well.
+  select k.display_name, k.erased_at into v_name, v_erased from public.customers k
+   where k.id = r.customer_id and k.location_id = p_location for update;
+  if v_erased is not null and p_changes ? 'customer_name' then return private.rb_refuse('customer_erased'); end if;
   v_cur := to_jsonb(r) || jsonb_build_object('customer_name', v_name);
 
   begin
@@ -410,8 +427,7 @@ begin
     end loop;
     r := private.rb_apply_fields(p_location, r.id, c);
   exception
-    when check_violation or not_null_violation or foreign_key_violation or unique_violation or invalid_datetime_format
-      or datetime_field_overflow or invalid_text_representation or invalid_parameter_value then
+    when integrity_constraint_violation or data_exception then
       return private.rb_refuse('invalid_field');
   end;
 
@@ -433,7 +449,7 @@ begin
   if p_input is null or jsonb_typeof(p_input) <> 'object' then return private.rb_refuse('invalid_input'); end if;
   select k into v_unknown from jsonb_object_keys(p_input) k where k <> all (v_allowed) limit 1;
   if v_unknown is not null then return private.rb_refuse('unknown_field', jsonb_build_object('field', v_unknown)); end if;
-  p := private.rb_replay(p_location, p_key, 'request_convert_enquiry',
+  p := private.rb_replay(p_location, p_actor, p_key, 'request_convert_enquiry',
     jsonb_build_object('request', p_request, 'version', p_expected_version, 'input', p_input));
   if p.result is not null then return p.result; end if;
   v_kind := coalesce(p_input ->> 'kind', 'appointment');
@@ -446,6 +462,9 @@ begin
   end if;
   if e.kind <> 'enquiry' then return private.rb_refuse('not_enquiry'); end if;
   if e.status = 'closed' then return private.rb_refuse('closed'); end if;
+  if exists (select 1 from public.customers k where k.id = e.customer_id and k.location_id = p_location and k.erased_at is not null) then
+    return private.rb_refuse('customer_erased');
+  end if;
   v_from := e.status;
 
   begin
@@ -460,8 +479,7 @@ begin
       e.id, g.pack, g.pack_version, p_actor)
     returning * into n;
   exception
-    when check_violation or not_null_violation or foreign_key_violation or unique_violation or invalid_datetime_format
-      or datetime_field_overflow or invalid_text_representation or invalid_parameter_value then
+    when integrity_constraint_violation or data_exception then
       return private.rb_refuse('invalid_field');
   end;
   update public.customer_requests q set status = 'closed', outcome = 'converted', closed_at = now(),
@@ -481,10 +499,11 @@ create function public.request_undo(p_location uuid, p_actor uuid, p_key text, p
 language plpgsql security definer set search_path = '' as $$
 declare
   g record; p record; a public.request_activities; r public.customer_requests; o public.customer_requests; v_undo uuid; v_pair public.request_activities; c jsonb := '{}'; v_cl jsonb;
+  v_name_after jsonb; v_name text; v_erased timestamptz;
 begin
   g := private.rb_gate(p_location, p_actor);
   if g.reason is not null then return private.rb_refuse(g.reason); end if;
-  p := private.rb_replay(p_location, p_key, 'request_undo', jsonb_build_object('activity', p_activity));
+  p := private.rb_replay(p_location, p_actor, p_key, 'request_undo', jsonb_build_object('activity', p_activity));
   if p.result is not null then return p.result; end if;
   select * into a from public.request_activities x where x.id = p_activity and x.location_id = p_location;
   if not found then return private.rb_refuse('not_found'); end if;
@@ -510,12 +529,19 @@ begin
   end if;
   if clock_timestamp() - a.created_at > interval '10 minutes' then return private.rb_refuse('window_passed'); end if;
 
+  -- A clash with something that changed since returns a fixed refusal: database error text can carry customer values.
+  begin
   if a.type in ('created') then
+    -- What the creation consumed goes back. An identifier added to an existing customer stays, as a fact about that customer.
+    update public.request_intakes i set state = 'pending' where i.id = r.intake_id and i.location_id = p_location and i.state = 'confirmed';
     update public.customer_requests q set status = 'closed', outcome = 'voided', closed_at = now(),
       row_version = q.row_version + 1, updated_at = now() where q.id = r.id returning q.* into r;
     v_undo := private.rb_activity(p_location, r.id, 'undone', p_actor, g.actor_role, 'request_undo', a.to_status, 'closed', null, 'voided', '{}', a.id);
   elsif a.type = 'status_changed' then
-    select v.before_value into v_cl from public.request_activity_values v where v.activity_id = a.id and v.field = 'closed_at' and v.cleared_at is null;
+    if a.from_status = 'closed' then
+      select v.before_value into v_cl from public.request_activity_values v where v.activity_id = a.id and v.field = 'closed_at' and v.cleared_at is null;
+      if v_cl is null then return private.rb_refuse('values_cleared'); end if;
+    end if;
     update public.customer_requests q set status = a.from_status, outcome = a.from_outcome,
       closed_at = case when a.from_status = 'closed' then (v_cl #>> '{}')::timestamptz end,
       row_version = q.row_version + 1, updated_at = now() where q.id = r.id returning q.* into r;
@@ -523,6 +549,14 @@ begin
   elsif a.type in ('corrected', 'confirmation_changed') then
     if exists (select 1 from public.request_activity_values v where v.activity_id = a.id and v.cleared_at is not null) then
       return private.rb_refuse('values_cleared');
+    end if;
+    -- The name is shared between requests: Undo only if this change is still the one in place.
+    select v.after_value into v_name_after from public.request_activity_values v where v.activity_id = a.id and v.field = 'customer_name';
+    if found then
+      select k.display_name, k.erased_at into v_name, v_erased from public.customers k
+       where k.id = r.customer_id and k.location_id = p_location for update;
+      if v_erased is not null then return private.rb_refuse('values_cleared'); end if;
+      if coalesce(to_jsonb(v_name), 'null'::jsonb) is distinct from v_name_after then return private.rb_refuse('customer_changed'); end if;
     end if;
     select jsonb_object_agg(v.field, coalesce(v.before_value, 'null'::jsonb)) into c from public.request_activity_values v where v.activity_id = a.id;
     r := private.rb_apply_fields(p_location, r.id, c);
@@ -540,6 +574,10 @@ begin
       perform private.rb_activity(p_location, o.id, 'undone', p_actor, g.actor_role, 'request_undo', v_new.to_status, 'closed', null, 'voided', '{}', v_new.id, r.id);
     end;
   end if;
+  exception
+    when integrity_constraint_violation or data_exception then
+      return private.rb_refuse('undo_conflict');
+  end;
 
   perform private.rb_audit(p_actor, 'request_undone', p_location, r.id, jsonb_build_object('undid', a.type));
   return private.rb_finish(p_location, p_actor, p_key, 'request_undo', p.input_hash, private.rb_result(r, v_undo));

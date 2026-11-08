@@ -224,9 +224,51 @@ select is(pg_temp.reason(pg_temp.st(:'s2', 'waiting', null, true, pg_temp.S())),
 select is(pg_temp.reason(pg_temp.undo((:'s2c'::jsonb ->> 'activity_id')::uuid, pg_temp.S())), 'forbidden', 'B14 staff cannot undo someone else''s change');
 
 -- Attribution and external references stay as given.
-select pg_temp.rid(pg_temp.mk('enquiry', '{"origin_channel":"phone","external_system":"booking_tool","external_id":"X1"}')) as x1 \gset
-select is((select origin_channel || '/' || entry_method || '/' || external_system || '/' || external_id from public.customer_requests where id = :'x1'), 'phone/typed/booking_tool/X1', 'attribution and external reference are stored');
-select is(pg_temp.reason(pg_temp.mk('enquiry', '{"external_system":"booking_tool","external_id":"X1"}')), 'invalid_field', 'an external reference is unique per business');
+select pg_temp.rid(pg_temp.mk('enquiry', '{"origin_channel":"phone","external_system":"booking_tool","external_id":"fictional-x1"}')) as x1 \gset
+select is((select origin_channel || '/' || entry_method || '/' || external_system || '/' || external_id from public.customer_requests where id = :'x1'), 'phone/typed/booking_tool/fictional-x1', 'attribution and external reference are stored');
+select is(pg_temp.reason(pg_temp.mk('enquiry', '{"external_system":"booking_tool","external_id":"fictional-x1"}')), 'invalid_field', 'an external reference is unique per business');
+
+select is(pg_temp.reason(pg_temp.mk('enquiry', '{"external_system":"whatsapp","external_id":"+447911123456"}')), 'real_data_refused', 'a real number cannot go in as an external reference');
+select is(pg_temp.reason(pg_temp.fix(:'x1', '{"external_id":"+447911123456"}')), 'real_data_refused', 'nor through a correction');
+select is(pg_temp.reason(pg_temp.mk('job', '{"starts_at":"2026-01-01 12:00:00+99"}')), 'invalid_field', 'a date with an impossible zone returns a plain refusal');
+
+-- Review findings: Undo with shared customers, conflicts, consumed intakes, erased customers, reopen, both sides of a conversion.
+select pg_temp.mk('job', '{"customer_name":"Name Zero"}') as sc \gset
+select pg_temp.rid(:'sc'::jsonb) as sc1 \gset
+select pg_temp.rid(pg_temp.mk('job', jsonb_build_object('customer_id', (select customer_id from public.customer_requests where id = :'sc1')))) as sc2 \gset
+select pg_temp.fix(:'sc1', '{"customer_name":"Name One"}') as sf1 \gset
+select pg_temp.fix(:'sc2', '{"customer_name":"Name Two"}') as sf2 \gset
+select is(pg_temp.reason(pg_temp.undo((:'sf1'::jsonb ->> 'activity_id')::uuid)), 'customer_changed', 'Undo cannot restore a name someone has changed since');
+select is((select display_name from public.customers k join public.customer_requests q on q.customer_id = k.id where q.id = :'sc1'), 'Name Two', 'the current name is kept');
+select is(pg_temp.undo((:'sf2'::jsonb ->> 'activity_id')::uuid) ->> 'ok', 'true', 'Undo of the change in place works');
+select is((select display_name from public.customers k join public.customer_requests q on q.customer_id = k.id where q.id = :'sc1'), 'Name One', 'it restores the name before it');
+select pg_temp.rid(pg_temp.mk('enquiry', '{"external_system":"booking_tool","external_id":"fictional-a"}')) as ex1 \gset
+select pg_temp.fix(:'ex1', '{"external_id":"fictional-b"}') as exf \gset
+select pg_temp.rid(pg_temp.mk('enquiry', '{"external_system":"booking_tool","external_id":"fictional-a"}')) as ex2 \gset
+select is(pg_temp.reason(pg_temp.undo((:'exf'::jsonb ->> 'activity_id')::uuid)), 'undo_conflict', 'an Undo that would clash returns a plain refusal');
+select is((select external_id from public.customer_requests where id = :'ex1'), 'fictional-b', 'and changes nothing');
+insert into public.request_intakes (id, location_id, source) values ('00000000-0000-4000-8000-00000000e152', pg_temp.L(), 'typed');
+select pg_temp.mk('job', '{"intake_id":"00000000-0000-4000-8000-00000000e152","external_system":"booking_tool","external_id":"fictional-c"}') as ic \gset
+select is(pg_temp.undo((:'ic'::jsonb ->> 'activity_id')::uuid) ->> 'outcome', 'voided', 'Undo of a creation from an intake works');
+select is((select state from public.request_intakes where id = '00000000-0000-4000-8000-00000000e152'), 'pending', 'the intake is free again');
+select is(pg_temp.mk('job', '{"intake_id":"00000000-0000-4000-8000-00000000e152","external_system":"booking_tool","external_id":"fictional-c"}') ->> 'ok', 'true', 'and it and its reference can be used again');
+select pg_temp.mk('enquiry', '{"customer_name":"Gone Fictional"}') as gq \gset
+select pg_temp.rid(:'gq'::jsonb) as g1 \gset
+update public.customers set erased_at = now(), display_name = null where id = (select customer_id from public.customer_requests where id = :'g1');
+select is(pg_temp.reason(pg_temp.fix(:'g1', '{"customer_name":"Back Again"}')), 'customer_erased', 'an erased customer cannot be named again');
+select is(pg_temp.reason(public.request_convert_enquiry(pg_temp.L(), pg_temp.O(), pg_temp.K(), :'g1', pg_temp.ver(:'g1'))), 'customer_erased', 'and cannot be converted');
+select pg_temp.rid(pg_temp.mk('job')) as rr \gset
+select pg_temp.st(:'rr', 'closed', 'cancelled', true) as rc \gset
+select pg_temp.st(:'rr', 'waiting', null, true) as ro \gset
+select is(pg_temp.undo((:'ro'::jsonb ->> 'activity_id')::uuid) ->> 'outcome', 'cancelled', 'Undo of a reopen closes it again');
+select is((select closed_at is not null from public.customer_requests where id = :'rr'), true, 'with its closing time restored');
+select pg_temp.rid(pg_temp.mk('enquiry')) as e9 \gset
+select public.request_convert_enquiry(pg_temp.L(), pg_temp.O(), pg_temp.K(), :'e9', pg_temp.ver(:'e9')) as conv9 \gset
+select is(pg_temp.undo((:'conv9'::jsonb ->> 'activity_id')::uuid) ->> 'ok', 'true', 'Undo of a conversion also works from the new request');
+select is(pg_temp.status(:'e9'), 'new', 'the enquiry returns');
+select public.request_create(pg_temp.L(), pg_temp.O(), 'actor-key', '{"kind":"job","summary":"Mine","entry_method":"typed"}') as ak \gset
+select is(pg_temp.reason(public.request_create(pg_temp.L(), pg_temp.S(), 'actor-key', '{"kind":"job","summary":"Mine","entry_method":"typed"}')), 'key_reused', 'one person''s key cannot replay another''s result');
+select is((select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname like 'rb\_%' and has_function_privilege('service_role', p.oid, 'execute')), 0, 'service_role cannot call the private helpers directly');
 
 -- B16: a refused creation leaves nothing behind.
 select count(*)::int as cust_before from public.customers \gset
