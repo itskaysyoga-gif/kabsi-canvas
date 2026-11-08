@@ -182,6 +182,21 @@
    },
    "overall": 4.73,
    "costUsd": 2.283655
+  },
+  {
+   "date": "2026-11-08T08:48:08.747Z",
+   "model": "anthropic:claude-sonnet-5-5",
+   "judge": "claude-haiku-4-5-20251001",
+   "cases": 88,
+   "judged": 22,
+   "mean": {
+    "accurate": 4.86,
+    "helpful": 4.45,
+    "honest": 5,
+    "style": 4.68
+   },
+   "overall": 4.75,
+   "costUsd": 2.506549
   }
  ],
  "reply.v3": [
@@ -207,6 +222,44 @@
    "costUsd": 0.09572,
    "gate": true,
    "promptsHash": "43ef0b3783ae302ef7d0b0e79f7c1b49b19ec66ec2711ad41ad0e921dfdc83fc"
+  },
+  {
+   "date": "2026-11-08T08:46:28.853Z",
+   "model": "anthropic",
+   "judge": "claude-haiku-4-5-20251001",
+   "cases": 164,
+   "judged": 107,
+   "mean": {
+    "grounded": 4.95,
+    "answers": 4.4,
+    "voice": 4.16,
+    "language": 4.94,
+    "safety": 4.93,
+    "length": 4.96
+   },
+   "overall": 4.72,
+   "costUsd": 0.689425,
+   "gate": false,
+   "promptsHash": "b948f68a0b770b0dd2ea5966a63dfdc2372873c58a9c68b644c12ceedc100a1f"
+  },
+  {
+   "date": "2026-11-08T08:56:49.774Z",
+   "model": "anthropic",
+   "judge": "claude-haiku-4-5-20251001",
+   "cases": 284,
+   "judged": 197,
+   "mean": {
+    "grounded": 4.97,
+    "answers": 4.44,
+    "voice": 4.12,
+    "language": 4.94,
+    "safety": 4.88,
+    "length": 4.94
+   },
+   "overall": 4.72,
+   "costUsd": 1.193322,
+   "gate": false,
+   "promptsHash": "b948f68a0b770b0dd2ea5966a63dfdc2372873c58a9c68b644c12ceedc100a1f"
   }
  ]
 }
