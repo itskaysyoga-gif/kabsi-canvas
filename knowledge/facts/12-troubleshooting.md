@@ -45,7 +45,7 @@ That's by design. Extra addresses (up to 3) see new reviews only. To let someone
 **Kabsi didn't prepare a post this month.**
 Kabsi prepares a post only from something true: a fact you confirmed in About your business in the last 90 days, or a photo you approved in the last 30. Without one it asks "Anything new this month? A dish, a service, an event?" instead. A draft that fails a check never reaches you. Kabsi's posts also need the switch on and an active business.
 
-**There is no Suggest phrases button.** Search phrases come back with Kabsi writing posts for you, once Kabsi's AI credit is on. Write your post in your own words meanwhile.
+**There is no Suggest phrases button.** Search phrases come back when Kabsi writes posts for you, which is not switched on yet. Write your post in your own words meanwhile.
 
 **My photo won't upload.** Use JPG, PNG, WebP or HEIC up to 20 MB, up to 20 at a time. A file that is not really a photo, or a moving image, is refused with the reason on the Photos screen.
 
