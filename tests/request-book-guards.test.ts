@@ -104,6 +104,21 @@ describe("RB-C2 guard: no shared file uses a trade word", () => {
   });
 });
 
+describe("RB-C2 guard: the source holds no Arabic script and no dash, only escapes", () => {
+  it("every character in every file of the folder is plain ASCII", () => {
+    const hits: string[] = [];
+    for (const f of walk(BOOK)) {
+      readFileSync(f, "utf8")
+        .split("\n")
+        .forEach((line, i) => {
+          // eslint-disable-next-line no-control-regex
+          if (/[^\x00-\x7f]/.test(line)) hits.push(`${relative(ROOT, f)}:${i + 1}`);
+        });
+    }
+    expect(hits).toEqual([]);
+  });
+});
+
 describe("RB-C2 guard: nothing under whatsapp/ imports request-book yet", () => {
   const whatsappDirs = [
     join(FUNCTIONS, "_shared/whatsapp"),
