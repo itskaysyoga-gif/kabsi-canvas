@@ -2,7 +2,7 @@
 // the sitemap or llms.txt, and its address answers 404. All decided from the clock the server passes; tested here with a
 // fake one.
 import { describe, expect, it } from "vitest";
-import { ALL_GUIDES, EARLIER, ORDER } from "../src/content/guides";
+import { ALL_GUIDES, EARLIER, ORDER, WEEKLY } from "../src/content/guides";
 import {
   FIRST_PUBLISH,
   PUBLISH_ALL_AT,
@@ -55,7 +55,11 @@ describe("the schedule", () => {
   });
 
   it("a guide scheduled after the moment stays out until its day, then is listed first", () => {
-    const base = ALL_GUIDES.map((g) => ({ slug: g.slug, publishAt: g.publishAt }));
+    // The 27 guides public from the one moment; the weekly guides are left out here and checked below.
+    const base = ALL_GUIDES.filter((g) => g.publishAt <= PUBLISH_ALL_AT).map((g) => ({
+      slug: g.slug,
+      publishAt: g.publishAt,
+    }));
     const future = [...base, { slug: "later", publishAt: weeklyAt(0) }];
     const during = publicGuides(future, at("2026-11-10T00:00:00Z")).map((g) => g.slug);
     expect(during).not.toContain("later");
@@ -65,6 +69,26 @@ describe("the schedule", () => {
     expect(isPublic({ publishAt: weeklyAt(0) }, at("2026-11-16T05:59:59Z"))).toBe(false);
   });
 
+  it("the 8 salon and barber guides are one a week from 16 Nov 2026, in the WEEKLY order, each public only from its day", () => {
+    expect(WEEKLY).toHaveLength(8);
+    WEEKLY.forEach((s, n) => {
+      const g = ALL_GUIDES.find((x) => x.slug === s);
+      expect(g?.publishAt, s).toBe(weeklyAt(n));
+    });
+    // The holiday guides come before their holidays: UAE National Day on 2 Dec, Christmas on 25 Dec.
+    expect(Date.parse(weeklyAt(0))).toBeLessThan(Date.parse("2026-12-02T00:00:00Z"));
+    expect(Date.parse(weeklyAt(1))).toBeLessThan(Date.parse("2026-11-30T00:00:00Z"));
+    const sunday = publicGuides(ALL_GUIDES, at("2026-11-15T12:00:00Z")).map((g) => g.slug);
+    for (const s of WEEKLY) expect(sunday).not.toContain(s);
+    expect(sunday).toHaveLength(27);
+    const monday = publicGuides(ALL_GUIDES, at("2026-11-16T06:00:00Z")).map((g) => g.slug);
+    expect(monday[0]).toBe(WEEKLY[0]);
+    expect(monday).toHaveLength(28);
+    const all = publicGuides(ALL_GUIDES, new Date(weeklyAt(7))).map((g) => g.slug);
+    expect(all.slice(0, 8)).toEqual([...WEEKLY].reverse());
+    expect(all).toHaveLength(35);
+  });
+
   it("before part A merged nothing new was public, and the earlier guides always are", () => {
     const before = publicGuides(ALL_GUIDES, at("2026-11-04T23:59:59Z")).map((g) => g.slug);
     for (const s of ORDER) expect(before).not.toContain(s);
@@ -72,9 +96,12 @@ describe("the schedule", () => {
   });
 
   it("caches the sitemap and llms.txt for at most an hour, and never past the next guide's moment", () => {
-    const later = [...ALL_GUIDES, { publishAt: weeklyAt(0) }];
+    const earlier = ALL_GUIDES.filter((g) => g.publishAt <= PUBLISH_ALL_AT);
+    const later = [...earlier, { publishAt: weeklyAt(0) }];
     expect(cacheSeconds(later, at("2026-11-16T05:50:00Z"))).toBe(600);
-    expect(cacheSeconds(ALL_GUIDES, at("2026-11-16T05:50:00Z"))).toBe(3600);
+    expect(cacheSeconds(earlier, at("2026-11-16T05:50:00Z"))).toBe(3600);
+    // The first weekly guide (UAE National Day and Eid) is the next moment for the real list.
+    expect(cacheSeconds(ALL_GUIDES, at("2026-11-16T05:50:00Z"))).toBe(600);
     expect(cacheSeconds([], at("2026-11-05T12:00:00Z"))).toBe(3600);
   });
 

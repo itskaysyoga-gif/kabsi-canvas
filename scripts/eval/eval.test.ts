@@ -25,10 +25,10 @@ import { UNTRUSTED } from "../../supabase/functions/_shared/ai/fence.ts";
 const count = (f: (c: (typeof CASES)[number]) => boolean) => CASES.filter(f).length;
 
 Deno.test(
-  "the set: 214 invented cases in the six groups the card names, the contradictions of 26.1 and the 4 language cases of Fix 1",
+  "the set: 334 invented cases in the six groups the card names, the contradictions of 26.1, the 4 language cases of Fix 1 and the 120 salon cases of the credit sprint",
   () => {
-    assert.equal(CASES.length, 214);
-    assert.equal(new Set(CASES.map((c) => c.id)).size, 214, "ids are unique");
+    assert.equal(CASES.length, 334);
+    assert.equal(new Set(CASES.map((c) => c.id)).size, 334, "ids are unique");
     const groups = {
       normal: 60,
       complaint: 40,
@@ -38,6 +38,7 @@ Deno.test(
       invented_fact: 20,
       contradiction: 10,
       language: 4,
+      salon: 120,
     };
     for (const [g, n] of Object.entries(groups))
       assert.equal(
@@ -77,6 +78,23 @@ Deno.test(
       for (const p of c.expect.forbid ?? []) new RegExp(p, "iu");
       assert.ok(c.rating >= 1 && c.rating <= 5, c.id);
     }
+    // Credit sprint B: every salon case says what it tests, and is held to that group's rules.
+    const salon = CASES.filter((c) => c.category === "salon");
+    for (const c of salon) {
+      assert.ok(c.kind, c.id);
+      if (c.kind === "high_risk") assert.equal(c.expect.risk, "high", c.id);
+      if (c.kind === "injection") assert.ok(c.expect.canary?.length, c.id);
+      if (c.kind === "healthcare" || c.kind === "invented_fact")
+        assert.ok(c.expect.forbid?.length, c.id);
+      if (BUSINESSES[c.business].industry === "health") assert.notEqual(c.expect.risk, "low", c.id);
+    }
+    const kinds = (k: string) => salon.filter((c) => c.kind === k).length;
+    assert.deepEqual(
+      ["normal", "complaint", "high_risk", "injection", "invented_fact", "healthcare"].map(kinds),
+      [35, 25, 18, 12, 18, 12],
+    );
+    assert.equal(new Set(salon.map((c) => c.business)).size, 6, "six businesses");
+    assert.ok(salon.filter((c) => c.language === "ar").length >= 8, "Arabic reviews from the UAE");
     // Every business and reviewer is invented: no Kabsi customer's name appears.
     const text = JSON.stringify(CASES) + JSON.stringify(BUSINESSES);
     for (const real of ["Yawmiyati", "Abou Hamze", "Safa Chicken", "QA Bakery"])
@@ -200,7 +218,7 @@ Deno.test(
 Deno.test("the gate fails on a run with errors or the wrong number of cases", () => {
   const ok = score("x", []);
   assert.equal(gate(ok).pass, false);
-  assert.match(gate(ok).failures[0], /expected 214 cases/);
+  assert.match(gate(ok).failures[0], /expected 334 cases/);
 });
 
 Deno.test("a stub that throws counts as an error and blocks, never as a pass", async () => {
@@ -243,7 +261,7 @@ Deno.test(
     const fail = await runAll(stubModel("fail"), { cases: s });
     assert.equal(fail.gate.pass, false);
     // A sample is not the full run: the full gate still refuses it.
-    assert.match(gate(pass.score).failures[0], /expected 214 cases, ran 20/);
+    assert.match(gate(pass.score).failures[0], /expected 334 cases, ran 20/);
   },
 );
 
@@ -343,7 +361,8 @@ Deno.test(
     assert.deepEqual([n("normal"), n("complaint")], [30, 20]);
     for (const k of ["high_risk", "injection", "healthcare", "invented_fact", "contradiction"])
       assert.equal(n(k), CASES.filter((x) => x.category === k).length, k);
-    assert.equal(c.length, 164);
+    assert.equal(n("salon"), 120, "every salon case is in the cut");
+    assert.equal(c.length, 284);
     assert.ok(
       c.some((x) => x.language === "es"),
       "Spanish cases are in the cut",

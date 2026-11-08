@@ -23,7 +23,7 @@
 - **Card code:** the 6-character code under a Kabsi card's QR.
 - **Test mode:** [TIME-SENSITIVE] Kabsi's state until Google approves its API access. Nothing is sent to Google automatically.
 - **Early access:** [TIME-SENSITIVE] a person on the Kabsi team does the Google steps by hand and posts what the owner approves, within one working day.
-- **Free:** the plan with the review link, QR code and table card. Also what a business is on after a trial or plan ends. **[CHANGING]** There will be no Free plan with Essentials and Pro.
+- **Free:** not a plan. What a business keeps without a plan, after a trial or a plan ends: the review link, the QR code, the printable counter card and a message to share. There is no Free plan.
 - **Free trial:** 14 days, no card, starting when Google access works.
 - **Kabsi Clients (5481006796):** Kabsi's Google business group. Owners invite it as a Manager.
 - **Waiting for Google access:** Kabsi's Manager access doesn't work yet for that business.

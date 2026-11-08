@@ -686,6 +686,18 @@ Florists follow 7.8; their page is new (search term "florist"), and kabsi.co/for
 
 ### 7.16 Beauty salons (Site 2, 5 Nov 2026, master plan 30.34 item 4)
 kabsi.co/for/beauty-salon is for salons that do several kinds of treatment: makeup, facials, waxing, brows. Kabsi turns a photo of a treatment and a line into a post for the owner's yes, checks the photo first, compares the hours Google shows with the owner's every day, and asks about special hours before each public holiday. A reply thanks a therapist or makeup artist by name only when the review names her and she is on the team list. A review about a skin reaction or another safety problem gets no draft: it is marked "This review needs a little more care" with a short checklist, and Kabsi writes a short, neutral holding reply only if the owner asks (13, "What happens with hard reviews?"). Photos of clients go up only when the owner sends them and approves the post; ask the client first. Kabsi does not take bookings. Google categories that fit: Beauty salon first, then Eyelash salon, Nail salon or Day spa only for work the salon really does. Search term for the free check: "beauty salon" in the UK and the UAE. Every business, person and number on the page is an invented Example (Amber Glow Beauty, Dubai).
+
+### 7.17 Nail salons (8 Nov 2026)
+Clients choose by the work they see: a photo of a new set and one line become a post for the owner's yes, and the photo check flags a dark, blurry or too small photo first. Kabsi checks the main category Google shows against the owner's every day (Google's own example is Nail salon, not the broader Salon). Reviews are mostly about how the set looks and lasts, waiting, price, and booking, lateness or cancellation rules. A reply thanks a technician by name only when the review names her and she is on the team list. A complaint about a fee, a refund or a wait gets a careful draft with the issue shown above it ("They mention a refund. Kabsi didn't promise one."); a complaint that names a technician gets no draft. A review about a reaction, an infection, a cut or another safety problem gets no draft: it is marked "This review needs a little more care" with a short checklist, and Kabsi writes a short, neutral holding reply only if the owner asks (13, "What happens with hard reviews?"); Kabsi never gives medical advice. Photos of a client's hands go up only when the owner sends them and approves the post; ask the client first. Kabsi does not edit prices on Google today. Search term for the free check: "nail salon".
+
+### 7.18 Spas and massage (8 Nov 2026)
+Reviews are mostly about the therapist, the room and how calm it felt, timing (a treatment that started late or felt short), price and packages. Replies thank the writer and pass the words to the team, and never describe what a treatment does for the body: Kabsi writes only the facts the owner gives it (the treatment, how long it takes, the price). A therapist is thanked by name only when the review names her and she is on the team list; a complaint that names a therapist gets no draft. A review about an injury, a burn, a reaction to an oil or product, or anything a client felt was unsafe or inappropriate gets no draft: it is marked "This review needs a little more care" with a short checklist, and Kabsi writes a short, neutral holding reply only if the owner asks (13, "What happens with hard reviews?"). When the main Google category is a health one (for example Massage therapist), Kabsi treats the business as a health business (13, "Does Kabsi treat clinics, law firms and financial businesses differently?"); with Massage spa or Day spa it does not, and the careful habit above still applies. Photos show the room made up, never a client. Kabsi asks before Eid and each public holiday and sets special hours after the owner's yes. Kabsi does not connect to booking systems. Google categories that fit: Massage spa, Day spa. Search term: "spa".
+
+### 7.19 Medical and aesthetic clinics (8 Nov 2026)
+An aesthetic or skin clinic is a health business when its Google category is a health one (Skin care clinic, Medical clinic, Dermatologist): every review is at least medium risk, a reply never says the reviewer was a patient and never mentions a visit, an appointment, a treatment or a result, and Kabsi never sends what a patient wrote to WhatsApp (13, "Does Kabsi treat clinics, law firms and financial businesses differently?"). Reviews are about results, pain, price, the consultation and the doctor; a five-star reply thanks the writer and says the team will hear the words, with no names. A review about a reaction, an injury, a burn, a complication or another safety problem gets no draft: it is marked "This review needs a little more care" with a short checklist, and Kabsi writes a short, neutral holding reply only if the owner asks (13, "What happens with hard reviews?"); before replying, the owner should speak to the clinic's insurer or adviser and take the conversation private. Add "Don't confirm the reviewer is a patient or mention any treatment" under **Anything Kabsi should never say or promise** (7.3). Health advertising rules differ by country: in the UK, Botox and other prescription-only medicines may not be promoted to the public, so a post may promote a consultation without naming the medicine. Kabsi posts only photos the owner sends and approves and never writes about results; not legal advice. Use 'Medical clinic' only with a licensed doctor and 'Dermatologist' only with a registered dermatologist. Search term: "skin clinic".
+
+### 7.20 Physiotherapy (8 Nov 2026)
+A physiotherapy clinic is a health business when its Google category is a health one (Google's list has Physical therapist): every review is at least medium risk, and a reply thanks the writer, invites them to get in touch and never mentions a visit, the injury or the treatment, and promises nothing about results (13, "Does Kabsi treat clinics, law firms and financial businesses differently?"). Reviews are about how quickly a patient was seen, the physio, the explanation they got, price and parking. A review about an injury during or after a session gets no draft: it is marked "This review needs a little more care" with a short checklist, and Kabsi writes a short, neutral holding reply only if the owner asks (13, "What happens with hard reviews?"); Kabsi never gives health advice. In the UK only HCPC registered staff may be called physiotherapists, so Kabsi uses only the names on the team list. A clinic that also visits patients at home sets a service area; one that only visits hides its address. Hours and open status are checked every day. Kabsi never connects to a clinic system and never sends patient details on WhatsApp. Search term: "physio".
 ## 8. Google policy and review best practice
 
 ### 8.1 How Google local results work
@@ -1262,7 +1274,7 @@ Essentials is $29 a month or $290 a year. Pro is $59 a month or $590 a year. Ext
 Yes. 14 days, no card. It starts when Kabsi's access to your Google profile works.
 
 **Is there a free plan?**
-Yes. Free is your review link, a QR code, a printable counter card from the free review link tool and a message to share. The branded counter card and table tent PDFs come with the plans. The free part keeps working for as long as Kabsi operates.
+No. There are two plans, Essentials and Pro, and a 14-day Pro trial with no card. Without a plan a business keeps, free, its review link, a QR code, a printable counter card from the free review link tool and a message to share. The branded counter card and table tent PDFs come with the plans. The free part keeps working for as long as Kabsi operates.
 
 **Are prices the same in every country?**
 Yes, in US dollars.
@@ -1382,6 +1394,34 @@ Delete your business in Settings, and ask by email to delete your login too.
 
 ---
 
+### Questions owners in the UAE and the UK ask (credit sprint, 8 Nov 2026)
+
+**Can I pay in dirhams or pounds?**
+No. Prices are in US dollars only, and Kabsi shows no converted price. A card in dirhams or pounds is charged in US dollars; the card's bank converts it at its own rate and may add its own fee. Card payments are not open yet.
+
+**Is VAT added in the UAE or the UK?**
+Prices are plus tax where it applies. Creem, the merchant of record, works out any sales tax or VAT at its checkout; Kabsi does not set the rate. For what an invoice must show for your company, write to hello@kabsi.co before you pay.
+
+**Does the founding price cover my second branch?**
+No. The founding price is for the plan. An extra location has one price for everyone, $15 a month or $150 a year, founding place or not.
+
+**Can I pay with Apple Pay, or in instalments with Tabby?**
+Kabsi takes cards only, through Creem's checkout, and offers no pay-later plans. Whether a wallet such as Apple Pay shows depends on Creem's checkout; ask hello@kabsi.co if you need to know before you pay.
+
+**Does WhatsApp work with WhatsApp Business?**
+Yes. Kabsi messages the phone number you opted in with, so the messages arrive in whichever WhatsApp app uses that number, WhatsApp or WhatsApp Business.
+
+**Can my manager approve on WhatsApp while I am away, for example over Eid?**
+Yes, for what you let managers approve. In Settings, Team, turn a kind on (review replies, for example), and a manager who has opted in their own phone can approve, undo and edit those drafts on WhatsApp. Billing stays with the owner.
+
+**Can I pause my plan while we close for a season?**
+There is no pause. Cancel on the Plan page or on WhatsApp and the plan runs to the end of the period you paid for; choose a plan again when you reopen. A founding price is kept only while the subscription stays paid. For the weeks you are closed, set Closed for a while under Hours.
+
+**Does Kabsi know UAE National Day and Eid?**
+Yes. Kabsi asks about UAE public holidays from the official UAE list: National Day is 2 and 3 December. Eid and the other Islamic holidays follow the moon, so their dates are estimates until they are announced. Kabsi asks five days before and never assumes your hours.
+
+**Which data law does Kabsi follow, UK GDPR or the UAE's?**
+The privacy page (kabsi.co/privacy) says what Kabsi keeps, for how long, where it is processed, and how to see, correct or delete it. For a question about a specific law, write to hello@kabsi.co.
 ## 12. Glossary
 
 - **Google Business Profile:** your business's listing on Google Search and Maps.
@@ -1407,7 +1447,7 @@ Delete your business in Settings, and ask by email to delete your login too.
 - **Card code:** the 6-character code under a Kabsi card's QR.
 - **Test mode:** [TIME-SENSITIVE] Kabsi's state until Google approves its API access. Nothing is sent to Google automatically.
 - **Early access:** [TIME-SENSITIVE] a person on the Kabsi team does the Google steps by hand and posts what the owner approves, within one working day.
-- **Free:** the plan with the review link, QR code and table card. Also what a business is on after a trial or plan ends. **[CHANGING]** There will be no Free plan with Essentials and Pro.
+- **Free:** not a plan. What a business keeps without a plan, after a trial or a plan ends: the review link, the QR code, the printable counter card and a message to share. There is no Free plan.
 - **Free trial:** 14 days, no card, starting when Google access works.
 - **Kabsi Clients (5481006796):** Kabsi's Google business group. Owners invite it as a Manager.
 - **Waiting for Google access:** Kabsi's Manager access doesn't work yet for that business.
