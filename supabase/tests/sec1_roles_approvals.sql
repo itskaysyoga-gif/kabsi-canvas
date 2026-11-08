@@ -233,6 +233,9 @@ select is(public.claim_publication(((select v ->> 'publication_id' from t where 
   'then the same publication is claimed');
 
 -- 8. Founding 25: the owner match, for staff admins, without the number --------------------------------------------
+-- Definer review (R-126): the staff panel does not call it yet, so the browser grant was revoked on 8 Nov; this
+-- transaction (rolled back) grants it back to prove the staff admin check the panel will rely on.
+grant execute on function public.staff_founding_matches(uuid) to authenticated;
 insert into public.founding_applications (id, business_name, country, trade, business_kind, whatsapp, why_now, case_study,
   checkin_consent, consent_text)
 values ('00000000-0000-4000-8000-0000000004f1', 'Other Barber', 'AE', 'beauty_hair', 'Barber', '+15550002003',
