@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 8 Nov 2026, Fixes A, Fixes B, Definer review and the credit sprint. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 8 Nov 2026, after Close 1. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -12,8 +12,8 @@ Files named in this list are in `docs/progress/archive/`.
 - 5 Nov 2026: Scan 2, Copy 3, App 4, Guides 4, Fix 3, Industries 2 and 3, Style 1, App 5 (PRs 369 to 408). Detail: the dated `2026-11-05-*.md` files.
 - 5 Nov 2026, App 6, Scan 3 and Site 2 (PRs 409 to 419): Settings saves at once; one bot check per search session, the progressive free check and the review link tool; header, footer, photos, About. `2026-11-05-app6.md`, `-scan3.md`, `-site2.md`.
 - Launch 1 to 4 (30.35 to 30.38, PRs 422 to 448): About and the readiness check, Nora's link filter, server copies of Lead and FreeScanCompleted, one door to sign-up, UK holidays by nation, Functions in fra1, /privacy section 15, the live speed gate passing (Home 206 KB, Pricing 221 KB, /scan 231 KB). `2026-11-06-launch1.md` to `-launch4.md`.
-- Speed 2 (PRs 452 to 460, approved by lane R): tagged ad clicks and the founding count from Vercel's edge; suggestions through `/api/suggest` (no cache of Google's lists, Places terms). `2026-11-06-speed2.md`.
-- Harvey 4A (30.39): Outbound in Kabsi, locked, no business written to. Outbound test (PRs 464 to 468): inbox login, Companies House from Harvey's register, the part G run. Record corrected 7 Nov: Gmail put both test emails in Spam (Rashid moved them to the inbox, 22:38 Beirut); mail-tester 9.2, only the domain's age. Outbound polish: a name ending in s takes an apostrophe only; new gate 30.39 item 13. `2026-11-06-outbound-test.md`.
+- Speed 2 (PRs 452 to 460): tagged ad clicks and the founding count from Vercel's edge; suggestions through `/api/suggest`, no cache. `2026-11-06-speed2.md`.
+- Harvey 4A (30.39): Outbound in Kabsi, locked, no business written to. Outbound test (PRs 464 to 468): Gmail put both test emails in Spam (Rashid moved them to the inbox); mail-tester 9.2, only the domain's age; new gate 30.39 item 13. `2026-11-06-outbound-test.md`.
 - No customer is live yet. Before the first Meta ad (30.35 item 5): the DataForSEO top-up, Vercel Pro and the open lines of `docs/launch1/readiness.md`. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -53,7 +53,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - App 5: may qa-staff@test.local be staff, for live staff runs? (LATER row)
 - Launch 1: send one Founding 25 application named "QA Launch 1 test" (a session removes the row).
 - Outbound: before you say start, the placement test of 30.39 item 13 (LATER row).
-- Credit sprint: lane R decides reply.v4 (PR 499); four facts need an answer (UAE VAT, Creem invoice fields, Apple Pay, data law).
+- Close 1: merge PR 499 (reply.v4) with the admin merge; the rule on main refuses it while the Prompt gate is red, by design (R-130); then check the deployed function names reply.v4. After the DataForSEO top-up, one full free check to see why the one of 6 Nov failed (30.42).
 
 ## Open After merge checks and findings
 
@@ -63,8 +63,8 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 8 Nov 2026, Credit sprint (R-129, PRs 493 to 499): 7 live runs by hand, 12.83 of 65 USD. Replies: 120 salon cases, reply.v4 judge 4.72 to 4.78 (PR 499 waits for lane R, Prompt gate). Nora: 90 owner questions, facts fixed, 4.73 to 4.81. 8 salon guides from 16 Nov, judged 5 of 5. Ledger `2026-11-08-credit-sprint.md`.
-- 8 Nov 2026, Live check (R-126): 64 pages crawled, consent and keyboard checked; six small defects fixed; free check timing not run. `2026-11-08-live-check.md`.
+- 8 Nov 2026, Close 1 (R-130 to R-133, PRs 496, 499 to 502): live check merged and PostHog stops capturing after a no (one flag call left); reply.v4 ready, merge refused by the rule; the quick check says about 30 seconds and sends its seconds; Nora's findings fixed; master plan 30.42. `2026-11-08-close1.md`.
+- 8 Nov 2026, Credit sprint (R-129, PRs 493 to 499): 7 live runs by hand, 12.83 of 65 USD; reply.v4 judge 4.72 to 4.78; Nora's 90 owner questions 4.73 to 4.81; 8 salon guides from 16 Nov. Ledger `2026-11-08-credit-sprint.md`.
 
 ## How a session updates this page
 
