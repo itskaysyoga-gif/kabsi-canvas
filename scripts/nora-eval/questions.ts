@@ -208,7 +208,10 @@ export const QUESTIONS: Question[] = [
     lang: "en",
     topic: "What customers say",
     ask: "Does Kabsi summarise what my customers say about me?",
-    kb: [/\*\*What customers say \(Pro\):\*\*/, /What customers say \(Pro\):\*\* a monthly summary[^\n]*not switched on yet/],
+    kb: [
+      /\*\*What customers say \(Pro\):\*\*/,
+      /What customers say \(Pro\):\*\* a monthly summary[^\n]*not switched on yet/,
+    ],
     must: [/What customers say/],
     coming: true,
     reference:
