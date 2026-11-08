@@ -94,8 +94,10 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <GlobalErrorBoundary>
-          <Outlet />
+          {/* Live check 8 Nov 2026 (R-126): the bar is first in the page, so a keyboard or screen reader visitor reaches it
+              at once instead of after every link of the page. It is fixed to the foot of the screen either way. */}
           <DeferredPrivacyBanner />
+          <Outlet />
         </GlobalErrorBoundary>
       </AuthProvider>
     </QueryClientProvider>

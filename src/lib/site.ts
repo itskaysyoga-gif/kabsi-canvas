@@ -369,7 +369,11 @@ export function pageHead(o: {
       content: o.imageAlt ?? `Kabsi. ${BRAND_LINE}`,
     },
   ];
-  if (o.noindex) meta.push({ name: "robots", content: "noindex" });
+  // Live check 8 Nov 2026 (R-126): every page says its robots state, not only the pages kept out of search.
+  meta.push({
+    name: "robots",
+    content: o.noindex ? "noindex" : "index, follow, max-image-preview:large",
+  });
   return {
     meta,
     links: [{ rel: "canonical", href: url }],
