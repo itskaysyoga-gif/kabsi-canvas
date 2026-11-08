@@ -118,7 +118,7 @@ export function CareBottom({ r, latest }: { r: CareData; latest: boolean }) {
             <p className="mt-2 text-label font-semibold text-text-2">
               Google's figures are kept with a report for 30 days.
               {r.activity.example
-                ? " These are examples until Kabsi's Google connection is live."
+                ? " These are examples on the demo business."
                 : ""}
             </p>
           </>
