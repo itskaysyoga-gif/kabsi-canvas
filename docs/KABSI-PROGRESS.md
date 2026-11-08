@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 8 Nov 2026, Fixes A, Fixes B and Definer review. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 8 Nov 2026, Fixes A, Fixes B, Definer review and the credit sprint. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -62,9 +62,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 8 Nov 2026, Credit sprint (R-129): live evaluation runs by hand on the promotional credit, at most 65 USD; the ledger and the scores are in `2026-11-08-credit-sprint.md`. Part A baseline: reply.v3 judge 4.72, Nora 4.75; 3.20 USD so far.
 - 8 Nov 2026, Fixes B (R-126, PRs 488, 491): examples by trade, Prepared before Google is read, Reports lead, Home counts. `2026-11-08-fixes-b.md`.
 - 8 Nov 2026, Definer review (R-126): three unused definer functions and `action_tokens` closed to the browser; allowlist test; 59 no-policy tables service-only. `2026-11-08-definer-review.md`.
-- 8 Nov 2026, Fixes A (R-126, R-127, 30.41): the audit's lines, owner WhatsApp no longer called coming in the facts, the weekly report email, five LATER rows. `2026-11-08-fixes-a.md`.
 
 ## How a session updates this page
 
