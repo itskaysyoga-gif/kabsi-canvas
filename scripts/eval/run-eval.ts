@@ -10,7 +10,7 @@
 // Run from a copy of the repo with nodeModulesDir set: gate.sh makes one.
 import { CASES, cut, liveModel, memoryFor, type Model, runAll, sample, stubModel } from "./eval.ts";
 import { meterCost, newMeter } from "../../supabase/functions/_shared/ai/client.ts";
-import { REPLY_V3 } from "../../supabase/functions/_shared/ai/prompts/reply.v3.ts";
+import { REPLY_V4 } from "../../supabase/functions/_shared/ai/prompts/reply.v4.ts";
 import { addRun, JUDGE_MODEL, makeJudge, summarize } from "./judge.ts";
 
 const args = Deno.args;
@@ -80,7 +80,7 @@ if (out)
   await Deno.writeTextFile(
     out,
     JSON.stringify(
-      { promptVersion: REPLY_V3, score, gate, stopped, cost, judge: sum, results },
+      { promptVersion: REPLY_V4, score, gate, stopped, cost, judge: sum, results },
       null,
       1,
     ),
@@ -120,7 +120,7 @@ if (judge && flag("--scores")) {
     gate: gate.pass,
     promptsHash: await promptsHash(),
   };
-  await Deno.writeTextFile(file, JSON.stringify(addRun(all, REPLY_V3, run), null, 1) + "\n");
+  await Deno.writeTextFile(file, JSON.stringify(addRun(all, REPLY_V4, run), null, 1) + "\n");
 }
 const pct = (n: number) => `${Math.round(n * 1000) / 10} percent`;
 console.log(

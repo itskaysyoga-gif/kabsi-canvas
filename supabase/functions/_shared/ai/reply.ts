@@ -9,12 +9,12 @@ import { fenceDraft, fenceReview, houseStyle, type ReviewInput, UNTRUSTED } from
 import { type Memory, memoryParts } from "./memory.ts";
 import { type ReplyOutput, replyChecks, scriptLanguage } from "./checks.ts";
 import { runContract, type Send, type Workflow } from "./contract.ts";
-import { REPLY_RULES, REPLY_V3, replyTask } from "./prompts/reply.v3.ts";
+import { REPLY_RULES, REPLY_V4, replyTask } from "./prompts/reply.v4.ts";
 import { CHECK_RULES } from "./prompts/check.v1.ts";
 import { CLASSIFY_RULES } from "./prompts/classify.v2.ts";
 import { type Industry, mergeRisk, type Risk, riskByRules, type RiskReason } from "./risk.ts";
 
-export { CONTACT_LINE } from "./prompts/reply.v3.ts";
+export { CONTACT_LINE } from "./prompts/reply.v4.ts";
 
 // Language and risk level (K-13, P0.3-03): code rules first, then the small model; the higher level wins. A review
 // with no text is not sent to a model, and neither is one the code rules already mark high: nothing can lower it and
@@ -86,7 +86,7 @@ export function replyWorkflow(o: { checkCall?: typeof message; meter?: Meter } =
   const call = o.checkCall ?? message;
   const draft = task("reply", "draft"), check = task("reply", "check");
   return {
-    promptVersion: REPLY_V3,
+    promptVersion: REPLY_V4,
     system: (i) => replySystem(i.memory),
     user: replyUser,
     maxTokens: draft.maxTokens,

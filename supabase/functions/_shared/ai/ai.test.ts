@@ -10,7 +10,7 @@ import { classify, draftGrounded, parseReply, replyWorkflow } from "./reply.ts";
 import { parseJson } from "./client.ts";
 import { editKinds, factAdditions, RULE_TEXT } from "./edits.ts";
 import { fenceDraft, houseStyle } from "./fence.ts";
-import { REPLY_V3 } from "./prompts/reply.v3.ts";
+import { REPLY_V4 } from "./prompts/reply.v4.ts";
 
 const DAY = 86_400_000;
 const row = (slot: string, key: string, value: Record<string, unknown>, extra: Partial<FactRow> = {}): FactRow =>
@@ -255,7 +255,7 @@ Deno.test("runner: the ai_runs record has the prompt version, models, hashes, me
   const m = await mem();
   const r = await draftGrounded({ review, memory: m, language: "en", risk: "low", recentReplies: [] }, send({}), { checkCall: checkOk });
   const rec = runRecord(r, { locationId: "loc-1", reviewId: "rv-1", workflow: "review_reply", memoryVersion: m.version });
-  assert.equal(rec.prompt_version, REPLY_V3);
+  assert.equal(rec.prompt_version, REPLY_V4);
   assert.equal(rec.model, "stub-draft");
   assert.match(rec.input_hash, /^[0-9a-f]{64}$/);
   assert.match(rec.output_hash!, /^[0-9a-f]{64}$/);
