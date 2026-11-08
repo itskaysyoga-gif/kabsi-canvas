@@ -8,6 +8,10 @@ select * from no_plan();
 
 \ir _fixtures.psql
 
+-- Definer review (R-126): no owner page offers the opt-in yet, so the browser grant was revoked on 8 Nov. The rules
+-- below are the ones the page will rely on, so this transaction (rolled back) grants it back to test them.
+grant execute on function public.set_protection_autofix(uuid, text, boolean, text) to authenticated;
+
 update public.locations set consent_at = now(), access_granted_at = now(), google_account_id = 'accounts/test',
   google_location_id = case when id = '00000000-0000-4000-8000-0000000000c1' then 'locations/mock-victim' else 'locations/mock-other' end,
   status = 'active'
@@ -74,6 +78,11 @@ reset role;
 select tests.act_as('00000000-0000-4000-8000-0000000000b2');
 select throws_ok($$ select public.set_protection_autofix('00000000-0000-4000-8000-0000000000c2', 'regular_hours', true,
   repeat('Kabsi puts back my approved opening hours. ', 2)) $$, 'P0001', 'pro_required', 'an Essentials business cannot');
+-- Definer review (R-126): the owner of business B cannot switch it on, or off, for business A.
+select throws_ok($$ select public.set_protection_autofix('00000000-0000-4000-8000-0000000000c1', 'regular_hours', true,
+  repeat('Kabsi puts back my approved opening hours. ', 2)) $$, '42501', null, 'the owner of another business cannot switch it on');
+select throws_ok($$ select public.set_protection_autofix('00000000-0000-4000-8000-0000000000c1', 'website', false) $$, '42501', null,
+  'the owner of another business cannot switch it off');
 reset role;
 select tests.act_as('00000000-0000-4000-8000-0000000000a1');
 select throws_ok(format($$ select public.set_protection_autofix('00000000-0000-4000-8000-0000000000c1', %L, true,
