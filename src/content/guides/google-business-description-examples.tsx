@@ -234,8 +234,8 @@ export const guide: GuideDoc = {
           Profile Coach, on Essentials and Pro, lists the description among the things a complete
           Google profile has, and shows what yours is missing. On Pro, Kabsi will write a draft
           description of up to 750 characters from the facts you confirmed, with no links, offers or
-          contact details, once its AI credit is switched on. Until then the screen says so and
-          nothing is written.
+          contact details, once that writer is switched on. It is not switched on yet, so the screen
+          says so and nothing is written.
         </p>
         <p>
           Nothing reaches Google without your approval, and Kabsi never suggests keywords for your

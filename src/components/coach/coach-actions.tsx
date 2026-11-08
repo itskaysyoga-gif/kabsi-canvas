@@ -334,8 +334,7 @@ function Description({ locationId }: { locationId: string }) {
     >
       {a?.state === "ai_off" ? (
         <p className="text-small text-text-2">
-          Kabsi writes this draft once its AI credit is switched on. Nothing has been written for
-          you yet.
+          This writer is not switched on yet. Nothing has been written for you.
         </p>
       ) : null}
       {a?.state === "no_facts" ? (
