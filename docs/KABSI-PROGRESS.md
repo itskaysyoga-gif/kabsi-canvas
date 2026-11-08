@@ -63,7 +63,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 8 Nov 2026, Request book PR A (Build decisions tab of the KABSI 3.0 doc): eight empty service-only tables, real customer data refused by the database, nothing calls them; no behaviour, price or wording change, so no facts change.
+- 8 Nov 2026, Request book PR A and B (dark): 8 service-only tables and 6 functions, off by default, real customer identifiers refused, nothing calls them; no behaviour, price or wording change. `2026-11-08-request-book.md`.
 - 8 Nov 2026, Close 1 (R-130 to R-133, PRs 496, 499 to 502): live check merged and PostHog stops capturing after a no (one flag call left); reply.v4 ready, merge refused by the rule; the quick check says about 30 seconds and sends its seconds; Nora's findings fixed; master plan 30.42. `2026-11-08-close1.md`.
 
 ## How a session updates this page
