@@ -451,13 +451,13 @@ Delete your business in Settings, and ask by email to delete your login too.
 No. Prices are in US dollars only, and Kabsi shows no converted price. A card in dirhams or pounds is charged in US dollars; the card's bank converts it at its own rate and may add its own fee. Card payments are not open yet.
 
 **Is VAT added in the UAE or the UK?**
-Prices are plus tax where it applies. Creem, the merchant of record, works out any sales tax or VAT at its checkout; Kabsi does not set the rate. For what an invoice must show for your company, write to hello@kabsi.co before you pay.
+Prices are plus tax where it applies. Creem, the merchant of record, works out any sales tax or VAT at its checkout; Kabsi does not set the rate and does not state one. What the invoice or receipt shows, such as a company name or a VAT number, is shown on Creem's receipt; the detail is confirmed before card payments open. For your company's details, write to hello@kabsi.co before you pay.
 
 **Does the founding price cover my second branch?**
 No. The founding price is for the plan. An extra location has one price for everyone, $15 a month or $150 a year, founding place or not.
 
 **Can I pay with Apple Pay, or in instalments with Tabby?**
-Kabsi takes cards only, through Creem's checkout, and offers no pay-later plans. Whether a wallet such as Apple Pay shows depends on Creem's checkout; ask hello@kabsi.co if you need to know before you pay.
+Cards work, through Creem's checkout. Creem lists Apple Pay and Google Pay as supported, so one may appear at checkout; what shows depends on the product, your country and your device, so it may appear and may not. Kabsi offers no pay-later plans such as Tabby. Card payments are not open yet.
 
 **Does WhatsApp work with WhatsApp Business?**
 Yes. Kabsi messages the phone number you opted in with, so the messages arrive in whichever WhatsApp app uses that number, WhatsApp or WhatsApp Business.
@@ -472,4 +472,4 @@ There is no pause. Cancel on the Plan page or on WhatsApp and the plan runs to t
 Yes. Kabsi asks about UAE public holidays from the official UAE list: National Day is 2 and 3 December. Eid and the other Islamic holidays follow the moon, so their dates are estimates until they are announced. Kabsi asks five days before and never assumes your hours.
 
 **Which data law does Kabsi follow, UK GDPR or the UAE's?**
-The privacy page (kabsi.co/privacy) says what Kabsi keeps, for how long, where it is processed, and how to see, correct or delete it. For a question about a specific law, write to hello@kabsi.co.
+Kabsi does not claim to comply with any named law. The privacy page (kabsi.co/privacy) says what Kabsi keeps, for how long, where it is processed, and how to see, correct or delete it. You can ask for your data to be deleted at any time, and for a question about a specific law, write to hello@kabsi.co.
