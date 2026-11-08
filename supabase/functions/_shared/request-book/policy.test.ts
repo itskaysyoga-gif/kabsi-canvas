@@ -234,3 +234,35 @@ Deno.test("policy: only an open enquiry converts, to an appointment or a job, an
   assertEquals(convertDecision({ ...ok, kind: "job" }), { allowed: false, reason: "not_enquiry" });
   assertEquals(convertDecision({ ...ok, status: "closed" }), { allowed: false, reason: "closed" });
 });
+
+// ---- found by the independent review ---------------------------------------------------------------------------
+
+Deno.test("policy: a role that is not owner, manager or staff is refused everywhere, as a non-member", () => {
+  for (const role of ["admin", null, undefined, ""] as unknown as Role[]) {
+    assertEquals(statusDecision({ role, kind: "job", from: "waiting", to: "active", outcome: null, startsAt: null, now: NOW }), { allowed: false, reason: "not_member" });
+    assertEquals(correctDecision(role, ["next_action"]), { allowed: false, reason: "not_member" });
+    assertEquals(undoDecision({ role, isOriginalActor: true, ageMinutes: 1, isLatest: true, isUndo: false, alreadyUndone: false }), { allowed: false, reason: "not_member" });
+    assertEquals(confirmationDecision({ role, kind: "appointment", status: "requested", startsAt: FUTURE, confirmed: true, alreadySo: false }), { allowed: false, reason: "not_member" });
+    assertEquals(convertDecision({ role, kind: "enquiry", status: "new", to: "appointment" }), { allowed: false, reason: "not_member" });
+  }
+});
+
+Deno.test("policy: reopening needs to know how the request closed", () => {
+  const base = { role: "owner" as Role, kind: "enquiry" as Kind, from: "closed", to: "new", outcome: null, startsAt: null, now: NOW, reopenTo: "new" };
+  assertEquals(statusDecision(base), { allowed: false, reason: "not_reopenable" }); // closedOutcome left out
+  assertEquals(statusDecision({ ...base, closedOutcome: "converted" }), { allowed: false, reason: "not_reopenable" });
+  assertEquals(statusDecision({ ...base, closedOutcome: "lost" }), { allowed: true, approval: "ask_first", flags: ["reopened"] });
+});
+
+Deno.test("policy: a correction of a closed request, of an erased customer's name, and of a time that clears confirmations", () => {
+  assertEquals(correctDecision("owner", ["summary"], { status: "closed" }), { allowed: false, reason: "closed" });
+  assertEquals(correctDecision("owner", ["summary"], { status: "requested" }).allowed, true);
+  assertEquals(correctDecision("owner", ["customer_name"], { customerErased: true }), { allowed: false, reason: "customer_erased" });
+  assertEquals(correctDecision("owner", ["summary"], { customerErased: true }).allowed, true);
+  assertEquals(correctDecision("owner", ["starts_at"], { kind: "appointment", hasConfirmation: true }), { allowed: true, approval: "undo_offered", flags: ["confirmations_cleared"] });
+  assertEquals(correctDecision("manager", ["ends_at", "summary"], { hasConfirmation: true }), { allowed: true, approval: "undo_offered", flags: ["confirmations_cleared"] });
+  assertEquals(correctDecision("owner", ["starts_at"], { hasConfirmation: false }), { allowed: true, approval: "undo_offered", flags: [] });
+  assertEquals(correctDecision("owner", ["summary"], { hasConfirmation: true }), { allowed: true, approval: "undo_offered", flags: [] });
+  // A closed request is refused before anything else a role could do to it, but a role limit still wins first.
+  assertEquals(correctDecision("staff", ["summary"], { status: "closed" }), { allowed: false, reason: "forbidden" });
+});

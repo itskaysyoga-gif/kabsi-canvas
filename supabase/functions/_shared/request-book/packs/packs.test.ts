@@ -59,8 +59,8 @@ Deno.test("packs: the three differ in the words an owner reads, and agree on the
 Deno.test("packs: no word that claims a fact, no dash, no exclamation mark and no Arabic script anywhere in a pack", () => {
   for (const p of PACKS) {
     const text = JSON.stringify(p);
-    assert(!/[–—!]/.test(text), `${p.id} dash or exclamation mark`);
-    assert(!/[؀-ۿ]/.test(text), `${p.id} Arabic script`);
+    assert(!/[\u2013\u2014!]/.test(text), `${p.id} dash or exclamation mark`);
+    assert(!/[\u0600-\u06ff]/.test(text), `${p.id} Arabic script`);
     // Examples are what an owner types and may say booked or confirmed; the words an owner is shown may not.
     const shown = JSON.stringify({ title: p.title, words: p.words, services: p.services.map((s) => s.label), fields: p.fields.map((f) => f.label) });
     assert(!/\b(book(ed|ing)?|available|availability|confirm(ed|ation)?)\b/i.test(shown), `${p.id} claim word`);
@@ -153,10 +153,10 @@ Deno.test("schema: no dash, exclamation mark, Arabic script, edge space or lengt
     p.words.status["appointment"]!["requested"] = word;
     return problems(p);
   };
-  assert(mk("Asked — waiting").some((x) => x.includes("dash")));
-  assert(mk("Asked – waiting").some((x) => x.includes("dash")));
+  assert(mk("Asked \u2014 waiting").some((x) => x.includes("dash")));
+  assert(mk("Asked \u2013 waiting").some((x) => x.includes("dash")));
   assert(mk("Asked!").some((x) => x.includes("exclamation")));
-  assert(mk("مرحبا").some((x) => x.includes("Arabic script")));
+  assert(mk("\u0645\u0631\u062d\u0628\u0627").some((x) => x.includes("Arabic script")));
   assert(mk(" Asked").some((x) => x.includes("spaces at an end")));
   assert(mk("x".repeat(41)).length > 0);
   assert(mk("").length > 0);
@@ -183,7 +183,7 @@ Deno.test("schema: services need a key, a label and plain spellings, and no spel
   f.services[0]!.key = "Bad Key";
   assert(problems(f).some((x) => x.includes("services[0].key")));
   const g = base();
-  g.services[0]!.spellings = ["café"];
+  g.services[0]!.spellings = ["caf\u00e9"];
   assert(problems(g).some((x) => x.includes("lower case")));
 });
 
@@ -238,4 +238,26 @@ Deno.test("schema: assertValidPack throws and names every problem", () => {
     message = (e as Error).message;
   }
   assert(message.includes("is not valid") && message.includes("id") && message.includes("kinds"));
+});
+
+// ---- found by the independent review ---------------------------------------------------------------------------
+
+Deno.test("schema: a key the schema does not define is refused at every level, not only the top", () => {
+  const withExtra = (mutate: (p: Record<string, any>) => void) => {
+    const p = clone(salonV1) as Record<string, any>;
+    mutate(p);
+    return problems(p);
+  };
+  assert(withExtra((p) => { p.services[0].run = "x"; }).some((x) => x.startsWith("services[0].run")));
+  assert(withExtra((p) => { p.fields[0].onSave = "x"; }).some((x) => x.startsWith("fields[0].onSave")));
+  assert(withExtra((p) => { p.examples[0].extra = "x"; }).some((x) => x.startsWith("examples[0].extra")));
+  assert(withExtra((p) => { p.words.hook = "x"; }).some((x) => x.startsWith("words.hook")));
+  assert(withExtra((p) => { p.words.customer.extra = "x"; }).some((x) => x.startsWith("words.customer.extra")));
+  assert(withExtra((p) => { p.words.kinds.appointment.extra = "x"; }).some((x) => x.includes("words.kinds.appointment.extra")));
+});
+
+Deno.test("schema: every Arabic block and every dash or exclamation mark an owner could read is refused", () => {
+  const mk = (title: string) => problems({ ...clone(salonV1), title });
+  for (const c of ["\u0645", "\u0750", "\u08a1", "\ufb51", "\ufe8d", "\ufdf2"]) assert(mk(`Salon ${c}`).some((x) => x.includes("Arabic script")), c.codePointAt(0)!.toString(16));
+  for (const c of ["\u2012", "\u2013", "\u2014", "\u2015", "\u2212", "\uff01", "!"]) assert(mk(`Salon ${c} one`).some((x) => x.includes("dash")), c.codePointAt(0)!.toString(16));
 });

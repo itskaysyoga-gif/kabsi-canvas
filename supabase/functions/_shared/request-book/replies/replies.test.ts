@@ -109,12 +109,17 @@ Deno.test("replies: unconfirmed means missing either confirmation, and the line 
   assertEquals(confirmationText(row({ kind: "enquiry", status: "new" }), gymV1), null);
   assertEquals(confirmationText(row({ status: "closed", outcome: "attended" }), salonV1), null);
 
-  const list = openListReply([row({ staff_confirmed: true }), row({ customer_confirmed: true }), row(), row({ staff_confirmed: true, customer_confirmed: true })], 0, c, { unconfirmed: true }).body;
+  const list = openListReply([row({ staff_confirmed: true }), row({ customer_confirmed: true }), row()], 0, c, { unconfirmed: true }).body;
   assertStringIncludes(list, "Needs confirmation from the client");
   assertStringIncludes(list, "Needs confirmation from the salon");
   assertStringIncludes(list, "Needs confirmation from the salon and from the client");
-  assertStringIncludes(list, "Confirmed by the salon \u00b7 Confirmed by the client");
-  assertStringIncludes(list, "4 appointments still need a confirmation.");
+  assertStringIncludes(list, "Confirmed by the client, as told to staff");
+  assertStringIncludes(list, "3 appointments still need a confirmation.");
+  // The headline is only as strong as the rows: a row that holds both confirmations is not claimed to be missing one.
+  const mixed = openListReply([row({ staff_confirmed: true, customer_confirmed: true }), row()], 0, c, { unconfirmed: true }).body;
+  assertStringIncludes(mixed, "2 open.");
+  assertNotMatch(mixed, /still need/);
+  assertStringIncludes(mixed, "Confirmed by the salon " + String.fromCharCode(0xb7) + " Confirmed by the client, as told to staff");
 });
 
 Deno.test("replies: the words come from the pack", () => {
@@ -344,4 +349,65 @@ Deno.test("replies: no reply text uses a retired name, an exclamation mark or a 
     assertMatch(t, /\S/);
   }
   assert(KINDS.length === 3);
+});
+
+// ---- found by the independent review ---------------------------------------------------------------------------
+
+Deno.test("replies: a time with no day, or with too many readings, never gives an empty button or a Save", () => {
+  const c = ctx(salonV1);
+  const read = (t: string) => normalizeMessage(t, { country: "AE", timeZone: TZ, now: NOW, pack: salonV1 });
+  const noDay = proposalReply({ kind: "appointment", name: "Sarah", summary: "Haircut", norm: read("Sarah haircut at 3") }, c);
+  assertEquals(noDay.buttons, ["03:00", "15:00"]);
+  assertNotMatch(noDay.body, / or \n| or $/);
+  for (const text of ["Sarah next sunday 3", "Sarah sunday 3"]) {
+    const many = proposalReply({ kind: "appointment", name: "Sarah", summary: null, norm: read(text) }, c);
+    assertEquals(many.buttons, ["Change"], text);
+    assertNotMatch(many.body, /Save/);
+    assertStringIncludes(many.body, "Say the day and the hour");
+  }
+  // Two phone numbers are two buttons, and nothing can be saved until one is chosen.
+  const phones = proposalReply({ kind: "appointment", name: "Maya", summary: null, norm: read("Maya 0501234567 or 0551234567") }, c);
+  assertEquals(phones.buttons, ["+971501234567", "+971551234567"]);
+  assertNotMatch(phones.body, /tap Save/);
+  for (const text of ["Sarah at 3", "Sarah next sunday 3", "Maya 0501234567 or 0551234567", "Sarah tomorrow 10"]) {
+    const r = proposalReply({ kind: "appointment", name: "Sarah", summary: null, norm: read(text) }, c);
+    for (const b of r.buttons ?? []) assert(b.trim().length > 0, `${text}: empty button`);
+  }
+});
+
+Deno.test("replies: a long list never loses its footer or its count; the rows are what shrink", () => {
+  const c = ctx(salonV1);
+  const long = (i: number) => row({ number: i, customer_name: "N".repeat(200), summary: "S".repeat(300), starts_at: null, requested_window_text: "W".repeat(200) });
+  const rows = Array.from({ length: 15 }, (_, i) => long(i + 1));
+  const l = openListReply(rows, 40, c, { unconfirmed: true }).body;
+  assert(l.length <= 4096, `${l.length}`);
+  assertStringIncludes(l, COVERS_NOTE);
+  assertMatch(l, /and \d+ more/);
+  const total = Number(l.match(/^(\d+) /)![1]);
+  const shownRows = l.split("\n").filter((x) => x.startsWith("#")).length;
+  assertEquals(total, 55);
+  assertEquals(Number(l.match(/and (\d+) more/)![1]) + shownRows, 55);
+  // The same for a search with several hits.
+  const f = foundReply(rows, 40, c).body;
+  assertStringIncludes(f, COVERS_NOTE);
+  assertMatch(f, /and \d+ more/);
+});
+
+Deno.test("replies: a correction with many changes keeps its note about the confirmations and counts what it left out", () => {
+  const c = ctx(salonV1);
+  const changes = Array.from({ length: 12 }, (_, i) => ({ field: "summary", before: "B".repeat(80), after: `${"A".repeat(78)}${i}` }));
+  const r = correctedReply(row({ number: 12 }), changes, c, ["confirmations_cleared"]);
+  assert(r.body.length <= 1024);
+  assertStringIncludes(r.body, "The time changed, so both confirmations were cleared.");
+  assertMatch(r.body, /and \d+ more changes/);
+});
+
+Deno.test("replies: tomorrow is the next date on the business's calendar, not 24 hours on", () => {
+  const ny = "America/New_York";
+  const night = new Date("2027-03-14T04:30:00Z"); // 23:30 on 13 Mar in New York
+  assertEquals(formatWhen("2027-03-14T14:00:00.000Z", ny, night), "Tomorrow 10:00");
+  assertEquals(formatWhen("2027-03-15T14:00:00.000Z", ny, night), "Mon 15 Mar 10:00");
+  assertEquals(formatWhen("2027-03-14T03:00:00.000Z", ny, night), "Today 22:00");
+  // A zone that is not a zone gives no text rather than an error.
+  assertEquals(formatWhen("2027-03-14T14:00:00.000Z", "Not/AZone", night), "");
 });

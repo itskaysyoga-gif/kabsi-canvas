@@ -56,8 +56,11 @@ const KEY = /^[a-z][a-z0-9_]{1,30}$/;
 
 /** Words that claim a fact. Code writes them from the record; a pack may never supply one (reply rule). */
 export const CLAIM_WORDS = /\b(book(?:ed|ing|ings)?|available|availability|confirm(?:ed|s|ing|ation|ations)?)\b/i;
-const DASH_OR_BANG = /[–—!]/;
-const ARABIC_SCRIPT = /[؀-ۿݐ-ݿ]/;
+// Every dash an owner could read as an em or en dash, and every exclamation mark, ASCII or full-width.
+// Every dash an owner could read as an em or en dash, and every exclamation mark, ASCII or full-width.
+const DASH_OR_BANG = /[\u2012-\u2015\u2212\uff01!]/;
+// The whole Arabic script: the main block, its supplements and extended blocks, and both presentation forms.
+const ARABIC_SCRIPT = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff\ufb50-\ufdff\ufe70-\ufeff]/;
 
 export type PackProblem = { path: string; message: string };
 
@@ -75,8 +78,14 @@ function checkText(path: string, v: unknown, max: number, out: PackProblem[], op
   return true;
 }
 
+/** An object may hold only the keys it is defined to hold: a pack is data, and a stray key could be anything. */
+function onlyKeys(path: string, v: Record<string, unknown>, allowed: readonly string[], out: PackProblem[]) {
+  for (const k of Object.keys(v)) if (!allowed.includes(k)) out.push({ path: path ? `${path}.${k}` : k, message: "is not part of the pack schema" });
+}
+
 function checkWords(path: string, v: unknown, out: PackProblem[]) {
   if (!isObj(v)) return void out.push({ path, message: "must be { singular, plural }" });
+  onlyKeys(path, v, ["singular", "plural"], out);
   checkText(`${path}.singular`, v["singular"], 40, out);
   checkText(`${path}.plural`, v["plural"], 40, out);
 }
@@ -106,6 +115,7 @@ export function validatePack(input: unknown): PackProblem[] {
   const w = p["words"];
   if (!isObj(w)) out.push({ path: "words", message: "is required" });
   else {
+    onlyKeys("words", w, ["customer", "staffSide", "kinds", "status"], out);
     checkWords("words.customer", w["customer"], out);
     checkText("words.staffSide", w["staffSide"], 40, out);
     const wk = isObj(w["kinds"]) ? w["kinds"] : null;
@@ -146,6 +156,7 @@ export function validatePack(input: unknown): PackProblem[] {
     services.forEach((s, i) => {
       const at = `services[${i}]`;
       if (!isObj(s)) return void out.push({ path: at, message: "must be { key, label, spellings }" });
+      onlyKeys(at, s, ["key", "label", "spellings"], out);
       if (typeof s["key"] !== "string" || !KEY.test(s["key"])) out.push({ path: `${at}.key`, message: "must match ^[a-z][a-z0-9_]{1,30}$" });
       else if (keys.has(s["key"])) out.push({ path: `${at}.key`, message: "is used twice" });
       else keys.add(s["key"]);
@@ -175,6 +186,7 @@ export function validatePack(input: unknown): PackProblem[] {
     fields.forEach((f, i) => {
       const at = `fields[${i}]`;
       if (!isObj(f)) return void out.push({ path: at, message: "must be { key, label, target, required }" });
+      onlyKeys(at, f, ["key", "label", "target", "required"], out);
       if (typeof f["key"] !== "string" || !KEY.test(f["key"])) out.push({ path: `${at}.key`, message: "must match ^[a-z][a-z0-9_]{1,30}$" });
       else if (seen.has(f["key"])) out.push({ path: `${at}.key`, message: "is used twice" });
       else seen.add(f["key"]);
@@ -195,6 +207,7 @@ export function validatePack(input: unknown): PackProblem[] {
     examples.forEach((e, i) => {
       const at = `examples[${i}]`;
       if (!isObj(e)) return void out.push({ path: at, message: "must be { text, kind }" });
+      onlyKeys(at, e, ["text", "kind"], out);
       // An example is what an owner types, so it may say booked or confirmed; it still follows the other copy rules.
       checkText(`${at}.text`, e["text"], 200, out, { claims: false });
       if (!used.includes(e["kind"] as Kind)) out.push({ path: `${at}.kind`, message: "must be one of the used kinds" });

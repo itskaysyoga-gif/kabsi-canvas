@@ -1,6 +1,6 @@
 // Digits and text folding (normalizer "digits", version 1). Arabic-Indic and Eastern Arabic-Indic digits become Latin
 // digits, one character for one character, so a position found in the changed text is the same position in the original.
-// Code points are written as escapes: no Arabic script appears in this file.
+// Code points are written as escapes (\\uXXXX), so the source holds no Arabic script and no dash to be mistaken for one.
 
 export const DIGITS_VERSION = 1;
 
@@ -42,10 +42,10 @@ export function wordsOnly(text: string): string {
 export function foldKey(text: string): string {
   return toLatinDigits(text)
     .normalize("NFKD")
-    .replace(/[̀-ͯـً-ٰٟ]/g, "")
-    .replace(/[آأإ]/g, "ا")
-    .replace(/ة/g, "ه")
-    .replace(/ى/g, "ي")
+    .replace(/[\u0300-\u036f\u0640\u064b-\u065f\u0670]/g, "")
+    .replace(/[\u0622\u0623\u0625]/g, "\u0627")
+    .replace(/\u0629/g, "\u0647")
+    .replace(/\u0649/g, "\u064a")
     .toLowerCase()
     .replace(/\s+/g, " ")
     .trim();

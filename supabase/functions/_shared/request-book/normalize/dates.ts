@@ -82,17 +82,24 @@ const isRealDate = (x: Ymd) => {
   return t.getUTCFullYear() === x.y && t.getUTCMonth() === x.m - 1 && t.getUTCDate() === x.d;
 };
 
-/** The instant of a local date and time in a zone, or null when that wall time does not exist there (a clock change). */
-function instantOf(x: Ymd, hh: number, mm: number, tz: string): string | null {
+/**
+ * Every instant at which a local date and time shows on the clock in a zone: none when a clock change skips it, two
+ * when a clock change repeats it, otherwise one.
+ */
+function instantsOf(x: Ymd, hh: number, mm: number, tz: string): string[] {
   const guess = Date.UTC(x.y, x.m - 1, x.d, hh, mm);
-  let at = guess;
-  for (let i = 0; i < 3; i++) {
+  const offsetAt = (ms: number) => {
+    const l = localParts(new Date(ms), tz);
+    return Date.UTC(l.y, l.m - 1, l.d, l.hh, l.mm) - Math.floor(ms / 60_000) * 60_000;
+  };
+  const offsets = new Set([offsetAt(guess - 24 * 3600_000), offsetAt(guess), offsetAt(guess + 24 * 3600_000)]);
+  const found = new Set<number>();
+  for (const o of offsets) {
+    const at = guess - o;
     const l = localParts(new Date(at), tz);
-    const shown = Date.UTC(l.y, l.m - 1, l.d, l.hh, l.mm);
-    at += guess - shown;
+    if (l.y === x.y && l.m === x.m && l.d === x.d && l.hh === hh && l.mm === mm) found.add(at);
   }
-  const l = localParts(new Date(at), tz);
-  return l.y === x.y && l.m === x.m && l.d === x.d && l.hh === hh && l.mm === mm ? new Date(at).toISOString() : null;
+  return [...found].sort((p, q) => p - q).map((ms) => new Date(ms).toISOString());
 }
 
 type Found<T> = { value: T; start: number; end: number };
@@ -215,14 +222,19 @@ function bare(h: number, mi: number): Hour {
   return [{ hh: h, mm: mi }, { hh: h + 12, mm: mi }];
 }
 
-/** A bare number right after the day word ("tomorrow 10", "thursday 3") is an hour; anywhere else it is not read. */
+/**
+ * A bare number right after the day word ("tomorrow 10", "thursday 3", "tomorrow 10.30") is an hour; anywhere else it is
+ * not read. An hour or minute that cannot exist ("24:00", "10:75") is returned with no readings, so it is unknown and
+ * never silently dropped.
+ */
 function hourAfterDay(t: string, dayEnd: number): { reads: Hour; start: number; end: number } | null {
-  const m = /^[\s,]*(?:at\s+|l\s+|el\s+)?(\d{1,2})(?![0-9:.\/])(?!\s*(?:st|nd|rd|th|am|pm)\b)(?![a-z])(?![\s.\-]*\d)/.exec(t.slice(dayEnd));
+  const m = /^[\s,]*(?:at\s+|l\s+|el\s+)?(\d{1,2})(?:[:.h](\d{2}))?(?![0-9:.\/])(?!\s*(?:st|nd|rd|th|am|pm)\b)(?![a-z])(?![\s.\-]*\d)/.exec(t.slice(dayEnd));
   if (!m) return null;
   const h = Number(m[1]);
+  const mi = m[2] ? Number(m[2]) : 0;
   const start = dayEnd + m[0].indexOf(m[1]!);
-  const end = start + m[1]!.length;
-  return { reads: h > 23 ? [] : bare(h, 0), start, end };
+  const end = dayEnd + m[0].length;
+  return { reads: h > 23 || mi > 59 ? [] : bare(h, mi), start, end };
 }
 
 /**
@@ -262,16 +274,21 @@ export function normalizeWhen(text: string, ctx: { now: Date; timeZone: string }
   const days: (Ymd | null)[] = day ? day.days : [null];
   const times: ({ hh: number; mm: number } | null)[] = time ? time.reads : [null];
   const candidates: WhenCandidate[] = [];
+  let skipped = false;
   for (const d of days) {
     for (const hm of times) {
-      let startsAt: string | null = null;
-      if (d && hm) {
-        startsAt = instantOf(d, hm.hh, hm.mm, ctx.timeZone);
-        if (!startsAt) continue; // that wall time does not exist in this zone: not a reading
+      if (!d || !hm) {
+        candidates.push({ date: d ? iso(d) : null, time: hm ? `${pad(hm.hh)}:${pad(hm.mm)}` : null, startsAt: null });
+        continue;
       }
-      candidates.push({ date: d ? iso(d) : null, time: hm ? `${pad(hm.hh)}:${pad(hm.mm)}` : null, startsAt });
+      const at = instantsOf(d, hm.hh, hm.mm, ctx.timeZone);
+      // A wall time a clock change skips does not exist; one it repeats is two instants. Either way the owner did not say which.
+      if (at.length === 0) skipped = true;
+      for (const startsAt of at) candidates.push({ date: iso(d), time: `${pad(hm.hh)}:${pad(hm.mm)}`, startsAt });
     }
   }
+  // A reading that was dropped as impossible must not leave the other reading looking like what was written.
+  if (skipped) return { status: "unknown", reason: "time_does_not_exist", version: v };
   if (candidates.length === 0) return { status: "unknown", reason: "time_does_not_exist", version: v };
   if (candidates.length > 1) return { status: "ambiguous", candidates, raw, start, end, version: v };
   const c = candidates[0]!;

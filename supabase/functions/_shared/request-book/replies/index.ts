@@ -26,7 +26,7 @@ export function finish(body: string, buttons?: string[]): Reply {
 }
 
 const label = (row: Pick<RequestRow, "kind" | "number">, pack: Pack) => `${kindWord(pack, row.kind)} ${row.number}`;
-const who = (row: Pick<RequestRow, "customer_name">) => row.customer_name ?? "No name";
+const who = (row: Pick<RequestRow, "customer_name">) => clip(row.customer_name ?? "No name", 40);
 
 /** One request on one line: number, who, what, when, status and, for an appointment, what is still missing. */
 export function requestLine(row: RequestRow, ctx: ReplyContext, opts: { summaryMax?: number } = {}): string {
@@ -36,7 +36,7 @@ export function requestLine(row: RequestRow, ctx: ReplyContext, opts: { summaryM
   parts.push(statusWord(ctx.pack, row));
   const c = confirmationShort(row, ctx.pack);
   if (c) parts.push(c);
-  return parts.join(" · ");
+  return parts.join(" \u00b7 ");
 }
 
 /** The whole state of one request, in one reply. */
@@ -55,22 +55,35 @@ export function summaryReply(row: RequestRow, ctx: ReplyContext): Reply {
   return finish(lines.join("\n"));
 }
 
-/** A list of requests: the first 15, then how many more, and the note that it covers only what was entered in Kabsi. */
-function listBody(rows: RequestRow[], more: number, ctx: ReplyContext): string {
-  const shown = rows.slice(0, MAX_ROWS);
-  const rest = more + (rows.length - shown.length);
-  const kinds = [...new Set(shown.map((r) => r.kind))];
-  const out: string[] = [];
-  if (kinds.length <= 1) out.push(...shown.map((r) => requestLine(r, ctx)));
-  else {
-    const order = ctx.pack.kinds.filter((k) => kinds.includes(k)).concat(kinds.filter((k) => !ctx.pack.kinds.includes(k)));
-    for (const k of order) {
-      out.push(kindWord(ctx.pack, k, true));
-      out.push(...shown.filter((r) => r.kind === k).map((r) => requestLine(r, ctx)));
-    }
+/**
+ * Lines that must fit one message: the head, then the rows, then the footer. Rows are dropped from the end, and counted
+ * in "and N more", until it fits, so the footer (the note that a list covers only what was entered in Kabsi) is never
+ * the part that is cut.
+ */
+function fit(head: string[], items: string[], foot: string[], max: number, alreadyMore: number, moreText: (n: number) => string): string {
+  let shown = items.length;
+  for (;;) {
+    const more = alreadyMore + (items.length - shown);
+    const body = [...head, ...items.slice(0, shown), ...(more > 0 ? [moreText(more)] : []), ...foot].join("\n");
+    if (body.length <= max || shown <= 0) return body;
+    shown--;
   }
-  if (rest > 0) out.push(`and ${rest} more`);
-  return out.join("\n");
+}
+
+/** The rows of a list, grouped by kind when there is more than one, as lines. */
+function listLines(shown: RequestRow[], ctx: ReplyContext): string[] {
+  const kinds = [...new Set(shown.map((r) => r.kind))];
+  if (kinds.length <= 1) return shown.map((r) => requestLine(r, ctx));
+  const order = ctx.pack.kinds.filter((k) => kinds.includes(k)).concat(kinds.filter((k) => !ctx.pack.kinds.includes(k)));
+  return order.flatMap((k) => [kindWord(ctx.pack, k, true), ...shown.filter((r) => r.kind === k).map((r) => requestLine(r, ctx))]);
+}
+
+/** A list of requests: the first 15, then how many more, and the note that it covers only what was entered in Kabsi. */
+function listReply(head: string, rows: RequestRow[], more: number, ctx: ReplyContext, foot: string[]): Reply {
+  const shown = rows.slice(0, MAX_ROWS);
+  const lines = listLines(shown, ctx);
+  const body = fit([head], lines, foot, TEXT_BODY_MAX, more + (rows.length - shown.length), (n) => `and ${n} more`);
+  return finish(body);
 }
 
 /** "What is open", with the filter that was asked for. Plain text, no buttons. */
@@ -81,10 +94,12 @@ export function openListReply(rows: RequestRow[], more: number, ctx: ReplyContex
     const none = filter.unconfirmed ? `No ${plural} are waiting for a confirmation.` : "Nothing is open.";
     return finish(`${none}\n${COVERS_NOTE}`);
   }
-  const head = filter.unconfirmed
+  // The headline is only as strong as the rows: if any listed row holds both confirmations it is not claimed to be missing one.
+  const allMissing = rows.every((r) => r.kind === "appointment" && !(r.staff_confirmed && r.customer_confirmed));
+  const head = filter.unconfirmed && allMissing
     ? `${total} ${total === 1 ? kindWord(ctx.pack, "appointment").toLowerCase() : plural} still ${total === 1 ? "needs" : "need"} a confirmation.`
     : `${total} open.`;
-  return finish(`${head}\n${listBody(rows, more, ctx)}\n${COVERS_NOTE}`);
+  return listReply(head, rows, more, ctx, [COVERS_NOTE]);
 }
 
 /** The answer to "find": none, one in full, or several to choose from. */
@@ -92,7 +107,7 @@ export function foundReply(rows: RequestRow[], more: number, ctx: ReplyContext):
   const total = rows.length + more;
   if (total === 0) return finish(`Nothing found in Kabsi for that.\n${COVERS_NOTE}`);
   if (total === 1 && rows[0]) return summaryReply(rows[0], ctx);
-  return finish(`${total} found. Which one? Send its number.\n${listBody(rows, more, ctx)}\n${COVERS_NOTE}`);
+  return listReply(`${total} found. Which one? Send its number.`, rows, more, ctx, [COVERS_NOTE]);
 }
 
 export type ProposalView = {
@@ -104,9 +119,16 @@ export type ProposalView = {
   norm: Pick<NormalizedMessage, "phone" | "when">;
 };
 
+/** What one reading of a time is called on a button: the day and hour, or whichever part was written. */
+const readingLabel = (c: { date: string | null; time: string | null; startsAt: string | null }, ctx: ReplyContext): string => {
+  if (c.startsAt) return formatWhen(c.startsAt, ctx.timeZone, ctx.now);
+  return [c.date ? formatDay(c.date) : "", c.time ?? ""].filter(Boolean).join(" ");
+};
+
 /**
  * The proposal the owner saves. What was read is shown plainly, an unknown is left out, never filled in. When a time
- * or a number could be read two ways, each reading is a button and the tap saves that reading.
+ * or a number could be read two or three ways, each reading is a button and the tap saves that reading. While anything
+ * is still unresolved there is no Save: with more readings than buttons the owner is asked to say it again.
  */
 export function proposalReply(p: ProposalView, ctx: ReplyContext): Reply {
   const parts: string[] = [];
@@ -122,12 +144,20 @@ export function proposalReply(p: ProposalView, ctx: ReplyContext): Reply {
     else if (w.date) parts.push(`${formatDay(w.date)}, ${w.dayPart ? `${w.dayPart}, no exact time` : "no time"}`);
     else if (w.dayPart) parts.push(`${w.dayPart}, no exact time`);
   } else if (w.status === "ambiguous") {
-    readings = w.candidates.map((c) => (c.startsAt ? formatWhen(c.startsAt, ctx.timeZone, ctx.now) : c.date ? formatDay(c.date) : ""));
+    readings = w.candidates.map((c) => readingLabel(c, ctx)).filter(Boolean);
     parts.push(readings.join(" or "));
   }
-  const head = `${kindWord(ctx.pack, p.kind)}: ${parts.length ? parts.join(" · ") : "nothing readable yet"}`;
-  if (readings.length >= 2 && readings.length <= MAX_BUTTONS) {
-    return finish(`${head}\nWhich time did you mean? Nothing is saved until you tap.`, readings);
+  const head = `${kindWord(ctx.pack, p.kind)}: ${parts.length ? parts.join(" \u00b7 ") : "nothing readable yet"}`;
+  if (w.status === "ambiguous") {
+    if (readings.length === w.candidates.length && readings.length >= 2 && readings.length <= MAX_BUTTONS) {
+      return finish(`${head}\nWhich time did you mean? Nothing is saved until you tap.`, readings);
+    }
+    return finish(`${head}\nThat time could mean several things. Say the day and the hour, for example Thursday 3pm. Nothing is saved yet.`, ["Change"]);
+  }
+  if (phone.status === "ambiguous") {
+    const numbers = phone.candidates.map((c) => c.value);
+    if (numbers.length >= 2 && numbers.length <= MAX_BUTTONS) return finish(`${head}\nWhich number did you mean? Nothing is saved until you tap.`, numbers);
+    return finish(`${head}\nThere is more than one number. Send the one to use. Nothing is saved yet.`, ["Change"]);
   }
   return finish(`${head}\nNothing is saved until you tap Save.`, ["Save", "Change"]);
 }
@@ -191,8 +221,10 @@ const shown = (field: string, v: unknown, ctx: ReplyContext): string => {
 /** After a correction: each field with what it was and what it is now, and a note when the time change cleared the confirmations. */
 export function correctedReply(row: RequestRow, changes: FieldChange[], ctx: ReplyContext, flags: string[] = []): Reply {
   const lines = changes.map((c) => `${fieldLabel(ctx.pack, c.field)} changed from ${shown(c.field, c.before, ctx)} to ${shown(c.field, c.after, ctx)}.`);
-  if (flags.includes("confirmations_cleared")) lines.push("The time changed, so both confirmations were cleared.");
-  return finish([`${label(row, ctx.pack)}`, ...lines].join("\n"), ["Undo"]);
+  // The note about the confirmations is part of the answer, so it is kept and the changes shrink to make room.
+  const note = flags.includes("confirmations_cleared") ? ["The time changed, so both confirmations were cleared."] : [];
+  const body = fit([label(row, ctx.pack)], lines, note, BUTTON_BODY_MAX, 0, (n) => `and ${n} more ${n === 1 ? "change" : "changes"}`);
+  return finish(body, ["Undo"]);
 }
 
 /** After an enquiry became an appointment or a job: the enquiry stays on record and the new one holds no confirmation. */

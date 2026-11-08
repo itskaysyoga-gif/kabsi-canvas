@@ -99,3 +99,37 @@ Deno.test("registry: a missing, wrongly typed or out of range input is refused",
   assertEquals(checkInput("find", null), { ok: false, reason: "invalid_input" });
   assertEquals(checkInput("find", [] as unknown), { ok: false, reason: "invalid_input" });
 });
+
+// ---- found by the independent review ---------------------------------------------------------------------------
+
+Deno.test("registry: a name that exists on every object is still an unknown field", () => {
+  for (const key of ["constructor", "toString", "hasOwnProperty", "__proto__", "valueOf"]) {
+    const input = JSON.parse(`{"${key}": "x", "name": "ab"}`);
+    assertEquals(checkInput("find", input), { ok: false, reason: "unknown_field", field: key }, key);
+  }
+});
+
+Deno.test("registry: what each operation needs is enforced, as the database enforces it", () => {
+  const miss = (field: string) => ({ ok: false as const, reason: "missing_field" as const, field });
+  assertEquals(checkInput("update", { operation: "status", to_status: "contacted" }), miss("request_id"));
+  assertEquals(checkInput("update", { operation: "status", request_id: ID, to_status: "contacted" }), miss("expected_version"));
+  assertEquals(checkInput("update", { operation: "status", request_id: ID, expected_version: 1 }), miss("to_status"));
+  assertEquals(checkInput("update", { operation: "status", request_id: ID, expected_version: 1, to_status: "closed" }), miss("outcome"));
+  assertEquals(checkInput("update", { operation: "status", request_id: ID, expected_version: 1, to_status: "closed", outcome: "completed" }), { ok: true });
+  assertEquals(checkInput("update", { operation: "conversion" }), miss("request_id"));
+  assertEquals(checkInput("update", { operation: "confirmation", request_id: ID, expected_version: 1, party: "staff" }), miss("confirmed"));
+  assertEquals(checkInput("correct", { request_id: ID, expected_version: 1 }), miss("summary"));
+  assertEquals(checkInput("correct", { request_id: ID, expected_version: 1, details: { car: "x" } }), { ok: true });
+  assertEquals(checkInput("capture", { source: "typed" }), miss("text"));
+  assertEquals(checkInput("find", {}), miss("name"));
+  assertEquals(checkInput("summarize", {}), miss("number"));
+});
+
+Deno.test("registry: a time must be a real date with an offset", () => {
+  for (const bad of ["2026-02-31T10:00:00Z", "2026-11-09T10:00:00", "2026-11-09", "2026-13-01T10:00:00Z", "2026-11-09T25:00:00Z", "tomorrow"]) {
+    assertEquals(checkInput("list_open", { due: bad }), { ok: false, reason: "invalid_field", field: "due" }, bad);
+  }
+  for (const good of ["2026-11-09T06:00:00Z", "2026-11-09T06:00:00.000Z", "2026-11-09T10:00:00+04:00", "2026-11-09T10:00+04:00"]) {
+    assertEquals(checkInput("list_open", { due: good }), { ok: true }, good);
+  }
+});

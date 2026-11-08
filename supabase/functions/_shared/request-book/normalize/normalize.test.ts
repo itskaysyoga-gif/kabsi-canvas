@@ -8,9 +8,9 @@ import { normalizePhone, PHONE_VERSION } from "./phone.ts";
 import { normalizeVocabulary } from "./vocabulary.ts";
 
 // The Arabic-Indic digits 0501234567 and the Eastern Arabic-Indic ones.
-const ARABIC_INDIC = "٠٥٠١٢٣٤٥٦٧";
-const EASTERN = "۰۵۰۱۲۳۴۵۶۷";
-const FULL_WIDTH = "０５０１２３４５６７";
+const ARABIC_INDIC = "\u0660\u0665\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667";
+const EASTERN = "\u06f0\u06f5\u06f0\u06f1\u06f2\u06f3\u06f4\u06f5\u06f6\u06f7";
+const FULL_WIDTH = "\uff10\uff15\uff10\uff11\uff12\uff13\uff14\uff15\uff16\uff17";
 
 // Sunday 8 Nov 2026, 14:00 in Dubai.
 const NOW = new Date("2026-11-08T10:00:00Z");
@@ -47,9 +47,9 @@ Deno.test("digits: readable() and wordsOnly() keep the length, so a position in 
 });
 
 Deno.test("digits: foldKey ignores case, accents, spacing and digit forms, and never changes what is shown", () => {
-  assertEquals(foldKey("  Zoë   KHOURY "), "zoe khoury");
+  assertEquals(foldKey("  Zo\u00eb   KHOURY "), "zoe khoury");
   assertEquals(foldKey(`Room ${ARABIC_INDIC}`), "room 0501234567");
-  assertEquals(foldKey("أحمد"), foldKey("احمد"));
+  assertEquals(foldKey("\u0623\u062d\u0645\u062f"), foldKey("\u0627\u062d\u0645\u062f"));
 });
 
 // ---- phone ----------------------------------------------------------------------------------------------------
@@ -316,4 +316,60 @@ Deno.test("vocabulary: nothing the pack knows is unknown, and a different pack k
   assertEquals(normalizeVocabulary("ok thanks", salonV1).status, "unknown");
   assertEquals(normalizeVocabulary("brakes", salonV1).status, "unknown");
   assertEquals(normalizeVocabulary("highlights", garageV1).status, "unknown");
+});
+
+// ---- found by the independent review ---------------------------------------------------------------------------
+
+Deno.test("phone: two numbers written with only a space or a hyphen between them are two numbers", () => {
+  for (const t of ["0501234567 0507654321", "0501234567 - 0507654321", "0501234567-0507654321", "0501234567 / 0507654321"]) {
+    const r = normalizePhone(t, "AE");
+    assertEquals(r.status, "ambiguous", t);
+    if (r.status === "ambiguous") assertEquals(r.candidates.map((c) => c.value), ["+971501234567", "+971507654321"], t);
+  }
+  const one = normalizePhone("Corolla 2016 0501234567", "AE");
+  assert(one.status === "ok" && one.value === "+971501234567");
+});
+
+Deno.test("phone: a date or a time is never a phone number, in any country", () => {
+  const cases: [string, string][] = [
+    ["15 11 2026 10 30", "GB"], ["2026-11-15 10:30", "US"], ["15 nov 2026 11 30 55", "US"], ["10-11-2026 3 pm", "LB"],
+    ["15 11 2026", "GB"], ["2026 11 15", "AE"], ["11 2026 3", "LB"],
+  ];
+  for (const [t, c] of cases) assertEquals(normalizePhone(t, c).status, "unknown", `${t} ${c}`);
+  // A real number that ends in a year-like group is still a number.
+  const r = normalizePhone("+971 50 123 2026", null);
+  assert(r.status === "ok" && r.value === "+971501232026");
+});
+
+Deno.test("phone: an Arabic punctuation mark beside a number does not hide it, an Arabic letter against it does", () => {
+  for (const mark of ["\u060c", "\u061b", "\u061f"]) {
+    for (const t of [`0501234567${mark}`, `${mark}0501234567`]) {
+      const r = normalizePhone(t, "AE");
+      assert(r.status === "ok" && r.value === "+971501234567", JSON.stringify(t));
+    }
+  }
+  assertEquals(normalizePhone("\u0639\u0644\u064a0501234567", "AE").status, "unknown");
+});
+
+Deno.test("dates: an hour that a clock change skips is unknown, and one that it repeats is two readings, never a guess", () => {
+  const ny = "America/New_York";
+  const march = new Date("2027-03-01T12:00:00Z");
+  // 14 Mar 2027 02:30 does not exist in New York; 14:30 must not be offered as if the owner had written it.
+  assertEquals(normalizeWhen("14 mar 2027 2:30", { now: march, timeZone: ny }).status, "unknown");
+  assertEquals(normalizeWhen("14 mar 2027 2:30am", { now: march, timeZone: ny }).status, "unknown");
+  const eve = new Date("2027-03-13T15:00:00Z");
+  assertEquals(normalizeWhen("tomorrow 2:30", { now: eve, timeZone: ny }).status, "unknown");
+  // 1 Nov 2026 01:30 happens twice in New York.
+  const oct = new Date("2026-10-20T12:00:00Z");
+  const twice = normalizeWhen("1 nov 2026 1:30am", { now: oct, timeZone: ny });
+  assertEquals(twice.status, "ambiguous");
+  if (twice.status === "ambiguous") assertEquals(twice.candidates.map((c) => c.startsAt), ["2026-11-01T05:30:00.000Z", "2026-11-01T06:30:00.000Z"]);
+});
+
+Deno.test("dates: an hour or minute that cannot exist is unknown, not dropped", () => {
+  for (const t of ["tomorrow 24:00", "tomorrow 10:75", "tomorrow 25", "tomorrow 10.75"]) assertEquals(when(t).status, "unknown", t);
+  const dot = when("tomorrow 10.30");
+  assert(dot.status === "ok" && dot.time === "10:30" && dot.raw === "tomorrow 10.30");
+  const colon = when("tomorrow 10:30");
+  assert(colon.status === "ok" && colon.time === "10:30");
 });

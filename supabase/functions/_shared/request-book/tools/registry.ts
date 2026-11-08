@@ -187,15 +187,36 @@ export const UNDO_BUTTON = { database: "request_undo", idempotency: "button_id" 
 export const TOOL_NAMES = Object.keys(TOOLS) as ToolName[];
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const ISO_TIME = /^(\d{4})-(\d{2})-(\d{2})T([01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/;
+
+/** A timestamp with a real calendar date and an explicit offset. Date.parse alone accepts 31 February and a time with no zone. */
+function isIsoTime(v: unknown): boolean {
+  if (typeof v !== "string") return false;
+  const m = ISO_TIME.exec(v);
+  if (!m) return false;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const date = new Date(Date.UTC(y, mo - 1, d));
+  return date.getUTCFullYear() === y && date.getUTCMonth() === mo - 1 && date.getUTCDate() === d;
+}
+
+/** What each operation of update needs, on top of the fields every input may carry. */
+const UPDATE_REQUIRES: Record<string, readonly string[]> = {
+  status: ["request_id", "expected_version", "to_status"],
+  confirmation: ["request_id", "expected_version", "party", "confirmed"],
+  conversion: ["request_id", "expected_version"],
+};
+const CORRECT_FIELDS = ["summary", "requested_window_text", "starts_at", "ends_at", "next_action", "next_action_due_at", "follow_up_user_id", "customer_name", "details"] as const;
 
 export type InputCheck = { ok: true } | { ok: false; reason: "invalid_input" | "unknown_field" | "invalid_field" | "missing_field"; field?: string };
+
+const missing = (field: string): InputCheck => ({ ok: false, reason: "missing_field", field });
 
 /** Checks an input against a tool's schema. Refuses a field the schema does not name, like the database does. */
 export function checkInput(tool: ToolName, input: unknown): InputCheck {
   const schema = TOOLS[tool].input;
   if (typeof input !== "object" || input === null || Array.isArray(input)) return { ok: false, reason: "invalid_input" };
   const obj = input as Record<string, unknown>;
-  for (const key of Object.keys(obj)) if (!(key in schema)) return { ok: false, reason: "unknown_field", field: key };
+  for (const key of Object.keys(obj)) if (!Object.hasOwn(schema, key)) return { ok: false, reason: "unknown_field", field: key };
   for (const [key, f] of Object.entries(schema)) {
     const v = obj[key];
     if (v === undefined || v === null) {
@@ -207,10 +228,29 @@ export function checkInput(tool: ToolName, input: unknown): InputCheck {
       : f.type === "integer" ? Number.isInteger(v)
       : f.type === "boolean" ? typeof v === "boolean"
       : f.type === "uuid" ? typeof v === "string" && UUID.test(v)
-      : f.type === "iso_time" ? typeof v === "string" && !Number.isNaN(Date.parse(v)) && /^\d{4}-\d{2}-\d{2}T/.test(v)
+      : f.type === "iso_time" ? isIsoTime(v)
       : f.type === "object" ? typeof v === "object" && !Array.isArray(v)
       : typeof v === "string" && (f.values ?? []).includes(v);
     if (!good) return { ok: false, reason: "invalid_field", field: key };
+  }
+  return requirements(tool, obj);
+}
+
+const has = (obj: Record<string, unknown>, key: string) => obj[key] !== undefined && obj[key] !== null;
+
+/** What a tool needs beyond the fields that are always required: the database refuses the same gaps. */
+function requirements(tool: ToolName, obj: Record<string, unknown>): InputCheck {
+  if (tool === "update") {
+    for (const f of UPDATE_REQUIRES[String(obj["operation"])] ?? []) if (!has(obj, f)) return missing(f);
+    if (obj["operation"] === "status" && obj["to_status"] === "closed" && !has(obj, "outcome")) return missing("outcome");
+  } else if (tool === "correct") {
+    if (!CORRECT_FIELDS.some((f) => has(obj, f))) return missing("summary");
+  } else if (tool === "capture") {
+    if (!has(obj, "text") && !has(obj, "intake_id")) return missing("text");
+  } else if (tool === "find") {
+    if (!["number", "name", "phone", "text"].some((f) => has(obj, f))) return missing("name");
+  } else if (tool === "summarize") {
+    if (!has(obj, "request_id") && !has(obj, "number")) return missing("number");
   }
   return { ok: true };
 }

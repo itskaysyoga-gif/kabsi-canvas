@@ -67,13 +67,15 @@ export function statusDecision(args: {
   role: Role; kind: Kind; from: string; to: string; outcome: string | null; startsAt: Date | null; now: Date;
   /** The status the request had before it was closed, from its timeline. Null when unknown. */
   reopenTo?: string | null;
-  /** The outcome the request closed with, for reopening. */
+  /** The outcome the request closed with, for reopening. Required when `from` is "closed"; left out, a reopening is refused. */
   closedOutcome?: string | null;
 }): Decision {
   const { role, kind, from, to, outcome } = args;
+  if (!ROLES.includes(role)) return no("not_member");
   if (from === "closed") {
     if (!isManagerOrOwner(role)) return no("forbidden");
-    if (args.closedOutcome === "converted" || args.closedOutcome === "voided") return no("not_reopenable");
+    // How it closed must be known: a request closed as converted or voided is never reopened, and not knowing refuses.
+    if (args.closedOutcome === undefined || args.closedOutcome === "converted" || args.closedOutcome === "voided") return no("not_reopenable");
     if (args.reopenTo == null || to !== args.reopenTo || outcome !== null) return no("not_allowed");
     return yes("ask_first", ["reopened"]);
   }
@@ -158,19 +160,31 @@ export function actionDecision(role: Role, action: Action, opts: { isProposer?: 
   return no("forbidden");
 }
 
-/** request_correct: the fields to change, by role. An unknown field is refused whoever asks. */
-export function correctDecision(role: Role, fields: readonly string[]): Decision {
+/**
+ * request_correct: the fields to change, by role, and the state of the request. An unknown field is refused whoever asks,
+ * a closed request cannot be corrected, an erased customer's name cannot be changed, and a new time on an appointment
+ * that holds a confirmation clears both (the flag the database records).
+ */
+export function correctDecision(
+  role: Role, fields: readonly string[],
+  state: { status?: string; kind?: Kind; hasConfirmation?: boolean; customerErased?: boolean } = {},
+): Decision {
+  if (!ROLES.includes(role)) return no("not_member");
   if (fields.length === 0) return no("invalid_input");
   const unknown = fields.find((f) => !(CORRECTABLE_FIELDS as readonly string[]).includes(f));
   if (unknown) return no("unknown_field");
   if (role === "staff" && fields.some((f) => !(STAFF_CORRECTABLE_FIELDS as readonly string[]).includes(f))) return no("forbidden");
-  return yes("undo_offered");
+  if (state.status === "closed") return no("closed");
+  if (state.customerErased && fields.includes("customer_name")) return no("customer_erased");
+  const clears = state.hasConfirmation === true && (fields.includes("starts_at") || fields.includes("ends_at"));
+  return yes("undo_offered", clears ? ["confirmations_cleared"] : []);
 }
 
 /** request_undo: the person, how old the change is, and whether it is the latest one. An Undo cannot be undone. */
 export function undoDecision(args: {
   role: Role; isOriginalActor: boolean; ageMinutes: number; isLatest: boolean; isUndo: boolean; alreadyUndone: boolean;
 }): Decision {
+  if (!ROLES.includes(args.role)) return no("not_member");
   if (!isManagerOrOwner(args.role) && !args.isOriginalActor) return no("forbidden");
   if (args.isUndo) return no("not_undoable");
   if (args.alreadyUndone) return no("already_undone");
@@ -192,6 +206,7 @@ export function confirmationDecision(args: {
 
 /** request_convert_enquiry: only an open enquiry becomes an appointment or a job; the enquiry stays as it was. */
 export function convertDecision(args: { role: Role; kind: Kind; status: string; to: Kind }): Decision {
+  if (!ROLES.includes(args.role)) return no("not_member");
   if (args.to !== "appointment" && args.to !== "job") return no("invalid_field");
   if (args.kind !== "enquiry") return no("not_enquiry");
   if (args.status === "closed") return no("closed");

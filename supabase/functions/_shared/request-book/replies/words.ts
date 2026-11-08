@@ -44,20 +44,26 @@ export const clip = (text: string, max: number): string => (text.length <= max ?
 
 const MONTH_DAY = (parts: Intl.DateTimeFormatPart[], t: string) => parts.find((p) => p.type === t)?.value ?? "";
 
-/** "Thu 10 Nov 15:00", or "Today 15:00" and "Tomorrow 10:00", in the business's time zone. */
+/** "Thu 10 Nov 15:00", or "Today 15:00" and "Tomorrow 10:00", in the business's time zone. Empty when the zone or time is not valid. */
 export function formatWhen(iso: string, timeZone: string, now: Date): string {
   const at = new Date(iso);
-  if (Number.isNaN(at.getTime())) return "";
-  const f = (d: Date) =>
-    new Intl.DateTimeFormat("en-GB", { timeZone, weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
-      .formatToParts(d);
-  const p = f(at);
-  const time = `${MONTH_DAY(p, "hour")}:${MONTH_DAY(p, "minute")}`;
-  const dayKey = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
-  const key = dayKey(at);
-  if (key === dayKey(now)) return `Today ${time}`;
-  if (key === dayKey(new Date(now.getTime() + 24 * 3600_000))) return `Tomorrow ${time}`;
-  return `${MONTH_DAY(p, "weekday")} ${MONTH_DAY(p, "day")} ${MONTH_DAY(p, "month")} ${time}`;
+  if (Number.isNaN(at.getTime()) || Number.isNaN(now.getTime())) return "";
+  try {
+    const p = new Intl.DateTimeFormat("en-GB", { timeZone, weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+      .formatToParts(at);
+    const time = `${MONTH_DAY(p, "hour")}:${MONTH_DAY(p, "minute")}`;
+    const dayKey = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+    // Calendar days in the business's zone: tomorrow is the next date on its calendar, not 24 hours on.
+    const today = dayKey(now);
+    const [y, m, d] = today.split("-").map(Number) as [number, number, number];
+    const tomorrow = new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10);
+    const key = dayKey(at);
+    if (key === today) return `Today ${time}`;
+    if (key === tomorrow) return `Tomorrow ${time}`;
+    return `${MONTH_DAY(p, "weekday")} ${MONTH_DAY(p, "day")} ${MONTH_DAY(p, "month")} ${time}`;
+  } catch {
+    return "";
+  }
 }
 
 /** The time of a request: the set time, or the words the customer used with a plain note that no time is set. */
@@ -94,7 +100,7 @@ export function confirmationShort(row: Pick<RequestRow, "kind" | "status" | "sta
   const customer = `the ${pack.words.customer.singular}`;
   const parts: string[] = [];
   if (row.staff_confirmed) parts.push(`Confirmed by ${staff}`);
-  if (row.customer_confirmed) parts.push(`Confirmed by ${customer}`);
+  if (row.customer_confirmed) parts.push(`Confirmed by ${customer}, as told to staff`);
   const missing: string[] = [];
   if (!row.staff_confirmed) missing.push(staff);
   if (!row.customer_confirmed) missing.push(customer);
