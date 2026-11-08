@@ -39,11 +39,21 @@ describe("Fixes A lines", () => {
   });
   it("while the calendar is not set every booking button is the email words; with it the current words return", () => {
     expect(BOOKING_EMAIL_LABEL).toBe("Email us to arrange a call");
-    expect(BOOKING_EMAIL_HELPER).toBe("Tell us your business name and a good time. We reply by email.");
-    expect(bookingLabel("Book a short call")).toBe(BOOKING_READY ? "Book a short call" : BOOKING_EMAIL_LABEL);
+    expect(BOOKING_EMAIL_HELPER).toBe(
+      "Tell us your business name and a good time. We reply by email.",
+    );
+    expect(bookingLabel("Book a short call")).toBe(
+      BOOKING_READY ? "Book a short call" : BOOKING_EMAIL_LABEL,
+    );
   });
   it("no dash and no exclamation mark in the new lines", () => {
-    for (const s of [HERO_PRICE_LINE, SCAN_LINE, TRIAL_SEPARATE_LINE, BOOKING_EMAIL_LABEL, BOOKING_EMAIL_HELPER])
+    for (const s of [
+      HERO_PRICE_LINE,
+      SCAN_LINE,
+      TRIAL_SEPARATE_LINE,
+      BOOKING_EMAIL_LABEL,
+      BOOKING_EMAIL_HELPER,
+    ])
       expect(s).not.toMatch(/[!–—]/);
   });
 });

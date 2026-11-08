@@ -776,8 +776,8 @@ function DeleteBusiness({
         <>
           <p className="mt-2 text-small text-text-2">
             After 7 days we delete its reviews, drafts, posts, photos, reports and settings. Your
-            review link and QR code stop working, including on any NFC card or sticker that
-            carries them.
+            review link and QR code stop working, including on any NFC card or sticker that carries
+            them.
           </p>
           <p className="mt-1 text-small text-text-2">
             Payment records are kept where the law requires.

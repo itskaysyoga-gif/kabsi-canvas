@@ -14,7 +14,9 @@ type Props = { kind: BookingKind; children: ReactNode; className?: string; butto
 /** While the calendar is not set (BOOKING_READY false) the helper under every booking button (R-126, CONV-01). */
 export function BookingHelper({ className }: { className?: string }) {
   if (BOOKING_READY) return null;
-  return <span className={cn("block text-small text-text-2", className)}>{BOOKING_EMAIL_HELPER}</span>;
+  return (
+    <span className={cn("block text-small text-text-2", className)}>{BOOKING_EMAIL_HELPER}</span>
+  );
 }
 
 /**

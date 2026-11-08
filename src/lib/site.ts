@@ -94,7 +94,8 @@ export function bookingUrl(kind: BookingKind, embed = false): string {
 
 /** While BOOKING_READY is false every booking button reads this, with the helper beside it (R-126, CONV-01). */
 export const BOOKING_EMAIL_LABEL = "Email us to arrange a call";
-export const BOOKING_EMAIL_HELPER = "Tell us your business name and a good time. We reply by email.";
+export const BOOKING_EMAIL_HELPER =
+  "Tell us your business name and a good time. We reply by email.";
 /** The words of a booking button: the current words once the calendar is set, otherwise the email words. */
 export const bookingLabel = (current: string): string =>
   BOOKING_READY ? current : BOOKING_EMAIL_LABEL;
