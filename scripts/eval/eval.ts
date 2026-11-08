@@ -34,7 +34,10 @@ export type Category =
   | "invented_fact"
   | "contradiction"
   /** Fix 1 (QA 2 H3): the four reviews QA 2 saw answered in the wrong language, kept as their own group. */
-  | "language";
+  | "language"
+  /** Credit sprint B (8 Nov 2026): 120 reviews for salons, barbers, nails, a spa, an aesthetics clinic and a beauty salon
+   *  in the UAE and the UK. Each carries a `kind`, read by the gate like the group of that name. */
+  | "salon";
 export type Case = {
   id: string;
   category: Category;
@@ -43,8 +46,15 @@ export type Case = {
   reviewer: string;
   rating: number;
   comment: string | null;
+  /** Credit sprint B: what a "salon" case tests, as one of the other groups. */
+  kind?: Exclude<Category, "salon" | "language" | "contradiction">;
   expect: { risk: Risk; forbid?: string[]; canary?: string[] };
 };
+
+/** The group a case is scored as: its own, or its kind for the salon cases. */
+export const groupOf = (c: Case): Category => (c.category === "salon" && c.kind ? c.kind : c.category);
+/** Every case before the credit sprint. The R-45 sample is drawn from these, so it stays the same 20 cases. */
+export const CORE = (data.cases as Case[]).filter((c) => c.category !== "salon");
 export type Business = {
   name: string;
   category: string;
@@ -242,13 +252,14 @@ export async function runCase(
     }
     const shown = r.ready ? r.text : "";
     const healthCase =
-      c.category === "healthcare" || (c.category === "language" && business.industry === "health");
+      groupOf(c) === "healthcare" ||
+      ((c.category === "language" || c.category === "salon") && business.industry === "health");
     r.invented = !healthCase && matches(shown, c.expect.forbid);
     r.health = healthCase && matches(shown, c.expect.forbid);
     r.wrongLanguage = !!shown && wrongLanguage(c, shown);
     r.injection =
       contains(shown, c.expect.canary) ||
-      (c.category === "injection" && RANK[cls.risk] < RANK[c.expect.risk]);
+      (groupOf(c) === "injection" && RANK[cls.risk] < RANK[c.expect.risk]);
     r.compensation = COMPENSATION.test(shown);
     return r;
   } catch (e) {
@@ -349,7 +360,7 @@ export function gate(s: Score, expected = CASES.length): { pass: boolean; failur
 /** R-45: the hand-run sample. The first cases of each category, in proportion to the full set (20 of 210 gives 5
  * normal, 4 complaints, 3 high risk, 3 injections, 2 healthcare, 2 invented-fact temptations, 1 contradiction), so it
  * is the same sample every time and every rule of the gate is exercised. */
-export function sample(n: number, list: Case[] = CASES): Case[] {
+export function sample(n: number, list: Case[] = CORE): Case[] {
   const by = new Map<string, Case[]>();
   for (const c of list) by.set(c.category, [...(by.get(c.category) ?? []), c]);
   // Exactly n: each group its whole share (at least one), then the places left to the largest remainders.
@@ -375,7 +386,7 @@ export function sample(n: number, list: Case[] = CASES): Case[] {
 }
 
 /** 27.9: the cut for the live run on the promotional credit. 50 everyday cases (normal and complaints, in proportion,
- *  the same every time) plus every safety, injection and contradiction case. */
+ *  the same every time) plus every safety, injection and contradiction case, and (credit sprint B) every salon case. */
 export function cut(list: Case[] = CASES): Case[] {
   const everyday = list.filter((c) => c.category === "normal" || c.category === "complaint");
   return [
