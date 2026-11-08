@@ -1901,3 +1901,7 @@ Instagram: <R-59 address>"
 - Home (DSH-05, DSH-08), at the top three small counts: "Needs your yes <n>", "Urgent <n>", "Done this week <n>" (the last opens the latest report). Then "Needs your yes" shows the first 3 waiting items, urgent ones first and never behind the fold, then "See all <n>" shows the rest in place and becomes "Show fewer". Each item keeps its own Approve, Edit and Details; nothing is approved in bulk.
 - Insights, An answer customers might see, on an Example business (DSH-07): the outlined "Example" badge and "Example answer. Example sources, not live citations." under the "Asked on" line. The example sources fit the trade (a hair guide under a salon, a food guide under a cafe).
 - Insights, Search terms on an Example business (DSH-01): seven example terms that fit the trade, in the same shape (five with a count, two "fewer than 15"): hair salon, barber, beauty and nails, spa, clinic, restaurant, cafe, gym, and a general list for anything else. A hair salon never shows a cafe term.
+
+## 68. F-1: a forwarded Yes (8 Nov 2026, WhatsApp)
+
+- A message the owner forwards to Kabsi never counts as their own yes. When a forwarded "Yes" meets something waiting for a yes, nothing is approved and the owner reads: "That looks forwarded, so I did not count it as your yes. Tap Yes, or type it yourself." (SAY.forwardedYes in supabase/functions/_shared/whatsapp/say.ts.)

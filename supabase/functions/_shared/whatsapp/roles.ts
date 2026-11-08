@@ -29,9 +29,9 @@ export type Conversation = {
 };
 
 export type OpenQuestion =
-  | { type: "role"; pending: string | null; options: Domain[] }
+  | { type: "role"; pending: string | null; options: Domain[]; forwarded?: true }
   // Photo Post 1: a photo sent with words waits here (its WhatsApp media id and the words) while the person picks the business.
-  | { type: "business"; pending: string | null; options: { id: string; name: string }[]; media?: { id: string; size: number | null; mime: string | null; caption: string } }
+  | { type: "business"; pending: string | null; options: { id: string; name: string }[]; media?: { id: string; size: number | null; mime: string | null; caption: string }; forwarded?: true }
   | { type: "which"; options: { token: string; label: string }[] }
   | { type: "digest"; ids: number[] }
   | { type: "hours"; pending: string; location_id: string }

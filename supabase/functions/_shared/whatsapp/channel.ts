@@ -42,6 +42,9 @@ export type Inbound = {
   media?: Media | null;
   contacts?: Contact[];
   referral?: Record<string, string> | null;
+  // F-1: Meta's message context marks a message the person forwarded (context.forwarded, or context.frequently_forwarded
+  // past 5 forwards). A forwarded message is never the person's own yes, no, number answer or code (router.ts).
+  forwarded: boolean;
 };
 export type StatusEvent = { messageId: string; status: "sent" | "delivered" | "read" | "failed"; error: string | null };
 
@@ -80,6 +83,7 @@ export function parseWebhook(event: string | null, body: unknown): { messages: I
         media: mediaOf(m, k),
         contacts: contactsOf(m),
         referral: referralOf(m),
+        forwarded: forwardedOf(m),
       });
     } else if (["sent", "delivered", "read", "failed"].includes(String(k.status))) {
       const errs = (Array.isArray(k.statuses) ? (k.statuses as unknown[]) : []).flatMap((s) => (Array.isArray(obj(s).errors) ? (obj(s).errors as unknown[]) : []));
@@ -87,6 +91,14 @@ export function parseWebhook(event: string | null, body: unknown): { messages: I
     }
   }
   return { messages, statuses };
+}
+
+// F-1: Kapso's v2 message carries Meta's message object, context included. Either flag set means forwarded; a message
+// without context (a typed message, a button tap) is not.
+function forwardedOf(m: Obj): boolean {
+  const c = obj(m.context);
+  const on = (v: unknown) => v === true || v === "true";
+  return on(c.forwarded) || on(c.frequently_forwarded);
 }
 
 const MEDIA_KINDS = ["image", "document", "audio", "video", "sticker"] as const;

@@ -160,6 +160,8 @@ export const SAY = {
   notYours: "This is no longer yours to approve. Nothing changed.",
   whichOne: "Which one?",
   nothingWaiting: "Nothing is waiting for your yes right now.",
+  // F-1: a forwarded "Yes" never approves anything.
+  forwardedYes: "That looks forwarded, so I did not count it as your yes. Tap Yes, or type it yourself.",
   noted: "Okay, nothing was changed.",
   onIt: "On it.",
   unclear: "I did not catch that. You can send \"help\" to see what you can do here, or \"talk to a person\".",
