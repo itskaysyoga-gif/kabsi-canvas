@@ -428,7 +428,7 @@ export const QUESTIONS_OWNERS: Question[] = [
     topic: "a card in dirhams",
     ask: "my card is in dirhams, will it work? any extra fees?",
     kb: [
-      /A card in dirhams or pounds is charged in US dollars; the card\'s bank converts it/,
+      /A card in dirhams or pounds is charged in US dollars; the card's bank converts it/,
       /By card, in US dollars, and nothing else/,
       CURRENCY,
     ],
