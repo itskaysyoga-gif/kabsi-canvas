@@ -63,6 +63,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 8 Nov 2026, Request book PR A (Build decisions tab of the KABSI 3.0 doc): eight empty service-only tables, real customer data refused by the database, nothing calls them; no behaviour, price or wording change, so no facts change.
 - 8 Nov 2026, Close 1 (R-130 to R-133, PRs 496, 499 to 502): live check merged and PostHog stops capturing after a no (one flag call left); reply.v4 ready, merge refused by the rule; the quick check says about 30 seconds and sends its seconds; Nora's findings fixed; master plan 30.42. `2026-11-08-close1.md`.
 - 8 Nov 2026, Credit sprint (R-129, PRs 493 to 499): 7 live runs by hand, 12.83 of 65 USD; reply.v4 judge 4.72 to 4.78; Nora's 90 owner questions 4.73 to 4.81; 8 salon guides from 16 Nov. Ledger `2026-11-08-credit-sprint.md`.
 
