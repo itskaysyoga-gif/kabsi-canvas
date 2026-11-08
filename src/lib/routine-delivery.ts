@@ -75,7 +75,7 @@ export function chosenChannel(i: DeliveryInput): RoutineChannel {
 
 /**
  * The Reports page lead (Fixes B, DSH-02): it says where the Monday report really goes, by the owner's choice. The hint to
- * switch to WhatsApp is said only when Settings lets the owner do it (`canSwitch`, from whatsappBlock being null).
+ * switch to WhatsApp is said only when Settings gives the owner a way to it (`canSwitch`: WhatsApp can be chosen now, or only needs connecting first).
  */
 export function reportsLead(channel: RoutineChannel, canSwitch = true): string {
   if (channel === "whatsapp") return "Every Monday on WhatsApp. The last 12 weeks are here.";
