@@ -64,8 +64,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 ## Recent entries (newest first)
 
 - 8 Nov 2026, Credit sprint (R-129, PRs 493 to 499): 7 live runs by hand, 12.83 of 65 USD. Replies: 120 salon cases, reply.v4 judge 4.72 to 4.78 (PR 499 waits for lane R, Prompt gate). Nora: 90 owner questions, facts fixed, 4.73 to 4.81. 8 salon guides from 16 Nov, judged 5 of 5. Ledger `2026-11-08-credit-sprint.md`.
-- 8 Nov 2026, Live check (R-126): production crawl of 64 sitemap pages, Lighthouse, consent, keyboard; six small defects fixed (PostHog opt-out after reset, Meta cookies, focus on wake and on dialog close, cookie bar order, robots meta); free check timing not run. `2026-11-08-live-check.md`.
-- 8 Nov 2026, Fixes B (R-126, PRs 488, 491): examples by trade, Prepared before Google is read, Reports lead, Home counts. `2026-11-08-fixes-b.md`.
+- 8 Nov 2026, Live check (R-126): 64 pages crawled, consent and keyboard checked; six small defects fixed; free check timing not run. `2026-11-08-live-check.md`.
 
 ## How a session updates this page
 
