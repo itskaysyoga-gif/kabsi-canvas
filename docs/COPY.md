@@ -1569,6 +1569,14 @@ Every guide's words are in its own content file, src/content/guides/<slug>.tsx; 
 | google-review-link-and-qr-code | cafe-counter | Reviews | review link and QR code |
 | why-chatgpt-describes-your-business-wrongly | florist-wide | AI answers | wrongly? |
 | keep-your-hours-and-details-the-same-everywhere | bakery-counter | Hours and details | the same everywhere? |
+| uae-national-day-and-eid-hours-on-google | salon-studio | Hours and details | National Day and Eid |
+| christmas-and-bank-holiday-hours-on-google-uk | nail-desk | Hours and details | Christmas and bank holiday hours |
+| reply-to-bad-google-review-salon | salon-wash | Reviews | bad Google review |
+| what-to-post-on-google-as-a-barber | barber-cut | Photos and posts | post on Google? |
+| reply-to-review-that-names-your-stylist | beauty-salon-wide | Reviews | names my stylist? |
+| reply-to-reviews-about-no-shows-and-cancellation-fees | nail-technician | Reviews | cancellation fee? |
+| where-to-put-your-google-review-link-salon | barber-shave | Reviews | review link? |
+| why-google-shows-wrong-details-for-your-salon | spa-facial | Problems and fixes | wrong details |
 
 ## 56. Industries 3: the industry pages short and scannable (5 Nov 2026, master plan 30.33 item 2)
 

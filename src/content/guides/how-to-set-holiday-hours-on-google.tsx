@@ -227,8 +227,8 @@ export const guide: GuideDoc = {
           before the month starts.
         </p>
         <p>
-          For the UK, Kabsi uses the England and Wales bank holidays from GOV.UK; Scotland and
-          Northern Ireland days are not asked, so set those yourself. On Hours you can also set
+          For the UK, Kabsi uses your own nation's bank holidays from GOV.UK, read from your Google
+          address: England and Wales, Scotland or Northern Ireland. On Hours you can also set
           special days for any date. During early access, a person on the Kabsi team sends what you
           approve to Google within one working day. <SiteRef to="/scan">Run the free check</SiteRef>
           .
