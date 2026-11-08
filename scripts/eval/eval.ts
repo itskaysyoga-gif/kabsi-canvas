@@ -52,7 +52,8 @@ export type Case = {
 };
 
 /** The group a case is scored as: its own, or its kind for the salon cases. */
-export const groupOf = (c: Case): Category => (c.category === "salon" && c.kind ? c.kind : c.category);
+export const groupOf = (c: Case): Category =>
+  c.category === "salon" && c.kind ? c.kind : c.category;
 /** Every case before the credit sprint. The R-45 sample is drawn from these, so it stays the same 20 cases. */
 export const CORE = (data.cases as Case[]).filter((c) => c.category !== "salon");
 export type Business = {
