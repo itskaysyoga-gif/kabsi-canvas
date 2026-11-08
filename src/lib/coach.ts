@@ -88,6 +88,28 @@ export const STATUS_LABEL: Record<CoachStatus, string> = {
   later: "Later",
 };
 
+/**
+ * Fixes B (DSH-03): "Done" is said only after a successful Google read-back. While Google's details read "Not checked yet"
+ * (mock mode, or no read yet) an item the business filled in is Prepared, in a neutral pill, never a green Done.
+ */
+export type CoachShown = CoachStatus | "prepared";
+export const PREPARED_LABEL = "Prepared";
+
+export function shownStatus(status: CoachStatus, googleChecked: boolean): CoachShown {
+  return status === "done" && !googleChecked ? "prepared" : status;
+}
+
+/** True only when Kabsi has read the live Google profile (coach.source). */
+export const googleChecked = (c: Pick<Coach, "source">) => c.source === "live";
+
+/** The counter above the checklist: "<n> of 8 done", or "<n> of 8 prepared. Google check pending." before the read-back. */
+export function coachCounter(rows: Pick<CoachRow, "status">[], checked: boolean): string {
+  const n = rows.filter((r) => r.status === "done").length;
+  return checked
+    ? `${n} of ${rows.length} done`
+    : `${n} of ${rows.length} prepared. Google check pending.`;
+}
+
 /** What the checklist adds to a row, in words: a number Kabsi read, or what the row waits for. */
 export function detailLine(row: CoachRow): string | null {
   const d: CoachDetail = row.detail ?? {};

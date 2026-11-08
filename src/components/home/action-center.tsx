@@ -15,6 +15,7 @@ import {
   homeState,
   isBacklogSummary,
   nextMonday,
+  waitingView,
   type AttentionLine,
 } from "@/lib/home-state";
 import { loadCardDetails } from "@/lib/home";
@@ -48,11 +49,25 @@ export function ActionCenter({ loc, access }: { loc: Location; access: Access })
   const [held, setHeld] = useState<Map<string, { task: Task; a: Approved }>>(new Map());
   const state = homeState(list.data?.tasks ?? []);
   const all = [...state.cards, ...state.rest];
-  const yes = all.filter((t) => NEEDS_YES.includes(t.kind));
-  for (const h of held.values()) if (!yes.some((t) => t.id === h.task.id)) yes.unshift(h.task);
+  const waiting = all.filter((t) => NEEDS_YES.includes(t.kind));
+  // Fixes B (DSH-05): the first three waiting items, urgent ones always before the fold; "See all" shows the rest in place.
+  const [expanded, setExpanded] = useState(false);
+  const view = waitingView(waiting, expanded, new Set(held.keys()));
+  const yes = [...view.shown];
+  for (const h of held.values()) if (!waiting.some((t) => t.id === h.task.id)) yes.unshift(h.task);
+  const detailTasks = [
+    ...new Map(
+      [...held.values()]
+        .map((h) => h.task)
+        .concat(waiting)
+        .map((t) => [t.id, t]),
+    ).values(),
+  ];
   const details = useQuery({
-    queryKey: ["card-details", loc.id, yes.map((t) => t.id).join(",")],
-    queryFn: () => loadCardDetails(yes),
+    // The details of the folded items load too, so "See all" opens at once.
+    queryKey: ["card-details", loc.id, [...yes, ...waiting].map((t) => t.id).join(",")],
+    queryFn: () =>
+      loadCardDetails([...new Map([...yes, ...waiting].map((t) => [t.id, t])).values()]),
     enabled: yes.length > 0,
   });
   const choice = role === "owner" ? planChoice(ent.data ?? null) : null;
@@ -102,9 +117,10 @@ export function ActionCenter({ loc, access }: { loc: Location; access: Access })
     // The right column only takes room when it has something to show; otherwise the left one uses the full width.
     <div className="grid items-start gap-8 lg:has-[>[data-side]>*]:grid-cols-[minmax(0,1fr)_22rem] xl:has-[>[data-side]>*]:grid-cols-[minmax(0,1fr)_25rem]">
       <div className="min-w-0 space-y-8">
+        <HomeCounts locationId={loc.id} yes={waiting.length} urgent={view.urgent} />
         <NeedsAttention lines={attention} />
         {yes.length > 0 ? (
-          <HomeSection id="yes-h" title="Needs your yes" count={yes.length} note={REPLY_NOTE}>
+          <HomeSection id="yes-h" title="Needs your yes" count={waiting.length} note={REPLY_NOTE}>
             <ul className="divide-y divide-line">
               {yes.map((t, i) =>
                 isBacklogSummary(t) ? (
@@ -126,6 +142,18 @@ export function ActionCenter({ loc, access }: { loc: Location; access: Access })
                 ),
               )}
             </ul>
+            {view.folded ? (
+              <button
+                type="button"
+                className={buttonClass("tertiary") + " mt-3"}
+                aria-expanded={expanded}
+                aria-controls="yes-h"
+                data-testid="yes-see-all"
+                onClick={() => setExpanded((v) => !v)}
+              >
+                {expanded ? "Show fewer" : `See all ${view.total}`}
+              </button>
+            ) : null}
           </HomeSection>
         ) : null}
         {attention.length === 0 && yes.length === 0 ? (
@@ -138,6 +166,61 @@ export function ActionCenter({ loc, access }: { loc: Location; access: Access })
         <DoneThisWeek locationId={loc.id} />
         <BusinessNumbers locationId={loc.id} />
       </div>
+    </div>
+  );
+}
+
+// Fixes B (DSH-05, DSH-08): three small counts at the top. "Done this week" opens the latest report. Nothing here approves
+// anything; it only says how much is waiting, how much is urgent and how much Kabsi did.
+function HomeCounts({
+  locationId,
+  yes,
+  urgent,
+}: {
+  locationId: string;
+  yes: number;
+  urgent: number;
+}) {
+  const q = useQuery({
+    queryKey: ["done-lately", locationId],
+    queryFn: () => recentTasks(locationId, { limit: 20, days: 7 }),
+    refetchInterval: 60_000,
+  });
+  const done = doneThisWeek(q.data ?? [], Number.POSITIVE_INFINITY).length;
+  const tile = "block min-h-11 rounded-card border border-line bg-surface-1 px-3 py-2 shadow-rest";
+  return (
+    <div
+      role="group"
+      className="grid grid-cols-3 gap-2"
+      aria-label="Where things stand"
+      data-testid="home-counts"
+    >
+      <div className={tile}>
+        <span className="block font-display text-h3 font-bold">{yes}</span>
+        <span className="block text-small text-text-2">Needs your yes</span>
+      </div>
+      <div className={tile}>
+        <span className={"block font-display text-h3 font-bold" + (urgent > 0 ? " text-bad" : "")}>
+          {urgent}
+        </span>
+        <span className="block text-small text-text-2">Urgent</span>
+      </div>
+      <Link
+        to="/app/report"
+        className={
+          tile + " hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2"
+        }
+        aria-label={
+          q.isLoading || q.isError
+            ? "Done this week, open the latest report"
+            : `Done this week ${done}, open the latest report`
+        }
+      >
+        <span className="block font-display text-h3 font-bold">
+          {q.isLoading || q.isError ? "" : done}
+        </span>
+        <span className="block text-small text-text-2">Done this week</span>
+      </Link>
     </div>
   );
 }

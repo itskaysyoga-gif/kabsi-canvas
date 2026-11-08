@@ -73,6 +73,17 @@ export function chosenChannel(i: DeliveryInput): RoutineChannel {
   return v === "whatsapp" && blocked ? "email" : v;
 }
 
+/**
+ * The Reports page lead (Fixes B, DSH-02): it says where the Monday report really goes, by the owner's choice. The hint to
+ * switch to WhatsApp is said only when Settings lets the owner do it (`canSwitch`, from whatsappBlock being null).
+ */
+export function reportsLead(channel: RoutineChannel, canSwitch = true): string {
+  if (channel === "whatsapp") return "Every Monday on WhatsApp. The last 12 weeks are here.";
+  return canSwitch
+    ? "Every Monday by email. The last 12 weeks are here. You can switch to WhatsApp in Settings."
+    : "Every Monday by email. The last 12 weeks are here.";
+}
+
 /** One stored choice changed in a copy of the list (what the page shows at once, before the save answers). */
 export function withPref(prefs: Pref[], next: Pref): Pref[] {
   const rest = prefs.filter((p) => !(p.category === next.category && p.channel === next.channel));

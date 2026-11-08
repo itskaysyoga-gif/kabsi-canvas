@@ -6,6 +6,10 @@ import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import { trackReportOpened } from "@/lib/telemetry";
 import { loadNearby } from "@/lib/insights";
+import { loadPrefs, loadRoutineChannel } from "@/lib/notifications";
+import { chosenChannel, reportsLead, whatsappBlock } from "@/lib/routine-delivery";
+import { whatsappOwnersOn, whatsappStatus } from "@/lib/whatsapp-owner";
+import { WHATSAPP_ON } from "@/lib/site";
 import { dateRange } from "@/lib/date-range";
 import { AccountTop, Panel } from "@/components/kabsi/d3-account";
 import { EmptyState, ErrorState, Skeleton, buttonClass } from "@/components/kabsi/ui";
@@ -50,9 +54,48 @@ async function loadReports(locationId: string): Promise<Row[]> {
 
 const dates = (r: ReportData) => dateRange(r.period);
 
+// Fixes B (DSH-02): the lead follows the owner's choice of where routine messages go, read the same way Settings reads it.
+// Until it is read, and when a read fails, the page says nothing about the channel rather than the wrong thing.
+function useReportsLead(locationId: string | undefined) {
+  const on = WHATSAPP_ON && !!locationId;
+  const status = useQuery({ queryKey: ["whatsapp-status"], queryFn: whatsappStatus, enabled: on });
+  const stored = useQuery({
+    queryKey: ["routine-channel"],
+    queryFn: loadRoutineChannel,
+    enabled: on,
+  });
+  const prefs = useQuery({
+    queryKey: ["notification-prefs", locationId],
+    queryFn: () => loadPrefs(locationId!),
+    enabled: on,
+  });
+  const ownersOn = useQuery({
+    queryKey: ["whatsapp-owners-on"],
+    queryFn: whatsappOwnersOn,
+    enabled: on,
+    staleTime: 60_000,
+  });
+  if (!locationId) return undefined;
+  if (WHATSAPP_ON) {
+    if (status.isError || stored.isError || prefs.isError) return undefined;
+    if (status.isLoading || stored.isLoading || prefs.isLoading || ownersOn.isLoading)
+      return undefined;
+  }
+  const input = {
+    whatsappOn: WHATSAPP_ON,
+    ownersOn: ownersOn.data,
+    status: status.data,
+    statusFailed: false,
+    stored: stored.data,
+    prefs: prefs.data ?? [],
+  };
+  return reportsLead(chosenChannel(input), whatsappBlock(input) === null);
+}
+
 function ReportPage() {
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
   const loc = location.data;
+  const lead = useReportsLead(loc?.id);
   const reports = useQuery({
     queryKey: ["reports", loc?.id],
     queryFn: () => loadReports(loc!.id),
@@ -77,7 +120,7 @@ function ReportPage() {
 
   return (
     <>
-      <AccountTop title="Reports" lead="Every Monday on WhatsApp. The last 12 weeks are here." />
+      <AccountTop title="Reports" lead={lead} />
       {!location.isLoading && !loc ? (
         <Link to="/start" className={buttonClass()} data-main-cta>
           Add your business

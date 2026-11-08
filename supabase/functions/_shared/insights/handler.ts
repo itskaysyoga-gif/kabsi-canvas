@@ -9,13 +9,15 @@
 import { insightPeriods, termsMonth, type Day } from "./periods.ts";
 import { ALL_METRICS, type DailySeries, summarise } from "./summary.ts";
 import { normaliseTerms, type RawTerm, type Term } from "./terms.ts";
-import { EXAMPLE_TERMS, exampleSeries } from "./example.ts";
+import { exampleSeries, exampleTermsFor } from "./example.ts";
 
 export type Deps = {
   getUser: (req: Request) => Promise<{ id: string } | null>;
   memberRole: (locationId: string, userId: string) => Promise<string | null>;
   /** "mock" while Google is in mock mode or the business is a demo; "none" for a business with no Google location. */
   source: (locationId: string) => Promise<"live" | "mock" | "none">;
+  /** What the business is, for example search terms that fit its trade (Fixes B). Google's category, its label and the name. */
+  trade: (locationId: string) => Promise<{ category: string | null; categoryLabel: string | null; name: string | null }>;
   featureAccess: (locationId: string) => Promise<{ pro: boolean } | null>;
   loadDaily: (locationId: string, metrics: string[], start: Day, end: Day) => Promise<DailySeries>;
   loadTerms: (locationId: string, month: { year: number; month: number }) => Promise<RawTerm[]>;
@@ -74,7 +76,7 @@ export function makeHandler(d: Deps) {
       let rawTerms: RawTerm[] = [];
       if (source === "mock") {
         series = exampleSeries(periods);
-        rawTerms = pro ? EXAMPLE_TERMS : [];
+        rawTerms = pro ? exampleTermsFor(await d.trade(body.location_id)) : [];
       } else {
         // One call covers both periods: they are the two latest months, back to back.
         series = await d.loadDaily(body.location_id, ALL_METRICS, periods.previous.start, periods.current.end);

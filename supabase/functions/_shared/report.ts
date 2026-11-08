@@ -7,7 +7,7 @@ import { dailyFigures, performanceSource, profileRating, searchTermsFor } from "
 import { isConciergeLocationId } from "./concierge.ts";
 import { ALL_METRICS } from "./insights/summary.ts";
 import { termsMonth } from "./insights/periods.ts";
-import { EXAMPLE_TERMS } from "./insights/example.ts";
+import { exampleTermsFor } from "./insights/example.ts";
 import { normaliseTerms, termCountText } from "./insights/terms.ts";
 import { type Counts, composeCare, exampleWeekSeries, type Inputs, type ReportTerms, type WeekActivity, weekActivity, weekPeriods } from "./care-report/compose.ts";
 import { admin, APP_URL, captureError, esc } from "./kabsi.ts";
@@ -79,7 +79,7 @@ async function careBlocks(loc: Loc, now: Date) {
       }
       if (pro && (source === "live" || loc.is_demo)) {
         const month = termsMonth(now);
-        const raw = source === "mock" ? EXAMPLE_TERMS : await searchTermsFor(loc.google_location_id!, month);
+        const raw = source === "mock" ? exampleTermsFor({ name: loc.name }) : await searchTermsFor(loc.google_location_id!, month);
         terms = {
           source, example: source === "mock", month_label: month.label, fetched_at: now.toISOString(),
           items: normaliseTerms(raw).slice(0, 5).map((t) => ({ term: t.term, count: termCountText(t) })),

@@ -18,6 +18,7 @@ import {
   AI_LABEL,
   asSentence,
   compareText,
+  AI_EXAMPLE_LINE,
   loadAiAnswer,
   loadInsights,
   loadNearby,
@@ -70,7 +71,7 @@ function InsightsPage() {
   });
   const ai = useQuery({
     queryKey: ["ai-answer", loc?.id],
-    queryFn: () => loadAiAnswer(loc!.id),
+    queryFn: () => loadAiAnswer(loc!.id, undefined, !!loc!.is_demo),
     enabled: !!loc && open === true,
   });
   const rival = useQuery({
@@ -159,6 +160,12 @@ function AiPanel({ a }: { a: AiAnswerView }) {
       <p className="text-small text-text-2">
         Asked on {a.askedOn}, {a.every}.
       </p>
+      {a.example ? (
+        <p className="mt-2 flex flex-wrap items-center gap-2 text-small font-semibold text-text-2">
+          <ExampleBadge />
+          {AI_EXAMPLE_LINE}
+        </p>
+      ) : null}
       <div className="mt-3 rounded-inner bg-surface-2 p-4">
         <p className="text-small font-bold text-text-2">The question, to {a.assistant}</p>
         <p className="mt-1 text-body font-semibold">&lsquo;{asSentence(a.question)}&rsquo;</p>

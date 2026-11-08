@@ -8,12 +8,14 @@ const NOW = new Date("2026-10-21T12:00:00Z");
 
 function setup(o: {
   user?: boolean; role?: string | null; source?: "live" | "mock" | "none"; pro?: boolean; limited?: boolean; googleFails?: boolean;
+  trade?: { category: string | null; categoryLabel: string | null; name: string | null };
 } = {}) {
   const calls = { daily: 0, terms: 0, logged: [] as Record<string, unknown>[], errors: 0 };
   const deps: Deps = {
     getUser: () => Promise.resolve(o.user === false ? null : { id: "user-1" }),
     memberRole: () => Promise.resolve(o.role === undefined ? "owner" : o.role),
     source: () => Promise.resolve(o.source ?? "mock"),
+    trade: () => Promise.resolve(o.trade ?? { category: null, categoryLabel: null, name: "Test business" }),
     featureAccess: () => Promise.resolve({ pro: o.pro ?? true }),
     loadDaily: () => {
       calls.daily++;
@@ -92,6 +94,15 @@ Deno.test("search terms are Pro only, with fewer than 15 for small counts", asyn
   assertEquals(basic.calls.terms, 0); // the terms are not even fetched
   const example = (await (await setup({ source: "mock", pro: false }).post({ location_id: LOC })).json()) as InsightsAnswer;
   assertEquals(example.terms, null);
+});
+
+Deno.test("example search terms follow the trade: a hair salon gets salon terms, never cafe terms", async () => {
+  const salon = (await (await setup({ source: "mock", trade: { category: "hair_salon", categoryLabel: "Hair salon", name: "Juniper Hair Studio" } }).post({ location_id: LOC })).json()) as InsightsAnswer;
+  const cafe = (await (await setup({ source: "mock", trade: { category: null, categoryLabel: "Cafe", name: "Harbour Lane Coffee" } }).post({ location_id: LOC })).json()) as InsightsAnswer;
+  assertEquals(salon.terms!.items.length, 7);
+  assertEquals(salon.terms!.items[0].term, "hair salon near me");
+  assertEquals(cafe.terms!.items[0].term, "coffee near me");
+  assertEquals(salon.terms!.items.some((t) => /coffee|latte|cafe|brunch|pastr/.test(t.term)), false);
 });
 
 Deno.test("a business with no Google location has no figures, and no error", async () => {
