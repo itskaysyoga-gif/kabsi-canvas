@@ -1400,7 +1400,7 @@ Kabsi takes cards only, through Creem's checkout, and offers no pay-later plans.
 Yes. Kabsi messages the phone number you opted in with, so the messages arrive in whichever WhatsApp app uses that number, WhatsApp or WhatsApp Business.
 
 **Can my manager approve on WhatsApp while I am away, for example over Eid?**
-Yes. A manager who has opted in their own phone can approve, undo and edit drafts on WhatsApp, as the owner can. Billing stays with the owner.
+Yes, for what you let managers approve. In Settings, Team, turn a kind on (review replies, for example), and a manager who has opted in their own phone can approve, undo and edit those drafts on WhatsApp. Billing stays with the owner.
 
 **Can I pause my plan while we close for a season?**
 There is no pause. Cancel on the Plan page or on WhatsApp and the plan runs to the end of the period you paid for; choose a plan again when you reopen. A founding price is kept only while the subscription stays paid. For the weeks you are closed, set Closed for a while under Hours.

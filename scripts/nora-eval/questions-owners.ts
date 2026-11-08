@@ -109,11 +109,15 @@ export const QUESTIONS_OWNERS: Question[] = [
     lang: "en",
     topic: "the founding price for a second location",
     ask: "if I get the founding price, is my second shop also on the founding price?",
-    kb: [FOUNDING_PRICE, /Extra location \| \$15 a month or \$150 a year/],
-    must: [MAIL],
+    kb: [
+      /An extra location has one price for everyone, \$15 a month or \$150 a year, founding place or not/,
+      FOUNDING_PRICE,
+      /Extra location \| \$15 a month or \$150 a year/,
+    ],
+    must: [/\$15/],
     coming: true,
     reference:
-      "The founding price is for the plan: Essentials $19 or Pro $39 a month for the first 30 paying businesses, kept while they stay subscribed. An extra location is $15 a month or $150 a year, and the facts I have do not say it has a founding price, so write to hello@kabsi.co and a person will confirm. Card payments are not open yet, so there is nothing to pay today.",
+      "No. The founding price is for the plan: Essentials $19 or Pro $39 a month for the first 30 paying businesses, kept while they stay subscribed. An extra location has one price for everyone, $15 a month or $150 a year, founding place or not. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "o07",
@@ -423,12 +427,16 @@ export const QUESTIONS_OWNERS: Question[] = [
     lang: "en",
     topic: "a card in dirhams",
     ask: "my card is in dirhams, will it work? any extra fees?",
-    kb: [/By card, in US dollars, and nothing else/, CURRENCY],
-    must: [MAIL],
+    kb: [
+      /A card in dirhams or pounds is charged in US dollars; the card\'s bank converts it/,
+      /By card, in US dollars, and nothing else/,
+      CURRENCY,
+    ],
+    must: [/US dollars/i],
     forbid: [LOCAL_PRICE],
     coming: true,
     reference:
-      "Kabsi charges in US dollars only, through Creem. The facts I have do not say what your bank charges to pay in US dollars, so your bank is the one to ask. Card payments are not open yet, so there is nothing to pay today. For anything else, write to hello@kabsi.co.",
+      "Yes, it works. Kabsi charges in US dollars only, through Creem. A card in dirhams is charged in US dollars, and your bank converts it at its own rate and may add its own fee, so your bank can tell you what that fee is. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "o33",
@@ -489,12 +497,13 @@ export const QUESTIONS_OWNERS: Question[] = [
     topic: "connecting WhatsApp",
     ask: "how do I connect whatsapp? do I need whatsapp business or normal one ok",
     kb: [
+      /so the messages arrive in whichever WhatsApp app uses that number, WhatsApp or WhatsApp Business/,
       /a one-time code sent from their phone, which is also their opt-in/,
       /Kabsi's WhatsApp number is \+1 205 745 6874/,
     ],
-    must: [/Connect WhatsApp/, MAIL],
+    must: [/Connect WhatsApp/, /WhatsApp Business/],
     reference:
-      "In setup or Settings, tap Connect WhatsApp. It shows a one-time code that you send from your phone to Kabsi's number, +1 205 745 6874, and that message is also your yes to get messages. The facts I have do not say whether you need WhatsApp Business or the normal app, so write to hello@kabsi.co if it matters.",
+      "In setup or Settings, tap Connect WhatsApp. It shows a one-time code that you send from your phone to Kabsi's number, +1 205 745 6874, and that message is also your yes to get messages. Either app is fine: Kabsi messages the number you opted in with, so it arrives in WhatsApp or WhatsApp Business, whichever uses that number.",
   },
   {
     id: "o38",
@@ -543,12 +552,13 @@ export const QUESTIONS_OWNERS: Question[] = [
     topic: "a manager approving on WhatsApp",
     ask: "can my salon manager approve on whatsapp while im travelling for eid",
     kb: [
+      /a manager who has opted in their own phone can approve, undo and edit those drafts on WhatsApp/,
       /The owner can turn a kind on to let managers approve it too/,
       /always need the owner, whatever the setting/,
     ],
-    must: [MAIL],
+    must: [/manager/i, /Settings/],
     reference:
-      "By default only the owner approves. In Settings, Team, you can let managers approve a kind, such as review replies, and a manager then approves only what you allow. The facts I have do not say whether a manager can connect their own WhatsApp to approve there, so write to hello@kabsi.co to check. Changes to the business name, address, main category or open status always need you.",
+      "Yes, for what you let managers approve. By default only the owner approves. In Settings, Team, turn a kind on, such as review replies, and a manager who has opted in their own phone can approve, undo and edit those drafts on WhatsApp. Billing stays with you.",
   },
   {
     id: "o42",
@@ -859,10 +869,14 @@ export const QUESTIONS_OWNERS: Question[] = [
     lang: "en",
     topic: "pausing a plan",
     ask: "closing the salon for 2 months in summer, can I pause the plan instead of cancelling?",
-    kb: [CANCEL_LINE, /\*\*Closed for a while\*\*/],
-    must: [MAIL],
+    kb: [
+      /There is no pause\. Cancel on the Plan page or on WhatsApp/,
+      CANCEL_LINE,
+      /\*\*Closed for a while\*\*/,
+    ],
+    must: [/pause/i, /Closed for a while/],
     reference:
-      "The facts I have do not describe pausing a plan. You can cancel any time, and your plan runs to the end of the period you paid for. In Hours, Closed for a while sets the days you are closed on Google, with your approval. To ask about a pause, write to hello@kabsi.co.",
+      "There is no pause. Cancel on the Plan page or on WhatsApp and your plan runs to the end of the period you paid for, then choose a plan again when you reopen. A founding price is kept only while the subscription stays paid. For the weeks you are closed, set Closed for a while under Hours, and Google shows it after your approval.",
   },
   {
     id: "o70",
