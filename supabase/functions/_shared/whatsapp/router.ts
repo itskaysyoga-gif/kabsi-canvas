@@ -24,8 +24,9 @@ export type Command =
   // V4 (30.16 section 3): the setup replies under Kabsi's onboarding messages, and the owner's yes to the monthly answer's facts.
   | { k: "onboarding"; action: OnboardingAction; locationId: string }
   | { k: "facts"; action: "yes" | "no"; locationId: string; month: string }
-  // F-1: forwardedYes marks a forwarded message whose words are a yes. It is never the owner's yes (agent.ts).
-  | { k: "free"; text: string; forwardedYes?: true }
+  // F-1: a forwarded message whose words would be a yes, a no or a number. forwardedAnswer: it never answers Kabsi's questions;
+  // forwardedYes: it is never the owner's yes (agent.ts).
+  | { k: "free"; text: string; forwardedAnswer?: true; forwardedYes?: true }
   | { k: "empty" };
 
 export type OnboardingAction = "yes" | "help" | "someone_else" | "cannot_find" | "done" | "skip_first";
@@ -112,8 +113,8 @@ export function parse(m: Inbound): Command {
   if (scan) return { k: "scan_code", code: `KAB-${scan[1].toUpperCase()}`, rest: raw.replace(scan[0], "").trim() };
   const partner = PARTNER_CODE.exec(raw);
   if (partner) return { k: "partner_code", code: partner[1].toUpperCase() };
-  if (fwd && YES.has(t)) return { k: "free", text: raw.slice(0, 2000), forwardedYes: true };
-  if (fwd && (NO.has(t) || /^\d{1,2}$/.test(t))) return { k: "free", text: raw.slice(0, 2000) };
+  if (fwd && YES.has(t)) return { k: "free", text: raw.slice(0, 2000), forwardedAnswer: true, forwardedYes: true };
+  if (fwd && (NO.has(t) || /^\d{1,2}$/.test(t))) return { k: "free", text: raw.slice(0, 2000), forwardedAnswer: true };
   if (YES.has(t)) return { k: "yes" };
   if (NO.has(t)) return { k: "no" };
   if (/^\d{1,2}$/.test(t)) return { k: "number", n: Number(t) };

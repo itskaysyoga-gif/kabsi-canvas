@@ -113,10 +113,10 @@ Deno.test("the router: buttons by id, STOP but not cancel, codes, the scan and p
 // F-1: a forwarded message is not the person's own words: never yes, no, a number answer or a code. STOP still wins.
 Deno.test("the router: forwarded text is never yes, no, a number or a code; STOP and buttons are unchanged", () => {
   const f = (text: string) => parse(inbound({ text, forwarded: true }));
-  assert.deepEqual(f("Yes"), { k: "free", text: "Yes", forwardedYes: true });
-  assert.deepEqual(f("ok"), { k: "free", text: "ok", forwardedYes: true });
-  assert.deepEqual(f("No"), { k: "free", text: "No" });
-  assert.deepEqual(f("2"), { k: "free", text: "2" });
+  assert.deepEqual(f("Yes"), { k: "free", text: "Yes", forwardedAnswer: true, forwardedYes: true });
+  assert.deepEqual(f("ok"), { k: "free", text: "ok", forwardedAnswer: true, forwardedYes: true });
+  assert.deepEqual(f("No"), { k: "free", text: "No", forwardedAnswer: true });
+  assert.deepEqual(f("2"), { k: "free", text: "2", forwardedAnswer: true });
   assert.deepEqual(f("KABSI 123456"), { k: "free", text: "KABSI 123456" });
   assert.deepEqual(f("123456"), { k: "free", text: "123456" });
   assert.deepEqual(f("STAFF ABCD2345"), { k: "free", text: "STAFF ABCD2345" });

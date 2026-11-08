@@ -226,6 +226,8 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   if (cmd.k === "free" && cmd.forwardedYes && businesses(who).length && (await d.db.openItems(phone)).length) {
     return answered(t, SAY.forwardedYes, "forwarded_yes");
   }
+  // F-1: a forwarded yes, no or number never answers Kabsi's own questions (the search, hours, the monthly question).
+  const fwdAnswer = cmd.k === "free" && !!cmd.forwardedAnswer;
 
   // Answers to Kabsi's own questions: the role, the business, a digest number, "Which one?".
   if (cmd.k === "role_pick") {
@@ -233,7 +235,10 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     const q = conv?.open_question;
     await d.db.setConv(phone, { active_role: cmd.to, open_question: null });
     const next: Who = { ...who, conversation: conv ? { ...conv, active_role: cmd.to, open_question: null } : conv };
-    if (q?.type === "role" && q.pending) return run({ ...t, who: next }, parse({ ...t.m, text: q.pending, buttonId: null, media: null, forwarded: !!q.forwarded }));
+    if (q?.type === "role" && q.pending) {
+      const m: Inbound = { ...t.m, text: q.pending, buttonId: null, media: null, forwarded: !!q.forwarded };
+      return run({ ...t, who: next, m }, parse(m));
+    }
     return answered({ ...t, who: next }, SAY.switched(cmd.to === "business" ? "your business" : cmd.to === "partner" ? "your partner tools" : "Kabsi staff tools"), "role_set");
   }
   if (cmd.k === "business_pick") return pickedBusiness(t, cmd.locationId);
@@ -247,12 +252,12 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   // The map's buttons and the owner's search for the map (28.5).
   if (cmd.k === "map") return mapButton(t, cmd.action, cmd.scanId);
   if (cmd.k === "keyword") return keywordButton(t, cmd.action, cmd.locationId);
-  if (conv?.open_question?.type === "keyword" && !conv.open_question.suggested && cmd.k === "free") {
+  if (conv?.open_question?.type === "keyword" && !conv.open_question.suggested && cmd.k === "free" && !fwdAnswer) {
     return keywordTyped(t, conv.open_question.location_id, cmd.text);
   }
 
   // The one question back about an hours change: the answer is read together with the first message.
-  if (conv?.open_question?.type === "hours" && (cmd.k === "free" || (cmd.k === "tool" && cmd.tool === "hours"))) {
+  if (conv?.open_question?.type === "hours" && ((cmd.k === "free" && !fwdAnswer) || (cmd.k === "tool" && cmd.tool === "hours"))) {
     const q = conv.open_question;
     await d.db.setConv(phone, { open_question: null, active_location_id: q.location_id, active_role: "business" });
     const next: Turn = { ...t, who: { ...who, conversation: { ...conv, open_question: null, active_location_id: q.location_id, active_role: "business" } } };
@@ -281,7 +286,7 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     if (typed) return onboardingButton(t, typed === "yes" ? "yes" : typed, oq.location_id);
   }
   if (oq?.type === "update" && now - Date.parse(oq.at) < ANSWER_WINDOW_MS) {
-    if (cmd.k === "free") return monthlyAnswer(t, oq.location_id, cmd.text);
+    if (cmd.k === "free" && !fwdAnswer) return monthlyAnswer(t, oq.location_id, cmd.text);
     // A bare yes answers "anything new?", never an approval waiting elsewhere: ask what is new and keep the question open.
     if (cmd.k === "yes") return answered(t, SAY.updateWhat, "update_what");
   }
@@ -353,7 +358,10 @@ async function pickedBusiness(t: Turn, locationId: string): Promise<string> {
   await t.d.db.setConv(t.phone, { active_location_id: b.location_id, active_role: "business", open_question: null });
   const conv = t.who.conversation ? { ...t.who.conversation, active_location_id: b.location_id, active_role: "business" as Domain, open_question: null } : null;
   const next: Turn = { ...t, who: { ...t.who, conversation: conv } };
-  if (q?.type === "business" && q.pending) return run(next, parse({ ...t.m, text: q.pending, buttonId: null, media: null, forwarded: !!q.forwarded }));
+  if (q?.type === "business" && q.pending) {
+    const m: Inbound = { ...t.m, text: q.pending, buttonId: null, media: null, forwarded: !!q.forwarded };
+    return run({ ...next, m }, parse(m));
+  }
   // Photo Post 1: the photo sent with words before the business was picked is handled now, for the business just picked.
   if (q?.type === "business" && q.media) {
     const m = q.media;

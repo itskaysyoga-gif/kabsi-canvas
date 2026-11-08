@@ -199,6 +199,15 @@ const CASES: Case[] = [
       { from: PHONES.owner, text: "yes", expect: "which_one" },
       { from: PHONES.owner, text: "1", forwarded: true, expect: /^(unclear|nora|unclear_no_ai)/ }],
     check: (w) => { assert.equal(w.calls.filter((c) => c.startsWith("approve")).length, 0); assert.equal((w.conversation(PHONES.owner).open_question as { type: string }).type, "which"); } },
+  { name: "owner: a forwarded Yes or No does not answer the monthly question", tags: ["owner", "F-1"],
+    setup: (w) => (w.conversation(PHONES.owner).open_question = { type: "update", location_id: BIZ.harbour, at: new Date(w.now).toISOString() }), steps: [
+      { from: PHONES.owner, text: "Yes", forwarded: true, expect: /^(unclear|nora|unclear_no_ai)/ },
+      { from: PHONES.owner, text: "No", forwarded: true, expect: /^(unclear|nora|unclear_no_ai)/ }],
+    check: (w) => { assert.equal(w.calls.filter((c) => c.startsWith("monthly_answered") || c.startsWith("post:")).length, 0); assert.equal((w.conversation(PHONES.owner).open_question as { type: string }).type, "update"); } },
+  { name: "owner: a forwarded Yes does not become the search for the map", tags: ["owner", "F-1", "map"],
+    setup: (w) => (w.conversation(PHONES.owner).open_question = { type: "keyword", location_id: BIZ.harbour, suggested: null }), steps: [
+      { from: PHONES.owner, text: "Yes", forwarded: true, expect: /^(unclear|nora|unclear_no_ai)/ }],
+    check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("keyword:")).length, 0) },
   { name: "owner: a forwarded STOP still stops", tags: ["owner", "9.5", "F-1"], steps: [
     { from: PHONES.owner, text: "STOP", forwarded: true, expect: "stopped" }], check: (w) => assert.equal(w.users[0].optin, "stopped") },
   { name: "a forwarded owner code does not bind", tags: ["9.2", "F-1", "privacy"], setup: (w) => { w.users[0].phone = null; w.users[0].optin = "none"; },
@@ -207,7 +216,7 @@ const CASES: Case[] = [
   { name: "a forwarded staff code does not bind", tags: ["staff_admin", "F-1", "privacy"], steps: [
     { from: PHONES.newStaff, text: "STAFF ABCD2345", forwarded: true, expect: /^(greeting|unclear|nora)/ },
     { from: PHONES.newStaff, text: "status", expect: /^(greeting|unclear|nora|help)/ }],
-    check: (w) => assert.doesNotMatch(w.sent.map((s) => s.body).join(" "), /staff phone|Jobs failed/) },
+    check: (w) => { assert.equal(w.staffAdmin.has(PHONES.newStaff), false, "not staff_admin"); assert.doesNotMatch(w.sent.map((s) => s.body).join(" "), /staff phone|Jobs failed/); } },
   { name: "owner: a forwarded Yes with nothing waiting takes the free-text path", tags: ["owner", "F-1"], steps: [
     { from: PHONES.owner, text: "Yes", forwarded: true, expect: /^(unclear|nora|unclear_no_ai)/ }] },
   { name: "two roles: a forwarded Yes held for the role question is still not a yes after the pick", tags: ["two_roles", "F-1"], steps: [
