@@ -121,8 +121,8 @@ export const guide: GuideDoc = {
             Google says some booking links can appear on your profile automatically from third-party
             providers, and that you cannot delete them from your profile settings. To take one off,
             contact the provider through its opt-out link, support form or account portal. Google
-            says the provider must act on an opt-out request within 5 business days; if the link
-            is still there after that, you can report it to Google through its contact form.
+            says the provider must act on an opt-out request within 5 business days; if the link is
+            still there after that, you can report it to Google through its contact form.
           </p>
           <Callout kind="tip" title="Test the link after every change">
             When you move to a new booking tool, open your profile on a phone and tap the booking
