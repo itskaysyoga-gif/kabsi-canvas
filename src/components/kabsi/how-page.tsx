@@ -46,7 +46,7 @@ export function HowItWorksPage() {
                 <YellowNumber n={1} className="size-9 text-small" />
                 <div>
                   <h3 className="text-title">Run the free check</h3>
-                  <p className="mt-1 text-body text-text-2">About 10 seconds, no access needed.</p>
+                  <p className="mt-1 text-body text-text-2">About 30 seconds, no access needed.</p>
                   <SiteLink to="/scan" className={cn(linkCls, "text-body")}>
                     {MAIN_CTA}
                     <ArrowRight className="size-4" aria-hidden />

@@ -30,7 +30,7 @@ const LOOKS_AT: { title: string; text: string }[] = [
 ];
 
 const GET_BACK = [
-  "About 10 seconds.",
+  "About 30 seconds.",
   "No Google access needed, no password, no card.",
   "Kabsi asks for nothing before you see the result.",
 ] as const;
@@ -39,7 +39,7 @@ export function CheckLooksAtVisual() {
   // Scan 3 (30.34 item 2): yellow number markers and a short label pill (DESIGN.md, the highlight bar's other yellow uses).
   return (
     <figure className="relative rounded-panel border border-line bg-surface-1 p-5 shadow-float sm:p-6">
-      <YellowLabel>About 10 seconds</YellowLabel>
+      <YellowLabel>About 30 seconds</YellowLabel>
       <p className="mt-3 text-title font-bold">What Kabsi checks</p>
       <p className="text-body text-text-2">On your public Google profile. No access needed.</p>
       <ol className="mt-5 space-y-2.5">

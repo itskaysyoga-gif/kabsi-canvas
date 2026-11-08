@@ -9,7 +9,7 @@ export const HOME_LINE =
 /** The free check's hero. */
 export const CHECK_HERO = {
   title: "Check your business on Google, free.",
-  line: "See what customers see on your Google profile and what to do first. About 10 seconds, and no access needed.",
+  line: "See what customers see on your Google profile and what to do first. About 30 seconds, and no access needed.",
 } as const;
 
 /** Pricing's hero (approved, COPY 34 and 38). */
