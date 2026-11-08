@@ -317,6 +317,7 @@ function applyCapture() {
   const want = !paused && analyticsAllowed();
   const keep = analyticsPersistent();
   try {
+    let wasReset = false;
     if (want !== captureOn) {
       captureOn = want;
       if (want) window.posthog?.opt_in_capturing?.();
@@ -326,8 +327,14 @@ function applyCapture() {
       persistent = keep;
       window.posthog?.set_config?.({ persistence: keep ? "localStorage+cookie" : "memory" });
       if (keep && pendingUser) window.posthog?.identify?.(pendingUser);
-      if (!keep) window.posthog?.reset?.();
+      if (!keep) {
+        window.posthog?.reset?.();
+        wasReset = true;
+      }
     }
+    // Live check 8 Nov 2026 (R-126): posthog.reset() also clears the opt-out flag, so a visitor who withdrew a yes was
+    // counted again (dead clicks, heatmaps) until the next page load. The no is applied again after the reset.
+    if (wasReset && !want) window.posthog?.opt_out_capturing?.();
   } catch {
     /* ignore */
   }
