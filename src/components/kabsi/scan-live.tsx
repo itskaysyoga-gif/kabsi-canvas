@@ -40,7 +40,7 @@ import {
   type FreeCheck,
   type StartedCheck,
 } from "@/lib/public-api";
-import { track } from "@/lib/telemetry";
+import { elapsedSeconds, track } from "@/lib/telemetry";
 import { pixelCustom, pixelEvent } from "@/lib/meta-pixel";
 import { WAITLIST_LINE, WAITLIST_WHATSAPP_LINE } from "@/lib/waitlist-copy";
 import { NEARBY_SAMPLE, type NearbyCheck, type NearbyPlace } from "./map-data";
@@ -169,7 +169,7 @@ export function ScanSearching({ query, progress = 1 }: { query: string; progress
           );
         })}
       </ol>
-      <p className="mt-4 text-small text-text-2">About 10 seconds. Nothing changes on Google.</p>
+      <p className="mt-4 text-small text-text-2">About 30 seconds. Nothing changes on Google.</p>
     </div>
   );
 }
@@ -393,6 +393,7 @@ export function LiveFreeCheck({
   async function pick(place: FoundBusiness) {
     setPhase({ kind: "checking", place });
     setProgress(1);
+    const startedAt = Date.now();
     try {
       const snapshot = await runCheck(
         place.place_id,
@@ -418,7 +419,10 @@ export function LiveFreeCheck({
         }).catch(() => null);
       }
       setProgress(3);
-      track("free_scan_completed", { source: "tool" });
+      track("free_scan_completed", {
+        source: "tool",
+        seconds: elapsedSeconds(startedAt, Date.now()),
+      });
       // Scan 2 (30.29): a finished check is the custom FreeScanCompleted; Lead is a contact given.
       pixelCustom("FreeScanCompleted");
       setPhase({ kind: "result", snapshot, check });

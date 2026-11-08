@@ -396,7 +396,7 @@ test.describe("Scan 3: the free check result", () => {
     await page.goto("/scan");
     await expect(page.locator("h1 .d9-mark")).toHaveText("free.");
     await expect(page.getByText("What Kabsi checks")).toBeVisible();
-    await expect(page.getByText("About 10 seconds", { exact: true })).toBeVisible();
+    await expect(page.getByText("About 30 seconds", { exact: true })).toBeVisible();
     await expect(page.locator("figure ol li")).toHaveCount(5);
     await expect(page.getByAltText("A salon owner looking at a tablet in her salon")).toHaveCount(
       1,
