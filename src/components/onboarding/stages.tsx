@@ -54,10 +54,12 @@ import {
   THIRD_PARTY_HELP_URL,
   WHATSAPP_URL,
   bookingHref,
+  bookingLabel,
   BOOKING_READY,
 } from "@/lib/site";
 import { loadTasks } from "@/lib/tasks";
 import { track } from "@/lib/telemetry";
+import { BookingHelper } from "@/components/shared/booking-link";
 import { cn } from "@/lib/utils";
 import {
   WHATSAPP_CONSENT_TEXT,
@@ -685,9 +687,10 @@ export function FounderHelp() {
           </a>
         ) : null}
         <a href={bookingHref("setup")} {...external} className={buttonClass("secondary", "md")}>
-          Book a short call
+          {bookingLabel("Book a short call")}
         </a>
       </div>
+      <BookingHelper className="mt-2" />
     </div>
   );
 }

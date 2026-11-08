@@ -1,3 +1,4 @@
+import { BOOKING_EMAIL_HELPER, BOOKING_EMAIL_LABEL, BOOKING_READY } from "../src/lib/site";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -170,7 +171,9 @@ describe("each screen, walked once (P0.4-04)", () => {
       const html = render(row(id, id === "someone_else_owns" ? "agency_has_it" : null));
       expect(html).toContain(esc(SCENARIO_TITLES[id]));
       expect(html).toContain("Back to the steps");
-      expect(html).toContain("setup call");
+      // R-126: while the calendar link is not set the booking link is an email, with its helper.
+      expect(html).toContain(BOOKING_READY ? "setup call" : BOOKING_EMAIL_LABEL);
+      if (!BOOKING_READY) expect(html).toContain(BOOKING_EMAIL_HELPER);
       if (id === "not_eligible") {
         expect(html).not.toContain("I&#x27;ve done it");
         expect(html).toContain("hello@kabsi.co");

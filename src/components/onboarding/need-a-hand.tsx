@@ -20,7 +20,7 @@ import {
   type HelpStep,
 } from "@/lib/onboarding-help";
 import { STEP_CLIPS } from "@/lib/onboarding-clips";
-import { SETUP_CALL_MINUTES } from "@/lib/site";
+import { BOOKING_READY, SETUP_CALL_MINUTES } from "@/lib/site";
 
 export type HelpState = {
   step: HelpStep;
@@ -186,8 +186,10 @@ export function NeedAHand({ help }: { help: HelpState }) {
           {cfg.call ? (
             <section className="mt-6" aria-labelledby="hand-call">
               <h3 id="hand-call" className="flex items-center gap-2 text-body font-bold">
-                <Phone className="size-4" aria-hidden="true" /> Book a free {SETUP_CALL_MINUTES}
-                -minute setup call
+                <Phone className="size-4" aria-hidden="true" />{" "}
+                {BOOKING_READY
+                  ? `Book a free ${SETUP_CALL_MINUTES}-minute setup call`
+                  : `A free ${SETUP_CALL_MINUTES}-minute setup call`}
               </h3>
               <p className="mt-1 text-small leading-6 text-text-2">
                 Screen share, no camera needed. A real person does it with you.

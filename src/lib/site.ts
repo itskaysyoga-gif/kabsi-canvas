@@ -92,6 +92,13 @@ export function bookingUrl(kind: BookingKind, embed = false): string {
   return `${BOOKING_URL}?${q.join("&")}`;
 }
 
+/** While BOOKING_READY is false every booking button reads this, with the helper beside it (R-126, CONV-01). */
+export const BOOKING_EMAIL_LABEL = "Email us to arrange a call";
+export const BOOKING_EMAIL_HELPER = "Tell us your business name and a good time. We reply by email.";
+/** The words of a booking button: the current words once the calendar is set, otherwise the email words. */
+export const bookingLabel = (current: string): string =>
+  BOOKING_READY ? current : BOOKING_EMAIL_LABEL;
+
 /** Where a booking link goes: Calendly once the link is set, otherwise an email that asks for a time. */
 export function bookingHref(kind: BookingKind): string {
   if (BOOKING_READY) return bookingUrl(kind);
@@ -117,7 +124,10 @@ export const NOT_AFFILIATED = "Kabsi is independent and not affiliated with Goog
 /** The trial, always apart from the free check (master plan 30.15 section 3.10). */
 export const TRIAL_LINE = "Free for 14 days once Kabsi is connected. No card.";
 /** Under every scan box: the free check needs nothing from the owner. */
-export const SCAN_LINE = "Free check. No Google access needed. Takes about 10 seconds.";
+export const SCAN_LINE = "Free check. No account and no Google access needed.";
+/** Under the search box on Home, /scan and the /for pages (R-126, COPY-02): the trial is a separate thing. */
+export const TRIAL_SEPARATE_LINE =
+  "The 14-day free trial is separate. It starts once Kabsi is a Manager on your profile.";
 /** The main button on every public page (master plan 30.15 section 1). */
 export const MAIN_CTA = "Check my business free";
 /** Google's own page on working with a third party (footer small print, master plan 30.10 point 5). */
@@ -199,6 +209,8 @@ export const PLAN_PRICES = {
   extraLocationMonthly: 15,
   extraLocationYearly: 150,
 } as const;
+/** Under the Home hero's lead (R-126, COPY-01), built from the plan price and TRIAL_LINE so no number is typed twice. */
+export const HERO_PRICE_LINE = `Plans from ${PLAN_PRICES.essentialsMonthly} US dollars a month. ${TRIAL_LINE}`;
 /**
  * Price 1 (master plan 30.20 section 6, Rashid's "yes 29/59" of 30 Oct 2026): the list prices above are for new
  * businesses; the first 30 paying businesses, and Founding 25, pay the founding price and keep it while they stay

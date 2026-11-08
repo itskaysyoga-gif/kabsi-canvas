@@ -24,7 +24,7 @@ Decisions taken while writing (lane R, R-41):
 - Label: "Find your business on Google"
 - Placeholder: "Business name and city"
 - Button: "Check my business free"
-- Under it: "Free check. No Google access needed. Takes about 10 seconds."
+- Under it: "Free check. No account and no Google access needed." On Home, /scan and the /for pages a second line follows: "The 14-day free trial is separate. It starts once Kabsi is a Manager on your profile." (Fixes A, section 66.)
 - Waitlist state (cap 0): "The free check opens soon. Leave your email or WhatsApp number and Kabsi sends your result the day it opens." Button: "Save my place". Done: "Saved. You are on the list." On kabsi.co the waiting list is built (UX 1, section 25); "free scan" and "map" are not owner words, so the lines say "free check" and "result" (UX 1 round 2).
 
 **Finding your business (Check 2, 1 Nov 2026, lane R decisions; one box on Home, the industry pages and /scan):**
@@ -1876,3 +1876,12 @@ Facebook: <R-59 address>
 Instagram: <R-59 address>"
 
 **The staff page kabsi.co/staff/outbound** (Harvey 4A part C): H1 "Emails waiting for your yes" (highlight on "your yes"); line "The day's drafts with their sources, the replies that need you, and whether sending is locked." Panels: "Sending" (one of: "Sending is locked. Test mode: only the test addresses receive mail." / "Sending is locked. Nothing is prepared or sent." / "Sending is open since <date>. Only what you approve is sent." / "Stopped on <date>: <reason>. Only lane R reopens it.", then "Approved and waiting to send: <n>."), "Today's drafts" (each with Source page, Read on, Detail, Company number with its status and "Companies House file of <date>"; buttons Approve, Edit, Edit follow-up, Skip; at the end "Read every draft above first. This approves the <n> shown and their follow-ups." and "Approve all <n>"), "Replies" (each reply with "Your answer, ready to send" and Send, Edit, Skip, or "No answer is prepared. Kabsi drafts one only for a clear yes. Answer from rashid@getkabsi.com, then tap Done." with a Done button). There is no control that opens sending.
+
+## 66. Fixes A: the lines of the ChatGPT pre-launch audit (8 Nov 2026, master plan 30.41, R-126)
+
+- **Home hero (COPY-01):** under the lead, one line built from the plan price and TRIAL_LINE: "Plans from 29 US dollars a month. Free for 14 days once Kabsi is connected. No card." (HERO_PRICE_LINE in src/lib/site.ts.)
+- **Free check (COPY-02):** SCAN_LINE is "Free check. No account and no Google access needed." Under the search box on Home, /scan and the /for pages: "The 14-day free trial is separate. It starts once Kabsi is a Manager on your profile." "Takes about 10 seconds" is gone: the database holds no timing for the quick check, and the full check's median is 353 seconds.
+- **Plan lines (COPY-03):** Essentials "For an owner who wants every review answered, the profile kept right and 2 posts a month made ready." Pro "For a busier business: a post every week, menu and offers kept current, and a team that approves." Both match plan_limits() (posts_per_month 2; weekly_posts, team_roles) and the plan table.
+- **Setup call (CONV-01):** while BOOKING_READY is false every booking button reads "Email us to arrange a call" with the helper "Tell us your business name and a good time. We reply by email." When BOOKING_READY is true the earlier words come back ("Book a free 20-minute setup call", "Book a short call", "Book the call").
+- **Delete this business (DSH-04):** "After 7 days we delete its reviews, drafts, posts, photos, reports and settings. Your review link and QR code stop working, including on any NFC card or sticker that carries them." The next line, "Payment records are kept where the law requires.", matches the deletion job.
+- **Weekly report email (EMAIL-01):** subject "Your Kabsi week: 3 replies, 1 post, 2 profile changes", a part with a count of zero left out. A week with nothing sent: "Your Kabsi week: your profile was checked, nothing needed you"; if something waits for a yes: "Your Kabsi week: your profile was checked, 2 things are waiting for your yes". First line of the body: "After your yes, Kabsi sent 3 replies, 1 post and 2 profile changes to Google. 2 things are waiting for your yes." or "Kabsi sent nothing to Google this week. Nothing is waiting for your yes."

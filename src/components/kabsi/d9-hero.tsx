@@ -5,6 +5,7 @@
 import { ArrowRight } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { HERO_PRICE_LINE } from "@/lib/site";
 import { ExampleBadge, KabsiMark, WithWhatsAppMark } from "./ui";
 import { Img, PHOTOS, type Photo } from "./photos";
 import { ScanBox } from "./scan-box";
@@ -42,9 +43,11 @@ export function D9Hero() {
           <p className="mt-4 max-w-[36rem] text-lead text-text-2 sm:mt-6">
             <WithWhatsAppMark text={D9_HERO_LINE} />
           </p>
+          {/* R-126 (COPY-01): the plan price and the trial, built from the constants, under the lead. */}
+          <p className="mt-2 max-w-[36rem] text-small text-text-2 sm:mt-3">{HERO_PRICE_LINE}</p>
           {/* relative z-10: the suggestion list opens above the hero phone that follows (Web 4 review). */}
           <div className="relative z-10 mt-5 max-w-[36rem] sm:mt-7">
-            <ScanBox id="hero-scan" />
+            <ScanBox id="hero-scan" trialSeparate />
             <SiteLink to="/how-it-works" className={cn(d9LinkCls, "mt-1 text-body sm:mt-2")}>
               See how it works
               <D9Arrow />

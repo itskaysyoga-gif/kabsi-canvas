@@ -1,3 +1,4 @@
+import { BOOKING_EMAIL_HELPER, BOOKING_EMAIL_LABEL, BOOKING_READY } from "../src/lib/site";
 import { existsSync } from "node:fs";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -71,7 +72,9 @@ describe("the Manager guide (P0.4-03)", () => {
     expect(html).toContain("Copy group ID");
     expect(html).toContain("Step 1 of 5");
     expect(html).toContain("Show me the phone version");
-    expect(html).toContain("setup call");
+    // R-126: while the calendar link is not set the booking link is an email, with its helper.
+    expect(html).toContain(BOOKING_READY ? "setup call" : BOOKING_EMAIL_LABEL);
+    if (!BOOKING_READY) expect(html).toContain(BOOKING_EMAIL_HELPER);
     expect(html).toContain("Open my Google profile");
     expect(html).toContain("/help/manager-steps/desktop/step-1-open-profile.png");
     // the 20 second clip slot renders nothing until the clip exists
