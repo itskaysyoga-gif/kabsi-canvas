@@ -5,14 +5,16 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { ALL_GUIDES } from "../src/content/guides";
-import { PUBLISH_ALL_AT, publicGuides } from "../src/content/guides/schedule";
+import { PUBLISH_ALL_AT, publicGuides, weeklyAt } from "../src/content/guides/schedule";
 import { LASTMOD, SITEMAP_PAGES, sitemapXml } from "../src/lib/sitemap";
 
-const xml = sitemapXml(publicGuides(ALL_GUIDES, new Date(PUBLISH_ALL_AT)));
-const lastmodOf = (path: string) =>
+const OPEN = publicGuides(ALL_GUIDES, new Date(PUBLISH_ALL_AT));
+const xml = sitemapXml(OPEN);
+const lastmodIn = (sitemap: string, path: string) =>
   new RegExp(
     `<loc>https://kabsi\\.co${path === "/" ? "" : path}</loc><lastmod>([0-9-]+)</lastmod>`,
-  ).exec(xml)?.[1];
+  ).exec(sitemap)?.[1];
+const lastmodOf = (path: string) => lastmodIn(xml, path);
 
 describe("the sitemap's lastmod", () => {
   it("has no date typed in the code that builds it", () => {
@@ -36,8 +38,11 @@ describe("the sitemap's lastmod", () => {
     }
   });
   it("gives each guide its content file's updated date, and the guides list the newest of them", () => {
-    for (const g of ALL_GUIDES) expect(lastmodOf(`/guides/${g.slug}`), g.slug).toBe(g.updated);
-    const newest = ALL_GUIDES.map((g) => g.updated)
+    for (const g of OPEN) expect(lastmodOf(`/guides/${g.slug}`), g.slug).toBe(g.updated);
+    // A weekly guide is in the sitemap, with its own updated date, only from its day.
+    const later = sitemapXml(publicGuides(ALL_GUIDES, new Date(weeklyAt(7))));
+    for (const g of ALL_GUIDES) expect(lastmodIn(later, `/guides/${g.slug}`), g.slug).toBe(g.updated);
+    const newest = OPEN.map((g) => g.updated)
       .sort()
       .at(-1)!;
     expect(lastmodOf("/guides")! >= newest).toBe(true);

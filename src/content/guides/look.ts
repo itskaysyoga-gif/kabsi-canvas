@@ -45,6 +45,14 @@ export const GUIDE_LOOK: Record<string, GuideLook> = {
   "google-review-link-and-qr-code": { photo: "cafe-counter", group: "Reviews", mark: "review link and QR code" },
   "why-chatgpt-describes-your-business-wrongly": { photo: "florist-wide", group: "AI answers", mark: "wrongly?" },
   "keep-your-hours-and-details-the-same-everywhere": { photo: "bakery-counter", group: "Hours and details", mark: "the same everywhere?" },
+  "uae-national-day-and-eid-hours-on-google": { photo: "salon-studio", group: "Hours and details", mark: "National Day and Eid" },
+  "christmas-and-bank-holiday-hours-on-google-uk": { photo: "nail-desk", group: "Hours and details", mark: "Christmas and bank holiday hours" },
+  "reply-to-bad-google-review-salon": { photo: "salon-wash", group: "Reviews", mark: "bad Google review" },
+  "what-to-post-on-google-as-a-barber": { photo: "barber-cut", group: "Photos and posts", mark: "post on Google?" },
+  "reply-to-review-that-names-your-stylist": { photo: "beauty-salon-wide", group: "Reviews", mark: "names my stylist?" },
+  "reply-to-reviews-about-no-shows-and-cancellation-fees": { photo: "nail-technician", group: "Reviews", mark: "cancellation fee?" },
+  "where-to-put-your-google-review-link-salon": { photo: "barber-shave", group: "Reviews", mark: "review link?" },
+  "why-google-shows-wrong-details-for-your-salon": { photo: "spa-facial", group: "Problems and fixes", mark: "wrong details" },
 };
 
 /** The look of a guide, with a safe default for a new guide that has no entry yet (the test fails before it ships). */
