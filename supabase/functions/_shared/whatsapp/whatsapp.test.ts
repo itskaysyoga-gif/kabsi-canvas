@@ -52,6 +52,21 @@ Deno.test("parses Kapso v2 messages, button replies, photos, batches and receipt
   assert.deepEqual(receipt.statuses, [{ messageId: "out1", status: "failed", error: "Re-engagement message" }]);
 });
 
+// F-1: Meta's context.forwarded (5 forwards or fewer) and context.frequently_forwarded (more than 5), carried in Kapso's v2
+// message. A reply's context (id and from only) is not a forward.
+Deno.test("reads the forwarded marker from the message context", () => {
+  const one = (extra: Record<string, unknown>) => parseWebhook("whatsapp.message.received", {
+    message: { id: "wf", timestamp: "1730092800", type: "text", text: { body: "Yes" }, kapso: { direction: "inbound" }, ...extra },
+    conversation: { phone_number: "+15551234567", phone_number_id: "PNID" }, phone_number_id: "PNID",
+  }).messages[0];
+  assert.equal(one({ context: { forwarded: true } }).forwarded, true);
+  assert.equal(one({ context: { frequently_forwarded: true } }).forwarded, true);
+  assert.equal(one({}).forwarded, false);
+  assert.equal(one({ context: null }).forwarded, false);
+  assert.equal(one({ context: { id: "wamid.out.1", from: "15550000000" } }).forwarded, false);
+  assert.equal(one({ context: { forwarded: false } }).forwarded, false);
+});
+
 Deno.test("a review alert: business, stars, first name only, at most 300 characters of the review, the draft", () => {
   const long = "Great coffee. ".repeat(40);
   const body = reviewAlertBody({ business: "Harbour Lane Coffee", stars: 5, reviewer: "Maya Haddad", text: long, draft: "Thank you, Maya." });

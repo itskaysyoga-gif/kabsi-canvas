@@ -95,7 +95,7 @@ Deno.test("18.2: the case is read from session 19's task", () => {
   assert.equal(caseOf({ action: "suspended" }), "suspended");
 });
 
-const inbound = (o: Partial<Inbound>): Inbound => ({ phoneNumberId: "P", from: "+12125550143", messageId: "m", timestamp: 1, type: "text", text: null, buttonId: null, mediaId: null, ...o });
+const inbound = (o: Partial<Inbound>): Inbound => ({ phoneNumberId: "P", from: "+12125550143", messageId: "m", timestamp: 1, type: "text", text: null, buttonId: null, mediaId: null, forwarded: false, ...o });
 Deno.test("the router: buttons by id, STOP but not cancel, codes, the scan and partner codes", () => {
   assert.deepEqual(parse(inbound({ buttonId: "a:abcdefghijklmnopqrstuv" })), { k: "button", action: "approve", token: "abcdefghijklmnopqrstuv" });
   assert.deepEqual(parse(inbound({ buttonId: "w:abcdefghijklmnopqrstuv" })), { k: "button", action: "approve", token: "abcdefghijklmnopqrstuv" });
@@ -108,6 +108,25 @@ Deno.test("the router: buttons by id, STOP but not cancel, codes, the scan and p
   assert.deepEqual(parse(inbound({ text: "staff abcd2345" })), { k: "bind", code: "STAFF ABCD2345" });
   assert.equal((parse(inbound({ text: "Hi Kabsi, my scan code is KAB-7Q4M2X9P" })) as { code: string }).code, "KAB-7Q4M2X9P");
   assert.equal((parse(inbound({ text: "code P-sara" })) as { code: string }).code, "P-SARA");
+});
+
+// F-1: a forwarded message is not the person's own words: never yes, no, a number answer or a code. STOP still wins.
+Deno.test("the router: forwarded text is never yes, no, a number or a code; STOP and buttons are unchanged", () => {
+  const f = (text: string) => parse(inbound({ text, forwarded: true }));
+  assert.deepEqual(f("Yes"), { k: "free", text: "Yes", forwardedAnswer: true, forwardedYes: true });
+  assert.deepEqual(f("ok"), { k: "free", text: "ok", forwardedAnswer: true, forwardedYes: true });
+  assert.deepEqual(f("No"), { k: "free", text: "No", forwardedAnswer: true });
+  assert.deepEqual(f("2"), { k: "free", text: "2", forwardedAnswer: true });
+  assert.deepEqual(f("KABSI 123456"), { k: "free", text: "KABSI 123456" });
+  assert.deepEqual(f("123456"), { k: "free", text: "123456" });
+  assert.deepEqual(f("STAFF ABCD2345"), { k: "free", text: "STAFF ABCD2345" });
+  for (const t of ["STOP", "baja", "توقف"]) assert.equal(f(t).k, "stop", t);
+  assert.equal(f("stats").k, "tool", "other forwarded words keep their usual meaning");
+  assert.deepEqual(parse(inbound({ buttonId: "a:abcdefghijklmnopqrstuv", forwarded: true })), { k: "button", action: "approve", token: "abcdefghijklmnopqrstuv" });
+  // Typed by the person, the same words are as before.
+  assert.deepEqual(parse(inbound({ text: "Yes" })), { k: "yes" });
+  assert.deepEqual(parse(inbound({ text: "2" })), { k: "number", n: 2 });
+  assert.deepEqual(parse(inbound({ text: "KABSI 123456" })), { k: "bind", code: "123456" });
 });
 
 // A fake Kapso: records the calls and the bodies it was sent.

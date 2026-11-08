@@ -601,10 +601,10 @@ export class World {
 }
 
 let seq = 0;
-export function msg(w: World, from: string, o: { text?: string; button?: string; media?: Media; contacts?: Contact[]; referral?: Record<string, string>; id?: string; ts?: number; pnid?: string } = {}): Inbound {
+export function msg(w: World, from: string, o: { text?: string; button?: string; media?: Media; contacts?: Contact[]; referral?: Record<string, string>; id?: string; ts?: number; pnid?: string; forwarded?: boolean } = {}): Inbound {
   return {
     phoneNumberId: o.pnid ?? PNID, from, messageId: o.id ?? `wamid.in.${++seq}`, timestamp: o.ts ?? w.now / 1000, type: o.media ? o.media.kind : o.contacts ? "contacts" : o.button ? "interactive" : "text",
     text: o.text ?? null, buttonId: o.button ?? null, mediaId: o.media?.kind === "image" ? o.media.id : null, media: o.media ?? null, contacts: o.contacts ?? [],
-    referral: o.referral ?? null,
+    referral: o.referral ?? null, forwarded: o.forwarded ?? false,
   };
 }
