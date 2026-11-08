@@ -1,9 +1,17 @@
 import { ShortParas } from "@/components/kabsi/d3-account";
 import { StatusPill, type Tone } from "@/components/kabsi/ui";
-import { detailLine, STATUS_LABEL, type CoachRow, type CoachStatus } from "@/lib/coach";
+import {
+  detailLine,
+  PREPARED_LABEL,
+  shownStatus,
+  STATUS_LABEL,
+  type CoachRow,
+  type CoachShown,
+} from "@/lib/coach";
 
-const TONE: Record<CoachStatus, Tone> = {
+const TONE: Record<CoachShown, Tone> = {
   done: "ok",
+  prepared: "info",
   todo: "warn",
   unknown: "info",
   later: "info",
@@ -13,19 +21,25 @@ const TONE: Record<CoachStatus, Tone> = {
 export function CoachList({
   rows,
   label = "Profile checklist",
+  checked = true,
 }: {
   rows: CoachRow[];
   label?: string;
+  /** False while Google's details are not read back: a filled in item reads Prepared, not Done (Fixes B). */
+  checked?: boolean;
 }) {
   return (
     <ul className="divide-y divide-line" aria-label={label}>
       {rows.map((r) => {
         const line = detailLine(r);
+        const shown = shownStatus(r.status, checked);
         return (
           <li key={r.id} className="py-4 first:pt-0 last:pb-0" data-testid={`coach-${r.id}`}>
             <div className="flex flex-wrap items-start justify-between gap-2">
               <p className="min-w-0 flex-1 text-body font-bold text-text-1">{r.title}</p>
-              <StatusPill tone={TONE[r.status]}>{STATUS_LABEL[r.status]}</StatusPill>
+              <StatusPill tone={TONE[shown]}>
+                {shown === "prepared" ? PREPARED_LABEL : STATUS_LABEL[shown]}
+              </StatusPill>
             </div>
             <div className="mt-1">
               <ShortParas className="text-small text-text-2" text={r.why} />

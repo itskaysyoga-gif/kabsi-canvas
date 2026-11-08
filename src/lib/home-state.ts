@@ -393,6 +393,41 @@ export function attentionLines(i: {
   return out;
 }
 
+/** How many waiting items show before "See all" (Fixes B, DSH-05). Urgent items are never behind it. */
+export const FOLD = 3;
+
+export type WaitingView = {
+  /** The items to show now, in order: urgent first, then the order they came in. */
+  shown: Task[];
+  /** All waiting items, shown or not. */
+  total: number;
+  urgent: number;
+  /** True when "See all <total>" has something to open. */
+  folded: boolean;
+};
+
+/**
+ * The owner's waiting items for Home: the first three in the current order, urgent ones first and never behind the fold
+ * (with five urgent items, all five show), and "See all" shows the rest in place. An item the owner just approved
+ * (`pinned`) stays on screen through its Undo window. Nothing is approved in bulk: every item keeps its own actions.
+ */
+export function waitingView(
+  tasks: Task[],
+  expanded: boolean,
+  pinned: ReadonlySet<string> = new Set(),
+): WaitingView {
+  const urgent = tasks.filter((t) => t.priority === "urgent");
+  const ordered = [...urgent, ...tasks.filter((t) => t.priority !== "urgent")];
+  const fold = Math.max(FOLD, urgent.length);
+  const shown = expanded ? ordered : ordered.filter((t, i) => i < fold || pinned.has(t.id));
+  return {
+    shown,
+    total: ordered.length,
+    urgent: urgent.length,
+    folded: ordered.length > fold,
+  };
+}
+
 /** "Done by Kabsi this week": the latest state of each item once (no duplicates), at most three. */
 export function doneThisWeek<T extends { targetId: string; kind: string; owner?: string }>(
   items: T[],

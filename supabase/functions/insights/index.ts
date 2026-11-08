@@ -28,6 +28,14 @@ serve((req) => {
       return (data?.role as string | undefined) ?? null;
     },
     source: async (locationId) => performanceSource(await googleId(locationId)),
+    trade: async (locationId) => {
+      const { data } = await admin().from("locations").select("name, category, category_label").eq("id", locationId).maybeSingle();
+      return {
+        category: (data?.category as string | null | undefined) ?? null,
+        categoryLabel: (data?.category_label as string | null | undefined) ?? null,
+        name: (data?.name as string | null | undefined) ?? null,
+      };
+    },
     featureAccess: async (locationId) => {
       const { data, error } = await admin().rpc("feature_access", { p_location: locationId });
       return error ? null : (data as { pro: boolean });

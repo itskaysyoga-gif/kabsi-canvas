@@ -5,7 +5,7 @@ import { CoachActions } from "@/components/coach/coach-actions";
 import { CoachList } from "@/components/coach/coach-list";
 import { AccountTop, Panel, SourceLabel } from "@/components/kabsi/d3-account";
 import { Banner, ButtonLink, ErrorState, Skeleton } from "@/components/kabsi/ui";
-import { coachRows, loadCoach } from "@/lib/coach";
+import { coachCounter, coachRows, googleChecked, loadCoach } from "@/lib/coach";
 import { myLatestLocation } from "@/lib/onboarding";
 
 // Profile Coach (P0.8-09, K-136): what a complete Google profile has, what is missing and why. Essentials sees the
@@ -30,7 +30,7 @@ function CoachPage() {
   });
   const c = coach.data;
   const rows = c ? coachRows(c) : [];
-  const done = rows.filter((r) => r.status === "done").length;
+  const checked = c ? googleChecked(c) : false;
   // After an action: the checklist, the tasks on Home and the profile watch all move.
   const changed = () =>
     Promise.all(
@@ -84,7 +84,7 @@ function CoachPage() {
       ) : null}
       {live && c && !c.locked ? (
         <div className="space-y-4">
-          {c.source !== "live" ? (
+          {!checked ? (
             <div data-testid="coach-not-live">
               <Banner title="Not checked yet">
                 Kabsi reads the description, categories and details from your live Google profile.
@@ -95,13 +95,9 @@ function CoachPage() {
           <Panel
             title="Your checklist"
             id="checklist"
-            action={
-              <SourceLabel>
-                {done} of {rows.length} done
-              </SourceLabel>
-            }
+            action={<SourceLabel>{coachCounter(rows, checked)}</SourceLabel>}
           >
-            <CoachList rows={rows} />
+            <CoachList rows={rows} checked={checked} />
           </Panel>
           {c.pro && loc ? (
             <CoachActions locationId={loc.id} onChanged={changed} />

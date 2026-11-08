@@ -186,6 +186,9 @@ export async function loadNearby(
   return { state: "running", keyword: first.keyword };
 }
 
+// Fixes B (DSH-07): said on an Example business only, where the answer and its sources are invented for the demo.
+export const AI_EXAMPLE_LINE = "Example answer. Example sources, not live citations.";
+
 export type AiAnswerView = {
   question: string;
   assistant: string;
@@ -194,15 +197,21 @@ export type AiAnswerView = {
   named: boolean | null;
   sources: string[];
   answer: string | null;
+  /** Fixes B (DSH-07): an Example business's answer and sources are invented, and the screen says so. */
+  example: boolean;
 };
 
 const ASSISTANT: Record<string, string> = { chatgpt: "ChatGPT", perplexity: "Perplexity" };
 
 /** The latest live AI answer (ChatGPT or Perplexity; Gemini text is never kept): the exact question, who and when, named or not, the sources. */
-export async function loadAiAnswer(locationId: string, tz?: string): Promise<AiAnswerView | null> {
+export async function loadAiAnswer(
+  locationId: string,
+  tz?: string,
+  demo = false,
+): Promise<AiAnswerView | null> {
   const { data, error } = await supabase
     .from("ai_visibility_runs")
-    .select("id, provider, run_at, named, sources, ai_visibility_prompts(text, cadence)")
+    .select("id, provider, model, run_at, named, sources, ai_visibility_prompts(text, cadence)")
     .eq("location_id", locationId)
     .eq("state", "done")
     .eq("source", "live")
@@ -214,6 +223,7 @@ export async function loadAiAnswer(locationId: string, tz?: string): Promise<AiA
     | {
         id: string;
         provider: string;
+        model: string | null;
         run_at: string;
         named: boolean | null;
         sources: { domain: string; title: string }[] | null;
@@ -243,6 +253,7 @@ export async function loadAiAnswer(locationId: string, tz?: string): Promise<AiA
     named: r.named,
     sources: [...new Set((r.sources ?? []).map((s) => s.domain).filter(Boolean))].slice(0, 3),
     answer: (ans.data as { answer?: string } | null)?.answer ?? null,
+    example: demo || r.model === "demo",
   };
 }
 
