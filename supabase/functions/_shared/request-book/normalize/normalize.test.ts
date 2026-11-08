@@ -4,7 +4,7 @@ import { garageV1, salonV1 } from "../packs/index.ts";
 import { foldKey, readable, toLatinDigits, wordsOnly } from "./digits.ts";
 import { normalizeWhen } from "./dates.ts";
 import { NORMALIZER_VERSIONS, normalizeMessage } from "./index.ts";
-import { normalizePhone } from "./phone.ts";
+import { normalizePhone, PHONE_VERSION } from "./phone.ts";
 import { normalizeVocabulary } from "./vocabulary.ts";
 
 // The Arabic-Indic digits 0501234567 and the Eastern Arabic-Indic ones.
@@ -124,7 +124,34 @@ Deno.test("phone: two different numbers are ambiguous with both listed, and the 
   assert(same.status === "ok" && same.value === "+971501234567");
 });
 
+Deno.test("phone: a message at the 8,000 character limit costs a bounded amount and never a wrong number", () => {
+  const long: Record<string, string> = {
+    singleDigits: "1 ".repeat(4000),
+    oneRun: "0".repeat(8000),
+    dashed: "1-".repeat(4000),
+    plusSigns: "+".repeat(8000),
+    repeatedNumber: "0501234567 ".repeat(700),
+    brokenRuns: "tomorrow 10 03 123 456 ".repeat(340),
+  };
+  for (const [name, text] of Object.entries(long)) {
+    const t = performance.now();
+    const r = normalizePhone(text, "AE");
+    assert(performance.now() - t < 2000, `${name} took too long`);
+    assert(r.status === "unknown" || (name === "repeatedNumber" && r.status === "ok"), `${name}: ${r.status}`);
+  }
+  assertEquals(normalizePhone("1 ".repeat(4000), "AE"), { status: "unknown", reason: "too_many_candidates", version: PHONE_VERSION });
+});
+
 // ---- dates ----------------------------------------------------------------------------------------------------
+
+Deno.test("dates and vocabulary: a message at the 8,000 character limit is read in a bounded time", () => {
+  for (const text of ["next ".repeat(1600), "in the ".repeat(1100), "1/".repeat(4000), "oil ".repeat(2000), " ".repeat(8000), "tomorrow ".repeat(900)]) {
+    const t = performance.now();
+    when(text);
+    normalizeVocabulary(text, garageV1);
+    assert(performance.now() - t < 2000);
+  }
+});
 
 Deno.test("dates: tomorrow with an hour is that day at that hour in the location's zone", () => {
   for (const t of ["tomorrow 10", "bukra l 10", "bukra 10", "tomorrow at 10", "tomorrow 10am", "tomorrow 10:00"]) {

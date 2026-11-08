@@ -8,6 +8,11 @@ import type { Normalized } from "./result.ts";
 
 export const PHONE_VERSION = 1;
 
+/** A phone number has at most 15 digits (E.164), so no stretch of groups longer than that is ever tried. */
+const MAX_DIGITS = 15;
+/** The most phone checks one message may cost. A message that needs more is unknown, never a partial answer. */
+const MAX_CHECKS = 200;
+
 type Token = { text: string; start: number; end: number };
 
 // A phone is written with digits and these separators; a "+" may open it.
@@ -59,8 +64,10 @@ function runs(text: string, tokens: Token[]): Token[][] {
 export function normalizePhone(text: string, country: string | null | undefined): Normalized<string> {
   const t = readable(text);
   const found: { value: string; raw: string; start: number; end: number }[] = [];
+  const budget = { left: MAX_CHECKS };
   for (const run of runs(text, digitTokens(text))) {
-    const hit = longestPassing(run, t, country);
+    const hit = longestPassing(run, t, country, budget);
+    if (budget.left < 0) return { status: "unknown", reason: "too_many_candidates", version: PHONE_VERSION };
     if (hit) found.push(hit);
   }
   const distinct = found.filter((f, i) => found.findIndex((g) => g.value === f.value) === i);
@@ -70,14 +77,18 @@ export function normalizePhone(text: string, country: string | null | undefined)
   return { status: "ok", value: f.value, raw: text.slice(f.start, f.end), start: f.start, end: f.end, version: PHONE_VERSION };
 }
 
-function longestPassing(run: Token[], t: string, country: string | null | undefined) {
-  for (let len = run.length; len >= 1; len--) {
+function longestPassing(run: Token[], t: string, country: string | null | undefined, budget: { left: number }) {
+  const digits = run.map((tok) => tok.text.replace(/\D/g, "").length);
+  for (let len = Math.min(run.length, MAX_DIGITS); len >= 1; len--) {
+    let count = digits.slice(0, len).reduce((a, b) => a + b, 0);
     for (let from = 0; from + len <= run.length; from++) {
+      if (from > 0) count += digits[from + len - 1]! - digits[from - 1]!;
+      // Fewer than 7 digits is never a phone (this keeps a year or a time from being tried), and more than 15 cannot be.
+      if (count < 7 || count > MAX_DIGITS) continue;
+      if (--budget.left < 0) return null;
       const first = run[from]!;
       const last = run[from + len - 1]!;
       const raw = t.slice(first.start, last.end);
-      // Fewer than 7 digits is never a phone; this also keeps a year or a time from being tried.
-      if (raw.replace(/\D/g, "").length < 7) continue;
       const e164 = toE164(raw, country);
       if (e164) return { value: e164, raw, start: first.start, end: last.end };
     }
