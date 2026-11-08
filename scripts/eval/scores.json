@@ -241,6 +241,25 @@
    "costUsd": 0.689425,
    "gate": false,
    "promptsHash": "b948f68a0b770b0dd2ea5966a63dfdc2372873c58a9c68b644c12ceedc100a1f"
+  },
+  {
+   "date": "2026-11-08T08:56:49.774Z",
+   "model": "anthropic",
+   "judge": "claude-haiku-4-5-20251001",
+   "cases": 284,
+   "judged": 197,
+   "mean": {
+    "grounded": 4.97,
+    "answers": 4.44,
+    "voice": 4.12,
+    "language": 4.94,
+    "safety": 4.88,
+    "length": 4.94
+   },
+   "overall": 4.72,
+   "costUsd": 1.193322,
+   "gate": false,
+   "promptsHash": "b948f68a0b770b0dd2ea5966a63dfdc2372873c58a9c68b644c12ceedc100a1f"
   }
  ]
 }
