@@ -52,6 +52,9 @@ Add the Kabsi group ID 5481006796 as a Manager on your Google Business Profile, 
 **How long does setup take?**
 A few minutes: find your business, add the Kabsi group ID 5481006796 as a Manager, fill in About your business, choose a plan.
 
+**How long does the free check take?**
+The quick check takes about 30 seconds: your rating, hours and details as customers see them, the three businesses that come up around you, and one ChatGPT answer. It needs no sign-up and no access. The fuller check from 49 places around you takes longer and arrives on WhatsApp.
+
 **How fast do new reviews reach me?**
 Kabsi checks every few minutes. You choose one place for new reviews, WhatsApp or email, and a review that needs care still also comes by email. Reviews of 3 stars or less, and any review Kabsi marks medium or high risk, are emailed right away; other reviews are emailed at once while your business is open and come together in the daily email, at the hour you choose, outside your opening hours. Nothing is emailed between 22:00 and 08:00; it waits until 08:00.
 

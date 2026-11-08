@@ -521,8 +521,7 @@ export function Closing() {
           </h2>
           {/* Hidden on a phone: the line under the check box says the same. */}
           <p className="mt-4 hidden text-lead text-text-2 sm:block">
-            The quick check shows in about 10 seconds. Kabsi asks for nothing before you see the
-            result.
+            Kabsi asks for nothing before you see the result.
           </p>
           <ScanBox id="closing-scan" className="mt-6 sm:mt-8" note={SCAN_LINE} />
           <p className="mt-2 text-small text-text-2">{TRIAL_LINE}</p>

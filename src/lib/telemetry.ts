@@ -288,8 +288,16 @@ type SafeProps = Partial<
     | "utm_campaign"
     | "utm_content",
     string
-  >
+  > & {
+    /** free_scan_completed only (R-131): whole seconds from choosing the business to the result on screen. */
+    seconds: number;
+  }
 >;
+
+/** Whole seconds between two clock readings in milliseconds, never negative (R-131). A number only, no business detail. */
+export function elapsedSeconds(startMs: number, endMs: number): number {
+  return Math.max(0, Math.round((endMs - startMs) / 1000));
+}
 
 // Demo workspace (P0.1-06, R-17): nothing from a demo business reaches PostHog. The app and the email-link page
 // pause analytics while a demo business is on screen; a real business turns it back on.
