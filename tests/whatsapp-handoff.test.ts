@@ -25,6 +25,7 @@ describe("the scan hand-off to WhatsApp", () => {
       text,
       buttonId: null,
       mediaId: null,
+      forwarded: false,
     });
     expect(cmd).toMatchObject({ k: "scan_code", code: "KAB-7Q4M2X9P" });
   });

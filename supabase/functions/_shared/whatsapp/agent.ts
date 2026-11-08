@@ -221,6 +221,11 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     await d.db.attachCode(phone, null, cmd.code);
     return answered(t, SAY.partnerCodeNoted, "partner_code");
   }
+  // F-1: a forwarded "Yes" is not the owner's own yes. With something waiting for a yes, nothing is approved and the owner is
+  // asked to tap Yes or type it; with nothing waiting it is free text like any other forwarded message.
+  if (cmd.k === "free" && cmd.forwardedYes && businesses(who).length && (await d.db.openItems(phone)).length) {
+    return answered(t, SAY.forwardedYes, "forwarded_yes");
+  }
 
   // Answers to Kabsi's own questions: the role, the business, a digest number, "Which one?".
   if (cmd.k === "role_pick") {
@@ -228,7 +233,7 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     const q = conv?.open_question;
     await d.db.setConv(phone, { active_role: cmd.to, open_question: null });
     const next: Who = { ...who, conversation: conv ? { ...conv, active_role: cmd.to, open_question: null } : conv };
-    if (q?.type === "role" && q.pending) return run({ ...t, who: next }, parse({ ...t.m, text: q.pending, buttonId: null, media: null }));
+    if (q?.type === "role" && q.pending) return run({ ...t, who: next }, parse({ ...t.m, text: q.pending, buttonId: null, media: null, forwarded: !!q.forwarded }));
     return answered({ ...t, who: next }, SAY.switched(cmd.to === "business" ? "your business" : cmd.to === "partner" ? "your partner tools" : "Kabsi staff tools"), "role_set");
   }
   if (cmd.k === "business_pick") return pickedBusiness(t, cmd.locationId);
@@ -263,14 +268,16 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   if (oq?.type === "photo_category") {
     if (cmd.k === "number") return photoCategoryPicked(t, oq, String(cmd.n));
     // Anything that is not a kind of photo is a new message, not an answer: the menu is closed and the message handled as usual.
-    if (cmd.k === "free" && pickCategory(cmd.text)) return photoCategoryPicked(t, oq, cmd.text);
+    // F-1: forwarded words never answer the menu.
+    if (cmd.k === "free" && !t.m.forwarded && pickCategory(cmd.text)) return photoCategoryPicked(t, oq, cmd.text);
     await d.db.setConv(phone, { open_question: null });
   }
   // V4: the onboarding buttons, the setup question typed as words, and the owner's yes to the monthly answer's facts.
   if (cmd.k === "onboarding") return onboardingButton(t, cmd.action, cmd.locationId);
   if (cmd.k === "facts") return factsButton(t, cmd.action, cmd.locationId, cmd.month);
   if (oq?.type === "setup") {
-    const typed = cmd.k === "yes" ? "yes" : cmd.k === "tool" && cmd.tool === "help" ? "help" : cmd.k === "free" ? setupReply(cmd.text) : null;
+    // F-1: forwarded words never answer the setup question (setupReply reads more yes words than the router's list).
+    const typed = cmd.k === "yes" ? "yes" : cmd.k === "tool" && cmd.tool === "help" ? "help" : cmd.k === "free" && !t.m.forwarded ? setupReply(cmd.text) : null;
     if (typed) return onboardingButton(t, typed === "yes" ? "yes" : typed, oq.location_id);
   }
   if (oq?.type === "update" && now - Date.parse(oq.at) < ANSWER_WINDOW_MS) {
@@ -324,7 +331,7 @@ async function withBusiness(t: Turn, toolName: string, pending: string | null, f
   const b = pickBusiness(t.who);
   if (!b) {
     const options = list.map((x) => ({ id: x.location_id, name: x.business }));
-    await t.d.db.setConv(t.phone, { open_question: { type: "business", pending, options, ...keep } satisfies OpenQuestion });
+    await t.d.db.setConv(t.phone, { open_question: { type: "business", pending, options, ...keep, ...fwdMark(t) } satisfies OpenQuestion });
     if (options.length <= 3) {
       return answered(t, SAY.whichBusiness, "which_business", options.map((o) => ({ id: `b:${o.id}`, title: o.name.slice(0, 20) })));
     }
@@ -346,7 +353,7 @@ async function pickedBusiness(t: Turn, locationId: string): Promise<string> {
   await t.d.db.setConv(t.phone, { active_location_id: b.location_id, active_role: "business", open_question: null });
   const conv = t.who.conversation ? { ...t.who.conversation, active_location_id: b.location_id, active_role: "business" as Domain, open_question: null } : null;
   const next: Turn = { ...t, who: { ...t.who, conversation: conv } };
-  if (q?.type === "business" && q.pending) return run(next, parse({ ...t.m, text: q.pending, buttonId: null, media: null }));
+  if (q?.type === "business" && q.pending) return run(next, parse({ ...t.m, text: q.pending, buttonId: null, media: null, forwarded: !!q.forwarded }));
   // Photo Post 1: the photo sent with words before the business was picked is handled now, for the business just picked.
   if (q?.type === "business" && q.media) {
     const m = q.media;
@@ -402,8 +409,12 @@ async function tool(t: Turn, name: string, arg: string | undefined, text: string
   }
 }
 
+// F-1: words held while the person picks a role or a business keep their forwarded mark, so a forwarded "Yes" read again
+// after the pick is still not a yes.
+const fwdMark = (t: Turn): { forwarded?: true } => (t.m.forwarded ? { forwarded: true } : {});
+
 async function askRole(t: Turn, options: Domain[], pending: string): Promise<string> {
-  await t.d.db.setConv(t.phone, { open_question: { type: "role", pending, options } satisfies OpenQuestion });
+  await t.d.db.setConv(t.phone, { open_question: { type: "role", pending, options, ...fwdMark(t) } satisfies OpenQuestion });
   const title = (x: Domain) => (x === "business" ? "My business" : x === "partner" ? "Partner tools" : "Staff tools");
   const q = options.includes("partner") ? SAY.whichRole : SAY.whichRoleStaff;
   return answered(t, q, "which_role", options.slice(0, 3).map((x) => ({ id: `r:${x}`, title: title(x) })));

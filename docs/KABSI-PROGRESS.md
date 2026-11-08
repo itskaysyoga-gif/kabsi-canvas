@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 8 Nov 2026, after RB-0. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 8 Nov 2026, after F-1. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -63,9 +63,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 8 Nov 2026, F-1: a forwarded "Yes" never approves; forwarded text is never yes, no, a number answer or a code, STOP still stops. Rashid: forward a Yes from a test phone once (archive file). `2026-11-08-f-1.md`.
 - 8 Nov 2026, RB-0 (R-134 to R-139, master plan 30.43): KABSI 3.0 recorded in `docs/kabsi-3/` (docs only); every later request book session needs Rashid's go. `2026-11-08-rb-0.md`.
 - 8 Nov 2026, Request book PR A and B (dark): 8 service-only tables and 6 functions, off by default, real customer identifiers refused, nothing calls them; no behaviour, price or wording change. `2026-11-08-request-book.md`.
-- 8 Nov 2026, Close 1 (R-130 to R-133, PRs 496, 499 to 502): live check, reply.v4 ready, 30 seconds wording; master plan 30.42. `2026-11-08-close1.md`.
 
 ## How a session updates this page
 

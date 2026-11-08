@@ -24,7 +24,8 @@ export type Command =
   // V4 (30.16 section 3): the setup replies under Kabsi's onboarding messages, and the owner's yes to the monthly answer's facts.
   | { k: "onboarding"; action: OnboardingAction; locationId: string }
   | { k: "facts"; action: "yes" | "no"; locationId: string; month: string }
-  | { k: "free"; text: string }
+  // F-1: forwardedYes marks a forwarded message whose words are a yes. It is never the owner's yes (agent.ts).
+  | { k: "free"; text: string; forwardedYes?: true }
   | { k: "empty" };
 
 export type OnboardingAction = "yes" | "help" | "someone_else" | "cannot_find" | "done" | "skip_first";
@@ -97,16 +98,22 @@ export function parse(m: Inbound): Command {
   const raw = (m.text ?? "").trim();
   if (!raw) return { k: "empty" };
   const t = norm(raw);
+  // STOP wins even when forwarded (Meta's opt-out rule).
   if (STOP.has(t)) return { k: "stop" };
   if (START.has(t)) return { k: "start" };
-  const staff = STAFF_CODE.exec(raw);
+  // F-1: a forwarded message is not the person's own words. It never binds a phone, never says yes or no, and never answers
+  // a question with a number; it goes the free-text path instead.
+  const fwd = m.forwarded === true;
+  const staff = fwd ? null : STAFF_CODE.exec(raw);
   if (staff) return { k: "bind", code: `STAFF ${staff[1].toUpperCase()}` };
-  const owner = OWNER_CODE.exec(raw);
+  const owner = fwd ? null : OWNER_CODE.exec(raw);
   if (owner) return { k: "bind", code: owner[1] };
   const scan = SCAN_CODE.exec(raw);
   if (scan) return { k: "scan_code", code: `KAB-${scan[1].toUpperCase()}`, rest: raw.replace(scan[0], "").trim() };
   const partner = PARTNER_CODE.exec(raw);
   if (partner) return { k: "partner_code", code: partner[1].toUpperCase() };
+  if (fwd && YES.has(t)) return { k: "free", text: raw.slice(0, 2000), forwardedYes: true };
+  if (fwd && (NO.has(t) || /^\d{1,2}$/.test(t))) return { k: "free", text: raw.slice(0, 2000) };
   if (YES.has(t)) return { k: "yes" };
   if (NO.has(t)) return { k: "no" };
   if (/^\d{1,2}$/.test(t)) return { k: "number", n: Number(t) };

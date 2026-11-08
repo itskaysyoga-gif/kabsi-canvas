@@ -13,7 +13,7 @@ import { BIZ, msg, NOW0, PHONES, PNID, type SentMsg, USERS, World } from "./worl
 
 type Step = {
   from: string; text?: string; button?: string | ((w: World) => string); media?: Media; contacts?: { name: string | null; phones: string[] }[];
-  referral?: Record<string, string>; id?: string; ts?: number; pnid?: string;
+  referral?: Record<string, string>; id?: string; ts?: number; pnid?: string; forwarded?: true;
   expect: string | RegExp; reply?: RegExp; none?: true; buttons?: string[]; head?: RegExp; ai?: number;
 };
 type Case = { name: string; lang?: "en" | "es" | "ar"; tags?: string[]; setup?: (w: World) => void; steps: Step[]; check?: (w: World) => void };
@@ -174,6 +174,47 @@ const CASES: Case[] = [
       { from: PHONES.owner, text: "Yes", expect: "which_one", reply: /Which one/, buttons: ["Reply: Harbour Lane", "Post: Harbour Lane C"] },
       { from: PHONES.owner, button: "w:tok00000000000000000002", expect: "approved" }] },
   { name: "owner: typed yes with nothing waiting", tags: ["owner"], steps: [{ from: PHONES.owner, text: "ok", expect: "yes_nothing" }] },
+  // F-1: a forwarded "Yes" is never the owner's yes. Nothing is approved and the owner is asked to tap Yes or type it.
+  { name: "owner: a forwarded Yes approves nothing; the typed Yes after it does", tags: ["owner", "25.5", "F-1"],
+    setup: (w) => void w.alert(PHONES.owner, BIZ.harbour), steps: [
+      { from: PHONES.owner, text: "Yes", forwarded: true, expect: "forwarded_yes", reply: /^That looks forwarded, so I did not count it as your yes\. Tap Yes, or type it yourself\.$/, ai: 0 }],
+    check: (w) => {
+      assert.equal(w.calls.filter((c) => c.startsWith("approve")).length, 0, "nothing approved");
+      assert.equal(w.actions.get("tok00000000000000000001")!.used, false, "still waiting");
+    } },
+  { name: "owner: after a forwarded Yes, the owner's typed Yes approves", tags: ["owner", "25.5", "F-1"],
+    setup: (w) => void w.alert(PHONES.owner, BIZ.harbour), steps: [
+      { from: PHONES.owner, text: "yes", forwarded: true, expect: "forwarded_yes" },
+      { from: PHONES.owner, text: "yes", expect: "approved", reply: /Approved for Harbour Lane Coffee/ }] },
+  { name: "owner: after a forwarded Yes, the Approve button still works", tags: ["owner", "25.5", "F-1"],
+    setup: (w) => void w.alert(PHONES.owner, BIZ.harbour), steps: [
+      { from: PHONES.owner, text: "Yes", forwarded: true, expect: "forwarded_yes" },
+      { from: PHONES.owner, button: "a:tok00000000000000000001", expect: "approved", buttons: ["Undo"] }] },
+  { name: "owner: a forwarded Yes with two items waiting asks nothing and approves nothing", tags: ["owner", "25.5", "F-1"],
+    setup: (w) => { w.alert(PHONES.owner, BIZ.harbour); w.alert(PHONES.owner, BIZ.harbour, "post_alert"); }, steps: [
+      { from: PHONES.owner, text: "Yes", forwarded: true, expect: "forwarded_yes" }],
+    check: (w) => { assert.equal(w.calls.filter((c) => c.startsWith("approve")).length, 0); assert.equal(w.conversation(PHONES.owner).open_question ?? null, null); } },
+  { name: "owner: a forwarded number does not pick from Which one", tags: ["owner", "25.5", "F-1"],
+    setup: (w) => { for (let i = 0; i < 4; i++) w.alert(PHONES.owner, BIZ.harbour, i % 2 ? "post_alert" : "review_alert"); }, steps: [
+      { from: PHONES.owner, text: "yes", expect: "which_one" },
+      { from: PHONES.owner, text: "1", forwarded: true, expect: /^(unclear|nora|unclear_no_ai)/ }],
+    check: (w) => { assert.equal(w.calls.filter((c) => c.startsWith("approve")).length, 0); assert.equal((w.conversation(PHONES.owner).open_question as { type: string }).type, "which"); } },
+  { name: "owner: a forwarded STOP still stops", tags: ["owner", "9.5", "F-1"], steps: [
+    { from: PHONES.owner, text: "STOP", forwarded: true, expect: "stopped" }], check: (w) => assert.equal(w.users[0].optin, "stopped") },
+  { name: "a forwarded owner code does not bind", tags: ["9.2", "F-1", "privacy"], setup: (w) => { w.users[0].phone = null; w.users[0].optin = "none"; },
+    steps: [{ from: "+12125550199", text: "KABSI 123456", forwarded: true, expect: /^(greeting|unclear|nora)/ }],
+    check: (w) => assert.equal(w.users[0].phone, null) },
+  { name: "a forwarded staff code does not bind", tags: ["staff_admin", "F-1", "privacy"], steps: [
+    { from: PHONES.newStaff, text: "STAFF ABCD2345", forwarded: true, expect: /^(greeting|unclear|nora)/ },
+    { from: PHONES.newStaff, text: "status", expect: /^(greeting|unclear|nora|help)/ }],
+    check: (w) => assert.doesNotMatch(w.sent.map((s) => s.body).join(" "), /staff phone|Jobs failed/) },
+  { name: "owner: a forwarded Yes with nothing waiting takes the free-text path", tags: ["owner", "F-1"], steps: [
+    { from: PHONES.owner, text: "Yes", forwarded: true, expect: /^(unclear|nora|unclear_no_ai)/ }] },
+  { name: "two roles: a forwarded Yes held for the role question is still not a yes after the pick", tags: ["two_roles", "F-1"], steps: [
+    { from: PHONES.both, text: "Yes", forwarded: true, expect: "which_role" },
+    // An approval arrives while the role question is open; the pick reads the held words again, still as forwarded.
+    { from: PHONES.both, button: (w) => (w.alert(PHONES.both, BIZ.alnoor), "r:business"), expect: "forwarded_yes", reply: /That looks forwarded/ }],
+    check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("approve")).length, 0) },
   { name: "owner: no", tags: ["owner"], steps: [{ from: PHONES.owner, text: "no", expect: "no" }] },
   { name: "owner: exact reply is shown back for a Yes, nothing goes to Google before it", tags: ["owner", "9.3", "25.5"],
     setup: (w) => (w.conversation(PHONES.owner).last_task = { type: "review", review_id: "r-harbour-1", location_id: BIZ.harbour }),
@@ -586,7 +627,7 @@ for (const c of CASES) {
       const aiBefore = w.aiCalls;
       const button = typeof s.button === "function" ? s.button(w) : s.button;
       const started = performance.now();
-      const r = await receive(deps, msg(w, s.from, { text: s.text, button, media: s.media, contacts: s.contacts, referral: s.referral, id: s.id, ts: s.ts, pnid: s.pnid }));
+      const r = await receive(deps, msg(w, s.from, { text: s.text, button, media: s.media, contacts: s.contacts, referral: s.referral, id: s.id, ts: s.ts, pnid: s.pnid, forwarded: s.forwarded }));
       const took = performance.now() - started;
       const label = `step ${i + 1} (${s.text ?? button ?? s.media?.kind ?? "contact"})`;
       if (typeof s.expect === "string") assert.equal(r, s.expect, label);
