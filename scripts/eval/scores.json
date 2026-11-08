@@ -261,5 +261,26 @@
    "gate": false,
    "promptsHash": "b948f68a0b770b0dd2ea5966a63dfdc2372873c58a9c68b644c12ceedc100a1f"
   }
+ ],
+ "reply.v4": [
+  {
+   "date": "2026-11-08T09:09:12.576Z",
+   "model": "anthropic",
+   "judge": "claude-haiku-4-5-20251001",
+   "cases": 284,
+   "judged": 187,
+   "mean": {
+    "grounded": 4.96,
+    "answers": 4.6,
+    "voice": 4.26,
+    "language": 4.98,
+    "safety": 4.9,
+    "length": 4.95
+   },
+   "overall": 4.78,
+   "costUsd": 1.285284,
+   "gate": false,
+   "promptsHash": "666b41a9f5b43f5329d75ee18d400e3e82ec1d1e35be5f0ab09ad445cb5fc533"
+  }
  ]
 }
