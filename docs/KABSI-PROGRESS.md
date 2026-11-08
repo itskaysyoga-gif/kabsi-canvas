@@ -53,6 +53,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - App 5: may qa-staff@test.local be staff, for live staff runs? (LATER row)
 - Launch 1: send one Founding 25 application named "QA Launch 1 test" (a session removes the row).
 - Outbound: before you say start, the placement test of 30.39 item 13 (LATER row).
+- Credit sprint: lane R decides reply.v4 (PR 499); four facts need an answer (UAE VAT, Creem invoice fields, Apple Pay, data law).
 
 ## Open After merge checks and findings
 
@@ -62,9 +63,8 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 8 Nov 2026, Credit sprint (R-129): live evaluation runs by hand on the promotional credit, at most 65 USD; the ledger and the scores are in `2026-11-08-credit-sprint.md`. Part A baseline: reply.v3 judge 4.72, Nora 4.75; 3.20 USD so far.
+- 8 Nov 2026, Credit sprint (R-129, PRs 493 to 499): 7 live runs by hand, 12.83 of 65 USD. Replies: 120 salon cases, reply.v4 judge 4.72 to 4.78 (PR 499 waits for lane R, Prompt gate). Nora: 90 owner questions, facts fixed, 4.73 to 4.81. 8 salon guides from 16 Nov, judged 5 of 5. Ledger `2026-11-08-credit-sprint.md`.
 - 8 Nov 2026, Fixes B (R-126, PRs 488, 491): examples by trade, Prepared before Google is read, Reports lead, Home counts. `2026-11-08-fixes-b.md`.
-- 8 Nov 2026, Definer review (R-126): three unused definer functions and `action_tokens` closed to the browser; allowlist test; 59 no-policy tables service-only. `2026-11-08-definer-review.md`.
 
 ## How a session updates this page
 

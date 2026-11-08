@@ -6,7 +6,16 @@
 // guide page itself loads its one content file on demand (load.ts).
 import type { GuideDoc } from "./types";
 
-export const WEEKLY = [] as const;
+export const WEEKLY = [
+  "uae-national-day-and-eid-hours-on-google",
+  "christmas-and-bank-holiday-hours-on-google-uk",
+  "reply-to-bad-google-review-salon",
+  "what-to-post-on-google-as-a-barber",
+  "reply-to-review-that-names-your-stylist",
+  "reply-to-reviews-about-no-shows-and-cancellation-fees",
+  "where-to-put-your-google-review-link-salon",
+  "why-google-shows-wrong-details-for-your-salon",
+] as const;
 
 export const ORDER = [
   "why-is-my-business-not-on-google-maps",

@@ -71,3 +71,12 @@ Gaps fixed in the facts (13-faq, 14-glossary): paying in dirhams or pounds; VAT 
 Gaps left for lane R (the facts cannot honestly say more without a decision or Creem's answer): whether UAE VAT is added and at what rate; what a Creem invoice shows (company name, VAT number); whether Apple Pay shows at Creem's checkout; a statement on UK GDPR and the UAE's data law.
 
 Findings left in run 6, for a Nora session (her answers, not the facts): o20 and o70 do not say "not available yet" for a [COMING] item; o21 states "3 month", not in the facts; o19 and o22 leave out the kabsi.co/founding link; o27 says "forever" about the founding price; o76 does not open with the delete warning; o87 leaves out "Your businesses"; o09 and o49 leave out the hand-off. The judge also marked down three correct answers given in the owner's own language (o08 Arabic, o26 Arabic, o86 French) as "not in English"; the judge, not Nora, is wrong there.
+## D. Guides and trade pages
+
+Every trade the task named already had a /for page (nail salon, beauty salon, spa and massage, medical and aesthetic clinic, lash and brow studio, tattoo studio, physiotherapy), so none was added. Added: 8 guides for UAE and UK salon and barber owners, published one a week from 16 Nov 2026 (30.32 item 2), and industry notes 7.17 to 7.20 (nail salons, spas and massage, medical and aesthetic clinics, physiotherapy) in facts 09.
+
+| Run | What | Judged | accurate | helpful | honest | style | overall |
+|---|---|---|---|---|---|---|---|
+| 4 | 8 guides and 4 industry notes against the facts | 12 of 12 | 5 | 5 | 5 | 5 | 5 |
+
+Nothing was flagged, so nothing was fixed after the judge. A fresh read of the sources found the published holiday guide's Kabsi box out of date (Scotland and Northern Ireland are asked since 6 Nov); fixed. The hair salon checklist's booking-link step stays a LATER row.
