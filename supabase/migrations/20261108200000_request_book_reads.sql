@@ -37,8 +37,9 @@ language sql immutable parallel safe set search_path = '' as $$
       '01234567890123456789'), '[^0-9]', '', 'g'), '0'), '')
 $$;
 
+-- Definer, so that any later writer of customers fills the key without needing rights on the helper.
 create function private.rb_customers_name_key() returns trigger
-language plpgsql set search_path = '' as $$
+language plpgsql security definer set search_path = '' as $$
 begin
   new.name_key := private.rb_fold(new.display_name);
   return new;
@@ -224,10 +225,10 @@ begin
     if v_phone is null or length(v_phone) < 7 then return private.rb_refuse('invalid_field', '{"field": "phone"}'); end if;
   end if;
   if p_query ? 'text' then
-    select array_agg(w) into v_words from (
-      select w from unnest(regexp_split_to_array(coalesce(private.rb_fold(p_query ->> 'text'), ''), ' ')) w
-       where length(w) >= 2 limit 6) s;
-    if v_words is null then return private.rb_refuse('invalid_field', '{"field": "text"}'); end if;
+    -- Every word given is matched; none is dropped, so a search is never wider than asked.
+    select array_agg(w) into v_words from unnest(regexp_split_to_array(coalesce(private.rb_fold(p_query ->> 'text'), ''), ' ')) w
+     where w <> '';
+    if v_words is null or cardinality(v_words) > 6 then return private.rb_refuse('invalid_field', '{"field": "text"}'); end if;
   end if;
 
   with hits as (
@@ -244,7 +245,7 @@ begin
              where position(w in coalesce(private.rb_fold(q.summary), '')) = 0))
      order by (q.status = 'closed'), q.created_at desc, q.number desc
      limit 15)
-  select coalesce(jsonb_agg(private.rb_row(h.q, h.name)), '[]'::jsonb), coalesce(max(h.total), 0)::integer
+  select coalesce(jsonb_agg(private.rb_row(h.q, h.name) order by ((h.q).status = 'closed'), (h.q).created_at desc, (h.q).number desc), '[]'::jsonb), coalesce(max(h.total), 0)::integer
     into v_rows, v_total from hits h;
   return jsonb_build_object('ok', true, 'rows', v_rows, 'more', greatest(v_total - jsonb_array_length(v_rows), 0));
 end $$;
@@ -299,7 +300,7 @@ begin
        and (v_due is null or (q.next_action_due_at is not null and q.next_action_due_at <= v_due))
      order by q.created_at desc, q.number desc
      limit 15)
-  select coalesce(jsonb_agg(private.rb_row(h.q, h.name)), '[]'::jsonb), coalesce(max(h.total), 0)::integer
+  select coalesce(jsonb_agg(private.rb_row(h.q, h.name) order by (h.q).created_at desc, (h.q).number desc), '[]'::jsonb), coalesce(max(h.total), 0)::integer
     into v_rows, v_total from hits h;
   return jsonb_build_object('ok', true, 'rows', v_rows, 'more', greatest(v_total - jsonb_array_length(v_rows), 0));
 end $$;
@@ -339,7 +340,9 @@ begin
            'phone_hint', case when h.phone is not null then '***' || right(private.rb_digits(h.phone), 4) end,
            'request_count', (select count(*) from public.customer_requests q
                               where q.location_id = p_location and q.customer_id = h.id and q.outcome is distinct from 'voided'),
-           'last_seen_at', h.last_seen_at)), '[]'::jsonb),
+           'last_seen_at', h.last_seen_at)
+           order by (h.phone is not null and h.by_name) desc, (h.phone is not null) desc, h.last_seen_at desc nulls last, h.created_at desc),
+         '[]'::jsonb),
          coalesce(max(h.total), 0)::integer
     into v_rows, v_total from hits h;
   return jsonb_build_object('ok', true, 'suggestion_only', true, 'candidates', v_rows,

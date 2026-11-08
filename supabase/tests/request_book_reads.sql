@@ -127,6 +127,8 @@ select is(jsonb_array_length(public.request_find(pg_temp.L(), pg_temp.O(), '{"ph
 select is((public.request_find(pg_temp.L(), pg_temp.O(), jsonb_build_object('number', (select number from public.customer_requests where id = :'q2'))) -> 'rows' -> 0 ->> 'request_id')::uuid, :'q2'::uuid, 'R5 by number');
 select is(jsonb_array_length(public.request_find(pg_temp.L(), pg_temp.O(), '{"name":"omar","text":"trim"}') -> 'rows'), 0, 'R5 every key given must match');
 select is(pg_temp.reason(public.request_find(pg_temp.L(), pg_temp.O(), '{"sql":"1"}')), 'unknown_field', 'R5 an unknown key is refused');
+select is(jsonb_array_length(public.request_find(pg_temp.L(), pg_temp.O(), '{"text":"colour z"}') -> 'rows'), 0, 'R5 a one letter word still counts, nothing is dropped');
+select is(pg_temp.reason(public.request_find(pg_temp.L(), pg_temp.O(), '{"text":"a b c d e f g"}')), 'invalid_field', 'R5 more than six words is refused');
 select is(pg_temp.reason(public.request_find(pg_temp.L(), pg_temp.O(), '{"phone":"123"}')), 'invalid_field', 'R5 a phone too short to match is refused');
 select is(jsonb_array_length(public.request_find(pg_temp.L(), pg_temp.O(), jsonb_build_object('text', '%'' or 1=1 --')) -> 'rows'), 0, 'R5 search text is a value, never SQL');
 
@@ -158,6 +160,7 @@ select public.request_find(pg_temp.L(), pg_temp.O(), '{"text":"batch item"}') as
 select is(jsonb_array_length(:'bf'::jsonb -> 'rows'), 15, 'R6 at most fifteen rows');
 select is((:'bf'::jsonb ->> 'more')::int, 5, 'R6 and the count of the rest');
 select is(:'bf'::jsonb -> 'rows' -> 0 ->> 'summary', 'Batch item 20', 'R6 most recent first');
+select is(jsonb_array_length(public.request_find(pg_temp.L(), pg_temp.O(), '{"text":"batch item 7"}') -> 'rows'), 2, 'R5 a short word narrows the search (items 7 and 17)');
 select is((public.customer_suggest(pg_temp.L(), pg_temp.O(), 'batch', null) ->> 'more')::int, 5, 'R6 suggestions keep the same limit');
 select public.request_list_open(pg_temp.L(), pg_temp.O(), '{"kind":"job"}') as lo \gset
 select is(jsonb_array_length(:'lo'::jsonb -> 'rows') + (:'lo'::jsonb ->> 'more')::int, 23, 'R6 every open job is counted, the closed one is not');
