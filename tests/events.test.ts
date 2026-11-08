@@ -94,6 +94,29 @@ describe("track in the browser", () => {
     expect(posthog.capture).toHaveBeenCalledWith("free_scan_completed", { source: "tool" });
   });
 
+  it("free_scan_completed carries whole seconds from choosing the business to the result, and no business detail (R-131)", async () => {
+    const posthog = { capture: vi.fn() };
+    vi.stubGlobal("window", { posthog });
+    const { track, elapsedSeconds } = await import("../src/lib/telemetry");
+    expect(elapsedSeconds(1_000, 22_600)).toBe(22); // 21.6 s, the median of the 9 real runs
+    expect(elapsedSeconds(0, 33_500)).toBe(34);
+    expect(elapsedSeconds(0, 5_600)).toBe(6);
+    expect(elapsedSeconds(5_000, 4_000)).toBe(0); // a clock that went back never gives a negative
+    expect(Number.isInteger(elapsedSeconds(0, 12_345))).toBe(true);
+    track("free_scan_completed", { source: "tool", seconds: elapsedSeconds(0, 21_600) });
+    expect(posthog.capture).toHaveBeenCalledWith("free_scan_completed", {
+      source: "tool",
+      seconds: 22,
+    });
+    const sent = posthog.capture.mock.calls[0]![1] as Record<string, unknown>;
+    expect(Object.keys(sent).sort()).toEqual(["seconds", "source"]);
+    // The screen sends only the number: no name, address or place id next to it.
+    const screen = readFileSync("src/components/kabsi/scan-live.tsx", "utf8");
+    expect(screen).toMatch(
+      /track\("free_scan_completed", \{\s*source: "tool",\s*seconds: elapsedSeconds\(startedAt, Date\.now\(\)\),?\s*\}\)/,
+    );
+  });
+
   it("weekly_report_opened is sent once per report, with the business and where it was opened", async () => {
     const posthog = { capture: vi.fn() };
     vi.stubGlobal("window", { posthog });
