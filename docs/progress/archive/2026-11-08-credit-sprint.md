@@ -13,6 +13,8 @@ Real cost is the cost the run itself printed (drafts, Nora's answers and the jud
 | 3 | 8 Nov 09:03 | [42465259356](https://github.com/itskaysyoga-gif/kabsi-canvas/actions/runs/42465259356) | B | Eval live on claude/credit-b-prompt, reply.v4: the same 284 cases, Nora none. Attempt 1 stopped at the Deno download, no model call | 5 + 0.01 | 1.285 + 0 = 1.285 | 5.93 |
 | 4 | 8 Nov 09:13 | [42466220933](https://github.com/itskaysyoga-gif/kabsi-canvas/actions/runs/42466220933) | D | QA Nora judge on claude/credit-d: 8 new guides and 4 industry notes judged against the facts | 1 | 0.200 | 6.13 |
 | 5 | 8 Nov 09:15 | [42465541964](https://github.com/itskaysyoga-gif/kabsi-canvas/actions/runs/42465541964) | C | Eval live on claude/credit-c before the fact fixes: Nora's 90 new owner questions (o01 to o90, judged), replies none. Attempts 1 to 3 stopped at the Deno download, no model call | 0.01 + 3.5 | 0 + 3.110 = 3.110 | 9.24 |
+| 6 | 8 Nov 09:25 | [42466828844](https://github.com/itskaysyoga-gif/kabsi-canvas/actions/runs/42466828844) | C | Eval live on claude/credit-c after the fact fixes: the same 90 questions, judged. Attempt 1 stopped at the Deno download, no model call | 0.01 + 3.5 | 0 + 3.118 = 3.118 | 12.36 |
+| 7 | 8 Nov 09:35 | [42467514112](https://github.com/itskaysyoga-gif/kabsi-canvas/actions/runs/42467514112) | C | Eval live on claude/credit-c: the five questions that now ask for the new facts (o06, o32, o37, o41, o69), judged. Attempt 1 stopped at the Deno download, no model call | 0.01 + 0.6 | 0 + 0.475 = 0.475 | 12.83 |
 
 ## A. Baseline (run 1, main at 924e219)
 
@@ -52,6 +54,23 @@ Lab pass first (kabsi-reply-lab, this session as the model, no credit): the six 
 
 Prompt gate: reply.v4 is its own pull request. The CI Prompt gate fails a prompt change while EVAL_LIVE is false (by design, LATER row of Eval 1), so it waits for lane R with runs 2 and 3 as its evidence and its promptsHash in scores.json.
 
+## C. Nora: 90 questions from owners in Dubai and Manchester
+
+The set: `scripts/nora-eval/questions-owners.ts`, o01 to o90, 9 on each of price (also in dirhams and pounds), the trial, founding places, card payments not open yet, WhatsApp opt-in, adding Kabsi as a Manager, what Kabsi never does, cancelling, data and deletion, other trades. 82 English, 6 Arabic, 2 French.
+
+| Run | Facts | Questions | Judged | accurate | helpful | honest | style | overall | Gate |
+|---|---|---|---|---|---|---|---|---|---|
+| 5 | before | 90 | 90 | 4.80 | 4.49 | 4.89 | 4.76 | 4.73 | 2 honesty, 9 rule findings |
+| 6 | after | 90 | 90 | 4.86 | 4.58 | 4.96 | 4.83 | 4.81 | 3 honesty, 14 rule findings (6 of them the hand-off the gap questions still asked for, now answered from the facts) |
+| 7 | after, five questions updated | 5 (o06, o32, o37, o41, o69) | 5 | 4.80 | 4.80 | 5.00 | 4.80 | 4.85 | passed |
+
+The 14 questions written on a gap: judge 4.50 before, 4.75 after.
+
+Gaps fixed in the facts (13-faq, 14-glossary): paying in dirhams or pounds; VAT (Creem works it out); the founding price and a second branch (an extra location has one price, `creem.ts`); Apple Pay and pay-later; WhatsApp Business; a manager approving on WhatsApp (only the kinds the owner turns on); no pause; UAE National Day and Eid (the official UAE list); which data law. A contradiction: the FAQ said "Is there a free plan? Yes" while section 01 says there is no Free plan; now "No". Four stale questions (n62, n63, n66, n67) still expected the Visibility Map and AI Visibility to be "not available yet"; they are live since 5 Nov.
+
+Gaps left for lane R (the facts cannot honestly say more without a decision or Creem's answer): whether UAE VAT is added and at what rate; what a Creem invoice shows (company name, VAT number); whether Apple Pay shows at Creem's checkout; a statement on UK GDPR and the UAE's data law.
+
+Findings left in run 6, for a Nora session (her answers, not the facts): o20 and o70 do not say "not available yet" for a [COMING] item; o21 states "3 month", not in the facts; o19 and o22 leave out the kabsi.co/founding link; o27 says "forever" about the founding price; o76 does not open with the delete warning; o87 leaves out "Your businesses"; o09 and o49 leave out the hand-off. The judge also marked down three correct answers given in the owner's own language (o08 Arabic, o26 Arabic, o86 French) as "not in English"; the judge, not Nora, is wrong there.
 ## D. Guides and trade pages
 
 Every trade the task named already had a /for page (nail salon, beauty salon, spa and massage, medical and aesthetic clinic, lash and brow studio, tattoo studio, physiotherapy), so none was added. Added: 8 guides for UAE and UK salon and barber owners, published one a week from 16 Nov 2026 (30.32 item 2), and industry notes 7.17 to 7.20 (nail salons, spas and massage, medical and aesthetic clinics, physiotherapy) in facts 09.
