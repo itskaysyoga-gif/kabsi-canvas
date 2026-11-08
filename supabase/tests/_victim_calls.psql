@@ -30,7 +30,6 @@ select throws_ok($$ select public.photo_link_create('00000000-0000-4000-8000-000
 select throws_ok($$ select public.photo_link_revoke('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'photo_link_revoke refuses a non-member');
 select throws_ok($$ select public.photo_link_status('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'photo_link_status refuses a non-member');
 select throws_ok($$ select public.set_post_cadence('00000000-0000-4000-8000-0000000000c1', 4) $$, '42501', null, 'set_post_cadence refuses a non-member');
-select throws_ok($$ select public.set_protection_autofix('00000000-0000-4000-8000-0000000000c1', 'website', false) $$, '42501', null, 'set_protection_autofix refuses a non-member');
 select throws_ok($$ select public.set_review_link_mode('VCTM22', 'page') $$, '42501', null, 'set_review_link_mode refuses a non-member');
 select throws_ok($$ select public.start_review_report('00000000-0000-4000-8000-0000000000e1', 'fake_content') $$, '42501', null, 'start_review_report refuses a non-member');
 select throws_ok($$ select public.advance_review_report('00000000-0000-4000-8000-0000000000f9', 'answered') $$, '42501', null, 'advance_review_report refuses a non-member');

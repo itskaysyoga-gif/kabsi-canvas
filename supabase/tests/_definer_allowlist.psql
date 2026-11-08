@@ -112,7 +112,7 @@ insert into definer_allowlist (role, sig, reason, caller) values
   ('authenticated', 'staff_payout_sent(uuid,text)', 'staff page: is_staff()', 'browser: lib/programs.ts'),
   ('authenticated', 'staff_payouts_approve(date)', 'staff page: is_staff()', 'browser: lib/programs.ts'),
   ('authenticated', 'staff_set_concierge(uuid,boolean)', 'staff page: is_staff()', 'browser: lib/concierge.ts'),
-  ('authenticated', 'staff_set_google_writes(boolean,text)', 'stop switch: staff admin only, no page yet (decision to confirm, R-126)', 'Edge: _shared'),
+  ('authenticated', 'staff_set_google_writes(boolean,text)', 'stop switch: staff admin only, no page yet (decision to confirm, R-126)', 'none yet: kept for an emergency pause by a staff admin (LATER row)'),
   ('authenticated', 'staff_system_health()', 'staff page: is_staff()', 'browser: components/staff/system-health-panel.tsx lib/read-timeout.ts'),
   ('authenticated', 'staff_today()', 'staff page: is_staff()', 'browser: routes/_authenticated/staff/index.tsx'),
   ('authenticated', 'staff_validation()', 'staff page: is_staff()', 'browser: components/staff/validation-panel.tsx'),

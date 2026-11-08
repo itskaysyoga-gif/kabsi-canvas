@@ -128,14 +128,14 @@ select throws_ok($$ select public.staff_concierge_convert('00000000-0000-4000-80
 select throws_ok($$ select public.staff_concierge_mark_posted('00000000-0000-4000-8000-0000000000f2') $$, '42501', null, 'staff_concierge_mark_posted refuses a non-staff user');
 select throws_ok($$ select public.staff_concierge_queue() $$, '42501', null, 'staff_concierge_queue refuses a non-staff user');
 select throws_ok($$ select public.staff_concierge_task_done('00000000-0000-4000-8000-0000000000f2', 'x') $$, '42501', null, 'staff_concierge_task_done refuses a non-staff user');
-select throws_ok($$ select * from public.staff_contacts(10) $$, '42501', null, 'staff_contacts refuses a non-staff user');
+select ok(not has_function_privilege('authenticated', 'public.staff_contacts(integer)', 'execute'), 'staff_contacts is closed to the browser (definer review, 8 Nov)');
 select throws_ok($$ select public.staff_grant_trial('00000000-0000-4000-8000-0000000000c1', 7) $$, '42501', null, 'staff_grant_trial refuses a non-staff user');
 -- Partners session: the Founding 25 and Kabsi Partners staff functions.
 select throws_ok($$ select public.staff_founding_decide('00000000-0000-4000-8000-0000000000c1', 'accepted') $$, '42501', null, 'staff_founding_decide refuses a non-staff user');
 select throws_ok($$ select public.staff_founding_link('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'staff_founding_link refuses a non-staff user');
 select throws_ok($$ select public.staff_founding_overview() $$, '42501', null, 'staff_founding_overview refuses a non-staff user');
 -- Sec 1: the Founding 25 owner match and the Google writes stop switch are for Kabsi staff admins only.
-select throws_ok($$ select public.staff_founding_matches('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'staff_founding_matches refuses a non-staff user');
+select ok(not has_function_privilege('authenticated', 'public.staff_founding_matches(uuid)', 'execute'), 'staff_founding_matches is closed to the browser (its staff admin check is tested in sec1_roles_approvals.sql)');
 select throws_ok($$ select public.staff_set_google_writes(true, 'stranger tries') $$, '42501', null, 'staff_set_google_writes refuses a non-staff user');
 -- V4: onboarding and the founder-assisted checklist.
 select throws_ok($$ select public.staff_founding_checklist('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'staff_founding_checklist refuses a non-staff user');

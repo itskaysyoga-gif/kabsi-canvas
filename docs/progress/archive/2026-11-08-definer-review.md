@@ -506,5 +506,15 @@ No page reads any of them with `.from(...)` (grep of `src/`), and after this mig
 
 ## Checks run in the session
 
-- `bash scripts/db-test.sh` on a local Supabase stack (CLI 2.119.0, as CI): every migration applied in one transaction, then `supabase test db`: 78 files, 4090 tests, all passed (after one fix: the allowlist generator had kept `set_protection_autofix`; the new stale-line test caught it). `jobs_claim_concurrency.sh` and `publication_concurrency.sh`: ok. The Deno property test was not run locally (no Deno in the session); CI runs it.
+- `bash scripts/db-test.sh` on a local Supabase stack (CLI 2.119.0, as CI): every migration applied in one transaction, then `supabase test db`: 78 files, 4086 tests, all passed on a fresh stack after the review fixes (the first run caught one slip: the allowlist generator had kept `set_protection_autofix`, and the new stale-line test failed on it). `jobs_claim_concurrency.sh` and `publication_concurrency.sh`: ok. The Deno property test was not run locally (no Deno in the session); CI runs it.
 - `npm test`: 127 files, 1322 tests passed. `npm run check:repo`: passed. `npm run lint:changed`: no lintable files changed.
+
+## Independent review (before merge)
+
+A fresh agent given only the diff and the rules. Confirmed: nothing revoked is called by `src/`, `supabase/functions/` or `workers/`; the `action_tokens` revoke breaks no path (every reader is SECURITY DEFINER or the service role); the new test is sound per overload and fails safe on schema-qualified names; the grants inside two test files end with their rollback; `rls_functions.sql` covers the same 120 functions. Its findings and what was done:
+
+1. Low: `staff_set_google_writes` stays allowlisted with no caller, and its caller text was wrong. Kept on purpose (the only audited way to pause Google writes); the caller text now says so; LATER row for lane R.
+2. Low: three refusal tests passed only because the grant was gone. `rls_functions.sql` now asserts `staff_contacts` and `staff_founding_matches` are closed; the `set_protection_autofix` line left `_victim_calls.psql` and `protection_autofix.sql` now proves the owner of business B can neither switch it on nor off for business A (with the grant restored inside that test's transaction). `staff_contacts` has no test of its own check while it is closed.
+3. Note: the excluded schemas were wide. `extensions`, `cron` and `pgmq` are now covered; only the schemas Supabase ships stay excluded (on the local stack `net.http_get`, `net.http_post` and `supabase_functions.http_request` are browser-executable Supabase helpers; on production none).
+
+The first independent read of the 119 browser function bodies (before the change) found no cross-business hole; its design questions are the second LATER row.

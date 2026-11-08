@@ -78,6 +78,11 @@ reset role;
 select tests.act_as('00000000-0000-4000-8000-0000000000b2');
 select throws_ok($$ select public.set_protection_autofix('00000000-0000-4000-8000-0000000000c2', 'regular_hours', true,
   repeat('Kabsi puts back my approved opening hours. ', 2)) $$, 'P0001', 'pro_required', 'an Essentials business cannot');
+-- Definer review (R-126): the owner of business B cannot switch it on, or off, for business A.
+select throws_ok($$ select public.set_protection_autofix('00000000-0000-4000-8000-0000000000c1', 'regular_hours', true,
+  repeat('Kabsi puts back my approved opening hours. ', 2)) $$, '42501', null, 'the owner of another business cannot switch it on');
+select throws_ok($$ select public.set_protection_autofix('00000000-0000-4000-8000-0000000000c1', 'website', false) $$, '42501', null,
+  'the owner of another business cannot switch it off');
 reset role;
 select tests.act_as('00000000-0000-4000-8000-0000000000a1');
 select throws_ok(format($$ select public.set_protection_autofix('00000000-0000-4000-8000-0000000000c1', %L, true,

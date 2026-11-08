@@ -1,6 +1,6 @@
 -- Definer review (R-126, 8 Nov 2026): no SECURITY DEFINER function is executable by anon or authenticated unless it is
--- on the reviewed allowlist in _definer_allowlist.psql. Covers every schema the app owns (any schema but the ones
--- Supabase and Postgres manage), so a new schema is covered too. A stale line (function gone or revoked) fails as well,
+-- on the reviewed allowlist in _definer_allowlist.psql. Covers every schema but the ones Supabase and Postgres ship
+-- (listed below), so public, private, extensions, cron and any new schema are covered. A stale line (function gone or revoked) fails as well,
 -- so the list never claims a grant that is not there.
 begin;
 create extension if not exists pgtap with schema extensions;
@@ -15,9 +15,11 @@ create temp view definer_grants as
     join pg_namespace n on n.oid = p.pronamespace
    cross join (values ('anon'), ('authenticated')) as r(role)
    where p.prosecdef
+     -- Only the schemas Supabase itself ships and upgrades are skipped (net and supabase_functions hold Supabase's own
+     -- http helpers, executable by the browser roles on the local stack). extensions, cron and pgmq stay covered.
      and n.nspname not in ('pg_catalog', 'information_schema', 'pg_toast', 'auth', 'storage', 'realtime', 'graphql',
-                           'graphql_public', 'vault', 'pgbouncer', 'extensions', 'cron', 'net', 'supabase_functions',
-                           'supabase_migrations', 'pgsodium', 'pgsodium_masks', '_realtime', '_analytics', 'pgmq')
+                           'graphql_public', 'vault', 'pgbouncer', 'net', 'supabase_functions', 'supabase_migrations',
+                           'pgsodium', 'pgsodium_masks', '_realtime', '_analytics')
      and n.nspname not like 'pg_temp%' and n.nspname not like 'pg_toast_temp%'
      and has_function_privilege(r.role, p.oid, 'execute');
 
@@ -40,7 +42,8 @@ select is((select array_agg(sig order by sig) from definer_allowlist where role 
 select ok((select bool_and(length(reason) > 10 and length(caller) > 3) from definer_allowlist),
   'every allowlist line names its reason and its caller');
 
--- The three closed on 8 Nov: no page calls them; the service role keeps them.
+-- The three closed on 8 Nov: no page calls them; the service role keeps them. (Their old refusal tests in
+-- rls_functions.sql and _victim_calls.psql are replaced by these privilege checks.)
 select ok(not has_function_privilege('authenticated', 'public.staff_contacts(integer)', 'execute'), 'authenticated cannot run staff_contacts');
 select ok(not has_function_privilege('authenticated', 'public.staff_founding_matches(uuid)', 'execute'), 'authenticated cannot run staff_founding_matches');
 select ok(not has_function_privilege('authenticated', 'public.set_protection_autofix(uuid,text,boolean,text)', 'execute'), 'authenticated cannot run set_protection_autofix');
