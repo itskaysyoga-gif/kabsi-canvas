@@ -51,6 +51,10 @@ select lives_ok($$insert into public.customer_identifiers (location_id, customer
 select lives_ok($$insert into public.customer_identifiers (location_id, customer_id, kind, value) values ('00000000-0000-4000-8000-00000000d0c1', '00000000-0000-4000-8000-00000000d101', 'email', 'sarah@example.com')$$, 'A4 a reserved fictional email is accepted');
 select throws_ok($$update public.customer_identifiers set value = '+447700900123' where kind = 'phone' and value = '+12025550142'$$, '23514', null, 'A4 a fictional phone cannot be updated to a real one');
 
+select throws_ok($$insert into public.customer_identifiers (location_id, customer_id, kind, value) values ('00000000-0000-4000-8000-00000000d0c1', '00000000-0000-4000-8000-00000000d101', 'email', 'someone@gmail.com@example.com')$$, '23514', null, 'A4 a real email cannot hide before a reserved domain');
+select throws_ok($$insert into public.customer_identifiers (location_id, customer_id, kind, value) values ('00000000-0000-4000-8000-00000000d0c1', '00000000-0000-4000-8000-00000000d101', 'email', E'someone@gmail.com\n@example.org')$$, '23514', null, 'A4 a real email cannot hide on another line');
+select throws_ok($$insert into public.customer_identifiers (location_id, customer_id, kind, value) values ('00000000-0000-4000-8000-00000000d0c1', '00000000-0000-4000-8000-00000000d101', 'email', '+447700900123@example.test')$$, '23514', null, 'A4 a real phone cannot pass as an email');
+
 -- A5: real data and live state are impossible for now.
 select throws_ok($$update public.location_packs set real_data_allowed = true where pack = 'salon'$$, '23514', null, 'A5 real_data_allowed cannot be true');
 select throws_ok($$update public.location_packs set state = 'on' where pack = 'salon'$$, '23514', null, 'A5 state cannot be on');
@@ -61,12 +65,23 @@ select throws_ok($$insert into public.customer_requests (location_id, number, ki
 select throws_ok($$insert into public.customer_requests (location_id, number, kind, status, customer_id, summary, entry_method, pack, pack_version, converted_from_request_id) values ('00000000-0000-4000-8000-00000000d0c1', 9, 'appointment', 'requested', '00000000-0000-4000-8000-00000000d101', 'x', 'typed', 'salon', 1, '00000000-0000-4000-8000-00000000d202')$$, '23503', null, 'A6 another business''s enquiry is refused');
 select throws_ok($$insert into public.request_activities (location_id, request_id, type, actor_user_id, actor_role, tool) values ('00000000-0000-4000-8000-00000000d0c1', '00000000-0000-4000-8000-00000000d202', 'created', '00000000-0000-4000-8000-00000000d0a1', 'owner', 'x_tool')$$, '23503', null, 'A6 an activity cannot reach another business''s request');
 
+insert into public.request_activities (id, location_id, request_id, type, actor_user_id, actor_role, tool) values
+  ('00000000-0000-4000-8000-00000000d302', '00000000-0000-4000-8000-00000000d0c2', '00000000-0000-4000-8000-00000000d202', 'created', '00000000-0000-4000-8000-00000000d0b1', 'owner', 'request_create');
+select throws_ok($$insert into public.request_activities (location_id, request_id, type, actor_user_id, actor_role, tool, undo_of) values ('00000000-0000-4000-8000-00000000d0c1', '00000000-0000-4000-8000-00000000d201', 'undone', '00000000-0000-4000-8000-00000000d0a1', 'owner', 'x_tool', '00000000-0000-4000-8000-00000000d302'); set constraints all immediate$$, '23503', null, 'A6 an undo cannot point at another business''s activity');
+select throws_ok($$insert into public.request_activities (location_id, request_id, type, actor_user_id, actor_role, tool, related_request_id) values ('00000000-0000-4000-8000-00000000d0c1', '00000000-0000-4000-8000-00000000d201', 'converted_in', '00000000-0000-4000-8000-00000000d0a1', 'owner', 'x_tool', '00000000-0000-4000-8000-00000000d202'); set constraints all immediate$$, '23503', null, 'A6 a link cannot point at another business''s request');
+
 -- A7: append only.
 select throws_ok($$update public.request_activities set tool = 'other_tool' where id = '00000000-0000-4000-8000-00000000d301'$$, '42501', null, 'A7 an activity cannot be updated');
 select throws_ok($$delete from public.request_activities where id = '00000000-0000-4000-8000-00000000d301'$$, '42501', null, 'A7 an activity cannot be deleted while its request exists');
 select throws_ok($$update public.request_activity_values set after_value = '"C"' where activity_id = '00000000-0000-4000-8000-00000000d301'$$, '42501', null, 'A7 a value cannot be changed');
 select throws_ok($$delete from public.request_activity_values where activity_id = '00000000-0000-4000-8000-00000000d301'$$, '42501', null, 'A7 a value cannot be deleted');
 select lives_ok($$update public.request_activity_values set before_value = null, after_value = null, cleared_at = now() where activity_id = '00000000-0000-4000-8000-00000000d301'$$, 'A7 a value can be cleared');
+select throws_ok($$update public.request_activity_values set cleared_at = now() + interval '1 day' where activity_id = '00000000-0000-4000-8000-00000000d301'$$, '42501', null, 'A7 a cleared value cannot be rewritten');
+select throws_ok($$delete from public.customer_requests where id = '00000000-0000-4000-8000-00000000d201'$$, '42501', null, 'A7 deleting a request cannot erase its timeline');
+select throws_ok($$delete from public.customers where id = '00000000-0000-4000-8000-00000000d101'$$, '42501', null, 'A7 deleting a customer cannot erase a timeline');
+set constraints all immediate;
+select throws_ok($$truncate public.request_activities cascade$$, '42501', null, 'A7 activities cannot be truncated');
+select throws_ok($$truncate public.request_activity_values$$, '42501', null, 'A7 values cannot be truncated');
 
 -- A8: only valid combinations per kind.
 create function pg_temp.bad(p_set text) returns text language sql as $f$
@@ -90,14 +105,27 @@ select is((select count(*)::int from information_schema.columns c join rb_tables
 select throws_ok($$update public.customer_requests set follow_up_user_id = '00000000-0000-4000-8000-00000000d0b1' where id = '00000000-0000-4000-8000-00000000d201'$$, '23503', null, 'A11 a follow-up owner from another business is refused');
 select lives_ok($$update public.customer_requests set follow_up_user_id = '00000000-0000-4000-8000-00000000d0a1' where id = '00000000-0000-4000-8000-00000000d201'$$, 'A11 a member can own the follow-up');
 
+insert into auth.users (instance_id, id, aud, role, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+values ('00000000-0000-0000-0000-000000000000', '00000000-0000-4000-8000-00000000d0a2', 'authenticated', 'authenticated', 'rb-staff-a@example.test', now(), '{}', '{}', now(), now());
+insert into public.location_members (location_id, user_id, role) values ('00000000-0000-4000-8000-00000000d0c1', '00000000-0000-4000-8000-00000000d0a2', 'staff');
+update public.customer_requests set follow_up_user_id = '00000000-0000-4000-8000-00000000d0a2' where id = '00000000-0000-4000-8000-00000000d201';
+delete from public.location_members where user_id = '00000000-0000-4000-8000-00000000d0a2';
+select is((select follow_up_user_id from public.customer_requests where id = '00000000-0000-4000-8000-00000000d201'), null::uuid, 'A11 losing membership only clears the field');
+
 -- A9: deleting a business removes everything of its own, and only its own. Last, because it removes the fixtures.
-select lives_ok($$delete from public.locations where id = '00000000-0000-4000-8000-00000000d0c1'$$, 'A9 deleting a business does not fail');
+insert into public.tool_executions (location_id, idempotency_key, tool, input_hash, result, actor_user_id) values
+  ('00000000-0000-4000-8000-00000000d0c1', 'k1', 'request_create', repeat('a', 64), '{}', '00000000-0000-4000-8000-00000000d0a1');
+insert into public.request_intakes (location_id, source) values ('00000000-0000-4000-8000-00000000d0c1', 'typed');
+update public.locations set deletion_requested_at = now() where id = '00000000-0000-4000-8000-00000000d0c1';
+select lives_ok($$select public.delete_location_now('00000000-0000-4000-8000-00000000d0c1'); set constraints all immediate$$, 'A9 the existing deletion job does not fail');
 select is((select count(*)::int from public.customer_requests where location_id = '00000000-0000-4000-8000-00000000d0c1')
         + (select count(*)::int from public.customers where location_id = '00000000-0000-4000-8000-00000000d0c1')
         + (select count(*)::int from public.customer_identifiers where location_id = '00000000-0000-4000-8000-00000000d0c1')
         + (select count(*)::int from public.request_activities where location_id = '00000000-0000-4000-8000-00000000d0c1')
         + (select count(*)::int from public.request_activity_values where location_id = '00000000-0000-4000-8000-00000000d0c1')
-        + (select count(*)::int from public.location_packs where location_id = '00000000-0000-4000-8000-00000000d0c1'), 0, 'A9 all of its rows are gone');
+        + (select count(*)::int from public.location_packs where location_id = '00000000-0000-4000-8000-00000000d0c1')
+        + (select count(*)::int from public.request_intakes where location_id = '00000000-0000-4000-8000-00000000d0c1')
+        + (select count(*)::int from public.tool_executions where location_id = '00000000-0000-4000-8000-00000000d0c1'), 0, 'A9 all of its rows are gone');
 select is((select count(*)::int from public.customer_requests where location_id = '00000000-0000-4000-8000-00000000d0c2'), 1, 'A9 another business is untouched');
 
 select * from finish();

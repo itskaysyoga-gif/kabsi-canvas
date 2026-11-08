@@ -7,9 +7,10 @@
 -- Service-only, as the repo's other service tables: RLS on, no policies, no grants to anon or authenticated. service_role
 -- reads but cannot write, so only the PR B functions (SECURITY DEFINER, owned by postgres) can change a row.
 --
--- Real customer data is refused here, not by convention: location_packs.state is 'off' or 'test', real_data_allowed has a
--- check that forces false, and customer_identifiers takes only reserved fictional phones and emails. A later migration,
--- after the customer data controls and legal review, is the only way to lift this.
+-- Real customer identifiers are refused here: location_packs.state is 'off' or 'test', real_data_allowed has a check that
+-- forces false, and customer_identifiers takes only reserved fictional phones and emails. Free text cannot be checked by
+-- a constraint, so test data stays fictional by rule, and the PR B functions refuse any location not in test. A later
+-- migration, after the customer data controls and legal review, is the only way to lift this.
 --
 -- Rollback is by switches. Nothing here is dropped as a rollback once rows exist.
 
@@ -66,7 +67,7 @@ begin
   end if;
   -- Test mode: the North American 555-0100 to 555-0199 range and the reserved email domains cannot belong to anyone.
   if (new.kind = 'phone' and new.value ~ '^\+1[2-9][0-9]{2}55501[0-9]{2}$')
-     or (new.kind = 'email' and new.value ~* '@(example\.(com|org|net)|[a-z0-9-]+\.(test|example|invalid))$') then
+     or (new.kind = 'email' and new.value ~* '^[a-z][a-z0-9._-]{0,63}@(example\.(com|org|net)|[a-z0-9-]+\.(test|example|invalid))$') then
     return new;
   end if;
   raise exception 'request_book: real customer data is not allowed' using errcode = '23514';
@@ -192,11 +193,15 @@ create table public.request_activities (
   actor_user_id uuid not null,
   actor_role text not null check (actor_role in ('owner', 'manager', 'staff')),
   tool text not null check (tool ~ '^[a-z][a-z_]{1,62}$'),
-  undo_of uuid unique,
+  undo_of uuid,
   related_request_id uuid,
   created_at timestamptz not null default now(),
   unique (location_id, id),
-  foreign key (location_id, request_id) references public.customer_requests (location_id, id) on delete cascade
+  unique (location_id, undo_of),
+  foreign key (location_id, request_id) references public.customer_requests (location_id, id) on delete cascade,
+  -- Deferred and no action: a set-null action would hit the append-only guard when a whole business is deleted.
+  foreign key (location_id, undo_of) references public.request_activities (location_id, id) deferrable initially deferred,
+  foreign key (location_id, related_request_id) references public.customer_requests (location_id, id) deferrable initially deferred
 );
 create index request_activities_request_idx on public.request_activities (location_id, request_id, created_at desc);
 
@@ -213,30 +218,38 @@ create table public.request_activity_values (
 );
 create index request_activity_values_location_idx on public.request_activity_values (location_id, activity_id);
 
--- Append only, while the parent exists. When a business is deleted the parent is already gone in the same statement, so
--- the existing deletion job (delete_location_now) keeps working.
+-- Append only, while the business exists. When a business is deleted its row is already gone in the same statement, so
+-- the existing deletion job (delete_location_now) keeps working, and nothing else can remove a timeline.
 create function private.request_activities_guard() returns trigger
 language plpgsql set search_path = '' as $$
 begin
-  if tg_op = 'DELETE' and not exists (select 1 from public.customer_requests r where r.id = old.request_id) then
-    return old;
+  if tg_op = 'DELETE' then
+    if not exists (select 1 from public.locations l where l.id = old.location_id) then
+      return old;
+    end if;
   end if;
   raise exception 'request_activities is append-only' using errcode = '42501';
 end $$;
 revoke all on function private.request_activities_guard() from public, anon, authenticated;
 create trigger request_activities_guard before update or delete on public.request_activities
   for each row execute function private.request_activities_guard();
+create trigger request_activities_no_truncate before truncate on public.request_activities
+  for each statement execute function private.request_activities_guard();
 
 create function private.request_activity_values_guard() returns trigger
 language plpgsql set search_path = '' as $$
 begin
+  if tg_op = 'TRUNCATE' then
+    raise exception 'request_activity_values may only be cleared' using errcode = '42501';
+  end if;
   if tg_op = 'DELETE' then
-    if not exists (select 1 from public.request_activities a where a.id = old.activity_id) then
+    if not exists (select 1 from public.locations l where l.id = old.location_id) then
       return old;
     end if;
     raise exception 'request_activity_values may only be cleared' using errcode = '42501';
   end if;
-  if (new.activity_id, new.location_id, new.field) is distinct from (old.activity_id, old.location_id, old.field)
+  if old.cleared_at is not null
+     or (new.activity_id, new.location_id, new.field) is distinct from (old.activity_id, old.location_id, old.field)
      or new.before_value is not null or new.after_value is not null or new.cleared_at is null then
     raise exception 'request_activity_values may only be cleared' using errcode = '42501';
   end if;
@@ -245,6 +258,8 @@ end $$;
 revoke all on function private.request_activity_values_guard() from public, anon, authenticated;
 create trigger request_activity_values_guard before update or delete on public.request_activity_values
   for each row execute function private.request_activity_values_guard();
+create trigger request_activity_values_no_truncate before truncate on public.request_activity_values
+  for each statement execute function private.request_activity_values_guard();
 
 -- 8. One result per idempotency key. Ids only: never a name, a phone or a customer's words.
 create table public.tool_executions (
