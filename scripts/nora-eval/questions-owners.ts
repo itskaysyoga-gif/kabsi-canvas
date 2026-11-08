@@ -82,13 +82,14 @@ export const QUESTIONS_OWNERS: Question[] = [
     ask: "Im VAT registered in the UK. will i get a proper VAT invoice with my company name?",
     kb: [
       /Payments are processed by Creem, our merchant of record/,
+      /is shown on Creem's receipt/,
       /Invoices, receipts, VAT or tax documents, company details on invoices/,
     ],
     must: [MAIL],
     forbid: [YES],
     coming: true,
     reference:
-      "Payments are processed by Creem, Kabsi's merchant of record, which handles sales tax and VAT once card payments open. Invoices, VAT documents and the company details on them are handled by a person on the team, so write to hello@kabsi.co. Card payments are not open yet, so there is nothing to pay today.",
+      "Payments are processed by Creem, Kabsi's merchant of record, which handles sales tax and VAT once card payments open. What an invoice shows, such as a company name or a VAT number, is shown on Creem's receipt, and the detail is confirmed before card payments open. For your company's details write to hello@kabsi.co. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "o05",
@@ -390,12 +391,16 @@ export const QUESTIONS_OWNERS: Question[] = [
     lang: "en",
     topic: "Apple Pay or Tabby",
     ask: "do u take apple pay or tabby",
-    kb: [/By card, in US dollars, and nothing else/, /Payment methods not listed/],
-    must: [MAIL],
-    forbid: [YES],
+    kb: [
+      /By card, in US dollars, and nothing else/,
+      /Creem lists Apple Pay and Google Pay as supported/,
+      /Payment methods not listed/,
+    ],
+    must: [/cards?/i, /Apple Pay/i],
+    forbid: [/Tabby (is|will be) (accepted|available|supported)/i],
     coming: true,
     reference:
-      "Kabsi takes payment by card, in US dollars, and nothing else, through Creem, its merchant of record. I cannot confirm any other way to pay, so for anything else write to hello@kabsi.co. Card payments are not open yet, so there is nothing to pay today.",
+      "Cards work, in US dollars, through Creem, Kabsi's merchant of record. Creem lists Apple Pay as supported, so it may appear at checkout; what shows depends on the product, your country and your device. Kabsi offers no pay-later plan such as Tabby. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "o30",
@@ -415,12 +420,12 @@ export const QUESTIONS_OWNERS: Question[] = [
     lang: "en",
     topic: "a bank transfer",
     ask: "can I just do bank transfer from my emirates NBD account",
-    kb: [/Kabsi takes no crypto, cash or bank transfer, and no other payment app/],
+    kb: [/Kabsi takes no crypto, cash or bank transfer, and offers no pay-later plan/],
     must: [/card/i],
     forbid: [YES],
     coming: true,
     reference:
-      "No. Kabsi takes no bank transfer, crypto or cash. The only way to pay is by card in US dollars, and card payments are not open yet, so there is nothing to pay today.",
+      "No. Kabsi takes no bank transfer, crypto or cash. Payment is by card in US dollars, and card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "o32",
@@ -1000,12 +1005,13 @@ export const QUESTIONS_OWNERS: Question[] = [
     ask: "are you compliant with UK GDPR and the UAE data law?",
     kb: [
       /You can ask to see, correct, delete, get a copy of, or object to the use of your data/,
+      /Kabsi does not claim to comply with any named law/,
       /Never give legal, tax or medical advice/,
     ],
-    must: [MAIL],
-    forbid: [/\bcompliant\b/i],
+    must: [MAIL, /kabsi\.co\/privacy/],
+    forbid: [/\bcompliant\b/i, /\bwe comply\b|\bKabsi complies\b|\bfully\b[^.]{0,20}\bcompl/i],
     reference:
-      "I cannot give legal advice or answer for your case. What I can say: you can ask to see, correct, delete, get a copy of or object to the use of your data, Kabsi replies within 30 days, and you can complain to your local data protection authority. For a specific question, write to hello@kabsi.co.",
+      "Kabsi does not claim to comply with any named law, and I cannot give legal advice. The privacy page, kabsi.co/privacy, says what Kabsi keeps, for how long and how to see, correct or delete it. You can ask for your data to be deleted at any time. For a specific question, write to hello@kabsi.co.",
   },
   {
     id: "o81",

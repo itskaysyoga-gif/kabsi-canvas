@@ -12,7 +12,7 @@ export const guide: GuideDoc = {
   description:
     "What a hair salon or barbershop should have on its Google profile, item by item, from Google's own help pages: category, hours, services, booking, photos.",
   publishAt: PUBLISH_ALL_AT,
-  updated: READ,
+  updated: "2026-11-08",
   checked: READ,
   topic: "Checklist",
   answer:
@@ -119,8 +119,10 @@ export const guide: GuideDoc = {
             To add your own link, on Google Search select Booking, then Add link, enter the address
             and Save. With more than one link, Set preferred link marks one as Business preferred.
             Google says some booking links can appear on your profile automatically from third-party
-            providers; to take one off, select Booking, then Remove Provider, and Google says the
-            provider must remove it within 5 days of your request.
+            providers, and that you cannot delete them from your profile settings. To take one off,
+            contact the provider through its opt-out link, support form or account portal. Google
+            says the provider must act on an opt-out request within 5 business days; if the link is
+            still there after that, you can report it to Google through its contact form.
           </p>
           <Callout kind="tip" title="Test the link after every change">
             When you move to a new booking tool, open your profile on a phone and tap the booking
@@ -279,7 +281,7 @@ export const guide: GuideDoc = {
     {
       title: "Google: Manage your local business links",
       url: "https://support.google.com/business/answer/6218037?hl=en",
-      read: READ,
+      read: "2026-11-08",
     },
     {
       title: "Google: Tips for business-specific photos on your Business Profile",

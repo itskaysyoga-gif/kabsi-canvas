@@ -114,7 +114,7 @@ export const buildFaqGroups = (whatsappOn: boolean = WHATSAPP_ON): FaqGroup[] =>
       items: [
         {
           q: "What does the free check show?",
-          a: "What customers see on your Google profile today and what to do first: your opening hours, how many reviews you have and your rating, your photos, your website and phone, and your category. It takes about 10 seconds and needs no access.",
+          a: "What customers see on your Google profile today and what to do first: your opening hours, how many reviews you have and your rating, your photos, your website and phone, and your category. It takes about 30 seconds and needs no access.",
         },
         {
           q: "How do I add Kabsi to my Google profile?",
