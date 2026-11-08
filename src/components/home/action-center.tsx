@@ -55,6 +55,14 @@ export function ActionCenter({ loc, access }: { loc: Location; access: Access })
   const view = waitingView(waiting, expanded, new Set(held.keys()));
   const yes = [...view.shown];
   for (const h of held.values()) if (!waiting.some((t) => t.id === h.task.id)) yes.unshift(h.task);
+  const detailTasks = [
+    ...new Map(
+      [...held.values()]
+        .map((h) => h.task)
+        .concat(waiting)
+        .map((t) => [t.id, t]),
+    ).values(),
+  ];
   const details = useQuery({
     // The details of the folded items load too, so "See all" opens at once.
     queryKey: ["card-details", loc.id, [...yes, ...waiting].map((t) => t.id).join(",")],
@@ -202,9 +210,15 @@ function HomeCounts({
         className={
           tile + " hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2"
         }
-        aria-label={`Done this week ${done}, open the latest report`}
+        aria-label={
+          q.isLoading || q.isError
+            ? "Done this week, open the latest report"
+            : `Done this week ${done}, open the latest report`
+        }
       >
-        <span className="block font-display text-h3 font-bold">{q.isLoading ? "" : done}</span>
+        <span className="block font-display text-h3 font-bold">
+          {q.isLoading || q.isError ? "" : done}
+        </span>
         <span className="block text-small text-text-2">Done this week</span>
       </Link>
     </div>

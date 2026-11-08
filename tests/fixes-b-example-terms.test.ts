@@ -37,7 +37,7 @@ describe("example search terms by trade", () => {
         t,
       ).toEqual(["142", "86", "61", "37", "24", null, null]);
       expect(rows.slice(5).map((r) => r.insightsValue?.threshold)).toEqual(["15", "15"]);
-      for (const r of rows) expect(r.searchKeyword).not.toMatch(/[–—!]/);
+      for (const r of rows) expect(r.searchKeyword).not.toMatch(/[\u2013\u2014!]/);
     }
   });
 
@@ -86,6 +86,15 @@ describe("example search terms by trade", () => {
       [{ category: "gym" }, "gym"],
       [{ categoryLabel: "Hair and beauty salon" }, "hair_salon"],
       [{ category: "hair_salon", name: "Harbour Lane Coffee" }, "hair_salon"],
+      [
+        { category: "establishment", categoryLabel: "Salon", name: "Coffee and Cuts" },
+        "hair_salon",
+      ],
+      [{ category: "bar", name: "Hair of the Dog Pub" }, "general"],
+      [{ category: "bakery", name: "Spa Road Bakery" }, "general"],
+      [{ category: "florist", name: "Beauty and Bloom" }, "general"],
+      [{ name: "Smith Barbershop" }, "barber"],
+      [{ categoryLabel: "Salon" }, "hair_salon"],
       [{ name: "Harbour Lane Coffee" }, "cafe"],
       [{ category: "bakery", name: "Rye and Co" }, "general"],
       [{}, "general"],

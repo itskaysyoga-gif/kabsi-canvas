@@ -7,7 +7,7 @@ import { myLatestLocation } from "@/lib/onboarding";
 import { trackReportOpened } from "@/lib/telemetry";
 import { loadNearby } from "@/lib/insights";
 import { loadPrefs, loadRoutineChannel } from "@/lib/notifications";
-import { chosenChannel, reportsLead } from "@/lib/routine-delivery";
+import { chosenChannel, reportsLead, whatsappBlock } from "@/lib/routine-delivery";
 import { whatsappOwnersOn, whatsappStatus } from "@/lib/whatsapp-owner";
 import { WHATSAPP_ON } from "@/lib/site";
 import { dateRange } from "@/lib/date-range";
@@ -78,18 +78,18 @@ function useReportsLead(locationId: string | undefined) {
   if (!locationId) return undefined;
   if (WHATSAPP_ON) {
     if (status.isError || stored.isError || prefs.isError) return undefined;
-    if (status.isLoading || stored.isLoading || prefs.isLoading) return undefined;
+    if (status.isLoading || stored.isLoading || prefs.isLoading || ownersOn.isLoading)
+      return undefined;
   }
-  return reportsLead(
-    chosenChannel({
-      whatsappOn: WHATSAPP_ON,
-      ownersOn: ownersOn.data,
-      status: status.data,
-      statusFailed: false,
-      stored: stored.data,
-      prefs: prefs.data ?? [],
-    }),
-  );
+  const input = {
+    whatsappOn: WHATSAPP_ON,
+    ownersOn: ownersOn.data,
+    status: status.data,
+    statusFailed: false,
+    stored: stored.data,
+    prefs: prefs.data ?? [],
+  };
+  return reportsLead(chosenChannel(input), whatsappBlock(input) === null);
 }
 
 function ReportPage() {

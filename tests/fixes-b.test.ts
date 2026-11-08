@@ -16,7 +16,7 @@ import { FOLD, waitingView } from "../src/lib/home-state";
 import { AI_EXAMPLE_LINE } from "../src/lib/insights";
 import type { Task } from "../src/lib/tasks";
 
-const noDash = (s: string) => expect(s).not.toMatch(/[–—!]/);
+const noDash = (s: string) => expect(s).not.toMatch(/[\u2013\u2014!]/);
 
 describe("the Reports lead follows the owner's channel (DSH-02)", () => {
   it("says WhatsApp for WhatsApp and email for email, with the way to switch", () => {
@@ -26,6 +26,12 @@ describe("the Reports lead follows the owner's channel (DSH-02)", () => {
     );
     noDash(reportsLead("whatsapp"));
     noDash(reportsLead("email"));
+  });
+
+  it("does not suggest switching to WhatsApp when Settings does not let the owner", () => {
+    const line = reportsLead("email", false);
+    expect(line).toBe("Every Monday by email. The last 12 weeks are here.");
+    expect(line).not.toMatch(/switch/);
   });
 
   it("reads email while WhatsApp cannot carry anything, as Settings does", () => {

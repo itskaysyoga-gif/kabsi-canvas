@@ -61,9 +61,10 @@ export const EXAMPLE_TERMS_BY_TRADE: Record<Trade, RawTerm[]> = {
 // Places types (hair_salon) and the words owners and Google use (Hair salon), most specific first. A hair and beauty
 // salon is a hair salon; a barber shop is not.
 const TRADE_RULES: [Trade, RegExp][] = [
-  ["barber", /\bbarbers?\b/],
+  ["barber", /\bbarbers?(shops?)?\b/],
   ["hair_salon", /\b(hair|hairdressers?|hairdressing|hairstylists?)\b/],
   ["beauty_nails", /\b(nails?|beauty|manicure|pedicure|lash|lashes|brows?|waxing|makeup)\b/],
+  ["hair_salon", /\bsalon\b/], // a bare "salon" reads as a hair salon; beauty and nail salons matched above
   ["spa", /\b(spa|massage|wellness)\b/],
   ["clinic", /\b(clinic|doctor|medical|dentist|dental|physio|physiotherapist|physiotherapy|chiropractor)\b/],
   ["restaurant", /\b(restaurant|bistro|grill|diner|pizzeria|steakhouse|takeaway)\b/],
@@ -71,10 +72,14 @@ const TRADE_RULES: [Trade, RegExp][] = [
   ["gym", /\b(gym|fitness|crossfit|pilates|yoga)\b/],
 ];
 
-/** The trade of a business from its Google category, the category's label and, last, its name. Anything else is general. */
+/**
+ * The trade of a business from its Google category and the category's label. The name is read only when Google gave neither,
+ * so a pub called "Hair of the Dog" with the category bar is general, never a hair salon. Anything else is general.
+ */
 export function tradeOf(b: { category?: string | null; categoryLabel?: string | null; name?: string | null }): Trade {
-  for (const raw of [b.category, b.categoryLabel, b.name]) {
-    const text = String(raw ?? "").toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+  const clean = (raw: string | null | undefined) => String(raw ?? "").toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+  const given = [clean(b.category), clean(b.categoryLabel)].filter(Boolean);
+  for (const text of given.length ? given : [clean(b.name)]) {
     if (!text) continue;
     for (const [trade, re] of TRADE_RULES) if (re.test(text)) return trade;
   }
