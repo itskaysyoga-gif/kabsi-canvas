@@ -9,8 +9,10 @@
 //                                                          one at a time (App 6): the first answer writes Nora's cached facts
 //                                                          (about 66,000 tokens), the other four read them, so five questions
 //                                                          cost about 0.25 US dollars instead of four cache writes at once
-//   node scripts/nora-eval/run-nora-eval.ts --live --with-28 --judge --budget 2.5   all 88 questions (the 60, the
-//                                                          20 of 28.7, the 3 of Scope 1 and the 5 page-link questions), each scored by the judge (26.1), stopped at the budget
+//   node scripts/nora-eval/run-nora-eval.ts --live --with-28 --judge --budget 2.5   all 178 questions (the 60, the
+//                                                          20 of 28.7, the 3 of Scope 1, the 5 page-link questions and the 90
+//                                                          owner questions of questions-owners.ts), each scored by the judge
+//                                                          (26.1), stopped at the budget
 //
 // Add --out <file> to keep the findings. Nothing is stored and no account is read.
 import { writeFileSync } from "node:fs";
@@ -20,6 +22,7 @@ import { QUESTIONS } from "./questions.ts";
 import { QUESTIONS_28 } from "./questions-28.ts";
 import { QUESTIONS_SCOPE1 } from "./questions-scope1.ts";
 import { QUESTIONS_PAGES } from "./questions-pages.ts";
+import { QUESTIONS_OWNERS } from "./questions-owners.ts";
 import { addRun, JUDGE_MODEL, makeJudge, summarize, type JudgeScore } from "../eval/judge.ts";
 import { costMicros, type Usage } from "../../supabase/functions/_shared/ai/agents.ts";
 import { readFileSync } from "node:fs";
@@ -59,7 +62,7 @@ if (stub) {
 const all = args.includes("--pages")
   ? QUESTIONS_PAGES
   : args.includes("--with-28")
-    ? [...QUESTIONS, ...QUESTIONS_28, ...QUESTIONS_SCOPE1, ...QUESTIONS_PAGES]
+    ? [...QUESTIONS, ...QUESTIONS_28, ...QUESTIONS_SCOPE1, ...QUESTIONS_PAGES, ...QUESTIONS_OWNERS]
     : QUESTIONS;
 const n = Number(flag("--sample") ?? all.length);
 // Fix 1: --ids en16,en26 asks only those questions (a cheap check of a fix before the full run); the gate expects that many.

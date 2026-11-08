@@ -1,7 +1,8 @@
 // The 20 questions of master plan 28.7: Nora on the new position (maps, AI answers, competitors, review requests, what
 // the free check shows, what each plan holds). Same shape and rules as questions.ts (60 questions, which stay as they
 // are, so the "Nora gate (60 questions)" job keeps its name and its count). The live run asks all 80.
-// Everything about the new product is [COMING]: the answer says it is not available yet and gives no date.
+// Everything about the new product was [COMING] when this was written; the Visibility Map and AI Visibility are live
+// since 5 Nov 2026 (Go live 1), so n62, n63, n66 and n67 no longer expect "not available yet" (credit sprint C).
 import type { Question } from "./questions.ts";
 
 // "Kabsi doesn't guarantee any ranking" is the honest answer: a guarantee only counts when nothing negates it just before.
@@ -32,9 +33,8 @@ export const QUESTIONS_28: Question[] = [
     kb: [/\| Visibility Map \| 1 keyword, monthly \| 5 keywords, weekly \|/],
     // Eval 1: "search term" is the owner's word for a keyword since 30.15.
     must: [/\b1 (keyword|search term)/i, /\b5 (keywords|search terms)/i],
-    coming: true,
     reference:
-      "The Visibility Map is not available yet. When it is, Essentials will check 1 keyword a month and Pro 5 keywords every week.",
+      "The Visibility Map checks 1 keyword a month on Essentials and 5 keywords every week on Pro.",
   },
   {
     id: "n63",
@@ -43,9 +43,8 @@ export const QUESTIONS_28: Question[] = [
     ask: "How far out does the map check go for a dental clinic?",
     kb: [/about 1 km for a cafe, 3 km for a salon, 5 km for a clinic or auto repair/],
     must: [/5 km/],
-    coming: true,
     reference:
-      "The Visibility Map is not available yet. The grid will be wider for a trade where customers travel further: about 5 km for a clinic, 3 km for a salon and 1 km for a cafe.",
+      "The Visibility Map's grid is wider for a trade where customers travel further: about 5 km for a clinic, 3 km for a salon and 1 km for a cafe.",
   },
   {
     id: "n64",
@@ -77,9 +76,8 @@ export const QUESTIONS_28: Question[] = [
     ask: "How many AI questions are checked on each plan?",
     kb: [/\| AI Visibility \| 3 prompts, monthly \| 10 prompts, every 2 weeks \|/],
     must: [/\b3\b/, /\b10\b/],
-    coming: true,
     reference:
-      "AI Visibility is not available yet. Essentials will check 3 prompts a month and Pro 10 prompts every 2 weeks.",
+      "AI Visibility checks 3 prompts a month on Essentials and 10 prompts every 2 weeks on Pro.",
   },
   {
     id: "n67",
@@ -89,9 +87,8 @@ export const QUESTIONS_28: Question[] = [
     gloss: "Does Kabsi check whether Perplexity mentions my business?",
     kb: [/run on ChatGPT and Perplexity/],
     must: [/Perplexity/],
-    coming: true,
     reference:
-      "Eso será AI Visibility y todavía no está disponible. Kabsi hará preguntas con las palabras de sus clientes en ChatGPT y Perplexity, y anotará si su negocio aparece, en qué lugar y qué competidores y fuentes se citan.",
+      "Sí, eso es AI Visibility. Kabsi hace preguntas con las palabras de sus clientes en ChatGPT y Perplexity, y anota si su negocio aparece, en qué lugar y qué competidores y fuentes se citan.",
   },
   // ── competitors ──────────────────────────────────────────────────────────────────────────────────────────────────
   {
