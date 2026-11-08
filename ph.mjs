@@ -1,0 +1,10 @@
+import { createRequire } from "node:module";
+const require = createRequire("/home/user/kabsi-canvas/package.json");
+const { chromium } = require("playwright");
+const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1243/chrome-linux64/chrome", args: ["--no-sandbox","--disable-blink-features=AutomationControlled"], proxy: { server: "http://127.0.0.1:42853" } });
+const UA = `Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${browser.version()} Safari/537.36`;
+const ctx = await browser.newContext({ locale: "en-GB", timezoneId: "Europe/London", userAgent: UA });
+await ctx.route("**/api/geo", r => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ country: "GB" }) }));
+const page = await ctx.newPage(); await page.goto("https://kabsi.co/", { waitUntil: "load" }); await page.waitForTimeout(8000);
+console.log(await page.evaluate(async () => { const p = window.posthog; const o = {}; o.startOptedOut = p.has_opted_out_capturing(); p.opt_out_capturing(); o.afterOptOut = p.has_opted_out_capturing(); p.set_config({ persistence: "localStorage+cookie" }); o.afterSetConfig = p.has_opted_out_capturing(); p.reset(); o.afterReset = p.has_opted_out_capturing(); o.localKeys = Object.keys(localStorage).filter(k=>k.includes("opt_in_out")); return o; }));
+await browser.close();
