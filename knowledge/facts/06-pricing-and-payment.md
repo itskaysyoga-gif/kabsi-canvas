@@ -26,7 +26,7 @@ Essentials is $29 a month or $290 a year. Pro is $59 a month or $590 a year. An 
 
 ### 4.2 How to pay
 
-By card, in US dollars, and nothing else. Payments are processed by Creem, our merchant of record. **[COMING]** Card checkout through Creem is not open yet (it is built and runs in Creem's test mode; it opens at the launch gate). Until it opens there is nothing to pay: the Plan page says "Card payments in US dollars are coming. Until they open there is nothing to pay." Kabsi takes no crypto, cash or bank transfer, and no other payment app. Never give a wallet address or a payment ID. Anything else about paying: hand off.
+By card, in US dollars, and nothing else that Kabsi offers itself. Payments are processed by Creem, our merchant of record. Creem lists Apple Pay and Google Pay as supported, so one may appear at Creem's checkout; what shows depends on the product, the country and the device, so say it may appear and that cards work. **[COMING]** Card checkout through Creem is not open yet (it is built and runs in Creem's test mode; it opens at the launch gate). Until it opens there is nothing to pay: the Plan page says "Card payments in US dollars are coming. Until they open there is nothing to pay." Kabsi takes no crypto, cash or bank transfer, and offers no pay-later plan. Never give a wallet address or a payment ID. Anything else about paying: hand off.
 
 **[COMING] How paying will work once plans open (built 25 Oct 2026, session 10).** Not available yet, no date. Say only what is below.
 - Choosing a plan opens Creem's secure checkout for that business, in US dollars, plus tax where it applies; Creem is the merchant of record and handles sales tax and VAT. The paid period starts the day the owner pays.
