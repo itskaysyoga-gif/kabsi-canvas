@@ -89,7 +89,10 @@ function useReportsLead(locationId: string | undefined) {
     stored: stored.data,
     prefs: prefs.data ?? [],
   };
-  return reportsLead(chosenChannel(input), whatsappBlock(input) === null);
+  // Settings can get the owner to WhatsApp when it is chosen now or only needs connecting first; when WhatsApp is not open or
+  // is paused, Settings offers no way, so the lead does not say there is one.
+  const block = whatsappBlock(input);
+  return reportsLead(chosenChannel(input), block === null || block.fix === "connect");
 }
 
 function ReportPage() {

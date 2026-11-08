@@ -2,7 +2,7 @@
 // (DSH-03), Home shows three counts and three waiting items with urgent ones before the fold (DSH-05, DSH-08), and an
 // Example business's AI answer says so (DSH-07).
 import { describe, expect, it } from "vitest";
-import { chosenChannel, reportsLead } from "../src/lib/routine-delivery";
+import { chosenChannel, reportsLead, whatsappBlock } from "../src/lib/routine-delivery";
 import {
   coachCounter,
   coachRows,
@@ -32,6 +32,21 @@ describe("the Reports lead follows the owner's channel (DSH-02)", () => {
     const line = reportsLead("email", false);
     expect(line).toBe("Every Monday by email. The last 12 weeks are here.");
     expect(line).not.toMatch(/switch/);
+  });
+
+  it("says it can be switched when WhatsApp only needs connecting, and not when it is paused or not open", () => {
+    const base = { statusFailed: false, prefs: [], stored: null };
+    const hint = (i: Parameters<typeof whatsappBlock>[0]) => {
+      const b = whatsappBlock(i);
+      return b === null || b.fix === "connect";
+    };
+    expect(hint({ ...base, whatsappOn: true, status: { state: "none" } })).toBe(true);
+    expect(hint({ ...base, whatsappOn: true, status: { state: "stopped" } })).toBe(true);
+    expect(hint({ ...base, whatsappOn: true, status: { state: "active" } })).toBe(true);
+    expect(hint({ ...base, whatsappOn: false, status: undefined })).toBe(false);
+    expect(hint({ ...base, whatsappOn: true, ownersOn: false, status: { state: "active" } })).toBe(
+      false,
+    );
   });
 
   it("reads email while WhatsApp cannot carry anything, as Settings does", () => {
