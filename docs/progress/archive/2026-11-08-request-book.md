@@ -22,6 +22,12 @@ PR B, 7 confirmed, all fixed: Undo could restore a stale shared customer name; a
 - Decision: the original actor may Undo their own change for 10 minutes, even as staff. Staff still cannot cancel, mark lost or reopen someone else's work.
 - `customer_identifiers` added to an existing customer stay after an Undo of the creation, as a fact about that customer.
 
+## Production state of PR B
+
+Applied 8 Nov 2026 through `apply_migration` after Rashid's explicit approval, version 20261108183317. Read-back: 6 public functions, 12 private helpers, 18 of 18 function bodies match the file by md5, 0 browser execute rights, 0 execute rights on the helpers for any API role including service_role, index definition carries the voided condition, 0 settings, 0 pack rows, 0 requests, 0 customers, 0 tool executions, `request_create` returns `disabled`. Security advisors name none of the new functions.
+
+Wiring requirement for any later PR: a service_role caller naming a real member succeeds as that member, because the database cannot prove who is behind a call. The WhatsApp wiring must take actor and location from the verified sender, never from message text, and must carry that as an acceptance test.
+
 ## Not done, by authorization
 
 PR C and PR D are specified in the doc and not built. No location has a pack row. Nothing is wired to WhatsApp.
