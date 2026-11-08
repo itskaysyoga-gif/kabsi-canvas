@@ -503,3 +503,8 @@ No page reads any of them with `.from(...)` (grep of `src/`), and after this mig
 | Nora's chats (the assistant function; staff read through staff_chats) | `chat_conversations`, `chat_messages` | service-only on purpose |
 | Owner data the app reads through a membership-checked function | `coach_profile`, `coach_read_failures`, `coach_site_check`, `style_edits` | service-only on purpose |
 | Outbound (Rashid's daily batch through staff_outbound_ functions) | `outbound_days`, `outbound_harvey_queue`, `outbound_suppression` | service-only on purpose |
+
+## Checks run in the session
+
+- `bash scripts/db-test.sh` on a local Supabase stack (CLI 2.119.0, as CI): every migration applied in one transaction, then `supabase test db`: 78 files, 4090 tests, all passed (after one fix: the allowlist generator had kept `set_protection_autofix`; the new stale-line test caught it). `jobs_claim_concurrency.sh` and `publication_concurrency.sh`: ok. The Deno property test was not run locally (no Deno in the session); CI runs it.
+- `npm test`: 127 files, 1322 tests passed. `npm run check:repo`: passed. `npm run lint:changed`: no lintable files changed.

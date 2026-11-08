@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 7 Nov 2026, Audit close. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 8 Nov 2026, Definer review. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -33,7 +33,6 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 ## Open for Rashid (as last recorded; the full table is `docs/progress/archive/steps-only-rashid-can-do.md`)
 
 - The lane R checklist of 7 Nov is Rashid's project doc `claude/kabsi-whats-left-2026-11-07.md` (not in this repository). In four lines: card payments stay closed until Creem's live setup; the first Meta ad waits for the DataForSEO top-up, Vercel Pro and the open lines of `docs/launch1/readiness.md`; the first paying business waits for Kapso Pro and the rest of 30.19 section 6; the dates that matter are the end of the promotional AI credit on 17 Nov and the Sentry budget before 30 Nov.
-- Done 25 Oct: Clean 1 drops, the Places purge, Resend webhook, R2, backups, Pub/Sub, WHATSAPP_LIVE (`2026-11-05-golive1.md`).
 - Phone test (13b part 1): passed 25 Oct (ladder above). 13b part 2: send START from the staff phone (it is stopped); delete the Supabase secrets SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET and the Supabase SENTRY_AUTH_TOKEN; run `supabase/manual/20261025_drop_slack_leftovers.sql` (expect `0 | 0 | 0 | 0`); remove the Kabsi app from Slack when you like.
 - Sec 2: the backup secret, unused secrets, two-step logins (`docs/security/secrets-and-accounts.md`); the retention switch (`supabase/data/20261027_sec2_retention_on.sql`).
 - Supabase Auth: leaked-password protection; paste the four `emails/auth/*.html` templates again, rebuilt on 5 Nov with the WhatsApp line (steps in emails/auth/README.md).
@@ -58,13 +57,13 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 ## Open After merge checks and findings
 
 - After merge checks that a session could not run (they need a phone or a person) are in `docs/progress/archive/after-merge.md`. The first session of each kind reads the ones for its own area before starting.
-- New in Ops 1 part B: zod 3 to 4 is a session of its own (dependency review names it as an exception); one test row `bounced@resend.dev` is left in `email_suppressions`. Full list in the archive entry.
+- Ops 1 part B left one test row `bounced@resend.dev` in `email_suppressions` (archive entry).
 - Found, not done: `docs/progress/archive/found-not-done.md`. Decisions to confirm: `docs/progress/archive/decisions-to-confirm.md`.
 
 ## Recent entries (newest first)
 
+- 8 Nov 2026, Definer review (R-126): 457 definer functions inventoried, three unused ones and `action_tokens` closed to the browser, an allowlist test guards new ones; the 59 no-policy tables are service-only. Lane R: the stop switch grant and two LATER rows. `2026-11-08-definer-review.md`.
 - 7 Nov 2026, Audit close (R-125, 30.40): audit account cancelled, PRs 479 to 485 closed, `save_signup_attribution` restored; Rashid runs `supabase/manual/20261107_audit_close_drops.sql` (expect 0s, `password_accounts` 1) and deletes the nine audit branches. `2026-11-07-audit-close.md`.
-- 7 Nov 2026, Demo pack (R-125): both demo businesses complete, screenshot pack for the dashboard review. `2026-11-07-demo-pack.md`.
 
 ## How a session updates this page
 
