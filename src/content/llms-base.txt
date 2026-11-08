@@ -13,7 +13,7 @@ Key facts:
 - Reviews: each new review gets a draft reply in the reviewer's language (for example English, Spanish or French). Drafts only use facts the owner gave Kabsi, make no promises of money, and are checked before they reach the owner. Hard reviews (a complaint or a refund) get a calm draft; the most sensitive (health, a threat, legal action, a complaint that names someone on the team) get no draft and a short checklist.
 - Google Profile: post drafts (optional), photo checks before publishing, special and holiday hours. All of it waits for the owner's approval; nothing is published on a schedule.
 - Google Protection: watches the Google profile's name, phone, address, hours, website and category, and tells the owner when one changes on Google (an urgent change always by email). The owner chooses: Google is right, or Keep my information. Nothing changes unless the owner says so. It cannot lock a profile.
-- Your weekly report: every Monday, on WhatsApp or by email (by email until WhatsApp opens for owners), with what Kabsi did that week (replies, posts and photos sent to Google, changes caught), what waits for the owner's yes, the numbers Google gives (calls, direction requests, website clicks, new reviews) and review link opens. Facts only.
+- Your weekly report: every Monday, on WhatsApp or by email (the owner chooses), with what Kabsi did that week (replies, posts and photos sent to Google, changes caught), what waits for the owner's yes, the numbers Google gives (calls, direction requests, website clicks, new reviews) and review link opens. Facts only.
 - Nora: Kabsi's assistant. She answers questions on the site and in the dashboard, and helps owners fill in their business facts. She is an AI and says so when asked.
 - Get Reviews (review link and QR code): free in every country. They open the business's own Google review form for every customer. There is no filtering of unhappy customers. Ask every customer the same way, as they visit. Never offer a reward. Opens are counted as opens, not reviews. They work with the owner's own QR codes and NFC cards. Kabsi sells no NFC cards.
 - What Kabsi works with today: Today, Kabsi works only with your Google Business Profile. It does not connect to booking systems, Tripadvisor, Booking.com, Airbnb, Facebook reviews, a till or a CRM, and it does not message your customers.
@@ -22,6 +22,7 @@ Key facts:
 - Google data: review text and reviewer names are kept at most 30 days after Google last returned them.
 - Compared with Gemini in Business Profile: Gemini is Google's free assistant for one verified profile that the owner opens and asks. Kabsi comes to the owner with a reply already prepared, tells the owner when Google changes the profile, writes only from facts the owner confirmed, and has a person behind it. Source: https://support.google.com/business/answer/17142585
 - Operator and contact: Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co.
+- Last updated: 8 Nov 2026.
 
 ## Main pages
 

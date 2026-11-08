@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ExternalLink } from "lucide-react";
-import { BookingLink } from "@/components/shared/booking-link";
+import { BookingHelper, BookingLink } from "@/components/shared/booking-link";
 import { CopyButton } from "@/components/shared/copy-button";
 import { StepClip } from "@/components/onboarding/step-clip";
 import { Button } from "@/components/ui/button";
@@ -102,6 +102,7 @@ export function ManagerGuide({
               Book a free setup call
             </BookingLink>
             .
+            <BookingHelper className="mt-1" />
           </p>
         ) : null}
         {card.opensListing ? (
@@ -177,6 +178,7 @@ export function ManagerGuide({
           Book a free {SETUP_CALL_MINUTES}-minute setup call
         </BookingLink>
         .
+        <BookingHelper className="mt-1" />
       </p>
     </div>
   );

@@ -5,7 +5,7 @@
 // own profile, so a real owner's email never shows example figures; a block without real numbers is left out. The demo
 // business keeps its labelled examples. No review text and no quotes (K-113.3, R-19). Pure, so a test can read it.
 import { card, chips, esc, label, para, statCards } from "../email-layout.ts";
-import { didChips, type Receipt } from "../results-report/receipt.ts";
+import { didChips, type Chip, type Receipt } from "../results-report/receipt.ts";
 import type { Counts } from "../care-report/compose.ts";
 import { TOKENS } from "./tokens.ts";
 
@@ -44,7 +44,41 @@ const counts = (c: ReportData["care"]): Counts => ({
   ...(c?.counts ?? { posts_published: 0, hours_updates: 0, profile_updates: 0, photos_published: 0 }),
 });
 
-export type RenderedReport = { html: string; text: string; dates: string; preheader: string; button: { label: string; path: string } };
+/**
+ * R-126 (EMAIL-01): what went to Google after the owner's yes, counted from the receipt's chips, which come only from
+ * published and read-back items. Photos count with the profile changes; a prepared reply that was not sent is not here.
+ */
+export function sentCounts(did: Chip[]): { replies: number; posts: number; changes: number } {
+  const n = (...keys: string[]) => did.filter((c) => keys.includes(c.key)).reduce((s, c) => s + c.count, 0);
+  return { replies: n("replies"), posts: n("posts"), changes: n("photos", "hours", "details", "put_back") };
+}
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+/** The parts of the week that are not zero: "3 replies", "1 post", "2 profile changes". */
+function sentParts(c: { replies: number; posts: number; changes: number }): string[] {
+  return [
+    c.replies ? plural(c.replies, "reply", "replies") : "",
+    c.posts ? plural(c.posts, "post", "posts") : "",
+    c.changes ? plural(c.changes, "profile change", "profile changes") : "",
+  ].filter(Boolean);
+}
+/** The subject: "Your Kabsi week: 3 replies, 1 post, 2 profile changes", a zero part left out. A week with nothing sent is
+ *  "Your Kabsi week: your profile was checked, nothing needed you"; if something is waiting for the owner's yes, that
+ *  last part says so instead, because "nothing needed you" would not be true. */
+export function weekSubject(did: Chip[], waiting: number): string {
+  const parts = sentParts(sentCounts(did));
+  if (parts.length) return `Your Kabsi week: ${parts.join(", ")}`;
+  return `Your Kabsi week: your profile was checked, ${waiting ? `${plural(waiting, "thing is", "things are")} waiting for your yes` : "nothing needed you"}`;
+}
+/** The first line of the body: what Kabsi sent to Google after the owner's yes, then what is waiting. */
+export function sentLine(did: Chip[], waiting: number): string {
+  const parts = sentParts(sentCounts(did));
+  const sent = parts.length
+    ? `After your yes, Kabsi sent ${parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}` : parts[0]} to Google.`
+    : "Kabsi sent nothing to Google this week.";
+  return `${sent} ${waiting ? `${plural(waiting, "thing is", "things are")} waiting for your yes.` : "Nothing is waiting for your yes."}`;
+}
+
+export type RenderedReport = { html: string; text: string; dates: string; preheader: string; subject: string; button: { label: string; path: string } };
 
 export function renderReport(loc: { name: string }, r: ReportData): RenderedReport {
   const dates = dateRange(r.period);
@@ -59,7 +93,10 @@ export function renderReport(loc: { name: string }, r: ReportData): RenderedRepo
   const growth = rc?.growth ?? null;
 
   const parts: string[] = [];
-  const text: string[] = [`${loc.name}, ${dates}`];
+  // R-126: the first line says what went to Google after the owner's yes, then what is waiting.
+  const first1 = sentLine(did, waiting.count);
+  parts.push(para(`<strong>${esc(first1)}</strong>`));
+  const text: string[] = [first1, `${loc.name}, ${dates}`];
   parts.push(para(`<strong>${esc(loc.name)}</strong> · ${esc(dates)}`, { muted: true }));
 
   // What Kabsi did
@@ -135,5 +172,5 @@ export function renderReport(loc: { name: string }, r: ReportData): RenderedRepo
   const preheader = did.length
     ? `${dates}: Kabsi did ${did.reduce((s, c) => s + c.count, 0)} things this week. ${waiting.count ? `${waiting.count} waiting for your yes.` : "Nothing waits for your yes."}`
     : `${dates}: a quiet week. ${waiting.count ? `${waiting.count} waiting for your yes.` : "Nothing waits for your yes."}`;
-  return { html: parts.join(""), text: text.join("\n\n"), dates, preheader, button };
+  return { html: parts.join(""), text: text.join("\n\n"), dates, preheader, subject: weekSubject(did, waiting.count), button };
 }
