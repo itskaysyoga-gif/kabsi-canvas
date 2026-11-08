@@ -41,7 +41,8 @@ describe("the sitemap's lastmod", () => {
     for (const g of OPEN) expect(lastmodOf(`/guides/${g.slug}`), g.slug).toBe(g.updated);
     // A weekly guide is in the sitemap, with its own updated date, only from its day.
     const later = sitemapXml(publicGuides(ALL_GUIDES, new Date(weeklyAt(7))));
-    for (const g of ALL_GUIDES) expect(lastmodIn(later, `/guides/${g.slug}`), g.slug).toBe(g.updated);
+    for (const g of ALL_GUIDES)
+      expect(lastmodIn(later, `/guides/${g.slug}`), g.slug).toBe(g.updated);
     const newest = OPEN.map((g) => g.updated)
       .sort()
       .at(-1)!;
