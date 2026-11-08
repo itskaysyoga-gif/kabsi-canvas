@@ -441,7 +441,7 @@ export function caseOf(user: string): Case {
   return c;
 }
 const signature = (c: Case) => String(BUSINESSES[c.business].card.signature);
-// The stubs answer in the review's language, as reply.v3 asks (Fix 1).
+// The stubs answer in the review's language, as reply.v3 and v4 ask (Fix 1).
 const THANKS: Record<string, string> = {
   ar: "شكرا جزيلا لتقييمك ولوقتك، ونتمنى أن نراك مرة أخرى قريبا في المكان.",
   fr: "Merci pour votre avis.",

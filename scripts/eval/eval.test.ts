@@ -18,7 +18,7 @@ import {
   wrongLanguage,
 } from "./eval.ts";
 import { makeJudge, parseScore, REPLY_RUBRIC, summarize } from "./judge.ts";
-import { REPLY_RULES } from "../../supabase/functions/_shared/ai/prompts/reply.v3.ts";
+import { REPLY_RULES } from "../../supabase/functions/_shared/ai/prompts/reply.v4.ts";
 import { CLASSIFY_RULES } from "../../supabase/functions/_shared/ai/prompts/classify.v2.ts";
 import { UNTRUSTED } from "../../supabase/functions/_shared/ai/fence.ts";
 
