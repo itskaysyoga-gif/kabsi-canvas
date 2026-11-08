@@ -64,7 +64,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 ## Recent entries (newest first)
 
 - 7 Nov 2026, Audit close (R-125, 30.40): audit account cancelled, PRs 479 to 485 closed, `save_signup_attribution` restored; Rashid runs `supabase/manual/20261107_audit_close_drops.sql` (expect 0s, `password_accounts` 1) and deletes the nine audit branches. `2026-11-07-audit-close.md`.
-- 7 Nov 2026, Ready 2 (go-live safety): PRs 473 to 478. `2026-11-07-ready2.md`.
+- 7 Nov 2026, Demo pack (R-125): both demo businesses complete, screenshot pack for the dashboard review. `2026-11-07-demo-pack.md`.
 
 ## How a session updates this page
 
