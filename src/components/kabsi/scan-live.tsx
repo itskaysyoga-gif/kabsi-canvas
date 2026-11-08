@@ -419,7 +419,10 @@ export function LiveFreeCheck({
         }).catch(() => null);
       }
       setProgress(3);
-      track("free_scan_completed", { source: "tool", seconds: elapsedSeconds(startedAt, Date.now()) });
+      track("free_scan_completed", {
+        source: "tool",
+        seconds: elapsedSeconds(startedAt, Date.now()),
+      });
       // Scan 2 (30.29): a finished check is the custom FreeScanCompleted; Lead is a contact given.
       pixelCustom("FreeScanCompleted");
       setPhase({ kind: "result", snapshot, check });

@@ -112,8 +112,8 @@ describe("track in the browser", () => {
     expect(Object.keys(sent).sort()).toEqual(["seconds", "source"]);
     // The screen sends only the number: no name, address or place id next to it.
     const screen = readFileSync("src/components/kabsi/scan-live.tsx", "utf8");
-    expect(screen).toContain(
-      'track("free_scan_completed", { source: "tool", seconds: elapsedSeconds(startedAt, Date.now()) })',
+    expect(screen).toMatch(
+      /track\("free_scan_completed", \{\s*source: "tool",\s*seconds: elapsedSeconds\(startedAt, Date\.now\(\)\),?\s*\}\)/,
     );
   });
 
