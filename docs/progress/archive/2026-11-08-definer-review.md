@@ -13,7 +13,7 @@ Branch `claude/definer-review`. Lane R decision R-126: the Supabase security adv
 
 ## What changed
 
-Migration `supabase/migrations/<version>_definer_review.sql` (applied with apply_migration, read back below):
+Migration `supabase/migrations/20261108061639_definer_review.sql` (applied with apply_migration, read back below):
 
 1. `revoke execute ... from public, anon, authenticated` on `staff_contacts(integer)`, `staff_founding_matches(uuid)` and `set_protection_autofix(uuid,text,boolean,text)`. The service role keeps them. A page that later calls one grants it back in its own migration with its allowlist line.
 2. `revoke all on public.action_tokens from anon, authenticated`: the one no-policy table that still granted SELECT, REFERENCES and TRIGGER to `authenticated` (no row could pass RLS; the grant had no use). No view or invoker function reads it.
@@ -518,3 +518,15 @@ A fresh agent given only the diff and the rules. Confirmed: nothing revoked is c
 3. Note: the excluded schemas were wide. `extensions`, `cron` and `pgmq` are now covered; only the schemas Supabase ships stay excluded (on the local stack `net.http_get`, `net.http_post` and `supabase_functions.http_request` are browser-executable Supabase helpers; on production none).
 
 The first independent read of the 119 browser function bodies (before the change) found no cross-business hole; its design questions are the second LATER row.
+
+## Applied and read back (8 Nov 2026)
+
+- apply_migration `definer_review`, version 20261108061639 (list_migrations), file renamed to match.
+- Read-back (select only): `authenticated` can run 120 definer functions in public, `anon` 1; `staff_contacts`, `staff_founding_matches`, `set_protection_autofix` false for authenticated; the service role keeps `staff_founding_matches`; `action_tokens` select false for authenticated; `staff_set_google_writes` still true (kept); of the 94 rpc names the app's code calls (all but `suggest_take`), 0 lack an authenticated grant.
+- Security advisor before and after: `authenticated_security_definer_function_executable` 123 to 120; `anon_security_definer_function_executable` 1 to 1 (`suggest_take`, the approved exception); `rls_enabled_no_policy` 59 to 59 (classified above, no policy added by design); `auth_leaked_password_protection` 1 (Rashid's dashboard step, already in PROGRESS).
+
+## Part E: nothing the product uses lost its grant
+
+- /app as the QA demo owner (`qa-demo@test.local`, Harbour Lane Coffee and Juniper Hair Studio), on production, in one read-only transaction rolled back, as `authenticated` with the owner's claims: activity_feed 40 rows, plan_summary, feature_access (pro), coach_checklist (unlocked), my_access, holiday_calendar, my_notification_prefs, photo_link_status, whatsapp_status, can_see true, is_staff false, 24 reviews through RLS, the Posts page's `photo_sig` column readable. The read-only guard stopped `onboarding_status` (it writes a resume code), so nothing changed. A signed-in browser run was not made: minting a sign-in code is an `execute_sql` write, which the build skill forbids.
+- /staff as the staff admin (the only staff row; there is no QA admin, App 5's LATER question), same read-only transaction: is_staff, staff_today, staff_operations, staff_job_health, staff_system_health, staff_founding_overview, staff_partners_overview, staff_activation, staff_validation, staff_chat_stats, staff_business_diagnostics all answered. No staff data was printed (yes or no only).
+- Free check, Playwright on https://kabsi.co/scan at 390 px: the page loads, typing a business name calls `/api/suggest` (200, configuration probe); the suggestion list waits for the Cloudflare bot check, which a headless browser cannot pass (known since Scan 2). Direct call of `/rest/v1/rpc/suggest_take` with the public key and a wrong route key: HTTP 400 `suggest_take: not allowed`, so anon keeps its grant and the key check holds. `/rest/v1/rpc/staff_contacts` with the public key: HTTP 401 `permission denied`. kabsi.co/app and /staff answer 200.

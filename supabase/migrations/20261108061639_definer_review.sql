@@ -2,7 +2,7 @@
 -- calls. The inventory is docs/progress/archive/2026-11-08-definer-review.md; the reviewed allowlist is
 -- supabase/tests/_definer_allowlist.psql and supabase/tests/definer_allowlist.sql fails on any function outside it.
 --
--- staff_contacts: the old contacts list (names, emails, phones); no staff page reads it since the CRM moved.
+-- staff_contacts: the old contacts list (names, emails, phones); no staff page reads it.
 -- staff_founding_matches: the Founding 25 owner match (Sec 1); the staff panel does not call it yet.
 -- set_protection_autofix: the Pro auto-fix opt-in; no owner page offers it yet and the switch is off by policy.
 -- The page that later calls one of them grants it back in its own migration, with its line in the allowlist.
