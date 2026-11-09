@@ -112,7 +112,7 @@ Deno.test("scan2: SEVEN Burgers (5 Nov): the chains ChatGPT named are not near i
   const v = publicView(done);
   assertEquals(v.ai?.question_line, "We asked ChatGPT: 'best fast food restaurant in Boqaata, Lebanon'");
   assertEquals(v.ai?.sources_line, "No sources cited.");
-  assertEquals(v.ai?.asked_line, "Asked on 5 November 2026 through OpenAI's API, with web search. The ChatGPT app can answer differently, and answers change from run to run.");
+  assertEquals(v.ai?.asked_line, "Asked ChatGPT on 5 November 2026, with web search. The ChatGPT app can answer differently, and answers change from run to run.");
   assertEquals(v.fast.competitors.map((c) => c.name), ["West Diner", "Eatout", "Shawarma Albasha"], "at your address, Latin names only");
 });
 
@@ -151,6 +151,13 @@ Deno.test("scan2: the other lines, and a row from before Scan 2 shows no questio
   assertEquals([l.question, l.asked, l.sources_line], [null, null, null]);
   const local = storeAi({ ...base, names: ["قطر الندى", "West Diner"] }, [{ title: "قطر الندى", cid: null }, { title: "West Diner", cid: null }], true);
   assertEquals(aiLine(local), "ChatGPT did not name you. It named West Diner, which Google Maps shows near you.", "the next business takes the place of a name not in Latin letters");
+});
+
+Deno.test("Tidy 1 (R-143 item 2): the asked line names the assistant and the date, with no API words, for ChatGPT and its Perplexity twin", () => {
+  const base = { provider: "chatgpt" as const, named: false, competitors: [], sources: [], label: "x", question: "q", asked_at: "2026-11-05T09:00:00.000Z" };
+  assertEquals(aiLines({ ...base, web_search_forced: false })!.asked, "Asked ChatGPT on 5 November 2026. The ChatGPT app can answer differently, and answers change from run to run.");
+  assertEquals(aiLines({ ...base, assistant: "Perplexity" as never, web_search_forced: false })!.asked, "Asked Perplexity on 5 November 2026. The Perplexity app can answer differently, and answers change from run to run.");
+  for (const a of ["ChatGPT", "Perplexity"]) assert(!/API|OpenAI/.test(aiLines({ ...base, assistant: a as never, web_search_forced: true })!.asked ?? ""), `${a}: no API words`);
 });
 
 Deno.test("scan2: names not in Latin letters are never shown: a card reads 'another business came first'", () => {

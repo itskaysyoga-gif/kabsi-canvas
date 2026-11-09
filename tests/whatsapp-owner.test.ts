@@ -17,7 +17,7 @@ describe("WhatsApp owner channel in the app (P0.8-03)", () => {
       /Kapso/,
       /STOP/,
       /low and medium risk/,
-      /name, address, categories, map pin, phone or opening status/,
+      /name, address, categories, map location, phone or opening status/,
     ]) {
       expect(WHATSAPP_CONSENT_TEXT).toMatch(p);
     }

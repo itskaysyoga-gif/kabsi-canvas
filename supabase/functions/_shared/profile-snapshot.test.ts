@@ -732,7 +732,7 @@ Deno.test("launch1: with the check's code the email holds the result page's near
       "Not clear from this answer. ChatGPT named businesses Kabsi could not match to your area on Google Maps, so it does not show whether ChatGPT would name you here.",
       "Question: 'best coffee shop in Example Town, United Kingdom'",
       "Model: ChatGPT (gpt-4.1-mini)",
-      "Asked on 5 November 2026",
+      "Asked ChatGPT on 5 November 2026",
       "https://kabsi.co/scan/SEVEN234",
     ]) assert.ok(t.includes(line), `missing: ${line}`);
     assert.ok(w.sent[0].html.includes("<strong>Did ChatGPT name your business?</strong>"));
@@ -774,7 +774,7 @@ Deno.test("launch1: WhatsApp carries the profile line, the result page's nearby 
     assert.equal((await w.call({ ...WA, code: "SEVEN234" })).status, 200);
     const [, line] = w.wa.sent[0].params;
     assert.ok(line.includes("When someone searches for 'coffee shop' near you, you appear 2nd in this Google Maps check. You appeared in the first three at 18 of 49 points around you. Did ChatGPT name your business? Not clear from this answer."));
-    assert.ok(line.includes("Question: 'best coffee shop in Example Town, United Kingdom'. Model: ChatGPT (gpt-4.1-mini). Asked on 5 November 2026. kabsi.co/scan/SEVEN234"));
+    assert.ok(line.includes("Question: 'best coffee shop in Example Town, United Kingdom'. Model: ChatGPT (gpt-4.1-mini). Asked ChatGPT on 5 November 2026. kabsi.co/scan/SEVEN234"));
     assert.ok(line.length <= 900);
     assert.ok(line.endsWith("kabsi.co/scan/SEVEN234"));
     assert.ok(!/\n/.test(line));

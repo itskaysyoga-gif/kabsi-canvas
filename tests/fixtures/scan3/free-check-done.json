@@ -35,7 +35,7 @@
   "named": false,
   "line": "ChatGPT did not name you. It named North Diner, Quay Eats and Corner Grill, which Google Maps shows near you.",
   "question_line": "We asked ChatGPT: 'best fast food restaurant in Example Town, United Kingdom'",
-  "asked_line": "Asked on 5 November 2026 through OpenAI's API, with web search. The ChatGPT app can answer differently, and answers change from run to run.",
+  "asked_line": "Asked ChatGPT on 5 November 2026, with web search. The ChatGPT app can answer differently, and answers change from run to run.",
   "sources": [],
   "sources_line": "No sources cited.",
   "named_other": 2,

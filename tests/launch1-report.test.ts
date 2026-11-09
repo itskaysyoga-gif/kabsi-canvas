@@ -44,7 +44,7 @@ describe("Launch 1: the report reads like the result page", () => {
       "No. It named Burger One and Grill Two, which Google Maps shows near you.",
       "Question: 'best fast food restaurant in Boqaata, Lebanon'",
       "Model: ChatGPT (gpt-4.1-mini)",
-      "Asked on 5 November 2026",
+      "Asked ChatGPT on 5 November 2026",
     ]);
   });
 
@@ -88,7 +88,7 @@ describe("Launch 1: the report reads like the result page", () => {
     expect(body.length).toBeLessThanOrEqual(900);
     expect(body).toContain(`${LEAD} ${COUNT} ${AI_QUESTION} ${aiVerdict(AI).line}`);
     expect(body).toContain(
-      "Question: 'best fast food restaurant in Boqaata, Lebanon'. Model: ChatGPT (gpt-4.1-mini). Asked on 5 November 2026. kabsi.co/scan/CFE4RMDN",
+      "Question: 'best fast food restaurant in Boqaata, Lebanon'. Model: ChatGPT (gpt-4.1-mini). Asked ChatGPT on 5 November 2026. kabsi.co/scan/CFE4RMDN",
     );
     expect(body.endsWith("kabsi.co/scan/CFE4RMDN")).toBe(true);
   });

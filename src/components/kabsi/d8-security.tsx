@@ -245,7 +245,7 @@ export function D8Security() {
               </p>
             </Block>
             <Block title="Payments, and who to ask">
-              <p>Payments are processed by Creem, our merchant of record.</p>
+              <p>Card payments will be processed by Creem, our merchant of record.</p>
               <p>If you think something is wrong, write to {MAIL}. A person replies.</p>
             </Block>
           </div>

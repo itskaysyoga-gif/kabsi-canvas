@@ -180,10 +180,16 @@ describe("Scan 3: Did ChatGPT name your business?", () => {
     ).toEqual([
       "Question: 'best fast food restaurant in Boqaata, Lebanon'",
       "Model: ChatGPT (gpt-4.1-mini)",
-      "Asked on 5 November 2026",
+      "Asked ChatGPT on 5 November 2026",
     ]);
     expect(modelName(null)).toBeNull();
     expect(AI_SAMPLE).toMatch(/One sample answer/);
+    // Tidy 1 (R-143 item 2): no API words, and the Perplexity twin names Perplexity.
+    expect(AI_SAMPLE).not.toMatch(/API|OpenAI/);
+    expect(aiAskedLines({ question: "q", asked_at: "2026-11-05T09:00:00.000Z", assistant: "Perplexity" })).toEqual([
+      "Question: 'q'",
+      "Asked Perplexity on 5 November 2026",
+    ]);
   });
 });
 

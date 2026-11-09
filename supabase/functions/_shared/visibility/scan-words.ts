@@ -80,22 +80,30 @@ const longDate = (iso: string) =>
     timeZone: "UTC",
   }).format(new Date(iso));
 
+/** The assistant's name as the owner reads it: ChatGPT, or Perplexity (Tidy 1, R-143 item 2). Anything else reads ChatGPT. */
+export const assistantName = (a: string | null | undefined) => (a === "Perplexity" ? "Perplexity" : "ChatGPT");
+
+/** "Asked ChatGPT on 5 November 2026" and its twin "Asked Perplexity on 5 November 2026" (R-143 item 2: no API words). */
+export const askedLead = (assistant: string | null | undefined, iso: string) =>
+  `Asked ${assistantName(assistant)} on ${longDate(iso)}`;
+
 /** The question, the model and the date, under the verdict. */
 export function aiAskedLines(a: {
   question?: string | null;
   model?: string | null;
   asked_at?: string | null;
+  assistant?: string | null;
 }): string[] {
   const out: string[] = [];
   if (a.question) out.push(`Question: '${a.question}'`);
   const m = modelName(a.model);
   if (m) out.push(`Model: ChatGPT (${m})`);
-  if (a.asked_at) out.push(`Asked on ${longDate(a.asked_at)}`);
+  if (a.asked_at) out.push(askedLead(a.assistant, a.asked_at));
   return out;
 }
 
 export const AI_SAMPLE =
-  "One sample answer, asked through OpenAI's API. The ChatGPT app can answer differently, and answers change from run to run.";
+  "One sample answer. The ChatGPT app can answer differently, and answers change from run to run.";
 
 /* ---------- The main finding and what Kabsi would do ---------- */
 

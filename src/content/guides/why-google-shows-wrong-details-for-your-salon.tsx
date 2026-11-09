@@ -188,7 +188,7 @@ export const guide: GuideDoc = {
       <>
         <p>
           Once Kabsi is connected to Google, Google Protection checks your business name, phone,
-          website, address, opening hours, main category, open status and map pin every day against
+          website, address, opening hours, main category, open status and map location every day against
           the details you confirmed. When Google shows something different, you get one email that
           explains it, for example "Google shows Sunday closing at 18:00. You approved 22:00.", and
           says whether Google made the change itself or Kabsi does not know who did. You choose

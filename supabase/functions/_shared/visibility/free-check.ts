@@ -19,7 +19,7 @@ import { countryName, latinName, ownName, shownTerm } from "./area.ts";
 export { shownTerm } from "./area.ts";
 import { refusalOf } from "./refusal.ts";
 import type { ReportParts } from "./report.ts";
-import { AI_QUESTION, aiAskedLines, aiVerdict, nearbyCount, nearbyLead } from "./scan-words.ts";
+import { AI_QUESTION, aiAskedLines, aiVerdict, askedLead, assistantName, nearbyCount, nearbyLead } from "./scan-words.ts";
 export { CODE_RE, NOT_PART } from "./report.ts";
 
 export const CHECK_LINE = "Free check. No Google access needed.";
@@ -113,9 +113,6 @@ export function aiLine(a: StoredAi | null): string | null {
   return "ChatGPT did not name you.";
 }
 
-const longDate = (iso: string) =>
-  new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(iso));
-
 /** The AI card's lines, the same on the page, in the email and on WhatsApp (docs/COPY.md 49). */
 export function aiLines(a: StoredAi | null) {
   if (!a) return null;
@@ -126,7 +123,7 @@ export function aiLines(a: StoredAi | null) {
     sources,
     sources_line: a.question && !sources.length ? NO_SOURCES : null,
     asked: a.question && a.asked_at
-      ? `Asked on ${longDate(a.asked_at)} through OpenAI's API${a.web_search_forced ? ", with web search" : ""}. The ChatGPT app can answer differently, and answers change from run to run.`
+      ? `${askedLead(a.assistant, a.asked_at)}${a.web_search_forced ? ", with web search" : ""}. The ${assistantName(a.assistant)} app can answer differently, and answers change from run to run.`
       : null,
   };
 }

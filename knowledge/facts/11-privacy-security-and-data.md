@@ -2,7 +2,7 @@
 
 ### 9.1 Who is responsible
 
-Kabsi is operated by Rashid Abou Hamzy, who is also the person responsible for the personal data. The privacy page, the terms and every email read the operator line from one constant and say: "Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co." The terms and the privacy page open with that line and "Payments are processed by Creem, our merchant of record." (Site 2, 5 Nov 2026; before that the website footer carried them). The privacy page and the terms say Kabsi is not partnered with Google, and the privacy page lists Creem as a processor, marked "When switched on" until card payments open (Sync 2b, 9 Nov 2026, LEG-14). The site gives no city and never a street address. The footer of every public page says: "Kabsi is independent and not affiliated with Google. © 2026 Kabsi."
+Kabsi is operated by Rashid Abou Hamzy, who is also the person responsible for the personal data. The privacy page, the terms and every email read the operator line from one constant and say: "Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co." The terms and the privacy page open with that line and "Card payments will be processed by Creem, our merchant of record." (Site 2, 5 Nov 2026; before that the website footer carried them). The privacy page and the terms say Kabsi is not partnered with Google, and the privacy page lists Creem as a processor, marked "When switched on" until card payments open (Sync 2b, 9 Nov 2026, LEG-14). The site gives no city and never a street address. The footer of every public page says: "Kabsi is independent and not affiliated with Google. © 2026 Kabsi."
 
 ### 9.2 What Kabsi collects
 

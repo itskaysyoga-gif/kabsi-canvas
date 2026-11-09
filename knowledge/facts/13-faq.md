@@ -246,7 +246,7 @@ Yes. On Hours, choose the dates, Closed or different hours, review what Google w
 ### Google Protection
 
 **What is Google Protection?**
-Kabsi watches your business name, phone, website, address, opening hours, main category, open status (open, temporarily closed, permanently closed) and map pin, and compares them with the details you confirmed. When Google shows something different, you get one email that explains it, for example "Google shows Sunday closing at 18:00. You approved 22:00.", and says whether Google made the change itself or Kabsi does not know who did. On Kabsi you choose: "Google is right" (Google's value becomes your approved detail and nothing is sent to Google) or "Keep my information" (Kabsi sends your approved value back to Google, then checks Google shows it). Nothing changes on Google unless you say so, and Kabsi never puts anything back by itself. A change waiting for the owner appears as a card on Home.
+Kabsi watches your business name, phone, website, address, opening hours, main category, open status (open, temporarily closed, permanently closed) and map location, and compares them with the details you confirmed. When Google shows something different, you get one email that explains it, for example "Google shows Sunday closing at 18:00. You approved 22:00.", and says whether Google made the change itself or Kabsi does not know who did. On Kabsi you choose: "Google is right" (Google's value becomes your approved detail and nothing is sent to Google) or "Keep my information" (Kabsi sends your approved value back to Google, then checks Google shows it). Nothing changes on Google unless you say so, and Kabsi never puts anything back by itself. A change waiting for the owner appears as a card on Home.
 
 **Can Google Protection lock my Google profile?**
 No. Nobody can lock a Google profile or stop people suggesting edits. Kabsi tells you fast and puts your version back only if you say so.
@@ -261,7 +261,7 @@ Tap "Google is right". Google's value becomes your approved version.
 Google removes things from business names that break its naming rules: a web address, a city or area, a slogan or extra keywords. When that is what Google removed (for example "Rosa Bakery.com" to "Rosa Bakery"), Kabsi recommends "Google is right" and says why: business names on Google can't include them, and putting them back can lead to a suspension. "Keep my information" is still there, with that warning.
 
 **Why do I have to sign in for some changes?**
-Your business name, address, main category, open status and map pin can make Google ask you to verify your business again when they change. Kabsi asks you to sign in to choose these (an email link alone is not enough; the email page asks you to sign in and brings you back), only the owner can choose, and Kabsi says "Changing this can make Google ask you to verify your business again." Kabsi also sends at most one of these details back to Google at a time, at least 7 days apart; a second one inside the 7 days waits, and Kabsi says the date it can go.
+Your business name, address, main category, open status and map location can make Google ask you to verify your business again when they change. Kabsi asks you to sign in to choose these (an email link alone is not enough; the email page asks you to sign in and brings you back), only the owner can choose, and Kabsi says "Changing this can make Google ask you to verify your business again." Kabsi also sends at most one of these details back to Google at a time, at least 7 days apart; a second one inside the 7 days waits, and Kabsi says the date it can go.
 
 **What if Google keeps changing the same detail?**
 Kabsi puts the same detail back at most twice in 30 days. If Google changes it a third time, Kabsi does not send it again: a person on the Kabsi team contacts Google Business Profile support for you, with an explanation ready.
@@ -340,7 +340,7 @@ By card, in US dollars. Card payments are coming; until they open there is nothi
 No. Card payments in US dollars are the only way to pay Kabsi.
 
 **Does my plan renew automatically?**
-Kabsi never charges on its own today. How renewals work with card payments will be on the pricing page when card payments open. Monthly plans can be cancelled at any time.
+Not today: card payments are not open yet, so nothing is charged and nothing renews. Once card payments open, a plan is a Creem subscription that renews every month or every year, from the day you paid, until you cancel, and Creem charges the card you gave at checkout. Cancelling on the Plan page stops the next renewal and your plan runs to the end of the period you paid for. Monthly plans can be cancelled at any time.
 
 **When does my plan start?**
 When payment is confirmed and Kabsi's Google access works. Waiting for access doesn't count.
