@@ -134,7 +134,7 @@ export const guide: GuideDoc = {
           own profile and sign, and Google says you may need to verify again after a name change or
           a move. If the result is two profiles for one salon, see{" "}
           <GuideLink slug="duplicate-google-listings">
-            duplicate Google listings: how to find and fix them
+            duplicate Google profiles: how to find and fix them
           </GuideLink>
           .
         </p>
@@ -187,19 +187,18 @@ export const guide: GuideDoc = {
     body: (
       <>
         <p>
-          Once Kabsi is a Manager on your profile, Google Protection checks your business name,
-          phone, website, address, opening hours, main category, open status and map pin every day
-          against the details you confirmed. When Google shows something different, you get one
-          email that explains it, for example "Google shows Sunday closing at 18:00. You approved
-          22:00.", and says whether Google made the change itself or Kabsi does not know who did.
-          You choose "Google is right" or "Keep my information", and Kabsi never puts anything back
-          by itself.
+          Once Kabsi is connected to Google, Google Protection checks your business name, phone,
+          website, address, opening hours, main category, open status and map pin every day against
+          the details you confirmed. When Google shows something different, you get one email that
+          explains it, for example "Google shows Sunday closing at 18:00. You approved 22:00.", and
+          says whether Google made the change itself or Kabsi does not know who did. You choose
+          "Google is right" or "Keep my information", and Kabsi never puts anything back by itself.
         </p>
         <p>
           Kabsi cannot lock your profile or stop suggested edits. It does not edit services,
-          attributes or the booking link on Google today, and it does not connect to booking
-          systems, so a third-party booking link is yours to remove with the provider. Nothing
-          changes on Google until you say so. <SiteRef to="/scan">Run the free check</SiteRef>.
+          attributes or the booking link on Google, so a third-party booking link is yours to remove
+          with the provider. Nothing changes on Google until you say so.{" "}
+          <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>
     ),

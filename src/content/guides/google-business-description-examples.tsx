@@ -17,7 +17,7 @@ const GARAGE =
   "Harbourside Motors is a family-run garage in Bedminster, Bristol, servicing and repairing cars since 1998. Our technicians handle servicing, diagnostics, brakes, clutches, tyres and air conditioning for most makes, including hybrid cars. MOT tests are done on site. Before any work starts we explain what your car needs and why, and we show you the old parts if you ask. You can wait in our customer lounge or leave the car with us for the day.";
 
 const PHYSIO =
-  "Cedar Line Physiotherapy is a clinic in Khalifa City, Abu Dhabi, treating sports injuries, back and neck pain, and recovery after surgery. Each session is one to one in a private treatment room, and your first visit includes a full assessment and a plan you can follow at home. Our team includes male and female physiotherapists, and you can ask for either when you book. We see adults and teenagers, and we treat runners, footballers and padel players every week. The clinic has its own parking and a lift to the first floor.";
+  "Cedar Line Physiotherapy is a clinic in Khalifa City, Abu Dhabi, treating sports injuries, back and neck pain, and recovery after surgery. Each session is one to one in a private treatment room, and your first visit includes a full assessment and a plan you can follow at home. Our team includes male and female physiotherapists, and you can ask for either when you call. We see adults and teenagers, and we treat runners, footballers and padel players every week. The clinic has its own parking and a lift to the first floor.";
 
 export const guide: GuideDoc = {
   slug: "google-business-description-examples",
@@ -184,8 +184,8 @@ export const guide: GuideDoc = {
         "No. Google says the description should be relevant and useful to customers, and does not allow gimmicky or distracting content. Name your area once, naturally, and use the words your customers use for what you do.",
       body: (
         <p>
-          Write it for the person reading it, not for a search engine. Your categories are what tell
-          Google what kind of business you are; see{" "}
+          Write it for the person reading it, not for a search engine. Google says your category
+          tells customers what your business is; see{" "}
           <GuideLink slug="choose-google-business-profile-categories">
             how to choose your Google Business Profile categories
           </GuideLink>

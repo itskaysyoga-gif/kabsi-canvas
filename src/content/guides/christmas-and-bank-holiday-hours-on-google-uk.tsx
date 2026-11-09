@@ -17,7 +17,7 @@ export const guide: GuideDoc = {
   checked: READ,
   topic: "Holiday hours",
   answer:
-    "Add every day from Christmas Eve to the first Monday of January under Special hours on your Google profile, open or closed, including the days you open as usual. Use your own nation's bank holidays: Scotland has two more than England and Wales over this period.",
+    "Add every day from Christmas Eve to the first Monday of January under Special hours on your Google profile, open or closed, including the days you open as usual. Use your own nation's bank holidays: Scotland has two more than England and Wales: St Andrew's Day on 30 November and 2nd January.",
   inShort: [
     "Christmas Day is Friday 25 December 2026 and Boxing Day's bank holiday moves to Monday 28 December.",
     "Scotland adds St Andrew's Day on 30 November and a 2nd January holiday on Monday 4 January 2027.",

@@ -146,8 +146,8 @@ export const guide: GuideDoc = {
           </li>
           <li>
             <b>5 stars, a question inside:</b> "Great cut. Do you do beard trims too?" Reply: "Thank
-            you, Sam. Yes, we do beard trims, and you can book one with your next cut. Glad you
-            liked it. The Juniper team"
+            you, Sam. Yes, we do beard trims, and you can add one to your next cut. Glad you liked
+            it. The Juniper team"
           </li>
           <li>
             <b>2 stars, in French:</b> "Commande arrivée froide et en retard." Reply: "Merci pour

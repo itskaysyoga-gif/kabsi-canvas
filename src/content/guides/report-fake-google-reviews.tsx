@@ -123,12 +123,11 @@ export const guide: GuideDoc = {
               <b>Decision pending</b>: flagged, not evaluated yet.
             </li>
             <li>
-              <b>Report reviewed - no policy violation</b>: evaluated, and Google found no
-              violation.
+              <b>Report reviewed, no policy violation</b>: evaluated, and Google found no violation.
             </li>
             <li>
-              <b>Escalated - check your email for updates</b>: your appeal is being looked at and
-              the final decision comes by email.
+              <b>Escalated, check your email for updates</b>: your appeal is being looked at and the
+              final decision comes by email.
             </li>
           </ul>
         </>
