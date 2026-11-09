@@ -129,6 +129,8 @@ The first real pilot is an independent salon or beauty business. After 30 days t
 | Willingness to pay | The price named, and what they say and do | They pay, or commit a date | Polite interest only |
 | Reasons for rejection | Recorded in their words | A fixable pattern | Does not need it |
 
+First session (R-140): RB-K adds a 10-minute first session in which the owner enters one practice request with a fictional name, finds it, corrects it and undoes the correction, then it is voided. The scorecard counts only requests created after that session ends.
+
 ## PR C and PR D, prepared for review only
 
 Neither will be built or merged without Rashid's separate authorization. PR C is now two sessions: RB-C1 first (the read, proposal and name search functions that PR B does not have), then RB-C2 (the packs, normalizers, tools and reply rules below). See `build-plan.md`.
