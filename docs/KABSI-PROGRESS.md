@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 8 Nov 2026, after F-1, RB-C1 and RB-C2. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 9 Nov 2026, after F-1, RB-C1, RB-C2 and RB-D. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -63,9 +63,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 9 Nov 2026, RB-D (R-139, dark): extraction (the model only quotes, code checks and fills), `likely_pm_hours`, 167 fictional cases, one hand run. `2026-11-09-rb-d.md`.
 - 8 Nov 2026, RB-C2 (R-139, dark): request book packs, normalizers, six tools, policy, replies and typed intake in `_shared/request-book/`; code only, not wired. `2026-11-08-rb-c2.md`.
 - 8 Nov 2026, RB-C1 (R-139, dark): request book reads, proposals and name search: 8 service-only functions behind the gate, applied as 20261108200837; nothing calls them. `2026-11-08-rb-c1.md`.
-- 8 Nov 2026, F-1: a forwarded "Yes" never approves; forwarded text is never yes, no, a number answer or a code, STOP still stops. Rashid: forward a Yes from a test phone once (archive file). `2026-11-08-f-1.md`.
 
 ## How a session updates this page
 
