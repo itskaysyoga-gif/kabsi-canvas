@@ -175,7 +175,7 @@ export const SCENARIOS: Record<string, Scenario> = {
   },
   owner_stop: {
     name: "owner_stop", about: "13b step 11: STOP gives one confirmation, then nothing", phones: [PHONES.owner], ai: false, steps: [
-      { note: "STOP", phone: PHONES.owner, text: "STOP", expect: { result: "stopped", reply: /no more WhatsApp messages from Kabsi/, replies: 1, conv: { stopped: true } } },
+      { note: "STOP", phone: PHONES.owner, text: "STOP", expect: { result: "stopped", reply: /WhatsApp messages are stopped\./, replies: 1, conv: { stopped: true } } },
       { note: "stats after STOP gets no reply", phone: PHONES.owner, text: "stats", expect: { result: "stopped_ignored", none: true } },
     ],
   },
@@ -210,7 +210,7 @@ export const SCENARIOS: Record<string, Scenario> = {
       { note: "a staff command is never revealed", phone: PHONES.unknown, text: "status", expect: { result: /^(greeting|unclear|free|nora)/, never: nothing("Jobs failed", "Kabsi staff") } },
       { note: "the scan code", phone: PHONES.unknown, text: "Hi Kabsi, my scan code is KAB-2M9Q4X7P", expect: { result: "scan_code", reply: /KAB-2M9Q4X7P/, conv: { scan_code: "KAB-2M9Q4X7P" } } },
       { note: "talk to a person", phone: PHONES.unknown, text: "talk to a person", expect: { result: "handoff", reply: /within one business day/ } },
-      { note: "STOP", phone: PHONES.unknown, text: "STOP", expect: { result: "stopped", reply: /no more WhatsApp messages/, conv: { stopped: true } } },
+      { note: "STOP", phone: PHONES.unknown, text: "STOP", expect: { result: "stopped", reply: /WhatsApp messages are stopped\./, conv: { stopped: true } } },
       { note: "silence after STOP", phone: PHONES.unknown, text: "hello", expect: { result: "stopped_ignored", none: true } },
     ],
   },

@@ -44,7 +44,7 @@ const REVIEW_REFUND: ReviewInput = {
 const SNAPSHOT: Snapshot = {
   place_id: "ChIJsample0000000", name: BIZ, address: "Jumeirah Beach Road, Dubai (Example)", category: "Hair salon", rating: 4.6, review_count: 128, business_status: "OPERATIONAL",
   open_now: true, hours: [], phone: null, website: "https://roselanesalon.example", has_photos: true, photo_count: 12, cached: false, checklist: [],
-  flags: [{ tone: "danger", fact: "No opening hours are shown on Google.", action: "Kabsi asks you for your hours and prepares them for you to approve." }, { tone: "warning", fact: "No phone number is shown on Google.", action: "Kabsi asks you to confirm it and prepares the change for you to approve." }],
+  flags: [{ tone: "danger", fact: "No opening hours are shown on Google.", action: "Kabsi asks you for your hours and sends them to Google once you say yes." }, { tone: "warning", fact: "No phone number is shown on Google.", action: "Add your phone number on your Google profile. Once you connect, Kabsi checks it every day with your other details." }],
 };
 const COUNTS = { replies_prepared: 5, replies_published: 4, posts_published: 1, photos_published: 2, photo_batches: 1, hours_updates: 1, profile_updates: 0, profile_checks: 2016, changes_found: 1, changes_kept: 0, changes_put_back: 1 };
 const REPORT = {
@@ -131,6 +131,6 @@ export function catalog(): CatalogEntry[] {
       ? { ...SETUP_SAMPLE, scenario: { id: "someone_else_owns", variant: "dont_know", startedAt: new Date("2026-10-01T09:00:00Z"), doneAt: new Date("2026-10-01T09:30:00Z") } }
       : id.startsWith("verify_")
         ? { ...SETUP_SAMPLE, scenario: { id: id === "verify_2" ? "google_reviewing" : "needs_verifying", variant: null, startedAt: new Date("2026-10-01T09:00:00Z"), doneAt: null } }
-        : LIFE_SAMPLE, { appUrl: APP, removalOn: true }))),
+        : LIFE_SAMPLE, { appUrl: APP, removalOn: false }))),
   ];
 }

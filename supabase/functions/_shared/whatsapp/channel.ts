@@ -9,7 +9,7 @@
 //   - What a review alert says is set under K-113 as amended on 21 Oct 2026: the business, the star rating, the
 //     reviewer's first name, the review text up to 300 characters and the draft. Nothing else of a review.
 //   - Approve is offered only where WhatsApp may approve (low and medium risk replies and weekly posts; K-129 point 2);
-//     everything else gets "Edit in app".
+//     everything else gets "Edit on kabsi.co".
 // Session 13b part 1: what a message asks for is read by router.ts and answered by agent.ts (say.ts holds the words).
 
 export const REPLAY_WINDOW_SECONDS = 600;

@@ -5,6 +5,7 @@
 // English first (K-119). The few lines below in Spanish and Arabic answer people who write in those languages; nothing
 // here is shown on the website or in marketing (R-61, 27.6).
 
+
 export type Lang = "en" | "es" | "ar";
 
 /** Photo Post 1: a post check that failed (posts/checks.ts code), as the end of "because it ..." in SAY.postProblem. */
@@ -43,8 +44,9 @@ export const SAY = {
   partnerCodeNoted: `Welcome to Kabsi. You came through a Kabsi Partner, so your free Pro trial is 30 days, no card. Start here: ${START_URL}`,
   unknownHelp:
     "I am Nora, Kabsi's assistant. Kabsi looks after your business on Google from WhatsApp: a reply ready for every review, your Google profile kept right, and nothing goes live without your yes.\n\nYou can send: your business name for a free check, \"prices\", \"start free\", \"partner\" or \"talk to a person\".",
+  // Sync 1 (WA-06): the trial line is TRIAL_LINE and the payment line PAY_TODAY_LINE of src/lib/site.ts; keep them equal.
   prices:
-    "Kabsi is free for 14 days, no card. Then Essentials is 29 US dollars a month and Pro is 59 US dollars a month, with an extra location at 15. The first 30 paying businesses pay 19 or 39 and keep that price while they stay subscribed. Card payments open soon. Details: kabsi.co/pricing",
+    "Free for 14 days once Kabsi is connected. No card. Then Essentials is 29 US dollars a month and Pro is 59 US dollars a month, with an extra location at 15 US dollars a month. The first 30 paying businesses pay 19 or 39 and keep that price while they stay subscribed. Nothing to pay today. Card payments in US dollars are coming. Details: kabsi.co/pricing",
   // 13b part 2 (judged 25 Oct): only what the facts say is open today; WhatsApp for owners and Partners are not open yet.
   trial: `Start free here, no card, about 10 minutes: ${START_URL}\n\nThe free trial starts once Kabsi can reach your Google profile.`,
   partnerProgram:
@@ -56,7 +58,8 @@ export const SAY = {
   staffBound: "This phone is now Kabsi's staff phone. Send \"status\", \"waiting\", \"today\", \"pause\" followed by a business name, or \"help\".",
   badCode: "That code did not work. Open Kabsi, go to Settings, What Kabsi tells you, and press Connect WhatsApp again.",
   phoneInUse: "This phone is already connected to another Kabsi account. Disconnect it there first, then send the code again.",
-  stopped: "You will get no more WhatsApp messages from Kabsi. Reply START at any time to turn them on again.",
+  // Sync 1 (WA-09): the approved Stop line of COPY.md 20.
+  stopped: "WhatsApp messages are stopped. Your plan and Kabsi's Google access stay as they are; change them here: https://kabsi.co/app/settings. Send Start to turn messages back on.",
   started: "Welcome back. Your Kabsi messages are on again. Send \"help\" to see what you can do here.",
 
   // Roles (29.7).
@@ -149,7 +152,7 @@ export const SAY = {
   mapLater: "Okay. Your map stays in your Kabsi account on kabsi.co.",
   mapGone: "That map is no longer here. Your latest map is in your Kabsi account on kabsi.co.",
   editStarted: "On it. A new draft is coming.",
-  noRecentReview: "Which review do you mean? Open the latest review alert and tap Edit in app, or send \"help\".",
+  noRecentReview: "Which review do you mean? Open the latest review alert and tap Edit on kabsi.co, or send \"help\".",
   exactShown: (business: string, text: string) =>
     `${business}: Kabsi will post this reply on Google after your yes.\n\n"${text}"`,
   newDraft: (business: string, text: string) => `${business}: here is the new draft.\n\n"${text}"`,
