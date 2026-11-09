@@ -30,7 +30,7 @@ export const Route = createFileRoute("/privacy")({
   component: Page,
 });
 
-const UPDATED = "6 November 2026";
+const UPDATED = "9 November 2026";
 
 // K-113.6, word for word. Set as raw HTML so the apostrophe stays a plain ' in the page source.
 const LIMITED_USE =
@@ -102,6 +102,10 @@ function Page() {
           <li>
             Your email address (to sign in with a code and to receive Kabsi emails), and any extra
             alert addresses you add.
+          </li>
+          <li>
+            If you sign in with Google: Kabsi receives your name, email address and profile photo
+            from Google.
           </li>
           <li>
             Your business name, address, country, time zone and Google identifiers (Place ID and
@@ -223,7 +227,9 @@ function Page() {
         </ul>
         <p>
           We don't sell or rent personal data, we don't use it for advertising, and we don't send
-          marketing emails without asking you first.
+          marketing emails to Kabsi users or visitors without asking first. Kabsi may send one plain
+          email, and one follow-up, to a UK registered company at the address it publishes, as
+          section 15 explains.
         </p>
       </section>
 
@@ -338,15 +344,16 @@ function Page() {
           </li>
           <li>
             GitHub: keeps our code and runs the weekly backup. The backup is encrypted before it
-            leaves that job, with a passphrase only Kabsi holds.
+            leaves that job, with a passphrase only Kabsi holds. GitHub also holds the contact list
+            of section 15 in a private repository.
           </li>
           <li>
             Vercel: hosting the website and your Kabsi account, and Speed Insights, which measures
             how fast pages load for visitors without cookies or any identifier.
           </li>
           <li>
-            Creem: card payments. Creem is our merchant of record and receives what it needs to take
-            a payment.
+            When switched on, Creem: card payments. Creem is our merchant of record and receives
+            what it needs to take a payment.
           </li>
           <li>Resend: sending email, through Amazon's EU (Ireland) region.</li>
           <li>
@@ -373,7 +380,10 @@ function Page() {
             Sentry: error reports, EU region, without IP addresses, review content or Google data.
           </li>
           <li>PostHog: anonymous usage statistics, in the United States.</li>
-          <li>Zoho: the mailbox for {CONTACT_EMAIL}, which holds the messages you send us.</li>
+          <li>
+            Zoho: the mailbox for {CONTACT_EMAIL}, which holds the messages you send us, and the
+            mailbox that sends and receives the emails of section 15.
+          </li>
           {WHATSAPP_ON ? (
             <>
               <li>
@@ -451,10 +461,15 @@ function Page() {
             a few steps: the pricing page, a finished free check, a sign-up, a trial and a plan
             bought. For a trial or a plan, Kabsi also tells Meta from its own servers (the
             Conversions API), with your email and phone number scrambled by a one-way hash as Meta
-            requires. If you came from a Click to WhatsApp ad, Kabsi sends Meta the click id of that
-            chat, so the ads learn which ones bring paying owners. In the EU, the UK, Switzerland,
-            the United Arab Emirates and Saudi Arabia a small bar at the bottom asks once, Accept or
-            Only necessary, and nothing for ads loads before you accept. Elsewhere there is no
+            requires. A finished free check and a contact you give (the check's report sent to you,
+            or a Founding 25 application) also go from Kabsi's servers, only where your privacy
+            choice allows ad measurement, with the same event id as your browser's so Meta counts
+            each once. They carry only a hashed random visitor id and Meta's own browser cookies,
+            never your email, phone, name or business. If you came from a Click to WhatsApp ad,
+            Kabsi sends Meta the click id of that chat, so the ads learn which ones bring paying
+            owners. In the EU, the EEA, the UK, Switzerland, the United Arab Emirates and Saudi
+            Arabia, and where the country is not known, a small bar at the bottom asks once, Accept
+            or Only necessary, and nothing for ads loads before you accept. Elsewhere there is no
             pop-up, and Your privacy choices has one switch, "Let Kabsi measure its ads", on or off.
             Your answer is remembered for 12 months. Kabsi does not sell your data to Meta or anyone
             else.
@@ -574,6 +589,11 @@ function Page() {
             Free tool abuse limits: 1 hour. The free Profile Check keeps its daily limit for 1 day.
           </li>
           <li>
+            A free check's results: the business's public Google Maps results, the findings of one
+            AI answer about it and the nearby places are kept 30 days, or 90 days once the business
+            signs up. Nothing from Google's Places service is kept but the Place ID.
+          </li>
+          <li>
             Google's public details for a business you checked: not kept, read from Google each
             time. Your email request for the check, with your choice about tips: until you ask us to
             remove it.
@@ -647,10 +667,10 @@ function Page() {
               and the wording you saw. An alert carries your business name, the star rating, the
               reviewer&apos;s first name, the review text up to 300 characters and the draft reply.
               You can approve low and medium risk replies and posts there, with 10 seconds to undo.
-              High-risk reviews and changes to your business name, address, categories, map pin,
-              phone or opening status are approved only on kabsi.co. Outside 24 hours from your last
-              message we send only message templates Meta has approved. Reply STOP at any time (or a
-              similar word such as UNSUBSCRIBE) and we stop at once and record it.
+              High-risk reviews and changes to your business name, address, categories, map
+              location, phone or opening status are approved only on kabsi.co. Outside 24 hours from
+              your last message we send only message templates Meta has approved. Reply STOP at any
+              time (or a similar word such as UNSUBSCRIBE) and we stop at once and record it.
             </p>
             <p>
               <b>What is sent.</b> The links on our site open WhatsApp with a short fixed message
@@ -706,23 +726,32 @@ function Page() {
         <p>
           {OPERATOR_NAME} runs Kabsi and keeps a list of local businesses, so Kabsi can tell
           suitable ones about its service later. For each business the list holds its name, kind of
-          business, address, phone number, website and an email address the business publishes
-          itself. It comes from OpenStreetMap and from the business's own website. Kabsi keeps no
-          names of owners or staff.
+          business, address, phone number, website, an email address the business publishes itself
+          and, for a UK company, its company number and status. It comes from OpenStreetMap, the
+          business's own website and Companies House. Kabsi keeps no names of owners or staff. The
+          list is held in Kabsi's database and a private GitHub repository, and is never sold or
+          shared.
         </p>
         <p>
           The lawful basis is legitimate interests: telling businesses about a service that may help
-          them. No message has been sent, and none is sent without a further check of the law in the
-          country where the business is. Kabsi checks each business again at least every six months
-          and marks one that has closed. We delete an entry 24 months after we add it, or 90 days
-          after the business closes, whichever is sooner. The list is held privately and is never
-          sold or shared.
+          them. Kabsi writes only to UK registered companies that are active on Companies House: one
+          plain email, and one follow-up, to the address the business publishes. The United Arab
+          Emirates and every other country are off. Nothing is sent before {OPERATOR_NAME} decides
+          to start, and no message has been sent yet.
+        </p>
+        <p>
+          Kabsi checks each business again at least every six months and marks one that has closed.
+          We delete an entry 24 months after we add it, or 90 days after the business closes,
+          whichever is sooner. A business Kabsi wrote to that does not reply is deleted 90 days
+          after the last email, and only a coded form of its domain is kept, so it is never written
+          to again.
         </p>
         <p>
           If you ask us to remove your business or never contact it, we do so within 30 days and
-          keep only a coded form of the address, so we never write to it. Write to {CONTACT_EMAIL}.
-          You can also ask what Kabsi holds about your business, object to Kabsi holding it, or
-          complain to the data protection authority where you are.
+          keep only a coded form of the address, so we never write to it. A request from the
+          business's own domain covers the whole business. Write to {CONTACT_EMAIL}. You can also
+          ask what Kabsi holds about your business, object to Kabsi holding it, or complain to the
+          data protection authority where you are.
         </p>
       </section>
 
