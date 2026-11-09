@@ -1,7 +1,8 @@
 # kabsi.co is the only address that should be indexed. Previews and *.vercel.app send X-Robots-Tag: noindex (vercel.json).
 User-agent: *
 Allow: /
-Disallow: /app
+Disallow: /app$
+Disallow: /app/
 Disallow: /partner$
 Disallow: /partner/
 Disallow: /staff
@@ -18,7 +19,8 @@ User-agent: ChatGPT-User
 User-agent: PerplexityBot
 User-agent: GPTBot
 Allow: /
-Disallow: /app
+Disallow: /app$
+Disallow: /app/
 Disallow: /partner$
 Disallow: /partner/
 Disallow: /staff
