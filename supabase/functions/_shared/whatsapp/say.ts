@@ -6,7 +6,31 @@
 // here is shown on the website or in marketing (R-61, 27.6).
 
 
+import { PAY_TODAY_LINE } from "../billing-words.ts";
+
 export type Lang = "en" | "es" | "ar";
+
+/**
+ * Sync 2a (R-142 item 7, WA-03): the hand-off promise follows the person's help line (master plan 30.21 section 2).
+ * Keep equal to HELP_LINES and WORKING_HOURS in src/lib/site.ts (tests/sync2a-whatsapp.test.ts checks it).
+ * An Essentials owner: the same working day. A Pro owner: within 4 working hours. Anyone else: within one working day.
+ */
+export const HANDOFF_TIMES = {
+  essentials: "the same working day",
+  pro: "within 4 working hours",
+  other: "within one working day",
+} as const;
+export const HANDOFF_HOURS = "Working hours: Monday to Friday, 9:00 to 18:00, UAE time.";
+/** Who the promise is for: an owner of a business (pro tells Pro from Essentials) or anyone else. */
+export function handoffTime(r: { role: string; pro?: boolean } | null | undefined): string {
+  if (r && r.role === "owner") return r.pro ? HANDOFF_TIMES.pro : HANDOFF_TIMES.essentials;
+  return HANDOFF_TIMES.other;
+}
+/** The hand-off reply in English by role; Spanish and Arabic keep their own line (say("handoff", lang)). */
+export function handoffReply(r: { role: string; pro?: boolean } | null | undefined, lang: Lang | string | null | undefined): string {
+  if (lang === "es" || lang === "ar") return say("handoff", lang);
+  return `Thanks. A person from Kabsi will answer you here ${handoffTime(r)}. ${HANDOFF_HOURS}`;
+}
 
 /** Photo Post 1: a post check that failed (posts/checks.ts code), as the end of "because it ..." in SAY.postProblem. */
 export const POST_ISSUE: Record<string, string> = {
@@ -37,11 +61,12 @@ export const SAY = {
     "Welcome to Kabsi. Did you just scan your business on kabsi.co? Send me your business name or the code from the page and I will pick up from there.",
   scanPicked: (code: string) =>
     `Thanks, I have your scan ${code}. Your full map comes here as soon as it is ready. Kabsi is free for 14 days, no card. Your saved result: ${scanResultUrl(code)}`,
-  scanByName: (name: string) =>
-    `Thanks. I will run the scan for ${name} here as soon as maps are switched on for WhatsApp. Until then you can check your business free at ${scanResultUrl(null)} and send me the code from the page.`,
+  // Sync 2a (R-142 item 7, WA-05): no promise of a scan here; the free check is the way in. COPY.md 63 says the same.
+  scanByName: () => `You can check your business free at ${scanResultUrl(null)} and send me the code from the page.`,
   mapComing:
     "Your full map is being made. It comes here as soon as it is ready.",
-  partnerCodeNoted: `Welcome to Kabsi. You came through a Kabsi Partner, so your free Pro trial is 30 days, no card. Start here: ${START_URL}`,
+  // Sync 2a (R-142 item 7, WA-08): no trial promise until Kabsi Partners opens (LATER row: terms 8, 9 and 17 name the 30 day partner trial then).
+  partnerCodeNoted: "Thanks, your partner code is noted.",
   unknownHelp:
     "I am Nora, Kabsi's assistant. Kabsi looks after your business on Google from WhatsApp: a reply ready for every review, your Google profile kept right, and nothing goes live without your yes.\n\nYou can send: your business name for a free check, \"prices\", \"start free\", \"partner\" or \"talk to a person\".",
   // Sync 1 (WA-06): the trial line is TRIAL_LINE and the payment line PAY_TODAY_LINE of src/lib/site.ts; keep them equal.
@@ -87,7 +112,8 @@ export const SAY = {
     `${business}: your printable QR card is in Kabsi under Get Reviews. It opens this link: ${url}`,
   billingSoon: "Billing is coming soon, reply 'talk to a person' for help",
   // Session 10 (10.2.10): the owner's billing actions. Prices come from the Creem catalogue; dates are long dates.
-  billingNoPlan: (business: string, url: string) => `${business} has no paid plan right now. Choose your plan here: ${url}`,
+  // Sync 2a (R-142 item 3, WA-07): card payments are closed, so no push to choose a plan: PAY_TODAY_LINE, then the Plan page.
+  billingNoPlan: (business: string, url: string) => `${business} has no paid plan right now. ${PAY_TODAY_LINE} Your plan page: ${url}`,
   billingStatus: (business: string, plan: string, end: string | null, ends: boolean) =>
     `${business} is on ${plan}. ${end ? (ends ? `It ends on ${end}.` : `It renews on ${end}.`) : ""} Reply "card", "invoice", "upgrade", "add a location" or "cancel".`.replace(/\s+/g, " "),
   billingPortal: (business: string, url: string) => `${business}: your card, invoices and receipts are here: ${url}`,
@@ -104,7 +130,7 @@ export const SAY = {
   billingAddAsk: (price: string) => `Add a location for ${price}? You pay for it on Creem's page, and it renews from today.`,
   billingAddLink: (url: string) => `Pay for the extra location here: ${url}\nKabsi adds it to your plan when the payment goes through.`,
   billingTryLater: "The payment service did not answer. Please try again in a minute, or reply \"talk to a person\".",
-  handoff: "Thanks. A person from Kabsi will answer you here within one business day.",
+  handoff: `Thanks. A person from Kabsi will answer you here ${HANDOFF_TIMES.other}. ${HANDOFF_HOURS}`,
   // 13b part 2 (30.10 point 7): hours and typed posts approved on WhatsApp, shown back exactly first (25.5).
   hoursShown: (business: string, line: string) => `${business}: Kabsi will set these hours on Google after your yes.\n\n${line}`,
   hoursAsk: "Which day, and what hours? For example: \"closed tomorrow\", \"open 10am to 2pm on Friday\" or \"closed 24 to 26 December\".",

@@ -304,7 +304,7 @@ Deno.test("the Home item and the report line: the sentence, the assistant, the q
   assertEquals(t.evidence.label, ACCURACY_LABEL);
   assertEquals(t.action, { label: "Check your hours", path: "/app/hours" });
   const b = accuracyBlock(FINDING, "UTC")!;
-  assertEquals(b.label, "Answers from ChatGPT and Perplexity through their API, which can differ from their apps.");
+  assertEquals(b.label, "Answers we get from ChatGPT and Perplexity directly, which can differ from what their apps show.");
   const rc = receipt({
     business: "Rose Lane Salon", counts: {} as never, needs: [], needsTotal: 0, plan: [], activity: null, demo: false, growth: null,
     ai: null, aiThisWeek: false, accuracy: FINDING, rivals: [], tz: "UTC",

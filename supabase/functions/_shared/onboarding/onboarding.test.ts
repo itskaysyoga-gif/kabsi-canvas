@@ -255,7 +255,7 @@ Deno.test("Competitor Watch speaks only when something changed that matters; the
   const b = aiBlock(ai, "Asia/Dubai")!;
   assert.equal(b.heading, "An answer customers might see");
   assert.equal(b.line, 'ChatGPT was asked "best hair salon in Dubai Marina" on 30 October. It did not name you.');
-  assert.equal(b.label, "Answers from ChatGPT and Perplexity through their API, which can differ from their apps.");
+  assert.equal(b.label, "Answers we get from ChatGPT and Perplexity directly, which can differ from what their apps show.");
 });
 
 // ─── the nearby places ─────────────────────────────────────────────────────────────────────────────────────────────

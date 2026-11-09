@@ -41,7 +41,8 @@ describe("the surface list", () => {
       expect(names).toContain(n);
     }
     for (const s of SURFACES) expect(s.files.length, s.name).toBeGreaterThan(0);
-    expect(SURFACES.flatMap((s) => s.files).length).toBeGreaterThan(400);
+    // Sync 2a: the four renewal preview files are gone; the floor is a sanity check, not a target.
+    expect(SURFACES.flatMap((s) => s.files).length).toBeGreaterThan(380);
   });
   it("is named in docs/SYNC.md", async () => {
     const { readFileSync } = await import("node:fs");

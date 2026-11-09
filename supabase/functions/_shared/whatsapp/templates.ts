@@ -145,15 +145,14 @@ export const TEMPLATES = {
     example: { business: "Smile Dental" },
     button: "Show me",
   },
+  // Sync 2a (R-142 item 6, WA-10): the first name kabsi_work_update said "it is on Google", the retired wording, and its v2 is
+  // approved and sent since 5 Nov 2026, so the v1 fallback is gone from the code. This one is the v2 text under its own name.
+  // The old name stays on Meta's side, unused; nothing is submitted.
   work_update: {
-    name: "kabsi_work_update",
-    body: "Kabsi here. There is news about a change you approved for {{business}}: it is on Google, still on its way, or needs another try. Reply here to read it.",
+    name: "kabsi_work_update_v2",
+    body: "Kabsi here. The status of a change you approved for {{business}} has been updated: it is live on Google, in progress, or did not go through. Reply here to read the details.",
     example: { business: "Smile Dental" },
     button: "Show me",
-    v2: {
-      name: "kabsi_work_update_v2",
-      body: "Kabsi here. The status of a change you approved for {{business}} has been updated: it is live on Google, in progress, or did not go through. Reply here to read the details.",
-    },
   },
   staff_alert: {
     name: "kabsi_staff_alert",
@@ -189,6 +188,7 @@ export const isReplacement = (name: string) => (Object.values(TEMPLATES) as Temp
 /** The name to send: the replacement name when its stored status reads APPROVED, else the name the code was given (the fallback).
  *  statusMap stores NOT_UTILITY for a replacement Meta filed under any other category, so it is never chosen. */
 export function sendName(name: string, statuses: Record<string, string>): string {
+  if (name in RETIRED_NAMES) return RETIRED_NAMES[name]!;
   const def = (Object.values(TEMPLATES) as TemplateDef[]).find((d) => d.name === name);
   return def?.v2 && statuses[def.v2.name] === "APPROVED" ? def.v2.name : name;
 }
@@ -245,7 +245,10 @@ export const SENDABLE_TEMPLATES: readonly SendableTemplate[] = (Object.values(TE
 
 export const SENDABLE_NAMES: ReadonlySet<string> = new Set(SENDABLE_TEMPLATES.map((t) => t.name));
 
+/** Sync 2a (R-142 item 6): a retired first name still sitting in a queued row is sent under its replacement, never refused. */
+export const RETIRED_NAMES: Readonly<Record<string, string>> = { kabsi_work_update: "kabsi_work_update_v2" };
+
 /** The sender calls this before any template goes out: a name that is not on the list above is an error, never a send. */
 export function assertSendable(name: string): void {
-  if (!SENDABLE_NAMES.has(name)) throw new Error(`template_not_listed: ${String(name).replace(/[^A-Za-z0-9_]/g, "").slice(0, 60)}`);
+  if (!SENDABLE_NAMES.has(name) && !(name in RETIRED_NAMES)) throw new Error(`template_not_listed: ${String(name).replace(/[^A-Za-z0-9_]/g, "").slice(0, 60)}`);
 }

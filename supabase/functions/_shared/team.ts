@@ -34,6 +34,8 @@ export function teamInviteEmail(i: TeamInvite, appUrl: string) {
     text: `${who} as ${r.name} of ${i.business} on Kabsi. You can ${r.can}.\n\nSign in with this email address, ${i.email}, to accept. The invitation works until ${day(i.expires_at)}.\n\nKabsi never asks for your Google password or a verification code.\n\nSign in: ${appUrl}/login`,
     button: { label: "Sign in to Kabsi", url: `${appUrl}/login` },
     note: "If you did not expect this, you can ignore this email. Nothing happens until you sign in.",
+    // Sync 2a (EML-07): the invitee did not ask for this email, so the footer must not say they did.
+    why: `Someone at ${i.business} invited you to Kabsi.`,
   };
 }
 

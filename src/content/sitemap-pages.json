@@ -195,7 +195,7 @@
     "path": "/faq",
     "changefreq": "monthly",
     "priority": "0.6",
-    "sources": ["src/routes/faq.tsx", "src/lib/faq.ts"]
+    "sources": ["src/routes/faq.tsx", "src/components/kabsi/faq-data.ts"]
   },
   {
     "path": "/partners",

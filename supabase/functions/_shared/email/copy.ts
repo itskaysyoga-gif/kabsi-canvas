@@ -74,18 +74,6 @@ export function deletionDone(business: string, appUrl: string): EmailContent {
 
 // ─── trial and plan ──────────────────────────────────────────────────────────────────────────────────
 
-export type RenewalStage = "r5" | "r1";
-export function renewalReminder(stage: RenewalStage, business: string, planLabel: string, day: string, planKind: string, appUrl: string): EmailContent {
-  const when = stage === "r1" ? "tomorrow" : "in a few days";
-  const plain = `Your ${planLabel} plan for ${business} ends ${when}, on ${day}. To keep reply drafts, Google Protection and the weekly report going, pay before then. Paying early adds the new period after this one, so you lose no days. Your review link and QR code keep working either way.`;
-  const url = `${appUrl}/app/plan?pay=${encodeURIComponent(planKind)}`;
-  return {
-    subject: stage === "r1" ? `${business}: your plan ends tomorrow` : `${business}: your plan ends on ${day}`,
-    preheader: "Pay before it ends and you lose no days.", title: "Your plan is ending",
-    bodyHtml: p(esc(plain)), button: { label: "Renew your plan", url }, text: `${plain}\n\nRenew your plan: ${url}`,
-  };
-}
-
 // ─── the week ─────────────────────────────────────────────────────────────────────────────────────────────────
 
 /** The Monday weekly report (30.18 section 3): the body is the visual work receipt of report-body.ts. */
@@ -176,7 +164,7 @@ export function holidayHoursAsk(o: HolidayAskInput, appUrl: string): EmailConten
     bodyHtml: p(`${esc(lead)}${esc(moon)}`) + p("Kabsi never assumes holiday hours. Choose one, check the hours on the next page and confirm. Nothing changes on Google until you do."),
     button: { label: "Choose your hours", url: o.links.choose }, links: answers,
     note: "You can also answer in Kabsi, under Hours.",
-    text: `${lead}${moon}\n\nKabsi never assumes holiday hours. Choose one, check the hours and confirm. Nothing changes on Google until you do.\n\nChoose your hours: ${o.links.choose}\n${answers.map((a) => `${a.label}: ${a.url}`).join("\n")}\n\nYou can also answer in Kabsi, under Hours: ${link(appUrl, "/app/hours")}`,
+    text: `${lead}${moon}\n\nKabsi never assumes holiday hours. Choose one, check the hours and confirm. Nothing changes on Google until you do.\n\nChoose your hours: ${o.links.choose}\n${answers.map((a) => `${a.label}: ${a.url}`).join("\n")}\n\nYour hours in Kabsi: ${link(appUrl, "/app/hours")}`,
     digest: {
       html: p(`<strong>${esc(o.business)}</strong>: ${esc(lead)} `) + `<div style="margin:0 0 12px 0;">${[{ label: "Choose your hours", url: o.links.choose }, ...answers].map((a) => `<a href="${esc(a.url)}" class="kb-t1" style="font-weight:700;color:${TOKENS.ink};margin-right:14px;">${esc(a.label)}</a>`).join("")}</div>`,
       text: `${o.business}: ${lead} Choose your hours: ${o.links.choose}`,

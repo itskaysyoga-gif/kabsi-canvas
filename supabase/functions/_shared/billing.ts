@@ -5,7 +5,7 @@
 import { admin, APP_URL, captureError, jobLog, log } from "./kabsi.ts";
 import { notify as notifyEmail } from "./notify.ts";
 import { esc } from "./email-layout.ts";
-import { staffPlanLine } from "./billing-lines.ts";
+import { billingLineAt, type Line, staffPlanLine } from "./billing-lines.ts";
 import type { EmailContent } from "./email/template.ts";
 import { paymentFailed, planCancelled } from "./email/account-copy.ts";
 import { outDb } from "./whatsapp/db.ts";
@@ -20,7 +20,6 @@ import {
 export const CREEM_MODE: Mode = modeOf(Deno.env.get("CREEM_MODE"));
 export const SUCCESS_URL = `${APP_URL}/billing/done`;
 const GRACE_DAYS = 7;
-const DATA_DAYS = 30;
 
 export function creem(): Creem {
   const key = Deno.env.get("CREEM_API_KEY") ?? "";
@@ -313,44 +312,10 @@ async function businessName(org: string): Promise<string> {
 export const longDate = (d: Date | string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(d));
 const addDays = (d: Date | string, n: number) => new Date(new Date(d).getTime() + n * 86_400_000);
 
-export type Line = { whatsapp: string; buttons?: { id: string; title: string }[]; email?: EmailContent };
-const para = (t: string) => `<p style="margin:0 0 16px 0;">${esc(t)}</p>`;
-function emailOf(subject: string, title: string, lines: string[], button?: { label: string; url: string }): EmailContent {
-  return { subject, title, preheader: lines[0], bodyHtml: lines.map(para).join(""), text: lines.join("\n\n") + (button ? `\n\n${button.label}: ${button.url}` : ""), button };
-}
-
-/** The words of each billing message (10.2.9). Pure, so tests read them. */
-export function billingLine(m: Message | "payment_reminder", c: { business: string; periodEnd?: string | null; graceEnds?: Date; portal?: string | null; dataUntil?: Date }): Line {
-  const end = c.periodEnd ? longDate(c.periodEnd) : null;
-  switch (m) {
-    case "scheduled_cancel": {
-      const lines = [`Your Kabsi plan for ${c.business} ends on ${end ?? "the last day you paid for"}.`, "Until then everything keeps working. Changed your mind? Tap Keep my plan."];
-      // Email 1: the cancellation email of 30.15 section 6 (COPY.md 25).
-      return { whatsapp: lines.join(" "), buttons: [{ id: "k:keep", title: "Keep my plan" }], email: planCancelled({ business: c.business, ends: c.periodEnd ?? null, dataDays: DATA_DAYS }, APP_URL) };
-    }
-    case "payment_failed":
-    case "payment_reminder": {
-      const until = c.graceEnds ? longDate(c.graceEnds) : null;
-      const lines = [`${c.business}: your card did not go through. Update it here: ${c.portal ?? `${APP_URL}/app/plan`}`, `Kabsi keeps working until ${until ?? "the grace period ends"}.`];
-      // Email 1: the failed-payment email of 30.15 section 6 (COPY.md 25).
-      const email = paymentFailed({ business: c.business, graceEnds: c.graceEnds ?? null, portal: c.portal ?? `${APP_URL}/app/plan`, reminder: m === "payment_reminder" });
-      return { whatsapp: (m === "payment_reminder" ? "Reminder. " : "") + lines.join("\n"), email };
-    }
-    case "paused": {
-      const until = c.dataUntil ? longDate(c.dataUntil) : null;
-      const lines = [`Your Kabsi plan for ${c.business} is paused. Approvals have stopped and nothing is lost.`, `Your data is kept until ${until}. Reply plan to start again.`];
-      return { whatsapp: lines.join(" "), email: emailOf(`${c.business}: your Kabsi plan is paused`, "Your plan is paused", [lines[0], `Your data is kept until ${until}.`], { label: "Choose your plan", url: `${APP_URL}/app/plan` }) };
-    }
-    case "ended": {
-      const until = c.dataUntil ? longDate(c.dataUntil) : null;
-      const lines = [`Your Kabsi plan for ${c.business} has ended. Thank you for trusting Kabsi with your Google profile.`, `Your data is kept until ${until}, then deleted. Reply plan any time to come back.`];
-      return { whatsapp: lines.join(" "), email: emailOf(`${c.business}: your Kabsi plan has ended`, "Your plan has ended", [lines[0], `Your data is kept until ${until}, then deleted.`], { label: "Choose your plan", url: `${APP_URL}/app/plan` }) };
-    }
-    case "resumed": {
-      const lines = [`Your Kabsi plan for ${c.business} carries on.${end ? ` The next payment is on ${end}.` : ""}`];
-      return { whatsapp: lines[0] };
-    }
-  }
+export type { Line } from "./billing-lines.ts";
+/** The words of each billing message (10.2.9). Pure, so tests read them; the words are in billing-lines.ts. */
+export function billingLine(m: Message | "payment_reminder", c: { business: string; periodEnd?: string | null; graceEnds?: Date; portal?: string | null }): Line {
+  return billingLineAt(m, c, APP_URL);
 }
 
 async function tellOwner(m: Message | "payment_reminder", s: SubRow, key: string) {
@@ -361,7 +326,6 @@ async function tellOwner(m: Message | "payment_reminder", s: SubRow, key: string
   const line = billingLine(m, {
     business, periodEnd: s.current_period_end, portal,
     graceEnds: s.past_due_at ? addDays(s.past_due_at, GRACE_DAYS) : undefined,
-    dataUntil: addDays(s.ended_at ?? new Date(), DATA_DAYS),
   });
   for (const p of people) {
     if (p.phone) {

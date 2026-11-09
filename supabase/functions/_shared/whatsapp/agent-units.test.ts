@@ -265,7 +265,7 @@ Deno.test("staff automations: an active Kapso workflow answering the number is r
 
 Deno.test("templates v2 (WhatsApp 2): the same parameters as the first name, utility wording, no offer, no promotion, no free", () => {
   const withV2 = (Object.values(TEMPLATES) as TemplateDef[]).filter((d) => d.v2);
-  assert.equal(withV2.length, 11, "the nine Meta put in Marketing, plus the two new ones it filed there on 28 Oct");
+  assert.equal(withV2.length, 10, "the nine Meta put in Marketing, plus the two new ones it filed there on 28 Oct, less the work update, whose v1 fallback was retired in Sync 2a (R-142 item 6)");
   for (const def of withV2) {
     assert.match(def.v2!.name, new RegExp(`^${def.name}_v[23]$`));
     const first = [...def.body.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]).sort();
@@ -274,8 +274,8 @@ Deno.test("templates v2 (WhatsApp 2): the same parameters as the first name, uti
     assert.doesNotMatch(def.v2!.body, /\b(free|offer|discount|deal|save|promo|limited time|upgrade|buy|special)\b/i, def.v2!.name);
   }
   assert.equal(new Set(allDefs().map((d) => d.name)).size, allDefs().length, "no name twice");
-  for (const k of ["photo_ready", "setup_step"] as const) {
-    assert.equal((TEMPLATES[k] as TemplateDef).v2, undefined, `${k} read Utility, so it has no v2`);
+  for (const k of ["photo_ready", "setup_step", "work_update"] as const) {
+    assert.equal((TEMPLATES[k] as TemplateDef).v2, undefined, `${k} has no v2 (it read Utility, or its v1 was retired)`);
   }
 });
 
@@ -343,9 +343,10 @@ Deno.test("Launch 3 part A: starting links sign-in then setup, a check links its
   assert.equal(scanResultUrl("KAB-7Q4M2X9P"), "https://kabsi.co/scan/KAB-7Q4M2X9P");
   assert.equal(scanResultUrl(null), "https://kabsi.co/scan");
   assert.match(SAY.scanPicked("KAB-7Q4M2X9P"), /Your saved result: https:\/\/kabsi\.co\/scan\/KAB-7Q4M2X9P$/);
-  assert.match(SAY.scanByName("Harbour Lane Coffee"), /https:\/\/kabsi\.co\/scan and send me the code/);
-  for (const line of [SAY.partnerCodeNoted, SAY.trial, SAY.needsAccount]) assert.ok(line.includes(START_URL), line);
-  for (const line of [SAY.scanPicked("KAB-7Q4M2X9P"), SAY.scanByName("X"), SAY.partnerCodeNoted, SAY.trial, SAY.needsAccount]) {
+  assert.equal(SAY.scanByName(), "You can check your business free at https://kabsi.co/scan and send me the code from the page.");
+  assert.equal(SAY.partnerCodeNoted, "Thanks, your partner code is noted.");
+  for (const line of [SAY.trial, SAY.needsAccount]) assert.ok(line.includes(START_URL), line);
+  for (const line of [SAY.scanPicked("KAB-7Q4M2X9P"), SAY.scanByName(), SAY.partnerCodeNoted, SAY.trial, SAY.needsAccount]) {
     assert.doesNotMatch(line, /get-started|[–—!]/, line);
   }
 });

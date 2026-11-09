@@ -190,7 +190,7 @@ export const QUESTIONS: Question[] = [
     must: [MAIL],
     coming: true,
     reference:
-      "Kabsi Partners, the affiliate program, is not open yet, and I can't give a date. When it opens anyone can apply and the team approves each person. For anything about it, write to hello@kabsi.co.",
+      "Kabsi Partners, the affiliate program, is not open yet, and I can't give a date. Anyone can apply now on the partners page or at hello@kabsi.co, and partner links open when card payments open.",
   },
   {
     id: "en13",
@@ -536,13 +536,13 @@ export const QUESTIONS: Question[] = [
     ask: "I have a duplicate listing on Google. Should I delete it?",
     kb: [
       /Do not delete a profile you think is a duplicate/,
-      /ask Google to mark the duplicate or merge/,
+      /Instead ask Google to merge them, and Google decides/,
     ],
     must: [/duplicate/i, /merge|mark/i],
     warnFirst: /do not delete|don't delete|never delete/i,
     forbid: [YES],
     reference:
-      "Do not delete it, because deleting a profile can lose its reviews. Ask Google to mark the duplicate or merge the listings from your Business Profile. Kabsi is a Manager, so it can't delete a profile anyway. For help, book the free call at kabsi.co/setup-call or write to hello@kabsi.co.",
+      "Do not delete it, because deleting a profile can lose its reviews. Ask Google to merge them, and Google decides: on Google Maps, open the extra profile, choose Suggest an edit, then Place closed or not here, then Duplicate of another place. Kabsi is a Manager, so it can't delete a profile anyway. For help, book the free call at kabsi.co/setup-call or write to hello@kabsi.co.",
   },
   {
     id: "en43",
