@@ -394,7 +394,7 @@ export const QUESTIONS_OWNERS: Question[] = [
     kb: [
       /By card, in US dollars, and nothing else/,
       /Creem lists Apple Pay and Google Pay as supported/,
-      /Payment methods not listed/,
+      /Payment methods other than a card/,
     ],
     must: [/cards?/i, /Apple Pay/i],
     forbid: [/Tabby (is|will be) (accepted|available|supported)/i],

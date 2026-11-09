@@ -31,7 +31,7 @@ export const barbershop: Industry = {
       text: "Google keeps weekly hours apart from special hours, so a bank holiday can differ.",
     },
     {
-      title: "Bank holidays in 2027",
+      title: "Easter and Christmas 2027",
       text: "England and Wales: Good Friday 26 March, Easter Monday 29 March, 27 and 28 December.",
     },
     {

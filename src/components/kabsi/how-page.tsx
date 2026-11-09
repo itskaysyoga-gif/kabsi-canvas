@@ -58,7 +58,7 @@ export function HowItWorksPage() {
                 <div>
                   <h3 className="text-title">Add Kabsi as a Manager</h3>
                   <p className="mt-1 text-body text-text-2">
-                    In your Google profile: Business Profile settings, People and access, Add. Paste
+                    In your Google profile: Business Profile settings, People and access, Add. Paste{" "}
                     {KABSI_GROUP_ID}, keep Manager, then Add. No password, and you stay the owner.
                   </p>
                   <SiteLink to="/security" className={cn(linkCls, "text-body")}>

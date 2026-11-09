@@ -56,7 +56,9 @@ export function GuideClosing() {
           <h2 id="guide-closing" className="font-display text-h2 font-bold text-text-1">
             Let Kabsi look after this.
           </h2>
-          <p className="mt-4 text-lead text-text-2">Free for 14 days, no card.</p>
+          <p className="mt-4 text-lead text-text-2">
+            Start with the free check. It shows what Google shows about your business today.
+          </p>
           <div className="mt-8" data-main-cta>
             <ButtonLink to="/scan">{MAIN_CTA}</ButtonLink>
           </div>
