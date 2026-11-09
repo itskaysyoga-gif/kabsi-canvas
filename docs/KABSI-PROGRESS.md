@@ -65,7 +65,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 - 9 Nov 2026, Sync 2b part A (PR 523): Outbound offers only the free check and opens only GB (applied); salons first. `2026-11-09-sync2b.md`.
 - 9 Nov 2026, Sync 2a (R-142, answers to Sync 1): part 0 plan 30.46 (PR 522); part 1 early access, booking words, no API, hand-off (PR 524). `2026-11-09-sync2a.md`.
-- 9 Nov 2026, Kapso 1: one list of every template the code sends, a send outside it refused, a daily read-only check of the number and templates with one staff alert a day. `2026-11-09-kapso1.md`.
+- 9 Nov 2026, Kapso 1 (PR 514): one list of every template the code sends, a send outside it refused, a daily read-only check (first run clean, number GREEN). `2026-11-09-kapso1.md`.
 
 ## How a session updates this page
 
