@@ -2,7 +2,10 @@
 // templates through Kapso's API with the existing Kapso secret and compares them with what the code sends
 // (templates.ts SENDABLE_TEMPLATES). It never creates, edits or deletes a template, never changes the webhook and never
 // sends a message. Anything wrong raises one staff alert a day (the ops event kind below is an urgent one in
-// staff-alerts.ts), naming the item and its state only: no phone number, no secret, no message text.
+// staff-alerts.ts), naming the item and its state only: no phone number, no secret, no message text. Tidy 1 (R-143 item 6):
+// a finding about the number itself (it could not be read, quality, messaging limit, webhook) is also emailed to
+// hello@kabsi.co once a day (master plan 9.9), because a WhatsApp alert cannot arrive when the number is down; a finding
+// about a template stays on WhatsApp only.
 // Pure apart from its deps, so the tests drive it with recorded Kapso answers.
 import { SENDABLE_TEMPLATES, type SendableTemplate } from "./templates.ts";
 
@@ -137,12 +140,37 @@ export function alertFor(findings: Finding[], day: string): Alert | null {
   };
 }
 
+/** The email for a day's findings about the number itself (9.9): names and states only. One key a day, so it is sent once. */
+export type NumberEmail = { key: string; subject: string; preheader: string; title: string; text: string; html: string };
+
+/** Where the number's findings go by email (9.9, R-32: no personal address). */
+export const NUMBER_EMAIL_TO = "hello@kabsi.co";
+export const NUMBER_EMAIL_KIND = "whatsapp_number_check";
+
+export function numberEmailFor(findings: Finding[], day: string): NumberEmail | null {
+  if (!findings.length) return null;
+  const lines = findings.map((f) => `${f.item} ${f.problem}`);
+  const text =
+    `The daily WhatsApp check found ${findings.length === 1 ? "1 item" : `${findings.length} items`} about Kabsi's number: ${lines.join(". ")}. ` +
+    "Check the number in Kapso. This email is sent as well as the staff alert, because a WhatsApp alert cannot arrive when the number is down.";
+  return {
+    key: `${NUMBER_EMAIL_KIND}:${day}`,
+    subject: `Kabsi WhatsApp number check found ${findings.length === 1 ? "1 item" : `${findings.length} items`}`,
+    preheader: "Check the number in Kapso.",
+    title: "WhatsApp number check",
+    text,
+    html: `<p>${text.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</p>`,
+  };
+}
+
 export type CheckDeps = {
   readNumber(): Promise<NumberReading>;
   readTemplates(): Promise<TemplateFound[]>;
   /** The highest messaging limit among the stored hourly readings, or null. */
   bestTier(): Promise<string | null>;
   emit(a: Alert): Promise<void>;
+  /** Tidy 1 (R-143 item 6): the email about the number itself, through the existing staff email path. Optional for older callers. */
+  email?(m: NumberEmail): Promise<void>;
   now(): Date;
 };
 
@@ -153,19 +181,33 @@ export type CheckResult = {
   templates: { name: string; state: TemplateState; in_use: boolean; status: string | null; category: string | null }[];
   findings: Finding[];
   alert_raised: boolean;
+  /** True when findings about the number itself were emailed (Tidy 1). */
+  email_raised: boolean;
 };
 
 /** The whole check. A read that fails is itself a finding (a check that cannot read must not pass), with no error text. */
 export async function runCheck(d: CheckDeps): Promise<CheckResult> {
   const day = d.now().toISOString().slice(0, 10);
   const unread: Finding[] = [];
-  const number = await d.readNumber().catch(() => (unread.push({ item: "number reading", problem: "could not be read from Kapso" }), null));
+  const unreadNumber: Finding[] = [];
+  const number = await d.readNumber().catch(() => {
+    const f = { item: "number reading", problem: "could not be read from Kapso" };
+    unread.push(f);
+    unreadNumber.push(f);
+    return null;
+  });
   const found = await d.readTemplates().catch(() => (unread.push({ item: "template list", problem: "could not be read from Kapso" }), null));
   const best = await d.bestTier().catch(() => null);
   const t = found ? compareTemplates(found) : { templates: [], findings: [] };
+  const onNumber = [...unreadNumber, ...(number ? compareNumber(number, best) : [])];
   const all = [...unread, ...t.findings, ...(number ? compareNumber(number, best) : [])];
   const alert = alertFor(all, day);
-  if (alert) await d.emit(alert);
+  // The staff alert (WhatsApp) carries every finding. The email carries only the findings about the number itself, and each
+  // is tried whatever the other does: a failure of either is loud (the health call fails), but never hides the other.
+  const mail = numberEmailFor(onNumber, day);
+  const sent = await Promise.allSettled([alert ? d.emit(alert) : Promise.resolve(), mail && d.email ? d.email(mail) : Promise.resolve()]);
+  const failed = sent.find((r): r is PromiseRejectedResult => r.status === "rejected");
+  if (failed) throw failed.reason;
   return {
     ok: all.length === 0,
     day,
@@ -173,5 +215,6 @@ export async function runCheck(d: CheckDeps): Promise<CheckResult> {
     templates: t.templates.map((r) => ({ name: r.name, state: r.state, in_use: r.in_use, status: r.status, category: r.category })),
     findings: all,
     alert_raised: !!alert,
+    email_raised: !!(mail && d.email),
   };
 }

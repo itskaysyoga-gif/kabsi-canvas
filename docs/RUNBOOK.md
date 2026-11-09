@@ -65,7 +65,10 @@ restricted or disconnected, or Kapso credit is under 5 US dollars.
 8. The daily check (Kapso 1, 05:17 UTC, `kabsi_whatsapp_check`) reads the number and every template the code can send and
    compares them with the code. A staff alert "WhatsApp check found N items" names each item and its state: a template
    not approved, missing or with the wrong number of parameters, quality YELLOW or RED, a lower messaging limit, or a
-   webhook not verified. It never changes anything. Do not edit templates in a build session: lane R decides. To run it by
+   webhook not verified. It never changes anything. Since Tidy 1 (R-143 item 6) a finding about the number itself (it could not
+   be read, quality, messaging limit, webhook) is also emailed to hello@kabsi.co, once a day, with the subject "Kabsi WhatsApp
+   number check found N items", because a WhatsApp alert cannot arrive when the number is down; a template finding stays on
+   WhatsApp only. Do not edit templates in a build session: lane R decides. To run it by
    hand: `select public.call_internal('health', '{"only":"kapso"}'::jsonb);` and read the answer in `net._http_response`.
 
 **Over when:** a test message to and from Rashid's own phone works, and `WHATSAPP_LIVE` is back to `true` if you changed it.
