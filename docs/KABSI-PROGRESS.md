@@ -63,7 +63,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 9 Nov 2026, Sync 1 part C (truth pass): 152 findings across 67 pages, emails, WhatsApp, Outbound, facts and Nora; 79 fixed, 38 for lane R (questions grouped in the archive file), 16 in LATER, one independent review. `2026-11-09-sync1.md`.
+- 9 Nov 2026, Sync 1 part C (truth pass, PRs 513 to 519, live on kabsi.co): 152 findings across 67 pages, emails, WhatsApp, Outbound, facts and Nora; 79 fixed, 38 for lane R (questions grouped in the archive file), 16 in LATER, one independent review. `2026-11-09-sync1.md`.
 - 9 Nov 2026, Sync 1 part B (guards): one shared rule list and `tests/sync-guards.test.ts` over every surface of docs/SYNC.md; three findings for part C. `2026-11-09-sync1.md`.
 - 9 Nov 2026, Sync 1 part A (docs only): `docs/SYNC.md`, the map of every surface; the rule in CLAUDE.md and the pull request template. `2026-11-09-sync1.md`.
 
