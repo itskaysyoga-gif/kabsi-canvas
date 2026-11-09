@@ -29,6 +29,116 @@
       "statusCode": 301
     },
     {
+      "source": "/for/:group(beauty-and-wellness|food-and-drink|health|auto|home-services|hospitality|fitness-and-sport|retail|professional-services)/",
+      "destination": "/for",
+      "statusCode": 301
+    },
+    {
+      "source": "/for/:old(clinics|clinics-and-dentists|hotels-and-guesthouses|shops-and-boutiques|small-hotel)",
+      "destination": "/for",
+      "statusCode": 301
+    },
+    {
+      "source": "/for/:old(clinics|clinics-and-dentists|hotels-and-guesthouses|shops-and-boutiques|small-hotel)/",
+      "destination": "/for",
+      "statusCode": 301
+    },
+    {
+      "source": "/for/:old(salon|salons|salons-and-barbers)",
+      "destination": "/for/hair-salon",
+      "statusCode": 301
+    },
+    {
+      "source": "/for/:old(salon|salons|salons-and-barbers)/",
+      "destination": "/for/hair-salon",
+      "statusCode": 301
+    },
+    {
+      "source": "/for/:old(barber-shop)",
+      "destination": "/for/barbershop",
+      "statusCode": 301
+    },
+    {
+      "source": "/for/:old(barber-shop)/",
+      "destination": "/for/barbershop",
+      "statusCode": 301
+    },
+    {
+      "source": "/for/:old(restaurants|restaurants-and-cafes)",
+      "destination": "/for/restaurant",
+      "statusCode": 301
+    },
+    {
+      "source": "/for/:old(restaurants|restaurants-and-cafes)/",
+      "destination": "/for/restaurant",
+      "statusCode": 301
+    },
+    {
+      "source": "/for/:old(cafes|cafes-and-bakeries)",
+      "destination": "/for/cafe",
+      "statusCode": 301
+    },
+    {
+      "source": "/for/:old(cafes|cafes-and-bakeries)/",
+      "destination": "/for/cafe",
+      "statusCode": 301
+    },
+    {
+      "source": "/for/:old(auto-repair-shop|car-services|garages-and-auto-repair)",
+      "destination": "/for/auto-repair",
+      "statusCode": 301
+    },
+    {
+      "source": "/for/:old(auto-repair-shop|car-services|garages-and-auto-repair)/",
+      "destination": "/for/auto-repair",
+      "statusCode": 301
+    },
+    {
+      "source": "/for/:old(dentists)",
+      "destination": "/for/dental-clinic",
+      "statusCode": 301
+    },
+    {
+      "source": "/for/:old(dentists)/",
+      "destination": "/for/dental-clinic",
+      "statusCode": 301
+    },
+    {
+      "source": "/for/:old(florists)",
+      "destination": "/for/florist",
+      "statusCode": 301
+    },
+    {
+      "source": "/for/:old(florists)/",
+      "destination": "/for/florist",
+      "statusCode": 301
+    },
+    {
+      "source": "/lebanon/",
+      "destination": "/pricing",
+      "statusCode": 301
+    },
+    {
+      "source": "/product/",
+      "destination": "/pricing",
+      "statusCode": 301
+    },
+    {
+      "source": "/google-profile-check/",
+      "destination": "/scan",
+      "statusCode": 301
+    },
+    {
+      "source": "/get-started/",
+      "destination": "/scan",
+      "statusCode": 301
+    },
+    {
+      "source": "/partner/",
+      "destination": "/partners",
+      "statusCode": 301
+    },
+    {
       "source": "/r/:code(SEVEN1|seven1)",
       "destination": "https://search.google.com/local/writereview?placeid=ChIJJ8-7quchHxURgn5sxhONNLI",
       "statusCode": 302

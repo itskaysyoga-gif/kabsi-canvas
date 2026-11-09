@@ -19,6 +19,7 @@ export function accessWorks(rows: readonly AccessRow[]): boolean {
       !r.is_demo &&
       !r.concierge &&
       !!r.google_location_id &&
+      !r.google_location_id.startsWith("locations/concierge-") &&
       !!r.access_granted_at &&
       r.access_state === "granted" &&
       r.voice_of_merchant === true,
