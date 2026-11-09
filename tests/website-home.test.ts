@@ -269,7 +269,9 @@ describe("the operator, the merchant of record and the social links", () => {
     // Site 2 (30.34 item 4): both lines open /terms and /privacy instead of sitting in the footer.
     for (const f of ["src/routes/terms.tsx", "src/routes/privacy.tsx"])
       expect(read(f), f).toContain("{OPERATOR_LINE} {MERCHANT_LINE}");
-    expect(read("src/routes/terms.tsx")).toMatch(/will be processed by\s+Creem,[\s\S]*merchant of record/);
+    expect(read("src/routes/terms.tsx")).toMatch(
+      /will be processed by\s+Creem,[\s\S]*merchant of record/,
+    );
     expect(ORG_LD).not.toHaveProperty("address");
   });
   it("no public page, email, fact file or JSON-LD names Hussein or the old operator city (R-55)", () => {

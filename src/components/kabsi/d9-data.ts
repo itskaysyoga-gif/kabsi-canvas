@@ -78,7 +78,16 @@ export const D9_WATCH = {
   title: "When Google shows something different, you choose.",
   /** Polish 4 (30.25 item 3): one line of at most 20 words. Channel-free, so it is true with WHATSAPP_ON either way. */
   line: "Kabsi checks your Google profile every day. When something differs, you choose, and nothing changes without your yes.",
-  watched: ["Name", "Hours", "Phone", "Website", "Address", "Category", "Open status", "Map location"],
+  watched: [
+    "Name",
+    "Hours",
+    "Phone",
+    "Website",
+    "Address",
+    "Category",
+    "Open status",
+    "Map location",
+  ],
   rules: [
     {
       title: "Keep my information",

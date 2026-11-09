@@ -188,11 +188,12 @@ export const guide: GuideDoc = {
       <>
         <p>
           Once Kabsi is connected to Google, Google Protection checks your business name, phone,
-          website, address, opening hours, main category, open status and map location every day against
-          the details you confirmed. When Google shows something different, you get one email that
-          explains it, for example "Google shows Sunday closing at 18:00. You approved 22:00.", and
-          says whether Google made the change itself or Kabsi does not know who did. You choose
-          "Google is right" or "Keep my information", and Kabsi never puts anything back by itself.
+          website, address, opening hours, main category, open status and map location every day
+          against the details you confirmed. When Google shows something different, you get one
+          email that explains it, for example "Google shows Sunday closing at 18:00. You approved
+          22:00.", and says whether Google made the change itself or Kabsi does not know who did.
+          You choose "Google is right" or "Keep my information", and Kabsi never puts anything back
+          by itself.
         </p>
         <p>
           Kabsi cannot lock your profile or stop suggested edits. It does not edit services,
