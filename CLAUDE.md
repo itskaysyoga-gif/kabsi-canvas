@@ -24,6 +24,7 @@ One task per chat. The task ID comes from the prompt. Nothing else is in scope.
 - Staff alerts go to WhatsApp, never Slack (R-64); session 13b part 2 removed the Slack code.
 - Secrets never appear in code, commits, logs, pull requests or screenshots.
 - Every change that alters behaviour, price or wording updates the facts: edit the numbered file in `knowledge/facts/`, then run `node scripts/build-kb.mjs`, which writes `knowledge/kabsi-facts.md`, `public/llms-full.txt` and `src/content/llms-base.txt` (never edit those three by hand; `/llms.txt` is a server route that adds the public guides to the last one, Guides 3). Team-only notes go in `knowledge/internal/` and never reach Nora or the site.
+- A pull request that changes behaviour, price or wording walks docs/SYNC.md and lists in its report each surface it changed or checked.
 - The Kabsi Google group ID lives only in `KABSI_GROUP_ID` in `src/lib/site.ts`. There is no Lebanon-only wording (K-123); country rules that the law or consent need go in `src/lib/region.ts` when a task adds them.
 
 ## Git and deploys
