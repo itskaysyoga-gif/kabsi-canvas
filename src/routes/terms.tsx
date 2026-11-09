@@ -266,6 +266,8 @@ function Page() {
             A plan is a subscription through Creem, our merchant of record. It renews every month or
             every year, from the day you paid, until you cancel, and Creem charges the card you gave
             at each renewal. Your paid period starts the day you pay, including during your trial.
+            If you pay before Kabsi's access to your Google profile works, your plan starts the day
+            it works, so you don't lose any days while you wait.
           </li>
           <li>
             Moving to Pro applies at once, and Creem charges the difference for the rest of the
