@@ -24,6 +24,7 @@ import { pickTranscriber } from "../voice/transcribe.ts";
 import { onboardingHooks } from "../onboarding/db.ts";
 import { sensitivity } from "../review-growth/sensitive.ts";
 import { sendSensitiveAlert } from "../review-growth/alerts.ts";
+import type { BookDb, BookDeps } from "./book.ts";
 
 async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await admin().rpc(fn, args);
@@ -143,8 +144,9 @@ async function firstMap(locationId: string): Promise<{ state: "started" | "waiti
     await runMaps();
     return { state: "started", keyword: k.keyword as string };
   }
-  const { data: loc } = await db.from("locations").select("name, category_label, concierge, google_location_id").eq("id", locationId).maybeSingle();
-  if (!loc) return { state: "none" };
+  const { data: loc } = await db.from("locations").select("name, category_label, concierge, google_location_id, is_demo").eq("id", locationId).maybeSingle();
+  // RB-E: a demo or test business (is_demo, the RB-E test businesses included) is never offered a map search when it connects.
+  if (!loc || loc.is_demo) return { state: "none" };
   // The search terms report (Google's own, read only, never stored) when Google has one; the mock has none.
   // Fix 3: asked with the business's Google location name, never Kabsi's own id; no name, no Google call.
   let terms: { keyword: string; count: number }[] = [];
@@ -218,6 +220,42 @@ function noraFor(key: string | undefined): Nora | null {
   };
 }
 
+// RB-E: the request book's service-only functions. Location and actor always come from the agent's verified BusinessRole.
+type Json = Record<string, unknown>;
+export const bookDb: BookDb = {
+  // The seam's one check. app_settings.request_book first: with it off (production today) nothing else is read.
+  async on(ids) {
+    const { data: s } = await admin().from("app_settings").select("value").eq("key", "request_book").maybeSingle();
+    if (s?.value !== "on" || !ids.length) return {};
+    const { data, error } = await admin().from("location_packs").select("location_id, pack, pack_version").in("location_id", ids).eq("state", "test");
+    if (error) throw new Error(`location_packs: ${error.message}`);
+    return Object.fromEntries((data ?? []).map((r) => [r.location_id as string, { pack: r.pack as string, version: r.pack_version as number }]));
+  },
+  propose: (l, a, k, raw, ev, pid) => rpc<Json>("request_intake_propose", {
+    p_location: l, p_actor: a, p_key: k, p_source: "typed", p_raw_text: raw, p_field_evidence: ev, p_provider_message_id: pid,
+  }),
+  revise: (l, a, k, i, raw, ev) => rpc<Json>("request_intake_revise", { p_location: l, p_actor: a, p_key: k, p_intake: i, p_raw_text: raw, p_field_evidence: ev }),
+  discard: (l, a, k, i) => rpc<Json>("request_intake_discard", { p_location: l, p_actor: a, p_key: k, p_intake: i }),
+  intake: (l, a, i) => rpc<Json>("request_intake_get", { p_location: l, p_actor: a, p_intake: i }),
+  create: (l, a, k, input) => rpc<Json>("request_create", { p_location: l, p_actor: a, p_key: k, p_input: input }),
+  get: (l, a, ref) => rpc<Json>("request_get", { p_location: l, p_actor: a, p_ref: ref }),
+  find: (l, a, q) => rpc<Json>("request_find", { p_location: l, p_actor: a, p_query: q }),
+};
+
+/** The extraction call (RB-D's extract.ts): the check model, under its own ceiling for the whole number (R-45), as the intent router. */
+function bookFor(key: string | undefined): BookDeps {
+  return {
+    db: bookDb,
+    ask: key
+      ? async (r) => {
+        if (!(await rateLimit("wa_request_extract", 300, 3600))) throw new Error("extract_rate_limited");
+        // The same small model and the same way as the intent router's one call per typed message.
+        return await message(r.model, r.system, r.user, r.maxTokens);
+      }
+      : null,
+  };
+}
+
 /** The agent's dependencies on the real database, Kapso and the model (agent.ts). */
 export async function agentDeps(): Promise<AgentDeps> {
   const c = await whatsappCtx();
@@ -273,6 +311,7 @@ export async function agentDeps(): Promise<AgentDeps> {
     onboarding: onboardingHooks(c.out!),
     flush: () => flush(c.out!),
     billing: billingDeps,
+    book: bookFor(key),
   };
 }
 

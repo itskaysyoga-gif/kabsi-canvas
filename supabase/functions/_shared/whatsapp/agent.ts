@@ -9,7 +9,11 @@
 // Every dependency (database, Kapso, the model, the clock) is passed in, so the 100-conversation suite runs on fakes.
 import type { Button, Inbound } from "./channel.ts";
 import { fresh } from "./channel.ts";
-import { type Ai, route } from "./intent.ts";
+import { type Ai, isRequestTool, route } from "./intent.ts";
+import {
+  BOOK_SAY, bookOn, type BookDeps, createInput, findReply, ON_IT_REQUEST_MS, type Pack, PROPOSAL_OPEN_MS, proposalButtons, readRequest, type Ref,
+  refOf, refusalReply, requestSummary, rowOf, savedText, toEvidence,
+} from "./book.ts";
 import { photoRefusal, voiceCheck } from "./media.ts";
 import { MAX_BYTES } from "../photos/sniff.ts";
 import { notify, type Out, reply as sendReply } from "./outbox.ts";
@@ -138,6 +142,8 @@ export type AgentDeps = {
   sleep?: (ms: number) => Promise<void>;
   /** "On it" goes first when the model takes longer than this (the owner sees an answer within 8 seconds). */
   onItMs?: number;
+  /** RB-E: the request book (capture and find). Absent, or switched off for the business, and the agent is exactly as before. */
+  book?: BookDeps;
 };
 
 const ABUSE_QUIET_MS = 24 * 3600_000;
@@ -293,6 +299,12 @@ async function run(t: Turn, cmd: Command): Promise<string> {
 
   // A person is answering in the Kapso inbox: free text waits for them; buttons and commands still work.
   if (cmd.k === "free" && conv?.handoff_at && now - Date.parse(conv.handoff_at) < HANDOFF_QUIET_MS) return "handoff_quiet";
+
+  // RB-E: the request book seam. After every step that uses no AI and before the intent router, one check reads whether
+  // the request book is on for the business; when it is off, or the message is not one the book reads, nothing changes.
+  if (cmd.k === "request") return (await bookButton(t, cmd)) ?? answered(t, SAY.alreadyHandled, "request_off");
+  const booked = await bookSeam(t, cmd);
+  if (booked) return booked;
 
   // Buttons resolve by the task id inside them, with no AI call (9.1 point 2).
   if (cmd.k === "button") return button(t, cmd.action, cmd.token);
@@ -1115,9 +1127,203 @@ async function staff(t: Turn, name: string, arg: string | undefined): Promise<st
   }
 }
 
+// ─── The request book (RB-E): capture and find, for a business whose request book is on (book.ts).
+// The actor and the business are always the verified sender's own BusinessRole (user_id, location_id). Nothing in the
+// message or in a button can name another person or business: a button carries only a proposal id, and that id is looked up
+// only in this phone's own businesses.
+
+type RbQuestion = Extract<OpenQuestion, { type: "rb_proposal" }>;
+/** proposal: open for a second message to revise it (30 minutes). open: any proposal question here, whatever its age, so a
+ *  typed yes or no answers it and never reaches an approval waiting elsewhere. */
+type BookTurn = { on: Map<string, Pack>; b: BusinessRole | null; proposal: RbQuestion | null; open: RbQuestion | null };
+type Said = { send: () => Promise<string> };
+const said = (t: Turn, body: string, result: string, buttons?: Button[]): Said => ({ send: () => answered(t, body, result, buttons) });
+const bookCtx = (t: Turn, b: BusinessRole, pack: Pack) => ({ pack, timeZone: b.time_zone ?? "UTC", now: new Date((t.d.now ?? Date.now)()) });
+const withB = (t: Turn, b: BusinessRole): Turn => ({ ...t, business: b, head: head(t.who, "business", b) });
+
+/** The seam's one check: is the request book on for the active business (or, with none active, for any of the phone's own)? */
+async function bookCheck(t: Turn): Promise<BookTurn | null> {
+  if (!t.d.book) return null;
+  const list = businesses(t.who);
+  // Only when the message is about the business side: a phone with several kinds of role is asked first, as today.
+  if (!list.length || activeDomain(t) !== "business") return null;
+  const b = pickBusiness(t.who);
+  const on = await bookOn(t.d.book.db, b ? [b.location_id] : list.map((x) => x.location_id));
+  if (!on.size) return null;
+  const q = t.who.conversation?.open_question;
+  const open = q?.type === "rb_proposal" && b && q.location_id === b.location_id ? q : null;
+  const proposal = open && (t.d.now ?? Date.now)() - Date.parse(open.at) < PROPOSAL_OPEN_MS ? open : null;
+  return { on, b, proposal, open };
+}
+
+/** The word rules of the request book. Returns null for anything that keeps today's meaning. */
+async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
+  if (!t.d.book) return null;
+  // F-1: forwarded words never reach the request book, so a forwarded yes never saves; they go today's way.
+  if (t.m.forwarded) return null;
+  const text = (t.m.text ?? "").trim();
+  const words = cmd.k === "free" || (cmd.k === "tool" && ["hours", "post", "billing"].includes(cmd.tool));
+  const ref: Ref | null = cmd.k === "number" ? { number: cmd.n, word: null } : words ? refOf(text) : null;
+  const answer = (cmd.k === "yes" || cmd.k === "no") && t.who.conversation?.open_question?.type === "rb_proposal";
+  if (!ref && cmd.k !== "free" && !answer) return null;
+  const bt = await bookCheck(t);
+  if (!bt) return null;
+  const db = t.d.book.db;
+  const b = bt.b;
+  if (cmd.k === "yes" || cmd.k === "no") {
+    // Yes saves only when a proposal is waiting here; otherwise it keeps its meaning (approve the last task). While a draft
+    // is still open, a yes is never passed on to an approval waiting elsewhere (a Google reply or post).
+    if (!b || !bt.open) {
+      // The draft belongs to another of this phone's businesses: still open there, the yes is held back; otherwise the question is closed.
+      const q = t.who.conversation?.open_question as RbQuestion;
+      const qb = businesses(t.who).find((x) => x.location_id === q.location_id);
+      const g = qb ? await db.intake(qb.location_id, qb.user_id, q.intake_id).catch(() => null) : null;
+      if (cmd.k === "yes" && g?.ok === true && g.state === "pending") return answered(withB(t, qb!), BOOK_SAY.tapSave, "request_yes_tap_save");
+      await t.d.db.setConv(t.phone, { open_question: null });
+      return null;
+    }
+    const tb = withB(t, b);
+    const g = await db.intake(b.location_id, b.user_id, bt.open.intake_id).catch(() => null);
+    if (g?.ok !== true || g.state !== "pending") {
+      // The draft was already saved, dropped or has expired: the question is closed and the word keeps today's meaning.
+      await t.d.db.setConv(t.phone, { open_question: null });
+      return null;
+    }
+    if (cmd.k === "yes") return await bookSave(tb, b, bt.on.get(b.location_id)!, bt.open.intake_id, undefined, g);
+    await db.discard(b.location_id, b.user_id, `discard:${t.m.messageId}`, bt.open.intake_id).catch(() => null);
+    await t.d.db.setConv(t.phone, { open_question: null });
+    return answered(tb, BOOK_SAY.dropped, "request_dropped");
+  }
+  if (ref) {
+    // A number at a phone with several businesses and none chosen: the existing question first, then the number again.
+    if (!b) return withBusiness(t, "help", text, () => Promise.resolve("request_ref"));
+    const reply = await requestSummary(db, b.location_id, b.user_id, ref, bookCtx(t, b, bt.on.get(b.location_id)!)).catch(() => null);
+    if (!reply) return answered(withB(t, b), BOOK_SAY.tryAgain, "request_db_error");
+    return answered(withB(t, b), reply.body, ref.word ? `request_ref_${ref.word}` : "request_summary");
+  }
+  return await free(t, text, bt);
+}
+
+/** What a request tool answers, worked out before it is sent (so "On it" goes first when it takes a moment). */
+async function requestTool(t: Turn, bt: BookTurn, tool: string, arg: string | undefined, text: string, onlyIfNew = false): Promise<Said | null> {
+  try {
+    return await requestToolInner(t, bt, tool, arg, text, onlyIfNew);
+  } catch {
+    // A database or model failure: a plain line, never silence. Nothing was saved; the owner sends it again.
+    return said(bt.b ? withB(t, bt.b) : t, BOOK_SAY.tryAgain, "request_db_error");
+  }
+}
+
+async function requestToolInner(t: Turn, bt: BookTurn, tool: string, arg: string | undefined, text: string, onlyIfNew: boolean): Promise<Said | null> {
+  const b = bt.b;
+  // Several businesses and none chosen: the existing question, with the message kept for after the pick.
+  if (!b) return { send: () => withBusiness(t, "help", text, () => Promise.resolve("which_business")) };
+  const pack = bt.on.get(b.location_id)!;
+  const tb = withB(t, b);
+  const db = t.d.book!.db;
+  if (tool === "request_find") {
+    const r = await findReply(db, b.location_id, b.user_id, arg, bookCtx(t, b, pack));
+    return said(tb, r.body, "request_find");
+  }
+  // A new request, or a second message that revises the proposal still waiting for its tap.
+  let base = text;
+  let revising: string | null = null;
+  let before: unknown = null;
+  if (bt.proposal) {
+    const g = await db.intake(b.location_id, b.user_id, bt.proposal.intake_id).catch(() => null);
+    if (g?.ok === true && g.state === "pending" && typeof g.raw_text === "string") {
+      base = `${g.raw_text}\n${text}`;
+      revising = bt.proposal.intake_id;
+      before = g.field_evidence;
+    }
+  }
+  // A message the router could not place ("thanks", "ok") revises the draft only when it adds something to it.
+  if (onlyIfNew && !revising) return null;
+  const r = await readRequest(base, pack, { country: b.country, timeZone: b.time_zone ?? "UTC", now: new Date((t.d.now ?? Date.now)()) }, t.d.book!.ask);
+  if (!r.ok) return said(tb, r.reply.body, revising ? "request_revise_unread" : "request_unread");
+  const evidence = toEvidence(r.ex);
+  if (onlyIfNew && JSON.stringify(evidence) === JSON.stringify(before)) return said(tb, BOOK_SAY.stillWaiting, "request_still_waiting");
+  let intake: string | null = null;
+  if (revising) {
+    const v = await db.revise(b.location_id, b.user_id, `revise:${t.m.messageId}`, revising, r.ex.text, evidence);
+    if (v.ok === true || v.reason === "no_change") intake = revising;
+  }
+  if (!intake) {
+    const p = await db.propose(b.location_id, b.user_id, `propose:${t.m.messageId}`, r.ex.text, evidence, t.m.messageId);
+    if (p.ok !== true) {
+      const reason = String(p.reason ?? "unknown");
+      return said(tb, refusalReply({ reason }).body, `request_propose_refused:${reason}`);
+    }
+    intake = String(p.intake_id);
+  }
+  const at = new Date((t.d.now ?? Date.now)()).toISOString();
+  await t.d.db.setConv(t.phone, { open_question: { type: "rb_proposal", location_id: b.location_id, intake_id: intake, at } satisfies OpenQuestion });
+  return said(tb, r.ex.reply.body, revising ? "request_revised" : "request_proposed", proposalButtons(r.ex.reply, r.ex, intake));
+}
+
+/** Save, Change, or a reading under a proposal. The proposal is looked up only in the phone's own businesses. */
+async function bookButton(t: Turn, cmd: Extract<Command, { k: "request" }>): Promise<string | null> {
+  if (!t.d.book) return null;
+  const list = businesses(t.who);
+  if (!list.length) return null;
+  const on = await bookOn(t.d.book.db, list.map((x) => x.location_id));
+  const q = t.who.conversation?.open_question;
+  const first = q?.type === "rb_proposal" && q.intake_id === cmd.intakeId ? q.location_id : t.who.conversation?.active_location_id ?? null;
+  const order = [...list].sort((x, y) => Number(y.location_id === first) - Number(x.location_id === first)).filter((x) => on.has(x.location_id));
+  for (const b of order) {
+    const g = await t.d.book.db.intake(b.location_id, b.user_id, cmd.intakeId).catch(() => null);
+    if (g?.ok !== true) continue;
+    const tb = withB(t, b);
+    const pack = on.get(b.location_id)!;
+    if (cmd.action !== "change") return await bookSave(tb, b, pack, cmd.intakeId, cmd.pick, g);
+    if (g.state !== "pending") return answered(tb, g.state === "expired" ? BOOK_SAY.expired : SAY.alreadyHandled, `request_change_${g.state}`);
+    // Change: the proposal stays open for the next message, for its own business.
+    const at = new Date((t.d.now ?? Date.now)()).toISOString();
+    await t.d.db.setConv(t.phone, { active_role: "business", active_location_id: b.location_id,
+      open_question: { type: "rb_proposal", location_id: b.location_id, intake_id: cmd.intakeId, at } satisfies OpenQuestion });
+    return answered(tb, BOOK_SAY.changeAsk, "request_change");
+  }
+  return answered(t, SAY.alreadyHandled, "request_unknown");
+}
+
+/** Save: the proposal must still be open (an expired one is refused here; RB-I makes the database refuse it too). The key is
+ *  the WhatsApp id of the message that saves it, so a retry returns the first result and never makes a second request. */
+async function bookSave(tb: Turn, b: BusinessRole, pack: Pack, intakeId: string, pick?: number, read?: Record<string, unknown>): Promise<string> {
+  try {
+    return await bookSaveInner(tb, b, pack, intakeId, pick, read);
+  } catch {
+    // Nothing was saved, or the save is kept under its key and a second tap answers that it is already handled.
+    return answered(tb, BOOK_SAY.tryAgain, "request_db_error");
+  }
+}
+
+async function bookSaveInner(tb: Turn, b: BusinessRole, pack: Pack, intakeId: string, pick?: number, read?: Record<string, unknown>): Promise<string> {
+  const db = tb.d.book!.db;
+  const g = read ?? await db.intake(b.location_id, b.user_id, intakeId);
+  if (g.ok !== true) return answered(tb, g.reason === "not_found" ? SAY.alreadyHandled : refusalReply({ reason: String(g.reason) }).body, `request_save_refused:${g.reason}`);
+  if (g.state === "confirmed") return answered(tb, SAY.alreadyHandled, "request_already_saved");
+  if (g.state === "expired") return answered(tb, BOOK_SAY.expired, "request_expired");
+  if (g.state !== "pending") return answered(tb, refusalReply({ reason: "intake_unavailable" }).body, `request_unavailable:${g.state}`);
+  const built = createInput(pack, (g.field_evidence ?? {}) as Record<string, unknown>, intakeId, pick);
+  if (!built.ok) {
+    return answered(tb, built.why === "needs_tap" ? BOOK_SAY.tapReading : `Still needed: ${built.missing.join(", ")}. Nothing is saved yet.`, `request_save_${built.why}`);
+  }
+  const c = await db.create(b.location_id, b.user_id, tb.m.messageId, built.input);
+  if (c.ok !== true) {
+    const reason = String(c.reason ?? "unknown");
+    if (reason === "intake_unavailable") return answered(tb, SAY.alreadyHandled, "request_already_saved");
+    return answered(tb, refusalReply({ reason }).body, `request_create_refused:${reason}`);
+  }
+  const q = tb.who.conversation?.open_question;
+  if (q?.type === "rb_proposal" && q.intake_id === intakeId) await tb.d.db.setConv(tb.phone, { open_question: null });
+  const row = rowOf(await db.get(b.location_id, b.user_id, String(c.number)).catch(() => ({})));
+  const body = row ? savedText(row, bookCtx(tb, b, pack)).body : `${pack.words.kinds[pack.defaultKind]?.singular ?? "Request"} ${c.number} saved.`;
+  return answered(tb, body, c.replay ? "request_saved_replay" : "request_saved");
+}
+
 // ─── Free text: the intent router, with "On it" first when it takes a moment.
 
-async function free(t: Turn, text: string): Promise<string> {
+async function free(t: Turn, text: string, book?: BookTurn): Promise<string> {
   const { who } = t;
   const conv = who.conversation;
   const choose = needsRoleChoice(who, null);
@@ -1133,13 +1339,23 @@ async function free(t: Turn, text: string): Promise<string> {
   const sleep = t.d.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
   let settled = false;
   let onIt: Promise<unknown> | null = null;
-  void sleep(t.d.onItMs ?? 2500).then(() => {
+  // RB-E: with the request book on, the request tools may follow the router, so "On it" waits 10 seconds (it is billable).
+  void sleep(book ? ON_IT_REQUEST_MS : (t.d.onItMs ?? 2500)).then(() => {
     if (!settled) onIt = say1(tb0, SAY.onIt);
   });
-  const r = await route(t.d.ai, role, text);
-  settled = true;
+  let r: Awaited<ReturnType<typeof route>>;
+  let rb: Said | null = null;
+  try {
+    r = await route(t.d.ai, role, text, book ? { requestBook: true } : {});
+    // RB-E: a request tool's answer is worked out before "On it" is settled, so "On it" covers the extraction too.
+    rb = book && r.command.k === "tool" && isRequestTool(r.command.tool) ? await requestTool(t, book, r.command.tool, r.command.arg, text)
+      : book?.proposal && r.command.k !== "tool" ? await requestTool(t, book, "request_new", undefined, text, true) : null;
+  } finally {
+    settled = true;
+  }
   // "On it" already went: the answer follows it, never before it.
   if (onIt) await onIt;
+  if (rb) return rb.send();
   if (r.lang) await t.d.db.setConv(t.phone, { language: r.lang });
   const lang = r.lang ?? t.lang;
   if (r.command.k === "tool") {

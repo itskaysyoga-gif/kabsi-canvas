@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 9 Nov 2026, after F-1, RB-C1, RB-C2 and RB-D. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 9 Nov 2026, after RB-D, R-140 and RB-E. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -63,9 +63,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 9 Nov 2026, RB-E (R-139, Gate 1): request book on WhatsApp (capture, find) behind one seam; off until the test businesses migration; phone steps waiting. `2026-11-09-rb-e.md`.
 - 9 Nov 2026, R-140 (docs only): lane R decisions of 9 Nov in master plan 30.44: Gate 1 open, Gate 2 owner conversations, RB-K first session, a paid ads stop rule at day 60. No code or copy change.
 - 9 Nov 2026, RB-D (R-139, dark): extraction (the model only quotes, code checks and fills), `likely_pm_hours`, 167 fictional cases, one hand run. `2026-11-09-rb-d.md`.
-- 8 Nov 2026, RB-C2 (R-139, dark): request book packs, normalizers, six tools, policy, replies and typed intake in `_shared/request-book/`; code only, not wired. `2026-11-08-rb-c2.md`.
 
 ## How a session updates this page
 

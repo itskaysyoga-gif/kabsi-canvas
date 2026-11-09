@@ -8,6 +8,12 @@ import type { Sender } from "./deliver.ts";
 import type { Out, OutDb, OutRow } from "./outbox.ts";
 import type { SendState } from "./policy.ts";
 import type { Conversation, Role, Who } from "./roles.ts";
+import type { BookDb } from "./book.ts";
+
+/** RB-E: the request book in memory, close to the RB-C1 and PR B functions (the gate, the proposals, create, get, find). */
+type Intake = { id: string; location: string; raw: string; evidence: Record<string, unknown>; state: string; provider: string | null; by: string; expires: number };
+type Req = { id: string; location: string; number: number; kind: string; status: string; summary: string; customer_name: string | null; phones: string[];
+  requested_window_text: string | null; starts_at: string | null; intake_id: string | null; by: string; created_at: string };
 
 export const PNID = "1310486382156171";
 // Monday 26 Oct 2026, 15:00 UTC: 11:00 in New York, 15:00 in London, 17:00 in Beirut, 19:00 in Dubai.
@@ -88,6 +94,19 @@ export class World {
   /** Session 10: a fake Creem subscription by business; billing stays the old stub line while this is null. */
   billingSubs: Map<string, { plan: "essentials" | "pro"; period: "month" | "year"; state: string; periodEnd: string | null; cancelAtEnd: boolean; units: number; family: "founding" | "list" }> | null = null;
   calls: string[] = [];
+  // RB-E: the request book. Off, as in production, until a test switches it on and gives a business a pack in test.
+  bookSetting = "off";
+  packs = new Map<string, { pack: string; version: number; state: "off" | "test" }>();
+  intakes = new Map<string, Intake>();
+  requests: Req[] = [];
+  toolKeys = new Map<string, { hash: string; result: Record<string, unknown> }>();
+  /** Every request book call, as "function:location:actor". */
+  bookCalls: string[] = [];
+  /** The extraction model's answer for an owner message (the text inside the fence), as JSON with quotes. */
+  extractMap: Record<string, string> = {};
+  extractCalls: string[] = [];
+  /** How long each "On it" timer was set for. */
+  sleeps: number[] = [];
   handoffs: string[] = [];
   photos: string[] = [];
   voices: string[] = [];
@@ -540,6 +559,114 @@ export class World {
       mapPng: async () => new Uint8Array([0x89, 0x50, 0x4e, 0x47]) };
   }
 
+  bookDb(): BookDb {
+    const w = this;
+    const no = (reason: string, extra: Record<string, unknown> = {}) => ({ ok: false, reason, ...extra });
+    const gate = (loc: string, actor: string) => {
+      if (w.bookSetting !== "on" || w.packs.get(loc)?.state !== "test") return "disabled";
+      return w.biz.find((b) => b.id === loc)?.members[actor] ? null : "not_member";
+    };
+    const replay = (loc: string, actor: string, key: string, tool: string, input: unknown) => {
+      const hash = `${tool}:${actor}:${JSON.stringify(input)}`;
+      const k = w.toolKeys.get(`${loc}:${key}`);
+      return { hash, result: k ? (k.hash === hash ? { ...k.result, replay: true } : no("key_reused")) : null };
+    };
+    const finish = (loc: string, key: string, hash: string, result: Record<string, unknown>) => (w.toolKeys.set(`${loc}:${key}`, { hash, result }), result);
+    const uid = () => `00000000-0000-4000-9000-${String(++w.n).padStart(12, "0")}`;
+    const row = (q: Req) => ({ request_id: q.id, number: q.number, kind: q.kind, status: q.status, outcome: null, summary: q.summary, customer_id: `c-${q.id}`,
+      customer_name: q.customer_name, requested_window_text: q.requested_window_text, starts_at: q.starts_at, staff_confirmed: false, customer_confirmed: false,
+      next_action: null, next_action_due_at: null, follow_up_user_id: null, created_at: q.created_at });
+    const call = (fn: string, loc: string, actor: string) => w.bookCalls.push(`${fn}:${loc}:${actor}`);
+    return {
+      async on(ids) {
+        w.bookCalls.push(`on:${ids.join(",")}`);
+        if (w.bookSetting !== "on") return {};
+        return Object.fromEntries(ids.filter((id) => w.packs.get(id)?.state === "test").map((id) => [id, { pack: w.packs.get(id)!.pack, version: w.packs.get(id)!.version }]));
+      },
+      async propose(loc, actor, key, raw, evidence, provider) {
+        call("propose", loc, actor);
+        const g = gate(loc, actor);
+        if (g) return no(g);
+        const r = replay(loc, actor, key, "propose", { raw, evidence, provider });
+        if (r.result) return r.result;
+        if (provider && [...w.intakes.values()].some((i) => i.location === loc && i.provider === provider)) return no("duplicate_message");
+        const i: Intake = { id: uid(), location: loc, raw, evidence, state: "pending", provider, by: actor, expires: w.now + 30 * 86400_000 };
+        w.intakes.set(i.id, i);
+        return finish(loc, key, r.hash, { ok: true, intake_id: i.id, state: "pending" });
+      },
+      async revise(loc, actor, key, id, raw, evidence) {
+        call("revise", loc, actor);
+        const g = gate(loc, actor);
+        if (g) return no(g);
+        const r = replay(loc, actor, key, "revise", { id, raw, evidence });
+        if (r.result) return r.result;
+        const i = w.intakes.get(id);
+        if (!i || i.location !== loc) return no("not_found");
+        if (i.state !== "pending" || i.expires <= w.now) return no("intake_unavailable");
+        i.raw = raw;
+        i.evidence = evidence;
+        return finish(loc, key, r.hash, { ok: true, intake_id: i.id, state: "pending" });
+      },
+      async discard(loc, actor, _key, id) {
+        call("discard", loc, actor);
+        const g = gate(loc, actor);
+        if (g) return no(g);
+        const i = w.intakes.get(id);
+        if (!i || i.location !== loc) return no("not_found");
+        if (i.state !== "pending") return no("intake_unavailable");
+        i.state = "discarded";
+        return { ok: true, intake_id: i.id, state: i.state };
+      },
+      async intake(loc, actor, id) {
+        call("intake", loc, actor);
+        const g = gate(loc, actor);
+        if (g) return no(g);
+        const i = w.intakes.get(id);
+        if (!i || i.location !== loc) return no("not_found");
+        const q = w.requests.find((x) => x.intake_id === i.id);
+        return { ok: true, intake_id: i.id, source: "typed", raw_text: i.raw, field_evidence: i.evidence,
+          state: i.state === "pending" && i.expires <= w.now ? "expired" : i.state, request_id: q?.id ?? null };
+      },
+      async create(loc, actor, key, input) {
+        call("create", loc, actor);
+        const g = gate(loc, actor);
+        if (g) return no(g);
+        const r = replay(loc, actor, key, "create", input);
+        if (r.result) return r.result;
+        const i = input.intake_id ? w.intakes.get(String(input.intake_id)) : null;
+        if (input.intake_id && (!i || i.location !== loc || i.state !== "pending")) return no("intake_unavailable");
+        const phones = ((input.identifiers ?? []) as { value: string }[]).map((x) => x.value);
+        if (phones.some((p) => !/^\+\d+55501\d\d$/.test(p))) return no("real_data_refused");
+        if (i) i.state = "confirmed";
+        const number = w.requests.filter((x) => x.location === loc).length + 1;
+        const q: Req = { id: uid(), location: loc, number, kind: String(input.kind), status: input.kind === "job" ? "waiting" : input.kind === "enquiry" ? "new" : "requested",
+          summary: String(input.summary), customer_name: (input.customer_name as string) ?? null, phones, requested_window_text: (input.requested_window_text as string) ?? null,
+          starts_at: (input.starts_at as string) ?? null, intake_id: i?.id ?? null, by: actor, created_at: new Date(w.now).toISOString() };
+        w.requests.push(q);
+        return finish(loc, key, r.hash, { ok: true, request_id: q.id, number, kind: q.kind, status: q.status, outcome: null, row_version: 1, activity_id: uid(), flags: [] });
+      },
+      async get(loc, actor, ref) {
+        call("get", loc, actor);
+        const g = gate(loc, actor);
+        if (g) return no(g);
+        const n = Number(ref.replace("#", ""));
+        const q = w.requests.find((x) => x.location === loc && x.number === n);
+        if (!q) return no("not_found");
+        const r = row(q);
+        return { ok: true, request: { ...r, id: q.id, staff_confirmed_at: null, customer_confirmed_at: null }, customer_name: q.customer_name, customer_erased: false };
+      },
+      async find(loc, actor, query) {
+        call("find", loc, actor);
+        const g = gate(loc, actor);
+        if (g) return no(g);
+        const name = String(query.name ?? "").toLowerCase();
+        if (name.length < 2) return no("invalid_field");
+        const hits = w.requests.filter((x) => x.location === loc && (x.customer_name ?? "").toLowerCase().includes(name)).reverse();
+        return { ok: true, rows: hits.slice(0, 15).map(row), more: Math.max(0, hits.length - 15) };
+      },
+    };
+  }
+
   billingDeps(): BillingDeps {
     const w = this;
     const sub = (loc: string) => {
@@ -593,9 +720,18 @@ export class World {
       flush: async () => {},
       now: () => w.now,
       // "On it" fires at once in a slow case, never in a fast one.
-      sleep: () => (w.onItFast ? Promise.resolve() : new Promise<void>(() => {})),
+      sleep: (ms: number) => (w.sleeps.push(ms), w.onItFast ? Promise.resolve() : new Promise<void>(() => {})),
       onItMs: 2500,
       billing: w.billingSubs ? w.billingDeps() : undefined,
+      // RB-E: always present, so every existing case also runs with the seam in place and the request book off.
+      book: {
+        db: w.bookDb(),
+        ask: async (req) => {
+          const text = req.user.replace(/<\/?owner_message>/g, "").trim();
+          w.extractCalls.push(text);
+          return w.extractMap[text] ?? '{"fields":{},"said":{}}';
+        },
+      },
     };
   }
 }

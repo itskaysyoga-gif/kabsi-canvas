@@ -40,7 +40,9 @@ export type OpenQuestion =
   | { type: "update"; location_id: string; at: string }
   | { type: "photo_category"; photo_id: string; location_id: string }
   // V4: the first message back during onboarding ("Can Kabsi send your setup steps and approvals here?").
-  | { type: "setup"; location_id: string };
+  | { type: "setup"; location_id: string }
+  // RB-E: a request book proposal waiting for Save. Ids only: the words stay in the proposal row (request_intakes), never here.
+  | { type: "rb_proposal"; location_id: string; intake_id: string; at: string };
 
 export type Who = { phone: string; roles: Role[]; conversation: Conversation | null };
 
