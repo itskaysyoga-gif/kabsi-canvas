@@ -11,6 +11,10 @@ name: Eval live (by hand, 27.9)
 # cases (scripts/sec1/injection-live.ts: at most 30 cases, stopped at its own budget, 0.30 US dollars by default).
 # Launch 1 (master plan 30.35 item 6): "pages_only" runs only Nora's five page-link questions with the real Nora, one at a
 # time, stopped at pages_budget (0.40 US dollars), with no reply evaluation, no judge and no injection cases.
+# RB-D (request book, KABSI 3.0): "request_eval" runs the extraction evaluation of scripts/request-eval on the real small
+# model (the fictional cases, one call each), by hand, stopped at request_budget (at most 5 US dollars; the runner refuses
+# more). It is off by default and is not part of any other part: with evaluations and injection off, nothing else runs.
+# Its model answers are printed as RECORD lines so they can be saved as scripts/request-eval/recorded.json, which CI uses.
 on:
   workflow_dispatch:
     inputs:
@@ -54,6 +58,14 @@ on:
         description: Budget for the page-link questions, US dollars (at most 0.40)
         required: true
         default: "0.40"
+      request_eval:
+        description: "RB-D: run the request book extraction evaluation (the fictional cases, the small model, by hand)"
+        type: boolean
+        default: false
+      request_budget:
+        description: Budget for the request book evaluation, US dollars (at most 5)
+        required: true
+        default: "5"
 
 permissions:
   contents: read
@@ -113,6 +125,20 @@ jobs:
           cd "$scratch"
           deno run --allow-env --allow-read --allow-net scripts/sec1/injection-live.ts --budget "$INJECTION_BUDGET" ${INJECTION_IDS:+--ids "$INJECTION_IDS"} | tee "$GITHUB_WORKSPACE/injection-live.txt"
         continue-on-error: true
+      - name: Request book extraction (RB-D, real small model)
+        if: inputs.request_eval && !inputs.pages_only
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          REQUEST_BUDGET: ${{ inputs.request_budget }}
+        run: |
+          scratch="$(mktemp -d)"
+          mkdir -p "$scratch/supabase/functions" "$scratch/scripts/request-eval"
+          cp -r supabase/functions/. "$scratch/supabase/functions/"
+          cp -r scripts/request-eval/. "$scratch/scripts/request-eval/"
+          echo '{"nodeModulesDir":"auto"}' > "$scratch/deno.json"
+          cd "$scratch"
+          deno run --allow-env --allow-read --allow-net --allow-write="$GITHUB_WORKSPACE" scripts/request-eval/run.ts --live --budget "$REQUEST_BUDGET" --out "$GITHUB_WORKSPACE/request-eval-result.json" | tee "$GITHUB_WORKSPACE/request-eval-live.txt"
+        continue-on-error: true
       - name: Keep the results
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -123,5 +149,7 @@ jobs:
             nora-eval-result.json
             nora-pages-result.json
             injection-live.txt
+            request-eval-result.json
+            request-eval-live.txt
             scripts/eval/scores.json
           if-no-files-found: ignore

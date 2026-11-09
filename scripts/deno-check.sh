@@ -6,11 +6,12 @@
 # gate tested with stub models here too.
 set -euo pipefail
 scratch="$(mktemp -d)"
-mkdir -p "$scratch/supabase/functions" "$scratch/tests" "$scratch/scripts/eval" "$scratch/scripts/nora-eval" "$scratch/knowledge"
+mkdir -p "$scratch/supabase/functions" "$scratch/tests" "$scratch/scripts/eval" "$scratch/scripts/nora-eval" "$scratch/scripts/request-eval" "$scratch/knowledge"
 cp -r supabase/functions/. "$scratch/supabase/functions/"
 cp -r tests/fixtures "$scratch/tests/"
 cp -r scripts/eval/. "$scratch/scripts/eval/"
 cp -r scripts/nora-eval/. "$scratch/scripts/nora-eval/"
+cp -r scripts/request-eval/. "$scratch/scripts/request-eval/"
 cp knowledge/kabsi-facts.md "$scratch/knowledge/"
 cp -r knowledge/facts "$scratch/knowledge/"
 cp scripts/kb-lib.mjs "$scratch/scripts/"
@@ -28,6 +29,10 @@ deno test --no-check --allow-env --allow-read --allow-net=deno.land,cdn.jsdelivr
 cd "$scratch"
 deno check scripts/eval/*.ts
 deno test --no-check scripts/eval/
+# RB-D: the request book's extraction evaluation (fictional cases, recorded model answers): type-checked, and its tests run
+# with no network and no model call. The live run is by hand only (scripts/request-eval/live.ts, never run here).
+deno check scripts/request-eval/*.ts
+deno test --no-check --allow-read scripts/request-eval/
 # P0.6-06: Nora's evaluation (60 questions) is type-checked here; its stub run is a vitest test (tests/nora-sync.test.ts).
 deno check scripts/nora-eval/*.ts
 deno run --allow-read --allow-env scripts/nora-eval/run-nora-eval.ts --stub pass

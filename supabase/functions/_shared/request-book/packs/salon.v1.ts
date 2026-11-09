@@ -54,6 +54,8 @@ export const salonV1: Pack = assertValidPack({
     { key: "when", label: "When", target: "when", required: false },
     { key: "stylist", label: "With", target: "details", required: false },
   ],
+  // Bare hours this business usually means as the afternoon (RB-D). Data only.
+  likely_pm_hours: [1, 2, 3, 4, 5, 6, 7],
   examples: [
     { text: "Book Sarah for highlights Thursday afternoon", kind: "appointment" },
     { text: "Sarah confirmed Thursday 3", kind: "appointment" },
