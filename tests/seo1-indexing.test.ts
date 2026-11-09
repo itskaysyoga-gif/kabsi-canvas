@@ -18,7 +18,8 @@ function answer(path: string): Redirect | undefined {
     const m = /^(.*):[a-z]+\(([^)]*)\)(\/?)$/.exec(r.source);
     if (m) {
       const [, prefix, alts, slash] = m;
-      return path.startsWith(prefix!) && path === `${prefix}${path.slice(prefix!.length).replace(/\/$/, "")}${slash}`
+      return path.startsWith(prefix!) &&
+        path === `${prefix}${path.slice(prefix!.length).replace(/\/$/, "")}${slash}`
         ? alts!.split("|").includes(path.slice(prefix!.length).replace(/\/$/, ""))
         : false;
     }
