@@ -13,13 +13,14 @@ The rules are master plan 30.19 section 5 as changed by 30.39 (R-119), with 30.3
 - A stop (any complaint, or bounces above 3 percent of the last 100 sends) sets `sending_open` false with `stopped_reason` and alerts Rashid; only lane R clears it.
 
 ## Who
-- First country the UK, once the UK messaging decision is made (`open_countries`). Only registered companies that Harvey's register shows Active on Companies House's free Basic Company Data file at most 40 days old (30.39 item 12; no Companies House API key), with the company number recorded, and an email the business publishes on its own domain.
-- Salons and barbers first, then the Founding 25 mix. Sources: the business's own website, Companies House, OpenStreetMap (through Harvey). Never Google scraping, Places, the Business Profile API, bought lists or directories.
+- The UK only (30.45 item 5, R-142): `OPEN_COUNTRIES` in `outbound/rules.ts` and the database check on `open_countries` hold only GB; the UAE and every other country stay off. Sending opens only when Rashid says start, after card payments open. Only registered companies that Harvey's register shows Active on Companies House's free Basic Company Data file at most 40 days old (30.39 item 12; no Companies House API key), with the company number recorded, and an email the business publishes on its own domain.
+- The six salon industries first, in this order: hair salon, barbershop, beauty salon, nail salon, lash and brow studio, spa and massage (`SALON_INDUSTRIES`), then the other trades. Sources: the business's own website, Companies House, OpenStreetMap (through Harvey). Never Google scraping, Places, the Business Profile API, bought lists or directories.
 - Never anyone suppressed (address, domain and parent domains, sha256 of the lower-cased value, the same rule as Harvey), never a Kabsi customer, applicant or partner, never anyone written to before.
 
 ## The emails (docs/COPY.md section 65, word for word)
 - Plain text, UTF-8, no tracking, no image, no link but kabsi.co and kabsi.co/privacy, a mailto List-Unsubscribe with the subject "no thanks". Sent as Rashid Abou Hamzy <rashid@getkabsi.com> through Zoho (SMTP on 465; IMAP 993 to read). Never Resend, never kabsi.co as the sender.
 - Email 1 and the follow-up are signed "Rashid Abou Hamzy, founder of Kabsi" and "kabsi.co", with the footer of 30.19 section 5. No Facebook or Instagram address and no "Drafted with Nora" in these two (30.39 item 6). The reply to a clear yes is filled from its template (COPY 65), carries the Facebook and Instagram addresses of R-59 and is signed without Nora, because a template wrote it (30.39 item 11).
+- Email 1 and the follow-up offer only the free Google check and Google care, never Founding 25 or a price. The reply to a yes adds the founding price sentence (the first 30 paying businesses), never "25 founding businesses" (R-142).
 - One detail per Email 1, the first that is true on the page read at draft time; none true means no draft. Filled from the templates with no AI call.
 - The follow-up goes on day 4 or 5 in the same thread and is cancelled by any reply, bounce or suppression at that business. No second follow-up.
 
