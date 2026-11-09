@@ -1850,7 +1850,7 @@ Plain text only, sent as Rashid Abou Hamzy <rashid@getkabsi.com>. Filled from th
 
 "Hi <business> team,
 I came across <business> looking at <kind> in <city>. <detail sentence>
-I run Kabsi. It prepares your Google review replies, posts and opening hours, and you approve each one on WhatsApp before anything goes live. We're taking 25 founding businesses, with three months of Pro free.
+I run Kabsi. It prepares your Google review replies, posts and opening hours, and you approve each one on WhatsApp before anything goes live.
 Want me to run a free check of <business>'s Google profile and send you what I find?
 Rashid Abou Hamzy, founder of Kabsi
 kabsi.co"
@@ -1863,7 +1863,9 @@ Footer: "Why you got this: your business email is on your website. Reply 'no tha
 - Instagram linked: "Your Instagram shows the work, and the same photos could do well on your Google profile."
 - The site updated this year or last: "Your site looks recently updated, so your Google profile is the next place customers check."
 
-**<kind>**, from Harvey's industry: hair salons, barbers, beauty salons and spas, nail salons, restaurants, cafes, clinics, car repair garages, dentists, gyms, vets, physiotherapists.
+**<kind>**, from Harvey's industry. The six salon industries come first, in this order (lane R, 9 Nov 2026, R-142 decision 4c): hair salons (hair salon), barbers (barbershop), beauty salons (beauty salon), nail salons (nail salon), lash and brow studios (lash and brow studio), spas and massage studios (spa and massage). Then: clinics, dentists, physiotherapists, cafes, restaurants, car repair garages, gyms, vets.
+
+**Changed by Sync 2b (9 Nov 2026, R-142 decision 4a, master plan 30.45 item 5).** Email 1 offers only the free Google check: the line "We're taking 25 founding businesses, with three months of Pro free." is removed. The reply to a yes gives the check and the founding price sentence of section 34 (the first 30 paying businesses), never Founding 25 and never "25 founding businesses". Outbound writes only to UK registered companies active on Companies House; the UAE and every other country stay off.
 
 **Follow-up**, day 4 or 5, same thread. Subject: "Re: <business>'s Google profile"
 
@@ -1876,7 +1878,7 @@ then the same signature and footer.
 
 Thanks. Here is the free check of <business>'s Google profile: kabsi.co/scan/<code>
 
-We're taking 25 founding businesses, with three months of Pro free. If you'd like one of the places, apply at kabsi.co/founding, or reply here and I'll help.
+The first 30 paying businesses pay the founding price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year.
 
 Rashid Abou Hamzy, founder of Kabsi
 kabsi.co
