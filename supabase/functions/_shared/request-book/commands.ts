@@ -48,7 +48,7 @@ const EVERYDAY: [string, string[]][] = [
   ["no show", ["no_show"]], ["noshow", ["no_show"]], ["did not come", ["no_show"]], ["didnt come", ["no_show"]],
   ["did not show", ["no_show"]], ["didnt show", ["no_show"]], ["missed", ["no_show"]],
   ["cancel", ["cancelled"]], ["cancelled", ["cancelled"]], ["canceled", ["cancelled"]],
-  ["contacted", ["contacted"]], ["called", ["contacted"]], ["called back", ["contacted"]], ["messaged", ["contacted"]], ["replied", ["contacted"]],
+  ["contacted", ["contacted"]], ["called back", ["contacted"]],
   ["lost", ["lost"]], ["not interested", ["lost"]],
 ];
 
@@ -91,7 +91,22 @@ const NUMS = String.raw`${NUM}(?:\s*(?:,|&|and)?\s*${NUM})*`;
 const numbersOf = (s: string) => [...s.matchAll(/\d{1,9}/g)].map((m) => Number(m[0])).filter((n) => n > 0);
 // Words that are never a customer's name in these forms.
 const NOT_A_NAME = new Set(["it", "he", "she", "they", "we", "i", "you", "this", "that", "the", "all", "everyone", "everything", "what",
-  "who", "which", "whats", "what's", "nothing", "someone", "somebody", "anyone", "kabsi", "request", "requests", "number"]);
+  "who", "which", "whats", "what's", "nothing", "someone", "somebody", "anyone", "kabsi", "request", "requests", "number", "im", "i'm",
+  "ok", "okay", "my", "our", "your", "his", "her", "their", "thats", "that's", "its", "it's", "car", "mum", "mom", "dad", "we're", "were",
+  "all", "so", "and", "then", "now", "today", "here", "there", "yes", "no", "not", "just", "well"]);
+// After a name and 's: words that are another person, so "sarah's mum is here" is not about Sarah.
+const NOT_THEIRS = new Set(["mum", "mom", "dad", "mother", "father", "sister", "brother", "husband", "wife", "friend", "son", "daughter",
+  "kid", "kids", "child", "children", "baby", "boyfriend", "girlfriend", "partner", "cousin", "aunt", "uncle"]);
+
+/**
+ * Does a customer's name fit the name typed? Every word typed must be a whole word of the name ("Sam" is not Samira, and
+ * "Sarah K" fits "Sarah Khan" by the start of a word only for a single letter). The database's search is wider; this narrows it.
+ */
+export function nameFits(customer: string | null, typed: string): boolean {
+  if (!customer) return false;
+  const have = clean(customer).split(/[^a-z0-9']+/).filter(Boolean).map((x) => x.replace(/'s$/, ""));
+  return clean(typed).split(" ").filter(Boolean).every((t) => have.some((h) => h === t || (t.length === 1 && h.startsWith(t))));
+}
 const NAME = String.raw`([a-z][a-z' ]{0,40}?)`;
 
 function nameOf(raw: string): string | null {
@@ -107,10 +122,10 @@ function statusClause(c: string, phraseRe: string, phrases: Map<string, string[]
   const b = new RegExp(`^(${NUMS})\\s+(?:is\\s+)?(${phraseRe})$`).exec(c);
   if (b && keys(b[2]!)) return numbersOf(b[1]!).map((n) => ({ target: { number: n }, keys: keys(b[2]!)! }));
   // A name, then the status: "ali's car is ready", "sarah came in", "maya not interested".
-  const n = new RegExp(`^${NAME}(?:'s(?:\\s+[a-z]+)?)?\\s+(?:(?:is|was|has|just|now)\\s+)*(${phraseRe})$`).exec(c);
-  if (n && keys(n[2]!)) {
+  const n = new RegExp(`^${NAME}(?:'s(?:\\s+([a-z]+))?)?\\s+(?:(?:is|was|has|just|now)\\s+)*(${phraseRe})$`).exec(c);
+  if (n && keys(n[3]!) && !(n[2] && NOT_THEIRS.has(n[2]))) {
     const name = nameOf(n[1]!);
-    if (name) return [{ target: { name }, keys: keys(n[2]!)! }];
+    if (name) return [{ target: { name }, keys: keys(n[3]!)! }];
   }
   return null;
 }
@@ -129,7 +144,7 @@ export function parseBookCommand(text: string, pack: Pack): BookCommand | null {
 
   // Lists and questions about what is open. No model for the usual phrases.
   const kp = plurals(pack).join("|");
-  if (new RegExp(`^(?:(?:what'?s|what is|whats|show(?: me)?|anything)\\s+)?(?:still\\s+)?open(?:\\s+(?:${kp}|requests|today))?$`).test(c) ||
+  if (new RegExp(`^(?:what'?s|what is|whats|show(?: me)?|anything)\\s+(?:still\\s+)?open(?:\\s+(?:${kp}|requests))?$`).test(c) ||
     new RegExp(`^(?:what|which)\\s+(?:${kp}|requests)\\s+are\\s+(?:still\\s+)?open$`).test(c)) return { k: "open", keys: null };
   if (new RegExp(`^(?:(?:what'?s|what is|whats|who'?s|who is|which|what|any)\\s+)?(?:(?:${kp}|requests)\\s+(?:are|is)\\s+)?(?:still\\s+)?(?:unconfirmed|not confirmed)$`).test(c)) {
     return { k: "unconfirmed" };
@@ -144,7 +159,9 @@ export function parseBookCommand(text: string, pack: Pack): BookCommand | null {
 
   const phrases = statusPhrases(pack);
   const phraseRe = [...phrases.keys()].sort((x, y) => y.length - x.length).map(esc).join("|");
-  const what = new RegExp(`^(?:what'?s|what is|whats|who'?s|who is|what are|which are)\\s+(?:still\\s+)?(${phraseRe})$`).exec(c);
+  // "what's ready", "who's here": the everyday words only, never a pack word such as New ("what's new" is a greeting).
+  const everyday = EVERYDAY.map(([p]) => p).sort((x, y) => y.length - x.length).map(esc).join("|");
+  const what = new RegExp(`^(?:what'?s|what is|whats|who'?s|who is|what are|which are)\\s+(?:still\\s+)?(${everyday})$`).exec(c);
   if (what) {
     const keys = (phrases.get(what[1]!) ?? []).filter((k) => Object.values(OPEN_STATUSES).some((l) => l.includes(k)));
     if (keys.length) return { k: "open", keys };
@@ -221,13 +238,24 @@ export function readWhen(text: string, pack: Pack, ctx: { now: Date; timeZone: s
   if (every.length !== w.candidates.length || every.length < 2) return { k: "window", text: w.raw };
   // A reading already in the past is set aside when a later one remains ("Monday 6" said on a Monday evening is next Monday).
   const later = every.filter((x) => Date.parse(x.startsAt) > ctx.now.getTime());
-  const all = later.length ? later : every;
-  if (all.length === 1) return { k: "one", startsAt: all[0]!.startsAt };
+  let all = later.length ? later : every;
+  // More readings than buttons (the weekday is today and next week): the nearest day is the one meant.
+  if (all.length > 3) {
+    const first = [...all].sort((x, y) => x.date.localeCompare(y.date))[0]!.date;
+    all = all.filter((x) => x.date === first);
+  }
   // The date goes on the button only when the readings fall on different days.
   const days = new Set(all.map((x) => x.date)).size > 1;
   const label = (x: { date: string; time: string }) => `${days ? formatDay(x.date) : dayName(x.date)} ${hour12(x.time)}`;
   // likely_pm_hours (RB-D): the morning reading of an hour the business usually means as the afternoon is set aside.
   const pm = pack.likely_pm_hours ?? [];
+  // The words still had two readings: one left after the past is set aside is a guess, and the owner taps it.
+  if (all.length === 1) {
+    // Only the hour was in doubt (no am or pm): a tap. Only the day was (a weekday said on that day, with pm): applied.
+    const a = all[0]!;
+    const hourTwin = every.some((x) => x !== a && x.time.slice(3) === a.time.slice(3) && Math.abs(Number(x.time.slice(0, 2)) - Number(a.time.slice(0, 2))) === 12);
+    return hourTwin ? { k: "guess", startsAt: a.startsAt, label: `${dayName(a.date)} ${hour12(a.time)}` } : { k: "one", startsAt: a.startsAt };
+  }
   if (all.length === 2 && all[0]!.date === all[1]!.date) {
     const [am, later] = [...all].sort((x, y) => x.time.localeCompare(y.time));
     const h = Number(am!.time.slice(0, 2));

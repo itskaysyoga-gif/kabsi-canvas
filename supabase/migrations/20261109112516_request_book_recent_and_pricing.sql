@@ -3,7 +3,8 @@
 -- 1. public.request_recent: the requests this person touched at this business in the last few minutes, newest first, each
 --    with its latest effective activity (private.rb_latest). WhatsApp uses it for "not highlights, a trim" (the request
 --    touched in the last 30 minutes) and for a typed Undo (the latest effective activity, inside the 10 minutes that
---    request_undo itself enforces). Gate, membership and location as every request book function; service-only; STABLE,
+--    request_undo itself enforces). An Undo and a change already undone are not counted; the latest activity is returned
+--    only when it is this person's own. Gate, membership and location as every request book function; service-only; STABLE,
 --    so it writes nothing. Returns ids, numbers, kinds and times only, never a name or a customer's words.
 --
 -- 2. public.whatsapp_message_pricing: what Meta says about a delivered message's price, read from the status webhook
@@ -21,11 +22,16 @@ begin
   select coalesce(jsonb_agg(jsonb_build_object('request_id', s.id, 'number', s.number, 'kind', s.kind, 'touched_at', s.touched_at,
            'latest_activity_id', s.latest) order by s.touched_at desc, s.number desc), '[]'::jsonb)
     into v_rows
-    from (select q.id, q.number, q.kind, max(a.created_at) as touched_at, private.rb_latest(q.id) as latest
+    from (select q.id, q.number, q.kind, max(a.created_at) as touched_at,
+                 -- The latest effective change, only when it is this person's own: a typed Undo never reverses someone else's.
+                 (select l.id from public.request_activities l where l.id = private.rb_latest(q.id) and l.actor_user_id = p_actor) as latest
             from public.request_activities a
             join public.customer_requests q on q.id = a.request_id and q.location_id = p_location
            where a.location_id = p_location and a.actor_user_id = p_actor
              and a.created_at > now() - make_interval(mins => p_minutes)
+             -- An Undo, and a change that was undone, do not count as touching: a second "undo" goes to the next change back.
+             and a.type <> 'undone'
+             and not exists (select 1 from public.request_activities u where u.location_id = p_location and u.undo_of = a.id)
            group by q.id, q.number, q.kind
            order by max(a.created_at) desc, q.number desc
            limit 5) s;

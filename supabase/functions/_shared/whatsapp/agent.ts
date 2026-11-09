@@ -1389,7 +1389,8 @@ async function bookTap(t: Turn, cmd: Extract<Command, { k: "rbook" }>): Promise<
   const q = t.who.conversation?.open_question;
   if (cmd.action !== "undo") {
     // Yes, No and a time answer the question that is open, and only that one: an old button finds it closed.
-    const open = (q?.type === "rb_ask" || q?.type === "rb_time") && q.request_id === cmd.ids[0] ? q : null;
+    const open = (q?.type === "rb_ask" || q?.type === "rb_time") && q.request_id === cmd.ids[0] && q.nonce === cmd.nonce
+      && (t.d.now ?? Date.now)() - Date.parse(q.at) < RB_QUESTION_MS ? q : null;
     if (!open) return answered(t, SAY.alreadyHandled, "request_question_closed");
     if (cmd.action === "time") {
       if (open.type !== "rb_time") return answered(t, SAY.alreadyHandled, "request_question_closed");

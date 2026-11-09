@@ -21,7 +21,7 @@ import { clip, confirmationShort, kindWord, statusKeyWord, statusWord, whenText 
 import { OPEN_STATUSES, type Kind, type Reply, type RequestRow } from "../request-book/types.ts";
 import { MAX_RAW_TEXT } from "../request-book/intake/adapter.ts";
 import {
-  type BookCommand, correction, parseBookCommand, readWhen, saysArrived, servicesIn, type Since, statusFor, type Target,
+  type BookCommand, correction, nameFits, parseBookCommand, readWhen, saysArrived, servicesIn, type Since, statusFor, type Target,
 } from "../request-book/commands.ts";
 import type { Button } from "./channel.ts";
 import type { OpenQuestion } from "./roles.ts";
@@ -280,6 +280,8 @@ const whoOf = (row: Pick<RequestRow, "customer_name">) => clip(row.customer_name
 const refused = (r: Json) => refusalReply({ reason: String(r.reason ?? "unknown") }).body;
 const at = (now: Date) => now.toISOString();
 const sameInstant = (a: string | null, b: string | null) => !!a && !!b && Date.parse(a) === Date.parse(b);
+/** Eight letters and digits for a question's buttons. */
+export const nonce = () => [...crypto.getRandomValues(new Uint8Array(8))].map((b) => "abcdefghijklmnopqrstuvwxyz0123456789"[b % 36]).join("");
 
 type Resolved = { k: "one"; full: Full } | { k: "many"; rows: RequestRow[] } | { k: "not_open" } | { k: "none" } | { k: "refused"; body: string };
 
@@ -291,7 +293,8 @@ async function resolve(db: BookDb, me: Me, target: Target, fits: (r: RequestRow)
     return f ? { k: "one", full: f } : { k: "refused", body: refused(r) };
   }
   const r = await db.find(me.location, me.actor, { name: target.name });
-  const rows = r.ok === true && Array.isArray(r.rows) ? (r.rows as RequestRow[]) : [];
+  // The database matches part of a name; only whole words count here ("Sam" is not Samira).
+  const rows = (r.ok === true && Array.isArray(r.rows) ? (r.rows as RequestRow[]) : []).filter((x) => nameFits(x.customer_name, target.name));
   if (!rows.length) return { k: "none" };
   const open = rows.filter((x) => x.status !== "closed" && fits(x));
   if (!open.length) return { k: "not_open" };
@@ -379,10 +382,12 @@ async function statusCmd(db: BookDb, me: Me, items: { target: Target; keys: stri
     }
     lines.push(`${lbl(pack, row)}: ${refused(r)}`);
   }
+  const n = nonce();
   const question = ask
-    ? { type: "rb_ask" as const, location_id: me.location, request_id: ask.row.request_id, version: ask.version, to: ask.to, outcome: ask.outcome, at: at(ctx.now) }
+    ? { type: "rb_ask" as const, location_id: me.location, request_id: ask.row.request_id, version: ask.version, to: ask.to, outcome: ask.outcome, at: at(ctx.now), nonce: n }
     : null;
-  const yesNo = ask ? [{ id: `ra:${ask.row.request_id}`, title: "Yes" }, { id: `rx:${ask.row.request_id}`, title: "No" }] : [];
+  // With other parts already applied, their Undo stays on the reply next to Yes and No.
+  const yesNo = ask ? [{ id: `ra:${ask.row.request_id}:${n}`, title: "Yes" }, { id: `rx:${ask.row.request_id}:${n}`, title: "No" }, ...undoButton(undo)] : [];
   const askBody = ask ? askFirstReply(ask.row, ctx, { to: ask.to, outcome: ask.outcome, flags: ask.flags }).body : null;
   if (only && undo.length === 1 && !ask && lines.length === 1) {
     return { body: statusChangedReply(only.row, ctx, only.flags).body, result: "request_status", buttons: undoButton(undo), question: null };
@@ -419,8 +424,8 @@ export async function askAnswer(db: BookDb, me: Me, q: RbAsk, yes: boolean, ctx:
 async function confirmCmd(db: BookDb, me: Me, target: Target, when: string | null, ctx: Ctx, key: string): Promise<Act | null> {
   const pack = ctx.pack;
   const res = await resolve(db, me, target, (r) => r.kind === "appointment");
-  if (res.k === "none") return null;
-  if (res.k === "not_open") return { body: NOT_OPEN, result: "request_confirm_not_open" };
+  // No open appointment by that name: not a confirmation Kabsi can record, so the message goes on as before.
+  if (res.k === "none" || res.k === "not_open") return null;
   if (res.k === "refused") return { body: res.body, result: "request_confirm_refused" };
   if (res.k === "many") return which(res.rows, "confirmed", ctx, "request_confirm_which");
   const f = res.full;
@@ -428,22 +433,28 @@ async function confirmCmd(db: BookDb, me: Me, target: Target, when: string | nul
   const r = readWhen(when, pack, { now: ctx.now, timeZone: ctx.timeZone });
   const head = `${lbl(pack, f.row)} for ${whoOf(f.row)}`;
   const customer = pack.words.customer.singular;
-  if (r.k === "none" || r.k === "window") {
+  // "Sarah confirmed she will pay": no day or hour at all, so not a confirmation of a time.
+  if (r.k === "none") return null;
+  if (r.k === "window") {
     return { body: `${head}: say the day and the hour, for example Thursday 3pm. Nothing was changed.`, result: "request_confirm_no_time" };
   }
   if (r.k === "one") return await confirmApply(db, me, f, r.startsAt, ctx, key);
-  const question: RbTime = { type: "rb_time", location_id: me.location, request_id: f.row.request_id, action: "confirm",
-    readings: r.k === "guess" ? [r.startsAt] : r.readings.map((x) => x.startsAt), services: [], at: at(ctx.now) };
+  const n = nonce();
+  const question: RbTime = { type: "rb_time", location_id: me.location, request_id: f.row.request_id, version: f.version, action: "confirm",
+    readings: r.k === "guess" ? [r.startsAt] : r.readings.map((x) => x.startsAt), services: [], at: at(ctx.now), nonce: n };
   if (r.k === "guess") {
     return { body: `${head}: ${r.label}?\nTap it to set that time and record that the ${customer} confirmed. Nothing is changed until you tap.`,
-      result: "request_confirm_guess", buttons: [{ id: `rt:${f.row.request_id}:0`, title: r.label }], question };
+      result: "request_confirm_guess", buttons: [{ id: `rt:${f.row.request_id}:${n}:0`, title: r.label }], question };
   }
   return { body: `${head}: which time did the ${customer} confirm? Nothing is changed until you tap.`, result: "request_confirm_choose",
-    buttons: r.readings.map((x, i) => ({ id: `rt:${f.row.request_id}:${i}`, title: x.label })), question };
+    buttons: r.readings.map((x, i) => ({ id: `rt:${f.row.request_id}:${n}:${i}`, title: x.label })), question };
 }
 
 /** Sets the time when it is new (a time change clears the confirmations the old time had), then records the customer's confirmation. */
 async function confirmApply(db: BookDb, me: Me, f: Full, startsAt: string | null, ctx: Ctx, key: string): Promise<Act> {
+  // Checked before any write, so a time is never set on a request that cannot hold a confirmation.
+  if (f.row.kind !== "appointment") return { body: refusalReply({ reason: "not_appointment" }).body, result: "request_confirm_refused:not_appointment", question: null };
+  if (f.row.status === "closed") return { body: refusalReply({ reason: "closed" }).body, result: "request_confirm_refused:closed", question: null };
   const acts: string[] = [];
   let version = f.version;
   let cleared = false;
@@ -478,15 +489,16 @@ async function convertCmd(db: BookDb, me: Me, name: string, rest: string, ctx: C
   const r = readWhen(rest, pack, { now: ctx.now, timeZone: ctx.timeZone });
   const into = newKind(pack);
   if (r.k === "guess" || r.k === "choose") {
-    const question: RbTime = { type: "rb_time", location_id: me.location, request_id: f.row.request_id, action: "convert",
-      readings: r.k === "guess" ? [r.startsAt] : r.readings.map((x) => x.startsAt), services: s.keys, at: at(ctx.now) };
+    const n = nonce();
+    const question: RbTime = { type: "rb_time", location_id: me.location, request_id: f.row.request_id, version: f.version, action: "convert",
+      readings: r.k === "guess" ? [r.startsAt] : r.readings.map((x) => x.startsAt), services: s.keys, at: at(ctx.now), nonce: n };
     const head = `${lbl(pack, f.row)} for ${whoOf(f.row)} becomes ${/^[aeiou]/i.test(kindWord(pack, into)) ? "an" : "a"} ${kindWord(pack, into).toLowerCase()}`;
     if (r.k === "guess") {
       return { body: `${head}: ${r.label}?\nTap it to save it at that time. Nothing is changed until you tap.`, result: "request_convert_guess",
-        buttons: [{ id: `rt:${f.row.request_id}:0`, title: r.label }], question };
+        buttons: [{ id: `rt:${f.row.request_id}:${n}:0`, title: r.label }], question };
     }
     return { body: `${head}. Which time did you mean? Nothing is changed until you tap.`, result: "request_convert_choose",
-      buttons: r.readings.map((x, i) => ({ id: `rt:${f.row.request_id}:${i}`, title: x.label })), question };
+      buttons: r.readings.map((x, i) => ({ id: `rt:${f.row.request_id}:${n}:${i}`, title: x.label })), question };
   }
   const input: Json = { kind: into };
   if (s.labels.length) input.summary = s.labels.join(" and ");
@@ -511,6 +523,8 @@ export async function timePicked(db: BookDb, me: Me, q: RbTime, i: number, ctx: 
   if (!startsAt) return { body: "Tap the time you meant on the message above. Nothing is changed yet.", result: "request_time_tap" };
   const f = fullOf(await db.get(me.location, me.actor, q.request_id));
   if (!f) return { body: refusalReply({ reason: "not_found" }).body, result: "request_time_gone", question: null };
+  // The request changed since the question: the tap would apply to something the owner did not see.
+  if (f.version !== q.version) return { body: refusalReply({ reason: "version_conflict" }).body, result: "request_time_refused:version_conflict", question: null };
   if (q.action === "confirm") return await confirmApply(db, me, f, startsAt, ctx, key);
   const labels = q.services.map((k) => ctx.pack.services.find((s) => s.key === k)?.label).filter((x): x is string => !!x);
   const input: Json = { kind: newKind(ctx.pack), starts_at: startsAt };
@@ -520,7 +534,7 @@ export async function timePicked(db: BookDb, me: Me, q: RbTime, i: number, ctx: 
 
 // Correct: the request this person touched in the last 30 minutes, or the number they gave. If none, or it is not clear
 // which one, Kabsi asks; it never picks between two.
-async function correctCmd(db: BookDb, me: Me, number: number | null, from: string, to: string, ctx: Ctx, key: string): Promise<Act> {
+async function correctCmd(db: BookDb, me: Me, number: number | null, from: string, to: string, ctx: Ctx, key: string): Promise<Act | null> {
   const pack = ctx.pack;
   const ask = (n: number) => `Which one? Send its number with the change, for example ${n} not ${clip(from, 30)}, ${clip(to, 30)}. Nothing was changed.`;
   const cands: Full[] = [];
@@ -536,12 +550,15 @@ async function correctCmd(db: BookDb, me: Me, number: number | null, from: strin
       const f = fullOf(await db.get(me.location, me.actor, String(x.request_id)));
       if (f && f.row.status !== "closed") cands.push(f);
     }
-    if (!cands.length) return { body: ask(3), result: "request_correct_which" };
+    // Nothing touched lately: "not now, thanks" is not a correction, so the message goes on as before.
+    if (!cands.length) return null;
   }
   const hits = cands
     .map((f) => ({ f, c: correction(pack, { customer_name: f.row.customer_name, summary: f.row.summary, details: f.details }, from, to) }))
     .filter((x) => x.c !== null);
   if (!hits.length) {
+    // Without a number, words that are on no recent request are not a correction ("not sure, maybe later").
+    if (number === null) return null;
     if (cands.length === 1) return { body: `${lbl(pack, cands[0]!.row)} does not say ${clip(from, 40)}. Nothing was changed.`, result: "request_correct_not_found" };
     return { body: ask(cands[0]!.row.number), result: "request_correct_which" };
   }
@@ -566,19 +583,25 @@ async function undoCmd(db: BookDb, me: Me, ctx: Ctx, key: string): Promise<Act |
 
 /** Undoes these activities in order (the latest first). Null when the first is not this business's, so the caller tries another. */
 export async function undoIds(db: BookDb, me: Me, ids: string[], ctx: Ctx, key: string): Promise<Act | null> {
-  let last: Json | null = null;
+  const done: Json[] = [];
+  let stop: Json | null = null;
   for (const [i, id] of ids.entries()) {
     const r = await db.undo(me.location, me.actor, `${key}:${i}`, id);
     if (r.ok !== true) {
       if (i === 0 && r.reason === "not_found") return null;
-      if (!last) return { body: refused(r), result: `request_undo_refused:${r.reason}`, question: null };
+      if (!done.length) return { body: refused(r), result: `request_undo_refused:${r.reason}`, question: null };
+      stop = r;
       break;
     }
-    last = r;
+    done.push(r);
   }
-  const row = { kind: last!.kind as Kind, number: Number(last!.number), status: String(last!.status), outcome: (last!.outcome as string | null) ?? null };
-  const body = row.outcome === "voided" ? `Undone. ${lbl(ctx.pack, row)} was removed.` : undoneReply(row as RequestRow, ctx).body;
-  return { body, result: last!.replay ? "request_undone_replay" : "request_undone", question: null };
+  // Every request that was put back, then what could not be, so the reply never claims more than happened.
+  const lines = done.map((d) => {
+    const row = { kind: d.kind as Kind, number: Number(d.number), status: String(d.status), outcome: (d.outcome as string | null) ?? null };
+    return row.outcome === "voided" ? `Undone. ${lbl(ctx.pack, row)} was removed.` : undoneReply(row as RequestRow, ctx).body;
+  });
+  if (stop) lines.push(`The rest was not undone: ${refused(stop)}`);
+  return { body: lines.join("\n"), result: done.at(-1)!.replay ? "request_undone_replay" : stop ? "request_undone_partly" : "request_undone", question: null };
 }
 
 // What's open, grouped for this business only. 15 rows, then how many more, and the note that it covers only Kabsi.

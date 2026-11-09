@@ -883,9 +883,13 @@ export class World {
         if (g) return no(g);
         const since = w.now - minutes * 60_000;
         const seen = new Map<string, number>();
-        for (const a of w.activities) if (a.location === loc && a.actor === actor && a.at > since) seen.set(a.request, Math.max(seen.get(a.request) ?? 0, a.at));
+        for (const a of w.activities) {
+          if (a.location !== loc || a.actor !== actor || a.at <= since || a.type === "undone" || w.activities.some((u) => u.undoOf === a.id)) continue;
+          seen.set(a.request, Math.max(seen.get(a.request) ?? 0, a.at));
+        }
+        const own = (id: string | null) => (id && w.activities.find((a) => a.id === id)?.actor === actor ? id : null);
         const rows = [...seen.entries()].sort((x, y) => y[1] - x[1]).slice(0, 5)
-          .map(([id, t]) => ({ request_id: id, number: mine(loc, id)!.number, kind: mine(loc, id)!.kind, touched_at: new Date(t).toISOString(), latest_activity_id: latest(id) }));
+          .map(([id, t]) => ({ request_id: id, number: mine(loc, id)!.number, kind: mine(loc, id)!.kind, touched_at: new Date(t).toISOString(), latest_activity_id: own(latest(id)) }));
         return { ok: true, rows };
       },
     };

@@ -28,7 +28,7 @@ export type Command =
   | { k: "request"; action: "save" | "change" | "pick"; intakeId: string; pick?: number }
   // RB-F: Yes and No under a question asked before a change (by request id), Undo (by activity ids, the latest first), and a
   // tapped time (by request id and its place in the list). The business is never read from the button.
-  | { k: "rbook"; action: "ask_yes" | "ask_no" | "undo" | "time"; ids: string[]; pick?: number }
+  | { k: "rbook"; action: "ask_yes" | "ask_no" | "undo" | "time"; ids: string[]; pick?: number; nonce?: string }
   // F-1: a forwarded message whose words would be a yes, a no or a number. forwardedAnswer: it never answers Kabsi's questions;
   // forwardedYes: it is never the owner's yes (agent.ts).
   | { k: "free"; text: string; forwardedAnswer?: true; forwardedYes?: true }
@@ -175,12 +175,12 @@ export function parseButton(id: string): Command {
   if (rq) return { k: "request", action: rq[1] === "s" ? "save" : "change", intakeId: rq[2] };
   const rp = /^rp:([0-9a-f-]{36}):([0-2])$/.exec(id);
   if (rp) return { k: "request", action: "pick", intakeId: rp[1], pick: Number(rp[2]) };
-  const ra = /^r([ax]):([0-9a-f-]{36})$/.exec(id);
-  if (ra) return { k: "rbook", action: ra[1] === "a" ? "ask_yes" : "ask_no", ids: [ra[2]] };
+  const ra = /^r([ax]):([0-9a-f-]{36}):([a-z0-9]{8})$/.exec(id);
+  if (ra) return { k: "rbook", action: ra[1] === "a" ? "ask_yes" : "ask_no", ids: [ra[2]], nonce: ra[3] };
   const ru = /^ru:([0-9a-f-]{36}(?:\.[0-9a-f-]{36}){0,5})$/.exec(id);
   if (ru) return { k: "rbook", action: "undo", ids: ru[1].split(".") };
-  const rt = /^rt:([0-9a-f-]{36}):([0-2])$/.exec(id);
-  if (rt) return { k: "rbook", action: "time", ids: [rt[1]], pick: Number(rt[2]) };
+  const rt = /^rt:([0-9a-f-]{36}):([a-z0-9]{8}):([0-2])$/.exec(id);
+  if (rt) return { k: "rbook", action: "time", ids: [rt[1]], nonce: rt[2], pick: Number(rt[3]) };
   const biz = /^b:([0-9a-f-]{36})$/.exec(id);
   if (biz) return { k: "business_pick", locationId: biz[1] };
   return { k: "empty" };

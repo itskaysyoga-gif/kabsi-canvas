@@ -45,8 +45,10 @@ export type OpenQuestion =
   | { type: "rb_proposal"; location_id: string; intake_id: string; at: string }
   // RB-F: a change the database asked to be confirmed first (a skipped step, or one that ends a request), and the readings of
   // a time waiting for a tap. Ids, status codes and times only: no name and no customer's words.
-  | { type: "rb_ask"; location_id: string; request_id: string; version: number; to: string; outcome: string | null; at: string }
-  | { type: "rb_time"; location_id: string; request_id: string; action: "confirm" | "convert"; readings: string[]; services: string[]; at: string };
+  // The nonce is in the question's buttons, so an older button for the same request never answers a newer question.
+  | { type: "rb_ask"; location_id: string; request_id: string; version: number; to: string; outcome: string | null; at: string; nonce: string }
+  | { type: "rb_time"; location_id: string; request_id: string; version: number; action: "confirm" | "convert"; readings: string[]; services: string[];
+      at: string; nonce: string };
 
 export type Who = { phone: string; roles: Role[]; conversation: Conversation | null };
 

@@ -86,7 +86,7 @@ Deno.test("reader: confirm, convert, correct, undo and the list questions", () =
   assert.deepEqual(parseBookCommand("not Corolla, Civic", garageV1), { k: "correct", number: null, from: "corolla", to: "civic" });
   assert.deepEqual(parseBookCommand("2 not corolla but civic", garageV1), { k: "correct", number: 2, from: "corolla", to: "civic" });
   assert.deepEqual(parseBookCommand("Undo", salonV1), { k: "undo" });
-  for (const t of ["what's open", "Whats open?", "open", "what is still open", "which appointments are open"]) assert.deepEqual(parseBookCommand(t, salonV1), { k: "open", keys: null }, t);
+  for (const t of ["what's open", "Whats open?", "anything open", "what is still open", "which appointments are open"]) assert.deepEqual(parseBookCommand(t, salonV1), { k: "open", keys: null }, t);
   for (const t of ["what's unconfirmed", "what appointments are still unconfirmed", "unconfirmed", "who is not confirmed"]) {
     assert.deepEqual(parseBookCommand(t, salonV1), { k: "unconfirmed" }, t);
   }
@@ -195,7 +195,7 @@ Deno.test("update: here 3 4, ready 2 gets one reply; the one skipped step is the
   assert.equal(j3.status, "active");
   assert.equal(j1.status, "waiting");
   assert.match(last(w).body, /Job 3 is now In the shop\.\nJob 1 is still Waiting[\s\S]*Mark it Ready anyway\?/);
-  assert.deepEqual(last(w).buttons, ["Yes", "No"]);
+  assert.deepEqual(last(w).buttons, ["Yes", "No", "Undo"]);
   assert.equal(await send(w, { text: "yes" }), "request_status_acknowledged");
   assert.equal(j1.status, "ready");
   clean(w);
@@ -372,10 +372,9 @@ Deno.test("correct: not highlights, a trim applies to the request touched in the
   assert.deepEqual(last(w).buttons, ["Undo"]);
   assert.equal(await send(w, { text: "undo" }), "request_undone");
   assert.equal(s.summary, "Highlights");
-  // More than 30 minutes since anyone touched it: Kabsi asks which one and changes nothing.
+  // More than 30 minutes since anyone touched it: not a correction of anything, so it goes on as before; nothing changes.
   w.now += 31 * 60_000;
-  assert.equal(await send(w, { text: "not highlights, a trim" }), "request_correct_which");
-  assert.match(last(w).body, /Which one\? Send its number with the change, for example 3 not highlights, trim\. Nothing was changed\./);
+  assert.equal(await send(w, { text: "not highlights, a trim" }), "unclear");
   assert.equal(s.summary, "Highlights");
   // With the number it applies.
   assert.equal(await send(w, { text: "1 not highlights, a trim" }), "request_corrected");
@@ -388,7 +387,10 @@ Deno.test("correct: not Corolla, Civic changes the car; unclear between two asks
   assert.equal(await send(w, { text: "not Corolla, Civic" }), "request_corrected");
   assert.equal(a.details!.car, "Toyota Civic");
   assert.match(last(w).body, /Job 1\ncar changed from Toyota Corolla to Toyota Civic\./);
-  assert.equal(await send(w, { text: "not Golf, Polo" }), "request_correct_not_found");
+  // Words on no recent request, with no number: not a correction ("not sure, maybe later" goes the same way).
+  assert.equal(await send(w, { text: "not Golf, Polo" }), "unclear");
+  assert.equal(await send(w, { text: "not sure, maybe later" }), "unclear");
+  assert.equal(await send(w, { text: "1 not Golf, Polo" }), "request_correct_not_found");
   assert.match(last(w).body, /Job 1 does not say golf\. Nothing was changed\./);
   const b = await ali(w, { car: "Honda Civic" });
   assert.equal(await send(w, { text: "not Civic, Jazz" }), "request_correct_which");
@@ -535,7 +537,7 @@ Deno.test("isolation: a command acts only for the chosen business; another phone
   const undoId = ids(w)[0]!;
   // Another phone (Harbour Lane's owner, no request book) taps this phone's Undo, or a Yes: nothing happens.
   assert.equal(await send(w, { button: undoId }, PHONES.owner), "request_undo_unknown");
-  assert.equal(await send(w, { button: `ra:${j.id}` }, PHONES.owner), "request_question_closed");
+  assert.equal(await send(w, { button: `ra:${j.id}:abcdefgh` }, PHONES.owner), "request_question_closed");
   assert.equal(j.status, "active");
   // Yawmiyati's phone: stats and review link as before.
   assert.equal(await send(w, { text: "stats" }, PHONES.rashid), "stats");
@@ -567,4 +569,91 @@ Deno.test("pricing: a receipt's Meta pricing is read as billable, category and m
   assert.equal(none.statuses[0]!.pricing, undefined);
   const odd = parseWebhook(null, { message: { id: "wamid.out.3", kapso: { status: "delivered", statuses: [{ pricing: { billable: "yes", category: "<b>x</b>" } }] } } });
   assert.deepEqual(odd.statuses[0]!.pricing, { billable: null, category: null, model: null });
+});
+
+// --- The review's findings (fixed here), each as a case.
+
+Deno.test("review: a name matches whole words only, and another person's arrival is not the client's", async () => {
+  const w = world({ which: [SALON] });
+  const q = await make(w, SALON, { kind: "appointment", customer_name: "Samira", summary: "Haircut" });
+  const i = await make(w, SALON, { kind: "appointment", customer_name: "Ibrahim", summary: "Beard trim" });
+  for (const t of ["Sam came in", "im done", "ok here", "my car is ready"]) assert.notEqual(await send(w, { text: t }), "request_status", t);
+  assert.equal(q.status, "requested");
+  assert.equal(i.status, "requested");
+  const s = await sarah(w);
+  assert.equal(parseBookCommand("Sarah's mum is here", salonV1), null);
+  assert.notEqual(await send(w, { text: "Sarah's mum is here" }), "request_status_ask");
+  assert.equal(s.status, "requested");
+  // The whole name, and its first word, still work.
+  assert.equal(await send(w, { text: "Samira came in" }), "request_status_ask");
+});
+
+Deno.test("review: an older Yes or time button never answers a newer question about the same request", async () => {
+  const w = world({ which: [GARAGE] });
+  const q = await ali(w);
+  await send(w, { text: "cancel 1" });
+  const oldYes = ids(w)[0]!;
+  await send(w, { text: "1 no show" });
+  assert.equal((w.conversation(TEST).open_question as { to: string; outcome: string }).outcome, "no_show");
+  const newYes = ids(w)[0]!;
+  assert.equal(await send(w, { button: oldYes }), "request_question_closed");
+  assert.equal(q.status, "waiting");
+  assert.equal(await send(w, { button: newYes }), "request_status_acknowledged");
+  assert.equal(q.outcome, "no_show");
+  // A tapped time after the question's 30 minutes changes nothing.
+  const g = world({ which: [GYM] });
+  const o = await make(g, GYM, { kind: "appointment", customer_name: "Omar", summary: "Tour" });
+  await send(g, { text: "Omar confirmed Monday 6" });
+  const t = ids(g)[1]!;
+  g.now += 31 * 60_000;
+  assert.equal(await send(g, { button: t }), "request_question_closed");
+  assert.equal(o.starts_at, null);
+});
+
+Deno.test("review: a typed undo twice walks back two changes, not one request twice; never another person's change", async () => {
+  const w = world({ which: [GARAGE] });
+  const a = await ali(w), b = await ali(w);
+  w.now += 1000;
+  await send(w, { text: "here 1 2" });
+  assert.equal(await send(w, { text: "undo" }), "request_undone");
+  assert.equal(await send(w, { text: "undo" }), "request_undone");
+  assert.deepEqual([a.status, b.status], ["waiting", "waiting"]);
+  assert.equal(b.outcome, null, "the second request was not voided");
+  // Another member's later change on the request: a typed undo does not reverse it.
+  const other = id(111);
+  w.biz.find((x) => x.id === GARAGE)!.members[other] = "manager";
+  await send(w, { text: "1 here" });
+  await w.bookDb().setStatus(GARAGE, other, "seed:m", a.id, a.version!, "ready", null, false);
+  assert.notEqual(await send(w, { text: "undo" }), "request_undone");
+  assert.equal(a.status, "ready");
+});
+
+Deno.test("review: a confirmation by number on a job writes nothing; what's new is not a list; Undo stays beside a question", async () => {
+  const w = world({ which: [GARAGE] });
+  const j = await ali(w);
+  assert.equal(await send(w, { text: "1 confirmed Thursday 3pm" }), "request_confirm_refused:not_appointment");
+  assert.equal(j.starts_at, null);
+  assert.equal(acts(w, j.id).length, 1);
+  assert.equal(parseBookCommand("what's new", salonV1), null);
+  assert.equal(parseBookCommand("open today", salonV1), null);
+  assert.equal(parseBookCommand("open", salonV1), null);
+  // A combined message: the applied part keeps its Undo next to Yes and No.
+  const k = await ali(w);
+  await send(w, { text: "here 1, ready 2" });
+  assert.deepEqual(last(w).buttons, ["Yes", "No", "Undo"]);
+  assert.equal(await send(w, { button: ids(w)[2] }), "request_undone");
+  assert.equal(j.status, "waiting");
+  assert.equal(k.status, "waiting");
+  // "Sarah confirmed she will pay" has no day or hour: not a confirmation.
+  const s = world({ which: [SALON] });
+  const q = await sarah(s);
+  assert.notEqual(await send(s, { text: "Sarah confirmed she will pay" }), "request_confirm_no_time");
+  assert.equal(q.customer_confirmed_at, null);
+});
+
+Deno.test("review: one reading left after the past is set aside is still a tap, never applied at once", () => {
+  const ctx = { now: new Date(Date.UTC(2026, 9, 26, 6)), timeZone: "Asia/Dubai" };
+  const r = readWhen("today 3", gymV1, ctx);
+  assert.equal(r.k, "guess");
+  assert.equal((r as { label: string }).label, "Mon 3 pm");
 });
