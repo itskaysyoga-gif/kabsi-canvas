@@ -1,5 +1,6 @@
 // Founding 25 and Kabsi Partners, the pure part (master plan 30.17 section 1, 29, 30.15 section 5): what an application
 // must hold, and the words of the founding messages. No Deno and no database here, so tests run in Node.
+import { CARD_PAYMENTS_COMING } from "./email/lifecycle-copy.ts";
 
 export const FOUNDING_TRADES = ["beauty_hair", "food", "health", "other"] as const;
 export const FOUNDING_COUNTRIES = ["AE", "GB", "US"] as const;
@@ -114,12 +115,14 @@ export function foundingLine(day: FoundingDay, business: string, endsAt: string 
     90: `${business}: your free months end today`,
   };
   const body = lines[day];
+  // Sync 1 (EML-11): an email that names prices also says card payments are not open yet.
+  const mail = day === 60 ? body : [...body, CARD_PAYMENTS_COMING];
   return {
     whatsapp: body.join("\n"),
     email: {
       subject: subject[day], title: day === 60 ? "Your Founding 25 months" : "Choose your plan", preheader: body[0],
-      bodyHtml: body.map((t) => `<p style="margin:0 0 16px 0;">${esc(t)}</p>`).join(""),
-      text: body.join("\n\n"),
+      bodyHtml: mail.map((t) => `<p style="margin:0 0 16px 0;">${esc(t)}</p>`).join(""),
+      text: mail.join("\n\n"),
       button: day === 60 ? undefined : { label: "Choose your plan", url: plan },
     },
   };

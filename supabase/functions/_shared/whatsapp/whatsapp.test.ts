@@ -76,7 +76,7 @@ Deno.test("a review alert: business, stars, first name only, at most 300 charact
   assert.match(body, /Kabsi's reply: Thank you, Maya\./);
   assert.equal(firstName("  "), null);
   assert.doesNotMatch(body, /[—–!]/);
-  assert.deepEqual(alertButtons("tok", false).map((b) => b.title), ["Edit in app"]);
+  assert.deepEqual(alertButtons("tok", false).map((b) => b.title), ["Edit on kabsi.co"]);
   for (const b of alertButtons("tok", true)) assert.ok(b.title.length <= 20);
 });
 
@@ -146,7 +146,7 @@ Deno.test("review alerts: Approve only for a low or medium risk reply with a saf
   const f = fakeCtx();
   const base = { reviewId: "r1", locationId: "loc1", business: "Harbour Lane Coffee", stars: 5, reviewer: "Maya Haddad", text: "Lovely", draft: "Thank you.", safeDraft: true };
   await sendReviewAlert(f.ctx, ["u1"], { ...base, risk: "low" });
-  assert.equal(f.log[0].kind, "buttons:Approve|Edit in app");
+  assert.equal(f.log[0].kind, "buttons:Approve|Edit on kabsi.co");
   const high = fakeCtx();
   await sendReviewAlert(high.ctx, ["u1"], { ...base, risk: "high" });
   assert.equal(high.log[0].kind, "text", "a high-risk review gets no Approve button");
