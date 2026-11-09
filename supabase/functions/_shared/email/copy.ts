@@ -74,18 +74,6 @@ export function deletionDone(business: string, appUrl: string): EmailContent {
 
 // ─── trial and plan ──────────────────────────────────────────────────────────────────────────────────
 
-export type RenewalStage = "r5" | "r1";
-export function renewalReminder(stage: RenewalStage, business: string, planLabel: string, day: string, planKind: string, appUrl: string): EmailContent {
-  const when = stage === "r1" ? "tomorrow" : "in a few days";
-  const plain = `Your ${planLabel} plan for ${business} ends ${when}, on ${day}. To keep reply drafts, Google Protection and the weekly report going, pay before then. Paying early adds the new period after this one, so you lose no days. Your review link and QR code keep working either way.`;
-  const url = `${appUrl}/app/plan?pay=${encodeURIComponent(planKind)}`;
-  return {
-    subject: stage === "r1" ? `${business}: your plan ends tomorrow` : `${business}: your plan ends on ${day}`,
-    preheader: "Pay before it ends and you lose no days.", title: "Your plan is ending",
-    bodyHtml: p(esc(plain)), button: { label: "Renew your plan", url }, text: `${plain}\n\nRenew your plan: ${url}`,
-  };
-}
-
 // ─── the week ─────────────────────────────────────────────────────────────────────────────────────────────────
 
 /** The Monday weekly report (30.18 section 3): the body is the visual work receipt of report-body.ts. */

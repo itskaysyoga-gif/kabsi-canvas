@@ -32,7 +32,8 @@ const files = [
 
 describe("caniemail: Gmail, Outlook and Apple Mail", () => {
   it("reads every email", () => {
-    expect(files.length).toBeGreaterThanOrEqual(50);
+    // Sync 2a: two renewal previews retired (44 previews + 4 auth emails); the floor follows the real count.
+    expect(files.length).toBeGreaterThanOrEqual(48);
   });
   for (const file of files) {
     it(file, () => {

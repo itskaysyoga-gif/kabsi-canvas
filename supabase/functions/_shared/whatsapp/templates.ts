@@ -145,15 +145,14 @@ export const TEMPLATES = {
     example: { business: "Smile Dental" },
     button: "Show me",
   },
+  // Sync 2a (R-142 item 6, WA-10): the first name kabsi_work_update said "it is on Google", the retired wording, and its v2 is
+  // approved and sent since 5 Nov 2026, so the v1 fallback is gone from the code. This one is the v2 text under its own name.
+  // The old name stays on Meta's side, unused; nothing is submitted.
   work_update: {
-    name: "kabsi_work_update",
-    body: "Kabsi here. There is news about a change you approved for {{business}}: it is on Google, still on its way, or needs another try. Reply here to read it.",
+    name: "kabsi_work_update_v2",
+    body: "Kabsi here. The status of a change you approved for {{business}} has been updated: it is live on Google, in progress, or did not go through. Reply here to read the details.",
     example: { business: "Smile Dental" },
     button: "Show me",
-    v2: {
-      name: "kabsi_work_update_v2",
-      body: "Kabsi here. The status of a change you approved for {{business}} has been updated: it is live on Google, in progress, or did not go through. Reply here to read the details.",
-    },
   },
   staff_alert: {
     name: "kabsi_staff_alert",

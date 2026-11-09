@@ -24,16 +24,16 @@ describe("the honest limits line", () => {
   });
 });
 
-describe("Nora's three Scope 1 cases", () => {
-  it("are three and their ids do not clash with the other 80", () => {
-    expect(QUESTIONS_SCOPE1.map((q) => q.id)).toEqual(["sc01", "sc02", "sc03"]);
+describe("Nora's Scope 1 cases (three on the honest limits, two on bookings from Sync 2a)", () => {
+  it("are five and their ids do not clash with the other 80", () => {
+    expect(QUESTIONS_SCOPE1.map((q) => q.id)).toEqual(["sc01", "sc02", "sc03", "sc04", "sc05"]);
     const ids = new Set([...QUESTIONS, ...QUESTIONS_28, ...QUESTIONS_SCOPE1].map((q) => q.id));
-    expect(ids.size).toBe(83);
+    expect(ids.size).toBe(85);
   });
   it("pass on the reference answers and rest on facts the file holds", async () => {
     const { score } = await runAll(passStub, facts, { only: QUESTIONS_SCOPE1 });
     expect(score.findings).toEqual([]);
-    expect(gate(score, 3).pass).toBe(true);
+    expect(gate(score, 5).pass).toBe(true);
   });
   it("fail an answer that says never, gives a date or leaves out the free check", () => {
     const q = QUESTIONS_SCOPE1[0]!;

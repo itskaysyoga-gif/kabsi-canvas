@@ -47,12 +47,12 @@ describe("Nora's 90 owner questions", () => {
     for (const q of QUESTIONS_OWNERS) expect(check(q, q.reference, facts), q.id).toEqual([]);
   });
 
-  it("pass the gate on the reference answers, alone and with the other 88", async () => {
+  it("pass the gate on the reference answers, alone and with the other 90", async () => {
     const one = await runAll(passStub, facts, { only: QUESTIONS_OWNERS });
     expect(one.score.findings).toEqual([]);
     expect(gate(one.score, 90).pass).toBe(true);
     const both = await runAll(passStub, facts, { only: ALL });
     expect(both.score.findings).toEqual([]);
-    expect(gate(both.score, 178).pass).toBe(true);
+    expect(gate(both.score, 180).pass).toBe(true);
   });
 });

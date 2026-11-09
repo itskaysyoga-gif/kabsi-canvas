@@ -1,4 +1,4 @@
-// The whole-system steps: access, ratings, weekly reports, deletions, trial and renewal reminders.
+// The whole-system steps: access, ratings, weekly reports, deletions and the retired trial reminders.
 // Each decides what is due by looking at data, never at the clock alone, and is safe to run twice.
 // Since P0.1-12b each runs as its own job from the dispatcher (api/jobs.ts), offered every 5 minutes; Protection is
 // one job per business (protection.ts). /api/cron-tick still runs them all in one go for the weekly_now test hook and
@@ -6,7 +6,7 @@
 import { admin, APP_URL, captureError, isInternal, jobLog, json } from "../_shared/kabsi.ts";
 import { notify } from "../_shared/notify.ts";
 import * as copy from "../_shared/email/copy.ts";
-import { dueRenewalEmail, localDateHour, PLAN_LABEL, type RenewalStage } from "../_shared/plans.ts";
+import { localDateHour } from "../_shared/plans.ts";
 import { acceptInvitationsAndListLocations, googleMode, type ManagedLocation, removeKabsiAccess } from "../_shared/google/index.ts";
 import { type LookupMemory, strayListings } from "../_shared/invitations.ts";
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
@@ -310,33 +310,11 @@ export function trialsJob() {
   return Promise.resolve({ reminders: 0, retired: true });
 }
 
-// Job: renewal reminders for paid monthly and yearly plans (Q06), 5 days and 1 day before the last day, from 09:00
-// local. The link opens the Plan page: invoices are created there, never from cron, because they expire.
-export async function renewalsJob() {
-  const db = admin();
-  const { data, error } = await db.rpc("renewal_reminder_candidates");
-  if (error) throw error;
-  let reminders = 0;
-  for (const c of (data ?? []) as { plan_id: string; location_id: string; name: string; time_zone: string; kind: string; last_day: string; continues: boolean }[]) {
-    const now = localDateHour(new Date(), c.time_zone);
-    const { data: done } = await db.from("emails").select("kind").eq("location_id", c.location_id).like("dedupe_key", `renew_%:${c.plan_id}:%`);
-    const sent = (done ?? []).map((r) => String(r.kind).replace("renew_", "")) as RenewalStage[];
-    const stage = dueRenewalEmail(c.last_day, now.date, now.hour, sent, c.continues);
-    if (!stage) continue;
-    const day = formatDay(c.last_day);
-    const label = PLAN_LABEL[c.kind] ?? "Kabsi Pro";
-    await notify({
-      category: "billing", kind: `renew_${stage}`, key: `renew_${stage}:${c.plan_id}`, locationId: c.location_id, to: "owners",
-      inApp: { title: stage === "r1" ? "Your Kabsi plan ends tomorrow" : `Your Kabsi plan ends on ${day}`, link: "/app/plan" },
-      content: copy.renewalReminder(stage, c.name, label, day, c.kind, APP_URL),
-    }).catch((e) => captureError("cron-tick", e, { job: "renewals", location: c.location_id }));
-    reminders++;
-  }
-  return { renewals: reminders };
-}
+// Sync 2a (R-142 item 3): the renewal reminders are retired. No prepaid plan exists and Creem renews every subscription,
+// so Kabsi sends no renewal email; migration sync2a_retire_renewals stopped private.produce_jobs() offering the job.
 
 const JOBS: Record<string, () => Promise<Record<string, unknown>>> = {
-  access: accessJob, ratings: ratingsJob, weekly: weeklyJob, shield: shieldJob, deletions: deletionsJob, trials: trialsJob, renewals: renewalsJob,
+  access: accessJob, ratings: ratingsJob, weekly: weeklyJob, shield: shieldJob, deletions: deletionsJob, trials: trialsJob,
 };
 
 export async function cronTick(req: Request): Promise<Response> {

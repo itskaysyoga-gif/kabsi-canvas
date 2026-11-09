@@ -33,7 +33,7 @@ import { accessChangeEmail, type DisconnectDeps, runDisconnect } from "../_share
 import {
   type CheckClaim, type Claim, type Item, NotSent, type Outcome, type PublishDeps, publishOne, reconcileOne, replySeen, type Seen, type Sent,
 } from "../_shared/publish.ts";
-import { accessJob, deletionsJob, ratingsJob, renewalsJob, trialsJob, weeklyJob } from "./cron.ts";
+import { accessJob, deletionsJob, ratingsJob, trialsJob, weeklyJob } from "./cron.ts";
 import { photoFileStore, removeDuePhotoFiles } from "../_shared/retention.ts";
 import { detectTasks } from "../_shared/tasks.ts";
 import { type Cadence, careMonth, type Planned } from "../_shared/posts/plan.ts";
@@ -442,7 +442,6 @@ const HANDLERS: Record<string, JobHandler> = {
   weekly_reports: step("weekly", weeklyJob),
   deletions: step("deletions", deletionsJob),
   trial_reminders: step("trials", trialsJob),
-  renewal_reminders: step("renewals", renewalsJob),
   photo_files: step("photo_files", () => removeDuePhotoFiles(photoFileStore(admin()))),
   // P0.5-02: the posts care routine for one business, this month and the next (_shared/posts/plan.ts). It prepares
   // only from something true and asks one question otherwise; it never publishes.

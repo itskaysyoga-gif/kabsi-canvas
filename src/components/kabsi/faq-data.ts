@@ -96,7 +96,7 @@ export const BILLING_FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Can I pay today?",
-    a: "Nothing to pay today. Card payments in US dollars are coming. Payments are processed by Creem, our merchant of record.",
+    a: "Nothing to pay today. Card payments in US dollars are coming. Card payments will be processed by Creem, our merchant of record.",
   },
 ];
 

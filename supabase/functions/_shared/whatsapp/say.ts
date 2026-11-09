@@ -6,6 +6,8 @@
 // here is shown on the website or in marketing (R-61, 27.6).
 
 
+import { PAY_TODAY_LINE } from "../billing-words.ts";
+
 export type Lang = "en" | "es" | "ar";
 
 /**
@@ -110,7 +112,8 @@ export const SAY = {
     `${business}: your printable QR card is in Kabsi under Get Reviews. It opens this link: ${url}`,
   billingSoon: "Billing is coming soon, reply 'talk to a person' for help",
   // Session 10 (10.2.10): the owner's billing actions. Prices come from the Creem catalogue; dates are long dates.
-  billingNoPlan: (business: string, url: string) => `${business} has no paid plan right now. Choose your plan here: ${url}`,
+  // Sync 2a (R-142 item 3, WA-07): card payments are closed, so no push to choose a plan: PAY_TODAY_LINE, then the Plan page.
+  billingNoPlan: (business: string, url: string) => `${business} has no paid plan right now. ${PAY_TODAY_LINE} Your plan page: ${url}`,
   billingStatus: (business: string, plan: string, end: string | null, ends: boolean) =>
     `${business} is on ${plan}. ${end ? (ends ? `It ends on ${end}.` : `It renews on ${end}.`) : ""} Reply "card", "invoice", "upgrade", "add a location" or "cancel".`.replace(/\s+/g, " "),
   billingPortal: (business: string, url: string) => `${business}: your card, invoices and receipts are here: ${url}`,

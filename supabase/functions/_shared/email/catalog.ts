@@ -109,12 +109,10 @@ export function catalog(): CatalogEntry[] {
     e("one_reminder", "approval_needed", true, account.oneReminder({ business: BIZ, what: "reply", draft: REVIEW.draft!.body, url: LINKS.post })),
     e("receipt", "billing", false, account.receiptEmail({ business: BIZ, plan: "Kabsi Pro, monthly", amount: 39, tax: 0, paidOn: "2026-11-05T09:00:00Z", nextOn: "2026-12-05T09:00:00Z", founding: true, tz: "Asia/Dubai" }, APP)),
     e("payment_failed", "billing", false, account.paymentFailed({ business: BIZ, plan: "Kabsi Pro", amount: 39, on: "2026-12-05T09:00:00Z", graceEnds: "2026-12-12T09:00:00Z", portal: `${APP}/app/plan`, tz: "Asia/Dubai" })),
-    e("plan_cancelled", "billing", false, account.planCancelled({ business: BIZ, plan: "Kabsi Pro", ends: "2026-12-05T09:00:00Z", tz: "Asia/Dubai", dataDays: 30 }, APP)),
+    e("plan_cancelled", "billing", false, account.planCancelled({ business: BIZ, plan: "Kabsi Pro", ends: "2026-12-05T09:00:00Z", tz: "Asia/Dubai" }, APP)),
     e("manager_steps", "direct", true, copy.managerSteps(BIZ, APP, 3)),
     e("deletion_scheduled", "account", true, copy.deletionScheduled(BIZ, "28 October 2026", APP)),
     e("deletion_done", "account", true, copy.deletionDone(BIZ, APP)),
-    e("renew_r5", "billing", true, copy.renewalReminder("r5", BIZ, "Kabsi Pro, monthly", "28 October 2026", "pro_monthly", APP)),
-    e("renew_r1", "billing", true, copy.renewalReminder("r1", BIZ, "Kabsi Pro, monthly", "28 October 2026", "pro_monthly", APP)),
     e("weekly_report", "weekly_report", true, copy.weeklyReport(BIZ, report, report.html, report.text, APP)),
     e("holiday_hours", "approval_needed", true, copy.holidayHoursAsk({
       business: BIZ, holiday: "Christmas Day", when: "Friday 25 December", estimated: false, ramadan: false,
