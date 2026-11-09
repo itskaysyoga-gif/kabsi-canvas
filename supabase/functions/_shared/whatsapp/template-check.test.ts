@@ -34,6 +34,9 @@ Deno.test("the list holds every name the code can send, built from the table, wi
   assert.equal(wu.replaces, null);
   assert.equal(wu.replacedBy, null);
   assert.equal(ref("work_update", {}).name, "kabsi_work_update_v2");
+  // A queued row that still carries the retired name is sent under the v2 name, not refused.
+  assertSendable("kabsi_work_update");
+  assert.equal(sendName("kabsi_work_update", {}), "kabsi_work_update_v2");
 });
 
 Deno.test("name list guard: a send with a name outside the list fails, in the sender and in the source", async () => {

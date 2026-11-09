@@ -63,7 +63,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 9 Nov 2026, Sync 2a (R-142, answers to Sync 1): part 0 plan 30.46 (PR 522); part 1 early access, booking words, no API, hand-off (PR 524); part 2 renewals retired, billing words, templates, Nora (PR 525). `2026-11-09-sync2a.md`.
+- 9 Nov 2026, Sync 2a (R-142, answers to Sync 1): part 0 plan 30.46 (PR 522); part 1 early access, booking words, no API, hand-off (PR 524); part 2 renewals retired, billing words, templates, Nora (PR 526). `2026-11-09-sync2a.md`.
 - 9 Nov 2026, Kapso 1: one list of every template the code sends, a send outside it refused, a daily read-only check of the number and templates with one staff alert a day. `2026-11-09-kapso1.md`.
 - 9 Nov 2026, Sync 1 part C (truth pass, PRs 513 to 519, live on kabsi.co): 152 findings across 67 pages, emails, WhatsApp, Outbound, facts and Nora; 79 fixed, 38 for lane R (questions grouped in the archive file), 16 in LATER, one independent review. `2026-11-09-sync1.md`.
 

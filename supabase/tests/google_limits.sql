@@ -136,10 +136,10 @@ delete from public.jobs where kind = 'protection_check';
 update public.google_connections set next_protection_at = now() - interval '1 second' where location_id = '00000000-0000-4000-8000-0000000000c1';
 select is(private.produce_jobs() ->> 'protection_check', '0', 'a concierge business gets no Protection job');
 
-select is((select r ->> 'steps' from made where n = 1), '6', 'the first producer run offers the six whole-system steps');
+select is((select r ->> 'steps' from made where n = 1), '5', 'the first producer run offers the five whole-system steps (the renewal reminders were retired in Sync 2a)');
 select is((select array_agg(kind order by kind) from public.jobs where location_id is null and kind <> 'test_job'),
-  array['access_check', 'deletions', 'ratings_snapshot', 'renewal_reminders', 'trial_reminders', 'weekly_reports'],
-  'access, ratings, weekly reports, deletions, trial and renewal reminders');
+  array['access_check', 'deletions', 'ratings_snapshot', 'trial_reminders', 'weekly_reports'],
+  'access, ratings, weekly reports, deletions and the (retired, no-op) trial reminders');
 select ok((select bool_and(next_run_at > now() and next_run_at <= now() + interval '5 minutes') from public.jobs where location_id is null and kind <> 'test_job'),
   'each runs at its next slot inside the next 5 minutes');
 select is((select count(distinct extract(minute from next_run_at)::integer % 5) from public.jobs where location_id is null and kind <> 'test_job'), 5::bigint,

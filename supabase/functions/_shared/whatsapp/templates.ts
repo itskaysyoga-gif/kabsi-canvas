@@ -188,6 +188,7 @@ export const isReplacement = (name: string) => (Object.values(TEMPLATES) as Temp
 /** The name to send: the replacement name when its stored status reads APPROVED, else the name the code was given (the fallback).
  *  statusMap stores NOT_UTILITY for a replacement Meta filed under any other category, so it is never chosen. */
 export function sendName(name: string, statuses: Record<string, string>): string {
+  if (name in RETIRED_NAMES) return RETIRED_NAMES[name]!;
   const def = (Object.values(TEMPLATES) as TemplateDef[]).find((d) => d.name === name);
   return def?.v2 && statuses[def.v2.name] === "APPROVED" ? def.v2.name : name;
 }
@@ -244,7 +245,10 @@ export const SENDABLE_TEMPLATES: readonly SendableTemplate[] = (Object.values(TE
 
 export const SENDABLE_NAMES: ReadonlySet<string> = new Set(SENDABLE_TEMPLATES.map((t) => t.name));
 
+/** Sync 2a (R-142 item 6): a retired first name still sitting in a queued row is sent under its replacement, never refused. */
+export const RETIRED_NAMES: Readonly<Record<string, string>> = { kabsi_work_update: "kabsi_work_update_v2" };
+
 /** The sender calls this before any template goes out: a name that is not on the list above is an error, never a send. */
 export function assertSendable(name: string): void {
-  if (!SENDABLE_NAMES.has(name)) throw new Error(`template_not_listed: ${String(name).replace(/[^A-Za-z0-9_]/g, "").slice(0, 60)}`);
+  if (!SENDABLE_NAMES.has(name) && !(name in RETIRED_NAMES)) throw new Error(`template_not_listed: ${String(name).replace(/[^A-Za-z0-9_]/g, "").slice(0, 60)}`);
 }
