@@ -280,8 +280,8 @@ const whoOf = (row: Pick<RequestRow, "customer_name">) => clip(row.customer_name
 const refused = (r: Json) => refusalReply({ reason: String(r.reason ?? "unknown") }).body;
 const at = (now: Date) => now.toISOString();
 const sameInstant = (a: string | null, b: string | null) => !!a && !!b && Date.parse(a) === Date.parse(b);
-/** Eight letters and digits for a question's buttons. */
-export const nonce = () => [...crypto.getRandomValues(new Uint8Array(8))].map((b) => "abcdefghijklmnopqrstuvwxyz0123456789"[b % 36]).join("");
+/** Eight hex characters for a question's buttons (unbiased: straight from a random UUID). */
+export const nonce = () => crypto.randomUUID().replace(/-/g, "").slice(0, 8);
 
 type Resolved = { k: "one"; full: Full } | { k: "many"; rows: RequestRow[] } | { k: "not_open" } | { k: "none" } | { k: "refused"; body: string };
 
