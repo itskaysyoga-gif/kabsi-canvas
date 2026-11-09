@@ -53,7 +53,7 @@ Every page below is read at 390 px and 1440 px in the truth pass. The copy of ev
 | Partners `/partners`, `/partners/terms` | Kabsi Partners terms, payout minimum 25 | `d2-partners.tsx`, `partners_.terms.tsx` | C | Rashid |
 | Security `/security` | What Kabsi stores and does not | `d8-security.tsx` | C, F | Rashid |
 | Privacy `/privacy`, Terms `/terms` | The law's words, retention, the contact list notice | `src/components/marketing/legal.tsx`, `src/lib/retention.ts`, `src/lib/consent.ts`; `src/routes/privacy.tsx`, `terms.tsx` | C (legal wording changes only with lane R) | Rashid |
-| FAQ `/faq` and the FAQ on Pricing, Founding, Partners and the industry pages | Answers from the facts | `src/lib/faq.ts`, `src/components/kabsi/faq-data.ts`, `d8-faq.tsx` | F then C | Rashid |
+| FAQ `/faq` and the FAQ on Pricing, Founding, Partners and the industry pages | Answers from the facts | `src/lib/faq.ts` (the JSON-LD builder), `src/components/kabsi/faq-data.ts`, `d8-faq.tsx` | F then C | Rashid |
 | Setup call `/setup-call`, `/manager-steps` | How to add Kabsi as a manager; the booking is an email while `BOOKING_READY` is false | `setup-call.tsx`, `d2-flow.tsx`, `src/lib/manager-guide.ts` | C, S | Rashid |
 | Log in `/login` and signed-out screens | Sign-in wording, the code email first in in-app browsers | `sign-in-panel.tsx`, `src/lib/sign-in-errors.ts`, `signed-out.ts` | C | Rashid |
 | Header, footer, share text | Navigation, operator line, non-affiliation, social links | `site-header.tsx`, `site-footer.tsx`, `site-chrome.tsx`, `site.ts` | S | Rashid |

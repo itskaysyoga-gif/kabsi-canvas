@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 import { ALL_GUIDES } from "../src/content/guides";
 import { guideText } from "../src/content/guides/text";
 import type { GuideDoc } from "../src/content/guides/types";
-import { FAQ } from "../src/lib/faq";
+import { FAQ_ALL } from "../src/components/kabsi/faq-data";
 import { readText } from "./helpers/facts";
 import { SAYS_NOT, SURFACES, isKnown, surfaceText } from "./helpers/house-rules";
 
@@ -64,7 +64,7 @@ function sources(dir: string): string[] {
 
 describe("no line says what Google's ranking uses or rewards (K-144)", () => {
   it("the FAQ", () => {
-    const words = FAQ.map((f) => `${f.q}\n${f.a}`).join("\n");
+    const words = FAQ_ALL.map((f) => `${f.q}\n${f.a}`).join("\n");
     for (const re of RETIRED) expect(words).not.toMatch(re);
   });
   it("the facts file and the published full-facts file", () => {

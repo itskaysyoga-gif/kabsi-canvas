@@ -108,6 +108,7 @@ describe("Sync 2a part 2", () => {
     );
     for (const f of [
       "supabase/functions/_shared/billing.ts",
+      "supabase/functions/_shared/billing-lines.ts",
       "supabase/functions/_shared/email/account-copy.ts",
       "src/routes/_authenticated/app/plan.tsx",
     ]) {
@@ -116,7 +117,7 @@ describe("Sync 2a part 2", () => {
         /DATA_DAYS|dataDays|dataUntil|data_kept_until|kept for \$\{|then deleted/,
       );
     }
-    const billing = read("supabase/functions/_shared/billing.ts");
+    const billing = read("supabase/functions/_shared/billing-lines.ts");
     expect(billing.match(/ACCOUNT_STAYS_LINE/g)?.length).toBeGreaterThanOrEqual(2);
     expect(billing.match(/PAY_TODAY_LINE/g)?.length).toBeGreaterThanOrEqual(2);
     expect(read("supabase/functions/_shared/whatsapp/say.ts")).toContain("billingNoPlan");
@@ -162,5 +163,52 @@ describe("Sync 2a part 2", () => {
     expect(f01).not.toContain("**[COMING] The new product");
     expect(f01).toContain("prepares the work for your yes");
     expect(f01).not.toContain("measures, does the work");
+  });
+});
+
+describe("Sync 2a part 3", () => {
+  it("EML-12: the email catalog shows the billing and Founding 25 emails", () => {
+    const catalog = read("supabase/functions/_shared/email/catalog.ts");
+    for (const k of [
+      "billing_paused",
+      "billing_ended",
+      "billing_payment_reminder",
+      "founding_day",
+    ]) {
+      expect(catalog, k).toContain(k);
+    }
+    for (const k of [
+      "billing_paused",
+      "billing_ended",
+      "billing_payment_reminder",
+      "founding_day60",
+      "founding_day85",
+      "founding_day90",
+    ]) {
+      expect(readFileSync(`docs/email-previews/${k}.txt`, "utf8"), k).toMatch(/^Subject: /);
+    }
+  });
+
+  it("EML-07 and EML-08: the invite footer does not say the invitee asked, and the holiday email names the Hours link once", () => {
+    expect(read("supabase/functions/_shared/team.ts")).toContain(
+      "Someone at ${i.business} invited you to Kabsi.",
+    );
+    const text = read("docs/email-previews/holiday_hours.txt");
+    expect(text.match(/under Hours/g)?.length).toBe(1);
+    expect(text.match(/\/app\/hours/g)?.length).toBe(1);
+    expect(read("docs/email-previews/team_invite.txt")).not.toContain("You asked for this email");
+  });
+
+  it("PUB-09: /faq is sourced from faq-data.ts and the old unused FAQ array is gone", () => {
+    expect(read("src/lib/faq.ts")).not.toMatch(/export const FAQ\b/);
+    expect(read("src/content/sitemap-pages.json")).not.toContain('"src/lib/faq.ts"');
+  });
+
+  it("KB-39: the beauty salon card says as posts, in the page and in llms.txt", () => {
+    expect(read("src/content/industries/beauty-salon.ts")).toContain(
+      'card: "Makeup, facials and waxing as posts."',
+    );
+    expect(read("knowledge/facts/llms.txt")).toContain("makeup, facials and waxing as posts.");
+    expect(read("knowledge/facts/llms.txt")).not.toContain("posted for you");
   });
 });

@@ -54,7 +54,7 @@ export const QUESTIONS_28: Question[] = [
     kb: [/it never promises a position, reviews, calls or customers/],
     forbid: [/\b(yes|we will|you will)\b[^.]*\btop 3\b/i, NOT_PROMISED],
     reference:
-      "No. Kabsi never promises a position, reviews, calls or customers. It looks after your reviews and your listing, and once the Visibility Map is available it will show what it measured and what changed, without saying a change happened because of Kabsi.",
+      "No. Kabsi never promises a position, reviews, calls or customers. It looks after your reviews and your Google profile, and the nearby check shows what it measured and what changed, without saying a change happened because of Kabsi.",
   },
   // ── AI answers ───────────────────────────────────────────────────────────────────────────────────────────────────
   {
@@ -138,7 +138,7 @@ export const QUESTIONS_28: Question[] = [
     // Scope 1: the honest answer is a plain no today (Kabsi does not message customers), not a feature that is coming, so
     // the answer is not required to say "not yet" (Eval 1 row, n71's coming flag).
     reference:
-      "No, Kabsi does not message your customers. Today you can use your review link and QR code, and you send them yourself, the same message to every customer. Ask a customer, where you share a customer's contact in WhatsApp and Kabsi sends you back a ready message to forward from your own phone, is not available yet.",
+      "No, Kabsi does not message your customers. Today you can use your review link and QR code, and you send them yourself, the same message to every customer. Ask a customer works on WhatsApp once you have connected it: you send \"ask a customer\" and Kabsi sends you back a ready message to forward from your own phone.",
   },
   {
     id: "n72",
@@ -170,7 +170,7 @@ export const QUESTIONS_28: Question[] = [
     kb: [/the review link, the QR card and the staff Send review link \(live today\)/],
     must: [/review link/i, /QR/],
     reference:
-      "Today you have your review link, the QR card and the staff Send review link. The rest of Review Growth, such as a monthly review goal and Ask a customer, is not available yet.",
+      "Today you have your review link, the QR card, the staff Send review link and, once WhatsApp is connected, Ask a customer. Only the monthly review goal is not available yet.",
   },
   // ── the free check ───────────────────────────────────────────────────────────────────────────────────────────────
   {
@@ -209,15 +209,14 @@ export const QUESTIONS_28: Question[] = [
     id: "n78",
     lang: "en",
     topic: "what each plan holds",
-    ask: "What will I get with Essentials compared with Pro under the new plans?",
+    ask: "What do I get with Essentials compared with Pro?",
     kb: [
       /\| Posts and photos \| Holiday hours, 2 posts a month, photos from WhatsApp \| Weekly posts, photos from WhatsApp \|/,
       /\| Team roles and approval rules \| No \| Yes \|/,
     ],
     must: [/Essentials/, /Pro/],
-    coming: true,
     reference:
-      "The new plan contents are not available yet. Essentials and Pro will both have unlimited review replies, WhatsApp approvals, Google Protection and Review Growth. Essentials will have the Visibility Map with 1 keyword monthly, 3 AI prompts monthly, 3 competitors monthly, holiday hours and 2 posts a month. Pro will have 5 keywords weekly, 10 prompts every 2 weeks, 5 competitors weekly, weekly posts, the monthly PDF, and team roles and approval rules.",
+      "Both plans have a reply ready for every new review, your details checked every day, your photos, your review link and QR card, Profile Coach suggestions and your weekly report every Monday. Essentials has holiday hours and 2 posts a month. Pro has a post every week, team roles and approval rules, review graphics, the words people searched on Google to find you every month, and a guide to report a review that breaks Google's rules.",
   },
   {
     id: "n79",

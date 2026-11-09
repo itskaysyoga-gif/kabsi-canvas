@@ -1,7 +1,7 @@
 ## 10. Troubleshooting
 
 **I have a duplicate listing.**
-Do not delete a profile you think is a duplicate: deleting it can lose its reviews, and any managers linked to it. Kabsi is a Manager, so it cannot delete a profile either. Instead ask Google to mark the duplicate or merge the profiles from your Business Profile; ask Google to merge, and Google decides. Google's page "Resolve duplicate profiles & ownership issues" (support.google.com/business/answer/12756178, read on 22 Oct 2026) says merging combines the reviews, replies may be lost, and a profile flagged as a duplicate does not show on Search or Maps. For help, offer the free 20-minute call or hello@kabsi.co (section 1.3).
+Do not delete a profile you think is a duplicate: deleting it can lose its reviews, and any managers linked to it. Kabsi is a Manager, so it cannot delete a profile either. Instead ask Google to merge them, and Google decides: on Google Maps, open the extra profile, choose **Suggest an edit**, then **Place closed or not here**, then **Duplicate of another place**, then **Submit** (the duplicate listings guide, read on 5 Nov 2026). Google's page "Resolve duplicate profiles & ownership issues" (support.google.com/business/answer/12756178, read on 22 Oct 2026) says merging combines the reviews, replies may be lost, and a profile flagged as a duplicate does not show on Search or Maps. For help, offer the free 20-minute call or hello@kabsi.co (section 1.3).
 
 **I didn't get my login code.**
 Check spam, check the address, tap **Resend code**. Still stuck: hand off.

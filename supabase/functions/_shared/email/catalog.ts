@@ -7,6 +7,8 @@ import { digestEmail } from "../notify-engine.ts";
 import type { CategoryId, SystemCategory } from "../notify-categories.ts";
 import { checkEmail, type Snapshot } from "../profile-snapshot.ts";
 import { teamInviteEmail } from "../team.ts";
+import { billingLineAt } from "../billing-lines.ts";
+import { foundingLine } from "../programs.ts";
 import { esc } from "../email-layout.ts";
 import * as copy from "./copy.ts";
 import { reviewEmail, type ReviewInput } from "./review.ts";
@@ -110,6 +112,11 @@ export function catalog(): CatalogEntry[] {
     e("receipt", "billing", false, account.receiptEmail({ business: BIZ, plan: "Kabsi Pro, monthly", amount: 39, tax: 0, paidOn: "2026-11-05T09:00:00Z", nextOn: "2026-12-05T09:00:00Z", founding: true, tz: "Asia/Dubai" }, APP)),
     e("payment_failed", "billing", false, account.paymentFailed({ business: BIZ, plan: "Kabsi Pro", amount: 39, on: "2026-12-05T09:00:00Z", graceEnds: "2026-12-12T09:00:00Z", portal: `${APP}/app/plan`, tz: "Asia/Dubai" })),
     e("plan_cancelled", "billing", false, account.planCancelled({ business: BIZ, plan: "Kabsi Pro", ends: "2026-12-05T09:00:00Z", tz: "Asia/Dubai" }, APP)),
+    // Sync 2a (EML-12): the billing and Founding 25 emails the catalog did not show, built by the real builders.
+    e("billing_paused", "billing", false, billingLineAt("paused", { business: BIZ }, APP).email!),
+    e("billing_ended", "billing", false, billingLineAt("ended", { business: BIZ }, APP).email!),
+    e("billing_payment_reminder", "billing", false, billingLineAt("payment_reminder", { business: BIZ, graceEnds: new Date("2026-12-12T09:00:00Z"), portal: `${APP}/app/plan` }, APP).email!),
+    ...([60, 85, 90] as const).map((d) => e(`founding_day${d}`, "billing", false, foundingLine(d, BIZ, "2026-12-05T09:00:00Z", APP).email)),
     e("manager_steps", "direct", true, copy.managerSteps(BIZ, APP, 3)),
     e("deletion_scheduled", "account", true, copy.deletionScheduled(BIZ, "28 October 2026", APP)),
     e("deletion_done", "account", true, copy.deletionDone(BIZ, APP)),

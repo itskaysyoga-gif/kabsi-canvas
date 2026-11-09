@@ -1742,7 +1742,7 @@ Every new or changed line of Scan 3. The result's lines are in src/lib/scan-word
 
 *Every line is in src/content/industries/beauty-salon.ts with its row in docs/claims/beauty-salon.md. Amber Glow Beauty, Dubai, Noor and the nearby names are invented Examples.*
 
-- **Card on /for**: "Beauty salons" · "Makeup, facials and waxing, posted for you." /for now has 21 kinds of business and a 22nd card on charcoal, "Any other local business" · "Kabsi works for any business with a Google profile. Check yours free." (to /scan, hidden while filtering), so no card sits alone in a last row: 11 rows of 2 below 1024 px, 5 rows of 4 and a centred row of 2 from 1024 px.
+- **Card on /for**: "Beauty salons" · "Makeup, facials and waxing as posts." /for now has 21 kinds of business and a 22nd card on charcoal, "Any other local business" · "Kabsi works for any business with a Google profile. Check yours free." (to /scan, hidden while filtering), so no card sits alone in a last row: 11 rows of 2 below 1024 px, 5 rows of 4 and a centred row of 2 from 1024 px.
 - **Query**: "beauty salon Google Business Profile". Title "Beauty salon Google Business Profile help | Kabsi". Description "Kabsi looks after your beauty salon Google Business Profile: treatments as posts, hours checked daily, review replies prepared, all for your yes."
 - **Hero**: H1 "Your beauty salon, ready for its close up." ("ready for its close up." on the bar). Line "Your beauty salon Google Business Profile, cared for: treatment posts, true opening times, and review answers you sign off."
 - **Answer**: "For a beauty salon Google Business Profile, Kabsi turns treatments into posts, checks your hours daily and prepares review replies, all for your yes."
@@ -1922,3 +1922,12 @@ Instagram: <R-59 address>"
 - **Creem lines (PUB-07).** Pricing, "Can I pay today?": "Nothing to pay today. Card payments in US dollars are coming. Card payments will be processed by Creem, our merchant of record." About, "How Kabsi is built": "Card payments will be processed by Creem, our merchant of record." The security page, the Plan page and the footer keep the present tense line (LATER row).
 - **Templates (item 6).** `kabsi_work_update` is retired in code; `kabsi_work_update_v2` is the one name. `kabsi_map_ready` keeps "Visibility Map" (section 0.1 names the exception). No template is submitted.
 - **Nora (item 8).** She may answer in the visitor's language, Arabic script included, in the chat only. For bookings, customers' requests or a booking assistant: "Kabsi looks after your Google Business Profile. It is not a booking system and does not keep your customers' bookings or requests." (facts 04, section 2.1b, and nora-rules.ts; evaluation questions sc04 in English and sc05 in Spanish).
+
+### Part 3: the plain fixes of Sync 1
+
+- **EML-07.** The team invitation footer reads "Why you got this: Someone at [Business] invited you to Kabsi." (it said "You asked for this email").
+- **EML-08.** The plain text holiday hours email names the Hours link once: "Your hours in Kabsi: [link]", then the note "You can also answer in Kabsi, under Hours."
+- **EML-12.** The email previews show the billing paused, ended and payment reminder emails and the Founding 25 day 60, 85 and 90 emails (50 previews).
+- **GA-11.** Facts 12 gives the Maps steps for a duplicate profile: Suggest an edit, Place closed or not here, Duplicate of another place, Submit.
+- **IND-03.** The medical and aesthetic clinic free check term is "aesthetic clinic" (the page keyword and the UAE word) and "skin clinic" in the UK (facts 01 and 09 agree); the London Example reads "skin clinic".
+- **KB-39.** Beauty salons card on /for and in llms.txt: "Makeup, facials and waxing as posts."

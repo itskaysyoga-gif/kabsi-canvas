@@ -90,7 +90,7 @@ export const beautySalon: Industry = {
     h1: "Your beauty salon, ready for its close up.",
     mark: "ready for its close up.",
     line: "Your beauty salon Google Business Profile, cared for: treatment posts, true opening times, and review answers you sign off.",
-    card: "Makeup, facials and waxing, posted for you.",
+    card: "Makeup, facials and waxing as posts.",
     answer:
       "For a beauty salon Google Business Profile, Kabsi turns treatments into posts, checks your hours daily and prepares review replies, all for your yes.",
     watch: {

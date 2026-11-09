@@ -164,7 +164,7 @@ export function holidayHoursAsk(o: HolidayAskInput, appUrl: string): EmailConten
     bodyHtml: p(`${esc(lead)}${esc(moon)}`) + p("Kabsi never assumes holiday hours. Choose one, check the hours on the next page and confirm. Nothing changes on Google until you do."),
     button: { label: "Choose your hours", url: o.links.choose }, links: answers,
     note: "You can also answer in Kabsi, under Hours.",
-    text: `${lead}${moon}\n\nKabsi never assumes holiday hours. Choose one, check the hours and confirm. Nothing changes on Google until you do.\n\nChoose your hours: ${o.links.choose}\n${answers.map((a) => `${a.label}: ${a.url}`).join("\n")}\n\nYou can also answer in Kabsi, under Hours: ${link(appUrl, "/app/hours")}`,
+    text: `${lead}${moon}\n\nKabsi never assumes holiday hours. Choose one, check the hours and confirm. Nothing changes on Google until you do.\n\nChoose your hours: ${o.links.choose}\n${answers.map((a) => `${a.label}: ${a.url}`).join("\n")}\n\nYour hours in Kabsi: ${link(appUrl, "/app/hours")}`,
     digest: {
       html: p(`<strong>${esc(o.business)}</strong>: ${esc(lead)} `) + `<div style="margin:0 0 12px 0;">${[{ label: "Choose your hours", url: o.links.choose }, ...answers].map((a) => `<a href="${esc(a.url)}" class="kb-t1" style="font-weight:700;color:${TOKENS.ink};margin-right:14px;">${esc(a.label)}</a>`).join("")}</div>`,
       text: `${o.business}: ${lead} Choose your hours: ${o.links.choose}`,

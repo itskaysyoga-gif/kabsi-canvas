@@ -9,7 +9,7 @@ Normal hours: https://kabsi.co/h/HOLIDAYTOKEN?a=normal
 Closed: https://kabsi.co/h/HOLIDAYTOKEN?a=closed
 Custom hours: https://kabsi.co/h/HOLIDAYTOKEN?a=custom
 
-You can also answer in Kabsi, under Hours: https://kabsi.co/app/hours
+Your hours in Kabsi: https://kabsi.co/app/hours
 
 You can also answer in Kabsi, under Hours.
 
