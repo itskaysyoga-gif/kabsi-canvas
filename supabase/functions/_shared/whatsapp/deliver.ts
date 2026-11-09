@@ -11,7 +11,7 @@
 // follows its rules (6 a day, quiet hours, batching, digests, the window). Answers to inbound messages are the agent's.
 import { alertButtons, type Button, postAlertBody, type ReviewAlert, reviewAlertBody } from "./channel.ts";
 import { notify, type Out } from "./outbox.ts";
-import { ref, type TemplateRef } from "./templates.ts";
+import { assertSendable, ref, type TemplateRef } from "./templates.ts";
 import { errorText } from "../log-scrub.ts";
 
 export type Sent = { id: string };
@@ -144,7 +144,7 @@ export function mockSender(log: { to: string; kind: string; body: string }[] = [
     live: false,
     text: async (to, body) => (log.push({ to, kind: "text", body }), { id: id() }),
     buttons: async (to, body, b) => (log.push({ to, kind: `buttons:${b.map((x) => x.title).join("|")}`, body }), { id: id() }),
-    template: async (to, name) => (log.push({ to, kind: `template:${name}`, body: "" }), { id: id() }),
+    template: async (to, name) => (assertSendable(name), log.push({ to, kind: `template:${name}`, body: "" }), { id: id() }),
     media: async () => new Uint8Array(),
     image: async (to, png, body, b) => (log.push({ to, kind: `image:${png.length}:${b.map((x) => x.title).join("|")}`, body }), { id: id() }),
   };

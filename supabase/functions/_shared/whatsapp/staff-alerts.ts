@@ -34,6 +34,8 @@ const URGENT = new Set([
   // the run's address; sending its ops event here as well made two messages for one failure (drill of 7 Nov 2026, 30.25
   // item 5). The event is still counted in the morning digest.
   "backup_failed",
+  // Kapso 1: the daily WhatsApp number and template check found something wrong (items and states only)
+  "whatsapp_check",
 ]);
 /** About the number itself: email only (9.9). */
 const NUMBER_ONLY = /^whatsapp_number/;

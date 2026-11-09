@@ -131,6 +131,25 @@ export async function readTemplates(env: KapsoEnv): Promise<TemplateRow[]> {
   return rows(await call(env, `${META}/${waba}/message_templates?fields=${FIELDS}&limit=200`));
 }
 
+export type TemplateDetail = { name: string; status: string; category: string | null; language: string | null; params: number };
+
+/** Distinct named or numbered parameters in a template body, as Meta stores the text. */
+export function countParams(components: unknown): number {
+  const body = (Array.isArray(components) ? components.map(obj) : []).find((c) => String(c.type).toUpperCase() === "BODY");
+  const found = new Set<string>();
+  for (const m of String(body?.text ?? "").matchAll(/\{\{\s*([^{}\s]+)\s*\}\}/g)) found.add(m[1]);
+  return found.size;
+}
+
+/** Read only (Kapso 1): every template on the business account with status, category, language and the number of body
+ *  parameters it takes. One row per name and language. Nothing is submitted or changed. */
+export async function readTemplateDetails(env: KapsoEnv): Promise<TemplateDetail[]> {
+  const waba = await wabaId(env);
+  const raw = list(await call(env, `${META}/${waba}/message_templates?fields=name,status,category,language,components&limit=200`));
+  return raw.map((t) => ({ name: String(t.name), status: String(t.status ?? ""), category: t.category ? String(t.category) : null,
+    language: t.language ? String(t.language) : null, params: countParams(t.components) }));
+}
+
 /** The statuses Kabsi's sender needs: only the names in templates.ts, status by name (nothing else is stored). */
 export function statusMap(found: TemplateRow[]): Record<string, string> {
   const ours = new Set(allDefs().map((d) => d.name));

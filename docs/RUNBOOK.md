@@ -62,6 +62,11 @@ restricted or disconnected, or Kapso credit is under 5 US dollars.
 6. A webhook problem (messages sent to Kabsi get no answer): Kapso, the webhook for the Kabsi number, check the last
    deliveries. A `401` means `KAPSO_WEBHOOK_SECRET` differs from the one in Kapso: set both to the same new value.
 7. Never use the Kapso connector from a build session to send to owners (R-49).
+8. The daily check (Kapso 1, 05:17 UTC, `kabsi_whatsapp_check`) reads the number and every template the code can send and
+   compares them with the code. A staff alert "WhatsApp check found N items" names each item and its state: a template
+   not approved, missing or with the wrong number of parameters, quality YELLOW or RED, a lower messaging limit, or a
+   webhook not verified. It never changes anything. Do not edit templates in a build session: lane R decides. To run it by
+   hand: `select public.call_internal('health', '{"only":"kapso"}'::jsonb);` and read the answer in `net._http_response`.
 
 **Over when:** a test message to and from Rashid's own phone works, and `WHATSAPP_LIVE` is back to `true` if you changed it.
 
