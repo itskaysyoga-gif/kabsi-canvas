@@ -291,7 +291,9 @@ describe("RB-D guard: the extraction step is a new prompt, outside the reply pro
   it("keeps its prompt in the request book, so the reply Prompt gate (a change under ai/prompts) is untouched", () => {
     expect(extract).toContain("buildPrompt");
     for (const f of readdirSync(promptsDir)) {
-      expect(readFileSync(join(promptsDir, f), "utf8"), f).not.toMatch(/owner_message|already_arranged/);
+      expect(readFileSync(join(promptsDir, f), "utf8"), f).not.toMatch(
+        /owner_message|already_arranged/,
+      );
     }
     const ci = readFileSync(join(ROOT, ".github/workflows/ci.yml"), "utf8");
     expect(ci).toContain("grep -q '^supabase/functions/_shared/ai/prompts/'");

@@ -10,18 +10,37 @@
 // recorded.json; the model's answers hold the fictional case texts and nothing else. EVAL_LIVE is not used: this is
 // never run by CI, only by hand (the "Eval live" workflow, switch request_eval).
 import {
-  failures, loadSuite, marks, oracleAnswer, promptHash, report, requestFor, runCases, type RunOptions, type Suite,
+  failures,
+  loadSuite,
+  marks,
+  oracleAnswer,
+  promptHash,
+  report,
+  requestFor,
+  runCases,
+  type RunOptions,
+  type Suite,
 } from "./eval.ts";
 import type { Ask } from "../../supabase/functions/_shared/request-book/extract.ts";
 
-export type Recorded = { version: number; model: string; recordedAt: string; cases: Record<string, { hash: string; answer: string | null }> };
+export type Recorded = {
+  version: number;
+  model: string;
+  recordedAt: string;
+  cases: Record<string, { hash: string; answer: string | null }>;
+};
 
 export async function loadRecorded(): Promise<Recorded> {
-  return JSON.parse(await Deno.readTextFile(new URL("./recorded.json", import.meta.url))) as Recorded;
+  return JSON.parse(
+    await Deno.readTextFile(new URL("./recorded.json", import.meta.url)),
+  ) as Recorded;
 }
 
 /** An Ask that answers from a recording, by the hash of the exact prompt. A prompt that changed has no recording. */
-export async function recordedAsk(suite: Suite, rec: Recorded): Promise<{ ask: Ask; missing: string[] }> {
+export async function recordedAsk(
+  suite: Suite,
+  rec: Recorded,
+): Promise<{ ask: Ask; missing: string[] }> {
   const byHash = new Map<string, string | null>();
   for (const e of Object.values(rec.cases)) byHash.set(e.hash, e.answer);
   const missing: string[] = [];
@@ -38,7 +57,9 @@ export async function recordedAsk(suite: Suite, rec: Recorded): Promise<{ ask: A
 }
 
 export function oracleAsk(suite: Suite): Ask {
-  const byUser = new Map(suite.cases.map((c) => [requestFor(suite, c).user + requestFor(suite, c).system, c]));
+  const byUser = new Map(
+    suite.cases.map((c) => [requestFor(suite, c).user + requestFor(suite, c).system, c]),
+  );
   return (req) => {
     const c = byUser.get(req.user + req.system);
     return c ? Promise.resolve(oracleAnswer(suite, c)) : Promise.reject(new Error("unknown case"));
@@ -52,7 +73,10 @@ async function main() {
     return i >= 0 ? args[i + 1] : undefined;
   };
   const suite = await loadSuite();
-  const only = flag("--only")?.split(",").map((s) => s.trim()).filter(Boolean);
+  const only = flag("--only")
+    ?.split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
   const out = flag("--out");
 
   let ask: Ask;
@@ -60,7 +84,12 @@ async function main() {
   let mayStart: (() => boolean) | undefined;
   let onAnswer: RunOptions["onAnswer"];
   let concurrency = 1;
-  const recorded: Recorded = { version: 1, model: "", recordedAt: new Date().toISOString(), cases: {} };
+  const recorded: Recorded = {
+    version: 1,
+    model: "",
+    recordedAt: new Date().toISOString(),
+    cases: {},
+  };
 
   if (args.includes("--oracle")) {
     ask = oracleAsk(suite);
@@ -68,7 +97,9 @@ async function main() {
     const rec = await loadRecorded();
     const r = await recordedAsk(suite, rec);
     if (r.missing.length && !only) {
-      console.error(`The recording does not cover ${r.missing.length} case prompts (the prompt or the cases changed): ${r.missing.slice(0, 5).join(", ")}. Re-record by hand.`);
+      console.error(
+        `The recording does not cover ${r.missing.length} case prompts (the prompt or the cases changed): ${r.missing.slice(0, 5).join(", ")}. Re-record by hand.`,
+      );
       Deno.exit(2);
     }
     ask = r.ask;
@@ -80,7 +111,9 @@ async function main() {
     const budget = Number(flag("--budget") ?? "5");
     // The cap Rashid allowed for RB-D: never more than 5 US dollars, whatever the input says.
     if (!(budget > 0 && budget <= 5)) {
-      console.error("--budget takes a number of US dollars above 0 and at most 5. Nothing was run.");
+      console.error(
+        "--budget takes a number of US dollars above 0 and at most 5. Nothing was run.",
+      );
       Deno.exit(2);
     }
     const { live } = await import("./live.ts");
@@ -103,10 +136,28 @@ async function main() {
   const run = await runCases(suite, ask, { concurrency, mayStart, onAnswer, only });
   const m = marks(suite, run.results);
   console.log(report(m));
-  if (run.skipped.length) console.log(`Stopped at the budget: ${run.skipped.length} cases not run (${run.skipped.slice(0, 5).join(", ")} ...).`);
+  if (run.skipped.length)
+    console.log(
+      `Stopped at the budget: ${run.skipped.length} cases not run (${run.skipped.slice(0, 5).join(", ")} ...).`,
+    );
   if (spent) console.log(`Spent ${spent().toFixed(4)} US dollars.`);
-  if (args.includes("--failures") || args.includes("--live")) for (const f of failures(run.results)) console.log(`  ${f}`);
-  if (out) await Deno.writeTextFile(out, JSON.stringify({ marks: m, skipped: run.skipped, spentUsd: spent?.() ?? 0, recorded, results: run.results }, null, 1));
+  if (args.includes("--failures") || args.includes("--live"))
+    for (const f of failures(run.results)) console.log(`  ${f}`);
+  if (out)
+    await Deno.writeTextFile(
+      out,
+      JSON.stringify(
+        {
+          marks: m,
+          skipped: run.skipped,
+          spentUsd: spent?.() ?? 0,
+          recorded,
+          results: run.results,
+        },
+        null,
+        1,
+      ),
+    );
   Deno.exit(m.pass.all && run.skipped.length === 0 ? 0 : 1);
 }
 
