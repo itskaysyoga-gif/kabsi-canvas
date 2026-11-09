@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 9 Nov 2026 (Sync 2a). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 9 Nov 2026 (Tidy 1). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -63,6 +63,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 9 Nov 2026, Tidy 1 part 0 (R-143, docs): master plan 30.47 and the R-143 row. `2026-11-09-tidy1.md`.
 - 9 Nov 2026, RB-F (PR 525): request book update, confirm, convert, correct, Undo and what's open, no model; test businesses applied. `2026-11-09-rb-f.md`.
 - 9 Nov 2026, Sync 2b part B (PR 527, live on kabsi.co): the legal lines (privacy 3 and 15, LEG-07 to LEG-21, terms 9). Not legal advice; listed for Gate 3. `2026-11-09-sync2b.md`.
 - 9 Nov 2026, Sync 2b part A (PR 523): Outbound offers only the free check and opens only GB (applied); salons first. `2026-11-09-sync2b.md`.
