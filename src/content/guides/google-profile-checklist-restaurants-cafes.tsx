@@ -28,7 +28,7 @@ export const guide: GuideDoc = {
       id: "category",
       heading: "Which category should a restaurant or cafe choose?",
       answer:
-        "Pick the most specific main category from Google's list, because Google says the categories you select affect your local ranking. Google's example is a primary category of 'Pizza restaurant', which it says might show your business when people search for restaurants, Italian restaurants or pizza.",
+        "Pick the most specific main category from Google's list. Google's example is a primary category of 'Pizza restaurant', which it says might show your business when people search for restaurants, Italian restaurants or pizza.",
       body: (
         <>
           <p>

@@ -37,9 +37,7 @@ export const guide: GuideDoc = {
             time on your own website can therefore end up on your Google profile.
           </p>
           <p>
-            Google's ranking help adds that if your business information is not accurate, your
-            profile might not show up for relevant searches in your area. The same old details can
-            also reach answers from AI assistants, as explained in{" "}
+            Old details can also reach answers from AI assistants, as explained in{" "}
             <GuideLink slug="why-chatgpt-describes-your-business-wrongly">
               why ChatGPT describes your business wrongly
             </GuideLink>

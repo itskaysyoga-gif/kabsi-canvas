@@ -88,7 +88,7 @@ export const guide: GuideDoc = {
           </li>
           <li>
             <b>After the visit:</b> the bottom of a receipt, a thank you email or the end of a
-            WhatsApp chat about a booking.
+            WhatsApp chat after the visit.
           </li>
           <li>
             <b>Online:</b> your Instagram or Facebook bio and your website's contact page.
@@ -183,7 +183,7 @@ export const guide: GuideDoc = {
           profile, a QR code image and a printable counter card, from any phone. Inside Kabsi, Get
           reviews gives you a short link and a QR code, free for every business, that open your
           Google review page by default; you can set a link to show a short Kabsi page first
-          (kabsi.co/review/CODE), with the Google review button first and large. Get reviews shows
+          (kabsi.co/review/CODE), with the Google review button first and large. Get Reviews shows
           how often each link was opened. An open is not a review: Google decides which reviews
           appear.
         </p>

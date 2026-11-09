@@ -658,7 +658,7 @@ async function showForYes(t: Turn, reviewId: string, text: string | null, body: 
     return answered(t, a.reason === "high_risk" ? "This review needs a careful look, so it is approved only in Kabsi." : SAY.alreadyHandled, `show_refused:${a.reason}`);
   }
   const shown = body ?? SAY.newDraft(b.business, (a.text ?? text ?? "").trim());
-  return answered(t, shown, "shown_for_yes", [{ id: `a:${a.token}`, title: "Approve" }, { id: `e:${a.token}`, title: "Edit in app" }]);
+  return answered(t, shown, "shown_for_yes", [{ id: `a:${a.token}`, title: "Approve" }, { id: `e:${a.token}`, title: "Edit on kabsi.co" }]);
 }
 
 async function photo(t: Turn, mediaId: string, size: number | null = null): Promise<string> {

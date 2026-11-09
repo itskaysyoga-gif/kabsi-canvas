@@ -56,7 +56,7 @@ The success test is the one Rashid set: a busy owner finds Kabsi genuinely easie
 - The public website, prices and live WhatsApp routing.
 - Real customer data, which the database refuses today.
 
-The largest unknown is whether owners will type requests at all. Kabsi cannot see their customer chats, and anyone on a booking system would be entering things twice. Five short conversations with independent salon owners, by introduction only, test this more cheaply than code, and can start now.
+The largest unknown is whether owners will type requests at all. Kabsi cannot see their customer chats, and anyone on a booking system would be entering things twice. Five short conversations with independent salon owners, from Instagram, sent by hand as research (R-141), test this more cheaply than code, and can start now.
 
 ## Build order
 
@@ -64,7 +64,7 @@ The real-phone demo is 7 sessions away and the first real salon is 5 sessions af
 
 A stage starts only when the gate before it has its evidence. The website track starts after Gate 2 and goes public at Gate 5.
 
-Gate 1 opened on 9 Nov 2026 on RB-D's evaluation (R-140, master plan 30.44 item 2). The test phone with no Kabsi role is needed before RB-E's bind code and phone script, not before its code.
+Gate 1 opened on 9 Nov 2026 on RB-D's evaluation (R-140, master plan 30.44 item 2). The test phone is Rashid's own phone through his existing verified user (R-141, master plan 30.45 item 1), needed before RB-E's phone script, not before its code.
 
 | # | Session | What it does | Model | Needs first | Overlap |
 |---|---|---|---|---|---|
@@ -82,7 +82,7 @@ Gate 1 opened on 9 Nov 2026 on RB-D's evaluation (R-140, master plan 30.44 item 
 | 10 | RB-I | Retention rules and the real-data gate | Opus | RB-H | Alone |
 | 11 | RB-J | Privacy, terms, customer notice, facts | Sonnet | RB-I, the legal review's notes | With W-2 |
 |  | **Gate 3** |  |  |  |  |
-| 12 | RB-K | Pilot kit and the first session (R-140), one real salon switched on | Sonnet | Gate 3 | Alone |
+| 12 | RB-K | Pilot kit, the first session (R-140) and the salon worker ease test with RB-F's pass marks (R-141), one real salon switched on | Sonnet | Gate 3 | Alone |
 |  | **Gate 4: the 30-day scorecard** |  |  |  |  |
 | 13 | W-1 | Website and app design | Opus | Gate 2 | With RB-G, RB-H |
 | 14 | W-2 | Copy and facts, held back | Sonnet | W-1 approved | With RB-J |
@@ -97,8 +97,8 @@ Later capabilities each wait for their own evidence, and are listed in the Sessi
 
 | Gate | Opens | Evidence required | If it fails |
 |---|---|---|---|
-| 1 | The real phone | RB-C1, RB-C2 and RB-D merged. Eval pass marks met. A real authorized test number with no Kabsi role. Rashid's go | Fix and rerun. No phone work |
-| 2 | Customer data work | Full script passes on the real phone. Yawmiyati unchanged. Meta's pricing data read. A salon worker passes the ease test. Five owner conversations by introduction are done, and at least 3 of 5 say they would type requests on most working days (R-140) | After two rounds of fixes, redesign or stop. If fewer than 2 of 5 say they would type requests on most working days, the request book stops after the demo and Kabsi stays Google care (R-140) |
+| 1 | The real phone | RB-C1, RB-C2 and RB-D merged. Eval pass marks met. Rashid's own phone as the test owner (R-141). Rashid's go | Fix and rerun. No phone work |
+| 2 | Customer data work | Full script passes on the real phone. Yawmiyati unchanged. Meta's pricing data read. Five owner conversations from Instagram are done (R-141, master plan 30.45 item 3). A conversation counts only when the owner keeps requests by hand or in chats with no full booking platform and agrees to try Kabsi on their own phone for two weeks. At least 3 of 5 open the gate | After two rounds of fixes, redesign or stop. If fewer than 2 of 5 qualify and agree, the request book stops after the demo and Kabsi stays Google care |
 | 3 | One real business | RB-G to RB-J merged. Legal review. Kapso Pro with a 30-day window. Supabase Pro. Kapso's written answer on the provider terms. Rashid's go for one location | No real data |
 | 4 | More building | Pilot scorecard read after 30 days, with a usage check on day 14 | Continue, change focus to trades, or stop. If owners will not enter requests on most working days, the request book stops and Kabsi stays Google care |
 | 5 | The public website | Live for real owners. Facts updated. Claims checked. Rashid's go | The site keeps saying only what it says now |
@@ -169,7 +169,7 @@ The request book joins the existing agent through one switch, after the steps th
 - `whatsapp_resolve` is not changed. The switch is read separately.
 - With the switch off, the model's instructions are byte-identical, proved by a snapshot test, and the whole existing WhatsApp suite passes unchanged.
 - Yawmiyati's stats and review link are checked on the real phone after each phone session.
-- The test number has no other Kabsi role, because a second business on Rashid's phone would make Yawmiyati's flows ask which business.
+- The test number has no other Kabsi role, because a second business on Rashid's phone would make Yawmiyati's flows ask which business. For the RB-E and RB-F demo only, R-141 (master plan 30.45 item 1) replaces this: the test owner is Rashid's own phone through his existing verified user, and after Gate 2 the test businesses go to state off and those memberships are removed.
 
 ### Words that already mean something
 
@@ -271,10 +271,10 @@ Only the items below need Rashid. Everything else runs inside the sessions.
 |---|---|---|
 | Now | Run RB-0 | Open a claude.ai/code session on `kabsi-canvas`, choose Sonnet, paste the RB-0 prompt |
 | Now | Say go for F-1, RB-C1, RB-C2 and RB-D | Write GO on the first line of each prompt |
-| Now | Start the five owner conversations | Introductions only, no cold contact. Ask how they track requests today and whether they would type them anywhere |
+| Now | Start the five owner conversations (R-141) | From Instagram, by hand, as research, and never from any WhatsApp number. Ask how they track requests today and whether they would try Kabsi on their own phone for two weeks |
 | By 17 Nov | Set the monthly AI budget | Anthropic console. RB-D's hand run under 5 USD should finish before the credit ends |
-| Before Gate 1 | A real authorized WhatsApp number with no Kabsi role | Bind it with the owner code in RB-E. Never paste the number into a report |
-| At Gate 2 | Run the phone script, then the ease test with a salon worker | Script comes from RB-F's report |
+| Before Gate 1 | Rashid's own phone, the owner of Yawmiyati, joined to the three test businesses through his existing verified user (R-141) | Bind it through the test businesses in RB-E. No number in code. Never paste the number into a report |
+| At Gate 2 | Run the phone script | Script comes from RB-F's report. The ease test with a salon worker moves to RB-K's first session (R-141) |
 | Before Gate 3 | Legal review, Kapso Pro with a 30-day window, Supabase Pro | The review's notes go into the RB-J prompt |
 | Gate 3 | One real salon, from a Founding 25 application or an introduction | Rashid's go for one location |
 | Day 14 and day 30 of the pilot | Read the scorecard with lane R | Lane R decides continue, change focus or stop |

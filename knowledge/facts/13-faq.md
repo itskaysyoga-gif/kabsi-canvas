@@ -33,10 +33,10 @@ Kabsi is operated by Rashid Abou Hamzy. A person answers at hello@kabsi.co.
 No. Kabsi works from your email and your phone's web browser.
 
 **Is Kabsi connected to Google right now?**
-[TIME-SENSITIVE] Not through Google's API yet. Kabsi's API access is under Google's review, so Kabsi runs in test mode. You can sign up and set up now. In early access a person on our team does the Google steps by hand, within one working day, and you still approve every word. Your trial or plan starts when access works.
+[TIME-SENSITIVE] Yes, for connected businesses. Google opened Kabsi's Business Profile API access (reviews, posts and media) on 22 Oct 2026, and every change still waits for your yes. Your trial or plan starts when Kabsi's access to your Google profile works.
 
 **When will Kabsi be live on Google?**
-We're waiting on Google's review and can't give a date. We'll email you when your business is connected.
+Kabsi is live on Google for connected businesses. Your business is connected once Kabsi's access to your Google profile works, and we'll email you when it is.
 
 **Is there a demo?**
 The home page shows pictures of the real screens (a review with its reply ready, a change Google Protection found, the Profile Coach checklist) with invented data, each labelled "Example", and the free Google Profile Check shows a real business's public Google profile. Kabsi's product videos are recorded in a demo workspace with two invented businesses, Harbour Lane Coffee and Juniper Hair Studio; every screen there carries a "Demo data" tag, and none of their reviews, names or numbers are real.

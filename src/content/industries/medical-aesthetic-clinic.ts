@@ -132,7 +132,7 @@ export const medicalAestheticClinic: Industry = {
       "Kabsi looks after your aesthetic clinic Google Business Profile: replies that confirm no patient, hours checked daily, doctors' days as posts for your yes.",
     watch: {
       business: "Clearview Skin Clinic, London",
-      line: "Late evening clinics are easy to miss on Google. Kabsi checks your hours against yours every day.",
+      line: "Late evening clinics are easy to miss on Google. Kabsi checks the hours Google shows against yours every day.",
       fields: ["Opening hours", "Website", "Phone", "Main category", "Description"],
       what: "Wednesday",
       google: "09:00 to 17:00",

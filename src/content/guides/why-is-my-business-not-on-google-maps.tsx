@@ -21,7 +21,7 @@ export const guide: GuideDoc = {
     "Search your exact business name and town on Google Maps, signed out, to see what customers see.",
     "Google says only verified businesses can show their details on Maps and Search.",
     "A profile that breaks Google's guidelines can be suspended and stops showing until it is fixed.",
-    "Changes can take up to 3 days to appear, and a new business can take up to a month to rank.",
+    "Changes you make can take up to 3 days to appear.",
   ],
   sections: [
     {
@@ -56,12 +56,12 @@ export const guide: GuideDoc = {
       body: (
         <>
           <p>
-            Google lists the ways it may offer: phone or text, email, a live video call or a
-            postcard by mail. You do not choose freely: Google decides which methods your business
-            can use. Google says verification reviews take up to 5 business days, sometimes longer,
-            and that most postcard codes arrive within 14 days. While a postcard is on its way,
-            Google asks you not to edit your business name, address or category, because the code
-            would stop working.
+            Google lists the ways it may offer: phone or text, email, a live video call, a video
+            recording or a postcard by mail. You do not choose freely: Google decides which methods
+            your business can use. Google says verification reviews take up to 5 business days,
+            sometimes longer, and that most postcard codes arrive within 14 days. While a postcard
+            is on its way, Google asks you not to edit your business name, address or category,
+            because the code would stop working.
           </p>
           <p>
             Google says the options you are offered depend on your business type, public info,
@@ -134,7 +134,7 @@ export const guide: GuideDoc = {
       id: "new-or-edited",
       heading: "I only just set it up or changed it. How long does it take?",
       answer:
-        "Google says that when you edit your business info, changes can take up to 3 days to appear, and that rankings for new businesses can take up to a month to appear in search results. If you verified recently or changed your address, wait that long before you change anything else.",
+        "Google says that when you edit your business info, changes can take up to 3 days to appear. If you verified recently or changed your address, wait that long before you change anything else.",
       body: (
         <p>
           Make one correct change and give it that time before you judge the result. If more than a
@@ -147,15 +147,12 @@ export const guide: GuideDoc = {
       id: "not-coming-up",
       heading: "It shows for my name but not for 'salon near me'. Why?",
       answer:
-        "That is not a missing profile: it is how Google picks local results. Google says local results are mainly based on relevance, distance and popularity, and that there is no way to request or pay for a better local ranking, so the honest work is to make your profile complete and correct.",
+        'That is not a missing profile: it is how Google picks local results. Google says "Local results are mainly based on relevance, distance, and popularity." It also says "There\'s no way to request or pay for a better local ranking on Google." The honest work is to make your profile complete and correct.',
       body: (
         <>
           <p>
-            Relevance is how well your profile matches the search, distance is how far you are from
-            the person searching, and popularity is how well known the business is, in Google's
-            words. Google says complete and accurate business information helps it match your
-            profile to the right searches, and that it keeps the details of its ranking private.
-            Nobody outside Google can promise a position.
+            Google keeps the details of its ranking private, and nobody outside Google can promise a
+            position.
           </p>
           <p>
             What you control: the right main category, true opening hours, your address or service
@@ -191,9 +188,9 @@ export const guide: GuideDoc = {
       <>
         <p>
           The free check shows what Google shows about your business today, without any Google
-          access: the details on your profile, and where you come up for one search at your address
-          and at places around it, like a customer standing there. It is a quick way to tell a
-          missing profile from one that is simply not coming up.
+          access: the details on your profile, where you come up for one search at your address, the
+          three businesses that come up around you, and one ChatGPT answer. It is a quick way to
+          tell a missing profile from one that is simply not coming up.
         </p>
         <p>
           Kabsi itself works with a verified profile that you own or manage, and it cannot verify a

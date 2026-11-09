@@ -79,7 +79,7 @@ const CASES: Case[] = [
   { name: "unknown: a partner code is kept", tags: ["unknown", "29.4"], steps: [{ from: PHONES.unknown, text: "Hi, Code P-SARA", expect: "partner_code", reply: /30 days[\s\S]*https:\/\/kabsi\.co\/login\?next=\/start/ }],
     check: (w) => assert.equal(w.conversation(PHONES.unknown).partner_code, "P-SARA") },
   { name: "unknown: STOP, then nothing", tags: ["unknown", "9.5"], steps: [
-    { from: PHONES.unknown, text: "STOP", expect: "stopped", reply: /no more WhatsApp messages/ },
+    { from: PHONES.unknown, text: "STOP", expect: "stopped", reply: /WhatsApp messages are stopped\./ },
     { from: PHONES.unknown, text: "hello", expect: "stopped_ignored", none: true }] },
   { name: "unknown: START after STOP", tags: ["unknown", "9.5"], steps: [
     { from: PHONES.unknown, text: "stop", expect: "stopped" }, { from: PHONES.unknown, text: "START", expect: "started" }] },
@@ -227,7 +227,7 @@ const CASES: Case[] = [
   { name: "owner: no", tags: ["owner"], steps: [{ from: PHONES.owner, text: "no", expect: "no" }] },
   { name: "owner: exact reply is shown back for a Yes, nothing goes to Google before it", tags: ["owner", "9.3", "25.5"],
     setup: (w) => (w.conversation(PHONES.owner).last_task = { type: "review", review_id: "r-harbour-1", location_id: BIZ.harbour }),
-    steps: [{ from: PHONES.owner, text: "reply: Thank you so much for coming in, see you soon.", expect: "shown_for_yes", reply: /Harbour Lane Coffee: Kabsi will post this reply on Google after your yes/, buttons: ["Approve", "Edit in app"] }],
+    steps: [{ from: PHONES.owner, text: "reply: Thank you so much for coming in, see you soon.", expect: "shown_for_yes", reply: /Harbour Lane Coffee: Kabsi will post this reply on Google after your yes/, buttons: ["Approve", "Edit on kabsi.co"] }],
     check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("approve")).length, 0) },
   { name: "owner: exact reply with no recent review asks which", tags: ["owner"], steps: [{ from: PHONES.owner, text: "reply: Thanks a lot", expect: "no_review" }] },
   { name: "owner: an exact reply to a high-risk review is approved only in the app", tags: ["owner", "9.3"],
@@ -323,7 +323,7 @@ const CASES: Case[] = [
     { from: PHONES.owner, text: "STOP", expect: "stopped" }, { from: PHONES.owner, text: "stats", expect: "stopped_ignored", none: true }],
     check: (w) => assert.equal(w.users[0].optin, "stopped") },
   // 13b phone test findings (25 Oct): START opts back in for every role, the STOP reply names START, a staff code reply goes live.
-  { name: "owner: the STOP reply names START", tags: ["owner", "9.5"], steps: [{ from: PHONES.owner, text: "STOP", expect: "stopped", reply: /Reply START/ }] },
+  { name: "owner: the STOP reply names Start", tags: ["owner", "9.5"], steps: [{ from: PHONES.owner, text: "STOP", expect: "stopped", reply: /Send Start to turn messages back on/ }] },
   { name: "owner: START after STOP brings the business back", tags: ["owner", "9.5"], steps: [
     { from: PHONES.owner, text: "STOP", expect: "stopped" },
     { from: PHONES.owner, text: "START", expect: "started", reply: /on again/ },

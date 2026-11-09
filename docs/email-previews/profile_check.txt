@@ -7,10 +7,10 @@ Jumeirah Beach Road, Dubai (Example)
 Rating 4.6 · 128 reviews · Hair salon
 
 Needs fixing: No opening hours are shown on Google.
-Kabsi asks you for your hours and prepares them for you to approve.
+Kabsi asks you for your hours and sends them to Google once you say yes.
 
 Worth fixing: No phone number is shown on Google.
-Kabsi asks you to confirm it and prepares the change for you to approve.
+Add your phone number on your Google profile. Once you connect, Kabsi checks it every day with your other details.
 
 Kabsi can take care of these. You approve each one.
 Start your free trial: https://kabsi.co/login?next=/start

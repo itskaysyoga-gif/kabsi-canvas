@@ -13,7 +13,7 @@ The success test stays the same: a busy owner finds Kabsi genuinely easier than 
 | Requested, staff-confirmed, customer-confirmed | Two independent facts with who and when. No column exists that could claim availability was checked or a booking was made elsewhere |
 | Preserve enquiry history | Conversion closes the enquiry as `converted` and creates a linked appointment. The enquiry row and its timeline are unchanged. Nothing is added in between |
 | One workflow | One table, one set of functions. Kinds are data. Packs in PR C supply only words and fields |
-| Real owner number, fictional customers | The test owner is a real authorized WhatsApp number. Customer records are fictional and are never contacted. The 555-01xx range is only a guard against real numbers entering |
+| Real owner number, fictional customers | The test owner is Rashid's own phone, joined to the three test businesses through his existing verified user (R-141). Customer records are fictional and are never contacted. The 555-01xx range is only a guard against real numbers entering |
 | Scorecard, not a 3-of-10 gate | Below, and the Product decision now points here |
 | Salons and beauty first | The first real pilot is an independent salon or beauty business. Gym and garage packs validate the architecture and are not market positioning |
 
@@ -130,6 +130,8 @@ The first real pilot is an independent salon or beauty business. After 30 days t
 | Reasons for rejection | Recorded in their words | A fixable pattern | Does not need it |
 
 First session (R-140): RB-K adds a 10-minute first session in which the owner enters one practice request with a fictional name, finds it, corrects it and undoes the correction, then it is voided. The scorecard counts only requests created after that session ends.
+
+Ease test (R-141): the salon worker ease test is part of the pilot owner's first session in RB-K, with RB-F's pass marks. A miss is fixed before day 1 of the scorecard.
 
 ## PR C and PR D, prepared for review only
 

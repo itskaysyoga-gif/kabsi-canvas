@@ -1,6 +1,6 @@
 Subject: Rose Lane Salon: deleted from Kabsi
 
-We deleted Rose Lane Salon and its data from Kabsi. If Kabsi is still a Manager on your Google profile, remove the Kabsi Clients group (ID 5481006796) under People and access.
+We deleted Rose Lane Salon and its data from Kabsi. Your Kabsi review link and QR code no longer open your review page, and neither does any NFC card that carries them. If Kabsi is still a Manager on your Google profile, remove the Kabsi Clients group (ID 5481006796) under People and access.
 
 Open Kabsi: https://kabsi.co/app
 

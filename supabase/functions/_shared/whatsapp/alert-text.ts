@@ -35,8 +35,8 @@ export function postAlertBody(business: string, summary: string): string {
 }
 
 export type Button = { id: string; title: string };
-/** Approve only where WhatsApp may approve; Edit in app always. Titles are at most 20 characters (Meta's limit). */
+/** Approve only where WhatsApp may approve; Edit on kabsi.co always. Titles are at most 20 characters (Meta's limit). */
 export function alertButtons(token: string, mayApprove: boolean): Button[] {
-  return [...(mayApprove ? [{ id: `a:${token}`, title: "Approve" }] : []), { id: `e:${token}`, title: "Edit in app" }];
+  return [...(mayApprove ? [{ id: `a:${token}`, title: "Approve" }] : []), { id: `e:${token}`, title: "Edit on kabsi.co" }];
 }
 export const undoButton = (token: string): Button => ({ id: `u:${token}`, title: "Undo" });

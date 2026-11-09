@@ -8,7 +8,7 @@ Decisions taken while writing (lane R, R-41):
 - The main button is "See your map" (28.8); the second is "Try it on WhatsApp". "Start free" appears only on pricing and plan screens.
 - The line under every main button: "Free for 14 days. No card. Cancel in WhatsApp."
 - About shows no street address or city (R-55 holds over 24.6's address line until Kabsi has a registered entity).
-- The Weekly Care Report is called the Results Report everywhere (27.3).
+- The weekly report is called "Your weekly report" wherever a reader sees it (B-008, section 50). "Weekly Care Report" and "Results Report" are retired owner words; older sections below that still say "Results Report" are superseded by B-008.
 - While free_scan_daily_cap is 0, the scan box shows the waitlist state (below) instead of running.
 
 ## Shared pieces
@@ -148,7 +148,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 - Short answer box (40 to 60 words), then numbered steps with screenshots, "Common problems", one inline box ("See where you show up" with the scan box), 3 to 5 FAQs, "Google's own help page" link, related guides.
 - End block: "Let Kabsi look after this. Free for 14 days, no card." Button: "See your map".
 - First guides, titles: "How to rank higher on Google Maps" / "Why is my business not showing on Google Maps?" / "How to show up in ChatGPT answers" / "How to get more Google reviews, within Google's rules" / "How to choose your primary category" / "My Google Business Profile is suspended. What now?" / "How to set holiday hours on Google" / "How to reply to Google reviews" / "Someone changed my business info on Google".
-- Rule for the ranking guides: explain what Google says it uses (relevance, distance, prominence) and what an owner controls. No promise that any step raises a rank.
+- Rule for the ranking guides: quote Google's own help page word for word in quotation marks, with its link and the date read (30.32 item 7, K-144), and say what an owner controls. Never say in Kabsi's own words what Google's ranking uses. No promise that any step raises a rank.
 
 ## 7. Industry template (/for/TRADE)
 *Changed by Web 3: every finished industry page is on the light-led Design 6 shell; the H1's last phrase uses the phrase role (ink on ivory, never yellow on ivory). Unfinished pages stay noindex and unlinked.*

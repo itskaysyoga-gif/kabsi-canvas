@@ -172,7 +172,7 @@ export const cafe: Industry = {
     },
     {
       q: "Will Kabsi change my menu prices on Google?",
-      a: "Only when you tell it a price changed, and only after you reply Yes. Kabsi never invents a dish, a price or an offer.",
+      a: "No. Kabsi does not edit prices on Google today, and nothing reaches Google until you approve it.",
     },
     {
       q: "Does Kabsi post to Instagram or my delivery platforms?",

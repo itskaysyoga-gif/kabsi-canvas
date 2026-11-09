@@ -1,5 +1,6 @@
 import { Callout, Steps } from "@/components/marketing/guide-kit";
 import { GuideLink, Out, SiteRef } from "@/components/marketing/guide-links";
+import { KABSI_GROUP_ID } from "@/lib/site";
 import { PUBLISH_ALL_AT } from "./schedule";
 import type { GuideDoc } from "./types";
 
@@ -188,8 +189,8 @@ export const guide: GuideDoc = {
       <>
         <p>
           Kabsi cannot remove anyone from your profile, transfer ownership or request it for you.
-          Kabsi is a Manager on your profile (group ID 5481006796), and on Google only owners can
-          add or remove people. It never asks for your Google password or a verification code.
+          Kabsi is a Manager on your profile (group ID {KABSI_GROUP_ID}), and on Google only owners
+          can add or remove people. It never asks for your Google password or a verification code.
         </p>
         <p>
           What Kabsi does is check your details every day, such as your name, phone, website,

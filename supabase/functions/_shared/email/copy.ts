@@ -68,7 +68,7 @@ export function deletionDone(business: string, appUrl: string): EmailContent {
     subject: `${business}: deleted from Kabsi`, preheader: "Your business data is deleted.", title: "Deleted",
     bodyHtml: p(`We deleted <strong>${esc(business)}</strong> and its data from Kabsi. Your Kabsi review link and QR code no longer open your review page, and neither does any NFC card that carries them. If Kabsi is still a Manager on your Google profile, remove the Kabsi Clients group (ID ${KABSI_GROUP_ID}) under People and access.`),
     button: { label: "Open Kabsi", url: `${appUrl}/app` },
-    text: `We deleted ${business} and its data from Kabsi. If Kabsi is still a Manager on your Google profile, remove the Kabsi Clients group (ID ${KABSI_GROUP_ID}) under People and access.\n\nOpen Kabsi: ${appUrl}/app`,
+    text: `We deleted ${business} and its data from Kabsi. Your Kabsi review link and QR code no longer open your review page, and neither does any NFC card that carries them. If Kabsi is still a Manager on your Google profile, remove the Kabsi Clients group (ID ${KABSI_GROUP_ID}) under People and access.\n\nOpen Kabsi: ${appUrl}/app`,
   };
 }
 
