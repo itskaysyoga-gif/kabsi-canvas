@@ -13,7 +13,14 @@ import type { BookDb } from "./book.ts";
 /** RB-E: the request book in memory, close to the RB-C1 and PR B functions (the gate, the proposals, create, get, find). */
 type Intake = { id: string; location: string; raw: string; evidence: Record<string, unknown>; state: string; provider: string | null; by: string; expires: number };
 type Req = { id: string; location: string; number: number; kind: string; status: string; summary: string; customer_name: string | null; phones: string[];
-  requested_window_text: string | null; starts_at: string | null; intake_id: string | null; by: string; created_at: string };
+  requested_window_text: string | null; starts_at: string | null; intake_id: string | null; by: string; created_at: string;
+  // RB-F: what PR B's writes change.
+  outcome?: string | null; version?: number; details?: Record<string, unknown>; staff_confirmed_at?: string | null; customer_confirmed_at?: string | null;
+  customer_id?: string; converted_from?: string | null };
+/** RB-F: one activity of a request, as request_activities holds it (ids, codes and the values a correction changed). */
+type Activity = { id: string; location: string; request: string; type: string; from: string | null; to: string | null; fromOutcome: string | null;
+  toOutcome: string | null; flags: string[]; actor: string; role: string; at: number; undoOf: string | null; related: string | null;
+  values: { field: string; before: unknown; after: unknown }[] };
 
 export const PNID = "1310486382156171";
 // Monday 26 Oct 2026, 15:00 UTC: 11:00 in New York, 15:00 in London, 17:00 in Beirut, 19:00 in Dubai.
@@ -99,6 +106,8 @@ export class World {
   packs = new Map<string, { pack: string; version: number; state: "off" | "test" }>();
   intakes = new Map<string, Intake>();
   requests: Req[] = [];
+  /** RB-F: every request activity, in order. */
+  activities: Activity[] = [];
   toolKeys = new Map<string, { hash: string; result: Record<string, unknown> }>();
   /** Every request book call, as "function:location:actor". */
   bookCalls: string[] = [];
@@ -573,9 +582,45 @@ export class World {
     };
     const finish = (loc: string, key: string, hash: string, result: Record<string, unknown>) => (w.toolKeys.set(`${loc}:${key}`, { hash, result }), result);
     const uid = () => `00000000-0000-4000-9000-${String(++w.n).padStart(12, "0")}`;
-    const row = (q: Req) => ({ request_id: q.id, number: q.number, kind: q.kind, status: q.status, outcome: null, summary: q.summary, customer_id: `c-${q.id}`,
-      customer_name: q.customer_name, requested_window_text: q.requested_window_text, starts_at: q.starts_at, staff_confirmed: false, customer_confirmed: false,
-      next_action: null, next_action_due_at: null, follow_up_user_id: null, created_at: q.created_at });
+    const row = (q: Req) => ({ request_id: q.id, number: q.number, kind: q.kind, status: q.status, outcome: q.outcome ?? null, summary: q.summary,
+      customer_id: q.customer_id ?? `c-${q.id}`, customer_name: q.customer_name, requested_window_text: q.requested_window_text, starts_at: q.starts_at,
+      staff_confirmed: !!q.staff_confirmed_at, customer_confirmed: !!q.customer_confirmed_at, next_action: null, next_action_due_at: null, follow_up_user_id: null,
+      created_at: q.created_at });
+    const roleOf = (loc: string, actor: string) => w.biz.find((b) => b.id === loc)?.members[actor] ?? "staff";
+    const act = (loc: string, q: Req, type: string, actor: string, from: string | null, to: string | null, fromOutcome: string | null, toOutcome: string | null,
+      o: { flags?: string[]; undoOf?: string | null; related?: string | null; values?: Activity["values"] } = {}): Activity => {
+      const a: Activity = { id: uid(), location: loc, request: q.id, type, from, to, fromOutcome, toOutcome, flags: o.flags ?? [], actor, role: roleOf(loc, actor),
+        at: w.now + w.activities.length, undoOf: o.undoOf ?? null, related: o.related ?? null, values: o.values ?? [] };
+      w.activities.push(a);
+      return a;
+    };
+    const result = (q: Req, a: Activity, flags: string[] = []) => ({ ok: true, request_id: q.id, number: q.number, kind: q.kind, status: q.status,
+      outcome: q.outcome ?? null, row_version: q.version ?? 1, activity_id: a.id, flags });
+    // private.rb_rule, as policy.ts and the database have it.
+    const rule = (kind: string, from: string, to: string, outcome: string | null, startsAt: string | null) => {
+      const passed = !!startsAt && Date.parse(startsAt) <= w.now;
+      const r = (reason: string | null, ack = false, owner = false, flags: string[] = []) => ({ reason, ack, owner, flags });
+      if (to === from) return r("no_change");
+      if (to === "closed") {
+        if (!outcome) return r("outcome_required");
+        if (outcome === "voided") return r("not_allowed");
+        if (outcome === "converted") return r("use_convert");
+        if (kind === "enquiry" && outcome === "lost") return r(null, true, true);
+        if (outcome === "cancelled" && (kind === "appointment" || kind === "job")) return r(null, true, true);
+        if (kind === "appointment" && outcome === "attended") return !startsAt ? r(null, true, false, ["attended_without_time"]) : !passed ? r(null, true, false, ["attended_before_time"]) : r(null);
+        if (outcome === "no_show" && (kind === "appointment" || (kind === "job" && from === "waiting"))) return passed ? r(null) : r(null, true, false, ["no_show_before_time"]);
+        if (kind === "job" && outcome === "completed") return from === "waiting" ? r(null, true, false, ["arrival_not_recorded"]) : r(null);
+        return r("not_allowed");
+      }
+      if (outcome) return r("not_allowed");
+      const k = `${kind}:${from}:${to}`;
+      if (["enquiry:new:contacted", "job:waiting:active", "job:active:ready", "job:ready:active"].includes(k)) return r(null);
+      if (k === "job:waiting:ready") return r(null, true, false, ["arrival_not_recorded"]);
+      return r("not_allowed");
+    };
+    const latest = (req: string) => [...w.activities].reverse()
+      .find((a) => a.request === req && a.type !== "undone" && !w.activities.some((u) => u.undoOf === a.id))?.id ?? null;
+    const mine = (loc: string, id: string) => w.requests.find((x) => x.location === loc && x.id === id);
     const call = (fn: string, loc: string, actor: string) => w.bookCalls.push(`${fn}:${loc}:${actor}`);
     return {
       async on(ids) {
@@ -639,30 +684,213 @@ export class World {
         if (phones.some((p) => !/^\+\d+55501\d\d$/.test(p))) return no("real_data_refused");
         if (i) i.state = "confirmed";
         const number = w.requests.filter((x) => x.location === loc).length + 1;
-        const q: Req = { id: uid(), location: loc, number, kind: String(input.kind), status: input.kind === "job" ? "waiting" : input.kind === "enquiry" ? "new" : "requested",
+        if (input.initial_status !== undefined && (input.kind !== "job" || !["waiting", "active"].includes(String(input.initial_status)))) return no("invalid_field");
+        const q: Req = { id: uid(), location: loc, number, kind: String(input.kind),
+          status: input.kind === "job" ? String(input.initial_status ?? "waiting") : input.kind === "enquiry" ? "new" : "requested",
           summary: String(input.summary), customer_name: (input.customer_name as string) ?? null, phones, requested_window_text: (input.requested_window_text as string) ?? null,
-          starts_at: (input.starts_at as string) ?? null, intake_id: i?.id ?? null, by: actor, created_at: new Date(w.now).toISOString() };
+          starts_at: (input.starts_at as string) ?? null, intake_id: i?.id ?? null, by: actor, created_at: new Date(w.now).toISOString(),
+          outcome: null, version: 1, details: (input.details as Record<string, unknown>) ?? {}, staff_confirmed_at: null, customer_confirmed_at: null,
+          customer_id: `c-${uid()}`, converted_from: null };
         w.requests.push(q);
-        return finish(loc, key, r.hash, { ok: true, request_id: q.id, number, kind: q.kind, status: q.status, outcome: null, row_version: 1, activity_id: uid(), flags: [] });
+        const a = act(loc, q, "created", actor, null, q.status, null, null);
+        return finish(loc, key, r.hash, { ok: true, request_id: q.id, number, kind: q.kind, status: q.status, outcome: null, row_version: 1, activity_id: a.id, flags: [] });
       },
       async get(loc, actor, ref) {
         call("get", loc, actor);
         const g = gate(loc, actor);
         if (g) return no(g);
         const n = Number(ref.replace("#", ""));
-        const q = w.requests.find((x) => x.location === loc && x.number === n);
+        const q = /^[0-9a-f-]{36}$/.test(ref) ? mine(loc, ref) : w.requests.find((x) => x.location === loc && x.number === n);
         if (!q) return no("not_found");
         const r = row(q);
-        return { ok: true, request: { ...r, id: q.id, staff_confirmed_at: null, customer_confirmed_at: null }, customer_name: q.customer_name, customer_erased: false };
+        return { ok: true, request: { ...r, id: q.id, staff_confirmed_at: q.staff_confirmed_at ?? null, customer_confirmed_at: q.customer_confirmed_at ?? null,
+          row_version: q.version ?? 1, details: q.details ?? {} }, customer_name: q.customer_name, customer_erased: false };
       },
       async find(loc, actor, query) {
         call("find", loc, actor);
         const g = gate(loc, actor);
         if (g) return no(g);
+        if (query.text !== undefined) {
+          const words = String(query.text).toLowerCase().split(" ").filter(Boolean);
+          if (!words.length) return no("invalid_field");
+          const hits = w.requests.filter((x) => x.location === loc && words.every((wd) => x.summary.toLowerCase().includes(wd))).reverse();
+          return { ok: true, rows: hits.slice(0, 15).map(row), more: Math.max(0, hits.length - 15) };
+        }
         const name = String(query.name ?? "").toLowerCase();
         if (name.length < 2) return no("invalid_field");
-        const hits = w.requests.filter((x) => x.location === loc && (x.customer_name ?? "").toLowerCase().includes(name)).reverse();
+        const hits = w.requests.filter((x) => x.location === loc && (x.customer_name ?? "").toLowerCase().includes(name))
+          .sort((a, b) => Number(a.status === "closed") - Number(b.status === "closed") || b.number - a.number);
         return { ok: true, rows: hits.slice(0, 15).map(row), more: Math.max(0, hits.length - 15) };
+      },
+      // RB-F: PR B's writes, with the database's rules: the gate, the version, the move table, the owner-only moves, the ask
+      // first, Undo's 10 minutes and latest-only, and a time change clearing the confirmations.
+      async setStatus(loc, actor, key, id, version, to, outcome, ack) {
+        call("set_status", loc, actor);
+        const g = gate(loc, actor);
+        if (g) return no(g);
+        const rp = replay(loc, actor, key, "set_status", { id, version, to, outcome, ack });
+        if (rp.result) return rp.result;
+        const q = mine(loc, id);
+        if (!q) return no("not_found");
+        if (version !== (q.version ?? 1)) return no("version_conflict", { row_version: q.version ?? 1 });
+        if (q.status === "closed") return no("not_allowed");
+        const ru = rule(q.kind, q.status, to, outcome, q.starts_at);
+        if (ru.reason) return no(ru.reason);
+        if (ru.owner && !["owner", "manager"].includes(roleOf(loc, actor))) return no("forbidden");
+        if (ru.ack && !ack) return no("needs_confirmation", { flags: ru.flags });
+        const from = q.status, fromOutcome = q.outcome ?? null;
+        q.status = to;
+        q.outcome = outcome;
+        q.version = (q.version ?? 1) + 1;
+        const a = act(loc, q, "status_changed", actor, from, to, fromOutcome, outcome, { flags: ru.flags });
+        return finish(loc, key, rp.hash, result(q, a, ru.flags));
+      },
+      async setConfirmation(loc, actor, key, id, version, party, confirmed) {
+        call("set_confirmation", loc, actor);
+        const g = gate(loc, actor);
+        if (g) return no(g);
+        const rp = replay(loc, actor, key, "set_confirmation", { id, version, party, confirmed });
+        if (rp.result) return rp.result;
+        const q = mine(loc, id);
+        if (!q) return no("not_found");
+        if (version !== (q.version ?? 1)) return no("version_conflict");
+        if (q.kind !== "appointment") return no("not_appointment");
+        if (q.status === "closed") return no("closed");
+        if (confirmed && !q.starts_at) return no("time_required");
+        const field = party === "staff" ? "staff_confirmed_at" : "customer_confirmed_at";
+        if (!!q[field] === confirmed) return no("no_change");
+        const before = q[field] ?? null;
+        q[field] = confirmed ? new Date(w.now).toISOString() : null;
+        q.version = (q.version ?? 1) + 1;
+        const flags = [`${party}_${confirmed ? "confirmed" : "unconfirmed"}`, ...(party === "customer" ? ["recorded_by_staff"] : [])];
+        const a = act(loc, q, "confirmation_changed", actor, q.status, q.status, null, null, { flags, values: [{ field, before, after: q[field] }] });
+        return finish(loc, key, rp.hash, result(q, a, flags));
+      },
+      async correct(loc, actor, key, id, version, changes) {
+        call("correct", loc, actor);
+        const g = gate(loc, actor);
+        if (g) return no(g);
+        if (roleOf(loc, actor) === "staff") return no("forbidden");
+        const rp = replay(loc, actor, key, "correct", { id, version, changes });
+        if (rp.result) return rp.result;
+        const q = mine(loc, id);
+        if (!q) return no("not_found");
+        if (version !== (q.version ?? 1)) return no("version_conflict");
+        if (q.status === "closed") return no("closed");
+        const values: Activity["values"] = [];
+        const cur = q as unknown as Record<string, unknown>;
+        for (const [f, v] of Object.entries(changes)) {
+          if (JSON.stringify(cur[f] ?? null) === JSON.stringify(v)) continue;
+          values.push({ field: f, before: cur[f] ?? null, after: v });
+        }
+        if (!values.length) return no("no_change");
+        const flags: string[] = [];
+        if (("starts_at" in changes) && (q.staff_confirmed_at || q.customer_confirmed_at)) {
+          values.push({ field: "staff_confirmed_at", before: q.staff_confirmed_at ?? null, after: null },
+            { field: "customer_confirmed_at", before: q.customer_confirmed_at ?? null, after: null });
+          flags.push("confirmations_cleared");
+        }
+        for (const v of values) cur[v.field] = v.after;
+        q.version = (q.version ?? 1) + 1;
+        const a = act(loc, q, "corrected", actor, q.status, q.status, null, null, { flags, values });
+        return finish(loc, key, rp.hash, result(q, a, flags));
+      },
+      async convert(loc, actor, key, id, version, input) {
+        call("convert", loc, actor);
+        const g = gate(loc, actor);
+        if (g) return no(g);
+        const rp = replay(loc, actor, key, "convert", { id, version, input });
+        if (rp.result) return rp.result;
+        const e = mine(loc, id);
+        if (!e) return no("not_found");
+        if (version !== (e.version ?? 1)) return no("version_conflict");
+        if (e.kind !== "enquiry") return no("not_enquiry");
+        if (e.status === "closed") return no("closed");
+        const kind = String(input.kind ?? "appointment");
+        const n: Req = { id: uid(), location: loc, number: w.requests.filter((x) => x.location === loc).length + 1, kind, status: kind === "job" ? "waiting" : "requested",
+          summary: String(input.summary ?? e.summary), customer_name: e.customer_name, phones: e.phones, requested_window_text: (input.requested_window_text as string) ?? e.requested_window_text,
+          starts_at: (input.starts_at as string) ?? null, intake_id: null, by: actor, created_at: new Date(w.now).toISOString(), outcome: null, version: 1, details: {},
+          staff_confirmed_at: null, customer_confirmed_at: null, customer_id: e.customer_id, converted_from: e.id };
+        w.requests.push(n);
+        const from = e.status;
+        e.status = "closed";
+        e.outcome = "converted";
+        e.version = (e.version ?? 1) + 1;
+        const out = act(loc, e, "converted_out", actor, from, "closed", null, "converted", { related: n.id });
+        const inn = act(loc, n, "converted_in", actor, null, n.status, null, null, { related: e.id });
+        return finish(loc, key, rp.hash, { ...result(n, inn), enquiry_id: e.id, enquiry_activity_id: out.id });
+      },
+      async undo(loc, actor, key, activity) {
+        call("undo", loc, actor);
+        const g = gate(loc, actor);
+        if (g) return no(g);
+        const rp = replay(loc, actor, key, "undo", { activity });
+        if (rp.result) return rp.result;
+        const a = w.activities.find((x) => x.id === activity && x.location === loc);
+        if (!a) return no("not_found");
+        if (!["owner", "manager"].includes(roleOf(loc, actor)) && a.actor !== actor) return no("forbidden");
+        if (a.type === "undone") return no("not_undoable");
+        if (w.activities.some((u) => u.undoOf === a.id)) return no("already_undone");
+        const pair = a.type.startsWith("converted") ? w.activities.find((x) => x.request === a.related && x.related === a.request && x.type.startsWith("converted")) : null;
+        if (latest(a.request) !== a.id || (pair && latest(pair.request) !== pair.id)) return no("not_latest");
+        if (w.now - a.at > 10 * 60_000) return no("window_passed");
+        const q = mine(loc, a.request)!;
+        let u: Activity;
+        if (a.type === "created") {
+          const from = q.status;
+          q.status = "closed";
+          q.outcome = "voided";
+          if (q.intake_id) w.intakes.get(q.intake_id)!.state = "pending";
+          u = act(loc, q, "undone", actor, from, "closed", null, "voided", { undoOf: a.id });
+        } else if (a.type === "status_changed") {
+          q.status = a.from!;
+          q.outcome = a.fromOutcome;
+          u = act(loc, q, "undone", actor, a.to, q.status, a.toOutcome, q.outcome, { undoOf: a.id });
+        } else if (a.type === "corrected" || a.type === "confirmation_changed") {
+          const cur = q as unknown as Record<string, unknown>;
+          for (const v of a.values) cur[v.field] = v.before;
+          u = act(loc, q, "undone", actor, q.status, q.status, null, null, { undoOf: a.id });
+        } else {
+          const enq = a.type === "converted_out" ? a : pair!;
+          const neu = a.type === "converted_out" ? pair! : a;
+          const e = mine(loc, enq.request)!, n = mine(loc, neu.request)!;
+          e.status = enq.from!;
+          e.outcome = null;
+          n.status = "closed";
+          n.outcome = "voided";
+          e.version = (e.version ?? 1) + 1;
+          n.version = (n.version ?? 1) + 1;
+          u = act(loc, e, "undone", actor, "closed", e.status, "converted", null, { undoOf: enq.id, related: n.id });
+          act(loc, n, "undone", actor, neu.to, "closed", null, "voided", { undoOf: neu.id, related: e.id });
+          return finish(loc, key, rp.hash, result(e, u));
+        }
+        q.version = (q.version ?? 1) + 1;
+        return finish(loc, key, rp.hash, result(q, u));
+      },
+      async listOpen(loc, actor, filter) {
+        call("list_open", loc, actor);
+        const g = gate(loc, actor);
+        if (g) return no(g);
+        const hits = w.requests.filter((x) => x.location === loc && x.status !== "closed"
+          && (filter.status === undefined || x.status === filter.status)
+          && (filter.unconfirmed === undefined || (x.kind === "appointment" && (!x.staff_confirmed_at || !x.customer_confirmed_at) === filter.unconfirmed)))
+          .reverse();
+        return { ok: true, rows: hits.slice(0, 15).map(row), more: Math.max(0, hits.length - 15) };
+      },
+      async recent(loc, actor, minutes) {
+        call("recent", loc, actor);
+        const g = gate(loc, actor);
+        if (g) return no(g);
+        const since = w.now - minutes * 60_000;
+        const seen = new Map<string, number>();
+        for (const a of w.activities) {
+          if (a.location !== loc || a.actor !== actor || a.at <= since || a.type === "undone" || w.activities.some((u) => u.undoOf === a.id)) continue;
+          seen.set(a.request, Math.max(seen.get(a.request) ?? 0, a.at));
+        }
+        const own = (id: string | null) => (id && w.activities.find((a) => a.id === id)?.actor === actor ? id : null);
+        const rows = [...seen.entries()].sort((x, y) => y[1] - x[1]).slice(0, 5)
+          .map(([id, t]) => ({ request_id: id, number: mine(loc, id)!.number, kind: mine(loc, id)!.kind, touched_at: new Date(t).toISOString(), latest_activity_id: own(latest(id)) }));
+        return { ok: true, rows };
       },
     };
   }

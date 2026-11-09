@@ -63,6 +63,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 9 Nov 2026, RB-F (PR 525): request book update, confirm, convert, correct, Undo and what's open, no model; test businesses applied. `2026-11-09-rb-f.md`.
 - 9 Nov 2026, Sync 2b part B (PR 527, live on kabsi.co): the legal lines (privacy 3 and 15, LEG-07 to LEG-21, terms 9). Not legal advice; listed for Gate 3. `2026-11-09-sync2b.md`.
 - 9 Nov 2026, Sync 2b part A (PR 523): Outbound offers only the free check and opens only GB (applied); salons first. `2026-11-09-sync2b.md`.
 - 9 Nov 2026, Sync 2a (R-142, answers to Sync 1): part 0 plan 30.46 (PR 522); part 1 early access, booking words, no API, hand-off (PR 524); part 2 renewals retired, billing words, templates, Nora (PR 526); part 3 the 11 plain fixes, seven baselines (PR 529); live. `2026-11-09-sync2a.md`.

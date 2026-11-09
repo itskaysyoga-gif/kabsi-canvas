@@ -240,6 +240,18 @@ export const bookDb: BookDb = {
   create: (l, a, k, input) => rpc<Json>("request_create", { p_location: l, p_actor: a, p_key: k, p_input: input }),
   get: (l, a, ref) => rpc<Json>("request_get", { p_location: l, p_actor: a, p_ref: ref }),
   find: (l, a, q) => rpc<Json>("request_find", { p_location: l, p_actor: a, p_query: q }),
+  // RB-F: the PR B writes and the reads behind update, confirm, convert, correct, Undo and what's open.
+  setStatus: (l, a, k, r, v, to, outcome, ack) => rpc<Json>("request_set_status", {
+    p_location: l, p_actor: a, p_key: k, p_request: r, p_expected_version: v, p_to_status: to, p_outcome: outcome, p_acknowledged: ack,
+  }),
+  setConfirmation: (l, a, k, r, v, party, confirmed) => rpc<Json>("request_set_confirmation", {
+    p_location: l, p_actor: a, p_key: k, p_request: r, p_expected_version: v, p_party: party, p_confirmed: confirmed,
+  }),
+  correct: (l, a, k, r, v, changes) => rpc<Json>("request_correct", { p_location: l, p_actor: a, p_key: k, p_request: r, p_expected_version: v, p_changes: changes }),
+  convert: (l, a, k, r, v, input) => rpc<Json>("request_convert_enquiry", { p_location: l, p_actor: a, p_key: k, p_request: r, p_expected_version: v, p_input: input }),
+  undo: (l, a, k, act) => rpc<Json>("request_undo", { p_location: l, p_actor: a, p_key: k, p_activity: act }),
+  listOpen: (l, a, f) => rpc<Json>("request_list_open", { p_location: l, p_actor: a, p_filter: f }),
+  recent: (l, a, m) => rpc<Json>("request_recent", { p_location: l, p_actor: a, p_minutes: m }),
 };
 
 /** The extraction call (RB-D's extract.ts): the check model, under its own ceiling for the whole number (R-45), as the intent router. */
