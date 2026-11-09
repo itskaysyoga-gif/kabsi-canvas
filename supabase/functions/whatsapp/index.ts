@@ -89,6 +89,11 @@ async function webhook(req: Request, opts: { background?: (p: Promise<unknown>) 
         on: ctx.on,
         statusUpdate: async (s) => {
           await ctx.db.statusUpdate(s.messageId, s.status, s.error);
+          // RB-F: how Meta charges each delivered message (billable and category only), to count messages per request.
+          if (s.pricing) {
+            await admin().from("whatsapp_message_pricing").upsert({ provider_id: s.messageId, billable: s.pricing.billable, category: s.pricing.category,
+              pricing_model: s.pricing.model, recorded_at: new Date().toISOString() }).then(() => {}, () => {});
+          }
           await admin().from("whatsapp_outbox").update({ state: s.status === "failed" ? "failed" : "sent", error: s.error })
             .eq("provider_id", s.messageId).in("state", ["sent", "held"]).then(() => {}, () => {});
         },

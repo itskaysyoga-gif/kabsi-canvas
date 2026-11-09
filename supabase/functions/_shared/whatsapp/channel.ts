@@ -46,7 +46,10 @@ export type Inbound = {
   // past 5 forwards). A forwarded message is never the person's own yes, no, number answer or code (router.ts).
   forwarded: boolean;
 };
-export type StatusEvent = { messageId: string; status: "sent" | "delivered" | "read" | "failed"; error: string | null };
+export type StatusEvent = { messageId: string; status: "sent" | "delivered" | "read" | "failed"; error: string | null;
+  /** RB-F: Meta's price facts for the message (statuses[].pricing), when the receipt carries them. No person, no text. */
+  pricing?: Pricing | null };
+export type Pricing = { billable: boolean | null; category: string | null; model: string | null };
 
 type Obj = Record<string, unknown>;
 const obj = (v: unknown): Obj => (v && typeof v === "object" && !Array.isArray(v) ? (v as Obj) : {});
@@ -87,10 +90,22 @@ export function parseWebhook(event: string | null, body: unknown): { messages: I
       });
     } else if (["sent", "delivered", "read", "failed"].includes(String(k.status))) {
       const errs = (Array.isArray(k.statuses) ? (k.statuses as unknown[]) : []).flatMap((s) => (Array.isArray(obj(s).errors) ? (obj(s).errors as unknown[]) : []));
-      statuses.push({ messageId: id, status: k.status as StatusEvent["status"], error: errs.length ? String(obj(errs[0]).title ?? obj(errs[0]).message ?? "failed") : null });
+      const pricing = pricingOf(k.statuses);
+      statuses.push({ messageId: id, status: k.status as StatusEvent["status"], error: errs.length ? String(obj(errs[0]).title ?? obj(errs[0]).message ?? "failed") : null,
+        ...(pricing ? { pricing } : {}) });
     }
   }
   return { messages, statuses };
+}
+
+/** RB-F: the last pricing object Meta put on the message's receipts: billable, category and the pricing model, nothing else. */
+export function pricingOf(list: unknown): Pricing | null {
+  const all = (Array.isArray(list) ? list : []).map((x) => obj(obj(x).pricing)).filter((p) => Object.keys(p).length);
+  const p = all.at(-1);
+  if (!p) return null;
+  const word = (v: unknown, re: RegExp) => (typeof v === "string" && re.test(v) ? v : null);
+  return { billable: typeof p.billable === "boolean" ? p.billable : null, category: word(p.category, /^[a-z][a-z_]{0,40}$/),
+    model: word(p.pricing_model, /^[A-Za-z][A-Za-z_]{0,40}$/) };
 }
 
 // F-1: Kapso's v2 message carries Meta's message object, context included. Either flag set means forwarded; a message

@@ -13,6 +13,7 @@ import { type Ai, isRequestTool, route } from "./intent.ts";
 import {
   BOOK_SAY, bookOn, type BookDeps, createInput, findReply, ON_IT_REQUEST_MS, type Pack, PROPOSAL_OPEN_MS, proposalButtons, readRequest, type Ref,
   refOf, refusalReply, requestSummary, rowOf, savedText, toEvidence,
+  type Act, arrivedLine, askAnswer, parseBookCommand, type RbAsk, type RbTime, runCommand, timePicked, undoButton, undoIds,
 } from "./book.ts";
 import { photoRefusal, voiceCheck } from "./media.ts";
 import { MAX_BYTES } from "../photos/sniff.ts";
@@ -229,7 +230,7 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   }
   // F-1: a forwarded "Yes" is not the owner's own yes. With something waiting for a yes, nothing is approved and the owner is
   // asked to tap Yes or type it; with nothing waiting it is free text like any other forwarded message.
-  if (cmd.k === "free" && cmd.forwardedYes && businesses(who).length && (await d.db.openItems(phone)).length) {
+  if (cmd.k === "free" && cmd.forwardedYes && businesses(who).length && (RB_QUESTIONS.includes(conv?.open_question?.type ?? "") || (await d.db.openItems(phone)).length)) {
     return answered(t, SAY.forwardedYes, "forwarded_yes");
   }
   // F-1: a forwarded yes, no or number never answers Kabsi's own questions (the search, hours, the monthly question).
@@ -303,6 +304,7 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   // RB-E: the request book seam. After every step that uses no AI and before the intent router, one check reads whether
   // the request book is on for the business; when it is off, or the message is not one the book reads, nothing changes.
   if (cmd.k === "request") return (await bookButton(t, cmd)) ?? answered(t, SAY.alreadyHandled, "request_off");
+  if (cmd.k === "rbook") return (await bookTap(t, cmd)) ?? answered(t, SAY.alreadyHandled, "request_off");
   const booked = await bookSeam(t, cmd);
   if (booked) return booked;
 
@@ -1164,7 +1166,10 @@ async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
   const text = (t.m.text ?? "").trim();
   const words = cmd.k === "free" || (cmd.k === "tool" && ["hours", "post", "billing"].includes(cmd.tool));
   const ref: Ref | null = cmd.k === "number" ? { number: cmd.n, word: null } : words ? refOf(text) : null;
-  const answer = (cmd.k === "yes" || cmd.k === "no") && t.who.conversation?.open_question?.type === "rb_proposal";
+  const oq = t.who.conversation?.open_question;
+  // RB-F: a typed yes or no to a question asked before a change, or to the one reading of a time.
+  if ((cmd.k === "yes" || cmd.k === "no") && (oq?.type === "rb_ask" || oq?.type === "rb_time")) return await bookAnswer(t, cmd.k === "yes", oq);
+  const answer = (cmd.k === "yes" || cmd.k === "no") && oq?.type === "rb_proposal";
   if (!ref && cmd.k !== "free" && !answer) return null;
   const bt = await bookCheck(t);
   if (!bt) return null;
@@ -1193,6 +1198,16 @@ async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
     await db.discard(b.location_id, b.user_id, `discard:${t.m.messageId}`, bt.open.intake_id).catch(() => null);
     await t.d.db.setConv(t.phone, { open_question: null });
     return answered(tb, BOOK_SAY.dropped, "request_dropped");
+  }
+  // RB-F: update, confirm, convert, correct, Undo and what's open, read by code with no model.
+  if (b && cmd.k !== "number") {
+    const pack = bt.on.get(b.location_id)!;
+    const c = parseBookCommand(text, pack);
+    if (c) {
+      const act = await runCommand(db, { location: b.location_id, actor: b.user_id }, c, bookCtx(t, b, pack), t.m.messageId).catch(() => "error" as const);
+      if (act === "error") return answered(withB(t, b), BOOK_SAY.tryAgain, "request_db_error");
+      if (act) return await bookAct(withB(t, b), act);
+    }
   }
   if (ref) {
     // A number at a phone with several businesses and none chosen: the existing question first, then the number again.
@@ -1258,7 +1273,10 @@ async function requestToolInner(t: Turn, bt: BookTurn, tool: string, arg: string
   }
   const at = new Date((t.d.now ?? Date.now)()).toISOString();
   await t.d.db.setConv(t.phone, { open_question: { type: "rb_proposal", location_id: b.location_id, intake_id: intake, at } satisfies OpenQuestion });
-  return said(tb, r.ex.reply.body, revising ? "request_revised" : "request_proposed", proposalButtons(r.ex.reply, r.ex, intake));
+  // RB-F: a job the owner's words say is already in is saved as in; the proposal says so before Save.
+  const arrived = arrivedLine(pack, r.ex.text);
+  const body = arrived ? r.ex.reply.body.replace(/\n(?=[^\n]*$)/, `\n${arrived}\n`) : r.ex.reply.body;
+  return said(tb, body, revising ? "request_revised" : "request_proposed", proposalButtons(r.ex.reply, r.ex, intake));
 }
 
 /** Save, Change, or a reading under a proposal. The proposal is looked up only in the phone's own businesses. */
@@ -1304,7 +1322,7 @@ async function bookSaveInner(tb: Turn, b: BusinessRole, pack: Pack, intakeId: st
   if (g.state === "confirmed") return answered(tb, SAY.alreadyHandled, "request_already_saved");
   if (g.state === "expired") return answered(tb, BOOK_SAY.expired, "request_expired");
   if (g.state !== "pending") return answered(tb, refusalReply({ reason: "intake_unavailable" }).body, `request_unavailable:${g.state}`);
-  const built = createInput(pack, (g.field_evidence ?? {}) as Record<string, unknown>, intakeId, pick);
+  const built = createInput(pack, (g.field_evidence ?? {}) as Record<string, unknown>, intakeId, pick, typeof g.raw_text === "string" ? g.raw_text : null);
   if (!built.ok) {
     return answered(tb, built.why === "needs_tap" ? BOOK_SAY.tapReading : `Still needed: ${built.missing.join(", ")}. Nothing is saved yet.`, `request_save_${built.why}`);
   }
@@ -1318,7 +1336,101 @@ async function bookSaveInner(tb: Turn, b: BusinessRole, pack: Pack, intakeId: st
   if (q?.type === "rb_proposal" && q.intake_id === intakeId) await tb.d.db.setConv(tb.phone, { open_question: null });
   const row = rowOf(await db.get(b.location_id, b.user_id, String(c.number)).catch(() => ({})));
   const body = row ? savedText(row, bookCtx(tb, b, pack)).body : `${pack.words.kinds[pack.defaultKind]?.singular ?? "Request"} ${c.number} saved.`;
-  return answered(tb, body, c.replay ? "request_saved_replay" : "request_saved");
+  return answered(tb, body, c.replay ? "request_saved_replay" : "request_saved", undoButton([String(c.activity_id)]));
+}
+
+// ─── RB-F: the questions and buttons of update, confirm, convert and Undo.
+
+const RB_QUESTIONS = ["rb_proposal", "rb_ask", "rb_time"];
+/** How long a question asked before a change, or a time waiting for a tap, stays open. */
+const RB_QUESTION_MS = 30 * 60_000;
+
+/** Sends what a command did, and opens or closes its question. */
+async function bookAct(tb: Turn, act: Act): Promise<string> {
+  if (act.question !== undefined) {
+    const q = tb.who.conversation?.open_question;
+    // Only a request book question is closed here; another kind of question is left as it was.
+    if (act.question || RB_QUESTIONS.includes(q?.type ?? "")) await tb.d.db.setConv(tb.phone, { open_question: act.question });
+  }
+  return answered(tb, act.body, act.result, act.buttons?.length ? act.buttons : undefined);
+}
+
+/** A typed yes or no while a question about a change or a time is open. The question names its own business. */
+async function bookAnswer(t: Turn, yes: boolean, q: RbAsk | RbTime): Promise<string | null> {
+  const qb = businesses(t.who).find((x) => x.location_id === q.location_id);
+  const fresh = (t.d.now ?? Date.now)() - Date.parse(q.at) < RB_QUESTION_MS;
+  const on = qb && fresh ? await bookOn(t.d.book!.db, [qb.location_id]) : new Map<string, Pack>();
+  if (!qb || !on.size) {
+    // Too old, or the business is no longer this phone's or no longer on: the question closes and the word keeps today's meaning.
+    await t.d.db.setConv(t.phone, { open_question: null });
+    return null;
+  }
+  const active = pickBusiness(t.who);
+  const tb = withB(t, qb);
+  // Another business is chosen now: the yes is held back, never counted there.
+  if (active && active.location_id !== qb.location_id) return answered(tb, "A question about this business is waiting. Tap Yes or No on it.", "request_question_elsewhere");
+  const me = { location: qb.location_id, actor: qb.user_id };
+  const ctx = bookCtx(t, qb, on.get(qb.location_id)!);
+  try {
+    if (q.type === "rb_ask") return await bookAct(tb, await askAnswer(t.d.book!.db, me, q, yes, ctx, t.m.messageId));
+    if (!yes) return await bookAct(tb, { body: "Okay. Nothing was changed.", result: "request_time_no", question: null });
+    if (q.readings.length !== 1) return answered(tb, "Tap the time you meant on the message above. Nothing is changed yet.", "request_time_tap");
+    return await bookAct(tb, await timePicked(t.d.book!.db, me, q, 0, ctx, t.m.messageId));
+  } catch {
+    return answered(tb, BOOK_SAY.tryAgain, "request_db_error");
+  }
+}
+
+/** Yes, No, Undo or a time under a request book reply. The ids are looked up only in this phone's own businesses. */
+async function bookTap(t: Turn, cmd: Extract<Command, { k: "rbook" }>): Promise<string | null> {
+  if (!t.d.book) return null;
+  const list = businesses(t.who);
+  if (!list.length) return null;
+  const q = t.who.conversation?.open_question;
+  if (cmd.action !== "undo") {
+    // Yes, No and a time answer the question that is open, and only that one: an old button finds it closed.
+    const open = (q?.type === "rb_ask" || q?.type === "rb_time") && q.request_id === cmd.ids[0] ? q : null;
+    if (!open) return answered(t, SAY.alreadyHandled, "request_question_closed");
+    if (cmd.action === "time") {
+      if (open.type !== "rb_time") return answered(t, SAY.alreadyHandled, "request_question_closed");
+      const qb = list.find((x) => x.location_id === open.location_id);
+      const on = qb ? await bookOn(t.d.book.db, [qb.location_id]) : new Map<string, Pack>();
+      if (!qb || !on.size) return answered(t, SAY.alreadyHandled, "request_question_closed");
+      const tb = withB(t, qb);
+      try {
+        return await bookAct(tb, await timePicked(t.d.book.db, { location: qb.location_id, actor: qb.user_id }, open, cmd.pick ?? 0,
+          bookCtx(t, qb, on.get(qb.location_id)!), t.m.messageId));
+      } catch {
+        return answered(tb, BOOK_SAY.tryAgain, "request_db_error");
+      }
+    }
+    if (open.type !== "rb_ask") return answered(t, SAY.alreadyHandled, "request_question_closed");
+    const qb = list.find((x) => x.location_id === open.location_id);
+    const on = qb ? await bookOn(t.d.book.db, [qb.location_id]) : new Map<string, Pack>();
+    if (!qb || !on.size) return answered(t, SAY.alreadyHandled, "request_question_closed");
+    const tb = withB(t, qb);
+    try {
+      return await bookAct(tb, await askAnswer(t.d.book.db, { location: qb.location_id, actor: qb.user_id }, open, cmd.action === "ask_yes",
+        bookCtx(t, qb, on.get(qb.location_id)!), t.m.messageId));
+    } catch {
+      return answered(tb, BOOK_SAY.tryAgain, "request_db_error");
+    }
+  }
+  // Undo: the activity belongs to one business; the database answers not_found for any other, so each of the phone's
+  // businesses with the book on is tried, the active one first.
+  const on = await bookOn(t.d.book.db, list.map((x) => x.location_id));
+  const first = t.who.conversation?.active_location_id ?? null;
+  const order = [...list].sort((x, y) => Number(y.location_id === first) - Number(x.location_id === first)).filter((x) => on.has(x.location_id));
+  for (const b of order) {
+    const tb = withB(t, b);
+    try {
+      const act = await undoIds(t.d.book.db, { location: b.location_id, actor: b.user_id }, cmd.ids, bookCtx(t, b, on.get(b.location_id)!), t.m.messageId);
+      if (act) return await bookAct(tb, act);
+    } catch {
+      return answered(tb, BOOK_SAY.tryAgain, "request_db_error");
+    }
+  }
+  return answered(t, SAY.alreadyHandled, "request_undo_unknown");
 }
 
 // ─── Free text: the intent router, with "On it" first when it takes a moment.

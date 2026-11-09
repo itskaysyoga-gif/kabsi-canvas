@@ -142,7 +142,8 @@ Deno.test("capture: one proposal with Save and Change, nothing saved; Save makes
   assert.equal(q.location, SALON);
   assert.equal(q.by, TEST_USER);
   assert.match(last(w).body, /Appointment 1 saved\.\n#1 Sarah · Highlights · Thursday afternoon, no time set · Requested/);
-  assert.deepEqual(last(w).buttons, [], "Undo comes with RB-F");
+  // RB-F: Undo is offered for 10 minutes, by the creation's activity id.
+  assert.deepEqual(last(w).buttons, ["Undo"]);
   // The key of the Save is the WhatsApp id of the tap.
   assert.ok(w.toolKeys.has(`${SALON}:wamid.save.1`));
   assert.equal(w.conversation(TEST).open_question, null);
@@ -287,9 +288,14 @@ Deno.test("words: closed, cancel and post keep today's meaning alone and mean a 
   const w = bookWorld();
   await send(w, TEST, { text: "Book Sarah for highlights Thursday afternoon" });
   await send(w, TEST, { button: `rs:${lastIntake(w).id}` });
-  for (const t of ["closed 1", "cancel 1", "post 1", "Cancel #1"]) {
-    assert.match(await send(w, TEST, { text: t }), /^request_ref_(closed|cancel|post)$/, t);
-    assert.match(last(w).body, /Appointment 1 for Sarah[\s\S]*Changing a request here is not switched on yet\. Nothing was changed\./);
+  // RB-F: "closed 1" shows the request and asks how it ended; "post 1" shows it; "cancel 1" asks first (it ends the request).
+  assert.equal(await send(w, TEST, { text: "closed 1" }), "request_ref_closed");
+  assert.match(last(w).body, /Appointment 1 for Sarah[\s\S]*Say how it ended/);
+  assert.equal(await send(w, TEST, { text: "post 1" }), "request_ref_post");
+  assert.match(last(w).body, /Appointment 1 for Sarah/);
+  for (const t of ["cancel 1", "Cancel #1"]) {
+    assert.equal(await send(w, TEST, { text: t }), "request_status_ask", t);
+    assert.match(last(w).body, /This closes Appointment 1 as Cancelled\.\nGo ahead\?/);
   }
   assert.equal(await send(w, TEST, { text: "cancel" }), "billing_stub");
   assert.equal(await send(w, TEST, { text: "post" }), "post_ask");
@@ -399,7 +405,9 @@ Deno.test("words: forwarded text never saves and never reaches the request book 
   const w = bookWorld();
   await send(w, TEST, { text: "Book Sarah for highlights Thursday afternoon" });
   const before = w.bookCalls.length;
-  assert.match(await send(w, TEST, { text: "Yes", forwarded: true }), /^(unclear|nora)/);
+  // F-1 with a request draft waiting (RB-F): the looks forwarded line, and the draft still waits.
+  assert.equal(await send(w, TEST, { text: "Yes", forwarded: true }), "forwarded_yes");
+  assert.match(last(w).body, /That looks forwarded, so I did not count it as your yes/);
   assert.match(await send(w, TEST, { text: "Book Maya for a trim Friday", forwarded: true }), /^(unclear|nora)/);
   assert.match(await send(w, TEST, { text: "1", forwarded: true }), /^(unclear|nora)/);
   assert.equal(w.bookCalls.length, before);
