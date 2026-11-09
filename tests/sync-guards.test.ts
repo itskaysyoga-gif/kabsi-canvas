@@ -21,12 +21,23 @@ import {
 } from "./helpers/house-rules";
 
 const each = (fn: (s: Surface, file: string, text: string) => string[]): string[] =>
-  SURFACES.flatMap((s) => s.files.flatMap((f) => fn(s, f, surfaceText(s, f)).map((p) => `${f}: ${p}`)));
+  SURFACES.flatMap((s) =>
+    s.files.flatMap((f) => fn(s, f, surfaceText(s, f)).map((p) => `${f}: ${p}`)),
+  );
 
 describe("the surface list", () => {
   it("covers the surfaces of docs/SYNC.md and every file it names exists", () => {
     const names = SURFACES.map((s) => s.name);
-    for (const n of ["Facts", "Copy deck", "Auth emails", "WhatsApp agent, templates and request book", "Outbound templates", "Creem products and billing words", "Nora's rules and pages", "Share image words"]) {
+    for (const n of [
+      "Facts",
+      "Copy deck",
+      "Auth emails",
+      "WhatsApp agent, templates and request book",
+      "Outbound templates",
+      "Creem products and billing words",
+      "Nora's rules and pages",
+      "Share image words",
+    ]) {
       expect(names).toContain(n);
     }
     for (const s of SURFACES) expect(s.files.length, s.name).toBeGreaterThan(0);
@@ -58,7 +69,8 @@ describe("a Kabsi plan costs what src/lib/site.ts says, on every surface", () =>
       extra_year: PLAN_PRICES.extraLocationYearly,
     };
     expect(Object.keys(CATALOGUE).sort()).toEqual(Object.keys(want).sort());
-    for (const [key, product] of Object.entries(CATALOGUE)) expect(product.price, key).toBe(want[key]! * 100);
+    for (const [key, product] of Object.entries(CATALOGUE))
+      expect(product.price, key).toBe(want[key]! * 100);
   });
   it("the founding place counts are the constants (30 paying businesses, 25 applications)", () => {
     expect(each((_s, _f, t) => placeCountProblems(t))).toEqual([]);
@@ -70,14 +82,17 @@ describe("a Kabsi plan costs what src/lib/site.ts says, on every surface", () =>
     expect(priceProblems("An extra location is $15 a month or 150 US dollars a year.")).toEqual([]);
     expect(priceProblems("The extra location is $25 a month.")).toHaveLength(1);
     expect(priceProblems("Plans start at $9 a month.")).toHaveLength(1);
-    expect(priceProblems("You earn $14.75 a month for each Pro business a partner refers.")).toEqual([]);
+    expect(
+      priceProblems("You earn $14.75 a month for each Pro business a partner refers."),
+    ).toEqual([]);
     expect(priceProblems("Pro was $19 a month before 30 Oct.")).toEqual([]);
     expect(placeCountProblems("The first 40 paying businesses pay less.")).toHaveLength(1);
-    expect(placeCountProblems("12 of 30 founding places left. Founding 25. 25 places left.")).toEqual([]);
+    expect(
+      placeCountProblems("12 of 30 founding places left. Founding 25. 25 places left."),
+    ).toEqual([]);
     expect(placeCountProblems("Founding 20")).toHaveLength(1);
   });
 });
-
 
 /** The lines a never-say rule reads: a prose line, or a line of code a reader sees; a question may name a claim to answer it. */
 const linesOf = (s: Surface, t: string) =>
@@ -90,7 +105,10 @@ describe("the never-say list runs over every surface, not only the site", () => 
     expect(
       each((s, _f, t) =>
         linesOf(s, t)
-          .filter((line) => RETIRED_NAMES.test(line) && !(mayNegate(s) && SAYS_NOT.test(line)) && !isKnown(line))
+          .filter(
+            (line) =>
+              RETIRED_NAMES.test(line) && !(mayNegate(s) && SAYS_NOT.test(line)) && !isKnown(line),
+          )
           .map((line) => line.slice(0, 120)),
       ),
     ).toEqual([]);

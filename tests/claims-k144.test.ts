@@ -92,9 +92,10 @@ describe("no line says what Google's ranking uses or rewards (K-144)", () => {
   });
   it("the auth emails, the product email previews, the copy deck and the Outbound and WhatsApp words (Sync 1)", () => {
     // Prose may name a retired line to say it is retired; code and emails may not name it at all.
-    const surfaces = SURFACES.filter(
-      (s) =>
-        /^(Auth emails|Product email previews|Copy deck|Outbound templates|WhatsApp agent)/.test(s.name),
+    const surfaces = SURFACES.filter((s) =>
+      /^(Auth emails|Product email previews|Copy deck|Outbound templates|WhatsApp agent)/.test(
+        s.name,
+      ),
     );
     const found: string[] = [];
     for (const s of surfaces) {
