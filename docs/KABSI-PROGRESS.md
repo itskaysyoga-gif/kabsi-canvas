@@ -63,6 +63,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 9 Nov 2026, Tidy 1 part 2 (R-143 item 3): card checkout only once Google access works (guard and test), the terms line dropped. `2026-11-09-tidy1.md`.
 - 9 Nov 2026, Tidy 1 part 1 (R-143 items 1, 2, 4, 5, 7): Creem lines in the future tense, "Asked ChatGPT on [date]", map location, renewals in facts 06 and 13. `2026-11-09-tidy1.md`.
 - 9 Nov 2026, Tidy 1 part 0 (R-143, docs): master plan 30.47 and the R-143 row. `2026-11-09-tidy1.md`.
 - 9 Nov 2026, RB-F (PR 525): request book update, confirm, convert, correct, Undo and what's open, no model; test businesses applied. `2026-11-09-rb-f.md`.
