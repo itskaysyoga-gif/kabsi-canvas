@@ -24,6 +24,8 @@ export type Command =
   // V4 (30.16 section 3): the setup replies under Kabsi's onboarding messages, and the owner's yes to the monthly answer's facts.
   | { k: "onboarding"; action: OnboardingAction; locationId: string }
   | { k: "facts"; action: "yes" | "no"; locationId: string; month: string }
+  // RB-E: the buttons under a request book proposal: Save, Change, or one of two or three readings (by its place in the list).
+  | { k: "request"; action: "save" | "change" | "pick"; intakeId: string; pick?: number }
   // F-1: a forwarded message whose words would be a yes, a no or a number. forwardedAnswer: it never answers Kabsi's questions;
   // forwardedYes: it is never the owner's yes (agent.ts).
   | { k: "free"; text: string; forwardedAnswer?: true; forwardedYes?: true }
@@ -101,10 +103,11 @@ export function parse(m: Inbound): Command {
   const t = norm(raw);
   // STOP wins even when forwarded (Meta's opt-out rule).
   if (STOP.has(t)) return { k: "stop" };
-  if (START.has(t)) return { k: "start" };
   // F-1: a forwarded message is not the person's own words. It never binds a phone, never says yes or no, and never answers
-  // a question with a number; it goes the free-text path instead.
+  // a question with a number; it goes the free-text path instead. RB-E (lane R on F-1's LATER row): a forwarded START is not
+  // the person's own opt-in either, so it never turns messages back on after STOP. Scan and partner codes stay as they are.
   const fwd = m.forwarded === true;
+  if (!fwd && START.has(t)) return { k: "start" };
   const staff = fwd ? null : STAFF_CODE.exec(raw);
   if (staff) return { k: "bind", code: `STAFF ${staff[1].toUpperCase()}` };
   const owner = fwd ? null : OWNER_CODE.exec(raw);
@@ -163,6 +166,12 @@ export function parseButton(id: string): Command {
   if (fs) return { k: "onboarding", action: "skip_first", locationId: fs[1] };
   const kf = /^kf:(y|n):([0-9a-f-]{36}):(\d{4}-\d{2})$/.exec(id);
   if (kf) return { k: "facts", action: kf[1] === "y" ? "yes" : "no", locationId: kf[2], month: kf[3] };
+  // RB-E: rs:<proposal> Save, rc:<proposal> Change, rp:<proposal>:<0 to 2> one of the readings. The proposal id says which
+  // proposal; the business is never read from the button (agent.ts looks it up only in the phone's own businesses).
+  const rq = /^r([sc]):([0-9a-f-]{36})$/.exec(id);
+  if (rq) return { k: "request", action: rq[1] === "s" ? "save" : "change", intakeId: rq[2] };
+  const rp = /^rp:([0-9a-f-]{36}):([0-2])$/.exec(id);
+  if (rp) return { k: "request", action: "pick", intakeId: rp[1], pick: Number(rp[2]) };
   const biz = /^b:([0-9a-f-]{36})$/.exec(id);
   if (biz) return { k: "business_pick", locationId: biz[1] };
   return { k: "empty" };

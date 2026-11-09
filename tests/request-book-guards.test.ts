@@ -1,6 +1,6 @@
 // RB-C2 guards for the request book's code half (supabase/functions/_shared/request-book).
 //   1. No shared file uses a trade word. Only packs may: a pack is where a trade lives (build-decisions: "Kinds are data").
-//   2. Nothing under whatsapp/ imports request-book yet. The code is dark until a later session wires it, with Rashid's go.
+//   2. RB-E wired it through one seam: under whatsapp/ only book.ts (and its test) imports request-book.
 // And a check that the code's lists agree with the database migrations of PR A, PR B and RB-C1.
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -119,7 +119,7 @@ describe("RB-C2 guard: the source holds no Arabic script and no dash, only escap
   });
 });
 
-describe("RB-C2 guard: nothing under whatsapp/ imports request-book yet", () => {
+describe("RB-E guard: under whatsapp/ only the seam (book.ts) imports request-book", () => {
   const whatsappDirs = [
     join(FUNCTIONS, "_shared/whatsapp"),
     ...readdirSync(FUNCTIONS)
@@ -144,12 +144,16 @@ describe("RB-C2 guard: nothing under whatsapp/ imports request-book yet", () => 
     expect(importsRequestBook(`import { x } from "../hours.ts";`)).toBe(false);
   });
 
-  it("no file there imports it", () => {
+  it("no other file there imports it", () => {
     const hits = whatsappDirs
       .flatMap((d) => walk(d))
       .filter((f) => importsRequestBook(readFileSync(f, "utf8")))
-      .map((f) => relative(ROOT, f));
-    expect(hits).toEqual([]);
+      .map((f) => relative(ROOT, f))
+      .sort();
+    expect(hits).toEqual([
+      "supabase/functions/_shared/whatsapp/book.test.ts",
+      "supabase/functions/_shared/whatsapp/book.ts",
+    ]);
   });
 });
 
