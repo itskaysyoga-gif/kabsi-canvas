@@ -30,7 +30,7 @@ export const Route = createFileRoute("/terms")({
   component: Page,
 });
 
-const UPDATED = "30 October 2026";
+const UPDATED = "9 November 2026";
 
 function Page() {
   return (
@@ -256,16 +256,31 @@ function Page() {
           <li>
             The free trial lasts 14 days and needs no card. It starts when Kabsi's access to your
             Google profile works, so waiting for access costs you nothing. There is one trial per
-            Google business. If you pay during your trial, your paid plan starts the day the trial
-            ends.
+            Google business. Nothing is charged by itself when it ends.
           </li>
           <li>
-            A paid plan starts when your payment is confirmed and Kabsi's access to your Google
-            profile works. Time spent waiting for access doesn't count.
+            Card payments are not open yet, so nothing is charged today. The rules below apply from
+            the day card payments open.
           </li>
           <li>
-            Paying again before a plan ends adds the new period after the current one. Plans don't
-            renew automatically.
+            A plan is a subscription through Creem, our merchant of record. It renews every month or
+            every year, from the day you paid, until you cancel, and Creem charges the card you gave
+            at each renewal. Your paid period starts the day you pay, including during your trial.
+          </li>
+          <li>
+            Moving to Pro applies at once, and Creem charges the difference for the rest of the
+            period that day. Moving to Essentials applies from your next renewal. An extra location
+            is its own subscription that renews every month or year from the day you add it.
+          </li>
+          <li>
+            Cancelling on the Plan page stops the next renewal: your plan runs to the end of the
+            period you paid for, and everything keeps working until then (section 8). Extra
+            locations end with the plan.
+          </li>
+          <li>
+            If a renewal payment fails, Kabsi keeps working for 7 days and tells you how to update
+            your card. After that the plan is paused: Kabsi keeps watching and preparing, and
+            publishes nothing until the payment goes through.
           </li>
           <li>
             When a plan ends, reply drafts, posts, Google Protection and the weekly report stop.
@@ -393,8 +408,8 @@ function Page() {
             <li>
               If you opt in with Connect WhatsApp, we send you review alerts there and you can
               approve low and medium risk replies and posts, with 10 seconds to undo. High-risk
-              reviews and changes to your business name, address, categories, map pin, phone or
-              opening status are approved only on kabsi.co, signed in. You can reply STOP at any
+              reviews and changes to your business name, address, categories, map location, phone
+              or opening status are approved only on kabsi.co, signed in. You can reply STOP at any
               time to stop every message at once.
             </li>
             <li>

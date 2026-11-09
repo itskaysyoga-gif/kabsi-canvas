@@ -5,7 +5,9 @@ import { readText } from "./helpers/facts";
 // Launch 3 part B (30.37 item 6): the privacy notice for the businesses on Kabsi's contact list (UK GDPR article 14).
 // The section on /privacy, the facts and the public llms file say the same thing, and name neither the collection tool
 // nor how many countries or businesses it holds. Launch 4 part B (30.38 item 2, R-118): the retention periods, and the
-// section stays under 220 words (it was under 200 before lane R added them).
+// section stays under 220 words (it was under 200 before lane R added them). Sync 2b (R-142 decision 4d, 30.45 item 5):
+// lane R added UK registered companies only, Companies House as a source, where the list is held, the UAE and every
+// other country off, the 90-day deletion and the never-contact list of 30.39 item 2, so the cap is 320 words.
 const privacy = readFileSync("src/routes/privacy.tsx", "utf8");
 const start = privacy.indexOf("<h2>15. Businesses on Kabsi's contact list</h2>");
 const end = privacy.indexOf("<h2>16. Changes</h2>");
@@ -21,10 +23,21 @@ const facts = readText("knowledge/kabsi-facts.md");
 const llms = readText("public/llms-full.txt");
 
 describe("the contact list notice (30.37 item 6)", () => {
-  it("is on /privacy, under 220 words, and has no dashes or exclamation marks", () => {
+  it("section 3's marketing line covers users and visitors, with the Outbound exception (R-142 4d)", () => {
+    const flat = privacy.replace(/\s+/g, " ");
+    expect(flat).toContain(
+      "we don't send marketing emails to Kabsi users or visitors without asking first. Kabsi may send one plain email, and one follow-up, to a UK registered company at the address it publishes, as section 15 explains.",
+    );
+    expect(flat).not.toMatch(/marketing emails without asking you first/);
+    for (const text of [facts, llms]) {
+      expect(text).toContain("Kabsi may send one plain email, and one follow-up, to a UK registered company at the address it publishes");
+    }
+  });
+
+  it("is on /privacy, under 320 words, and has no dashes or exclamation marks", () => {
     expect(start).toBeGreaterThan(-1);
     expect(end).toBeGreaterThan(start);
-    expect(section.split(" ").length).toBeLessThan(220);
+    expect(section.split(" ").length).toBeLessThan(320);
     expect(section).not.toMatch(/[–—!]/);
     expect(section).not.toMatch(/[؀-ۿ]/);
   });
@@ -32,18 +45,26 @@ describe("the contact list notice (30.37 item 6)", () => {
   it("answers who, what, why, basis, source, retention, rights and objection", () => {
     expect(section).toMatch(/Rashid Abou Hamzy runs Kabsi/); // who
     expect(section).toMatch(
-      /name, kind of business, address, phone number, website and an email address the business publishes/,
+      /name, kind of business, address, phone number, website, an email address the business publishes/,
     ); // what
     expect(section).toMatch(/tell suitable ones about its service later/); // why
     expect(section).toMatch(
       /lawful basis is legitimate interests: telling businesses about a service that may help them/,
     ); // basis
-    expect(section).toMatch(/OpenStreetMap and from the business's own website/); // source
+    expect(section).toMatch(/OpenStreetMap, the business's own website and Companies House/); // sources (R-142)
+    expect(section).toMatch(/for a UK company, its company number and status/); // Companies House data
+    expect(section).toMatch(/held in Kabsi's database and a private GitHub repository/); // where it is held
     expect(section).toMatch(/at least every six months and marks one that has closed/); // retention
     expect(section).toMatch(/never sold or shared/);
     expect(section).toMatch(
-      /No message has been sent, and none is sent without a further check of the law in the country where the business is/,
-    );
+      /Kabsi writes only to UK registered companies that are active on Companies House: one plain email, and one follow-up, to the address the business publishes\./,
+    ); // 30.45 item 5
+    expect(section).toMatch(/The United Arab Emirates and every other country are off\./);
+    expect(section).toMatch(/Nothing is sent before Rashid Abou Hamzy decides to start, and no message has been sent yet\./);
+    expect(section).toMatch(
+      /A business Kabsi wrote to that does not reply is deleted 90 days after the last email, and only a coded form of its domain is kept/,
+    ); // 30.39 item 2
+    expect(section).toMatch(/A request from the business's own domain covers the whole business\./);
     expect(section).toMatch(/no names of owners or staff/);
     expect(section).toMatch(
       /We delete an entry 24 months after we add it, or 90 days after the business closes, whichever is sooner\./,
@@ -67,6 +88,9 @@ describe("the contact list notice (30.37 item 6)", () => {
     for (const text of [facts, llms]) {
       expect(text).toContain("Businesses on Kabsi's contact list");
       expect(text).toContain("OpenStreetMap");
+      expect(text).toContain("Companies House");
+      expect(text).toContain("UK registered companies");
+      expect(text).toContain("90 days after the last email");
       expect(text).toContain("legitimate interests");
       expect(text).toContain("at least every six months");
       expect(text).toContain("never sold or shared");
