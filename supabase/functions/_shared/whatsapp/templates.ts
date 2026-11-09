@@ -16,6 +16,10 @@ export type TemplateRef = { name: string; params: Record<string, string> };
 
 export const TEMPLATE_LANGUAGE = "en";
 
+/** The category every template is submitted under, and the one the daily check expects (Kapso 1). Marketing templates do not
+ *  reach US numbers, so nothing here is ever anything else. */
+export const TEMPLATE_CATEGORY = "UTILITY" as const;
+
 /** The access notice template (master plan 19, 30.10): its name lives here, not in a secret. */
 export const ACCESS_CHANGE_TEMPLATE = "kabsi_access_change";
 
@@ -203,7 +207,7 @@ export function submission(def: TemplateDef) {
   return {
     name: def.name,
     language: TEMPLATE_LANGUAGE,
-    category: "UTILITY",
+    category: TEMPLATE_CATEGORY,
     parameter_format: "NAMED",
     components: [
       {
@@ -214,4 +218,34 @@ export function submission(def: TemplateDef) {
       { type: "BUTTONS", buttons: [{ type: "QUICK_REPLY", text: def.button }] },
     ],
   };
+}
+
+// Kapso 1: the one list of every template name and language the code can send, built from the table above (so it cannot drift
+// from it). The daily check reads Meta's side against this list; both senders refuse a name that is not on it.
+export type SendableTemplate = {
+  name: string;
+  language: string;
+  category: typeof TEMPLATE_CATEGORY;
+  /** The named parameters the code fills for this template (ref() fills exactly these). */
+  params: readonly string[];
+  /** For a replacement name (v2 or later): the first name it replaces. Null for a first name. */
+  replaces: string | null;
+  /** For a first name that has a replacement: the replacement name. Null otherwise. */
+  replacedBy: string | null;
+};
+
+/** Every name the code can send: the first names and the replacement names, in the order of the table. */
+export const SENDABLE_TEMPLATES: readonly SendableTemplate[] = (Object.values(TEMPLATES) as TemplateDef[]).flatMap((def) => {
+  const params = Object.keys(def.example);
+  const first: SendableTemplate = { name: def.name, language: TEMPLATE_LANGUAGE, category: TEMPLATE_CATEGORY, params, replaces: null, replacedBy: def.v2?.name ?? null };
+  return def.v2
+    ? [first, { name: def.v2.name, language: TEMPLATE_LANGUAGE, category: TEMPLATE_CATEGORY, params, replaces: def.name, replacedBy: null }]
+    : [first];
+});
+
+export const SENDABLE_NAMES: ReadonlySet<string> = new Set(SENDABLE_TEMPLATES.map((t) => t.name));
+
+/** The sender calls this before any template goes out: a name that is not on the list above is an error, never a send. */
+export function assertSendable(name: string): void {
+  if (!SENDABLE_NAMES.has(name)) throw new Error(`template_not_listed: ${String(name).replace(/[^A-Za-z0-9_]/g, "").slice(0, 60)}`);
 }

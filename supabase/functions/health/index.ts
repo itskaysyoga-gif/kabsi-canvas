@@ -5,6 +5,8 @@ import { googleMode, invitationSearch, listAccountsOnce, refreshToken, searchTex
 import { languageOf, placeFromResults, streetPart } from "../_shared/invitations.ts";
 import { queueResponse, type QueueHealthRow } from "../_shared/queue-health.ts";
 import { secretMatches } from "../_shared/sec1/guards.ts";
+import { readHealth, readTemplateDetails } from "../_shared/whatsapp/kapso-admin.ts";
+import { bestTier, numberFromHealth, runCheck } from "../_shared/whatsapp/template-check.ts";
 
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { "content-type": "application/json" } });
 async function isInternal(req: Request) {
@@ -96,10 +98,35 @@ async function turnstileCheck(): Promise<string | null> {
   return codes.includes("invalid-input-secret") ? "secret rejected by Cloudflare" : `secret valid (${codes.join(",")})`;
 }
 
+// Kapso 1 (daily from pg_cron, or by hand with {"only":"kapso"}): read only. Kabsi's WhatsApp number and templates through Kapso's
+// API with the existing Kapso secret, against the list of names the code sends. A problem raises one staff alert a day.
+// The answer carries names and states only: no phone number, no secret. Nothing is created, edited, deleted or sent.
+async function kapsoCheck() {
+  const apiKey = Deno.env.get("KAPSO_API_KEY") ?? "";
+  const phoneNumberId = Deno.env.get("KAPSO_PHONE_NUMBER_ID") ?? "";
+  const env = { apiKey, phoneNumberId };
+  // Missing secrets are not a pass: the readers throw, and the check raises its "could not be read from Kapso" findings.
+  const configured = () => { if (!apiKey || !phoneNumberId) throw new Error("kapso_not_configured"); };
+  return await runCheck({
+    readNumber: async () => (configured(), numberFromHealth(await readHealth(env))),
+    readTemplates: async () => (configured(), await readTemplateDetails(env)),
+    bestTier: async () => {
+      const r = await rest("whatsapp_number_health?select=tier&order=checked_at.desc&limit=2200");
+      return r.ok ? bestTier(((await r.json()) as { tier: string | null }[]).map((x) => x.tier)) : null;
+    },
+    emit: async (a) => {
+      const r = await rest("rpc/ops_emit", { method: "POST", body: JSON.stringify({ p_kind: a.kind, p_channel: a.channel, p_title: a.title, p_body: a.body, p_dedupe: a.dedupe }) });
+      if (!r.ok) throw new Error(`ops_emit ${r.status}`);
+    },
+    now: () => new Date(),
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "GET" && new URL(req.url).pathname.replace(/\/+$/, "").endsWith("/queue")) return await queueCheck();
   if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
   const body = await req.json().catch(() => ({})) as { only?: string };
+  if (body.only === "kapso") return json({ checks: { kapso: await kapsoCheck() } });
   if (body.only === "jobs") return json({ checks: { jobs_recent: await jobsFreshness() } });
   if (body.only === "invitation_places") return json({ checks: { invitation_places: await invitationPlacesCheck(String((body as { case?: string }).case ?? "")) } });
   if (body.only === "turnstile") return json({ checks: { turnstile: (await turnstileCheck()) ?? "not configured" } });

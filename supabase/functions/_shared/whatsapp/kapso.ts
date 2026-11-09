@@ -4,7 +4,7 @@
 // leaves Kabsi (K-146). The key is read from the environment only and never logged.
 import type { Button } from "./channel.ts";
 import { mockSender, type Sender } from "./deliver.ts";
-import { sendName } from "./templates.ts";
+import { assertSendable, sendName } from "./templates.ts";
 import type { StatusMap } from "./template-status.ts";
 
 const KAPSO_PROXY = "https://api.kapso.ai/meta/whatsapp";
@@ -29,7 +29,7 @@ export async function pickSender(e: SenderEnv, statuses: () => Promise<StatusMap
       id: idOf(await client.messages.sendInteractiveButtons({ phoneNumberId, to, bodyText: body, buttons })),
     }),
     // Only Meta-approved templates, by name; the parameters are plain text (K-129 point 4).
-    template: async (to, name, params) => ({
+    template: async (to, name, params) => (assertSendable(name), {
       id: idOf(await client.messages.sendRaw({
         phoneNumberId,
         payload: {
