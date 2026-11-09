@@ -27,7 +27,7 @@ Kabsi's readers are busy local business owners. Write the way a calm, capable pe
 - Pages may say what an owner should do on Google (reply to every review, keep hours and details right, post when something changes, add photos) and that Kabsi does that work. Nothing promises more reviews, more customers, higher rankings or visibility.
 - The weekly report is the weekly report (27.3); "Weekly Care Report" is retired. Kabsi is never promoted as a review reply generator. Google's name never appears in a headline graphic or OG image.
 - Use these lines as they stand. Do not reword them or invent a near copy. A new line needs the lane R chat's yes.
-- Operator line: "Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co." Payments: "Payments are processed by Creem, our merchant of record."
+- Operator line: "Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co." Payments: "Card payments will be processed by Creem, our merchant of record."
 
 ## Hard rules
 - No em dashes, no en dashes, no exclamation marks. Not in copy, emails, WhatsApp, Nora, commit messages or docs. Use a full stop, a comma, a colon or the word "to".

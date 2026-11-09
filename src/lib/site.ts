@@ -111,11 +111,11 @@ export function bookingHref(kind: BookingKind): string {
 export const OPERATOR_NAME = "Rashid Abou Hamzy";
 /** Who signs the founder note on the homepage (lane R, 22 Oct 2026). */
 export const FOUNDER_SIGNATURE = `${OPERATOR_NAME}, founder`;
-/** The operator line for the footer, terms, privacy page and emails (R-55). Payments are processed by Creem, the merchant of record. */
+/** The operator line for the footer, terms, privacy page and emails (R-55). */
 export const OPERATOR_LINE = `Kabsi is operated by ${OPERATOR_NAME}. Contact: ${CONTACT_EMAIL}.`;
 /** Who takes the payments (R-55). At the top of /terms and /privacy, beside OPERATOR_LINE (Site 2 moved both out of the
  * footer, master plan 30.34 item 4). */
-export const MERCHANT_LINE = "Payments are processed by Creem, our merchant of record.";
+export const MERCHANT_LINE = "Card payments will be processed by Creem, our merchant of record.";
 
 /** The brand line (master plan 30.15 section 1; was "Your reviews and listing. Taken care of."). Google's name only as
  * plain words, never in a logo or graphic (K-112). */

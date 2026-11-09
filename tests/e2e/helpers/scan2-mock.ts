@@ -44,7 +44,7 @@ export const CHECK = {
     line: "ChatGPT did not name you. The businesses it named are not near you on Google Maps, so this answer does not reflect your area.",
     question_line: "We asked ChatGPT: 'best fast food restaurant in Boqaata, Lebanon'",
     asked_line:
-      "Asked on 5 November 2026 through OpenAI's API, with web search. The ChatGPT app can answer differently, and answers change from run to run.",
+      "Asked ChatGPT on 5 November 2026, with web search. The ChatGPT app can answer differently, and answers change from run to run.",
     sources: [],
     sources_line: "No sources cited.",
     named_other: 3,

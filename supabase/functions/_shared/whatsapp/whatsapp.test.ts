@@ -165,7 +165,7 @@ Deno.test("P0.8-04: a Protection change offers Put it back on WhatsApp, never fo
   assert.match(f.log[0].body, /Google shows: Mon to Fri 07:00 to 16:00/);
   assert.match(f.log[0].body, /You approved: Mon to Fri 07:00 to 18:00/);
   assert.doesNotMatch(f.log[0].body, /competitor|customer|[—–!]/i, "never says who made the edit");
-  for (const label of ["business name", "address", "main category", "map pin", "phone number", "open status"]) {
+  for (const label of ["business name", "address", "main category", "map location", "phone number", "open status"]) {
     const id = fakeCtx();
     await sendProtectionAlert(id.ctx, ["u1"], { ...base, label, identity: true });
     assert.equal(id.log[0].kind, "text", `${label}: no button`);

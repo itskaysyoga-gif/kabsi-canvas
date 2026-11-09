@@ -350,7 +350,7 @@ const MOCK_FIELDS: [string, string][] = [
   ["hours", "Opening hours"],
   ["categories", "Main category"],
   ["open_status", "Open status (OPEN, CLOSED_TEMPORARILY, CLOSED_PERMANENTLY)"],
-  ["map_pin", "Map pin (latitude, longitude)"],
+  ["map_pin", "Map location (latitude, longitude)"],
 ];
 function StaffEdit({ locationId }: { locationId: string }) {
   const staff = useQuery({ queryKey: ["am-staff"], queryFn: amStaff, staleTime: Infinity });

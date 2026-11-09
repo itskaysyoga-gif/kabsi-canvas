@@ -152,7 +152,7 @@ export const QUESTIONS: Question[] = [
     ],
     must: [/kabsi\.co/],
     reference:
-      "Yes, once you connect WhatsApp in setup or Settings. It works for low and medium risk replies and weekly posts, with a 10-second undo after Approve. High-risk reviews and your business name, address, categories, map pin, phone or open or closed status are approved on kabsi.co.",
+      "Yes, once you connect WhatsApp in setup or Settings. It works for low and medium risk replies and weekly posts, with a 10-second undo after Approve. High-risk reviews and your business name, address, categories, map location, phone or open or closed status are approved on kabsi.co.",
   },
   {
     id: "en10",

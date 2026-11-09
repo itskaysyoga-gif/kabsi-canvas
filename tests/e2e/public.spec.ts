@@ -172,7 +172,7 @@ test.describe("public pages", () => {
     ).toBeVisible({ timeout: 30_000 });
     expect(sent.check?.["city"]).toBe("Boqaata");
     await expect(page.getByText("No sources cited.")).toBeVisible();
-    await expect(page.getByText("Asked on 5 November 2026", { exact: true })).toBeVisible();
+    await expect(page.getByText("Asked ChatGPT on 5 November 2026", { exact: true })).toBeVisible();
     await expect(page.getByText("1 to look at, 5 shown on Google")).toBeVisible();
     await page.locator('details[data-detail="nearby"] > summary').click();
     const at = page.getByRole("heading", { name: "Who came first at your address" });

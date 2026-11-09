@@ -22,7 +22,7 @@ const NOUN: Record<string, { noun: string; many?: boolean }> = {
   phone: { noun: "phone number" },
   website: { noun: "website" },
   address: { noun: "address" },
-  map_pin: { noun: "map pin" },
+  map_pin: { noun: "map location" },
   main_category: { noun: "main category" },
   categories: { noun: "categories", many: true },
   regular_hours: { noun: "opening hours", many: true },

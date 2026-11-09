@@ -43,7 +43,7 @@ export function OpenChange({
   const { confirmed, risky, googleRight } = changeFlags(change);
   const words = changeWords(change.field, business);
   // K-16: the owner always; a manager only for what the owner allowed, and never name, address, main category, open status
-  // or map pin. Everyone else reads the card and the owner decides.
+  // or map location. Everyone else reads the card and the owner decides.
   const mayDecide = !!access?.approve.profile_change && (!risky || access.role === "owner");
   async function decide(decision: "accept" | "reject") {
     setBusy(decision);

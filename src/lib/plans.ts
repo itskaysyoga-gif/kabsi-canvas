@@ -87,7 +87,7 @@ export const PLAN_COPY = {
   title: "Your plan",
   chooseEssentials: "Choose Essentials",
   choosePro: "Choose Pro",
-  creem: "Payments are processed by Creem, our merchant of record.",
+  creem: "Card payments will be processed by Creem, our merchant of record.",
   monthly: "Monthly",
   yearly: "Yearly, 2 months free",
   openSoon: "Plans open soon",

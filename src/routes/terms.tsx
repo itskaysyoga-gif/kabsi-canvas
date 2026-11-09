@@ -238,8 +238,8 @@ function Page() {
           </li>
           <li>
             You pay by card, in US dollars. That is the only way to pay Kabsi. Card payments are
-            coming; until they open there is nothing to pay. Payments are processed by Creem, our
-            merchant of record. A payment counts once Creem has confirmed it.
+            coming; until they open there is nothing to pay. Card payments will be processed by
+            Creem, our merchant of record. A payment counts once Creem has confirmed it.
           </li>
           <li>Any fees your own bank charges are yours.</li>
           <li>

@@ -8,7 +8,7 @@ export const FIELD_LABEL: Record<string, string> = {
   regular_hours: "Opening hours",
   main_category: "Main category",
   open_status: "Open status",
-  map_pin: "Map pin",
+  map_pin: "Map location",
 };
 
 export const fieldLabel = (field: string) => FIELD_LABEL[field] ?? field.replace(/_/g, " ");

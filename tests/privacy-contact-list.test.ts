@@ -8,6 +8,7 @@ import { readText } from "./helpers/facts";
 // section stays under 220 words (it was under 200 before lane R added them). Sync 2b (R-142 decision 4d, 30.45 item 5):
 // lane R added UK registered companies only, Companies House as a source, where the list is held, the UAE and every
 // other country off, the 90-day deletion and the never-contact list of 30.39 item 2, so the cap is 320 words.
+// Tidy 1 (R-143 item 4, master plan 30.47): lane R approved the cap of 320 words (it was raised from 220 in Sync 2b).
 const privacy = readFileSync("src/routes/privacy.tsx", "utf8");
 const start = privacy.indexOf("<h2>15. Businesses on Kabsi's contact list</h2>");
 const end = privacy.indexOf("<h2>16. Changes</h2>");
@@ -36,7 +37,7 @@ describe("the contact list notice (30.37 item 6)", () => {
     }
   });
 
-  it("is on /privacy, under 320 words, and has no dashes or exclamation marks", () => {
+  it("is on /privacy, under 320 words (the cap lane R approved, R-143), and has no dashes or exclamation marks", () => {
     expect(start).toBeGreaterThan(-1);
     expect(end).toBeGreaterThan(start);
     expect(section.split(" ").length).toBeLessThan(320);

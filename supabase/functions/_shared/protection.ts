@@ -12,12 +12,12 @@ const admin = async () => (await kabsi()).admin();
 
 export const LABEL: Record<ProtectionField, string> = {
   name: "business name", phone: "phone number", website: "website", address: "address", regular_hours: "opening hours",
-  main_category: "main category", open_status: "open status", map_pin: "map pin",
+  main_category: "main category", open_status: "open status", map_pin: "map location",
 };
 // K-19, K-64, K-116.2, K-117: a change to these can make Google ask the business to verify again.
 export const HIGH_RISK: readonly ProtectionField[] = ["name", "address", "main_category", "open_status", "map_pin"];
 // K-46: an urgent profile change is emailed at once, even in quiet hours. The details customers rely on most, and every
-// high-risk field, are urgent; a change to the website or the map pin waits for the daily email.
+// high-risk field, are urgent; a change to the website or the map location waits for the daily email.
 export const URGENT: readonly ProtectionField[] = ["name", "phone", "address", "regular_hours", "main_category", "open_status"];
 export const VERIFY_WARNING = "Changing this can make Google ask you to verify your business again.";
 

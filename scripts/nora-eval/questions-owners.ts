@@ -81,7 +81,7 @@ export const QUESTIONS_OWNERS: Question[] = [
     topic: "a VAT invoice in the UK",
     ask: "Im VAT registered in the UK. will i get a proper VAT invoice with my company name?",
     kb: [
-      /Payments are processed by Creem, our merchant of record/,
+      /Card payments will be processed by Creem, our merchant of record/,
       /is shown on Creem's receipt/,
       /Invoices, receipts, VAT or tax documents, company details on invoices/,
     ],
@@ -89,7 +89,7 @@ export const QUESTIONS_OWNERS: Question[] = [
     forbid: [YES],
     coming: true,
     reference:
-      "Payments are processed by Creem, Kabsi's merchant of record, which handles sales tax and VAT once card payments open. What an invoice shows, such as a company name or a VAT number, is shown on Creem's receipt, and the detail is confirmed before card payments open. For your company's details write to hello@kabsi.co. Card payments are not open yet, so there is nothing to pay today.",
+      "Card payments will be processed by Creem, Kabsi's merchant of record, which handles sales tax and VAT once card payments open. What an invoice shows, such as a company name or a VAT number, is shown on Creem's receipt, and the detail is confirmed before card payments open. For your company's details write to hello@kabsi.co. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "o05",
@@ -460,13 +460,13 @@ export const QUESTIONS_OWNERS: Question[] = [
     topic: "who takes the payment",
     ask: "who actually takes the money, is it safe",
     kb: [
-      /Payments are processed by Creem, our merchant of record/,
+      /Card payments will be processed by Creem, our merchant of record/,
       /Choosing a plan opens Creem's secure checkout/,
     ],
     must: [/Creem/],
     coming: true,
     reference:
-      "Payments are processed by Creem, Kabsi's merchant of record. Choosing a plan will open Creem's secure checkout, by card in US dollars. Card payments are not open yet, so there is nothing to pay today, and Kabsi never asks for a card number in a chat.",
+      "Card payments will be processed by Creem, Kabsi's merchant of record. Choosing a plan will open Creem's secure checkout, by card in US dollars. Card payments are not open yet, so there is nothing to pay today, and Kabsi never asks for a card number in a chat.",
   },
   {
     id: "o35",

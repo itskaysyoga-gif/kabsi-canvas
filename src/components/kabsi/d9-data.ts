@@ -70,7 +70,7 @@ export const D9_HERO_STREAM: D9Message[] = [
 
 /**
  * Changed to the facts (COPY 43): Kabsi watches the name, phone, website, address, opening hours, main category, open
- * status and map pin; the owner chooses "Keep my information" or "Google is right"; nothing is put back by itself.
+ * status and map location; the owner chooses "Keep my information" or "Google is right"; nothing is put back by itself.
  * Design 9's "special hours, description" and "phone, categories or open status: you change them yourself" said more
  * than the facts and are not used.
  */
@@ -78,7 +78,16 @@ export const D9_WATCH = {
   title: "When Google shows something different, you choose.",
   /** Polish 4 (30.25 item 3): one line of at most 20 words. Channel-free, so it is true with WHATSAPP_ON either way. */
   line: "Kabsi checks your Google profile every day. When something differs, you choose, and nothing changes without your yes.",
-  watched: ["Name", "Hours", "Phone", "Website", "Address", "Category", "Open status", "Map pin"],
+  watched: [
+    "Name",
+    "Hours",
+    "Phone",
+    "Website",
+    "Address",
+    "Category",
+    "Open status",
+    "Map location",
+  ],
   rules: [
     {
       title: "Keep my information",
