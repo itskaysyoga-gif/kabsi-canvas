@@ -344,7 +344,7 @@ export function billingLine(m: Message | "payment_reminder", c: { business: stri
     case "ended": {
       const until = c.dataUntil ? longDate(c.dataUntil) : null;
       const lines = [`Your Kabsi plan for ${c.business} has ended. Thank you for trusting Kabsi with your Google profile.`, `Your data is kept until ${until}, then deleted. Reply plan any time to come back.`];
-      return { whatsapp: lines.join(" "), email: emailOf(`${c.business}: your Kabsi plan has ended`, "Your plan has ended", lines, { label: "Choose your plan", url: `${APP_URL}/app/plan` }) };
+      return { whatsapp: lines.join(" "), email: emailOf(`${c.business}: your Kabsi plan has ended`, "Your plan has ended", [lines[0], `Your data is kept until ${until}, then deleted.`], { label: "Choose your plan", url: `${APP_URL}/app/plan` }) };
     }
     case "resumed": {
       const lines = [`Your Kabsi plan for ${c.business} carries on.${end ? ` The next payment is on ${end}.` : ""}`];
