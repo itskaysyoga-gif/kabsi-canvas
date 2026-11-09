@@ -408,8 +408,8 @@ function Page() {
             <li>
               If you opt in with Connect WhatsApp, we send you review alerts there and you can
               approve low and medium risk replies and posts, with 10 seconds to undo. High-risk
-              reviews and changes to your business name, address, categories, map location, phone
-              or opening status are approved only on kabsi.co, signed in. You can reply STOP at any
+              reviews and changes to your business name, address, categories, map location, phone or
+              opening status are approved only on kabsi.co, signed in. You can reply STOP at any
               time to stop every message at once.
             </li>
             <li>

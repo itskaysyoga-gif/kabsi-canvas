@@ -30,7 +30,9 @@ describe("the contact list notice (30.37 item 6)", () => {
     );
     expect(flat).not.toMatch(/marketing emails without asking you first/);
     for (const text of [facts, llms]) {
-      expect(text).toContain("Kabsi may send one plain email, and one follow-up, to a UK registered company at the address it publishes");
+      expect(text).toContain(
+        "Kabsi may send one plain email, and one follow-up, to a UK registered company at the address it publishes",
+      );
     }
   });
 
@@ -60,7 +62,9 @@ describe("the contact list notice (30.37 item 6)", () => {
       /Kabsi writes only to UK registered companies that are active on Companies House: one plain email, and one follow-up, to the address the business publishes\./,
     ); // 30.45 item 5
     expect(section).toMatch(/The United Arab Emirates and every other country are off\./);
-    expect(section).toMatch(/Nothing is sent before Rashid Abou Hamzy decides to start, and no message has been sent yet\./);
+    expect(section).toMatch(
+      /Nothing is sent before Rashid Abou Hamzy decides to start, and no message has been sent yet\./,
+    );
     expect(section).toMatch(
       /A business Kabsi wrote to that does not reply is deleted 90 days after the last email, and only a coded form of its domain is kept/,
     ); // 30.39 item 2

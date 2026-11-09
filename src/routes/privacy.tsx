@@ -465,11 +465,11 @@ function Page() {
             or a Founding 25 application) also go from Kabsi's servers, only where your privacy
             choice allows ad measurement, with the same event id as your browser's so Meta counts
             each once. They carry only a hashed random visitor id and Meta's own browser cookies,
-            never your email, phone, name or business. If you came from a Click to WhatsApp ad, Kabsi sends Meta the click id of that
-            chat, so the ads learn which ones bring paying owners. In the EU, the EEA, the UK,
-            Switzerland, the United Arab Emirates and Saudi Arabia, and where the country is not
-            known, a small bar at the bottom asks once, Accept or
-            Only necessary, and nothing for ads loads before you accept. Elsewhere there is no
+            never your email, phone, name or business. If you came from a Click to WhatsApp ad,
+            Kabsi sends Meta the click id of that chat, so the ads learn which ones bring paying
+            owners. In the EU, the EEA, the UK, Switzerland, the United Arab Emirates and Saudi
+            Arabia, and where the country is not known, a small bar at the bottom asks once, Accept
+            or Only necessary, and nothing for ads loads before you accept. Elsewhere there is no
             pop-up, and Your privacy choices has one switch, "Let Kabsi measure its ads", on or off.
             Your answer is remembered for 12 months. Kabsi does not sell your data to Meta or anyone
             else.
@@ -668,9 +668,9 @@ function Page() {
               reviewer&apos;s first name, the review text up to 300 characters and the draft reply.
               You can approve low and medium risk replies and posts there, with 10 seconds to undo.
               High-risk reviews and changes to your business name, address, categories, map
-              location, phone or opening status are approved only on kabsi.co. Outside 24 hours from your last
-              message we send only message templates Meta has approved. Reply STOP at any time (or a
-              similar word such as UNSUBSCRIBE) and we stop at once and record it.
+              location, phone or opening status are approved only on kabsi.co. Outside 24 hours from
+              your last message we send only message templates Meta has approved. Reply STOP at any
+              time (or a similar word such as UNSUBSCRIBE) and we stop at once and record it.
             </p>
             <p>
               <b>What is sent.</b> The links on our site open WhatsApp with a short fixed message
@@ -742,9 +742,9 @@ function Page() {
         <p>
           Kabsi checks each business again at least every six months and marks one that has closed.
           We delete an entry 24 months after we add it, or 90 days after the business closes,
-          whichever is sooner. A business Kabsi wrote to that does not reply is deleted 90 days after
-          the last email, and only a coded form of its domain is kept, so it is never written to
-          again.
+          whichever is sooner. A business Kabsi wrote to that does not reply is deleted 90 days
+          after the last email, and only a coded form of its domain is kept, so it is never written
+          to again.
         </p>
         <p>
           If you ask us to remove your business or never contact it, we do so within 30 days and
