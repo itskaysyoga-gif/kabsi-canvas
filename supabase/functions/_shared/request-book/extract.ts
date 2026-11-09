@@ -49,6 +49,8 @@ export type ExtractedField = {
   validation: { passed: boolean; reason: string | null };
   /** Blank until the owner taps. Nothing in this file ever sets it. */
   owner_action: null;
+  /** True for a guess (inferred) and for two or three readings (ambiguous): nothing may be saved from this field until the owner taps. */
+  needs_tap: boolean;
   show: Show;
   /** What the owner reads for this field. Null when it is left out or shown only as buttons. */
   display: string | null;
@@ -59,6 +61,8 @@ export type Claim = { raw: string; start: number; end: number };
 
 export type Extraction = {
   version: number;
+  /** The message every start and end position points into: the caller's text with spaces trimmed at both ends. */
+  text: string;
   model: string;
   fields: Record<string, ExtractedField>;
   /** What the owner said happened. Noted with its quote. Never a confirmation in the record. */
@@ -254,7 +258,7 @@ const collapse = (s: string) => s.replace(/\s+/g, " ").trim();
 const base = (f: { key: string; label: string; target: FieldTarget }): ExtractedField => ({
   key: f.key, label: f.label, target: f.target, kind: "absent", raw: null, start: null, end: null, quote_source: null,
   normalized: null, normalizer: null, candidates: [], validation: { passed: false, reason: "not_written" }, owner_action: null,
-  show: "left_out", display: null,
+  needs_tap: false, show: "left_out", display: null,
 });
 
 type Spec = Pack["fields"][number];
@@ -447,32 +451,43 @@ function summaryField(spec: Spec, n: NormalizedMessage, loc: Located | null): Ex
 // ---------------------------------------------------------------------------------------------------------------------
 // The whole step.
 
-// What the owner said happened. The model proposes a quote; code accepts it only when the words themselves carry the
-// claim: a cue word for it (agreed, booked) in the quote and no word of doubt or denial beside it. A phrase that only
-// sounds like a yes ("ok", "he will bring it Thursday") is not an agreement, and "has not confirmed yet" is the opposite
-// of one, so neither is ever noted. A claim in words the cue lists do not know is simply not noted: the owner can say it.
+// What the owner said happened. The model proposes a quote; code accepts it only when the quote itself holds a word that
+// states the claim, as a whole word in the form of a statement (confirmed, agreed, booked), and no word of doubt, need,
+// request or denial stands beside it. A phrase that only sounds like a yes ("ok", "he will bring it Thursday"), a request
+// ("please confirm", "book Sarah"), a wait ("awaiting confirmation") and a denial ("has not confirmed") are never noted.
+// A claim in words the lists do not know is simply not noted: the owner can say it again and Kabsi records only that.
 const DOUBT = new Set([
-  "not", "never", "didnt", "hasnt", "havent", "isnt", "wasnt", "wont", "dont", "cant", "yet", "unsure", "maybe", "if",
-  "unconfirmed", "unbooked", "lissa", "mish", "mesh", "lam", "ma", "lays",
+  "not", "never", "no", "didnt", "hasnt", "havent", "isnt", "wasnt", "wont", "dont", "cant", "cannot", "yet", "unsure", "maybe", "if",
+  "unconfirmed", "unbooked", "need", "needs", "needed", "waiting", "awaiting", "await", "declined", "refused", "please", "can", "could",
+  "would", "should", "will", "shall", "wants", "want", "lissa", "mish", "mesh", "lam", "ma", "lays",
   "\u0644\u0645", "\u0645\u0627", "\u0644\u0627", "\u0628\u0639\u062f", "\u0644\u064a\u0633",
 ]);
-const CUES: Record<"agreed" | "already_arranged", RegExp> = {
-  agreed: new RegExp(
-    "confirm|agree|accept|said yes|says yes|okayed|approved|akkad|akad|ta2akkad|ta2kid|wafa2|wafaq|mwafe2|mowafe2|" +
-      "\u0627\u0643\u062f|\u062a\u0627\u0643\u062f|\u062a\u0627\u0643\u064a\u062f|\u0648\u0627\u0641\u0642|\u0645\u0648\u0627\u0641\u0642",
-  ),
-  already_arranged: new RegExp(
-    "book|arrang|reserv|schedul|set up|put in|in the (diary|system|app|calendar|book)|already|" +
-      "\u062d\u062c\u0632|\u0645\u0631\u062a\u0628",
-  ),
+const CUE_WORDS: Record<"agreed" | "already_arranged", Set<string>> = {
+  agreed: new Set([
+    "confirmed", "confirms", "agreed", "agrees", "accepted", "accepts", "approved", "okayed", "akkad", "akkadat", "akad", "akadat",
+    "taakad", "ta2akkad", "ta2akkadat", "wafa2", "wafaq", "wafeq", "mwafe2", "mowafe2",
+    "\u0627\u0643\u062f", "\u0627\u0643\u062f\u062a", "\u0627\u0643\u062f\u0648\u0627", "\u062a\u0627\u0643\u062f", "\u062a\u0627\u0643\u062f\u062a",
+    "\u0648\u0627\u0641\u0642", "\u0648\u0627\u0641\u0642\u062a", "\u0645\u0648\u0627\u0641\u0642",
+  ]),
+  already_arranged: new Set([
+    "booked", "arranged", "reserved", "scheduled",
+    "\u062d\u062c\u0632", "\u062d\u062c\u0632\u062a", "\u062d\u062c\u0632\u0646\u0627", "\u0645\u062d\u062c\u0648\u0632", "\u0645\u0631\u062a\u0628",
+  ]),
+};
+const CUE_PHRASES: Record<"agreed" | "already_arranged", RegExp> = {
+  agreed: /\b(said|says) yes\b/,
+  already_arranged: /\bin the (diary|system|app|calendar|book)\b|\bset up\b/,
 };
 
 const WINDOW = 20;
+const tokens = (t: string) => t.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
 
 function claimHolds(kind: "agreed" | "already_arranged", message: string, loc: Located): boolean {
-  if (!CUES[kind].test(fold(loc.raw).text)) return false;
+  const quote = fold(loc.raw).text.replace(/'/g, "");
+  const cue = tokens(quote).some((t) => CUE_WORDS[kind].has(t)) || CUE_PHRASES[kind].test(quote);
+  if (!cue) return false;
   const around = fold(message.slice(Math.max(0, loc.start - WINDOW), Math.min(message.length, loc.end + WINDOW))).text.replace(/'/g, "");
-  return !around.split(/[^\p{L}\p{N}]+/u).some((t) => DOUBT.has(t));
+  return !tokens(around).some((t) => DOUBT.has(t));
 }
 
 const claimOf = (
@@ -535,13 +550,14 @@ export function extractFields(text: string, modelText: string | null, ctx: Extra
   const said = { agreed: a.claim, already_arranged: e.claim };
 
   const all = Object.values(fields);
+  for (const f of all) f.needs_tap = f.kind === "inferred" || f.kind === "ambiguous";
   const nothingToRead = all.every((f) => f.kind === "absent") && !said.agreed && !said.already_arranged;
   const askField = all.find((f) => f.kind === "ambiguous")?.key ?? null;
   const missingRequired = pack.fields.filter((s) => s.required && fields[s.key]!.kind === "absent").map((s) => s.label);
   const saveReady = !nothingToRead && askField === null && missingRequired.length === 0;
 
   const ex: Extraction = {
-    version: EXTRACT_VERSION, model: EXTRACT_MODEL, fields, said, nothingToRead, issues: [...new Set(issues)], askField, missingRequired, saveReady,
+    version: EXTRACT_VERSION, text: message, model: EXTRACT_MODEL, fields, said, nothingToRead, issues: [...new Set(issues)], askField, missingRequired, saveReady,
     reply: { body: "" },
   };
   ex.reply = replyFor(ex, { pack, timeZone: ctx.timeZone, now: ctx.now });
@@ -600,7 +616,7 @@ export function toEvidence(ex: Extraction): Record<string, unknown> {
   for (const [k, f] of Object.entries(ex.fields)) {
     out[k] = {
       kind: f.kind, raw: f.raw, start: f.start, end: f.end, quote_source: f.quote_source, normalized: f.normalized, normalizer: f.normalizer,
-      candidates: f.candidates, validation: f.validation, owner_action: f.owner_action,
+      candidates: f.candidates, validation: f.validation, owner_action: f.owner_action, needs_tap: f.needs_tap,
     };
   }
   return out;

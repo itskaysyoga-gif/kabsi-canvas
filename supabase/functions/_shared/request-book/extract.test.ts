@@ -303,18 +303,70 @@ Deno.test("claims: a quote is kept only when its words carry the claim, and a de
   assertEquals(claim("Ali bring it Thursday at 9, ok", { agreed: "ok" }).said.agreed, null);
   assertEquals(claim("Ali said he will bring it Thursday at 9", { agreed: "he will bring it Thursday at 9" }).said.agreed, null);
   assert(claim("Ali said he will bring it Thursday at 9", { agreed: "he will bring it Thursday at 9" }).issues.includes("claim_not_supported:agreed"));
-  assertEquals(claim("Ali ماشي", { agreed: "ماشي" }).said.agreed, null);
+  assertEquals(claim("Ali \u0645\u0627\u0634\u064a", { agreed: "\u0645\u0627\u0634\u064a" }).said.agreed, null);
   // A denial, a doubt or a "not yet" beside a cue word drops it, in English and in written-out Arabic.
   assertEquals(claim("Ali did not confirm yet", { agreed: "confirm" }).said.agreed, null);
   assertEquals(claim("Ali has not confirmed", { agreed: "confirmed" }).said.agreed, null);
   assertEquals(claim("Ali is unconfirmed", { agreed: "unconfirmed" }).said.agreed, null);
   assertEquals(claim("Ali mish akkad lissa", { agreed: "akkad" }).said.agreed, null);
-  assertEquals(claim("Ali لم يؤكد بعد", { agreed: "يؤكد" }).said.agreed, null);
+  assertEquals(claim("Ali \u0644\u0645 \u064a\u0624\u0643\u062f \u0628\u0639\u062f", { agreed: "\u064a\u0624\u0643\u062f" }).said.agreed, null);
   // A real one is kept, with its quote.
   assertEquals(claim("Ali confirmed", { agreed: "confirmed" }).said.agreed?.raw, "confirmed");
   assertEquals(claim("Ali akkad el mawed", { agreed: "akkad" }).said.agreed?.raw, "akkad");
-  assertEquals(claim("Ali أكد الموعد", { agreed: "أكد" }).said.agreed?.raw, "أكد");
+  assertEquals(claim("Ali \u0623\u0643\u062f \u0627\u0644\u0645\u0648\u0639\u062f", { agreed: "\u0623\u0643\u062f" }).said.agreed?.raw, "\u0623\u0643\u062f");
   assertEquals(claim("Ali is booked in at the front desk", { already_arranged: "booked in at the front desk" }).said.already_arranged?.raw, "booked in at the front desk");
   assertEquals(claim("Ali is not booked yet", { already_arranged: "booked" }).said.already_arranged, null);
   assertEquals(claim("Ali wants brakes", { already_arranged: "wants brakes" }).said.already_arranged, null);
+});
+
+Deno.test("claims: requests, waits, modals, denials and imperatives are never a claim (phrasings the real run did not show)", () => {
+  const agreed: [string, string][] = [
+    ["Need to confirm with Sarah Thursday 3", "confirm"],
+    ["Waiting for Sarah to confirm", "confirm"],
+    ["Sarah will confirm tomorrow", "confirm"],
+    ["Please confirm Sarah Thursday 3", "confirm"],
+    ["Can Sarah confirm Thursday 3?", "confirm"],
+    ["Sarah cannot confirm Thursday", "confirm"],
+    ["No confirmation from Sarah", "confirmation"],
+    ["Awaiting confirmation from Sarah", "confirmation"],
+    ["Sarah disagreed with Thursday 3", "disagreed"],
+    ["Sarah disagreed with Thursday 3", "agreed"],
+    ["Sarah declined to accept Thursday", "accept"],
+    ["Sarah declined, she has not confirmed", "confirmed"],
+  ];
+  for (const [text, quote] of agreed) {
+    const r = ok(extractFields(text, answer({ customer_name: "Sarah" }, { agreed: quote }), ctx("salon")));
+    assertEquals(r.said.agreed, null, text);
+  }
+  const arranged: [string, string][] = [
+    ["Book Sarah for highlights Thursday 3", "Book Sarah"],
+    ["Sarah wants to book highlights", "wants to book"],
+    ["Please schedule Sarah Thursday 3", "schedule Sarah"],
+    ["Sarah already asked about Thursday", "already asked"],
+    ["Sarah wants to be booked Thursday", "booked"],
+  ];
+  for (const [text, quote] of arranged) {
+    const r = ok(extractFields(text, answer({ customer_name: "Sarah" }, { already_arranged: quote }), ctx("salon")));
+    assertEquals(r.said.already_arranged, null, text);
+  }
+  // And the statements are kept.
+  for (const [text, quote] of [["Sarah confirmed Thursday 3", "confirmed"], ["Sarah has agreed to Thursday", "agreed"], ["Sarah said yes to Thursday", "said yes"]]) {
+    assertEquals(ok(extractFields(text, answer({ customer_name: "Sarah" }, { agreed: quote }), ctx("salon"))).said.agreed?.raw, quote, text);
+  }
+  assertEquals(ok(extractFields("Sarah is booked in the diary", answer({ customer_name: "Sarah" }, { already_arranged: "booked in the diary" }), ctx("salon"))).said.already_arranged?.raw, "booked in the diary");
+});
+
+Deno.test("evidence: positions point into the trimmed text the result carries, and a guess or a choice needs the owner's tap", () => {
+  const original = "  Sarah colour tomorrow 4  ";
+  const r = ok(extractFields(original, answer({ customer_name: "Sarah", service: "colour", when: "tomorrow 4" }), ctx("salon")));
+  assertEquals(r.text, "Sarah colour tomorrow 4");
+  for (const f of Object.values(r.fields)) if (f.start !== null) assertEquals(r.text.slice(f.start, f.end!), f.raw);
+  const w = r.fields["when"]!;
+  assertEquals(w.kind, "inferred");
+  assert(w.needs_tap);
+  assertEquals(w.owner_action, null);
+  assertFalse(r.fields["customer_name"]!.needs_tap);
+  assertEquals((toEvidence(r)["when"] as { needs_tap: boolean }).needs_tap, true);
+  const amb = ok(extractFields("Sam tour Thursday 3", answer({ customer_name: "Sam", interest: "tour", when: "Thursday 3" }), ctx("gym")));
+  assert(amb.fields["when"]!.needs_tap);
 });
