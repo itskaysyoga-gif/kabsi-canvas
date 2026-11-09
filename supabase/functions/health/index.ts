@@ -6,7 +6,8 @@ import { languageOf, placeFromResults, streetPart } from "../_shared/invitations
 import { queueResponse, type QueueHealthRow } from "../_shared/queue-health.ts";
 import { secretMatches } from "../_shared/sec1/guards.ts";
 import { readHealth, readTemplateDetails } from "../_shared/whatsapp/kapso-admin.ts";
-import { bestTier, numberFromHealth, runCheck } from "../_shared/whatsapp/template-check.ts";
+import { bestTier, NUMBER_EMAIL_KIND, NUMBER_EMAIL_TO, numberFromHealth, runCheck } from "../_shared/whatsapp/template-check.ts";
+import { notify } from "../_shared/notify.ts";
 
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { "content-type": "application/json" } });
 async function isInternal(req: Request) {
@@ -117,6 +118,13 @@ async function kapsoCheck() {
     emit: async (a) => {
       const r = await rest("rpc/ops_emit", { method: "POST", body: JSON.stringify({ p_kind: a.kind, p_channel: a.channel, p_title: a.title, p_body: a.body, p_dedupe: a.dedupe }) });
       if (!r.ok) throw new Error(`ops_emit ${r.status}`);
+    },
+    // Tidy 1 (R-143 item 6, master plan 9.9): the number's own findings also go by email to hello@kabsi.co, once a day (the key is
+    // the day), through the same staff email path as the hourly number alert in the whatsapp function.
+    email: async (m) => {
+      const r = await notify({ category: "internal", kind: NUMBER_EMAIL_KIND, key: m.key, to: [{ email: NUMBER_EMAIL_TO, userId: null }],
+        content: { subject: m.subject, preheader: m.preheader, title: m.title, bodyHtml: m.html, text: m.text } });
+      if (r.failed > 0) throw new Error("number_email_failed");
     },
     now: () => new Date(),
   });

@@ -5,8 +5,9 @@ import { mockSender } from "./deliver.ts";
 import { countParams, readHealth, readTemplateDetails } from "./kapso-admin.ts";
 import { routeOf } from "./staff-alerts.ts";
 import {
-  alertFor, bestTier, CHECK_KIND, checkTemplate, compareNumber, compareTemplates, numberFromHealth, runCheck, tierValue,
-  type Alert, type NumberReading, type TemplateFound,
+  alertFor, bestTier, CHECK_KIND, checkTemplate, compareNumber, compareTemplates, NUMBER_EMAIL_KIND, NUMBER_EMAIL_TO, numberEmailFor,
+  numberFromHealth, runCheck, tierValue,
+  type Alert, type NumberEmail, type NumberReading, type TemplateFound,
 } from "./template-check.ts";
 import { allDefs, assertSendable, ref, SENDABLE_NAMES, SENDABLE_TEMPLATES, sendName, TEMPLATE_LANGUAGE, TEMPLATES, type TemplateKey } from "./templates.ts";
 
@@ -291,3 +292,114 @@ Deno.test("checkTemplate on its own: the order of the checks is missing, languag
   assert.equal(checkTemplate(t, [row({ params: 9 })], true).state, "wrong_params");
   assert.equal(checkTemplate(t, [row({ language: "EN" })], true).state, "ok");
 });
+
+// ---- Tidy 1 (R-143 item 6): the number's own findings are also emailed, once a day ------------------------------------------
+
+const withMail = (found: TemplateFound[], number: NumberReading, best: string | null, now: string, emitted: Alert[], mails: NumberEmail[]) =>
+  ({ ...deps(found, number, best, now, emitted), email: async (m: NumberEmail) => void mails.push(m) });
+
+Deno.test("Tidy 1: each finding about the number itself is emailed as well as sent to the staff phone", async () => {
+  const cases: [string, NumberReading, string | null, RegExp][] = [
+    ["quality YELLOW", { ...NUMBER_OK, quality: "YELLOW" }, "TIER_1K", /number quality is YELLOW/],
+    ["quality RED", { ...NUMBER_OK, quality: "RED" }, "TIER_1K", /number quality is RED/],
+    ["a lower messaging limit", { ...NUMBER_OK, tier: "TIER_250" }, "TIER_1K", /messaging limit is TIER_250, it was TIER_1K/],
+    ["an unverified webhook", { ...NUMBER_OK, webhookVerified: false }, "TIER_1K", /webhook is not verified/],
+  ];
+  for (const [name, number, best, text] of cases) {
+    const emitted: Alert[] = [];
+    const mails: NumberEmail[] = [];
+    const r = await runCheck(withMail(good(), number, best, "2026-11-10T05:17:00Z", emitted, mails));
+    assert.equal(emitted.length, 1, `${name}: the staff alert is still sent`);
+    assert.equal(mails.length, 1, `${name}: and one email`);
+    assert.match(mails[0].text, text, name);
+    assert.equal(r.email_raised, true, name);
+  }
+  // A number that cannot be read is a finding about the number: emailed too.
+  const emitted: Alert[] = [];
+  const mails: NumberEmail[] = [];
+  const r = await runCheck({ ...withMail(good(), NUMBER_OK, null, "2026-11-10T05:17:00Z", emitted, mails), readNumber: async () => { throw new Error("kapso 500 key=abcdefghijklmnopqrstuvwxyz012345"); } });
+  assert.equal(mails.length, 1);
+  assert.match(mails[0].text, /number reading could not be read from Kapso/);
+  assert.doesNotMatch(mails[0].text + mails[0].subject, /abcdefghijkl|500/, "no error text");
+  assert.equal(r.email_raised, true);
+});
+
+Deno.test("Tidy 1: a finding about a template stays on WhatsApp only, and a clean check sends no email", async () => {
+  const emitted: Alert[] = [];
+  const mails: NumberEmail[] = [];
+  const bad = set(set(good(), "kabsi_staff_alert", { status: "PAUSED" }), "kabsi_staff_alert_v3", { status: "PAUSED" });
+  const t = await runCheck(withMail(bad, NUMBER_OK, "TIER_1K", "2026-11-10T05:17:00Z", emitted, mails));
+  assert.equal(t.ok, false);
+  assert.equal(emitted.length, 1, "the staff alert names the template");
+  assert.equal(mails.length, 0, "no email for a template");
+  assert.equal(t.email_raised, false);
+  // An unread template list is a template finding too.
+  const unread = await runCheck({ ...withMail(good(), NUMBER_OK, null, "2026-11-10T05:17:00Z", emitted, mails), readTemplates: async () => { throw new Error("x"); } });
+  assert.deepEqual(unread.findings, [{ item: "template list", problem: "could not be read from Kapso" }]);
+  assert.equal(mails.length, 0);
+  const clean = await runCheck(withMail(good(), NUMBER_OK, "TIER_1K", "2026-11-10T05:17:00Z", emitted, mails));
+  assert.equal(clean.ok, true);
+  assert.equal(mails.length, 0);
+  assert.equal(clean.email_raised, false);
+});
+
+Deno.test("Tidy 1: with template and number findings together the email holds only the number's, and the staff alert holds all", async () => {
+  const emitted: Alert[] = [];
+  const mails: NumberEmail[] = [];
+  const rows = set(good(), "kabsi_post_ready", { status: "REJECTED" });
+  const r = await runCheck(withMail(rows, { ...NUMBER_OK, quality: "RED", webhookVerified: false }, "TIER_1K", "2026-11-10T05:17:00Z", emitted, mails));
+  assert.equal(r.findings.length, 3);
+  assert.match(emitted[0].body, /kabsi_post_ready is rejected/);
+  assert.equal(mails.length, 1);
+  assert.doesNotMatch(mails[0].text, /kabsi_post_ready|rejected/, "a template never reaches the email");
+  assert.match(mails[0].text, /number quality is RED/);
+  assert.match(mails[0].text, /webhook is not verified/);
+  assert.equal(mails[0].subject, "Kabsi WhatsApp number check found 2 items");
+});
+
+Deno.test("Tidy 1: the email is once a day (the key is the day), plain, and holds names and states only", async () => {
+  const emitted: Alert[] = [];
+  const mails: NumberEmail[] = [];
+  const number = { ...NUMBER_OK, quality: "YELLOW" };
+  for (const at of ["2026-11-10T05:17:00Z", "2026-11-10T05:17:00Z", "2026-11-10T21:59:00Z"]) await runCheck(withMail(good(), number, "TIER_1K", at, emitted, mails));
+  assert.equal(new Set(mails.map((m) => m.key)).size, 1, "every run of one day names one key, so the engine sends it once");
+  assert.equal(mails[0].key, `${NUMBER_EMAIL_KIND}:2026-11-10`);
+  await runCheck(withMail(good(), number, "TIER_1K", "2026-11-11T05:17:00Z", emitted, mails));
+  assert.equal(mails.at(-1)!.key, `${NUMBER_EMAIL_KIND}:2026-11-11`, "the next day is a new key");
+  const m = mails[0];
+  for (const text of [m.subject, m.preheader, m.title, m.text, m.html]) {
+    assert.doesNotMatch(text, /[\u2013\u2014!]/, "no dash or exclamation mark");
+    assert.doesNotMatch(text, /\+?\d{7,}/, "no phone number or id");
+    assert.doesNotMatch(text, /test-key|secret|token/i);
+  }
+  assert.match(m.text, /a WhatsApp alert cannot arrive when the number is down/);
+  assert.equal(numberEmailFor([], "2026-11-10"), null);
+  assert.equal(NUMBER_EMAIL_TO, "hello@kabsi.co", "R-32: only the Kabsi address");
+});
+
+Deno.test("Tidy 1: a failing email does not hide the staff alert, and a failing alert does not hide the email, and both are loud", async () => {
+  const number = { ...NUMBER_OK, quality: "RED" };
+  const emitted: Alert[] = [];
+  const mails: NumberEmail[] = [];
+  await assert.rejects(
+    () => runCheck({ ...withMail(good(), number, null, "2026-11-10T05:17:00Z", emitted, mails), email: async () => { throw new Error("number_email_failed"); } }),
+    /number_email_failed/,
+  );
+  assert.equal(emitted.length, 1, "the staff alert was still sent");
+  const emitted2: Alert[] = [];
+  const mails2: NumberEmail[] = [];
+  await assert.rejects(
+    () => runCheck({ ...withMail(good(), number, null, "2026-11-10T05:17:00Z", emitted2, mails2), emit: async () => { throw new Error("ops_emit 500"); } }),
+    /ops_emit 500/,
+  );
+  assert.equal(mails2.length, 1, "the email was still sent");
+});
+
+Deno.test("Tidy 1: the health function sends the email through the staff email path to hello@kabsi.co with the day's key", async () => {
+  const src = await Deno.readTextFile(new URL("../../health/index.ts", import.meta.url));
+  assert.match(src, /email: async \(m\) => \{/);
+  assert.match(src, /notify\(\{ category: "internal", kind: NUMBER_EMAIL_KIND, key: m\.key, to: \[\{ email: NUMBER_EMAIL_TO, userId: null \}\]/);
+  assert.match(src, /if \(r\.failed > 0\) throw/);
+  assert.doesNotMatch(src, /[\u2013\u2014]/);
+});
+
