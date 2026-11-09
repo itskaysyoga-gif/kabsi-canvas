@@ -116,6 +116,10 @@ describe("Founding 25 messages", () => {
       "https://kabsi.co/app/plan",
     );
     expect(foundingLine(60, "X", ends, "https://kabsi.co").email.button).toBeUndefined();
+    for (const d of [85, 90] as const)
+      expect(foundingLine(d, "X", ends, "https://kabsi.co").email.text).toContain(
+        "Card payments in US dollars are coming. Until they open there is nothing to pay.",
+      );
   });
 });
 
