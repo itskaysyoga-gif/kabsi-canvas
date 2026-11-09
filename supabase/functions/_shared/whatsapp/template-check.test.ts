@@ -114,6 +114,10 @@ Deno.test("check: a replacement that is not ready leaves the first name in use, 
   // v2 filed as Marketing is never sent (sendName), so the first name is in use and checked.
   const marketingV2 = set(good(), "kabsi_work_update_v2", { category: "MARKETING" });
   assert.equal(compareTemplates(marketingV2).templates.find((t) => t.name === "kabsi_work_update")!.in_use, true);
+  // A replacement the sender will send (APPROVED, UTILITY) with the wrong parameters or language is in use, and raises.
+  // kabsi_work_update takes one parameter (business).
+  assert.deepEqual(findingNames(set(good(), "kabsi_work_update_v2", { params: 3 })), ["kabsi_work_update_v2 has 3 parameters, the code fills 1"]);
+  assert.deepEqual(findingNames(set(good(), "kabsi_work_update_v2", { language: "ar" })), ["kabsi_work_update_v2 is not in the language the code sends"]);
   // The check's idea of "in use" is the sender's: sendName picks the replacement exactly when the check says it is in use.
   for (const t of SENDABLE_TEMPLATES.filter((x) => x.replacedBy)) {
     for (const [status, category] of [["APPROVED", "UTILITY"], ["APPROVED", "MARKETING"], ["PENDING", "UTILITY"], ["PAUSED", "UTILITY"]]) {
@@ -169,6 +173,13 @@ function recordedKapso() {
   };
   return { f, calls };
 }
+Deno.test("the check source has no dash or exclamation literal", async () => {
+  for (const f of ["./template-check.ts", "./template-check.test.ts"]) {
+    const text = await Deno.readTextFile(new URL(f, import.meta.url));
+    assert.doesNotMatch(text, /[\u2013\u2014]/, f);
+  }
+});
+
 const ENV = (f: typeof fetch) => ({ apiKey: "test-key", phoneNumberId: "1111111111", wabaId: "123456789012345", fetch: f });
 
 Deno.test("recorded Kapso answers: templates and number are read, nothing is written, and the parameters are counted", async () => {
@@ -231,7 +242,7 @@ Deno.test("the alert names the items and their states only, in plain words, and 
   assert.equal(routeOf({ kind: a.kind }), "urgent", "the staff phone on WhatsApp (R-64), not the digest and not email only");
   assert.match(a.title, /^WhatsApp check found 5 items: kabsi_review_waiting, kabsi_post_ready, number quality and 2 more$/);
   for (const text of [a.title, a.body]) {
-    assert.doesNotMatch(text, /[–—!]/, "no dash or exclamation mark");
+    assert.doesNotMatch(text, /[\u2013\u2014!]/, "no dash or exclamation mark");
     assert.doesNotMatch(text, /\+?\d{7,}/, "no phone number or id");
     assert.doesNotMatch(text, /test-key|secret|token/i);
   }

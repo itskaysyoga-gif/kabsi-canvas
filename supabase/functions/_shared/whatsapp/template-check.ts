@@ -91,7 +91,12 @@ const PROBLEM: Record<Exclude<TemplateState, "ok">, (r: TemplateResult) => strin
 /** Every listed template against what Meta has. */
 export function compareTemplates(found: TemplateFound[]): { templates: TemplateResult[]; findings: Finding[] } {
   const byName = (n: string) => SENDABLE_TEMPLATES.find((t) => t.name === n)!;
-  const ready = (n: string) => checkTemplate(byName(n), found, true).state === "ok";
+  // The sender's own test (templates.ts sendName and statusMap): the replacement is sent once it reads APPROVED and UTILITY. A wrong
+  // language or parameter count on it does not stop the sender, so it is in use, and checkTemplate then raises that mismatch.
+  const ready = (n: string) => {
+    const s = checkTemplate(byName(n), found, true);
+    return s.state !== "missing" && up(s.status) === "APPROVED" && up(s.category) === "UTILITY";
+  };
   const templates = SENDABLE_TEMPLATES.map((t) => {
     // A first name with a replacement is only the fallback while the replacement is not ready (templates.ts sendName: APPROVED and
     // UTILITY); a replacement is in use only once it is. A template not in use is reported but never raises an alert.

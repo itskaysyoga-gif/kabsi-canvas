@@ -104,11 +104,12 @@ async function turnstileCheck(): Promise<string | null> {
 async function kapsoCheck() {
   const apiKey = Deno.env.get("KAPSO_API_KEY") ?? "";
   const phoneNumberId = Deno.env.get("KAPSO_PHONE_NUMBER_ID") ?? "";
-  if (!apiKey || !phoneNumberId) return { ok: false, error: "kapso_not_configured" };
   const env = { apiKey, phoneNumberId };
+  // Missing secrets are not a pass: the readers throw, and the check raises its "could not be read from Kapso" findings.
+  const configured = () => { if (!apiKey || !phoneNumberId) throw new Error("kapso_not_configured"); };
   return await runCheck({
-    readNumber: async () => numberFromHealth(await readHealth(env)),
-    readTemplates: () => readTemplateDetails(env),
+    readNumber: async () => (configured(), numberFromHealth(await readHealth(env))),
+    readTemplates: async () => (configured(), await readTemplateDetails(env)),
     bestTier: async () => {
       const r = await rest("whatsapp_number_health?select=tier&order=checked_at.desc&limit=2200");
       return r.ok ? bestTier(((await r.json()) as { tier: string | null }[]).map((x) => x.tier)) : null;
