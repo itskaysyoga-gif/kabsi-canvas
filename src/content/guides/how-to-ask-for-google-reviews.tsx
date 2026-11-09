@@ -84,8 +84,8 @@ export const guide: GuideDoc = {
       body: (
         <ul>
           <li>
-            A salon or barber: the QR code at the till, and the link in the booking confirmation or
-            the message you already send after an appointment.
+            A salon or barber: the QR code at the till, and the link in the message you already send
+            after an appointment.
           </li>
           <li>
             A cafe or restaurant: the QR code on the table card or the receipt, never only on the
@@ -203,7 +203,7 @@ export const guide: GuideDoc = {
     body: (
       <>
         <p>
-          Get reviews is free for every business, with or without a plan: a short review link and a
+          Get Reviews is free for every business, with or without a plan: a short review link and a
           QR code that open your own Google review page, and a Send review link button so staff can
           send one ready message from their own WhatsApp after a visit. On both plans you also get a
           counter card and a table card ready to print. Every customer sees the same page: no rating

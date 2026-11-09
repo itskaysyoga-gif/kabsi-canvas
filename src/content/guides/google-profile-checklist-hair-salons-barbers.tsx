@@ -13,7 +13,7 @@ export const guide: GuideDoc = {
     "What a hair salon or barbershop should have on its Google profile, item by item, from Google's own help pages: category, hours, services, booking, photos.",
   publishAt: PUBLISH_ALL_AT,
   updated: "2026-11-08",
-  checked: READ,
+  checked: "2026-11-08",
   topic: "Checklist",
   answer:
     "A salon or barbershop profile needs a specific main category, true weekly and holiday hours, a list of services with prices, a way to book, real photos of the shop and the work, a short description and replies to reviews. Google's own help pages describe each of these, and you edit all of them from your profile while signed in.",
@@ -28,7 +28,7 @@ export const guide: GuideDoc = {
       id: "category",
       heading: "Which category should a hair salon or barbershop choose?",
       answer:
-        "Choose the most specific main category from the list Google offers, because Google says the categories you select affect your local ranking and that you cannot create your own. Google's own example is to pick 'Nail salon' rather than the general 'Salon', so a barbershop should look for its own category rather than a broad one.",
+        "Choose the most specific main category from the list Google offers. Google says you cannot create your own. Google's own example is to pick 'Nail salon' rather than the general 'Salon', so a barbershop should look for its own category rather than a broad one.",
       body: (
         <>
           <p>
@@ -68,8 +68,8 @@ export const guide: GuideDoc = {
           <p>
             Google keeps a list of holidays for both the UK and the UAE on which your profile may
             warn people that your hours might differ. For the UK it lists Christmas Eve, Christmas
-            Day and Boxing Day, with Boxing Day observed on Monday 28 December 2026. Set those dates
-            in advance. The full walk-through is in{" "}
+            Day and Boxing Day, with Boxing Day observed on Monday 28 December 2026, and New Year's
+            Day. Set those dates in advance. The full walk-through is in{" "}
             <GuideLink slug="how-to-set-holiday-hours-on-google">
               how to set holiday hours on Google
             </GuideLink>
