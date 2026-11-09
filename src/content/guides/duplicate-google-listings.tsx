@@ -8,7 +8,7 @@ const READ = "2026-11-05";
 
 export const guide: GuideDoc = {
   slug: "duplicate-google-listings",
-  title: "Duplicate Google listings: how to find and fix them",
+  title: "Duplicate Google profiles: how to find and fix them",
   description:
     "How to find a second Google profile for your business, ask Google to merge it, and what to do when Google marks yours as a duplicate by mistake.",
   publishAt: PUBLISH_ALL_AT,
@@ -226,7 +226,7 @@ export const guide: GuideDoc = {
     },
     {
       q: "I created the duplicate myself by mistake. What now?",
-      a: "Do not delete a profile you think is a duplicate: deleting it can lose its reviews. Google's page says that if you created a duplicate by mistake you can remove it without affecting your verified profile, and that removing a profile removes all its content and linked managers, so make sure it is the right one. Check which one has your reviews first.",
+      a: "Do not delete a profile you think is a duplicate: deleting it can lose its reviews. Ask Google to merge it, and check which one has your reviews first.",
     },
   ],
   sources: [

@@ -1,5 +1,6 @@
 import { Callout, Compare, Steps } from "@/components/marketing/guide-kit";
 import { GuideLink, SiteRef } from "@/components/marketing/guide-links";
+import { KABSI_GROUP_ID } from "@/lib/site";
 import type { GuideDoc } from "./types";
 
 // Guides 3, earlier guide rewritten on the template. Every claim about Google is from the sources below, read on 5 Nov 2026.
@@ -171,14 +172,14 @@ export const guide: GuideDoc = {
       <>
         <p>
           Kabsi uses Manager access too, with its group ID instead of an email address: in People
-          and access select Add, paste 5481006796, choose Manager, then Add (on some screens,
+          and access select Add, paste {KABSI_GROUP_ID}, choose Manager, then Add (on some screens,
           Invite). You stay the owner. Kabsi never asks for your Google password or a code Google
           sends you. It accepts only an invitation for the Manager role that matches a business you
           set up in Kabsi, and nothing goes on Google until you approve it.
         </p>
         <p>
           You can remove Kabsi any time without asking: in People and access select Kabsi Clients
-          (group ID 5481006796) and choose Remove person, or in Kabsi choose Settings, then
+          (group ID {KABSI_GROUP_ID}) and choose Remove person, or in Kabsi choose Settings, then
           Disconnect Kabsi from Google. Kabsi stops reading and posting at once.{" "}
           <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>

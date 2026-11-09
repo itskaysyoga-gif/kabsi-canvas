@@ -50,7 +50,7 @@ export const guide: GuideDoc = {
       id: "why-wrong",
       heading: "Why would it give an old closing time or phone number?",
       answer:
-        "In this guide's experience, the usual reason is a page that still says the old thing. Three causes worth checking are an old page of your own that was never updated, another site that lists you with old details, and your website and your Google profile saying different things.",
+        "A common reason is a page that still says the old thing. Three causes worth checking are an old page of your own that was never updated, another site that lists you with old details, and your website and your Google profile saying different things.",
       body: (
         <ul>
           <li>
@@ -148,11 +148,11 @@ export const guide: GuideDoc = {
       <>
         <p>
           Kabsi asks a few questions a customer might ask on ChatGPT and Perplexity through their
-          API, which can differ from their apps: 3 a month on Essentials, 10 on Pro. When an answer
-          names your business and states a fact differently from what you confirmed, such as Sunday
-          hours, your phone or your address, it shows the assistant's exact sentence, the question
-          and the date, with one line on Home and in your weekly report. Kabsi cannot change what an
-          assistant says.
+          API, which can differ from their apps: 3 a month on Essentials, 10 every 2 weeks on Pro.
+          When an answer names your business and states a fact differently from what you confirmed,
+          such as Sunday hours, your phone or your address, it shows the assistant's exact sentence,
+          the question and the date, with one line on Home and in your weekly report. Kabsi cannot
+          change what an assistant says.
         </p>
         <p>
           Where the fix is on your Google profile, Kabsi opens a task to fix it there, after your

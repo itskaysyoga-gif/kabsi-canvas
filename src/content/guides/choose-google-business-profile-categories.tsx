@@ -18,7 +18,7 @@ export const guide: GuideDoc = {
   answer:
     "Pick the one most specific category from Google's list that says what your business is, and make it your primary category. Then add only the few extra categories that describe other parts of the same business, because Google asks you to use as few categories as possible.",
   inShort: [
-    "The category in the first field is your primary category, and Google says categories affect your local ranking.",
+    "The category in the first field is your primary category.",
     "Choose categories that complete the sentence 'This business IS a', not 'this business HAS a'.",
     "You can add up to 9 more categories, but Google asks for the fewest that describe your core business.",
     "Changing a category can make Google ask you to verify your business again.",
@@ -28,7 +28,7 @@ export const guide: GuideDoc = {
       id: "primary",
       heading: "What is the primary category, and why does it matter?",
       answer:
-        "It is the main category of your business, the one in the first category field. Google says your categories tell customers what your business does, help connect you with people searching for your products or services, and affect your local ranking on Google.",
+        "It is the main category of your business, the one in the first category field. Google says your categories tell customers what your business does.",
       body: (
         <>
           <p>
@@ -38,8 +38,7 @@ export const guide: GuideDoc = {
             give your business a label on its profile.
           </p>
           <p>
-            Categories are one part of how Google picks local results, not the whole of it, and
-            nobody outside Google can promise a position. More on that in{" "}
+            Nobody outside Google can promise a position. More on that in{" "}
             <GuideLink slug="how-google-chooses-local-results">
               how Google chooses which businesses to show nearby
             </GuideLink>

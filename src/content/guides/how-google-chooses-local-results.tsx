@@ -16,7 +16,7 @@ export const guide: GuideDoc = {
   checked: READ,
   topic: "Local results",
   answer:
-    "Google's help says local results are mainly based on relevance, distance, and popularity, which it explains as how well your profile matches the search, how far you are from the person searching, and how well known your business is. Google also says there is no way to request or pay for a better local ranking, and that it keeps the details of its search algorithm confidential.",
+    'Google\'s help says "Local results are mainly based on relevance, distance, and popularity." It explains these as how well your profile matches the search, how far you are from the person searching, and how well known your business is. Google also says there is no way to request or pay for a better local ranking, and that it keeps the details of its search algorithm confidential.',
   inShort: [
     "Relevance: how well your Business Profile matches what someone is searching for.",
     "Distance: how far each business is from the customer who is searching.",
@@ -98,7 +98,7 @@ export const guide: GuideDoc = {
       id: "popularity",
       heading: "What makes a business popular, in Google's words?",
       answer:
-        'For popularity, Google speaks of "how well-known a business is", and says prominent places are more likely to show up in search results. Google says this is also based on information like how many websites link to your business and how many reviews you have, and that more reviews and positive ratings can help your business\'s local ranking.',
+        'For popularity, Google speaks of "how well-known a business is". Google says this is also based on information like how many websites link to your business and how many reviews you have.',
       body: (
         <>
           <p>
@@ -127,8 +127,8 @@ export const guide: GuideDoc = {
         <>
           <Steps
             items={[
-              "Verify your business. Google says this tells Google you are authorised to represent the business, so it is more likely to show up in search results.",
-              "Keep your information up to date. Google says businesses with complete and accurate information are more likely to show up in local search results, and that a profile with wrong information might not show up for relevant searches in your area.",
+              "Verify your business. Google says this tells Google you are authorised to represent the business.",
+              "Keep your information complete and up to date.",
               "Respond to reviews. Google says replying shows you value feedback, and that positive reviews and helpful replies can help your business stand out.",
               "Add photos and videos that show what you offer.",
             ]}
@@ -199,7 +199,7 @@ export const guide: GuideDoc = {
     },
     {
       q: "Why does a business further away come up above me?",
-      a: "Google says results are mainly based on relevance, distance and popularity together, so a business further away can still be shown first for a search. Google keeps the details confidential, so nobody outside Google can tell you exactly why for one search.",
+      a: 'Google says "Local results are mainly based on relevance, distance, and popularity." The three work together, so a business further away can still be shown first for a search. Google keeps the details confidential, so nobody outside Google can tell you exactly why for one search.',
     },
   ],
   sources: [
