@@ -11,7 +11,8 @@ const NO_PROMISE_OF_LATER =
   /\bnever\b|\b(planned|coming soon|roadmap|soon|later this|next (week|month|year)|will be added)\b/i;
 const FREE_CHECK = /kabsi\.co\/scan|free check/i;
 // Sync 2a (R-142 item 8, KB-28): the booking answer. It describes no assistant and promises nothing later.
-const BOOKING_LINE = /Kabsi looks after your Google Business Profile\. It is not a booking system and does not keep your customers' bookings or requests/;
+const BOOKING_LINE =
+  /Kabsi looks after your Google Business Profile\. It is not a booking system and does not keep your customers' bookings or requests/;
 const NO_PROMISE_OR_ASSISTANT =
   /\bnever\b|\b(planned|coming|soon|roadmap|later this|next (week|month|year)|will be added|request book|booking assistant that)\b|\bvamos a\b|\bpronto\b|\bpróximamente\b/i;
 

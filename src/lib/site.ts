@@ -240,7 +240,8 @@ export const foundingPlacesLine = (left: number) =>
 export const PRICE_TAX_LINE = "Prices are in US dollars, plus tax where it applies.";
 export const PAY_TODAY_LINE = "Nothing to pay today. Card payments in US dollars are coming.";
 /** Sync 2a (R-142 item 3): what a plan that ended, paused or was cancelled leaves behind. Keep equal to ACCOUNT_STAYS_LINE in supabase/functions/_shared/billing-words.ts. */
-export const ACCOUNT_STAYS_LINE = "Your account and its history stay. Ask us any time to delete them.";
+export const ACCOUNT_STAYS_LINE =
+  "Your account and its history stay. Ask us any time to delete them.";
 export const REFUND_LINE =
   "Monthly plans can be cancelled at any time. Yearly plans are refundable within 14 days.";
 /** The help lines, exactly as master plan 30.21 section 2 words them, with the working hours beside them. */
