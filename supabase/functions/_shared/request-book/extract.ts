@@ -447,10 +447,42 @@ function summaryField(spec: Spec, n: NormalizedMessage, loc: Located | null): Ex
 // ---------------------------------------------------------------------------------------------------------------------
 // The whole step.
 
-const claimOf = (message: string, mf: Folded, quote: string | null | undefined): { claim: Claim | null; dropped: boolean } => {
-  if (!quote) return { claim: null, dropped: false };
+// What the owner said happened. The model proposes a quote; code accepts it only when the words themselves carry the
+// claim: a cue word for it (agreed, booked) in the quote and no word of doubt or denial beside it. A phrase that only
+// sounds like a yes ("ok", "he will bring it Thursday") is not an agreement, and "has not confirmed yet" is the opposite
+// of one, so neither is ever noted. A claim in words the cue lists do not know is simply not noted: the owner can say it.
+const DOUBT = new Set([
+  "not", "never", "didnt", "hasnt", "havent", "isnt", "wasnt", "wont", "dont", "cant", "yet", "unsure", "maybe", "if",
+  "unconfirmed", "unbooked", "lissa", "mish", "mesh", "lam", "ma", "lays",
+  "\u0644\u0645", "\u0645\u0627", "\u0644\u0627", "\u0628\u0639\u062f", "\u0644\u064a\u0633",
+]);
+const CUES: Record<"agreed" | "already_arranged", RegExp> = {
+  agreed: new RegExp(
+    "confirm|agree|accept|said yes|says yes|okayed|approved|akkad|akad|ta2akkad|ta2kid|wafa2|wafaq|mwafe2|mowafe2|" +
+      "\u0627\u0643\u062f|\u062a\u0627\u0643\u062f|\u062a\u0627\u0643\u064a\u062f|\u0648\u0627\u0641\u0642|\u0645\u0648\u0627\u0641\u0642",
+  ),
+  already_arranged: new RegExp(
+    "book|arrang|reserv|schedul|set up|put in|in the (diary|system|app|calendar|book)|already|" +
+      "\u062d\u062c\u0632|\u0645\u0631\u062a\u0628",
+  ),
+};
+
+const WINDOW = 20;
+
+function claimHolds(kind: "agreed" | "already_arranged", message: string, loc: Located): boolean {
+  if (!CUES[kind].test(fold(loc.raw).text)) return false;
+  const around = fold(message.slice(Math.max(0, loc.start - WINDOW), Math.min(message.length, loc.end + WINDOW))).text.replace(/'/g, "");
+  return !around.split(/[^\p{L}\p{N}]+/u).some((t) => DOUBT.has(t));
+}
+
+const claimOf = (
+  kind: "agreed" | "already_arranged", message: string, mf: Folded, quote: string | null | undefined,
+): { claim: Claim | null; dropped: "not_found" | "not_supported" | null } => {
+  if (!quote) return { claim: null, dropped: null };
   const loc = locate(message, mf, quote, MAX_CLAIM_QUOTE);
-  return loc ? { claim: { raw: loc.raw, start: loc.start, end: loc.end }, dropped: false } : { claim: null, dropped: true };
+  if (!loc) return { claim: null, dropped: "not_found" };
+  if (!claimHolds(kind, message, loc)) return { claim: null, dropped: "not_supported" };
+  return { claim: { raw: loc.raw, start: loc.start, end: loc.end }, dropped: null };
 };
 
 /**
@@ -496,10 +528,10 @@ export function extractFields(text: string, modelText: string | null, ctx: Extra
     }
   }
 
-  const a = claimOf(message, mf, q.said["agreed"]);
-  const e = claimOf(message, mf, q.said["already_arranged"]);
-  if (a.dropped) issues.push("quote_not_found:agreed");
-  if (e.dropped) issues.push("quote_not_found:already_arranged");
+  const a = claimOf("agreed", message, mf, q.said["agreed"]);
+  const e = claimOf("already_arranged", message, mf, q.said["already_arranged"]);
+  if (a.dropped) issues.push(a.dropped === "not_found" ? "quote_not_found:agreed" : "claim_not_supported:agreed");
+  if (e.dropped) issues.push(e.dropped === "not_found" ? "quote_not_found:already_arranged" : "claim_not_supported:already_arranged");
   const said = { agreed: a.claim, already_arranged: e.claim };
 
   const all = Object.values(fields);

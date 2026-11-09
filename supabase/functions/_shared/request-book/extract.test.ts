@@ -295,3 +295,26 @@ Deno.test("the prompt names the fields of the pack, fences the text, and holds n
     assert(system.includes("never write, fix, translate, complete or guess"));
   }
 });
+
+Deno.test("claims: a quote is kept only when its words carry the claim, and a denial or a doubt beside it drops it", () => {
+  const claim = (text: string, said: { agreed?: string; already_arranged?: string }, id = "garage") =>
+    ok(extractFields(text, answer({ customer_name: "Ali" }, said), ctx(id)));
+  // Words that only sound like a yes are not an agreement.
+  assertEquals(claim("Ali bring it Thursday at 9, ok", { agreed: "ok" }).said.agreed, null);
+  assertEquals(claim("Ali said he will bring it Thursday at 9", { agreed: "he will bring it Thursday at 9" }).said.agreed, null);
+  assert(claim("Ali said he will bring it Thursday at 9", { agreed: "he will bring it Thursday at 9" }).issues.includes("claim_not_supported:agreed"));
+  assertEquals(claim("Ali ماشي", { agreed: "ماشي" }).said.agreed, null);
+  // A denial, a doubt or a "not yet" beside a cue word drops it, in English and in written-out Arabic.
+  assertEquals(claim("Ali did not confirm yet", { agreed: "confirm" }).said.agreed, null);
+  assertEquals(claim("Ali has not confirmed", { agreed: "confirmed" }).said.agreed, null);
+  assertEquals(claim("Ali is unconfirmed", { agreed: "unconfirmed" }).said.agreed, null);
+  assertEquals(claim("Ali mish akkad lissa", { agreed: "akkad" }).said.agreed, null);
+  assertEquals(claim("Ali لم يؤكد بعد", { agreed: "يؤكد" }).said.agreed, null);
+  // A real one is kept, with its quote.
+  assertEquals(claim("Ali confirmed", { agreed: "confirmed" }).said.agreed?.raw, "confirmed");
+  assertEquals(claim("Ali akkad el mawed", { agreed: "akkad" }).said.agreed?.raw, "akkad");
+  assertEquals(claim("Ali أكد الموعد", { agreed: "أكد" }).said.agreed?.raw, "أكد");
+  assertEquals(claim("Ali is booked in at the front desk", { already_arranged: "booked in at the front desk" }).said.already_arranged?.raw, "booked in at the front desk");
+  assertEquals(claim("Ali is not booked yet", { already_arranged: "booked" }).said.already_arranged, null);
+  assertEquals(claim("Ali wants brakes", { already_arranged: "wants brakes" }).said.already_arranged, null);
+});
