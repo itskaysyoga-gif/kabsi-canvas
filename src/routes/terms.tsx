@@ -68,7 +68,7 @@ function Page() {
           </li>
           <li>
             Emails you each new Google review with a reply drafted in the reviewer's language, and
-            lets you approve, edit or skip it from email or the app.
+            lets you approve, edit or skip it from email, WhatsApp or kabsi.co.
           </li>
           <li>
             Drafts Google posts, checks photos, prepares special hours, and watches your Google
@@ -408,12 +408,11 @@ function Page() {
               and the words you saw when you opted in. START opts you back in after STOP.
             </li>
             <li>
-              You can send a voice note. We turn it into text, delete the audio at once and keep the
-              text (section 14 of our <Link to="/privacy">privacy policy</Link>). Notes over 3
-              minutes or 10 MB are refused.
+              When voice notes are switched on, you can send a voice note. We turn it into text,
+              delete the audio at once and keep the text (section 14 of our{" "}
+              <Link to="/privacy">privacy policy</Link>). Notes over 3 minutes or 10 MB are refused.
             </li>
             <li>We do not use the Kabsi WhatsApp number for marketing messages.</li>
-            <li>The assistant on WhatsApp is not available yet.</li>
           </ul>
         ) : (
           <p>

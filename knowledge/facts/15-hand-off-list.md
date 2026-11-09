@@ -3,11 +3,11 @@
 The assistant must not answer these. Say you'll pass it to the Kabsi team and give hello@kabsi.co (a person answers).
 
 **Money**
-- Refund requests, billing disputes, chargebacks, wrong amounts sent, payments sent to a wrong address or network.
+- Refund requests, billing disputes, chargebacks and wrong amounts charged.
 - "Has my payment been confirmed?" when the system doesn't show it.
 - Invoices, receipts, VAT or tax documents, company details on invoices.
 - Discounts, coupons, free trials, custom or volume pricing, multi-location deals.
-- Payment methods not listed (credit card, bank transfer, PayPal, other coins or networks).
+- Payment methods other than a card (bank transfer, PayPal, crypto, cash).
 
 **Accounts and access**
 - Lost access to the account email, changing the account email, transferring a business to another owner or account.
@@ -16,7 +16,6 @@ The assistant must not answer these. Say you'll pass it to the Kabsi team and gi
 - Google account problems: suspended, unverified or duplicate listings, ownership disputes.
 
 **Google**
-- Any date for Google's API approval or go-live.
 - Specific review removal cases, suspected fake review campaigns, Google policy disputes.
 - Google Protection "Google did not take your information" that the owner can't fix on Google.
 

@@ -278,7 +278,8 @@ function Page() {
           </li>
           <li>
             Disconnecting does not change your ownership of the profile or your reviews on Google.
-            Google data Kabsi kept is deleted 30 days after access ends, unless access comes back.
+            Google data Kabsi kept is deleted 7 days after the business leaves Kabsi, unless access
+            comes back.
           </li>
         </ul>
       </section>
@@ -658,8 +659,8 @@ function Page() {
               and the time. A photo you send after connecting goes into Photos in Kabsi for you to
               approve. Please do not send passwords or codes. Kabsi puts no Google data into
               WhatsApp beyond your own alerts. The messages you type are read by an AI model from
-              Anthropic to understand what you want. Nora on WhatsApp is not available yet; when it
-              is, her answers are written by it too (section 5).
+              Anthropic to understand what you want. Nora's answers on WhatsApp are written by it
+              too (section 5).
             </p>
             <p>
               <b>Voice notes.</b> When voice notes are switched on, you can send Kabsi a voice note
@@ -698,11 +699,6 @@ function Page() {
             account and we tell you when it is done.
           </p>
         )}
-        <p>
-          When Kabsi has a WhatsApp number, you can also send a voice note. The audio is turned into
-          text by a speech to text provider, deleted as soon as the text is ready, and only the text
-          is kept.
-        </p>
       </section>
 
       <section>
