@@ -2,7 +2,7 @@
 // master plan 30.39). Pure: the caller fetches the file and the pages. Companies House comes from the register itself
 // (30.39 item 12): Harvey reads Companies House's free monthly Basic Company Data file (Open Government Licence) and
 // writes company_status and company_status_date (the file's date); there is no Companies House API key.
-import { INDUSTRY_ORDER, KIND_WORDS, nameOk, ownDomain } from "./rules.ts";
+import { INDUSTRY_ORDER, KIND_WORDS, nameOk, OPEN_COUNTRIES, ownDomain } from "./rules.ts";
 
 /** RFC 4180 CSV: quoted fields, doubled quotes, newlines inside quotes. */
 export function parseCsv(text: string): Record<string, string>[] {
@@ -67,26 +67,26 @@ export function companyRefusal(r: Record<string, string>, today: string): string
 
 /** Why a register row cannot be a candidate, or null. Suppression and the page are checked later. */
 export function rowRefusal(r: Record<string, string>, openCountries: readonly string[], today: string): string | null {
-  if (!openCountries.includes(r.country)) return "country_closed";
+  // Only the UK can ever open (30.45 item 5): a country outside OPEN_COUNTRIES is closed whatever the settings hold.
+  if (!(OPEN_COUNTRIES as readonly string[]).includes(r.country) || !openCountries.includes(r.country)) return "country_closed";
   if (!KIND_WORDS[r.industry]) return "industry";
   if (!nameOk(r.business_name)) return "name";
   if (!r.city || r.city.length > 60) return "city";
   if (!/^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/.test(r.email)) return "email";
   if (!ownDomain(r.email, r.website)) return "not_own_domain";
   if (!/^https?:\/\//i.test(r.email_page_url)) return "no_source_page";
-  if (r.country === "GB") {
-    if (r.company_type !== "registered company") return "not_registered_company";
-    if (!/^[A-Z0-9]{8}$/i.test(r.company_number)) return "no_company_number";
-    // Limited partnerships (LP England and Wales, SL Scotland, NL Northern Ireland) are partnerships, not companies:
-    // PECR's exemption covers limited companies and LLPs only (LLP numbers start OC, SO or NC and stay allowed).
-    if (/^(LP|SL|NL)/i.test(r.company_number)) return "limited_partnership";
-    const company = companyRefusal(r, today);
-    if (company) return company;
-  }
+  // Every row is a UK row from here: the registered company and Companies House checks always apply.
+  if (r.company_type !== "registered company") return "not_registered_company";
+  if (!/^[A-Z0-9]{8}$/i.test(r.company_number)) return "no_company_number";
+  // Limited partnerships (LP England and Wales, SL Scotland, NL Northern Ireland) are partnerships, not companies:
+  // PECR's exemption covers limited companies and LLPs only (LLP numbers start OC, SO or NC and stay allowed).
+  if (/^(LP|SL|NL)/i.test(r.company_number)) return "limited_partnership";
+  const company = companyRefusal(r, today);
+  if (company) return company;
   return null;
 }
 
-/** Salons and barbers first, then the Founding 25 mix, then Harvey's quality score, then the register's order. */
+/** The six salon industries first, then the other trades, then Harvey's quality score, then the register's order. */
 export function ordered(rows: Record<string, string>[]): Record<string, string>[] {
   const rank = (i: string) => {
     const k = INDUSTRY_ORDER.indexOf(i);
