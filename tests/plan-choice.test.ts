@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { CHOICE_FROM_DAY, daysUntil, planChoice } from "@/lib/plan-choice";
 import { CARD_PAYMENTS_COMING } from "@/lib/plans";
 import { PRICES_SENTENCE } from "@/lib/site";
+import { NEVER_NAMES } from "./helpers/house-rules";
 
 const now = new Date("2026-11-10T09:00:00Z");
 const trial = (day: number, endsInDays: number, graceInDays = endsInDays + 7) => ({
@@ -66,7 +67,8 @@ describe("plan choice from day 11", () => {
     for (const c of cards) {
       expect(c.cta.to).toBe("/app/plan");
       const all = `${c.title} ${c.body} ${c.cta.label}`;
-      expect(all).not.toMatch(/[–—!]|Profile Score|Do now|Listing Shield|Put mine back/);
+      expect(all).not.toMatch(/[–—!]/);
+      expect(all).not.toMatch(NEVER_NAMES);
       expect(all).not.toMatch(/checkout/i);
     }
   });

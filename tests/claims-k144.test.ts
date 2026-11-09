@@ -9,6 +9,7 @@ import { guideText } from "../src/content/guides/text";
 import type { GuideDoc } from "../src/content/guides/types";
 import { FAQ } from "../src/lib/faq";
 import { readText } from "./helpers/facts";
+import { SAYS_NOT, SURFACES, isKnown, surfaceText } from "./helpers/house-rules";
 
 const RETIRED: RegExp[] = [
   /relevance,? distance,? and prominence/i,
@@ -88,6 +89,24 @@ describe("no line says what Google's ranking uses or rewards (K-144)", () => {
       const text = readFileSync(f, "utf8");
       for (const re of RETIRED) expect(text, `${f} ${re}`).not.toMatch(re);
     }
+  });
+  it("the auth emails, the product email previews, the copy deck and the Outbound and WhatsApp words (Sync 1)", () => {
+    // Prose may name a retired line to say it is retired; code and emails may not name it at all.
+    const surfaces = SURFACES.filter((s) =>
+      /^(Auth emails|Product email previews|Copy deck|Outbound templates|WhatsApp agent)/.test(
+        s.name,
+      ),
+    );
+    const found: string[] = [];
+    for (const s of surfaces) {
+      for (const f of s.files) {
+        for (const line of surfaceText(s, f).split("\n")) {
+          if ((s.name === "Copy deck" && SAYS_NOT.test(line)) || isKnown(line)) continue;
+          for (const re of RETIRED) if (re.test(line)) found.push(`${f}: ${re}`);
+        }
+      }
+    }
+    expect(found).toEqual([]);
   });
   it("still says Kabsi promises no ranking, and says what it does", () => {
     const facts = readText("knowledge/kabsi-facts.md");

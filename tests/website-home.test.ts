@@ -25,6 +25,7 @@ import {
 } from "../src/lib/site";
 import { PLANS } from "../src/components/kabsi/plans";
 import { readText } from "./helpers/facts";
+import { NEVER_CLAIMS, NEVER_NAMES } from "./helpers/house-rules";
 
 const read = (f: string) => readFileSync(f, "utf8");
 const filesIn = (dir: string) =>
@@ -97,10 +98,8 @@ describe("the copy rules on every public line (kabsi-copy, K-112, K-144, 30.15)"
       const at = `${f}: ${s.slice(0, 60)}`;
       // A question that ends in "?" may name a claim only to answer "No one can promise that."
       if (!s.endsWith("?")) expect(s, at).not.toMatch(/\btop of google\b/i);
-      expect(s, at).not.toMatch(
-        /\b(autopilot|automatically|guaranteed?|approved by google|google partner|google-approved|more customers|set and forget|fully automatic|we manage everything|we remove bad reviews|no work needed)\b/i,
-      );
-      expect(s, at).not.toMatch(/Profile Score|Do now|Listing Shield|Put mine back/);
+      expect(s, at).not.toMatch(NEVER_CLAIMS);
+      expect(s, at).not.toMatch(NEVER_NAMES);
       // The weekly report replaces the Weekly Care Report (30.18); the legal text changes with the lawyer's.
       if (!LEGAL.test(f)) expect(s, at).not.toMatch(/Weekly Care Report/);
       expect(s, at).not.toMatch(/partner(s|ed)? with Google|Google'?s? (partner|official)/i);
