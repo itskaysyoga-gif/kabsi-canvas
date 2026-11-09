@@ -63,7 +63,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 9 Nov 2026, Kapso 1: the list of every template the code can send, a send outside it refused, and a daily read-only check of the number and the templates (health function, 05:17 UTC) with one staff alert a day; production run result in the archive file. `2026-11-09-kapso1.md`.
+- 9 Nov 2026, Kapso 1: one list of every template the code sends, a send outside it refused, a daily read-only check of the number and templates with one staff alert a day. `2026-11-09-kapso1.md`.
 - 9 Nov 2026, RB-E (R-139, Gate 1): request book on WhatsApp (capture, find) behind one seam; off until the test businesses migration; phone steps waiting. `2026-11-09-rb-e.md`.
 - 9 Nov 2026, R-140 (docs only): lane R decisions of 9 Nov in master plan 30.44: Gate 1 open, Gate 2 owner conversations, RB-K first session, a paid ads stop rule at day 60. No code or copy change.
 
