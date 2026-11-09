@@ -158,7 +158,8 @@ export const guide: GuideDoc = {
           A review that threatens legal action, accuses someone of a crime or names a member of your
           team in a complaint gets no draft: it is marked "This review needs a little more care"
           with a short checklist, and Kabsi writes a short, neutral holding reply only if you ask.
-          Kabsi works only with your Google profile. <SiteRef to="/scan">Run the free check</SiteRef>.
+          Kabsi works only with your Google profile.{" "}
+          <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>
     ),
