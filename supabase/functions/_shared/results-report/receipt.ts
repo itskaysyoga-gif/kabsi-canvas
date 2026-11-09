@@ -17,7 +17,7 @@ export type AiAnswer = {
 };
 export type RivalChange = { name: string; theirs: number; mine: number };
 
-export const AI_LABEL = "Answers from ChatGPT and Perplexity through their API, which can differ from their apps.";
+export const AI_LABEL = "Answers we get from ChatGPT and Perplexity directly, which can differ from what their apps show.";
 export const OPEN_NOTE = "An open is not a review.";
 const ASSISTANT: Record<string, string> = { chatgpt: "ChatGPT", perplexity: "Perplexity" };
 

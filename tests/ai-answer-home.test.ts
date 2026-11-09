@@ -5,7 +5,7 @@ import { attentionLines, cardAction, homeState } from "../src/lib/home-state";
 import type { Task } from "../src/lib/tasks";
 
 const LABEL =
-  "Answers from ChatGPT and Perplexity through their API, which can differ from their apps.";
+  "Answers we get from ChatGPT and Perplexity directly, which can differ from what their apps show.";
 const task = (fact: string, path: string): Task => ({
   id: `t-${fact}`,
   kind: "ai_answer",

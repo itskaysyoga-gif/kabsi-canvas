@@ -33,9 +33,7 @@ describe("Fixes A lines", () => {
     expect(line("essentials")).toBe(
       "For an owner who wants every review answered, the profile kept right and 2 posts a month made ready.",
     );
-    expect(line("pro")).toBe(
-      "For a busier business: a post every week, menu and offers kept current, and a team that approves.",
-    );
+    expect(line("pro")).toBe("For a busier business: a post every week and a team that approves.");
   });
   it("while the calendar is not set every booking button is the email words; with it the current words return", () => {
     expect(BOOKING_EMAIL_LABEL).toBe("Email us to arrange a call");

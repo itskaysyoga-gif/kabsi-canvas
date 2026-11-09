@@ -55,10 +55,10 @@ export const PLANS: {
     yearly: PLAN_PRICES.proYearly,
     foundingMonthly: FOUNDING_PRICES.proMonthly,
     foundingYearly: FOUNDING_PRICES.proYearly,
-    line: "For a busier business: a post every week, menu and offers kept current, and a team that approves.",
+    line: "For a busier business: a post every week and a team that approves.",
     lead: "Everything in Essentials, and:",
     work: [
-      "A post every week, with your menu and offers kept current",
+      "A post every week",
       "Team roles and approval rules: choose who can say yes",
       "Review graphics: turn a good review into an image to share",
       "The words people searched on Google to find you, every month",
@@ -108,7 +108,7 @@ export const MORE_LATER = "More checks come later.";
 export const PLAN_ROWS: [string, string, string][] = [
   ["A reply ready for every new review", "Yes", "Yes"],
   ["Your details checked every day, with an alert when something changes", "Yes", "Yes"],
-  ["Posts", "Holiday hours and 2 posts a month", "A post every week, menu and offers kept current"],
+  ["Posts", "Holiday hours and 2 posts a month", "A post every week"],
   ["Your photos, made ready for Google", "Yes", "Yes"],
   ["Your review link, a QR card and a ready message", "Yes", "Yes"],
   ["Profile Coach suggestions", "Yes", "Yes"],

@@ -38,13 +38,12 @@ By card, in US dollars, and nothing else that Kabsi offers itself. Payments are 
 
 ### 4.3 When the trial and the plan start
 
-- A **free trial** starts when Kabsi's access to your Google profile works and Google shows the profile as verified. It is 14 days. The Plan page shows the last day and how many days are left. It never starts for an early-access (concierge) business or a profile that is not verified.
+- A **free trial** starts when Kabsi's access to your Google profile works and Google shows the profile as verified. It is 14 days. The Plan page shows the last day and how many days are left. It never starts for a profile that is not verified.
 - **One trial per business and per person:** one per Google profile (place) and one per Google account (the owner's Google sign-in or email; Gmail dots and +tags count as the same address). A business or account that already had a trial goes straight to a paid plan.
 - **During the trial** you get the full product (new review drafts and publishing, Google Protection, the weekly report, one post a week, the review link and QR code, the assistant) with three limits: Kabsi lists every profile fix it finds but applies **3 of your choice** (the rest when you subscribe); it drafts replies for up to **10** older unanswered reviews (the rest when you subscribe); and after **100 drafts** it asks you to choose a plan or book a free setup call.
 - A **paid plan** starts when payment is confirmed **and** Kabsi's access works. Time spent waiting for access doesn't count.
 - If you pay during your trial, your paid plan starts the day the trial ends. You keep every trial day. **[CHANGING]** Once card payments open, the paid period starts the day you pay (master plan 10.2.2).
 - If you pay before access works, the Plan page shows your plan as "Paid" and says: "Your plan starts the day Kabsi's access to your Google profile works, so you don't lose any days while you wait."
-- **[TIME-SENSITIVE]** While Kabsi is in test mode (2.2), a trial or paid plan waits for Google access. In early access, it starts when the team has connected your business.
 
 ### 4.4 Renewals and reminders
 

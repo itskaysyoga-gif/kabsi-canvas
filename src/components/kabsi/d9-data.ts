@@ -165,7 +165,7 @@ export const D9_SHOW_UP = {
       "Hollis Hair on Gloucester Road takes late appointments every Thursday until 8 pm this month.",
     sources: ["Hollis Hair's Google profile", "Hollis Hair's website"],
     label:
-      "Answers from ChatGPT and Perplexity through their API, which can differ from their apps.",
+      "Answers we get from ChatGPT and Perplexity directly, which can differ from what their apps show.",
   },
 } as const;
 

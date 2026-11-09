@@ -7,14 +7,15 @@
 import { knownLinksOnly, noraRules } from "../nora-rules.ts";
 import { houseStyle, stripAll } from "../ai/fence.ts";
 
-export type Nora = (question: string, o: { role: string; lang: string | null; business: string | null }) => Promise<string>;
+export type NoraAsk = { role: string; lang: string | null; business: string | null; handoff?: string };
+export type Nora = (question: string, o: NoraAsk) => Promise<string>;
 
 /** What is different on WhatsApp. Later lines win over the website rules where they differ. */
 export const WHATSAPP_LINES = `## On WhatsApp (this chat), these lines win over anything above
 - You are answering inside Kabsi's own WhatsApp chat. Answer the question in your first sentence. Never open with a welcome, a greeting or an introduction of yourself, and never repeat the menu of words they can send.
 - Plain text only, short: at most 4 short sentences, or 3 short lines of steps. No Markdown, no links in brackets. Write a Kabsi page as a plain address without https, for example kabsi.co/pricing or kabsi.co/scan.
 - You have no tools here: never ask for an email, never call or mention save_contact, hand_off_to_human, list_tasks or save_fact. You cannot see or change anyone's account in this chat.
-- A person: they send "talk to a person" in this chat and someone from Kabsi answers here within one business day. They can also write to hello@kabsi.co to arrange a call (kabsi.co/setup-call).
+- A person: they send "talk to a person" in this chat and someone from Kabsi answers here within the time in the context, or within one working day if the context gives none (Working hours: Monday to Friday, 9:00 to 18:00, UAE time). They can also write to hello@kabsi.co to arrange a call (kabsi.co/setup-call).
 - This chat is Kabsi's WhatsApp number. Never give any other number.
 - Owners who connected their business approve replies, posts and hours here with a Yes; you yourself approve, publish and change nothing.`;
 
@@ -25,11 +26,11 @@ export function noraWhatsAppSystem(facts: string): string {
 }
 
 /** The person's words, fenced as data, with what the router knows about them. */
-export function noraUser(question: string, o: { role: string; lang: string | null; business: string | null }): string {
+export function noraUser(question: string, o: NoraAsk): string {
   const who = o.role === "unknown" || o.role === "prospect"
     ? "A person who is not a Kabsi customer yet."
     : `A ${o.role} of ${o.business ?? "a business"} on Kabsi.`;
-  return `<context>\n${who}${o.lang ? ` They write in the language with code ${o.lang}.` : ""}\n</context>\n<message>\n${
+  return `<context>\n${who}${o.lang ? ` They write in the language with code ${o.lang}.` : ""} A person from Kabsi answers them here ${o.handoff ?? "within one working day"}.\n</context>\n<message>\n${
     stripAll(question, /<\s*\/?\s*(message|context)\s*>/gi).slice(0, 1500)
   }\n</message>`;
 }

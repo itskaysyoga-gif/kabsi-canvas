@@ -166,7 +166,7 @@ const OWNER_SCRIPT: Step[] = [
   { note: "13b 7: a short voice note", phone: PHONES.owner, media: { kind: "audio", id: "replay-voice-5s", mime: "audio/ogg; codecs=opus", size: 20_000, voice: true }, expect: { result: /^voice_(not_configured|failed|empty)$/, reply: /not switched on yet|could not hear that note/ } },
   { note: "13b 8: a photo of the shop", phone: PHONES.owner, media: { kind: "image", id: "replay-photo", mime: "image/jpeg", size: 7000 }, expect: { result: "photo", head: OWNER_HEAD, reply: /getting your photo ready/ } },
   { note: "13b 9: upgrade (a demo business has no paid plan)", phone: PHONES.owner, text: "upgrade", expect: { result: "billing_no_plan", head: OWNER_HEAD, reply: /has no paid plan right now/ } },
-  { note: "13b 10: talk to a person", phone: PHONES.owner, text: "talk to a person", expect: { result: "handoff", reply: /within one business day/, conv: { handoff: true } } },
+  { note: "13b 10: talk to a person", phone: PHONES.owner, text: "talk to a person", expect: { result: "handoff", reply: /within 4 working hours/, conv: { handoff: true } } },
 ];
 
 export const SCENARIOS: Record<string, Scenario> = {
@@ -209,7 +209,7 @@ export const SCENARIOS: Record<string, Scenario> = {
       { note: "stats needs an account and shows no business", phone: PHONES.unknown, text: "stats", expect: { result: "needs_account", reply: /needs a Kabsi account/, never: nothing("Harbour Lane", "Juniper") } },
       { note: "a staff command is never revealed", phone: PHONES.unknown, text: "status", expect: { result: /^(greeting|unclear|free|nora)/, never: nothing("Jobs failed", "Kabsi staff") } },
       { note: "the scan code", phone: PHONES.unknown, text: "Hi Kabsi, my scan code is KAB-2M9Q4X7P", expect: { result: "scan_code", reply: /KAB-2M9Q4X7P/, conv: { scan_code: "KAB-2M9Q4X7P" } } },
-      { note: "talk to a person", phone: PHONES.unknown, text: "talk to a person", expect: { result: "handoff", reply: /within one business day/ } },
+      { note: "talk to a person", phone: PHONES.unknown, text: "talk to a person", expect: { result: "handoff", reply: /within one working day/ } },
       { note: "STOP", phone: PHONES.unknown, text: "STOP", expect: { result: "stopped", reply: /WhatsApp messages are stopped\./, conv: { stopped: true } } },
       { note: "silence after STOP", phone: PHONES.unknown, text: "hello", expect: { result: "stopped_ignored", none: true } },
     ],

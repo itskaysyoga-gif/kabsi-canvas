@@ -343,9 +343,10 @@ Deno.test("Launch 3 part A: starting links sign-in then setup, a check links its
   assert.equal(scanResultUrl("KAB-7Q4M2X9P"), "https://kabsi.co/scan/KAB-7Q4M2X9P");
   assert.equal(scanResultUrl(null), "https://kabsi.co/scan");
   assert.match(SAY.scanPicked("KAB-7Q4M2X9P"), /Your saved result: https:\/\/kabsi\.co\/scan\/KAB-7Q4M2X9P$/);
-  assert.match(SAY.scanByName("Harbour Lane Coffee"), /https:\/\/kabsi\.co\/scan and send me the code/);
-  for (const line of [SAY.partnerCodeNoted, SAY.trial, SAY.needsAccount]) assert.ok(line.includes(START_URL), line);
-  for (const line of [SAY.scanPicked("KAB-7Q4M2X9P"), SAY.scanByName("X"), SAY.partnerCodeNoted, SAY.trial, SAY.needsAccount]) {
+  assert.equal(SAY.scanByName(), "You can check your business free at https://kabsi.co/scan and send me the code from the page.");
+  assert.equal(SAY.partnerCodeNoted, "Thanks, your partner code is noted.");
+  for (const line of [SAY.trial, SAY.needsAccount]) assert.ok(line.includes(START_URL), line);
+  for (const line of [SAY.scanPicked("KAB-7Q4M2X9P"), SAY.scanByName(), SAY.partnerCodeNoted, SAY.trial, SAY.needsAccount]) {
     assert.doesNotMatch(line, /get-started|[–—!]/, line);
   }
 });

@@ -24,7 +24,7 @@ import {
   roleFor, type RoleName, type Who,
 } from "./roles.ts";
 import { type Command, isAbuse, parse } from "./router.ts";
-import { guessLang, headed, postIssue, SAY, say } from "./say.ts";
+import { guessLang, handoffReply, handoffTime, headed, postIssue, SAY, say } from "./say.ts";
 import { forWhatsApp, type Nora } from "./nora.ts";
 import { describeHours, type HoursChange, parseHours } from "./hours-parse.ts";
 import { checkTypedPost } from "../posts/typed.ts";
@@ -423,7 +423,7 @@ async function tool(t: Turn, name: string, arg: string | undefined, text: string
     case "prices": return answered(t, SAY.prices, "prices");
     case "trial": return answered(t, SAY.trial, "trial");
     case "partner_program": return answered(t, SAY.partnerProgram, "partner_program");
-    case "scan": return answered(t, arg ? SAY.scanByName(arg) : say("greeting", t.lang), "scan_stub");
+    case "scan": return answered(t, arg ? SAY.scanByName() : say("greeting", t.lang), "scan_stub");
     case "send_map": return sendMap(t);
     default: return free(t, text);
   }
@@ -474,7 +474,7 @@ async function person(t: Turn): Promise<string> {
   await t.d.db.setConv(t.phone, { handoff: true });
   const b = pickBusiness(t.who);
   await t.d.db.handoff(t.phone, b ? `${b.business} (${b.role}) asked to talk to someone` : `${/^[aeiou]/i.test(roleFor(t.who, activeDomain(t), b)) ? "An" : "A"} ${roleFor(t.who, activeDomain(t), b)} phone asked to talk to someone`);
-  return answered({ ...t, business: b, head: b ? head(t.who, "business", b) : t.head }, say("handoff", t.lang), "handoff");
+  return answered({ ...t, business: b, head: b ? head(t.who, "business", b) : t.head }, handoffReply(b, t.lang), "handoff");
 }
 
 async function sendMap(t: Turn): Promise<string> {
@@ -1377,7 +1377,7 @@ async function askNora(t: Turn, question: string): Promise<string> {
   const tb = { ...t, business: b, head: t.head ?? head(t.who, dom, b) };
   if (!t.d.nora) return answered(tb, say("unclear", t.lang), "unclear_no_nora");
   try {
-    const text = forWhatsApp(await t.d.nora(question, { role: roleFor(t.who, dom, b), lang: t.lang, business: b?.business ?? null }));
+    const text = forWhatsApp(await t.d.nora(question, { role: roleFor(t.who, dom, b), lang: t.lang, business: b?.business ?? null, handoff: handoffTime(b) }));
     if (!text) return answered(tb, say("unclear", t.lang), "nora_empty");
     return answered(tb, text, "nora");
   } catch {
