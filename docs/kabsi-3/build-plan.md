@@ -64,6 +64,8 @@ The real-phone demo is 7 sessions away and the first real salon is 5 sessions af
 
 A stage starts only when the gate before it has its evidence. The website track starts after Gate 2 and goes public at Gate 5.
 
+Gate 1 opened on 9 Nov 2026 on RB-D's evaluation (R-140, master plan 30.44 item 2). The test phone with no Kabsi role is needed before RB-E's bind code and phone script, not before its code.
+
 | # | Session | What it does | Model | Needs first | Overlap |
 |---|---|---|---|---|---|
 | 1 | RB-0 | Copies the design into the repo and records the decisions | Sonnet | Nothing | Alone |
@@ -80,7 +82,7 @@ A stage starts only when the gate before it has its evidence. The website track 
 | 10 | RB-I | Retention rules and the real-data gate | Opus | RB-H | Alone |
 | 11 | RB-J | Privacy, terms, customer notice, facts | Sonnet | RB-I, the legal review's notes | With W-2 |
 |  | **Gate 3** |  |  |  |  |
-| 12 | RB-K | Pilot kit, one real salon switched on | Sonnet | Gate 3 | Alone |
+| 12 | RB-K | Pilot kit and the first session (R-140), one real salon switched on | Sonnet | Gate 3 | Alone |
 |  | **Gate 4: the 30-day scorecard** |  |  |  |  |
 | 13 | W-1 | Website and app design | Opus | Gate 2 | With RB-G, RB-H |
 | 14 | W-2 | Copy and facts, held back | Sonnet | W-1 approved | With RB-J |
@@ -96,7 +98,7 @@ Later capabilities each wait for their own evidence, and are listed in the Sessi
 | Gate | Opens | Evidence required | If it fails |
 |---|---|---|---|
 | 1 | The real phone | RB-C1, RB-C2 and RB-D merged. Eval pass marks met. A real authorized test number with no Kabsi role. Rashid's go | Fix and rerun. No phone work |
-| 2 | Customer data work | Full script passes on the real phone. Yawmiyati unchanged. Meta's pricing data read. A salon worker passes the ease test | After two rounds of fixes, redesign or stop |
+| 2 | Customer data work | Full script passes on the real phone. Yawmiyati unchanged. Meta's pricing data read. A salon worker passes the ease test. Five owner conversations by introduction are done, and at least 3 of 5 say they would type requests on most working days (R-140) | After two rounds of fixes, redesign or stop. If fewer than 2 of 5 say they would type requests on most working days, the request book stops after the demo and Kabsi stays Google care (R-140) |
 | 3 | One real business | RB-G to RB-J merged. Legal review. Kapso Pro with a 30-day window. Supabase Pro. Kapso's written answer on the provider terms. Rashid's go for one location | No real data |
 | 4 | More building | Pilot scorecard read after 30 days, with a usage check on day 14 | Continue, change focus to trades, or stop. If owners will not enter requests on most working days, the request book stops and Kabsi stays Google care |
 | 5 | The public website | Live for real owners. Facts updated. Claims checked. Rashid's go | The site keeps saying only what it says now |
