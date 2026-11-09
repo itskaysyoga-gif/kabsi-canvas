@@ -34,7 +34,7 @@ A surface that states one of these reads it or repeats it. When it changes here,
 | WhatsApp number and switch | `supabase/functions/_shared/whatsapp-setting.ts` (`WHATSAPP_ON`) | Every page that says "on WhatsApp", auth emails, product emails |
 | Facebook and Instagram | `SOCIAL_LINKS` in `supabase/functions/_shared/social-links.ts` (R-59) | Footer, About, email footers |
 | The industries (21) | `src/content/industries/index.ts` | `/for` pages, `sitemap-pages.json`, OG images, `docs/claims/`, facts 09, Nora's page list, guide links |
-| Never-say names and claims | The lists in `tests/helpers/house-rules.ts` (from this session) | Every surface in sections 3 to 8 |
+| Never-say names and claims | The lists in `tests/helpers/house-rules.ts` | Every surface in sections 3 to 8 |
 | The operator, merchant and non-affiliation lines | `OPERATOR_LINE`, `MERCHANT_LINE`, `NOT_AFFILIATED`, `GOOGLE_NOTICE` in `src/lib/site.ts` | Footer, terms, privacy, emails |
 
 ## 3. The website (in this repository)
@@ -136,14 +136,17 @@ Every page below is read at 390 px and 1440 px in the truth pass. The copy of ev
 
 ## 11. Which guard watches which surface
 
+The shared lists (never-say names and claims, the dash and exclamation mark rules, the amounts read from `src/lib/site.ts`, the surface list itself) are in `tests/helpers/house-rules.ts`. A new surface goes into `SURFACES` there and into the tables above in the same pull request. `KNOWN_FINDINGS` in the same file holds the lines a truth pass has found and not yet fixed; each entry fails its own test once the line is fixed, so the list ends empty.
+
 | Guard | Surfaces it reads |
 |---|---|
-| `tests/prices.test.ts` | `src` (every ts and tsx), `supabase/functions/_shared/email`, `docs/email-previews`, the facts file, both llms files |
-| `tests/sync-guards.test.ts` (Sync 1 part B) | Everything above, plus `knowledge/facts/`, `docs/COPY.md`, `emails/auth`, `supabase/functions/_shared` (WhatsApp, Outbound, request book, Creem), `scripts/og.mjs`: prices, founding prices, the extra location and the places, and the never-say list |
-| `tests/claims-k144.test.ts` | FAQ, facts, llms files, every page, library, component and Edge Function, every guide |
-| `tests/website-home.test.ts` | The public site's lines: dashes, exclamation marks, promises, retired names, owner words |
-| `supabase/functions/_shared/email/catalog.test.ts` | Every product email sample |
-| `supabase/functions/_shared/whatsapp/conversations.test.ts`, `request-book/replies/replies.test.ts` | WhatsApp replies and request book replies |
+| `tests/prices.test.ts` | `src` (every ts and tsx), `supabase/functions/_shared/email`, `docs/email-previews`, the facts file, both llms files: every dollar amount is a Kabsi price or a named exception |
+| `tests/sync-guards.test.ts` | Facts, the built facts and llms files, `docs/COPY.md`, `emails/auth`, `docs/email-previews`, every file under `supabase/functions/_shared` and the WhatsApp, Outbound, billing and assistant functions, `scripts/og.mjs` and `scripts/industry-og.mjs`: a plan, an extra location or a founding amount that is not the one in `src/lib/site.ts` (and the wrong period), the founding place counts, the Creem catalogue in cents, the never-say names and claims, dashes and exclamation marks |
+| `tests/claims-k144.test.ts` | FAQ, facts, llms files, every page, library, component and Edge Function, every guide, and now `emails/auth`, the email previews, the copy deck, Outbound and WhatsApp words |
+| `tests/website-home.test.ts` | The public site's lines: dashes, exclamation marks, promises, retired names (reads `NEVER_CLAIMS` and `NEVER_NAMES` from the shared file), owner words |
+| `tests/plan-choice.test.ts` | The plan card's words (reads `NEVER_NAMES`) |
+| `supabase/functions/_shared/email/catalog.test.ts` | Every product email sample, built by the real builders |
+| `supabase/functions/_shared/whatsapp/conversations.test.ts`, `request-book/replies/replies.test.ts` | WhatsApp replies and request book replies, built by the real code (Deno) |
 | `npm run check:tokens` | Design tokens (K-108) |
 | `node scripts/build-kb.mjs --check` and `tests/knowledge-build.test.ts` | The three built facts files match `knowledge/facts/` |
 | `tests/sitemap.test.ts` | The sitemap equals the routes and the industry content |
