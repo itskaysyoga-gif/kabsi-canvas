@@ -27,18 +27,30 @@ describe("Sync 2a part 1", () => {
     expect(tattoo).toContain('title: "House rules in your description, kept right"');
     expect(tattoo).toContain('card: "House rules right, healed work as posts."');
     expect(tattoo).not.toMatch(/booking rules/i);
-    const guide = read("src/content/guides/reply-to-reviews-about-no-shows-and-cancellation-fees.tsx");
+    const guide = read(
+      "src/content/guides/reply-to-reviews-about-no-shows-and-cancellation-fees.tsx",
+    );
     expect(guide).toContain("Kabsi works only with your Google profile.");
     expect(guide).not.toContain("booking system");
   });
 
   it("item 5: no owner line says API for ChatGPT, Perplexity or Google, and the Pro line is the approved one", () => {
-    for (const p of ["src/components/kabsi/d8-about.tsx", "src/components/kabsi/d9-data.ts", "src/components/kabsi/faq-data.ts"]) {
+    for (const p of [
+      "src/components/kabsi/d8-about.tsx",
+      "src/components/kabsi/d9-data.ts",
+      "src/components/kabsi/faq-data.ts",
+    ]) {
       expect(read(p), p).not.toMatch(/(ChatGPT|Perplexity|OpenAI|Google)[^.]*\bAPI\b/);
     }
-    expect(read("src/components/kabsi/d8-about.tsx")).toContain("Kabsi connects to your Google Business Profile with your permission.");
-    expect(read("src/components/kabsi/d9-data.ts")).toContain("Answers we get from ChatGPT and Perplexity directly, which can differ from what their apps show.");
-    expect(PLANS.find((p) => p.id === "pro")?.line).toBe("For a busier business: a post every week and a team that approves.");
+    expect(read("src/components/kabsi/d8-about.tsx")).toContain(
+      "Kabsi connects to your Google Business Profile with your permission.",
+    );
+    expect(read("src/components/kabsi/d9-data.ts")).toContain(
+      "Answers we get from ChatGPT and Perplexity directly, which can differ from what their apps show.",
+    );
+    expect(PLANS.find((p) => p.id === "pro")?.line).toBe(
+      "For a busier business: a post every week and a team that approves.",
+    );
     expect(read("src/components/kabsi/plans.ts")).not.toMatch(/menu and offers/);
   });
 
@@ -56,7 +68,9 @@ describe("Sync 2a part 1", () => {
 
   it("item 7: the scan and partner code replies carry no promise", () => {
     const say = read("supabase/functions/_shared/whatsapp/say.ts");
-    expect(say).toContain("You can check your business free at ${scanResultUrl(null)} and send me the code from the page.");
+    expect(say).toContain(
+      "You can check your business free at ${scanResultUrl(null)} and send me the code from the page.",
+    );
     expect(say).toContain('partnerCodeNoted: "Thanks, your partner code is noted."');
     expect(say).not.toMatch(/as soon as maps are switched on|your free Pro trial is 30 days/);
   });
