@@ -138,7 +138,7 @@ export const QUESTIONS_28: Question[] = [
     // Scope 1: the honest answer is a plain no today (Kabsi does not message customers), not a feature that is coming, so
     // the answer is not required to say "not yet" (Eval 1 row, n71's coming flag).
     reference:
-      "No, Kabsi does not message your customers. Today you can use your review link and QR code, and you send them yourself, the same message to every customer. Ask a customer works on WhatsApp once you have connected it: you send \"ask a customer\" and Kabsi sends you back a ready message to forward from your own phone.",
+      'No, Kabsi does not message your customers. Today you can use your review link and QR code, and you send them yourself, the same message to every customer. Ask a customer works on WhatsApp once you have connected it: you send "ask a customer" and Kabsi sends you back a ready message to forward from your own phone.',
   },
   {
     id: "n72",
