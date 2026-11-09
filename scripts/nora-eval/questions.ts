@@ -63,11 +63,11 @@ export const QUESTIONS: Question[] = [
     lang: "en",
     topic: "Essentials against Pro",
     ask: "What is the difference between Essentials and Pro?",
-    kb: [/\*\*Essentials will include:\*\*/, /\*\*Pro will add:\*\*/],
+    kb: [/What each plan includes, as the website lists it/, /Everything in Essentials, and:/],
     must: [/Essentials/, /Pro/],
     coming: true,
     reference:
-      "Essentials will cover the core: review alerts with ready replies, Google Protection with a one tap Put it back, the review link and QR code, holiday hours reminders, the Weekly Care Report, About your business, Nora and the Profile Coach checklist. Pro will add things like review graphics, the Profile Coach actions, a search terms report and the Report a fake review helper. Neither plan is available yet, and card payments are not open yet.",
+      "Essentials is for an owner who wants every review answered and the profile kept right: a reply ready for every new review, your details checked every day, holiday hours, 2 posts a month and your photos made ready, your review link and QR card, Profile Coach suggestions and your weekly report every Monday. Pro adds a post every week, team roles and approval rules, review graphics, the words people searched to find you, and a guide to report a review that breaks Google's rules. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "en03",
@@ -215,7 +215,7 @@ export const QUESTIONS: Question[] = [
     must: [/What customers say/],
     coming: true,
     reference:
-      "A monthly What customers say summary for Pro is not available yet: it is not switched on. Today the Weekly Care Report shows your new reviews and your average rating.",
+      "A monthly What customers say summary for Pro is not available yet: it is not switched on. Today your weekly report shows your new reviews and your average rating.",
   },
   {
     id: "en15",
@@ -482,7 +482,7 @@ export const QUESTIONS: Question[] = [
     kb: [/Everyone, every country: \*\*hello@kabsi\.co\*\*/, /free 20-minute call with the team/],
     must: [CALL, MAIL, /person/i],
     reference:
-      "Of course. You can book a free 20-minute call at kabsi.co/setup-call, or write to hello@kabsi.co, where a real person answers. I'm Kabsi's AI assistant, and the team is one message away.",
+      "Of course. You can ask for a free 20-minute call at kabsi.co/setup-call, or write to hello@kabsi.co, where a real person answers. I'm Kabsi's AI assistant, and the team is one message away.",
   },
   {
     id: "en38",
@@ -609,10 +609,10 @@ export const QUESTIONS: Question[] = [
     lang: "en",
     topic: "Google go-live date",
     ask: "When will Kabsi be connected to Google for real?",
-    kb: [/We're waiting on Google's review and can't give a date/],
-    must: [/can't give a date|cannot give a date|no date/i],
+    kb: [/Google opened Kabsi's Business Profile API access/],
+    must: [/22 Oct|live|connected/i],
     reference:
-      "We're waiting on Google's review and can't give a date. Your trial or plan starts when access works.",
+      "Google opened Kabsi's access on 22 Oct 2026, and Kabsi is live for connected businesses. Your business is connected once Kabsi's access to your Google profile works, and every change still waits for your yes.",
   },
   // ── Spanish, French and Arabic ───────────────────────────────────────────────────────────────────────────────────
   {

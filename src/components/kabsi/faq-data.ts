@@ -114,7 +114,7 @@ export const buildFaqGroups = (whatsappOn: boolean = WHATSAPP_ON): FaqGroup[] =>
       items: [
         {
           q: "What does the free check show?",
-          a: "What customers see on your Google profile today and what to do first: your opening hours, how many reviews you have and your rating, your photos, your website and phone, and your category. It takes about 30 seconds and needs no access.",
+          a: "The quick check takes about 30 seconds: your rating, hours and details as customers see them, the three businesses that come up around you, and one ChatGPT answer. It needs no sign-up and no access.",
         },
         {
           q: "How do I add Kabsi to my Google profile?",
@@ -127,7 +127,7 @@ export const buildFaqGroups = (whatsappOn: boolean = WHATSAPP_ON): FaqGroup[] =>
         faq[2]!,
         {
           q: "Can't I do this myself for free?",
-          a: "Yes. Your Google profile is free, and you can reply to reviews and update it yourself. The subscription pays for the ongoing work: Kabsi keeps checking, drafts the replies and posts, follows up, and brings each one to you for a yes.",
+          a: "Yes. Your Google profile is free, and you can reply to reviews and update it yourself. The subscription pays for the ongoing work: Kabsi keeps checking, drafts the replies and posts, follows up, and brings each one to you on WhatsApp for a yes.",
         },
       ],
     },

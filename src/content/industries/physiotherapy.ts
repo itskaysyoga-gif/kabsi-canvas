@@ -73,7 +73,7 @@ export const physiotherapy: Industry = {
   },
   holidays: [
     {
-      title: "UK: late May and August",
+      title: "England and Wales: May and August",
       text: "31 May and 30 August 2027, both Mondays. Post who covers urgent bookings.",
     },
     {

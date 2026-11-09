@@ -23,6 +23,8 @@ const linkCls =
   "press inline-flex min-h-11 items-center gap-1.5 font-semibold text-text-1 underline decoration-text-3 decoration-1 underline-offset-4 hover:decoration-text-1";
 /** Design 9's section rhythm (as Home). */
 const sectionY = "py-12 sm:py-18 lg:py-24";
+/** "a salon", "an optician": the article that goes before a trade name. */
+const withArticle = (name: string) => `${/^[aeiou]/i.test(name) ? "an" : "a"} ${name}`;
 
 function Arrow() {
   return <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />;
@@ -158,7 +160,7 @@ function Watch({ industry: i }: { industry: Industry }) {
           <Headline
             id="watch-h"
             label="Profile watch"
-            text={`What Kabsi watches for a ${i.name}`}
+            text={`What Kabsi watches for ${withArticle(i.name)}`}
             mark="watches"
           />
           <p className="mt-4 max-w-[34rem] text-body text-text-2 sm:text-lead">{w.line}</p>
@@ -307,7 +309,7 @@ function Reading({ industry: i }: { industry: Industry }) {
           <div>
             <Headline
               id="guide-h"
-              text={`Your Google profile, as a ${i.name} owner`}
+              text={`Your Google profile, as ${withArticle(i.name)} owner`}
               mark="Your Google profile"
             />
             <CardGrid items={i.profile} className="mt-8" />

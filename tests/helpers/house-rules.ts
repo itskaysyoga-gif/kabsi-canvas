@@ -300,18 +300,5 @@ export function surfaceText(s: Surface, file: string): string {
  * Findings of the Sync 1 truth pass that part B's guards caught and part C fixes. Each is a line that breaks a rule today. The
  * test below fails when one is fixed and still listed, so part C removes each entry with its fix and the list ends empty.
  */
-export const KNOWN_FINDINGS: { text: string; why: string }[] = [
-  {
-    text: "the Weekly Care Report; Business Knowledge; Nora",
-    why: "F-01 facts 01: a live-sounding line names the retired Weekly Care Report",
-  },
-  {
-    text: "The Weekly Care Report is called the Results Report everywhere",
-    why: "F-02 COPY.md shared pieces: says the retired name is called Results Report, which is not an owner name either",
-  },
-  {
-    text: "explain what Google says it uses (relevance, distance, prominence)",
-    why: "F-03 COPY.md guide template: tells an author to explain what Google uses, which K-144 and 30.32 item 7 replace with a quoted, dated source",
-  },
-];
+export const KNOWN_FINDINGS: { text: string; why: string }[] = [];
 export const isKnown = (line: string) => KNOWN_FINDINGS.some((k) => line.includes(k.text));
