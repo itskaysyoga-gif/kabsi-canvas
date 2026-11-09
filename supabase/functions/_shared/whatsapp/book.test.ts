@@ -175,13 +175,13 @@ Deno.test("capture: a second message before a tap revises the same proposal; Sav
   const w = bookWorld({ which: [GYM] });
   w.aiMap["Maya asked about a trial"] = tool("request_new");
   w.extractMap["Maya asked about a trial"] = quotes({ customer_name: "Maya", phone: null, interest: "a trial", when: null });
-  w.aiMap["her number is 0501 555 0123"] = '{"tool":"unclear","args":{},"lang":"en"}';
-  w.extractMap["Maya asked about a trial\nher number is 0501 555 0123"] = quotes({ customer_name: "Maya", phone: null, interest: "a trial", when: null });
+  w.aiMap["Saturday morning"] = '{"tool":"unclear","args":{},"lang":"en"}';
+  w.extractMap["Maya asked about a trial\nSaturday morning"] = quotes({ customer_name: "Maya", phone: null, interest: "a trial", when: "Saturday morning" });
   assert.equal(await send(w, TEST, { text: "Maya asked about a trial" }), "request_proposed");
   const first = lastIntake(w);
-  assert.equal(await send(w, TEST, { text: "her number is 0501 555 0123" }), "request_revised");
+  assert.equal(await send(w, TEST, { text: "Saturday morning" }), "request_revised");
   assert.equal(w.intakes.size, 1, "the same proposal");
-  assert.equal(first.raw, "Maya asked about a trial\nher number is 0501 555 0123");
+  assert.equal(first.raw, "Maya asked about a trial\nSaturday morning");
   assert.equal(await send(w, TEST, { button: `rs:${first.id}` }), "request_saved");
   assert.equal(w.requests[0].kind, "enquiry");
   assert.match(last(w).body, /Enquiry 1 saved/);
@@ -324,11 +324,75 @@ Deno.test("words: yes saves only when a proposal is waiting; otherwise it approv
   assert.equal(w.actions.get(token)!.used, false, "the review reply waits");
   assert.equal(await send(w, TEST, { text: "yes" }), "approved");
   assert.ok(w.actions.get(token)!.used);
-  // A proposal older than 30 minutes is no longer what yes answers.
+  // Review finding 1: a draft older than 30 minutes is still what a yes answers, never a Google reply waiting elsewhere.
+  const token2 = w.alert(TEST, SALON);
   await send(w, TEST, { text: "Book Sarah for highlights Thursday afternoon", id: "wamid.p2" });
   w.now += 31 * 60_000;
-  assert.equal(await send(w, TEST, { text: "yes" }), "yes_nothing");
-  assert.equal(w.requests.length, 1);
+  assert.equal(await send(w, TEST, { text: "yes" }), "request_saved");
+  assert.equal(w.requests.length, 2);
+  assert.equal(w.actions.get(token2)!.used, false);
+  // Once the draft is saved the question is closed, and yes approves as today.
+  assert.equal(await send(w, TEST, { text: "yes" }), "approved");
+  assert.ok(w.actions.get(token2)!.used);
+});
+
+Deno.test("words: with a draft open at another of the phone's businesses, a yes approves nothing", async () => {
+  const w = bookWorld({ which: [SALON, GYM] });
+  await send(w, TEST, { button: `b:${SALON}` });
+  await send(w, TEST, { text: "Book Sarah for highlights Thursday afternoon" });
+  const token = w.alert(TEST, GYM);
+  w.conversation(TEST).active_location_id = GYM;
+  assert.equal(await send(w, TEST, { text: "yes" }), "request_yes_tap_save");
+  assert.match(last(w).body, /^Kabsi Test Salon \(owner\)\n\nA request draft is waiting/);
+  assert.equal(w.actions.get(token)!.used, false);
+  await send(w, TEST, { button: `rs:${lastIntake(w).id}` });
+  assert.equal(await send(w, TEST, { text: "yes" }), "approved");
+  assert.ok(w.actions.get(token)!.used);
+});
+
+Deno.test("capture: a message that adds nothing to the open draft does not change it", async () => {
+  const w = bookWorld();
+  await send(w, TEST, { text: "Book Sarah for highlights Thursday afternoon" });
+  const intake = lastIntake(w);
+  const raw = intake.raw;
+  w.aiMap["thanks"] = '{"tool":"unclear","args":{},"lang":"en"}';
+  w.extractMap["Book Sarah for highlights Thursday afternoon\nthanks"] = w.extractMap["Book Sarah for highlights Thursday afternoon"];
+  assert.equal(await send(w, TEST, { text: "thanks" }), "request_still_waiting");
+  assert.equal(intake.raw, raw);
+  assert.match(last(w).body, /still waiting\. Tap Save or Change/);
+  // A Google question with a draft open keeps its meaning.
+  w.aiMap["how many reviews this week"] = tool("stats", { days: "7" });
+  assert.equal(await send(w, TEST, { text: "how many reviews this week" }), "stats");
+  assert.equal(intake.raw, raw);
+});
+
+Deno.test("failure: a database error gives a plain line, never silence, and no stray On it", async () => {
+  const w = bookWorld();
+  w.onItFast = false;
+  const d = w.deps();
+  d.book!.db.propose = () => Promise.reject(new Error("db down"));
+  assert.equal(await receive(d, msg(w, TEST, { text: "Book Sarah for highlights Thursday afternoon" })), "request_db_error");
+  assert.match(last(w).body, /could not reach your request book just now\. Nothing new was saved/);
+  const e = w.deps();
+  e.book!.db.get = () => Promise.reject(new Error("db down"));
+  assert.equal(await receive(e, msg(w, TEST, { text: "request 1" })), "request_db_error");
+  await send(w, TEST, { text: "Book Sarah for highlights Thursday afternoon", id: "wamid.ok" });
+  const f = w.deps();
+  f.book!.db.create = () => Promise.reject(new Error("db down"));
+  assert.equal(await receive(f, msg(w, TEST, { button: `rs:${lastIntake(w).id}` })), "request_db_error");
+  assert.equal(w.requests.length, 0);
+});
+
+Deno.test("find: a number is read only where it stands on its own in the message", async () => {
+  const w = bookWorld();
+  await send(w, TEST, { text: "Book Sarah for highlights Thursday afternoon" });
+  await send(w, TEST, { button: `rs:${lastIntake(w).id}` });
+  w.aiMap["what about 142"] = tool("request_find", { number: "1" });
+  assert.equal(await send(w, TEST, { text: "what about 142" }), "request_find");
+  assert.match(last(w).body, /Send the name or the number/);
+  w.aiMap["what about 1 please"] = tool("request_find", { number: "1" });
+  assert.equal(await send(w, TEST, { text: "what about 1 please" }), "request_find");
+  assert.match(last(w).body, /Appointment 1 for Sarah/);
 });
 
 Deno.test("words: forwarded text never saves and never reaches the request book (F-1)", async () => {

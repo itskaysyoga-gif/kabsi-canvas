@@ -80,6 +80,9 @@ export const BOOK_SAY = {
   changesLater: "Changing a request here is not switched on yet. Nothing was changed.",
   findWhat: "Send the name or the number of the request.",
   notRead: "I could not read that just now. Nothing was saved. Please send it again.",
+  tryAgain: "Kabsi could not reach your request book just now. Nothing new was saved. Please send it again in a minute.",
+  tapSave: "A request draft is waiting. Tap Save or Change on it, so this yes is not counted for anything else.",
+  stillWaiting: "The request above is still waiting. Tap Save or Change. Nothing is saved yet.",
 } as const;
 
 // ─── Proposals.

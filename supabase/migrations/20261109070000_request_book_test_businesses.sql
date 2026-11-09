@@ -26,6 +26,13 @@ values ('e5e00000-0000-4000-8000-0000000000a0', '00000000-0000-0000-0000-0000000
   '', '', '', '', '', '', '', '')
 on conflict (id) do nothing;
 
+-- A new login emits a sign-up event (users_product_event). This one is a test login, not a person signing up: the event,
+-- and the ad conversion job it may queue where events are on, are removed in the same transaction, before anything sends.
+with e as (
+  delete from public.product_events where source_key = 'user:e5e00000-0000-4000-8000-0000000000a0:registration' returning id
+)
+delete from public.jobs j using e where j.kind = 'meta_capi' and j.dedupe_key = 'meta_capi:' || e.id;
+
 insert into public.organizations (id, name, type, is_demo)
 values ('e5e00000-0000-4000-8000-000000000010', 'Kabsi request book tests', 'owner', true)
 on conflict (id) do nothing;

@@ -1132,7 +1132,10 @@ async function staff(t: Turn, name: string, arg: string | undefined): Promise<st
 // message or in a button can name another person or business: a button carries only a proposal id, and that id is looked up
 // only in this phone's own businesses.
 
-type BookTurn = { on: Map<string, Pack>; b: BusinessRole | null; proposal: Extract<OpenQuestion, { type: "rb_proposal" }> | null };
+type RbQuestion = Extract<OpenQuestion, { type: "rb_proposal" }>;
+/** proposal: open for a second message to revise it (30 minutes). open: any proposal question here, whatever its age, so a
+ *  typed yes or no answers it and never reaches an approval waiting elsewhere. */
+type BookTurn = { on: Map<string, Pack>; b: BusinessRole | null; proposal: RbQuestion | null; open: RbQuestion | null };
 type Said = { send: () => Promise<string> };
 const said = (t: Turn, body: string, result: string, buttons?: Button[]): Said => ({ send: () => answered(t, body, result, buttons) });
 const bookCtx = (t: Turn, b: BusinessRole, pack: Pack) => ({ pack, timeZone: b.time_zone ?? "UTC", now: new Date((t.d.now ?? Date.now)()) });
@@ -1148,9 +1151,9 @@ async function bookCheck(t: Turn): Promise<BookTurn | null> {
   const on = await bookOn(t.d.book.db, b ? [b.location_id] : list.map((x) => x.location_id));
   if (!on.size) return null;
   const q = t.who.conversation?.open_question;
-  const fresh = q?.type === "rb_proposal" && (t.d.now ?? Date.now)() - Date.parse(q.at) < PROPOSAL_OPEN_MS;
-  const proposal = fresh && b && q.location_id === b.location_id ? q : null;
-  return { on, b, proposal };
+  const open = q?.type === "rb_proposal" && b && q.location_id === b.location_id ? q : null;
+  const proposal = open && (t.d.now ?? Date.now)() - Date.parse(open.at) < PROPOSAL_OPEN_MS ? open : null;
+  return { on, b, proposal, open };
 }
 
 /** The word rules of the request book. Returns null for anything that keeps today's meaning. */
@@ -1168,25 +1171,50 @@ async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
   const db = t.d.book.db;
   const b = bt.b;
   if (cmd.k === "yes" || cmd.k === "no") {
-    // Yes saves only when a proposal is waiting here; otherwise it keeps its meaning (approve the last task).
-    if (!b || !bt.proposal) return null;
+    // Yes saves only when a proposal is waiting here; otherwise it keeps its meaning (approve the last task). While a draft
+    // is still open, a yes is never passed on to an approval waiting elsewhere (a Google reply or post).
+    if (!b || !bt.open) {
+      // The draft belongs to another of this phone's businesses: still open there, the yes is held back; otherwise the question is closed.
+      const q = t.who.conversation?.open_question as RbQuestion;
+      const qb = businesses(t.who).find((x) => x.location_id === q.location_id);
+      const g = qb ? await db.intake(qb.location_id, qb.user_id, q.intake_id).catch(() => null) : null;
+      if (cmd.k === "yes" && g?.ok === true && g.state === "pending") return answered(withB(t, qb!), BOOK_SAY.tapSave, "request_yes_tap_save");
+      await t.d.db.setConv(t.phone, { open_question: null });
+      return null;
+    }
     const tb = withB(t, b);
-    if (cmd.k === "yes") return await bookSave(tb, b, bt.on.get(b.location_id)!, bt.proposal.intake_id);
-    await db.discard(b.location_id, b.user_id, `discard:${t.m.messageId}`, bt.proposal.intake_id).catch(() => null);
+    const g = await db.intake(b.location_id, b.user_id, bt.open.intake_id).catch(() => null);
+    if (g?.ok !== true || g.state !== "pending") {
+      // The draft was already saved, dropped or has expired: the question is closed and the word keeps today's meaning.
+      await t.d.db.setConv(t.phone, { open_question: null });
+      return null;
+    }
+    if (cmd.k === "yes") return await bookSave(tb, b, bt.on.get(b.location_id)!, bt.open.intake_id, undefined, g);
+    await db.discard(b.location_id, b.user_id, `discard:${t.m.messageId}`, bt.open.intake_id).catch(() => null);
     await t.d.db.setConv(t.phone, { open_question: null });
     return answered(tb, BOOK_SAY.dropped, "request_dropped");
   }
   if (ref) {
     // A number at a phone with several businesses and none chosen: the existing question first, then the number again.
     if (!b) return withBusiness(t, "help", text, () => Promise.resolve("request_ref"));
-    const reply = await requestSummary(db, b.location_id, b.user_id, ref, bookCtx(t, b, bt.on.get(b.location_id)!));
+    const reply = await requestSummary(db, b.location_id, b.user_id, ref, bookCtx(t, b, bt.on.get(b.location_id)!)).catch(() => null);
+    if (!reply) return answered(withB(t, b), BOOK_SAY.tryAgain, "request_db_error");
     return answered(withB(t, b), reply.body, ref.word ? `request_ref_${ref.word}` : "request_summary");
   }
   return await free(t, text, bt);
 }
 
 /** What a request tool answers, worked out before it is sent (so "On it" goes first when it takes a moment). */
-async function requestTool(t: Turn, bt: BookTurn, tool: string, arg: string | undefined, text: string): Promise<Said> {
+async function requestTool(t: Turn, bt: BookTurn, tool: string, arg: string | undefined, text: string, onlyIfNew = false): Promise<Said | null> {
+  try {
+    return await requestToolInner(t, bt, tool, arg, text, onlyIfNew);
+  } catch {
+    // A database or model failure: a plain line, never silence. Nothing was saved; the owner sends it again.
+    return said(bt.b ? withB(t, bt.b) : t, BOOK_SAY.tryAgain, "request_db_error");
+  }
+}
+
+async function requestToolInner(t: Turn, bt: BookTurn, tool: string, arg: string | undefined, text: string, onlyIfNew: boolean): Promise<Said | null> {
   const b = bt.b;
   // Several businesses and none chosen: the existing question, with the message kept for after the pick.
   if (!b) return { send: () => withBusiness(t, "help", text, () => Promise.resolve("which_business")) };
@@ -1200,16 +1228,21 @@ async function requestTool(t: Turn, bt: BookTurn, tool: string, arg: string | un
   // A new request, or a second message that revises the proposal still waiting for its tap.
   let base = text;
   let revising: string | null = null;
+  let before: unknown = null;
   if (bt.proposal) {
     const g = await db.intake(b.location_id, b.user_id, bt.proposal.intake_id).catch(() => null);
     if (g?.ok === true && g.state === "pending" && typeof g.raw_text === "string") {
       base = `${g.raw_text}\n${text}`;
       revising = bt.proposal.intake_id;
+      before = g.field_evidence;
     }
   }
+  // A message the router could not place ("thanks", "ok") revises the draft only when it adds something to it.
+  if (onlyIfNew && !revising) return null;
   const r = await readRequest(base, pack, { country: b.country, timeZone: b.time_zone ?? "UTC", now: new Date((t.d.now ?? Date.now)()) }, t.d.book!.ask);
   if (!r.ok) return said(tb, r.reply.body, revising ? "request_revise_unread" : "request_unread");
   const evidence = toEvidence(r.ex);
+  if (onlyIfNew && JSON.stringify(evidence) === JSON.stringify(before)) return said(tb, BOOK_SAY.stillWaiting, "request_still_waiting");
   let intake: string | null = null;
   if (revising) {
     const v = await db.revise(b.location_id, b.user_id, `revise:${t.m.messageId}`, revising, r.ex.text, evidence);
@@ -1256,6 +1289,15 @@ async function bookButton(t: Turn, cmd: Extract<Command, { k: "request" }>): Pro
 /** Save: the proposal must still be open (an expired one is refused here; RB-I makes the database refuse it too). The key is
  *  the WhatsApp id of the message that saves it, so a retry returns the first result and never makes a second request. */
 async function bookSave(tb: Turn, b: BusinessRole, pack: Pack, intakeId: string, pick?: number, read?: Record<string, unknown>): Promise<string> {
+  try {
+    return await bookSaveInner(tb, b, pack, intakeId, pick, read);
+  } catch {
+    // Nothing was saved, or the save is kept under its key and a second tap answers that it is already handled.
+    return answered(tb, BOOK_SAY.tryAgain, "request_db_error");
+  }
+}
+
+async function bookSaveInner(tb: Turn, b: BusinessRole, pack: Pack, intakeId: string, pick?: number, read?: Record<string, unknown>): Promise<string> {
   const db = tb.d.book!.db;
   const g = read ?? await db.intake(b.location_id, b.user_id, intakeId);
   if (g.ok !== true) return answered(tb, g.reason === "not_found" ? SAY.alreadyHandled : refusalReply({ reason: String(g.reason) }).body, `request_save_refused:${g.reason}`);
@@ -1301,11 +1343,16 @@ async function free(t: Turn, text: string, book?: BookTurn): Promise<string> {
   void sleep(book ? ON_IT_REQUEST_MS : (t.d.onItMs ?? 2500)).then(() => {
     if (!settled) onIt = say1(tb0, SAY.onIt);
   });
-  const r = await route(t.d.ai, role, text, book ? { requestBook: true } : {});
-  // RB-E: a request tool's answer is worked out before "On it" is settled, so "On it" covers the extraction too.
-  const rb = book && r.command.k === "tool" && isRequestTool(r.command.tool) ? await requestTool(t, book, r.command.tool, r.command.arg, text)
-    : book?.proposal && r.command.k !== "tool" ? await requestTool(t, book, "request_new", undefined, text) : null;
-  settled = true;
+  let r: Awaited<ReturnType<typeof route>>;
+  let rb: Said | null = null;
+  try {
+    r = await route(t.d.ai, role, text, book ? { requestBook: true } : {});
+    // RB-E: a request tool's answer is worked out before "On it" is settled, so "On it" covers the extraction too.
+    rb = book && r.command.k === "tool" && isRequestTool(r.command.tool) ? await requestTool(t, book, r.command.tool, r.command.arg, text)
+      : book?.proposal && r.command.k !== "tool" ? await requestTool(t, book, "request_new", undefined, text, true) : null;
+  } finally {
+    settled = true;
+  }
   // "On it" already went: the answer follows it, never before it.
   if (onIt) await onIt;
   if (rb) return rb.send();

@@ -85,7 +85,9 @@ export async function route(ai: Ai, role: RoleName, text: string, opts: { reques
   if (opts.requestBook && isRequestTool(tool)) {
     if (tool === "request_new") return { command: { k: "tool", tool }, lang, question: null };
     const num = arg("number");
-    if (num && /^#?\d{1,9}$/.test(num.trim()) && inMessage(num.replace("#", ""), text)) return { command: { k: "tool", tool, arg: `#${num.replace("#", "").trim()}` }, lang, question: null };
+    const digits = num?.replace("#", "").trim() ?? "";
+    // The number must stand on its own in the message: 14 is not read out of 142.
+    if (/^\d{1,9}$/.test(digits) && new RegExp(`(^|[^\\d])${digits}([^\\d]|$)`).test(text)) return { command: { k: "tool", tool, arg: `#${digits}` }, lang, question: null };
     const name = arg("name");
     return { command: { k: "tool", tool, arg: name && inMessage(name, text) ? name.trim().slice(0, 200) : undefined }, lang, question: null };
   }
