@@ -52,6 +52,26 @@ test.describe("public pages", () => {
     });
   }
 
+  // Industry 1 (R-144): SEO 1's duplicate measure on the 21 industry pages as served (scripts/lib/page-dup.mjs, the same
+  // code as tests/industry1-dup.test.ts and scripts/industry-dup.mjs). One pass, in the m390 project.
+  test("the industry pages: each at least 70 percent its own text, no pair above 35 percent", async ({
+    request,
+  }, info) => {
+    test.skip(info.project.name !== "m390", "one pass is enough");
+    const { failures, measure, sentences } = await import("../../scripts/lib/page-dup.mjs");
+    const industries = fromSitemap.filter((p) => p.startsWith("/for/"));
+    expect(industries).toHaveLength(21);
+    const pages: Record<string, Set<string>> = {};
+    for (const path of industries) {
+      const res = await request.get(path);
+      expect(res.status(), path).toBe(200);
+      pages[path] = sentences(await res.text());
+    }
+    const f = failures(measure(pages));
+    expect(f.own.map((o) => `${o.page} ${o.own} of ${o.total}`)).toEqual([]);
+    expect(f.pairs.map((p) => `${p.a} / ${p.b} ${p.same} of ${p.shorter}`)).toEqual([]);
+  });
+
   test("every guide in the sitemap: one h1, no sideways scroll, no serious axe issue", async ({
     page,
     request,

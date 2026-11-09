@@ -24,6 +24,17 @@ export const hairSalon: Industry = {
   searches: ["hair salon near me", "hairdressers", "balayage", "hair colour near me", "blow dry"],
   // Industries 3 (master plan 30.33 item 2): the two old guide sections as short cards. Each line keeps a fact of
   // docs/claims/hair-salon.md, whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Cut and blow dry",
+    "Full head colour",
+    "Balayage",
+    "Highlights",
+    "Root touch up",
+    "Toner and gloss",
+    "Wedding hair",
+    "Children's cuts",
+  ],
   profile: [
     {
       title: "Services with a price",
@@ -39,9 +50,70 @@ export const hairSalon: Industry = {
     },
     {
       title: "Photos true to the chair",
-      text: "Google asks for photos in focus and well lit. Kabsi checks each one first.",
+      text: "Sharp, bright photos of real work. Kabsi looks at every one before Google does.",
     },
   ],
+  reviews: [
+    {
+      title: "A stylist named in the review",
+      text: "The reply thanks that stylist, when the name is on your team list.",
+    },
+    {
+      title: "Colour that came out wrong",
+      text: "A calm draft asking the client to get in touch through your profile.",
+    },
+    {
+      title: "A scalp reaction to dye",
+      text: "A health matter: no draft, only a short checklist for you.",
+    },
+  ],
+  holidays: [
+    {
+      title: "Bank holidays, asked ahead",
+      text: "Five days before, Kabsi asks: normal, closed or your own hours.",
+    },
+    {
+      title: "Christmas week 2026",
+      text: "Christmas Day is Friday 25 December; the Boxing Day holiday is Monday 28.",
+    },
+    {
+      title: "A training day, closed",
+      text: "One day is special hours. Seven days or more is temporarily closed.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "Colour by the window",
+      text: "Shoot the finished colour in daylight. Kabsi flags a dark or blurry one.",
+    },
+    {
+      title: "The lengths, not the face",
+      text: "The back of the head or the ends. Kabsi does not look for faces.",
+    },
+    {
+      title: "The chair and the basin",
+      text: "A photo with no words goes on as a profile photo, after your yes.",
+    },
+  ],
+  posts: [
+    {
+      title: "A stylist's first day",
+      text: "Their name, what they love doing and when bookings with them open.",
+    },
+    {
+      title: "Colour of the month",
+      text: "One photo of the shade and one line from you.",
+    },
+    {
+      title: "Late nights before Christmas",
+      text: "Which evenings you stay open, once they are set as special hours.",
+    },
+  ],
+  categories: {
+    primary: "Hairdresser",
+    more: ["Beauty salon"],
+    line: "Hairdresser is the name in Google's own example; the label can change by country, so open your category box first.",
+  },
   page: {
     query: "hair salon Google Business Profile",
     title: "Hair salon Google Business Profile help | Kabsi",
@@ -87,7 +159,6 @@ export const hairSalon: Industry = {
         text: "Kabsi asks five days before each bank holiday and sets your answer after your yes.",
       },
     ],
-    nearby: { kind: "salon", term: "hair salon" },
     ai: {
       question: "Which hair salon in Clifton, Bristol does balayage on Saturdays?",
       answer: "Hollis Hair on Gloucester Road does balayage and is open on Saturdays from 9 am.",
@@ -112,16 +183,16 @@ export const hairSalon: Industry = {
       a: "Only when the review names them. Kabsi uses the names on the team list you give it, and never guesses one.",
     },
     {
-      q: "Does Kabsi work with my booking system?",
-      a: "No. Kabsi works only with your Google profile.",
-    },
-    {
-      q: "Can my salon manager approve instead of me?",
-      a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything.",
+      q: "Does Kabsi work with my salon booking system?",
+      a: "No, Kabsi looks after the salon's Google profile; appointments stay in your own system.",
     },
     {
       q: "How does Kabsi know what my salon is like?",
       a: "You tell it once, in About your business: services, team, hours and anything it should never say. Every draft uses those facts.",
+    },
+    {
+      q: "Where does the review QR card go in a salon?",
+      a: "At each station by the mirror and at reception. Hand it over the same way after every visit.",
     },
   ],
   guides: [

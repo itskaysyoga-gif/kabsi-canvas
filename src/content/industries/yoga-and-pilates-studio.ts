@@ -30,22 +30,32 @@ export const yogaAndPilatesStudio: Industry = {
   ],
   // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
   // docs/claims/yoga-and-pilates-studio.md, whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Hatha yoga",
+    "Vinyasa flow",
+    "Reformer pilates",
+    "Mat pilates",
+    "Beginners' course",
+    "Private sessions",
+    "Prenatal yoga",
+  ],
   profile: [
     {
       title: "Class times and the address",
       text: "Keep both exact, with special hours for holidays. Kabsi checks them against yours daily.",
     },
     {
-      title: "A new class is news",
-      text: "A photo with the day and time becomes a post. Never a made up offer.",
+      title: "Classes as services",
+      text: "Hot yoga, reformer, beginners: each can be a service with a description.",
     },
     {
-      title: "Thanks passed to the teacher",
-      text: "A review that names Sara thanks Sara, if she is on your team list.",
+      title: "Teachers by name",
+      text: "Add each teacher to your team list so replies thank the right one.",
     },
     {
-      title: "An injury in class",
-      text: "No draft, a short checklist, and a neutral holding reply only if you ask.",
+      title: "Mats and kit",
+      text: "Say in the description whether mats are provided, so beginners know.",
     },
   ],
   categories: {
@@ -53,6 +63,62 @@ export const yogaAndPilatesStudio: Industry = {
     more: ["Pilates studio"],
     line: "Choose the first by what most of your classes are, and add the other only if you teach it every week.",
   },
+  reviews: [
+    {
+      title: "Thanks passed to the teacher",
+      text: "A review that names Sara thanks Sara, if she is on your team list.",
+    },
+    {
+      title: "An injury in class",
+      text: "A safety matter: no draft, just a checklist and your decision.",
+    },
+    {
+      title: "A class that felt too full",
+      text: "One apology and an invitation to get in touch.",
+    },
+  ],
+  holidays: [
+    {
+      title: "National Day classes",
+      text: "Over 2 and 3 December, say which classes still run.",
+    },
+    {
+      title: "Studio hours in Ramadan",
+      text: "Changed hours become special hours, after your yes.",
+    },
+    {
+      title: "Eid al-Fitr",
+      text: "Set by the moon; Kabsi asks five days before the expected date.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "A new class is news",
+      text: "A photo with the day and time becomes a post. Never a made up offer.",
+    },
+    {
+      title: "The studio, empty and lit",
+      text: "Mats laid out and the room in daylight, no students.",
+    },
+    {
+      title: "The way in",
+      text: "Upstairs or in a tower? Show the door and the lift lobby.",
+    },
+  ],
+  posts: [
+    {
+      title: "A beginners' course",
+      text: "The start date, how many weeks and the time.",
+    },
+    {
+      title: "A workshop weekend",
+      text: "The date and the teacher, as an event post.",
+    },
+    {
+      title: "Classes over the holiday",
+      text: "Which classes run, once you confirm them.",
+    },
+  ],
   page: {
     query: "yoga studio Google Business Profile",
     title: "Yoga studio Google Business Profile help | Kabsi",
@@ -85,14 +151,13 @@ export const yogaAndPilatesStudio: Industry = {
       },
       {
         title: "Address and hours, checked daily",
-        text: "When Google shows something else, you choose which stays.",
+        text: "Where Google differs, you say which is right.",
       },
       {
         title: "Replies that thank the teacher",
         text: "Only when the review names her, and only names on your team list.",
       },
     ],
-    nearby: { kind: "studio", term: "yoga studio" },
     ai: {
       question:
         "Which studio in Al Reem Island, Abu Dhabi has beginner reformer pilates in the evening?",
@@ -111,7 +176,7 @@ export const yogaAndPilatesStudio: Industry = {
   },
   faqs: [
     {
-      q: "We moved studio. What does Kabsi do?",
+      q: "We moved studio, so what happens on Google?",
       a: "Tell Kabsi the new address. When Google still shows the old one, Kabsi tells you, and nothing changes without your yes.",
     },
     {
@@ -120,20 +185,20 @@ export const yogaAndPilatesStudio: Industry = {
     },
     {
       q: "What happens with a review about an injury?",
-      a: "An injury is a safety matter: no draft and a short checklist. Kabsi writes a neutral holding reply only if you ask.",
+      a: "Injuries are safety matters, so there is no draft, only a checklist; a holding reply is written if you ask.",
     },
     {
       q: "Will a reply thank the right teacher?",
-      a: "Only when the review names them and the name is on your team list. Kabsi never guesses.",
+      a: "Only if the review names the teacher and the name is on your team list.",
     },
     {
-      q: "Does Kabsi work with my booking system?",
-      a: "No. Kabsi works only with your Google profile.",
+      q: "Does Kabsi link to my class booking app?",
+      a: "No, class bookings stay in your own app; Kabsi looks after the Google profile.",
     },
   ],
   guides: [
     "google-posts-for-local-businesses",
     "keep-your-hours-and-details-the-same-everywhere",
-    "how-to-reply-to-google-reviews",
+    "how-to-respond-to-negative-google-reviews",
   ],
 };

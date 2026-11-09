@@ -94,3 +94,28 @@ Removed from the page: the five long tasks, the cake that was not like the pictu
 ### Industries 3: fixed after the independent check (5 Nov 2026)
 
 - FAQ: "... Check the link each time your provider changes." (was "Kabsi prepares a new link for your yes": Kabsi does not edit the order link on Google yet, knowledge/facts 2.1).
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card line | "No draft for an allergy: a checklist reaches you first." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I2 | Card title | "The window from the street" | A | none | A short label for the line under it. |
+| I3 | Card line | "Google says an outside photo helps people recognise the shop." | G | G8 | "When you add an exterior photo, it helps customers recognize your business when they visit." |
+| I4 | Card title | "The first loaf out" | A | none | A short label for the line under it. |
+| I5 | Card line | "A photo at opening and one line about what is warm." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I6 | Card title | "Weekend cake orders" | A | none | A short label for the line under it. |
+| I7 | Card line | "The order deadline for Saturday cakes, with its date." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I8 | Card title | "A seasonal bake" | A | none | A short label for the line under it. |
+| I9 | Card line | "Hot cross buns or mince pies, the week they come back." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I10 | Answer | "No, Kabsi writes only facts you give it; allergen information comes from your recipes and local rules. A review about a reaction gets no draft." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I11 | Answer | "No, the Kabsi chat is between Kabsi and you. It prepares your hours, posts and replies, and does not talk to your customers." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I12 | Answer | "Yes, the prices on your cake list, exactly, once you approve. Nothing is made up." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I13 | Service | "Sourdough loaves" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I14 | Service | "Celebration cakes" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I15 | Service | "Wedding cakes" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I16 | Service | "Morning pastries" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I17 | Service | "Wholesale bread" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I18 | Service | "Cupcakes" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

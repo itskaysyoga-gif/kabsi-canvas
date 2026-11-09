@@ -69,3 +69,48 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 Jobs, the watch line and the AI answer are unchanged. Related: pet grooming, dental clinic, physiotherapy, medical and aesthetic clinic, optician, florist. Guides: hours and details the same everywhere, negative reviews, holiday hours.
 
 Removed from the page: the search text (row 17); the two guide blocks as paragraphs; "you can add anything it should never say in About your business" (row 24); the guide line on the daily phone, hours and description check (row 22; job row 13 and the watch keep it); "and nothing is published until you approve it" (row 25); "Read the names in your own profile" (row 6); from the answer, "whether you are open now", "shows you a hard review as one that needs more care" and holiday hours (rows 9, 10; the holiday card keeps the last); "marked as needing a little more care" in the hard review FAQ.
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card title | "Services, plainly listed" | A | none | A short label for the line under it. |
+| I2 | Card line | "Vaccinations, neutering, dental care: each can be a service with a description." | G | G6 | Services can carry a price and a description; custom services are allowed; no prices in custom service names. |
+| I3 | Card title | "Which animals you see" | A | none | A short label for the line under it. |
+| I4 | Card line | "Cats and dogs only, or exotics too: say so in your description." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I5 | Card line | "No draft for grief or injury; a checklist reaches you instead." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I6 | Card title | "A long wait in reception" | A | none | A short label for the line under it. |
+| I7 | Card line | "One apology, and an invitation to get in touch with the clinic." | K | facts 09 (7.3, 7.6) | Drafts stay calm, never argue, admit fault or promise refunds, and ask the reviewer to get in touch through the details on the profile. |
+| I8 | Card title | "Christmas 2026" | A | none | A short label for the line under it. |
+| I9 | Card line | "25 December and the Boxing Day holiday on Monday 28. Post your cover." | T | H1 | England and Wales bank holidays; a weekend holiday moves to a substitute weekday. |
+| I10 | Card title | "Bank holidays, five days ahead" | A | none | A short label for the line under it. |
+| I11 | Card line | "Kabsi asks, then sets special hours after your yes." | G | G4 | Special hours keep regular hours for holidays and exceptional days; up to 6 days closed fits special hours, 7 or more Temporarily closed. |
+| I12 | Card title | "The reception desk" | A | none | A short label for the line under it. |
+| I13 | Card line | "Bright and welcoming, with no pet or owner in view." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I14 | Card title | "The consulting room" | A | none | A short label for the line under it. |
+| I15 | Card line | "Clean table, tidy shelves, good light." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I16 | Card title | "The car park and door" | A | none | A short label for the line under it. |
+| I17 | Card line | "Where to stop with a pet carrier, seen from the street." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I18 | Card title | "Vaccination clinic dates" | A | none | A short label for the line under it. |
+| I19 | Card line | "The days you run them, as a dated post." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I20 | Card title | "A new vet joins" | A | none | A short label for the line under it. |
+| I21 | Card line | "Their name and the animals they see." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I22 | Card title | "Bank holiday cover" | A | none | A short label for the line under it. |
+| I23 | Card line | "Who answers urgent calls while you are closed." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I24 | Card title | "The phone and hours, read daily" | A | none | A short label for the line under it. |
+| I25 | Card line | "If Google differs, you decide which version stays." | K | facts 04 (Google Protection) | When Google shows something other than what the owner confirmed, the owner chooses Keep my information or Google is right; nothing changes by itself. |
+| I26 | Answer | "No, drafts thank the owner and invite them to get in touch, and say nothing about the pet's care." | K | facts 09 (7.3, 7.6) | Drafts stay calm, never argue, admit fault or promise refunds, and ask the reviewer to get in touch through the details on the profile. |
+| I27 | Answer | "Yes, five days before each one, Kabsi asks what you will do and sets special hours once you say yes." | K | K2 (docs/holidays.md); facts 04 "Holiday hours" | Kabsi asks five days before a public holiday: normal hours, closed or custom hours; set once the owner says yes. |
+| I28 | Question | "Where does the review card go at a vet clinic?" | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I29 | Answer | "At reception, on appointment cards or in a follow-up email." | K | facts 09 (card placement, 7.1 to 7.8); facts 10 (ask everyone the same way, no incentive) | Where the review card goes for each trade; every customer asked the same way, never an incentive. |
+| I30 | Question | "Can a reply mention a pet's name?" | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I31 | Answer | "No, a reply says nothing about the pet or its care, only thanks and how to reach you." | K | K1 (facts 09, 7.3) | Replies stay general: no personal details, never confirm someone is a patient or mention their care. |
+| I32 | Service | "Vaccinations" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I33 | Service | "Neutering" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I34 | Service | "Pet dental care" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I35 | Service | "Microchipping" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I36 | Service | "Health checks" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I37 | Service | "Flea and worm treatment" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I38 | Service | "Nurse clinics" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

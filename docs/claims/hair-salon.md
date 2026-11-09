@@ -77,3 +77,50 @@ answer. The old tasks were not shown and are deleted.
 ### Industries 3: fixed after the independent check (5 Nov 2026)
 
 - Answer: "prepares review replies" replaces "drafts every reply", because a high risk review gets no draft (facts 13, "What happens with hard reviews?").
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card line | "Sharp, bright photos of real work. Kabsi looks at every one before Google does." | K | facts 13 "What photos can I post?"; facts 04 "Photos" | The photo check flags a dark, blurry or small (under 720 by 720) photo and a likely repeat; it does not look for faces. |
+| I2 | Card title | "A stylist named in the review" | A | none | A short label for the line under it. |
+| I3 | Card line | "The reply thanks that stylist, when the name is on your team list." | K | K1 (facts 09, 7.4) | Team names let replies thank the right person; names not on the list are never used. |
+| I4 | Card title | "Colour that came out wrong" | A | none | A short label for the line under it. |
+| I5 | Card line | "A calm draft asking the client to get in touch through your profile." | K | facts 09 (7.3, 7.6) | Drafts stay calm, never argue, admit fault or promise refunds, and ask the reviewer to get in touch through the details on the profile. |
+| I6 | Card title | "A scalp reaction to dye" | A | none | A short label for the line under it. |
+| I7 | Card line | "A health matter: no draft, only a short checklist for you." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I8 | Card title | "Bank holidays, asked ahead" | A | none | A short label for the line under it. |
+| I9 | Card line | "Five days before, Kabsi asks: normal, closed or your own hours." | K | K2 (docs/holidays.md); facts 04 "Holiday hours" | Kabsi asks five days before a public holiday: normal hours, closed or custom hours; set once the owner says yes. |
+| I10 | Card title | "Christmas week 2026" | A | none | A short label for the line under it. |
+| I11 | Card line | "Christmas Day is Friday 25 December; the Boxing Day holiday is Monday 28." | T | H1 | England and Wales bank holidays; a weekend holiday moves to a substitute weekday. |
+| I12 | Card title | "A training day, closed" | A | none | A short label for the line under it. |
+| I13 | Card line | "One day is special hours. Seven days or more is temporarily closed." | G | G4 | Special hours keep regular hours for holidays and exceptional days; up to 6 days closed fits special hours, 7 or more Temporarily closed. |
+| I14 | Card title | "Colour by the window" | A | none | A short label for the line under it. |
+| I15 | Card line | "Shoot the finished colour in daylight. Kabsi flags a dark or blurry one." | K | facts 13 "What photos can I post?"; facts 04 "Photos" | The photo check flags a dark, blurry or small (under 720 by 720) photo and a likely repeat; it does not look for faces. |
+| I16 | Card title | "The lengths, not the face" | A | none | A short label for the line under it. |
+| I17 | Card line | "The back of the head or the ends. Kabsi does not look for faces." | K | facts 13 "What photos can I post?"; facts 04 "Photos" | The photo check flags a dark, blurry or small (under 720 by 720) photo and a likely repeat; it does not look for faces. |
+| I18 | Card title | "The chair and the basin" | A | none | A short label for the line under it. |
+| I19 | Card line | "A photo with no words goes on as a profile photo, after your yes." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I20 | Card title | "A stylist's first day" | A | none | A short label for the line under it. |
+| I21 | Card line | "Their name, what they love doing and when bookings with them open." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I22 | Card title | "Colour of the month" | A | none | A short label for the line under it. |
+| I23 | Card line | "One photo of the shade and one line from you." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I24 | Card title | "Late nights before Christmas" | A | none | A short label for the line under it. |
+| I25 | Card line | "Which evenings you stay open, once they are set as special hours." | G | G4 | Special hours keep regular hours for holidays and exceptional days; up to 6 days closed fits special hours, 7 or more Temporarily closed. |
+| I26 | First category | "Hairdresser" | C | G13 (row 16 above) | The category rows earlier in this sheet (or the other sheet named there) show the name on a Google page or a live profile. |
+| I27 | Line | "Hairdresser is the name in Google's own example; the label can change by country, so open your category box first." | G | G1, G2, G13 | Pick the most specific category from Google's list; Google's example shows one category under different names by country. |
+| I28 | Question | "Does Kabsi work with my salon booking system?" | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I29 | Answer | "No, Kabsi looks after the salon's Google profile; appointments stay in your own system." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I30 | Question | "Where does the review QR card go in a salon?" | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I31 | Answer | "At each station by the mirror and at reception. Hand it over the same way after every visit." | K | facts 09 (card placement, 7.1 to 7.8); facts 10 (ask everyone the same way, no incentive) | Where the review card goes for each trade; every customer asked the same way, never an incentive. |
+| I32 | Service | "Cut and blow dry" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I33 | Service | "Full head colour" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I34 | Service | "Balayage" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I35 | Service | "Highlights" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I36 | Service | "Root touch up" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I37 | Service | "Toner and gloss" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I38 | Service | "Wedding hair" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I39 | Service | "Children's cuts" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I40 | Category | "Beauty salon" | C | lash-and-brow-studio.md row 4 (live profile, read 5 Nov 2026) | The category rows earlier in this sheet (or the other sheet named there) show the name on a Google page or a live profile. |

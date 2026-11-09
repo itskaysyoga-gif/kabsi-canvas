@@ -30,29 +30,96 @@ export const lashAndBrowStudio: Industry = {
   ],
   // Industries 3 (master plan 30.33 item 2): the two old guide sections as short cards. Each line keeps a fact of
   // docs/claims/lash-and-brow-studio.md, whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Classic lash extensions",
+    "Hybrid lashes",
+    "Volume lashes",
+    "Lash lift",
+    "Brow lamination",
+    "Brow tint",
+    "Brow threading",
+    "Lash removal",
+  ],
   profile: [
     {
+      title: "Brows as their own services",
+      text: "Lamination, tint and threading each get a line and a price.",
+    },
+    {
+      title: "Every set and lift listed",
+      text: "Classic, hybrid, volume, lifts and lamination, each as its own service.",
+    },
+    {
+      title: "A price on each service",
+      text: "Keep the price out of a custom service name; Google rejects that.",
+    },
+    {
+      title: "The booking link, checked",
+      text: "Clients book from your profile, so test the link after any change.",
+    },
+  ],
+  categories: {
+    primary: "Eyelash salon",
+    more: ["Beauty salon"],
+    line: "Eyelash salon first when lashes are most of the work. Labels vary by country, so check your own box.",
+  },
+  reviews: [
+    {
+      title: "The artist, by name",
+      text: "Thanks reach her when the review names her and she is on your list.",
+    },
+    {
+      title: "A set that shed fast",
+      text: "A calm draft inviting the client back in touch, with no blame.",
+    },
+    {
+      title: "Irritation or swelling",
+      text: "No draft for a health complaint; Kabsi sends a checklist instead.",
+    },
+  ],
+  holidays: [
+    {
+      title: "Before weddings and parties",
+      text: "Saturdays fill early, so a dated post names the free slots.",
+    },
+    {
+      title: "England's bank holidays",
+      text: "Asked five days ahead; your answer goes on Google after your yes.",
+    },
+    {
+      title: "Christmas party season",
+      text: "December Saturdays book up, so post the dates still free.",
+    },
+  ],
+  photoCards: [
+    {
       title: "Close photos clients trust",
-      text: "In focus, well lit, no heavy filters. Kabsi checks each photo first.",
+      text: "Sharp lashes in soft daylight. Kabsi flags a dark or blurry close up.",
     },
     {
       title: "The work, not the client",
       text: "A close crop of the lashes is enough; ask the client first if you like.",
     },
     {
-      title: "Hours checked every day",
-      text: "Kabsi compares Google's hours with yours daily and asks before each bank holiday.",
-    },
-    {
-      title: "A review about a reaction",
-      text: "No draft, a short checklist, and a neutral holding reply only if you ask.",
+      title: "Brows in two photos",
+      text: "The same angle and light before and after, with the client's yes.",
     },
   ],
-  categories: {
-    primary: "Eyelash salon",
-    more: ["Beauty salon"],
-    line: "Google's category names can differ by country, so read the list in your own profile. Add a second category only for work you really do.",
-  },
+  posts: [
+    {
+      title: "A new lift or tint",
+      text: "What it is, how long it takes and how to book.",
+    },
+    {
+      title: "Gaps in this week's diary",
+      text: "A dated update for the free slots, in your own words.",
+    },
+    {
+      title: "Your patch test rule",
+      text: "When clients need one, said the way your studio says it.",
+    },
+  ],
   page: {
     query: "eyelash salon Google Business Profile",
     title: "Eyelash salon Google Business Profile help | Kabsi",
@@ -66,7 +133,7 @@ export const lashAndBrowStudio: Industry = {
       "For an eyelash salon Google Business Profile, Kabsi turns fresh sets into posts, checks your hours daily and prepares review replies, all for your yes.",
     watch: {
       business: "Flutter Lash Studio, London",
-      line: "Late hours matter to clients who work. Kabsi checks the hours Google shows against yours every day.",
+      line: "Late hours matter to clients who work, and Kabsi compares your hours with Google's every day.",
       fields: ["Opening hours", "Special hours", "Website", "Phone", "Main category"],
       what: "Saturday",
       google: "10:00 to 16:00",
@@ -87,11 +154,10 @@ export const lashAndBrowStudio: Industry = {
         text: "Only when the review names her, and only names on your team list.",
       },
       {
-        title: "Holiday hours, asked ahead",
+        title: "Bank holiday hours, set early",
         text: "Five days before each bank holiday, Kabsi asks and sets your answer.",
       },
     ],
-    nearby: { kind: "studio", term: "eyelash salon" },
     ai: {
       question: "Which lash studio in Islington, London does a lash lift on Saturdays?",
       answer:
@@ -110,28 +176,28 @@ export const lashAndBrowStudio: Industry = {
   faqs: [
     {
       q: "Will Kabsi post photos of my clients' faces?",
-      a: "Only photos you send it, and only after you approve the post. A close crop of the lashes is enough.",
+      a: "Only the photos you choose to send, once you approve the post; a close crop of the lashes is enough.",
     },
     {
       q: "What does Kabsi do with a review about irritation?",
-      a: "It comes to you with no draft and a short checklist. Kabsi writes a short, neutral holding reply only if you ask.",
+      a: "You see it before anyone else, with a checklist and no draft. A short holding reply is written only on request.",
     },
     {
       q: "Can Kabsi thank the artist by name?",
       a: "Yes, when the review names her and her name is on your team list. Kabsi never guesses a name.",
     },
     {
-      q: "Does Kabsi work with my booking system?",
-      a: "No. Kabsi works only with your Google profile. Your booking link stays the one you set.",
+      q: "Can Kabsi connect to my lash booking app?",
+      a: "No, Kabsi looks after the studio's Google profile, and your booking link stays the one you set.",
     },
     {
-      q: "Can my senior artist approve instead of me?",
-      a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything.",
+      q: "Can a post say how long lashes last?",
+      a: "Only what you tell Kabsi, in your words. It adds no promise of its own.",
     },
   ],
   guides: [
     "photos-for-google-business-profile",
-    "how-to-reply-to-google-reviews",
+    "how-to-respond-to-negative-google-reviews",
     "how-to-set-holiday-hours-on-google",
   ],
 };

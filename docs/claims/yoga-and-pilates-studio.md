@@ -68,3 +68,48 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 Jobs, the watch line and the AI answer are unchanged. Related: gym and fitness, physiotherapy, spa and massage, nail salon, cafe, florist. Guides: posts, hours and details the same everywhere, replying to reviews.
 
 Removed from the page: the search text (row 17); the two guide blocks as paragraphs; "asks before each public holiday what you will do" (row 20); "a photo of the room" and "for your yes" in the class card (row 21; job row 13 keeps "for your yes"); "a name not on your list is never used" (row 22; the FAQ keeps "Kabsi never guesses"); "Kabsi never gives health advice" (row 23); from the answer, "what is new this week", "thanks the teacher the student named" and holiday hours (rows 8, 9); "marked as needing a little more care" in the injury FAQ.
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card title | "Classes as services" | A | none | A short label for the line under it. |
+| I2 | Card line | "Hot yoga, reformer, beginners: each can be a service with a description." | G | G6 | Services can carry a price and a description; custom services are allowed; no prices in custom service names. |
+| I3 | Card title | "Teachers by name" | A | none | A short label for the line under it. |
+| I4 | Card line | "Add each teacher to your team list so replies thank the right one." | K | K1 (facts 09, 7.4) | Team names let replies thank the right person; names not on the list are never used. |
+| I5 | Card title | "Mats and kit" | A | none | A short label for the line under it. |
+| I6 | Card line | "Say in the description whether mats are provided, so beginners know." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I7 | Card line | "A safety matter: no draft, just a checklist and your decision." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I8 | Card title | "A class that felt too full" | A | none | A short label for the line under it. |
+| I9 | Card line | "One apology and an invitation to get in touch." | K | facts 09 (7.3, 7.6) | Drafts stay calm, never argue, admit fault or promise refunds, and ask the reviewer to get in touch through the details on the profile. |
+| I10 | Card title | "National Day classes" | A | none | A short label for the line under it. |
+| I11 | Card line | "Over 2 and 3 December, say which classes still run." | T | H2; K2 (UAE dates estimated, the email says expected) | UAE holiday rules from u.ae; Islamic dates follow the moon. |
+| I12 | Card title | "Studio hours in Ramadan" | A | none | A short label for the line under it. |
+| I13 | Card line | "Changed hours become special hours, after your yes." | G | G4 | Special hours keep regular hours for holidays and exceptional days; up to 6 days closed fits special hours, 7 or more Temporarily closed. |
+| I14 | Card title | "Eid al-Fitr" | A | none | A short label for the line under it. |
+| I15 | Card line | "Set by the moon; Kabsi asks five days before the expected date." | K | K2 (docs/holidays.md); facts 04 "Holiday hours" | Kabsi asks five days before a public holiday: normal hours, closed or custom hours; set once the owner says yes. |
+| I16 | Card title | "The studio, empty and lit" | A | none | A short label for the line under it. |
+| I17 | Card line | "Mats laid out and the room in daylight, no students." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I18 | Card title | "The way in" | A | none | A short label for the line under it. |
+| I19 | Card line | "Upstairs or in a tower? Show the door and the lift lobby." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I20 | Card title | "A beginners' course" | A | none | A short label for the line under it. |
+| I21 | Card line | "The start date, how many weeks and the time." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I22 | Card title | "A workshop weekend" | A | none | A short label for the line under it. |
+| I23 | Card line | "The date and the teacher, as an event post." | G | G7 | Post types Updates, Offers and Events; an offer post has a View Offer button; posts without a date range archive after 6 months. |
+| I24 | Card title | "Classes over the holiday" | A | none | A short label for the line under it. |
+| I25 | Card line | "Which classes run, once you confirm them." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I26 | Card line | "Where Google differs, you say which is right." | K | facts 04 (Google Protection) | When Google shows something other than what the owner confirmed, the owner chooses Keep my information or Google is right; nothing changes by itself. |
+| I27 | Question | "We moved studio, so what happens on Google?" | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I28 | Answer | "Injuries are safety matters, so there is no draft, only a checklist; a holding reply is written if you ask." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I29 | Answer | "Only if the review names the teacher and the name is on your team list." | K | K1 (facts 09, 7.4) | Team names let replies thank the right person; names not on the list are never used. |
+| I30 | Question | "Does Kabsi link to my class booking app?" | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I31 | Answer | "No, class bookings stay in your own app; Kabsi looks after the Google profile." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I32 | Service | "Hatha yoga" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I33 | Service | "Vinyasa flow" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I34 | Service | "Reformer pilates" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I35 | Service | "Mat pilates" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I36 | Service | "Beginners' course" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I37 | Service | "Private sessions" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I38 | Service | "Prenatal yoga" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

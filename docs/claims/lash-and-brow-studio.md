@@ -78,3 +78,56 @@ longer on the page.
 ### Industries 3: fixed after the independent check (5 Nov 2026)
 
 - Answer: "prepares review replies" replaces "drafts every reply", because a high risk review gets no draft (facts 13, "What happens with hard reviews?").
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card title | "Brows as their own services" | A | none | A short label for the line under it. |
+| I2 | Card line | "Lamination, tint and threading each get a line and a price." | G | G6 | Services can carry a price and a description; custom services are allowed; no prices in custom service names. |
+| I3 | Card title | "Every set and lift listed" | A | none | A short label for the line under it. |
+| I4 | Card line | "Classic, hybrid, volume, lifts and lamination, each as its own service." | G | G6 | Services can carry a price and a description; custom services are allowed; no prices in custom service names. |
+| I5 | Card title | "A price on each service" | A | none | A short label for the line under it. |
+| I6 | Card line | "Keep the price out of a custom service name; Google rejects that." | G | G6 | Services can carry a price and a description; custom services are allowed; no prices in custom service names. |
+| I7 | Card title | "The booking link, checked" | A | none | A short label for the line under it. |
+| I8 | Card line | "Clients book from your profile, so test the link after any change." | G | G12 | "You can also add your own link to your Business Profile." |
+| I9 | Line | "Eyelash salon first when lashes are most of the work. Labels vary by country, so check your own box." | G | G1, G2, G13 | Pick the most specific category from Google's list; Google's example shows one category under different names by country. |
+| I10 | Card title | "The artist, by name" | A | none | A short label for the line under it. |
+| I11 | Card line | "Thanks reach her when the review names her and she is on your list." | K | K1 (facts 09, 7.4) | Team names let replies thank the right person; names not on the list are never used. |
+| I12 | Card title | "A set that shed fast" | A | none | A short label for the line under it. |
+| I13 | Card line | "A calm draft inviting the client back in touch, with no blame." | K | facts 09 (7.3, 7.6) | Drafts stay calm, never argue, admit fault or promise refunds, and ask the reviewer to get in touch through the details on the profile. |
+| I14 | Card title | "Irritation or swelling" | A | none | A short label for the line under it. |
+| I15 | Card line | "No draft for a health complaint; Kabsi sends a checklist instead." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I16 | Card title | "Before weddings and parties" | A | none | A short label for the line under it. |
+| I17 | Card line | "Saturdays fill early, so a dated post names the free slots." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I18 | Card title | "England's bank holidays" | A | none | A short label for the line under it. |
+| I19 | Card line | "Asked five days ahead; your answer goes on Google after your yes." | K | K2 (docs/holidays.md); facts 04 "Holiday hours" | Kabsi asks five days before a public holiday: normal hours, closed or custom hours; set once the owner says yes. |
+| I20 | Card title | "Christmas party season" | A | none | A short label for the line under it. |
+| I21 | Card line | "December Saturdays book up, so post the dates still free." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I22 | Card line | "Sharp lashes in soft daylight. Kabsi flags a dark or blurry close up." | K | facts 13 "What photos can I post?"; facts 04 "Photos" | The photo check flags a dark, blurry or small (under 720 by 720) photo and a likely repeat; it does not look for faces. |
+| I23 | Card title | "Brows in two photos" | A | none | A short label for the line under it. |
+| I24 | Card line | "The same angle and light before and after, with the client's yes." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I25 | Card title | "A new lift or tint" | A | none | A short label for the line under it. |
+| I26 | Card line | "What it is, how long it takes and how to book." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I27 | Card title | "Gaps in this week's diary" | A | none | A short label for the line under it. |
+| I28 | Card line | "A dated update for the free slots, in your own words." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I29 | Card title | "Your patch test rule" | A | none | A short label for the line under it. |
+| I30 | Card line | "When clients need one, said the way your studio says it." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I31 | Line | "Late hours matter to clients who work, and Kabsi compares your hours with Google's every day." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I32 | Card title | "Bank holiday hours, set early" | A | none | A short label for the line under it. |
+| I33 | Answer | "Only the photos you choose to send, once you approve the post; a close crop of the lashes is enough." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I34 | Answer | "You see it before anyone else, with a checklist and no draft. A short holding reply is written only on request." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I35 | Question | "Can Kabsi connect to my lash booking app?" | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I36 | Answer | "No, Kabsi looks after the studio's Google profile, and your booking link stays the one you set." | G | G12 | "You can also add your own link to your Business Profile." |
+| I37 | Question | "Can a post say how long lashes last?" | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I38 | Answer | "Only what you tell Kabsi, in your words. It adds no promise of its own." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I39 | Service | "Classic lash extensions" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I40 | Service | "Hybrid lashes" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I41 | Service | "Volume lashes" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I42 | Service | "Lash lift" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I43 | Service | "Brow lamination" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I44 | Service | "Brow tint" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I45 | Service | "Brow threading" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I46 | Service | "Lash removal" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

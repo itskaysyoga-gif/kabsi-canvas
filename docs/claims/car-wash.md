@@ -73,3 +73,46 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 | FAQ | "A calm draft asking the customer to get in touch. It never argues, admits fault or promises a refund, and waits for you." | 26 | K |
 
 Removed from the page: the search text paragraph (row 17), "A photo of a finished car shows the work better than any words" (row 21), "A review may be about the shine or the wait" (row 23), and the long answer (holiday hours stay in the profile card).
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card title | "Each wash with a price" | A | none | A short label for the line under it. |
+| I2 | Card line | "Google can show a service with a price. Keep prices out of custom names." | G | G6 | Services can carry a price and a description; custom services are allowed; no prices in custom service names. |
+| I3 | Card title | "How drivers can pay" | A | none | A short label for the line under it. |
+| I4 | Card line | "Card, cash or an app: say it plainly in your description." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I5 | Card title | "A scratch after the wash" | A | none | A short label for the line under it. |
+| I6 | Card line | "A calm draft: no argument, no fault admitted, no refund promised." | K | facts 09 (7.3, 7.6) | Drafts stay calm, never argue, admit fault or promise refunds, and ask the reviewer to get in touch through the details on the profile. |
+| I7 | Card title | "A long queue" | A | none | A short label for the line under it. |
+| I8 | Card line | "One apology for the wait, and nothing it cannot keep." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I9 | Card title | "A claim or a legal threat" | A | none | A short label for the line under it. |
+| I10 | Card line | "No draft: a legal threat comes to you with a checklist." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I11 | Card title | "National Day weekend" | A | none | A short label for the line under it. |
+| I12 | Card line | "Kabsi asks five days before 2 and 3 December what your hours are." | K | K2 (docs/holidays.md); facts 04 "Holiday hours" | Kabsi asks five days before a public holiday: normal hours, closed or custom hours; set once the owner says yes. |
+| I13 | Card title | "Eid al-Fitr" | A | none | A short label for the line under it. |
+| I14 | Card line | "1 to 3 Shawwal, by the moon. Say which days you open." | T | H2; K2 (UAE dates estimated, the email says expected) | UAE holiday rules from u.ae; Islamic dates follow the moon. |
+| I15 | Card title | "Washing after iftar" | A | none | A short label for the line under it. |
+| I16 | Card line | "Later Ramadan hours become special hours once you say yes." | G | G4 | Special hours keep regular hours for holidays and exceptional days; up to 6 days closed fits special hours, 7 or more Temporarily closed. |
+| I17 | Card title | "The bay from the road" | A | none | A short label for the line under it. |
+| I18 | Card line | "Show the entrance and the queue lane, so drivers know where to turn." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I19 | Card title | "Interior detail, close" | A | none | A short label for the line under it. |
+| I20 | Card line | "Seats and dashboard after a valet, in good light." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I21 | Card title | "Wash prices this month" | A | none | A short label for the line under it. |
+| I22 | Card line | "Your price list, posted exactly as you send it." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I23 | Card title | "Open late in summer" | A | none | A short label for the line under it. |
+| I24 | Card line | "The evening hours you keep, as a post." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I25 | Card title | "A detailing package" | A | none | A short label for the line under it. |
+| I26 | Card line | "An offer post with what it includes and an end date." | G | G7 | Post types Updates, Offers and Events; an offer post has a View Offer button; posts without a date range archive after 6 months. |
+| I27 | Card line | "Read daily. If Google differs, you pick which stays." | K | facts 04 (Google Protection) | When Google shows something other than what the owner confirmed, the owner chooses Keep my information or Google is right; nothing changes by itself. |
+| I28 | Answer | "Yes, the prices you send, exactly as written, in a post you approve." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I29 | Question | "Where does the review card go at a car wash?" | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I30 | Answer | "Where customers pay or collect their keys, offered to everyone the same way." | K | facts 09 (card placement, 7.1 to 7.8); facts 10 (ask everyone the same way, no incentive) | Where the review card goes for each trade; every customer asked the same way, never an incentive. |
+| I31 | Service | "Hand wash" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I32 | Service | "Valet" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I33 | Service | "Interior clean" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I34 | Service | "Full detail" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I35 | Service | "Ceramic coating" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I36 | Service | "Engine bay clean" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

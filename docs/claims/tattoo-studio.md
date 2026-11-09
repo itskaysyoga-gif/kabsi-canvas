@@ -69,3 +69,45 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 Jobs, the watch line and the AI answer are unchanged. Related: barbershop, lash and brow studio, nail salon, hair salon, medical and aesthetic clinic, spa and massage. Guides: photos, description examples, negative reviews.
 
 Removed from the page: the search text (row 18); the two guide blocks as paragraphs; "when their books open" (row 19); "too small" in the photo check (row 20); "a name not on your list is never used" (row 23, the FAQ keeps "Kabsi never guesses"); "Kabsi never gives medical advice" (row 24); "Read the names in your own profile" (row 6); from the answer, "show the work", "names the artist", "every review" and "asks about holiday hours in time" (rows 9, 10); "marked as needing a little more care" in the infection FAQ.
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card title | "Styles as services" | A | none | A short label for the line under it. |
+| I2 | Card line | "Fine line, blackwork, cover ups: each can be a service on Google." | G | G6 | Services can carry a price and a description; custom services are allowed; no prices in custom service names. |
+| I3 | Card title | "Your age rule, written down" | A | none | A short label for the line under it. |
+| I4 | Card line | "Put your minimum age policy in the description, in your words." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I5 | Card title | "Deposits, stated once" | A | none | A short label for the line under it. |
+| I6 | Card line | "If you take a deposit, say how it works in your description." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I7 | Card line | "An infection is a safety matter: no draft, a checklist for you." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I8 | Card title | "A wait past the booked time" | A | none | A short label for the line under it. |
+| I9 | Card line | "One apology and nothing promised that it cannot keep." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I10 | Card title | "Bank holiday weekends" | A | none | A short label for the line under it. |
+| I11 | Card line | "Kabsi asks five days before each and sets the hours you choose." | K | K2 (docs/holidays.md); facts 04 "Holiday hours" | Kabsi asks five days before a public holiday: normal hours, closed or custom hours; set once the owner says yes. |
+| I12 | Card title | "A convention weekend away" | A | none | A short label for the line under it. |
+| I13 | Card line | "A few days shut is special hours; seven or more, temporarily closed." | G | G4 | Special hours keep regular hours for holidays and exceptional days; up to 6 days closed fits special hours, 7 or more Temporarily closed. |
+| I14 | Card title | "Healed, a month on" | A | none | A short label for the line under it. |
+| I15 | Card line | "A healed photo shows how the lines settled." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I16 | Card title | "The studio, clean" | A | none | A short label for the line under it. |
+| I17 | Card line | "Stations wiped down and ready, in bright light." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I18 | Card title | "Flash day" | A | none | A short label for the line under it. |
+| I19 | Card line | "The date, the designs and whether it is walk in." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I20 | Card title | "A guest artist" | A | none | A short label for the line under it. |
+| I21 | Card line | "Their name and the dates they are in." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I22 | Card title | "Books open" | A | none | A short label for the line under it. |
+| I23 | Card line | "Which month an artist takes new bookings." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I24 | Answer | "Yes, write it in your description and posts. Kabsi checks the description every day and tells you when Google shows something else." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I25 | Answer | "That is a safety matter: no draft, a checklist, and a holding reply only when you ask." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I26 | Answer | "Only if the review names them and they are on your team list; no guessing." | K | K1 (facts 09, 7.4) | Team names let replies thank the right person; names not on the list are never used. |
+| I27 | Answer | "Yes, once you send them. Blurry or dark shots are flagged before anything is drafted." | K | facts 13 "What photos can I post?"; facts 04 "Photos" | The photo check flags a dark, blurry or small (under 720 by 720) photo and a likely repeat; it does not look for faces. |
+| I28 | Answer | "No, Kabsi posts on Google only; your Instagram stays yours." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I29 | Service | "Custom design" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I30 | Service | "Flash tattoos" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I31 | Service | "Cover ups" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I32 | Service | "Fine line" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I33 | Service | "Blackwork" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I34 | Service | "Touch ups" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I35 | Service | "Tattoo consultation" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

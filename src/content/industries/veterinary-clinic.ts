@@ -30,6 +30,16 @@ export const veterinaryClinic: Industry = {
   ],
   // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
   // docs/claims/veterinary-clinic.md, whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Vaccinations",
+    "Neutering",
+    "Pet dental care",
+    "Microchipping",
+    "Health checks",
+    "Flea and worm treatment",
+    "Nurse clinics",
+  ],
   profile: [
     {
       title: "Hours and the phone first",
@@ -40,12 +50,12 @@ export const veterinaryClinic: Industry = {
       text: "Sent to another clinic? Say so in your description and posts, not the category.",
     },
     {
-      title: "No treatment in a reply",
-      text: "Drafts thank the owner and invite contact through your profile, never the pet's treatment.",
+      title: "Services, plainly listed",
+      text: "Vaccinations, neutering, dental care: each can be a service with a description.",
     },
     {
-      title: "A pet hurt, or a death",
-      text: "No draft, a short checklist, and a neutral holding reply only if you ask.",
+      title: "Which animals you see",
+      text: "Cats and dogs only, or exotics too: say so in your description.",
     },
   ],
   categories: {
@@ -53,6 +63,58 @@ export const veterinaryClinic: Industry = {
     more: ["Animal hospital", "Emergency veterinarian service"],
     line: "Add the emergency category only if you really take emergencies in those hours. Names can differ by country.",
   },
+  reviews: [
+    {
+      title: "No treatment in a reply",
+      text: "Drafts thank the owner and invite contact through your profile, never the pet's treatment.",
+    },
+    {
+      title: "A pet hurt, or a death",
+      text: "No draft for grief or injury; a checklist reaches you instead.",
+    },
+    {
+      title: "A long wait in reception",
+      text: "One apology, and an invitation to get in touch with the clinic.",
+    },
+  ],
+  holidays: [
+    {
+      title: "Christmas 2026",
+      text: "25 December and the Boxing Day holiday on Monday 28. Post your cover.",
+    },
+    {
+      title: "Bank holidays, five days ahead",
+      text: "Kabsi asks, then sets special hours after your yes.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "The reception desk",
+      text: "Bright and welcoming, with no pet or owner in view.",
+    },
+    {
+      title: "The consulting room",
+      text: "Clean table, tidy shelves, good light.",
+    },
+    {
+      title: "The car park and door",
+      text: "Where to stop with a pet carrier, seen from the street.",
+    },
+  ],
+  posts: [
+    {
+      title: "Vaccination clinic dates",
+      text: "The days you run them, as a dated post.",
+    },
+    {
+      title: "A new vet joins",
+      text: "Their name and the animals they see.",
+    },
+    {
+      title: "Bank holiday cover",
+      text: "Who answers urgent calls while you are closed.",
+    },
+  ],
   page: {
     query: "veterinarian Google Business Profile",
     title: "Veterinarian Google Business Profile help | Kabsi",
@@ -79,8 +141,8 @@ export const veterinaryClinic: Industry = {
     },
     jobs: [
       {
-        title: "Hours and phone, checked daily",
-        text: "When Google shows something else, you choose which stays.",
+        title: "The phone and hours, read daily",
+        text: "If Google differs, you decide which version stays.",
       },
       {
         title: "Replies that share no care details",
@@ -91,7 +153,6 @@ export const veterinaryClinic: Industry = {
         text: "A new clinic day or a new vet becomes a post for your yes.",
       },
     ],
-    nearby: { kind: "clinic", term: "veterinarian" },
     ai: {
       question: "Which vet in Bishopston, Bristol is open on Saturday mornings?",
       answer: "Greenway Vets in Bishopston is open on Saturdays from 9 am to 1 pm.",
@@ -109,23 +170,23 @@ export const veterinaryClinic: Industry = {
   faqs: [
     {
       q: "Will a reply mention a pet's treatment?",
-      a: "No. Drafts thank the owner and invite them to get in touch, and say nothing about the pet's care.",
+      a: "No, drafts thank the owner and invite them to get in touch, and say nothing about the pet's care.",
     },
     {
       q: "Can Kabsi set our bank holiday hours?",
-      a: "Yes. Five days before each one, Kabsi asks what you will do and sets special hours once you say yes.",
-    },
-    {
-      q: "Does Kabsi see our clinic records?",
-      a: "No. Kabsi works with your Google profile and its reviews. It does not connect to your clinic system.",
+      a: "Yes, five days before each one, Kabsi asks what you will do and sets special hours once you say yes.",
     },
     {
       q: "What happens with a very hard review?",
       a: "No draft, just a short checklist. You write the reply, ask Kabsi for a neutral holding reply, or skip it.",
     },
     {
-      q: "Can our practice manager approve replies?",
-      a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything.",
+      q: "Where does the review card go at a vet clinic?",
+      a: "At reception, on appointment cards or in a follow-up email.",
+    },
+    {
+      q: "Can a reply mention a pet's name?",
+      a: "No, a reply says nothing about the pet or its care, only thanks and how to reach you.",
     },
   ],
   guides: [

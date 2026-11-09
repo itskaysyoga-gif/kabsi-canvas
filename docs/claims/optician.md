@@ -65,3 +65,49 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 | categories.line | "Choose the first by what most visits are for, glasses or eye tests. Check the names in your own profile; they differ by country." | 6 | A, G |
 
 Removed from the page: the search text paragraph (row 18) and the two guide sections it replaces as long text; "Frames sell on looks", "well lit" in the photo check, "a result, a prescription or a condition" (the job and the first FAQ keep it), and the answer's opening sentence and holiday clause.
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card title | "Eye tests as a service" | A | none | A short label for the line under it. |
+| I2 | Card line | "Google can show each service with a description, an eye test included." | G | G6 | Services can carry a price and a description; custom services are allowed; no prices in custom service names. |
+| I3 | Card title | "Home visits, if you do them" | A | none | A short label for the line under it. |
+| I4 | Card line | "A service area shows where you travel; the shop keeps its address." | G | G16 | A business that travels to customers can set a service area and hide its address. |
+| I5 | Card title | "Glasses not ready on time" | A | none | A short label for the line under it. |
+| I6 | Card line | "One apology and an invitation to contact the practice." | K | facts 09 (7.3, 7.6) | Drafts stay calm, never argue, admit fault or promise refunds, and ask the reviewer to get in touch through the details on the profile. |
+| I7 | Card title | "A complaint about a result" | A | none | A short label for the line under it. |
+| I8 | Card line | "No draft; a checklist comes to you, and you decide." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I9 | Card title | "Bank holidays in Leeds" | A | none | A short label for the line under it. |
+| I10 | Card line | "Kabsi asks five days before each and sets your hours after your yes." | K | K2 (docs/holidays.md); facts 04 "Holiday hours" | Kabsi asks five days before a public holiday: normal hours, closed or custom hours; set once the owner says yes. |
+| I11 | Card title | "A Saturday clinic" | A | none | A short label for the line under it. |
+| I12 | Card line | "A Saturday unlike the rest of the week is special hours for that date." | G | G4 | Special hours keep regular hours for holidays and exceptional days; up to 6 days closed fits special hours, 7 or more Temporarily closed. |
+| I13 | Card title | "Between Christmas and New Year" | A | none | A short label for the line under it. |
+| I14 | Card line | "Closed days that week go on Google as special hours." | G | G4 | Special hours keep regular hours for holidays and exceptional days; up to 6 days closed fits special hours, 7 or more Temporarily closed. |
+| I15 | Card title | "The testing room" | A | none | A short label for the line under it. |
+| I16 | Card line | "Equipment tidy and the room empty, in good light." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I17 | Card title | "The front of the shop" | A | none | A short label for the line under it. |
+| I18 | Card line | "Your sign from the pavement, so a first visit finds you." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I19 | Card title | "New frames in" | A | none | A short label for the line under it. |
+| I20 | Card line | "The brand or style, from the photo you send." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I21 | Card title | "Eye test slots" | A | none | A short label for the line under it. |
+| I22 | Card line | "Days with free test times, as a dated update." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I23 | Card title | "Contact lens checks" | A | none | A short label for the line under it. |
+| I24 | Card line | "When you offer them, in your own words." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I25 | Card line | "Read every day; when Google differs, you choose." | K | facts 04 (Google Protection) | When Google shows something other than what the owner confirmed, the owner chooses Keep my information or Google is right; nothing changes by itself. |
+| I26 | Answer | "No, drafts thank the patient and invite them to get in touch, and say nothing about their eyes." | K | facts 09 (7.3, 7.6) | Drafts stay calm, never argue, admit fault or promise refunds, and ask the reviewer to get in touch through the details on the profile. |
+| I27 | Answer | "Yes, send a photo of the frames; prices appear only if you give them." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I28 | Question | "Where does the review card go at an optician?" | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I29 | Answer | "At the desk when glasses are collected, the same for every patient." | K | facts 09 (card placement, 7.1 to 7.8); facts 10 (ask everyone the same way, no incentive) | Where the review card goes for each trade; every customer asked the same way, never an incentive. |
+| I30 | Question | "Will a reply say someone had an eye test?" | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I31 | Answer | "No, a public reply never confirms that someone is a patient." | K | K1 (facts 09, 7.3) | Replies stay general: no personal details, never confirm someone is a patient or mention their care. |
+| I32 | Service | "Eye test" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I33 | Service | "Contact lens fitting" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I34 | Service | "Children's eye test" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I35 | Service | "Glasses repairs" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I36 | Service | "Sunglasses" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I37 | Service | "Varifocals" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I38 | Service | "Frame adjustments" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I39 | Service | "Lens replacement" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

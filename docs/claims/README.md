@@ -12,6 +12,10 @@ an independent check read every line against the facts. Two Google pages joined 
 (https://support.google.com/business/answer/9157481) and G17 hiding the address
 (https://support.google.com/business/answer/2853879), both read 5 Nov 2026.
 
+Industry 1 (9 Nov 2026, lane R R-144) added an "Industry 1" section to every sheet: one row per new or reworded line
+(the services, photos, posts, review themes, hours and holidays each page gained, and the lines reworded so two pages do
+not read the same), typed and sourced from the register below. No new Google source was needed.
+
 ## How to read a sheet
 
 Each row is one sentence a reader sees on the page, with its type, its source and what the source says.

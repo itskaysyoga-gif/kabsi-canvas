@@ -44,6 +44,8 @@ export type Industry = {
   focus?: string;
   /** What customers type: the chips under "What people search for". */
   searches: string[];
+  /** Industry 1 (R-144): "What a <trade> can list", five to eight services the trade lists on Google, as chips. */
+  services: string[];
   /** Industries 3 (master plan 30.33 item 2): "Your Google profile, as a <trade> owner", two to four cards. */
   profile: Card[];
   /** Industries 2: the page on Design 9. Every finished page has it. */
@@ -54,10 +56,12 @@ export type Industry = {
   reviews?: Card[];
   /** "Google categories that fit": the names as chips, then one line. */
   categories?: { primary: string; more: string[]; line: string };
-  /** "Holidays and busy dates": two or three cards. */
+  /** "Hours and holidays at a <trade>" (Industry 1; was "Holidays and busy dates"): two or three cards. */
   holidays?: Card[];
-  /** "Photos and posts": two or three cards. */
+  /** "Photos that work for a <trade>", in the photo band beside the Example post (Industry 1): two or three cards. */
   photoCards?: Card[];
+  /** Industry 1 (R-144): "Posts a <trade> can make", two or three cards. */
+  posts?: Card[];
   story?: { title: string; lead: string; lines: ChatLine[] };
   faqs?: { q: string; a: string }[];
   /** Three guide slugs (GUIDE_TITLES), chosen by the page's jobs; the page links the ones that are public. */
@@ -130,8 +134,6 @@ export type D9Trade = {
   post: { owner: string; quote: string };
   /** Three jobs that come back for this trade: only what Kabsi does today. */
   jobs: [Task, Task, Task];
-  /** The nearby Example: "Near your <kind> you came up 2nd for '<term>'." */
-  nearby: { kind: string; term: string };
   /** The AI answer Example with its question. */
   ai: { question: string; answer: string; sources: [string, string] };
   /** Six related trades, by slug, closest first: the same kind of work, then the nearest. Never the page itself. */
