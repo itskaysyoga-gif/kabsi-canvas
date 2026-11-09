@@ -1,7 +1,7 @@
 // Sync 2a (R-142, master plan 30.46): lane R's answers to Sync 1. Each part adds its guards here.
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { HELP_LINES, WORKING_HOURS } from "@/lib/site";
+import { ACCOUNT_STAYS_LINE, HELP_LINES, PAY_TODAY_LINE, WORKING_HOURS } from "@/lib/site";
 import { PLANS } from "@/components/kabsi/plans";
 
 const read = (p: string) => readFileSync(p, "utf8");
@@ -73,5 +73,94 @@ describe("Sync 2a part 1", () => {
     );
     expect(say).toContain('partnerCodeNoted: "Thanks, your partner code is noted."');
     expect(say).not.toMatch(/as soon as maps are switched on|your free Pro trial is 30 days/);
+  });
+});
+
+describe("Sync 2a part 2", () => {
+  const sql = (f: string) => read(`supabase/migrations/${f}`);
+  it("item 3: nothing schedules the renewal reminders, and no code or email for them is left", () => {
+    // The newest migration that defines private.produce_jobs() does not offer the job.
+    const files = readdirSync("supabase/migrations")
+      .filter((f) => f.endsWith(".sql"))
+      .sort();
+    const defining = files.filter((f) =>
+      /create (or replace )?function private\.produce_jobs\(\)/i.test(sql(f)),
+    );
+    const newest = defining[defining.length - 1]!;
+    expect(newest).toMatch(/sync2a_retire_renewals/);
+    expect(sql(newest).replace(/^--.*$/gm, "")).not.toMatch(/renewal_reminders/);
+    expect(read("supabase/functions/api/jobs.ts")).not.toMatch(/renewal_reminders|renewalsJob/);
+    const cron = read("supabase/functions/api/cron.ts");
+    expect(cron).not.toMatch(
+      /renewalsJob|renewal_reminder_candidates|renewalReminder|dueRenewalEmail/,
+    );
+    expect(read("supabase/functions/_shared/email/copy.ts")).not.toMatch(/renewalReminder/);
+    expect(read("supabase/functions/_shared/plans.ts")).not.toMatch(/dueRenewalEmail/);
+    expect(read("supabase/functions/_shared/email/catalog.ts")).not.toMatch(/renew_r[15]/);
+  });
+
+  it("item 3: billing words are the two lines, kept equal to site.ts, and no 30 day deletion is promised", () => {
+    const words = read("supabase/functions/_shared/billing-words.ts");
+    expect(words).toContain(`PAY_TODAY_LINE = "${PAY_TODAY_LINE}"`);
+    expect(words).toContain(`ACCOUNT_STAYS_LINE = "${ACCOUNT_STAYS_LINE}"`);
+    expect(ACCOUNT_STAYS_LINE).toBe(
+      "Your account and its history stay. Ask us any time to delete them.",
+    );
+    for (const f of [
+      "supabase/functions/_shared/billing.ts",
+      "supabase/functions/_shared/email/account-copy.ts",
+      "src/routes/_authenticated/app/plan.tsx",
+    ]) {
+      const text = read(f);
+      expect(text, f).not.toMatch(
+        /DATA_DAYS|dataDays|dataUntil|data_kept_until|kept for \$\{|then deleted/,
+      );
+    }
+    const billing = read("supabase/functions/_shared/billing.ts");
+    expect(billing.match(/ACCOUNT_STAYS_LINE/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(billing.match(/PAY_TODAY_LINE/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(read("supabase/functions/_shared/whatsapp/say.ts")).toContain("billingNoPlan");
+    expect(read("supabase/functions/_shared/whatsapp/say.ts")).toMatch(
+      /billingNoPlan:[^\n]*\$\{PAY_TODAY_LINE\}/,
+    );
+    expect(read("supabase/functions/_shared/whatsapp/agent.ts")).toMatch(
+      /Your plan has ended, so nothing can be published\. \$\{PAY_TODAY_LINE\}/,
+    );
+    for (const { f, text } of facts)
+      expect(text, f).not.toMatch(
+        /your data is kept|data is kept for 30 days|then deleted\. Reply plan/i,
+      );
+  });
+
+  it("item 3: the Creem line on Pricing and About is future until Creem is live", () => {
+    const line = "Card payments will be processed by Creem, our merchant of record.";
+    expect(read("src/components/kabsi/d8-about.tsx")).toContain(line);
+    expect(read("src/components/kabsi/faq-data.ts")).toContain(line);
+  });
+
+  it("item 6: the work update v1 template is gone from the code; the v2 name is the one name", () => {
+    const t = read("supabase/functions/_shared/whatsapp/templates.ts");
+    expect(t).not.toMatch(/name: "kabsi_work_update",/);
+    expect(t).toContain('name: "kabsi_work_update_v2"');
+    expect(read("docs/COPY.md")).toMatch(
+      /Visibility Map is a K-02 product name, so the approved template `kabsi_map_ready`/,
+    );
+    expect(t).toContain('name: "kabsi_map_ready"');
+  });
+
+  it("item 8: Nora's rules allow Arabic script in the chat only and carry the booking line; facts hold it too", () => {
+    const rules = read("supabase/functions/_shared/nora-rules.ts");
+    const line =
+      "Kabsi looks after your Google Business Profile. It is not a booking system and does not keep your customers' bookings or requests.";
+    expect(rules).toMatch(
+      /Arabic script is fine in a chat reply when the visitor writes Arabic\. It stays in the chat: nothing Arabic is published/,
+    );
+    expect(rules).toContain(line);
+    expect(read("knowledge/facts/04-product.md")).toContain(line);
+    const f01 = read("knowledge/facts/01-decisions-coming-and-changing.md");
+    expect(f01).not.toContain("None of this is built");
+    expect(f01).not.toContain("**[COMING] The new product");
+    expect(f01).toContain("prepares the work for your yes");
+    expect(f01).not.toContain("measures, does the work");
   });
 });

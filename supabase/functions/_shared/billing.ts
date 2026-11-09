@@ -6,6 +6,7 @@ import { admin, APP_URL, captureError, jobLog, log } from "./kabsi.ts";
 import { notify as notifyEmail } from "./notify.ts";
 import { esc } from "./email-layout.ts";
 import { staffPlanLine } from "./billing-lines.ts";
+import { ACCOUNT_STAYS_LINE, PAY_TODAY_LINE } from "./billing-words.ts";
 import type { EmailContent } from "./email/template.ts";
 import { paymentFailed, planCancelled } from "./email/account-copy.ts";
 import { outDb } from "./whatsapp/db.ts";
@@ -20,7 +21,6 @@ import {
 export const CREEM_MODE: Mode = modeOf(Deno.env.get("CREEM_MODE"));
 export const SUCCESS_URL = `${APP_URL}/billing/done`;
 const GRACE_DAYS = 7;
-const DATA_DAYS = 30;
 
 export function creem(): Creem {
   const key = Deno.env.get("CREEM_API_KEY") ?? "";
@@ -320,13 +320,13 @@ function emailOf(subject: string, title: string, lines: string[], button?: { lab
 }
 
 /** The words of each billing message (10.2.9). Pure, so tests read them. */
-export function billingLine(m: Message | "payment_reminder", c: { business: string; periodEnd?: string | null; graceEnds?: Date; portal?: string | null; dataUntil?: Date }): Line {
+export function billingLine(m: Message | "payment_reminder", c: { business: string; periodEnd?: string | null; graceEnds?: Date; portal?: string | null }): Line {
   const end = c.periodEnd ? longDate(c.periodEnd) : null;
   switch (m) {
     case "scheduled_cancel": {
       const lines = [`Your Kabsi plan for ${c.business} ends on ${end ?? "the last day you paid for"}.`, "Until then everything keeps working. Changed your mind? Tap Keep my plan."];
       // Email 1: the cancellation email of 30.15 section 6 (COPY.md 25).
-      return { whatsapp: lines.join(" "), buttons: [{ id: "k:keep", title: "Keep my plan" }], email: planCancelled({ business: c.business, ends: c.periodEnd ?? null, dataDays: DATA_DAYS }, APP_URL) };
+      return { whatsapp: lines.join(" "), buttons: [{ id: "k:keep", title: "Keep my plan" }], email: planCancelled({ business: c.business, ends: c.periodEnd ?? null }, APP_URL) };
     }
     case "payment_failed":
     case "payment_reminder": {
@@ -337,14 +337,13 @@ export function billingLine(m: Message | "payment_reminder", c: { business: stri
       return { whatsapp: (m === "payment_reminder" ? "Reminder. " : "") + lines.join("\n"), email };
     }
     case "paused": {
-      const until = c.dataUntil ? longDate(c.dataUntil) : null;
-      const lines = [`Your Kabsi plan for ${c.business} is paused. Approvals have stopped and nothing is lost.`, `Your data is kept until ${until}. Reply plan to start again.`];
-      return { whatsapp: lines.join(" "), email: emailOf(`${c.business}: your Kabsi plan is paused`, "Your plan is paused", [lines[0], `Your data is kept until ${until}.`], { label: "Choose your plan", url: `${APP_URL}/app/plan` }) };
+      // Sync 2a (R-142 item 3): no 30 day deletion promise (no code deletes anything on a timer) and no push to pay while cards are closed.
+      const lines = [`Your Kabsi plan for ${c.business} is paused. Approvals have stopped and nothing is lost.`, ACCOUNT_STAYS_LINE, PAY_TODAY_LINE];
+      return { whatsapp: lines.join(" "), email: emailOf(`${c.business}: your Kabsi plan is paused`, "Your plan is paused", lines, { label: "Open Kabsi", url: `${APP_URL}/app/plan` }) };
     }
     case "ended": {
-      const until = c.dataUntil ? longDate(c.dataUntil) : null;
-      const lines = [`Your Kabsi plan for ${c.business} has ended. Thank you for trusting Kabsi with your Google profile.`, `Your data is kept until ${until}, then deleted. Reply plan any time to come back.`];
-      return { whatsapp: lines.join(" "), email: emailOf(`${c.business}: your Kabsi plan has ended`, "Your plan has ended", [lines[0], `Your data is kept until ${until}, then deleted.`], { label: "Choose your plan", url: `${APP_URL}/app/plan` }) };
+      const lines = [`Your Kabsi plan for ${c.business} has ended. Thank you for trusting Kabsi with your Google profile.`, ACCOUNT_STAYS_LINE, PAY_TODAY_LINE];
+      return { whatsapp: lines.join(" "), email: emailOf(`${c.business}: your Kabsi plan has ended`, "Your plan has ended", lines, { label: "Open Kabsi", url: `${APP_URL}/app/plan` }) };
     }
     case "resumed": {
       const lines = [`Your Kabsi plan for ${c.business} carries on.${end ? ` The next payment is on ${end}.` : ""}`];
@@ -361,7 +360,6 @@ async function tellOwner(m: Message | "payment_reminder", s: SubRow, key: string
   const line = billingLine(m, {
     business, periodEnd: s.current_period_end, portal,
     graceEnds: s.past_due_at ? addDays(s.past_due_at, GRACE_DAYS) : undefined,
-    dataUntil: addDays(s.ended_at ?? new Date(), DATA_DAYS),
   });
   for (const p of people) {
     if (p.phone) {

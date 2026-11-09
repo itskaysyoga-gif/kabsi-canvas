@@ -9,7 +9,7 @@
 //                                                          one at a time (App 6): the first answer writes Nora's cached facts
 //                                                          (about 66,000 tokens), the other four read them, so five questions
 //                                                          cost about 0.25 US dollars instead of four cache writes at once
-//   node scripts/nora-eval/run-nora-eval.ts --live --with-28 --judge --budget 2.5   all 178 questions (the 60, the
+//   node scripts/nora-eval/run-nora-eval.ts --live --with-28 --judge --budget 2.5   all 180 questions (the 60, the
 //                                                          20 of 28.7, the 3 of Scope 1, the 5 page-link questions and the 90
 //                                                          owner questions of questions-owners.ts), each scored by the judge
 //                                                          (26.1), stopped at the budget

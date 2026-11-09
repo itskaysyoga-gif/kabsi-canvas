@@ -8,6 +8,7 @@ import { CARD_PAYMENTS_COMING, FOUNDING_SENTENCE, PLAN_PRICES } from "./lifecycl
 import type { EmailContent } from "./template.ts";
 import { possessive, possessiveSuffix } from "../possessive.ts";
 import { TOKENS } from "./tokens.ts";
+import { ACCOUNT_STAYS_LINE } from "../billing-words.ts";
 
 /** "5 November" in the business's time zone (COPY.md writes dates without the year when it is this year's). */
 export function dayMonth(d: Date | string, tz = "UTC"): string {
@@ -186,10 +187,10 @@ export function paymentFailed(o: { business: string; plan?: string | null; amoun
   };
 }
 
-export function planCancelled(o: { business: string; plan?: string | null; ends?: Date | string | null; tz?: string; dataDays: number }, appUrl: string): EmailContent {
+export function planCancelled(o: { business: string; plan?: string | null; ends?: Date | string | null; tz?: string }, appUrl: string): EmailContent {
   const end = o.ends ? dayMonth(o.ends, o.tz ?? "UTC") : null;
   const lead = `${o.plan ?? "Your Kabsi plan"} for ${o.business} ends on ${end ?? "the last day you paid for"}. Until then everything works as now, and nothing more is charged.`;
-  const after = `Kabsi stops publishing, and your data is kept for ${o.dataDays} days, then deleted. You keep your review link and QR code. To remove Kabsi as a Manager, open People and access on Google.`;
+  const after = `Kabsi stops publishing. ${ACCOUNT_STAYS_LINE} You keep your review link and QR code. To remove Kabsi as a Manager, open People and access on Google.`;
   const ask = "Thank you for trying Kabsi. What could Kabsi have done better? Just reply.";
   return {
     subject: "Your Kabsi plan is cancelled", title: "Your plan is cancelled.", preheader: end ? `Everything works until ${end}.` : "Everything works until your plan ends.",

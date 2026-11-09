@@ -17,6 +17,7 @@ import {
 } from "@/lib/plans";
 import { daysUntil } from "@/lib/dashboard";
 import {
+  ACCOUNT_STAYS_LINE,
   FOUNDING_PRICES,
   FOUNDING_SENTENCE,
   PLAN_PRICES,
@@ -527,7 +528,7 @@ function StateBanner({
       return (
         <Banner tone="warn" title={`${name}: ${paused ? "paused" : "ended"}.`}>
           {paused ? "Approvals have stopped and nothing is lost." : "Your plan has ended."}
-          {b.data_kept_until ? ` Your data is kept until ${shortDate(b.data_kept_until)}.` : ""}
+          {` ${ACCOUNT_STAYS_LINE}`}
         </Banner>
       );
     if (b.payment_failed)

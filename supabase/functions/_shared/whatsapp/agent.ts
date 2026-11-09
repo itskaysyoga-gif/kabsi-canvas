@@ -26,6 +26,7 @@ import {
 import { type Command, isAbuse, parse } from "./router.ts";
 import { guessLang, handoffReply, handoffTime, headed, postIssue, SAY, say } from "./say.ts";
 import { forWhatsApp, type Nora } from "./nora.ts";
+import { PAY_TODAY_LINE } from "../billing-words.ts";
 import { describeHours, type HoursChange, parseHours } from "./hours-parse.ts";
 import { checkTypedPost } from "../posts/typed.ts";
 import { type CheckContext, checkPost } from "../posts/checks.ts";
@@ -923,7 +924,7 @@ async function approveToken(t: Turn, token: string): Promise<string> {
   if (reason === "high_risk") return answered(tb, "This review needs a careful look, so it is approved only in Kabsi.", "refused:high_risk");
   // Photo Post 1: Approve pressed before the photo engine finished with the post's photo. Nothing was used; Approve works again.
   if (/post_photo_missing/.test(reason)) return answered(tb, SAY.photoPostChecking, "refused:post_photo_missing");
-  if (reason === "plan_required") return answered(tb, "Your plan has ended, so nothing can be published. Open Kabsi to choose a plan.", "refused:plan_required");
+  if (reason === "plan_required") return answered(tb, `Your plan has ended, so nothing can be published. ${PAY_TODAY_LINE}`, "refused:plan_required");
   return answered(tb, `Kabsi could not approve this here. Open Kabsi to finish: ${t.d.appUrl}/app`, `refused:${reason}`);
 }
 

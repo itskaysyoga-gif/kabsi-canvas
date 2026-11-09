@@ -141,10 +141,12 @@ Deno.test("the digest email is grouped and has one button", () => {
 
 Deno.test("the catalog covers every kind of email Kabsi sends", () => {
   const kinds = catalog().map((c) => c.kind);
-  for (const needed of ["review_new", "review_high_risk", "backlog_ready", "digest", "access_granted", "access_lost", "deletion_scheduled", "renew_r5",
+  for (const needed of ["review_new", "review_high_risk", "backlog_ready", "digest", "access_granted", "access_lost", "deletion_scheduled", "plan_cancelled",
     "weekly_report", "weekly_post", "shield_alert_urgent", "team_invite", "profile_check",
     "assistant_report", "assistant_handoff", "assistant_handoff_ack", "life_welcome", "life_no_access_1h", "life_trial_day7", "life_trial_day14", "life_winback_30"]) assert.ok(kinds.includes(needed), needed);
   assert.equal(new Set(kinds).size, kinds.length);
+  // Sync 2a (R-142 item 3): no prepaid plan exists and Creem renews, so no renewal reminder is built.
+  assert.ok(!kinds.some((k) => k.startsWith("renew_")), "renewal reminder emails are retired");
 });
 
 Deno.test("retired emails stay gone (P0.8-01, K-123 to K-127): no partner, payment-method or Lebanon mail", () => {

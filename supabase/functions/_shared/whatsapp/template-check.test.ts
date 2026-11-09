@@ -25,9 +25,18 @@ Deno.test("the list holds every name the code can send, built from the table, wi
     const r = ref(key, {});
     assert.deepEqual(SENDABLE_TEMPLATES.find((t) => t.name === r.name)?.params, Object.keys(r.params), key);
   }
-  const v2 = SENDABLE_TEMPLATES.find((t) => t.name === "kabsi_work_update_v2")!;
-  assert.equal(v2.replaces, "kabsi_work_update");
-  assert.equal(SENDABLE_TEMPLATES.find((t) => t.name === "kabsi_work_update")!.replacedBy, "kabsi_work_update_v2");
+  const v2 = SENDABLE_TEMPLATES.find((t) => t.name === "kabsi_access_lost_v2")!;
+  assert.equal(v2.replaces, "kabsi_access_lost");
+  assert.equal(SENDABLE_TEMPLATES.find((t) => t.name === "kabsi_access_lost")!.replacedBy, "kabsi_access_lost_v2");
+  // Sync 2a (R-142 item 6): the work update v1 fallback is retired; the approved v2 is the only name, and nothing is submitted.
+  assert.ok(!SENDABLE_NAMES.has("kabsi_work_update"), "kabsi_work_update is retired");
+  const wu = SENDABLE_TEMPLATES.find((t) => t.name === "kabsi_work_update_v2")!;
+  assert.equal(wu.replaces, null);
+  assert.equal(wu.replacedBy, null);
+  assert.equal(ref("work_update", {}).name, "kabsi_work_update_v2");
+  // A queued row that still carries the retired name is sent under the v2 name, not refused.
+  assertSendable("kabsi_work_update");
+  assert.equal(sendName("kabsi_work_update", {}), "kabsi_work_update_v2");
 });
 
 Deno.test("name list guard: a send with a name outside the list fails, in the sender and in the source", async () => {
@@ -99,25 +108,25 @@ Deno.test("check: not approved (rejected, paused, pending), missing, wrong categ
 
 Deno.test("check: a replacement that is not ready leaves the first name in use, and a replacement that fails sends the check to the first name", () => {
   // v2 pending: the first name is what the sender sends, so it is the one checked; the v2 is reported, not alerted.
-  const pendingV2 = set(good(), "kabsi_work_update_v2", { status: "PENDING" });
+  const pendingV2 = set(good(), "kabsi_access_lost_v2", { status: "PENDING" });
   const a = compareTemplates(pendingV2);
   assert.deepEqual(a.findings, []);
-  assert.equal(a.templates.find((t) => t.name === "kabsi_work_update_v2")!.in_use, false);
-  assert.equal(a.templates.find((t) => t.name === "kabsi_work_update_v2")!.state, "not_approved");
-  assert.equal(a.templates.find((t) => t.name === "kabsi_work_update")!.in_use, true);
+  assert.equal(a.templates.find((t) => t.name === "kabsi_access_lost_v2")!.in_use, false);
+  assert.equal(a.templates.find((t) => t.name === "kabsi_access_lost_v2")!.state, "not_approved");
+  assert.equal(a.templates.find((t) => t.name === "kabsi_access_lost")!.in_use, true);
   // The same, and the fallback itself is paused: that one raises.
-  assert.deepEqual(findingNames(set(pendingV2, "kabsi_work_update", { status: "PAUSED" })), ["kabsi_work_update is paused, not approved"]);
+  assert.deepEqual(findingNames(set(pendingV2, "kabsi_access_lost", { status: "PAUSED" })), ["kabsi_access_lost is paused, not approved"]);
   // v2 ready: the first name is only the fallback now, so its own state does not raise.
-  const fine = compareTemplates(set(good(), "kabsi_work_update", { category: "MARKETING" }));
+  const fine = compareTemplates(set(good(), "kabsi_access_lost", { category: "MARKETING" }));
   assert.deepEqual(fine.findings, []);
-  assert.equal(fine.templates.find((t) => t.name === "kabsi_work_update")!.in_use, false);
+  assert.equal(fine.templates.find((t) => t.name === "kabsi_access_lost")!.in_use, false);
   // v2 filed as Marketing is never sent (sendName), so the first name is in use and checked.
-  const marketingV2 = set(good(), "kabsi_work_update_v2", { category: "MARKETING" });
-  assert.equal(compareTemplates(marketingV2).templates.find((t) => t.name === "kabsi_work_update")!.in_use, true);
+  const marketingV2 = set(good(), "kabsi_access_lost_v2", { category: "MARKETING" });
+  assert.equal(compareTemplates(marketingV2).templates.find((t) => t.name === "kabsi_access_lost")!.in_use, true);
   // A replacement the sender will send (APPROVED, UTILITY) with the wrong parameters or language is in use, and raises.
-  // kabsi_work_update takes one parameter (business).
-  assert.deepEqual(findingNames(set(good(), "kabsi_work_update_v2", { params: 3 })), ["kabsi_work_update_v2 has 3 parameters, the code fills 1"]);
-  assert.deepEqual(findingNames(set(good(), "kabsi_work_update_v2", { language: "ar" })), ["kabsi_work_update_v2 is not in the language the code sends"]);
+  // kabsi_access_lost takes one parameter (business).
+  assert.deepEqual(findingNames(set(good(), "kabsi_access_lost_v2", { params: 3 })), ["kabsi_access_lost_v2 has 3 parameters, the code fills 1"]);
+  assert.deepEqual(findingNames(set(good(), "kabsi_access_lost_v2", { language: "ar" })), ["kabsi_access_lost_v2 is not in the language the code sends"]);
   // The check's idea of "in use" is the sender's: sendName picks the replacement exactly when the check says it is in use.
   for (const t of SENDABLE_TEMPLATES.filter((x) => x.replacedBy)) {
     for (const [status, category] of [["APPROVED", "UTILITY"], ["APPROVED", "MARKETING"], ["PENDING", "UTILITY"], ["PAUSED", "UTILITY"]]) {
