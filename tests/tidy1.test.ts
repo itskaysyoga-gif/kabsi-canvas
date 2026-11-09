@@ -28,7 +28,9 @@ describe("Tidy 1 item 3: checkout only once Google access works", () => {
     const creates = billing.match(/createCheckout\(/g) ?? [];
     // one for the plan (startCheckout) and one for an extra location, which needs a running plan (addLocation, mustRun)
     expect(creates.length).toBe(2);
-    expect(billing.slice(billing.indexOf("export async function addLocation"))).toContain("mustRun(org)");
+    expect(billing.slice(billing.indexOf("export async function addLocation"))).toContain(
+      "mustRun(org)",
+    );
   });
 
   it("the Plan page keeps the choose buttons off until access works and says why", () => {
@@ -45,9 +47,13 @@ describe("Tidy 1 item 3: checkout only once Google access works", () => {
     expect(terms).not.toMatch(/starts the day\s+it works/);
     const facts = read("knowledge/facts/06-pricing-and-payment.md");
     expect(facts).not.toMatch(/If you pay before access works/);
-    expect(facts).toContain("Card checkout is offered only to a business whose Google access works");
+    expect(facts).toContain(
+      "Card checkout is offered only to a business whose Google access works",
+    );
     for (const f of ["knowledge/kabsi-facts.md", "public/llms-full.txt"])
-      expect(read(f), f).toContain("Card checkout is offered only to a business whose Google access works");
+      expect(read(f), f).toContain(
+        "Card checkout is offered only to a business whose Google access works",
+      );
   });
 
   it("the lines carry no dash or exclamation mark", () => {
