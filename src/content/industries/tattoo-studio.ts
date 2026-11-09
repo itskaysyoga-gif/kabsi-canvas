@@ -9,7 +9,7 @@ export const tattooStudio: Industry = {
   name: "tattoo studio",
   plural: "Tattoo studios",
   finished: true,
-  lead: "Healed work as posts, your booking rules right on Google and a calm reply for every review. You approve each one.",
+  lead: "Healed work as posts, your house rules right on Google and a calm reply for every review. You approve each one.",
   keyword: "tattoo shop",
   example: {
     business: "Black Lantern Tattoo",
@@ -57,11 +57,11 @@ export const tattooStudio: Industry = {
     query: "tattoo shop Google Business Profile",
     title: "Tattoo shop Google Business Profile help | Kabsi",
     description:
-      "Kabsi looks after your tattoo shop Google Business Profile: booking rules right, healed work as posts, and a calm reply to every review for your yes.",
+      "Kabsi looks after your tattoo shop Google Business Profile: house rules right, healed work as posts, and a calm reply to every review for your yes.",
     h1: "Your tattoo studio on Google, inked right.",
     mark: "inked right.",
-    line: "Kabsi looks after your tattoo shop Google Business Profile: booking rules right, healed work as posts, calm replies.",
-    card: "Booking rules right, healed work as posts.",
+    line: "Kabsi looks after your tattoo shop Google Business Profile: house rules right, healed work as posts, calm replies.",
+    card: "House rules right, healed work as posts.",
     answer:
       "A tattoo shop Google Business Profile should say how to book. Kabsi checks your description daily and prepares healed work posts and replies.",
     watch: {
@@ -83,7 +83,7 @@ export const tattooStudio: Industry = {
         text: "A photo and a line become a post that names the artist.",
       },
       {
-        title: "Booking rules, kept right",
+        title: "House rules in your description, kept right",
         text: "Kabsi checks your description and hours every day, and asks before anything changes.",
       },
       {

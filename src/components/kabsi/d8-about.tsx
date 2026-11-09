@@ -43,7 +43,7 @@ const OWN = [
 ] as const;
 
 const BUILT = [
-  "Built on Google's Business Profile API, with Manager access you add.",
+  "Kabsi connects to your Google Business Profile with your permission.",
   "Meta's WhatsApp Business Platform, through Kapso.",
   "Payments by Creem, our merchant of record.",
   "Kabsi's database in Frankfurt, Germany.",

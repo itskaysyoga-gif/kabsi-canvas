@@ -9,7 +9,7 @@ export type Finding = {
 };
 
 export const ASSISTANT: Record<string, string> = { chatgpt: "ChatGPT", perplexity: "Perplexity" };
-export const ACCURACY_LABEL = "Answers from ChatGPT and Perplexity through their API, which can differ from their apps.";
+export const ACCURACY_LABEL = "Answers we get from ChatGPT and Perplexity directly, which can differ from what their apps show.";
 export const ACCURACY_ACTION = "Make sure your Google profile and website say this. AI assistants read them.";
 export const FACT_WORD: Record<Detail, string> = {
   closing_time: "closing time", opening_time: "opening time", closed_day: "opening days", open_day: "opening days",

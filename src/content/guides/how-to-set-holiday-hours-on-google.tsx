@@ -229,9 +229,8 @@ export const guide: GuideDoc = {
         <p>
           For the UK, Kabsi uses your own nation's bank holidays from GOV.UK, read from your Google
           address: England and Wales, Scotland or Northern Ireland. On Hours you can also set
-          special days for any date. During early access, a person on the Kabsi team sends what you
-          approve to Google within one working day. <SiteRef to="/scan">Run the free check</SiteRef>
-          .
+          special days for any date. Nothing goes to Google until you approve it.{" "}
+          <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>
     ),

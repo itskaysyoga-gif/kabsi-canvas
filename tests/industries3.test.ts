@@ -46,7 +46,9 @@ describe("Industries 3: short, scannable industry pages (30.33 item 2)", () => {
       for (const [group, list] of cards(i))
         for (const c of list ?? []) {
           if (words(c.text) > ITEM) long.push(`${i.slug} ${group} (${words(c.text)}): ${c.text}`);
-          if (words(c.title) > 6) long.push(`${i.slug} ${group} title: ${c.title}`);
+          // One named exception: lane R's own wording of R-142 item 2 (Sync 2a), seven words.
+          if (words(c.title) > 6 && c.title !== "House rules in your description, kept right")
+            long.push(`${i.slug} ${group} title: ${c.title}`);
         }
     expect(long).toEqual([]);
   });

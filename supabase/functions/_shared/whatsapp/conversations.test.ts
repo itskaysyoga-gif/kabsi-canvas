@@ -62,7 +62,7 @@ const CASES: Case[] = [
   { name: "unknown: prices", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "prices", expect: "prices", reply: /29 US dollars.*59 US dollars.*first 30 paying businesses pay 19 or 39/s }] },
   { name: "unknown: start free", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "start free", expect: "trial", reply: /https:\/\/kabsi\.co\/login\?next=\/start/ }] },
   { name: "unknown: partner program", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "partner", expect: "partner_program", reply: /25 percent/ }] },
-  { name: "unknown: talk to a person", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "talk to a person", expect: "handoff", reply: /within one business day/ }],
+  { name: "unknown: talk to a person", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "talk to a person", expect: "handoff", reply: /within one working day\. Working hours: Monday to Friday, 9:00 to 18:00, UAE time\./ }],
     check: (w) => assert.equal(w.handoffs.length, 1) },
   { name: "unknown: stats needs an account and shows no business data", tags: ["unknown", "privacy"], steps: [{ from: PHONES.unknown, text: "stats", expect: "needs_account", reply: /https:\/\/kabsi\.co\/login\?next=\/start/ }] },
   { name: "unknown: someone else's Approve button is no longer theirs", tags: ["unknown", "privacy", "25.5"], steps: [
@@ -71,12 +71,12 @@ const CASES: Case[] = [
   { name: "unknown: a staff command is never revealed", tags: ["unknown", "privacy"], steps: [{ from: PHONES.unknown, text: "status", expect: /^(greeting|unclear|nora)/ }],
     check: (w) => assert.doesNotMatch(w.sent.map((s) => s.body).join(" "), /Jobs failed/) },
   { name: "unknown: a business name runs the scan inside WhatsApp (stub until V1)", tags: ["unknown"], setup: (w) => (w.aiMap["Harbour Lane Coffee"] = tool("scan", { name: "Harbour Lane Coffee" })),
-    steps: [{ from: PHONES.unknown, text: "Harbour Lane Coffee", expect: "scan_stub", reply: /run the scan for Harbour Lane Coffee[\s\S]*https:\/\/kabsi\.co\/scan and send me the code/, ai: 1 }] },
+    steps: [{ from: PHONES.unknown, text: "Harbour Lane Coffee", expect: "scan_stub", reply: /^You can check your business free at https:\/\/kabsi\.co\/scan and send me the code from the page\.$/, ai: 1 }] },
   { name: "unknown: the Click-to-WhatsApp referral is kept on the conversation", tags: ["unknown", "20.3"], steps: [
     { from: PHONES.unknown, text: "Hello", referral: { ctwa_clid: "ARAkLk", source_id: "120208", source_type: "ad" }, expect: "greeting" },
     { from: PHONES.unknown, text: "prices", referral: { ctwa_clid: "BBB", source_id: "120209", source_type: "ad" }, expect: "prices" }],
     check: (w) => { const c = w.conversation(PHONES.unknown); assert.equal((c.referral_first as Record<string, string>).ctwa_clid, "ARAkLk"); assert.equal((c.referral_last as Record<string, string>).source_id, "120209"); } },
-  { name: "unknown: a partner code is kept", tags: ["unknown", "29.4"], steps: [{ from: PHONES.unknown, text: "Hi, Code P-SARA", expect: "partner_code", reply: /30 days[\s\S]*https:\/\/kabsi\.co\/login\?next=\/start/ }],
+  { name: "unknown: a partner code is kept", tags: ["unknown", "29.4"], steps: [{ from: PHONES.unknown, text: "Hi, Code P-SARA", expect: "partner_code", reply: /^Thanks, your partner code is noted\.$/ }],
     check: (w) => assert.equal(w.conversation(PHONES.unknown).partner_code, "P-SARA") },
   { name: "unknown: STOP, then nothing", tags: ["unknown", "9.5"], steps: [
     { from: PHONES.unknown, text: "STOP", expect: "stopped", reply: /WhatsApp messages are stopped\./ },
@@ -283,7 +283,7 @@ const CASES: Case[] = [
     check: (w) => assert.equal(w.conversation(PHONES.owner).stopped_at, null) },
   { name: "owner: talk to a person, then free text waits for the person, a button still works", tags: ["owner", "9.9"], setup: (w) => void w.alert(PHONES.owner, BIZ.harbour),
     steps: [
-      { from: PHONES.owner, text: "talk to a person", expect: "handoff", head: /^Harbour Lane Coffee/ },
+      { from: PHONES.owner, text: "talk to a person", expect: "handoff", head: /^Harbour Lane Coffee/, reply: /within 4 working hours/ },
       { from: PHONES.owner, text: "are you there", expect: "handoff_quiet", none: true },
       { from: PHONES.owner, button: "a:tok00000000000000000001", expect: "approved" }] },
   // 13b part 2 (30.10 point 7): hours and typed posts are drafted, shown back exactly and approved with a Yes.

@@ -245,8 +245,8 @@ export const guide: GuideDoc = {
         <p>
           Kabsi is a Manager on your profile that you invite with its group ID, never asks for your
           password or a code, and asks you five days before a public holiday what your hours will
-          be. Google Protection works once Kabsi is connected to Google; during early access it is
-          off. <SiteRef to="/scan">Run the free check</SiteRef>.
+          be. Google Protection works once Kabsi is connected to Google.{" "}
+          <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>
     ),

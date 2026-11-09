@@ -37,7 +37,7 @@ export function accessPill(i: {
     tone: "grey",
     text: "We'll email you when access is ready",
     detail:
-      "During early access a person on the Kabsi team accepts the invitation. You can close this page.",
+      "A person on the Kabsi team accepts the invitation within one working day. You can close this page.",
     connected: false,
   };
 }

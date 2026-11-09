@@ -21,8 +21,6 @@
 - **NFC Tools:** a free app for writing a link onto an NFC tag.
 - **Tap / open:** one opening of your review page. Not a review.
 - **Card code:** the 6-character code under a Kabsi card's QR.
-- **Test mode:** [TIME-SENSITIVE] Kabsi's state until Google approves its API access. Nothing is sent to Google automatically.
-- **Early access:** [TIME-SENSITIVE] a person on the Kabsi team does the Google steps by hand and posts what the owner approves, within one working day.
 - **Free:** not a plan. What a business keeps without a plan, after a trial or a plan ends: the review link, the QR code, the printable counter card and a message to share. There is no Free plan.
 - **Free trial:** 14 days, no card, starting when Google access works.
 - **Kabsi Clients (5481006796):** Kabsi's Google business group. Owners invite it as a Manager.
