@@ -283,3 +283,33 @@ describe("RB-C2: the code's lists agree with the database", () => {
     }
   });
 });
+
+describe("RB-D guard: the extraction step is a new prompt, outside the reply prompt folder, with no network", () => {
+  const extract = readFileSync(join(BOOK, "extract.ts"), "utf8");
+  const promptsDir = join(FUNCTIONS, "_shared/ai/prompts");
+
+  it("keeps its prompt in the request book, so the reply Prompt gate (a change under ai/prompts) is untouched", () => {
+    expect(extract).toContain("buildPrompt");
+    for (const f of readdirSync(promptsDir)) {
+      expect(readFileSync(join(promptsDir, f), "utf8"), f).not.toMatch(/owner_message|already_arranged/);
+    }
+    const ci = readFileSync(join(ROOT, ".github/workflows/ci.yml"), "utf8");
+    expect(ci).toContain("grep -q '^supabase/functions/_shared/ai/prompts/'");
+  });
+
+  it("calls no network, reads no secret and imports no model client: the model is an injected function", () => {
+    expect(extract).not.toMatch(/\bfetch\s*\(|Deno\.env|ANTHROPIC|api\.anthropic|ai\/client/);
+    expect(extract).toMatch(/export type Ask = /);
+  });
+
+  it("uses the small check model, from the one place model ids live", () => {
+    expect(extract).toMatch(/EXTRACT_MODEL = MODELS\.check/);
+    expect(extract).not.toMatch(/claude-[a-z]+-\d/);
+  });
+
+  it("has no word that claims a fact in the lines it writes itself", () => {
+    const lines = extract.split("\n").filter((l) => /finish\(|lines\.push\(/.test(l));
+    expect(lines.length).toBeGreaterThan(5);
+    for (const l of lines) expect(l, l).not.toMatch(/\b(booked|available|confirmed)\b/i);
+  });
+});

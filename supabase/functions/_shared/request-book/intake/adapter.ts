@@ -22,7 +22,7 @@ export type IntakeInput = {
 
 /** What is stored for each field: the words, where they were, what code made of them, and nothing the owner has not seen. */
 export type FieldEvidence = {
-  kind: "stated" | "ambiguous" | "absent";
+  kind: "stated" | "inferred" | "ambiguous" | "absent";
   raw: string | null;
   start: number | null;
   end: number | null;

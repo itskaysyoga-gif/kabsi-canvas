@@ -49,6 +49,13 @@ export type Pack = {
   services: ServiceEntry[];
   fields: FieldSpec[];
   examples: PackExample[];
+  /**
+   * Optional data (RB-D). The bare hours, 1 to 7, that this business usually means as the afternoon or evening. When an
+   * owner writes an hour with no am or pm and it is in this list, it is shown as a guess with a question mark and Save
+   * accepts it in one tap; it is never saved without the tap. A business with no such pattern leaves it out, and both
+   * readings are buttons. The normalizer is not changed by it.
+   */
+  likely_pm_hours?: number[];
 };
 
 export const PACK_ID = /^[a-z][a-z0-9_]{1,40}$/;
@@ -214,7 +221,14 @@ export function validatePack(input: unknown): PackProblem[] {
     });
   }
 
-  const known = new Set(["id", "version", "title", "kinds", "defaultKind", "words", "services", "fields", "examples"]);
+  if (p["likely_pm_hours"] !== undefined) {
+    const h = p["likely_pm_hours"];
+    if (!Array.isArray(h) || h.length === 0 || h.some((x) => !Number.isInteger(x) || (x as number) < 1 || (x as number) > 7) || new Set(h).size !== h.length) {
+      out.push({ path: "likely_pm_hours", message: "must be a list of different whole hours from 1 to 7 (leave it out when there is no pattern)" });
+    }
+  }
+
+  const known = new Set(["id", "version", "title", "kinds", "defaultKind", "words", "services", "fields", "examples", "likely_pm_hours"]);
   for (const k of Object.keys(p)) if (!known.has(k)) out.push({ path: k, message: "is not part of the pack schema" });
   return out;
 }

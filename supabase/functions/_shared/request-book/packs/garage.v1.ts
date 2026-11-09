@@ -53,6 +53,8 @@ export const garageV1: Pack = assertValidPack({
     { key: "car", label: "Car", target: "details", required: false },
     { key: "registration", label: "Registration", target: "details", required: false },
   ],
+  // Bare hours this business usually means as the afternoon (RB-D). Data only.
+  likely_pm_hours: [1, 2, 3, 4, 5],
   examples: [
     { text: "Ali Corolla 2016 brakes squeaking, 0501234567, tomorrow 10", kind: "job" },
     { text: "Ali's car is ready", kind: "job" },

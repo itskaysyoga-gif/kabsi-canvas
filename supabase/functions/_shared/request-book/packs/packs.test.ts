@@ -261,3 +261,17 @@ Deno.test("schema: every Arabic block and every dash or exclamation mark an owne
   for (const c of ["\u0645", "\u0750", "\u08a1", "\ufb51", "\ufe8d", "\ufdf2"]) assert(mk(`Salon ${c}`).some((x) => x.includes("Arabic script")), c.codePointAt(0)!.toString(16));
   for (const c of ["\u2012", "\u2013", "\u2014", "\u2015", "\u2212", "\uff01", "!"]) assert(mk(`Salon ${c} one`).some((x) => x.includes("dash")), c.codePointAt(0)!.toString(16));
 });
+
+Deno.test("schema: likely_pm_hours is optional data, whole hours from 1 to 7, no repeats; salon and garage list them, gym does not", () => {
+  const base = () => clone(salonV1) as Record<string, unknown>;
+  assertEquals(problems(base()), []);
+  const without = base();
+  delete without["likely_pm_hours"];
+  assertEquals(problems(without), []);
+  for (const bad of [[], [0], [8], [1.5], ["3"], [3, 3], "3", null]) {
+    assert(problems({ ...base(), likely_pm_hours: bad }).some((x) => x.startsWith("likely_pm_hours")), JSON.stringify(bad));
+  }
+  assertEquals(salonV1.likely_pm_hours, [1, 2, 3, 4, 5, 6, 7]);
+  assertEquals(garageV1.likely_pm_hours, [1, 2, 3, 4, 5]);
+  assertEquals(gymV1.likely_pm_hours, undefined);
+});
