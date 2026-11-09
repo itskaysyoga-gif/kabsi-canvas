@@ -12,7 +12,9 @@
 -- (firstMap in whatsapp/db.ts) skips is_demo.
 --
 -- The test owner (R-141, for the RB-E and RB-F demo only): Rashid's existing verified user, selected here as the single
--- owner in location_members of the Yawmiyati location. The migration stops if there is not exactly one. No login is created,
+-- owner in location_members of the Yawmiyati location. The migration stops if there is more than one; on a database
+-- with no Yawmiyati (CI, a local stack) it makes nothing. Applied in production on 9 Nov 2026 with exactly one;
+-- RB-F's CI change after that (the no Yawmiyati case) touches fresh databases only. No login is created,
 -- and no phone number, email or user id is written in this file. His phone gets the three new businesses through the
 -- existing membership trigger (private.whatsapp_membership_sync), the same way any new membership of a bound person does.
 -- Customers are added only on the phone, fictional, with phones in 555-01xx (the database refuses any other while a pack
@@ -27,6 +29,11 @@ begin
   select count(*), min(m.user_id::text)::uuid into v_n, v_owner
     from public.location_members m join public.locations l on l.id = m.location_id
    where l.name = 'Yawmiyati' and l.is_demo = false and m.role = 'owner';
+  -- A fresh database (CI, a local stack) has no Yawmiyati: nothing is made there, and the request book stays off.
+  if v_n = 0 then
+    raise notice 'rb_test_owner: no Yawmiyati here, no test businesses made';
+    return;
+  end if;
   if v_n <> 1 then
     raise exception 'rb_test_owner: expected exactly one owner of Yawmiyati, found %', v_n;
   end if;
@@ -48,17 +55,17 @@ begin
     ('e5e00000-0000-4000-8000-000000000002', v_owner, 'owner'),
     ('e5e00000-0000-4000-8000-000000000003', v_owner, 'owner')
   on conflict do nothing;
+
+  insert into public.location_packs (location_id, pack, pack_version, state)
+  values
+    ('e5e00000-0000-4000-8000-000000000001', 'salon', 1, 'test'),
+    ('e5e00000-0000-4000-8000-000000000002', 'gym', 1, 'test'),
+    ('e5e00000-0000-4000-8000-000000000003', 'garage', 1, 'test')
+  on conflict (location_id) do nothing;
+
+  insert into public.app_settings (key, value) values ('request_book', 'on')
+  on conflict (key) do update set value = 'on', updated_at = now();
 end $$;
-
-insert into public.location_packs (location_id, pack, pack_version, state)
-values
-  ('e5e00000-0000-4000-8000-000000000001', 'salon', 1, 'test'),
-  ('e5e00000-0000-4000-8000-000000000002', 'gym', 1, 'test'),
-  ('e5e00000-0000-4000-8000-000000000003', 'garage', 1, 'test')
-on conflict (location_id) do nothing;
-
-insert into public.app_settings (key, value) values ('request_book', 'on')
-on conflict (key) do update set value = 'on', updated_at = now();
 
 -- Read-back after applying (select only):
 --   select l.name, l.status, l.is_demo, o.is_demo as org_demo, l.google_location_id, p.pack, p.state, p.real_data_allowed
