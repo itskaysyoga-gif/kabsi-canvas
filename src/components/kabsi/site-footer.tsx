@@ -48,6 +48,9 @@ const GROUPS: { title: string; links: FootLink[] }[] = [
       { label: "Founding 25", to: "/founding" },
       { label: "Contact", to: `mailto:${CONTACT_EMAIL}`, kind: "mail" },
       ...(WHATSAPP_ON ? [{ label: "WhatsApp", to: WHATSAPP_URL, kind: "whatsapp" as const }] : []),
+      // SEO 1: /setup-call is in the sitemap and was linked from nowhere on the site. Last in the group, so no
+      // baseline picture of the first screens of a page moves.
+      { label: "Help setting up", to: "/setup-call" },
     ],
   },
 ];
