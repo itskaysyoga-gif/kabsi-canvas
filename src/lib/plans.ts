@@ -91,6 +91,8 @@ export const PLAN_COPY = {
   monthly: "Monthly",
   yearly: "Yearly, 2 months free",
   openSoon: "Plans open soon",
+  /** Tidy 1 (R-143 item 3): the choose buttons stay off until Kabsi's access to the Google profile works. */
+  afterAccess: "You can choose a plan once Kabsi's access works.",
 } as const;
 export const PAID_NAMES: Record<string, string> = {
   essentials_month: "Kabsi Essentials, monthly",

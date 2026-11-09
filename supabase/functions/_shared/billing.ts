@@ -6,6 +6,7 @@ import { admin, APP_URL, captureError, jobLog, log } from "./kabsi.ts";
 import { notify as notifyEmail } from "./notify.ts";
 import { esc } from "./email-layout.ts";
 import { billingLineAt, type Line, staffPlanLine } from "./billing-lines.ts";
+import { ACCESS_FIRST_LINE, type AccessRow, accessWorks } from "./billing-access.ts";
 import type { EmailContent } from "./email/template.ts";
 import { paymentFailed, planCancelled } from "./email/account-copy.ts";
 import { outDb } from "./whatsapp/db.ts";
@@ -397,8 +398,25 @@ export async function checkoutOpen(org: string): Promise<boolean> {
   return open?.value === "on" || !!o?.billing_test;
 }
 
+/** The business's locations with their Google connection, as billing-access.ts reads them (the same facts as private.start_trial). */
+async function accessRows(org: string): Promise<AccessRow[]> {
+  const { data, error } = await admin().from("locations")
+    .select("is_demo, concierge, google_location_id, access_granted_at, google_connections(access_state, voice_of_merchant)")
+    .eq("organization_id", org);
+  if (error) throw error;
+  return (data ?? []).map((l) => {
+    const c = (Array.isArray(l.google_connections) ? l.google_connections[0] : l.google_connections) as
+      { access_state?: string | null; voice_of_merchant?: boolean | null } | null | undefined;
+    return { is_demo: l.is_demo, concierge: l.concierge, google_location_id: l.google_location_id, access_granted_at: l.access_granted_at,
+      access_state: c?.access_state ?? null, voice_of_merchant: c?.voice_of_merchant ?? null };
+  });
+}
+
 export async function startCheckout(org: string, userId: string | null, email: string | null, plan: Plan, period: Period, now = new Date()): Promise<string> {
   if (!(await checkoutOpen(org))) throw new BillingError("plans_closed", "Plans open soon.");
+  // Tidy 1 (R-143 item 3): card checkout is offered only to a business whose Google access works. Before anything is
+  // created at Creem or the database, so a refused business holds no founding place and no checkout row.
+  if (!accessWorks(await accessRows(org))) throw new BillingError("access_not_working", ACCESS_FIRST_LINE);
   const running = await currentSub(org);
   if (running && running.state !== "paused") throw new BillingError("already_paid", "This business already has a plan.");
   const ids = await productIds();

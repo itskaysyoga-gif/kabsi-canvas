@@ -165,7 +165,10 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
   const [pending, setPending] = useState<Pending>(null);
   const b = creemBilling(sum);
   const running = b && (b.state === "active" || b.state === "past_due");
-  const open = !!sum.checkout_open;
+  // Tidy 1 (R-143 item 3): a plan can be chosen only once Kabsi's access works (tier "none" is a business whose access has
+  // not started). The server refuses the same way (billing-access.ts), so this only keeps the buttons honest.
+  const accessNow = sum.tier !== "none";
+  const open = !!sum.checkout_open && accessNow;
   // Price 1: a running plan shows the price family it is on; a new checkout shows the founding price while places remain
   // (the server decides under its lock, and Creem's page shows the exact price before paying).
   const left = useFoundingLeft();
@@ -306,7 +309,7 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
                   onClick={() => void run("checkout", { plan: p.id, period })}
                   {...(p.id === "pro" ? { "data-main-cta": true } : {})}
                 >
-                  {open
+                  {sum.checkout_open
                     ? `${p.id === "pro" ? PLAN_COPY.choosePro : PLAN_COPY.chooseEssentials}, ${price(p.id)}`
                     : PLAN_COPY.openSoon}
                 </Button>
@@ -317,6 +320,9 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
       </div>
       {showChoose && open ? (
         <p className="text-small text-text-2">Creem's page shows the exact price before you pay.</p>
+      ) : null}
+      {showChoose && sum.checkout_open && !accessNow ? (
+        <p className="text-small text-text-2">{PLAN_COPY.afterAccess}</p>
       ) : null}
 
       {running ? (
