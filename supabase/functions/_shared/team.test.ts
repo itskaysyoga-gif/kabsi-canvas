@@ -18,6 +18,7 @@ Deno.test("the invitation says who, which business, which role and how to accept
   assert.match(m.text, /29 October 2026/);
   assert.match(m.text, /never asks for your Google password or a verification code/);
   assert.equal(m.button.url, "https://kabsi.co/login");
+  assert.equal(m.why, "Someone at Harbour Lane Coffee invited you to Kabsi.");
   for (const s of [m.subject, m.text, m.bodyHtml, m.note, m.title, m.preheader]) {
     assert.ok(!/[–—!]/.test(s), `no dashes or exclamation marks: ${s}`);
   }

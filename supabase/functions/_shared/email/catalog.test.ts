@@ -17,11 +17,18 @@ const render = (c: ReturnType<typeof catalog>[number]) => {
 };
 // What a reader sees: the HTML without its style block, the Outlook comments and the tags.
 const visible = (html: string) => html.replace(/<style>[\s\S]*?<\/style>/g, " ").replace(/<!--[\s\S]*?-->/g, " ").replace(/<[^>]+>/g, " ");
+// Sync 2a (EML-12): the Founding 25 day 60 email is a feedback ask with no button, by design (programs.ts). It is shown in the
+// catalog so it is read, and is the one named exception to the one-button rule (LATER row for lane R).
+const NO_BUTTON = ["founding_day60"];
 const yellow = (html: string) => html.match(new RegExp(`background:${TOKENS.yellow}`, "gi"))?.length ?? 0;
 
 Deno.test("every email has exactly one yellow button with black text", () => {
   for (const c of catalog()) {
     const { html } = render(c);
+    if (NO_BUTTON.includes(c.kind)) {
+      assert.equal(yellow(html), 0, c.kind);
+      continue;
+    }
     assert.equal(yellow(html), 1, c.kind);
     assert.match(html, new RegExp(`color:${TOKENS.black};text-decoration:none`), c.kind);
   }
@@ -77,7 +84,7 @@ Deno.test("every email has a preview line and a plain-text version with its butt
     const { text } = render(c);
     assert.ok(c.content.preheader.length > 0, c.kind);
     assert.ok(c.content.text.trim().length > 20, c.kind);
-    assert.ok(text.includes(c.content.button!.url), `${c.kind}: the button address is in the text`);
+    if (!NO_BUTTON.includes(c.kind)) assert.ok(text.includes(c.content.button!.url), `${c.kind}: the button address is in the text`);
     if (isStaffCategory(c.category)) {
       // P0.8-02b: mail for the Kabsi team has a plain staff footer (tested below).
       assert.match(text, /Why you got this: /, c.kind);
