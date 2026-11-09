@@ -1850,7 +1850,7 @@ Plain text only, sent as Rashid Abou Hamzy <rashid@getkabsi.com>. Filled from th
 
 "Hi <business> team,
 I came across <business> looking at <kind> in <city>. <detail sentence>
-I run Kabsi. It prepares your Google review replies, posts and opening hours, and you approve each one on WhatsApp before anything goes live. We're taking 25 founding businesses, with three months of Pro free.
+I run Kabsi. It prepares your Google review replies, posts and opening hours, and you approve each one on WhatsApp before anything goes live.
 Want me to run a free check of <business>'s Google profile and send you what I find?
 Rashid Abou Hamzy, founder of Kabsi
 kabsi.co"
@@ -1863,7 +1863,9 @@ Footer: "Why you got this: your business email is on your website. Reply 'no tha
 - Instagram linked: "Your Instagram shows the work, and the same photos could do well on your Google profile."
 - The site updated this year or last: "Your site looks recently updated, so your Google profile is the next place customers check."
 
-**<kind>**, from Harvey's industry: hair salons, barbers, beauty salons and spas, nail salons, restaurants, cafes, clinics, car repair garages, dentists, gyms, vets, physiotherapists.
+**<kind>**, from Harvey's industry. The six salon industries come first, in this order (lane R, 9 Nov 2026, R-142 decision 4c): hair salons (hair salon), barbers (barbershop), beauty salons (beauty salon), nail salons (nail salon), lash and brow studios (lash and brow studio), spas and massage studios (spa and massage). Then: clinics, dentists, physiotherapists, cafes, restaurants, car repair garages, gyms, vets.
+
+**Changed by Sync 2b (9 Nov 2026, R-142 decision 4a, master plan 30.45 item 5).** Email 1 offers only the free Google check: the line "We're taking 25 founding businesses, with three months of Pro free." is removed. The reply to a yes gives the check and the founding price sentence of section 34 (the first 30 paying businesses), never Founding 25 and never "25 founding businesses". Outbound writes only to UK registered companies active on Companies House; the UAE and every other country stay off.
 
 **Follow-up**, day 4 or 5, same thread. Subject: "Re: <business>'s Google profile"
 
@@ -1876,7 +1878,7 @@ then the same signature and footer.
 
 Thanks. Here is the free check of <business>'s Google profile: kabsi.co/scan/<code>
 
-We're taking 25 founding businesses, with three months of Pro free. If you'd like one of the places, apply at kabsi.co/founding, or reply here and I'll help.
+The first 30 paying businesses pay the founding price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year.
 
 Rashid Abou Hamzy, founder of Kabsi
 kabsi.co
@@ -1922,3 +1924,18 @@ Instagram: <R-59 address>"
 - **Creem lines (PUB-07).** Pricing, "Can I pay today?": "Nothing to pay today. Card payments in US dollars are coming. Card payments will be processed by Creem, our merchant of record." About, "How Kabsi is built": "Card payments will be processed by Creem, our merchant of record." The security page, the Plan page and the footer keep the present tense line (LATER row).
 - **Templates (item 6).** `kabsi_work_update` is retired in code; `kabsi_work_update_v2` is the one name. `kabsi_map_ready` keeps "Visibility Map" (section 0.1 names the exception). No template is submitted.
 - **Nora (item 8).** She may answer in the visitor's language, Arabic script included, in the chat only. For bookings, customers' requests or a booking assistant: "Kabsi looks after your Google Business Profile. It is not a booking system and does not keep your customers' bookings or requests." (facts 04, section 2.1b, and nora-rules.ts; evaluation questions sc04 in English and sc05 in Spanish).
+
+## 70. Sync 2b: the legal lines and the contact list notice (9 Nov 2026, lane R R-142 decisions 4d and 9)
+
+Lane R's words, word for word. This is not legal advice: every line is listed for the Gate 3 legal review in `docs/progress/archive/2026-11-09-sync2b.md`.
+
+- **/privacy, date:** "9 November 2026". **/terms, date:** "9 November 2026". /security has no date line.
+- **/privacy section 2 (LEG-17):** "If you sign in with Google: Kabsi receives your name, email address and profile photo from Google."
+- **/privacy section 3 (decision 4d):** "We don't sell or rent personal data, we don't use it for advertising, and we don't send marketing emails to Kabsi users or visitors without asking first. Kabsi may send one plain email, and one follow-up, to a UK registered company at the address it publishes, as section 15 explains."
+- **/privacy section 6 (LEG-14):** "When switched on, Creem: card payments. Creem is our merchant of record and receives what it needs to take a payment." GitHub "also holds the contact list of section 15 in a private repository"; Zoho is also "the mailbox that sends and receives the emails of section 15".
+- **/privacy section 7 (LEG-15, LEG-16):** after the Conversions API sentence, "A finished free check and a contact you give (the check's report sent to you, or a Founding 25 application) also go from Kabsi's servers, only where your privacy choice allows ad measurement, with the same event id as your browser's so Meta counts each once. They carry only a hashed random visitor id and Meta's own browser cookies, never your email, phone, name or business."; the bar: "In the EU, the EEA, the UK, Switzerland, the United Arab Emirates and Saudi Arabia, and where the country is not known, a small bar at the bottom asks once".
+- **/privacy section 9 (LEG-07):** "A free check's results: the business's public Google Maps results, the findings of one AI answer about it and the nearby places are kept 30 days, or 90 days once the business signs up. Nothing from Google's Places service is kept but the Place ID."
+- **/privacy section 14 and /terms section 16 (LEG-21):** "map location" for "map pin".
+- **/privacy section 15 (decision 4d, the article 14 notice):** four paragraphs: what the list holds (with the company number and status for a UK company), the sources (OpenStreetMap, the business's own website and Companies House), where it is held (Kabsi's database and a private GitHub repository); UK registered companies active on Companies House only, one plain email and one follow-up, the UAE and every other country off, nothing sent before Rashid decides to start; the six-month check, the 24-month and 90-day deletions, the 90-day deletion after the last email with only a coded form of the domain kept; removal within 30 days, a request from the business's own domain covers the whole business, the rights.
+- **/terms section 9 (LEG-09):** "Card payments are not open yet, so nothing is charged today. The rules below apply from the day card payments open." then a Creem subscription that renews every month or year from the day you paid until you cancel; the paid period starts the day you pay, and if you pay before Kabsi's access works the plan starts the day it works; Pro at once, Essentials from the next renewal; an extra location renews on its own date; cancelling on the Plan page stops the next renewal; a failed renewal gives 7 days, then the plan is paused. Retired: "Paying again before a plan ends adds the new period after the current one. Plans don't renew automatically." and "If you pay during your trial, your paid plan starts the day the trial ends."
+- **/security (LEG-18):** "You sign in with Google or a one time code sent to your email. No passwords."

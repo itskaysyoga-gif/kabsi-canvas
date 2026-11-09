@@ -53,24 +53,24 @@ export function ownDomain(email: string, website: string): boolean {
 }
 
 // ─── industries, countries, time zones
-/** Harvey's industry codes as an owner would say them, plural, for "looking at <kind> in <city>". */
+/** Harvey's industry codes as an owner would say them, plural, for "looking at <kind> in <city>". The six salon
+ *  industries come first, each with its own words (lane R, R-142 decision 4c, 30.45 item 5). */
 export const KIND_WORDS: Record<string, string> = {
-  "hair salon": "hair salons", "barbershop": "barbers", "beauty salon and spa": "beauty salons and spas",
-  "nail salon": "nail salons", "restaurant": "restaurants", "cafe": "cafes", "clinic": "clinics",
-  "car repair garage": "car repair garages", "dentist": "dentists", "gym": "gyms", "vet": "vets",
-  "physiotherapist": "physiotherapists",
+  "hair salon": "hair salons", "barbershop": "barbers", "beauty salon": "beauty salons", "nail salon": "nail salons",
+  "lash and brow studio": "lash and brow studios", "spa and massage": "spas and massage studios",
+  "restaurant": "restaurants", "cafe": "cafes", "clinic": "clinics", "car repair garage": "car repair garages",
+  "dentist": "dentists", "gym": "gyms", "vet": "vets", "physiotherapist": "physiotherapists",
 };
-/** Salons and barbers first, then the Founding 25 mix (beauty, then the other trades). */
+/** The six salon industries first, in lane R's order, then the other trades. */
+export const SALON_INDUSTRIES = ["hair salon", "barbershop", "beauty salon", "nail salon", "lash and brow studio", "spa and massage"] as const;
 export const INDUSTRY_ORDER = [
-  "hair salon", "barbershop", "beauty salon and spa", "nail salon", "clinic", "dentist", "physiotherapist", "cafe",
-  "restaurant", "car repair garage", "gym", "vet",
+  ...SALON_INDUSTRIES, "clinic", "dentist", "physiotherapist", "cafe", "restaurant", "car repair garage", "gym", "vet",
 ];
 
-export const TIME_ZONES: Record<string, string> = {
-  GB: "Europe/London", IE: "Europe/Dublin", AE: "Asia/Dubai", SA: "Asia/Riyadh", QA: "Asia/Qatar", KW: "Asia/Kuwait",
-  BH: "Asia/Bahrain", OM: "Asia/Muscat", AU: "Australia/Sydney", NZ: "Pacific/Auckland", SG: "Asia/Singapore",
-  CA: "America/Toronto", US: "America/New_York",
-};
+/** The only country Outbound may ever write to: UK registered companies active on Companies House (30.45 item 5). The
+ *  UAE and every other country stay off; the database's check on outbound_settings.open_countries says the same. */
+export const OPEN_COUNTRIES = ["GB"] as const;
+export const TIME_ZONES: Record<string, string> = { GB: "Europe/London" };
 
 // ─── house style
 /** No em or en dashes and no exclamation marks (CLAUDE.md). */
@@ -259,7 +259,7 @@ export function emailOne(p: { business: string; kind: string; city: string; deta
     body: [
       `Hi ${b} team,`,
       `I came across ${b} looking at ${p.kind} in ${p.city}. ${p.detail}`,
-      "I run Kabsi. It prepares your Google review replies, posts and opening hours, and you approve each one on WhatsApp before anything goes live. We're taking 25 founding businesses, with three months of Pro free.",
+      "I run Kabsi. It prepares your Google review replies, posts and opening hours, and you approve each one on WhatsApp before anything goes live.",
       `Want me to run a free check of ${possessive(b)} Google profile and send you what I find?`,
       SIGNATURE,
       FOOTER,

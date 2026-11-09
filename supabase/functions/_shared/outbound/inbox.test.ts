@@ -201,10 +201,11 @@ Deno.test("a person's yes: follow-up cancelled, needs Rashid, alert, the free ch
   assert.equal(body.replace(/Facebook: .*\nInstagram: .*$/, "Facebook: F\nInstagram: I"), [
     "Hi Rose Lane Salon team,",
     "Thanks. Here is the free check of Rose Lane Salon's Google profile: kabsi.co/scan/ABC123",
-    "We're taking 25 founding businesses, with three months of Pro free. If you'd like one of the places, apply at kabsi.co/founding, or reply here and I'll help.",
+    "The first 30 paying businesses pay the founding price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year.",
     "Rashid Abou Hamzy, founder of Kabsi\nkabsi.co\nFacebook: F\nInstagram: I",
   ].join("\n\n"), "lane R's words, word for word");
   assert.ok(!/Nora/.test(body), "signed without Nora");
+  assert.ok(!/Founding 25|25 founding|three months|kabsi\.co\/founding/.test(body), "the founding price, never Founding 25 (R-142 4a)");
   assert.match(body, /Facebook: www\.facebook\.com\/profile\.php\?id=\d+\nInstagram: www\.instagram\.com\/kabsi\.co$/);
   assert.ok(linksOk(body, "reply"));
   assert.ok(!/[–—!]/.test(body));
