@@ -20,6 +20,7 @@ Deno.test("Tidy 1: access works only when every part of the trial's own test hol
     ["no Google location", { ...working, google_location_id: null }],
     ["a demo location", { ...working, is_demo: true }],
     ["a concierge location", { ...working, concierge: true }],
+    ["a concierge Google location id (private.is_concierge_gid)", { ...working, google_location_id: "locations/concierge-7" }],
   ];
   for (const [name, row] of broken) assertEquals(accessWorks([row]), false, name);
 });
