@@ -6,7 +6,7 @@ import { prepare, type PrepareDeps, type Settings } from "./prepare.ts";
 import { robotsAllows } from "./page.ts";
 import { COMPANY_FILE_MAX_DAYS, companyRefusal, ordered, parseCsv, rowRefusal, toCandidate } from "./register.ts";
 import {
-  dailyCap, emailOne, emailOnPage, followUp, followUpDate, houseStyleOk, inWindow, isSuppressed, keysOf, linksOk, localParts,
+  dailyCap, emailOne, INDUSTRY_ORDER, KIND_WORDS, OPEN_COUNTRIES, SALON_INDUSTRIES, TIME_ZONES, emailOnPage, followUp, followUpDate, houseStyleOk, inWindow, isSuppressed, keysOf, linksOk, localParts,
   nameOk, ownDomain, pickDetail, sha,
 } from "./rules.ts";
 import { possessive } from "../possessive.ts";
@@ -19,7 +19,7 @@ Deno.test("Email 1 and the follow-up are the templates of COPY.md, word for word
   assert.equal(one.body, [
     "Hi Rose Lane Salon team,",
     "I came across Rose Lane Salon looking at hair salons in Exampleton. Your site lists your opening hours, and keeping Google's hours the same saves wasted trips.",
-    "I run Kabsi. It prepares your Google review replies, posts and opening hours, and you approve each one on WhatsApp before anything goes live. We're taking 25 founding businesses, with three months of Pro free.",
+    "I run Kabsi. It prepares your Google review replies, posts and opening hours, and you approve each one on WhatsApp before anything goes live.",
     "Want me to run a free check of Rose Lane Salon's Google profile and send you what I find?",
     "Rashid Abou Hamzy, founder of Kabsi\nkabsi.co",
     "Why you got this: your business email is on your website. Reply 'no thanks' and I will not write again. How Kabsi handles data: kabsi.co/privacy",
@@ -32,6 +32,39 @@ Deno.test("Email 1 and the follow-up are the templates of COPY.md, word for word
     assert.ok(!/facebook|instagram\.com|Drafted with Nora/i.test(t), "no social addresses and no Nora line in a first email");
   }
   assert.ok(linksOk(one.body, "first") && linksOk(two.body, "follow_up"), "only kabsi.co and kabsi.co/privacy");
+});
+
+Deno.test("Email 1 and the follow-up offer only the free Google check: no Founding 25 and no founding offer (R-142 4a)", () => {
+  const one = emailOne({ business: "Rose Lane Salon", kind: "hair salons", city: "Exampleton", detail: "Your site lists your opening hours, and keeping Google's hours the same saves wasted trips." });
+  const two = followUp({ business: "Rose Lane Salon" });
+  for (const t of [one.subject, one.body, two.subject, two.body]) {
+    assert.ok(!/founding|Founding 25|three months|Pro free|\b25\b|\$|US dollars|price/i.test(t), t);
+  }
+  assert.match(one.body, /Want me to run a free check of Rose Lane Salon's Google profile and send you what I find\?/);
+});
+
+Deno.test("only the UK can open: a non GB country is closed whatever open_countries holds (R-142 4b)", () => {
+  assert.deepEqual([...OPEN_COUNTRIES], ["GB"]);
+  assert.deepEqual(Object.keys(TIME_ZONES), ["GB"]);
+  const ok = { company_id: "1", business_name: "Rose Lane Salon", industry: "hair salon", country: "GB", city: "Exampleton",
+    website: "https://www.rose.example.com", email: "hello@rose.example.com", email_page_url: "https://rose.example.com/contact",
+    company_type: "registered company", company_number: "01234567", company_status: "Active", company_status_date: "2026-11-01" };
+  const all = ["GB", "IE", "AE", "SA", "QA", "KW", "BH", "OM", "AU", "NZ", "SG", "CA", "US"];
+  for (const c of all.filter((x) => x !== "GB")) {
+    assert.equal(rowRefusal({ ...ok, country: c }, all, "2026-11-06"), "country_closed", c);
+  }
+  assert.equal(rowRefusal(ok, all, "2026-11-06"), null);
+});
+
+Deno.test("the six salon industries come first, in lane R's order, each with its own words (R-142 4c)", () => {
+  const six = ["hair salon", "barbershop", "beauty salon", "nail salon", "lash and brow studio", "spa and massage"];
+  assert.deepEqual([...SALON_INDUSTRIES], six);
+  assert.deepEqual(INDUSTRY_ORDER.slice(0, 6), six);
+  assert.deepEqual(six.map((k) => KIND_WORDS[k]), ["hair salons", "barbers", "beauty salons", "nail salons", "lash and brow studios", "spas and massage studios"]);
+  assert.equal(KIND_WORDS["beauty salon and spa"], undefined, "the old joined code is split");
+  for (const k of INDUSTRY_ORDER) assert.ok(KIND_WORDS[k], k);
+  const csv = "company_id,industry,quality_score\n1,cafe,9\n2,spa and massage,1\n3,lash and brow studio,1\n4,beauty salon,1\n5,hair salon,1\n6,nail salon,1\n7,barbershop,1\n";
+  assert.deepEqual(ordered(parseCsv(csv)).map((r) => r.company_id), ["5", "7", "4", "6", "3", "2", "1"]);
 });
 
 Deno.test("links: Email 1 refuses anything but kabsi.co; a reply may carry a check link and the social pages", () => {
@@ -117,7 +150,7 @@ Deno.test("Companies House from Harvey's register: Active on a Basic Company Dat
   assert.equal(companyRefusal({ ...ok, company_status_date: "2026-02-30" }, day), "no_company_status", "not a real date");
   assert.equal(companyRefusal({ ok: "x" }, day), "no_company_status", "an older register without the columns");
   assert.equal(companyRefusal({ ...ok, company_status_date: "2026-11-07" }, day), "company_status_date_ahead");
-  assert.equal(rowRefusal({ ...ok, country: "US", company_status: "" }, ["US"], day), null, "only UK rows need Companies House");
+  assert.equal(rowRefusal({ ...ok, country: "US", company_status: "" }, ["US"], day), "country_closed", "only the UK can open (R-142)");
   for (const n of ["LP012345", "SL012345", "NL012345"]) assert.equal(rowRefusal({ ...ok, company_number: n }, ["GB"], day), "limited_partnership", n);
   for (const n of ["OC412345", "SO301234", "NC001234", "SC123456", "NI012345"]) assert.equal(rowRefusal({ ...ok, company_number: n }, ["GB"], day), null, n);
   assert.equal(toCandidate(ok).company_status, "active");
