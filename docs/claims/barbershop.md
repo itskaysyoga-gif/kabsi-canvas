@@ -122,3 +122,44 @@ sentence" from the unhappy customer answer. The old tasks were not shown and are
 ### Industries 3: fixed after the independent check (5 Nov 2026)
 
 - Answer: "prepares review replies" replaces "drafts every reply", because a high risk review gets no draft (facts 13, "What happens with hard reviews?").
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card title | "Walk-ins or bookings, said once" | A | none | A short label for the line under it. |
+| I2 | Card line | "Write in your description which days take walk-ins and which need booking." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I3 | Card title | "Your phone, for walk-in questions" | A | none | A short label for the line under it. |
+| I4 | Card line | "Kabsi checks the number Google shows against yours every day." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I5 | Card title | "A long Saturday wait" | A | none | A short label for the line under it. |
+| I6 | Card line | "One apology, no excuse, and no promise of a shorter queue." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I7 | Card title | "A nick from the razor" | A | none | A short label for the line under it. |
+| I8 | Card line | "That is an injury: no draft, just a checklist sent to you." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I9 | Card title | "The rush before a bank holiday" | A | none | A short label for the line under it. |
+| I10 | Card line | "Kabsi asks five days ahead, so extra chairs and hours are set in time." | K | K2 (docs/holidays.md); facts 04 "Holiday hours" | Kabsi asks five days before a public holiday: normal hours, closed or custom hours; set once the owner says yes. |
+| I11 | Card title | "The fade from behind" | A | none | A short label for the line under it. |
+| I12 | Card line | "Clean neckline, plain wall, good light. The cut is the subject." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I13 | Card title | "The shop from the street" | A | none | A short label for the line under it. |
+| I14 | Card line | "Google says an outside photo helps people recognise you as they arrive." | G | G8 | "When you add an exterior photo, it helps customers recognize your business when they visit." |
+| I15 | Card title | "Chairs at opening time" | A | none | A short label for the line under it. |
+| I16 | Card line | "Empty chairs and a tidy counter show a walk-in what to expect." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I17 | Card title | "Walk-in hours this week" | A | none | A short label for the line under it. |
+| I18 | Card line | "A late Thursday or an early Saturday start, said plainly." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I19 | Card title | "A new barber joins" | A | none | A short label for the line under it. |
+| I20 | Card line | "Their name and the cuts they do best, drafted for your yes." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I21 | Card title | "Your price list" | A | none | A short label for the line under it. |
+| I22 | Card line | "A photo of the board, posted only as you wrote it." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I23 | First category | "Barber shop" | C | see the category rows above | The category rows earlier in this sheet (or the other sheet named there) show the name on a Google page or a live profile. |
+| I24 | Line | "Barber shop has its own place in Google's list, apart from hair salons. Read the name in your own category box." | G | G1, G2, G13 | Pick the most specific category from Google's list; Google's example shows one category under different names by country. |
+| I25 | Answer | "No, Kabsi looks after your Google profile: hours, replies, posts and photos. It does not take bookings." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I26 | Answer | "No, Kabsi messages the shop owner, never the customer in the chair. You hand out the review card after a cut." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I27 | Answer | "Yes, the prices on your board, word for word, once you approve the post. It never makes up a deal." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I28 | Service | "Skin fade" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I29 | Service | "Scissor cut" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I30 | Service | "Beard trim" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I31 | Service | "Hot towel shave" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I32 | Service | "Line up" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I33 | Service | "Kids' cut" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I34 | Service | "Head shave" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

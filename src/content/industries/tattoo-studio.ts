@@ -30,22 +30,32 @@ export const tattooStudio: Industry = {
   ],
   // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
   // docs/claims/tattoo-studio.md, whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Custom design",
+    "Flash tattoos",
+    "Cover ups",
+    "Fine line",
+    "Blackwork",
+    "Touch ups",
+    "Tattoo consultation",
+  ],
   profile: [
-    {
-      title: "Photos are your portfolio",
-      text: "Fresh and healed shots both help. Kabsi tells you when one is blurry or dark.",
-    },
     {
       title: "Say how people book",
       text: "By appointment only? Say so in your description. Kabsi checks it every day.",
     },
     {
-      title: "Thanks passed to the artist",
-      text: "A review that names Leo thanks Leo, if he is on your team list.",
+      title: "Styles as services",
+      text: "Fine line, blackwork, cover ups: each can be a service on Google.",
     },
     {
-      title: "A review about an infection",
-      text: "No draft, a short checklist, and a neutral holding reply only if you ask.",
+      title: "Your age rule, written down",
+      text: "Put your minimum age policy in the description, in your words.",
+    },
+    {
+      title: "Deposits, stated once",
+      text: "If you take a deposit, say how it works in your description.",
     },
   ],
   categories: {
@@ -53,6 +63,58 @@ export const tattooStudio: Industry = {
     more: ["Tattoo artist", "Body piercing shop"],
     line: "Choose the first by most of your work; add body piercing only if you do it. Names can differ by country.",
   },
+  reviews: [
+    {
+      title: "Thanks passed to the artist",
+      text: "A review that names Leo thanks Leo, if he is on your team list.",
+    },
+    {
+      title: "A review about an infection",
+      text: "An infection is a safety matter: no draft, a checklist for you.",
+    },
+    {
+      title: "A wait past the booked time",
+      text: "One apology and nothing promised that it cannot keep.",
+    },
+  ],
+  holidays: [
+    {
+      title: "Bank holiday weekends",
+      text: "Kabsi asks five days before each and sets the hours you choose.",
+    },
+    {
+      title: "A convention weekend away",
+      text: "A few days shut is special hours; seven or more, temporarily closed.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "Photos are your portfolio",
+      text: "Fresh and healed shots both help. Kabsi tells you when one is blurry or dark.",
+    },
+    {
+      title: "Healed, a month on",
+      text: "A healed photo shows how the lines settled.",
+    },
+    {
+      title: "The studio, clean",
+      text: "Stations wiped down and ready, in bright light.",
+    },
+  ],
+  posts: [
+    {
+      title: "Flash day",
+      text: "The date, the designs and whether it is walk in.",
+    },
+    {
+      title: "A guest artist",
+      text: "Their name and the dates they are in.",
+    },
+    {
+      title: "Books open",
+      text: "Which month an artist takes new bookings.",
+    },
+  ],
   page: {
     query: "tattoo shop Google Business Profile",
     title: "Tattoo shop Google Business Profile help | Kabsi",
@@ -91,7 +153,6 @@ export const tattooStudio: Industry = {
         text: "A review about an infection gets no draft and a short checklist, so you decide.",
       },
     ],
-    nearby: { kind: "studio", term: "tattoo shop" },
     ai: {
       question: "Which tattoo studio in the Northern Quarter, Manchester does fine line work?",
       answer:
@@ -110,23 +171,23 @@ export const tattooStudio: Industry = {
   faqs: [
     {
       q: "Can Kabsi say we only work by appointment?",
-      a: "Yes. Write it in your description and posts. Kabsi checks the description every day and tells you when Google shows something else.",
+      a: "Yes, write it in your description and posts. Kabsi checks the description every day and tells you when Google shows something else.",
     },
     {
       q: "What happens with a review about an infection?",
-      a: "An infection is a safety matter: no draft and a short checklist. Kabsi writes a neutral holding reply only if you ask.",
+      a: "That is a safety matter: no draft, a checklist, and a holding reply only when you ask.",
     },
     {
       q: "Will a reply name the right artist?",
-      a: "Only when the review names them and the name is on your team list. Kabsi never guesses.",
+      a: "Only if the review names them and they are on your team list; no guessing.",
     },
     {
       q: "Can Kabsi post photos of fresh tattoos?",
-      a: "Yes, photos you send and approve. Kabsi checks each one is sharp and well lit first.",
+      a: "Yes, once you send them. Blurry or dark shots are flagged before anything is drafted.",
     },
     {
       q: "Does Kabsi post on Instagram too?",
-      a: "No. Kabsi works only with your Google profile.",
+      a: "No, Kabsi posts on Google only; your Instagram stays yours.",
     },
   ],
   guides: [

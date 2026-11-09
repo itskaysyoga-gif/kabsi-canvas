@@ -35,6 +35,16 @@ export const autoRepair: Industry = {
   ],
   // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
   // docs/claims/auto-repair.md, whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "MOT",
+    "Full service",
+    "Brake repair",
+    "Clutch replacement",
+    "Diagnostics",
+    "Tyres",
+    "Air conditioning recharge",
+  ],
   profile: [
     {
       title: "Every job on the list",
@@ -64,7 +74,7 @@ export const autoRepair: Industry = {
     },
     {
       title: "A safety problem with the car",
-      text: "No draft: a short checklist, and a neutral holding reply only if you ask.",
+      text: "A safety matter: no draft, and a checklist goes to you.",
     },
   ],
   categories: {
@@ -83,7 +93,7 @@ export const autoRepair: Industry = {
     },
     {
       title: "Ramadan, UAE",
-      text: "Private sector hours drop by two a day. Check key collection against the shorter day.",
+      text: "UAE private sector days are two hours shorter. Check key collection times against them.",
     },
   ],
   photoCards: [
@@ -96,8 +106,8 @@ export const autoRepair: Industry = {
       text: "Google says an outside photo helps people recognise you. Show where to leave the car.",
     },
     {
-      title: "Post ideas",
-      text: "Brake checks with the price, free MOT slots, air con checks before summer, Saturday hours.",
+      title: "The bays at opening time",
+      text: "A clear floor and tools on the wall, shot before the first job.",
     },
   ],
   story: {
@@ -121,6 +131,20 @@ export const autoRepair: Industry = {
       },
     ],
   },
+  posts: [
+    {
+      title: "Brake checks, with your price",
+      text: "Only the price you send, in a post you approve.",
+    },
+    {
+      title: "MOT slots this week",
+      text: "A dated update for the free slots in your diary.",
+    },
+    {
+      title: "Air con before summer",
+      text: "A seasonal check, written from what you really offer.",
+    },
+  ],
   page: {
     query: "auto repair shop Google Business Profile",
     title: "Auto repair shop Google Business Profile help | Kabsi",
@@ -159,7 +183,6 @@ export const autoRepair: Industry = {
         text: "A photo and a line become a post, with no price you did not give.",
       },
     ],
-    nearby: { kind: "garage", term: "car repair" },
     ai: {
       question: "Which garage in Salford, Manchester does same day MOTs?",
       answer: "Westgate Auto Repair in Salford offers same day MOTs when you book before 10 am.",
@@ -192,8 +215,8 @@ export const autoRepair: Industry = {
       a: "Where customers pay and collect keys, on the invoice, and in the message that says the car is ready. Ask every customer the same way.",
     },
     {
-      q: "Does Kabsi see my customers' records?",
-      a: "No. Kabsi works with your Google profile and the reviews on it. It does not connect to your customer records.",
+      q: "What if a review names a mechanic?",
+      a: "The reply thanks that mechanic only if the name is on your team list. Kabsi never guesses one.",
     },
   ],
   guides: [

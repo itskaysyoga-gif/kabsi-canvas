@@ -29,18 +29,32 @@ export const beautySalon: Industry = {
     "eyebrow threading near me",
     "bridal makeup",
   ],
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Facials",
+    "Full leg wax",
+    "Bridal makeup",
+    "Party makeup",
+    "Eyebrow shaping",
+    "Henna",
+    "Manicure and pedicure",
+  ],
   profile: [
     {
       title: "One menu, many treatments",
       text: "Facials, waxing, makeup and brows: list what you do, so searches find it.",
     },
     {
-      title: "Hours checked every day",
-      text: "Kabsi compares the hours Google shows with yours, daily.",
+      title: "Bridal packages as offers",
+      text: "An offer post carries a View Offer button. Give each one an end date.",
     },
     {
-      title: "Photos of the work",
-      text: "In focus and well lit. Kabsi checks each photo before it goes up.",
+      title: "Hours on Google, read daily",
+      text: "Kabsi reads your hours every day and asks when Google shows others.",
+    },
+    {
+      title: "Visits to brides at home",
+      text: "If you travel to them, set a service area beside your address.",
     },
   ],
   reviews: [
@@ -54,7 +68,7 @@ export const beautySalon: Industry = {
     },
     {
       title: "A reaction after a treatment",
-      text: "No draft: a short checklist, and a neutral holding reply only if you ask.",
+      text: "A skin reaction is a health matter: no draft, a checklist instead.",
     },
   ],
   categories: {
@@ -71,6 +85,10 @@ export const beautySalon: Industry = {
       title: "Eid and National Day",
       text: "Busy days for makeup. Kabsi asks your special hours before each one.",
     },
+    {
+      title: "Later nights in Ramadan",
+      text: "Evening hours go on Google as special hours, after your yes.",
+    },
   ],
   photoCards: [
     {
@@ -80,6 +98,24 @@ export const beautySalon: Industry = {
     {
       title: "The room, ready",
       text: "Chair, mirror and lights, no client. Kabsi checks focus and light.",
+    },
+    {
+      title: "Threading and brows, close",
+      text: "One brow, sharp and well lit, with no filter over the skin.",
+    },
+  ],
+  posts: [
+    {
+      title: "A new facial on the menu",
+      text: "What it is and how long it takes, in your words.",
+    },
+    {
+      title: "Makeup for Eid",
+      text: "A dated post for the days you take Eid bookings.",
+    },
+    {
+      title: "Bridal slots still open",
+      text: "Which Fridays have room, posted with the dates.",
     },
   ],
   page: {
@@ -95,7 +131,7 @@ export const beautySalon: Industry = {
       "For a beauty salon Google Business Profile, Kabsi turns treatments into posts, checks your hours daily and prepares review replies, all for your yes.",
     watch: {
       business: "Amber Glow Beauty, Dubai",
-      line: "Clients book around work. Kabsi checks the hours Google shows against yours every day.",
+      line: "Clients book around work, so Kabsi reads the hours on Google each day and compares them with yours.",
       fields: ["Opening hours", "Special hours", "Phone", "Website", "Main category"],
       what: "Friday",
       google: "10:00 to 18:00",
@@ -116,11 +152,10 @@ export const beautySalon: Industry = {
         text: "Only when the review names someone on your team list.",
       },
       {
-        title: "Holiday hours, asked ahead",
+        title: "Eid and holiday hours in time",
         text: "Before each public holiday, Kabsi asks your hours and sets your answer.",
       },
     ],
-    nearby: { kind: "salon", term: "beauty salon" },
     ai: {
       question: "Which beauty salon in Dubai Marina does bridal makeup on Fridays?",
       answer:
@@ -143,7 +178,7 @@ export const beautySalon: Industry = {
     },
     {
       q: "What happens with a review about a skin reaction?",
-      a: "It comes to you with no draft and a short checklist. Kabsi writes a neutral holding reply only if you ask.",
+      a: "It waits for you with a short checklist and no draft. You choose to reply, ask for a holding reply, or leave it.",
     },
     {
       q: "A client praised our makeup artist. Will the reply mention her?",
@@ -151,7 +186,7 @@ export const beautySalon: Industry = {
     },
     {
       q: "Can Kabsi take bookings for my treatments?",
-      a: "No. Clients still book the way they do today; Kabsi only looks after your Google profile.",
+      a: "No, clients still book the way they do today; Kabsi only looks after your Google profile.",
     },
     {
       q: "We also do nails and lashes. Which category comes first?",

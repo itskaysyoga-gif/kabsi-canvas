@@ -61,3 +61,45 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 | Job | "Gentle replies": "Warm for a wedding, gentle for a funeral, adding nothing the customer did not say." | 14 | K |
 
 Removed from the page: the search text paragraph (row 16), "asks when they differ" (row 18), the late night before a busy day (row 19), the funeral guide paragraph (row 22; the job and the FAQ keep it), and the long answer.
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card title | "Bouquets with a price" | A | none | A short label for the line under it. |
+| I2 | Card line | "Google can show each bouquet as a service with a price." | G | G6 | Services can carry a price and a description; custom services are allowed; no prices in custom service names. |
+| I3 | Card title | "If you deliver, say where" | A | none | A short label for the line under it. |
+| I4 | Card line | "Name the areas in your description so callers know before they ring." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I5 | Card title | "Same day orders, said clearly" | A | none | A short label for the line under it. |
+| I6 | Card line | "If you take them, give the cut off time in your description." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I7 | Card title | "A funeral order" | A | none | A short label for the line under it. |
+| I8 | Card line | "Brief and gentle, with nothing the customer did not share." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I9 | Card title | "A threat to take it further" | A | none | A short label for the line under it. |
+| I10 | Card line | "No draft for a legal threat; the checklist reaches you first." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I11 | Card title | "Valentine's week" | A | none | A short label for the line under it. |
+| I12 | Card line | "Opening early that week is special hours, set from what you say." | G | G4 | Special hours keep regular hours for holidays and exceptional days; up to 6 days closed fits special hours, 7 or more Temporarily closed. |
+| I13 | Card title | "Christmas Eve" | A | none | A short label for the line under it. |
+| I14 | Card line | "Short hours that day go on Google as special hours." | G | G4 | Special hours keep regular hours for holidays and exceptional days; up to 6 days closed fits special hours, 7 or more Temporarily closed. |
+| I15 | Card title | "The bench at work" | A | none | A short label for the line under it. |
+| I16 | Card line | "Stems, ribbon and tools on the table, in daylight." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I17 | Card title | "The shopfront in bloom" | A | none | A short label for the line under it. |
+| I18 | Card line | "Buckets by the door help people recognise the shop." | G | G8 | "When you add an exterior photo, it helps customers recognize your business when they visit." |
+| I19 | Card title | "Valentine's Day orders" | A | none | A short label for the line under it. |
+| I20 | Card line | "The last day to order, with its date in the post." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I21 | Card title | "Mother's Day" | A | none | A short label for the line under it. |
+| I22 | Card line | "What you have ready and when orders close." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I23 | Card title | "Sympathy flowers" | A | none | A short label for the line under it. |
+| I24 | Card line | "A quiet post that you make them, with no sales words." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I25 | Answer | "Yes, tell Kabsi the hours, and it sets them as special hours once you say yes. Before public holidays, Kabsi asks you first." | G | G4 | Special hours keep regular hours for holidays and exceptional days; up to 6 days closed fits special hours, 7 or more Temporarily closed. |
+| I26 | Answer | "Yes, send the photo; Kabsi checks it is sharp and bright, then drafts the post." | K | facts 13 "What photos can I post?"; facts 04 "Photos" | The photo check flags a dark, blurry or small (under 720 by 720) photo and a likely repeat; it does not look for faces. |
+| I27 | Answer | "No, orders stay with you by phone or online; Kabsi looks after the Google profile." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I28 | Question | "Where does the review card go for a florist?" | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I29 | Answer | "Tucked into each bouquet or delivery, or at the counter." | K | facts 09 (card placement, 7.1 to 7.8); facts 10 (ask everyone the same way, no incentive) | Where the review card goes for each trade; every customer asked the same way, never an incentive. |
+| I30 | Service | "Bouquets" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I31 | Service | "Wedding flowers" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I32 | Service | "Funeral flowers" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I33 | Service | "Event flowers" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I34 | Service | "Plants" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I35 | Service | "Flower subscriptions" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

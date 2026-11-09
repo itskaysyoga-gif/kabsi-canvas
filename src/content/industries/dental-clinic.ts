@@ -34,6 +34,16 @@ export const dentalClinic: Industry = {
   ],
   // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
   // docs/claims/dental-clinic.md, whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Check-up and clean",
+    "Hygienist visit",
+    "Fillings",
+    "Teeth whitening",
+    "Root canal treatment",
+    "Emergency appointment",
+    "Children's dentistry",
+  ],
   profile: [
     {
       title: "Replies that confirm no patient",
@@ -63,7 +73,7 @@ export const dentalClinic: Industry = {
     },
     {
       title: "An injury or a safety problem",
-      text: "No draft: a short checklist, and a neutral holding reply only if you ask.",
+      text: "No draft for an injury or safety problem; a checklist goes to you.",
     },
   ],
   categories: {
@@ -95,8 +105,8 @@ export const dentalClinic: Industry = {
       text: "Dentists and reception in clinic clothes, so patients know who they will meet.",
     },
     {
-      title: "Post ideas",
-      text: "Saturday check-ups, what to do in an emergency, a new dentist joining.",
+      title: "The waiting room",
+      text: "Chairs, light and the front desk, empty and calm.",
     },
   ],
   story: {
@@ -120,6 +130,20 @@ export const dentalClinic: Industry = {
       },
     ],
   },
+  posts: [
+    {
+      title: "Saturday check-ups",
+      text: "The days and times, when your clinic offers them.",
+    },
+    {
+      title: "What to do in an emergency",
+      text: "Your urgent line and hours, in one plain post.",
+    },
+    {
+      title: "A new dentist joining",
+      text: "Their name, the day they start and the treatments they do.",
+    },
+  ],
   page: {
     query: "dental clinic Google Business Profile",
     title: "Dental clinic Google Business Profile help | Kabsi",
@@ -154,11 +178,10 @@ export const dentalClinic: Industry = {
         text: "When Google shows something different, you choose which one stays.",
       },
       {
-        title: "Holiday hours, asked ahead",
+        title: "Holiday closures, asked first",
         text: "Before each public holiday, Kabsi asks and sets your answer once you say yes.",
       },
     ],
-    nearby: { kind: "clinic", term: "dentist" },
     ai: {
       question: "Which dentist in Al Barsha, Dubai is open on Sundays?",
       answer: "Parkside Dental in Al Barsha is open on Sundays from 9 am to 5 pm.",
@@ -175,10 +198,6 @@ export const dentalClinic: Industry = {
   },
   faqs: [
     {
-      q: "Does Kabsi see my patients' records?",
-      a: "No. Kabsi has Manager access to your Google profile only. It does not connect to your clinic system and never sends patient details on WhatsApp.",
-    },
-    {
       q: "Why are some reviews sent without a reply?",
       a: "An injury, a safety problem or a complaint naming a team member gets no draft, a short checklist, and a holding reply only if asked.",
     },
@@ -191,8 +210,12 @@ export const dentalClinic: Industry = {
       a: "Yes, a short reply shows the next patient that someone reads them. Kabsi's drafts never confirm someone is a patient, and you approve every one.",
     },
     {
-      q: "Can my practice manager approve instead of me?",
-      a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything.",
+      q: "Where does the review card go in a dental clinic?",
+      a: "At reception, on appointment cards or aftercare sheets, or in a follow-up email.",
+    },
+    {
+      q: "Will a reply say which dentist a patient saw?",
+      a: "No, a reply never confirms someone is a patient, so it never says who treated them.",
     },
   ],
   guides: [

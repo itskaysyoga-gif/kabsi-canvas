@@ -25,24 +25,91 @@ export const barbershop: Industry = {
   searches: ["barber near me", "walk in barber", "skin fade", "beard trim", "barber open now"],
   // Industries 3 (master plan 30.33 item 2): the two old guide sections as short cards. Each line keeps a fact of
   // docs/claims/barbershop.md, whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Skin fade",
+    "Scissor cut",
+    "Beard trim",
+    "Hot towel shave",
+    "Line up",
+    "Kids' cut",
+    "Head shave",
+  ],
   profile: [
     {
       title: "Hours a walk-in can trust",
       text: "Google keeps weekly hours apart from special hours, so a bank holiday can differ.",
     },
     {
-      title: "Easter and Christmas 2027",
-      text: "England and Wales: Good Friday 26 March, Easter Monday 29 March, 27 and 28 December.",
-    },
-    {
       title: "Cuts with a price",
       text: "Each cut can carry a price. Google rejects a custom name that has one.",
     },
     {
+      title: "Walk-ins or bookings, said once",
+      text: "Write in your description which days take walk-ins and which need booking.",
+    },
+    {
+      title: "Your phone, for walk-in questions",
+      text: "Kabsi checks the number Google shows against yours every day.",
+    },
+  ],
+  reviews: [
+    {
       title: "The barber, by name",
       text: "A reply passes the thanks on, and never offers a free cut for a review.",
     },
+    {
+      title: "A long Saturday wait",
+      text: "One apology, no excuse, and no promise of a shorter queue.",
+    },
+    {
+      title: "A nick from the razor",
+      text: "That is an injury: no draft, just a checklist sent to you.",
+    },
   ],
+  holidays: [
+    {
+      title: "Easter and Christmas 2027",
+      text: "England and Wales: Good Friday 26 March, Easter Monday 29 March, 27 and 28 December.",
+    },
+    {
+      title: "The rush before a bank holiday",
+      text: "Kabsi asks five days ahead, so extra chairs and hours are set in time.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "The fade from behind",
+      text: "Clean neckline, plain wall, good light. The cut is the subject.",
+    },
+    {
+      title: "The shop from the street",
+      text: "Google says an outside photo helps people recognise you as they arrive.",
+    },
+    {
+      title: "Chairs at opening time",
+      text: "Empty chairs and a tidy counter show a walk-in what to expect.",
+    },
+  ],
+  posts: [
+    {
+      title: "Walk-in hours this week",
+      text: "A late Thursday or an early Saturday start, said plainly.",
+    },
+    {
+      title: "A new barber joins",
+      text: "Their name and the cuts they do best, drafted for your yes.",
+    },
+    {
+      title: "Your price list",
+      text: "A photo of the board, posted only as you wrote it.",
+    },
+  ],
+  categories: {
+    primary: "Barber shop",
+    more: [],
+    line: "Barber shop has its own place in Google's list, apart from hair salons. Read the name in your own category box.",
+  },
   page: {
     query: "barber shop Google Business Profile",
     title: "Barber shop Google Business Profile help | Kabsi",
@@ -81,7 +148,6 @@ export const barbershop: Industry = {
         text: "Kabsi checks your hours daily and asks before each bank holiday.",
       },
     ],
-    nearby: { kind: "shop", term: "barber" },
     ai: {
       question: "Which barber near Leeds city centre takes walk-ins on Saturday?",
       answer: "Fade and Co on Call Lane takes walk-ins on Saturdays from 8 am to 6 pm.",
@@ -103,7 +169,7 @@ export const barbershop: Industry = {
     },
     {
       q: "Is Kabsi a booking system?",
-      a: "No. Kabsi looks after your Google profile: hours, replies, posts and photos. It does not take bookings.",
+      a: "No, Kabsi looks after your Google profile: hours, replies, posts and photos. It does not take bookings.",
     },
     {
       q: "What does a reply to an unhappy customer say?",
@@ -111,11 +177,11 @@ export const barbershop: Industry = {
     },
     {
       q: "Does Kabsi message my customers?",
-      a: "No. Kabsi talks only to you. It gives you a review link and a QR card, and you share them after a real visit.",
+      a: "No, Kabsi messages the shop owner, never the customer in the chair. You hand out the review card after a cut.",
     },
     {
       q: "Can Kabsi post our prices?",
-      a: "Only prices you give it, in a post you approve. Kabsi never invents a price or an offer.",
+      a: "Yes, the prices on your board, word for word, once you approve the post. It never makes up a deal.",
     },
   ],
   guides: [

@@ -30,22 +30,33 @@ export const optician: Industry = {
   ],
   // Industries 3 (master plan 30.33 item 2): the two guide sections are now short cards. Each line keeps a fact of
   // docs/claims/optician.md, whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Eye test",
+    "Contact lens fitting",
+    "Children's eye test",
+    "Glasses repairs",
+    "Sunglasses",
+    "Varifocals",
+    "Frame adjustments",
+    "Lens replacement",
+  ],
   profile: [
     {
       title: "The link patients book with",
       text: "Website, phone and hours checked against yours daily. Kabsi asks when they differ.",
     },
     {
-      title: "New frames on the shelf",
-      text: "A shelf photo and a line become a post for your yes, checked for sharpness.",
-    },
-    {
-      title: "Eye health stays private",
-      text: "Eye tests are health care. Drafts thank patients and ask them to get in touch.",
+      title: "Eye tests as a service",
+      text: "Google can show each service with a description, an eye test included.",
     },
     {
       title: "What Kabsi never says",
       text: "Add it in About your business; every draft follows it. Hard reviews come to you.",
+    },
+    {
+      title: "Home visits, if you do them",
+      text: "A service area shows where you travel; the shop keeps its address.",
     },
   ],
   categories: {
@@ -53,6 +64,62 @@ export const optician: Industry = {
     more: ["Optometrist", "Eye care center"],
     line: "Choose the first by what most visits are for, glasses or eye tests. Check the names in your own profile; they differ by country.",
   },
+  reviews: [
+    {
+      title: "Eye health stays private",
+      text: "Eye tests are health care. Drafts thank patients and ask them to get in touch.",
+    },
+    {
+      title: "Glasses not ready on time",
+      text: "One apology and an invitation to contact the practice.",
+    },
+    {
+      title: "A complaint about a result",
+      text: "No draft; a checklist comes to you, and you decide.",
+    },
+  ],
+  holidays: [
+    {
+      title: "Bank holidays in Leeds",
+      text: "Kabsi asks five days before each and sets your hours after your yes.",
+    },
+    {
+      title: "A Saturday clinic",
+      text: "A Saturday unlike the rest of the week is special hours for that date.",
+    },
+    {
+      title: "Between Christmas and New Year",
+      text: "Closed days that week go on Google as special hours.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "New frames on the shelf",
+      text: "A shelf photo and a line become a post for your yes, checked for sharpness.",
+    },
+    {
+      title: "The testing room",
+      text: "Equipment tidy and the room empty, in good light.",
+    },
+    {
+      title: "The front of the shop",
+      text: "Your sign from the pavement, so a first visit finds you.",
+    },
+  ],
+  posts: [
+    {
+      title: "New frames in",
+      text: "The brand or style, from the photo you send.",
+    },
+    {
+      title: "Eye test slots",
+      text: "Days with free test times, as a dated update.",
+    },
+    {
+      title: "Contact lens checks",
+      text: "When you offer them, in your own words.",
+    },
+  ],
   page: {
     query: "optician Google Business Profile",
     title: "Optician Google Business Profile help | Kabsi",
@@ -80,7 +147,7 @@ export const optician: Industry = {
     jobs: [
       {
         title: "The eye test link and hours",
-        text: "Checked every day. When Google shows something else, you choose.",
+        text: "Read every day; when Google differs, you choose.",
       },
       {
         title: "New frames, as posts",
@@ -91,7 +158,6 @@ export const optician: Industry = {
         text: "No result, no prescription, just thanks and an invitation to get in touch.",
       },
     ],
-    nearby: { kind: "practice", term: "optician" },
     ai: {
       question: "Which optician in Leeds city centre does children's eye tests on Saturday?",
       answer:
@@ -110,7 +176,7 @@ export const optician: Industry = {
   faqs: [
     {
       q: "Will a reply mention someone's prescription?",
-      a: "No. Drafts thank the patient and invite them to get in touch, and say nothing about their eyes.",
+      a: "No, drafts thank the patient and invite them to get in touch, and say nothing about their eyes.",
     },
     {
       q: "Our booking page moved. What happens?",
@@ -118,15 +184,15 @@ export const optician: Industry = {
     },
     {
       q: "Can Kabsi post our new frames?",
-      a: "Yes, photos you send and approve. Kabsi never writes a price you did not give.",
+      a: "Yes, send a photo of the frames; prices appear only if you give them.",
     },
     {
-      q: "Does Kabsi see patient records?",
-      a: "No. Kabsi works with your Google profile and its reviews. It does not connect to your practice system.",
+      q: "Where does the review card go at an optician?",
+      a: "At the desk when glasses are collected, the same for every patient.",
     },
     {
-      q: "Can our practice manager approve replies?",
-      a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything.",
+      q: "Will a reply say someone had an eye test?",
+      a: "No, a public reply never confirms that someone is a patient.",
     },
   ],
   guides: [

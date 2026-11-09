@@ -35,6 +35,15 @@ export const bakery: Industry = {
   ],
   // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of docs/claims/bakery.md,
   // whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Sourdough loaves",
+    "Celebration cakes",
+    "Wedding cakes",
+    "Morning pastries",
+    "Wholesale bread",
+    "Cupcakes",
+  ],
   profile: [
     {
       title: "Early opening hours, exact",
@@ -64,7 +73,7 @@ export const bakery: Industry = {
     },
     {
       title: "An allergy or a reaction",
-      text: "No draft: a short checklist, and a neutral holding reply only if you ask.",
+      text: "No draft for an allergy: a checklist reaches you first.",
     },
   ],
   categories: {
@@ -96,8 +105,8 @@ export const bakery: Industry = {
       text: "One cake, straight on. A custom order starts from what customers can see.",
     },
     {
-      title: "Post ideas",
-      text: "The first loaf out, weekend cake order deadlines, a seasonal bake, bank holiday hours.",
+      title: "The window from the street",
+      text: "Google says an outside photo helps people recognise the shop.",
     },
   ],
   story: {
@@ -124,6 +133,20 @@ export const bakery: Industry = {
       },
     ],
   },
+  posts: [
+    {
+      title: "The first loaf out",
+      text: "A photo at opening and one line about what is warm.",
+    },
+    {
+      title: "Weekend cake orders",
+      text: "The order deadline for Saturday cakes, with its date.",
+    },
+    {
+      title: "A seasonal bake",
+      text: "Hot cross buns or mince pies, the week they come back.",
+    },
+  ],
   page: {
     query: "bakery Google Business Profile",
     title: "Bakery Google Business Profile help | Kabsi",
@@ -162,7 +185,6 @@ export const bakery: Industry = {
         text: "Short and warm, using only what you told Kabsi.",
       },
     ],
-    nearby: { kind: "bakery", term: "bakery" },
     ai: {
       question: "Which bakery in Hackney, London sells sourdough on Saturdays?",
       answer: "Corner Bakery in Hackney bakes seeded sourdough every Saturday and opens at 6 am.",
@@ -177,7 +199,7 @@ export const bakery: Industry = {
     },
     {
       q: "Can Kabsi write the allergens for a cake?",
-      a: "No. Kabsi writes only facts you give it; allergen information comes from your recipes and local rules. A review about a reaction gets no draft.",
+      a: "No, Kabsi writes only facts you give it; allergen information comes from your recipes and local rules. A review about a reaction gets no draft.",
     },
     {
       q: "Can customers order from my Google profile?",
@@ -185,11 +207,11 @@ export const bakery: Industry = {
     },
     {
       q: "Can Kabsi take cake orders on WhatsApp?",
-      a: "No. The Kabsi chat is between Kabsi and you. It prepares your hours, posts and replies, and does not talk to your customers.",
+      a: "No, the Kabsi chat is between Kabsi and you. It prepares your hours, posts and replies, and does not talk to your customers.",
     },
     {
       q: "Will Kabsi post prices for cakes?",
-      a: "Only prices you give it, in a post you approve. Kabsi never invents a price or an offer.",
+      a: "Yes, the prices on your cake list, exactly, once you approve. Nothing is made up.",
     },
   ],
   guides: [

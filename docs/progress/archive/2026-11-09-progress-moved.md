@@ -20,3 +20,5 @@ Files named in this list are in `docs/progress/archive/`.
 - 9 Nov 2026, Sync 2b part B (PR 527, live on kabsi.co): the legal lines (privacy 3 and 15, LEG-07 to LEG-21, terms 9). Not legal advice; listed for Gate 3. `2026-11-09-sync2b.md`.
 - 9 Nov 2026, Sync 2b part A (PR 523): Outbound offers only the free check and opens only GB (applied); salons first. `2026-11-09-sync2b.md`.
 - 9 Nov 2026, Sync 2a (R-142, answers to Sync 1): part 0 plan 30.46 (PR 522); part 1 early access, booking words, no API, hand-off (PR 524); part 2 renewals retired, billing words, templates, Nora (PR 526); part 3 the 11 plain fixes, seven baselines (PR 529); live. `2026-11-09-sync2a.md`.
+
+- 9 Nov 2026, Tidy 1 part 0 (R-143, docs): master plan 30.47 and the R-143 row. `2026-11-09-tidy1.md`. (Moved from PROGRESS by Industry 1.)

@@ -95,3 +95,29 @@ The page was cut to master plan 30.33 item 2. Each line below replaces longer te
 | FAQ | "Google says a business serving customers at their location should have one profile and hide its address. Your profile then shows the area you serve." | 33 | G |
 
 Removed from the page: the five long tasks, the Dubai RTA inspection, the MOT a month early rule, Google's staffed hours rule, the honesty and late car review themes, the team photo tip, UK Christmas week 2027, and the long answer.
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card line | "A safety matter: no draft, and a checklist goes to you." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I2 | Card line | "UAE private sector days are two hours shorter. Check key collection times against them." | T | H3 | "During the holy month of Ramadan, working hours are reduced by 2 hours, every day." (private sector) |
+| I3 | Card title | "The bays at opening time" | A | none | A short label for the line under it. |
+| I4 | Card line | "A clear floor and tools on the wall, shot before the first job." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I5 | Card title | "Brake checks, with your price" | A | none | A short label for the line under it. |
+| I6 | Card line | "Only the price you send, in a post you approve." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I7 | Card title | "MOT slots this week" | A | none | A short label for the line under it. |
+| I8 | Card line | "A dated update for the free slots in your diary." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I9 | Card title | "Air con before summer" | A | none | A short label for the line under it. |
+| I10 | Card line | "A seasonal check, written from what you really offer." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I11 | Question | "What if a review names a mechanic?" | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I12 | Answer | "The reply thanks that mechanic only if the name is on your team list. Kabsi never guesses one." | K | K1 (facts 09, 7.4) | Team names let replies thank the right person; names not on the list are never used. |
+| I13 | Service | "MOT" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I14 | Service | "Full service" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I15 | Service | "Brake repair" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I16 | Service | "Clutch replacement" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I17 | Service | "Diagnostics" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I18 | Service | "Tyres" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I19 | Service | "Air conditioning recharge" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

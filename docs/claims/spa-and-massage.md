@@ -96,3 +96,32 @@ Removed from the page: the five long tasks (the price range on real profiles, th
 
 - Profile card "The booking link": "Your own booking page. Check the link on Google whenever it moves." and the FAQ ending "Check the booking link on Google when your page moves." Kabsi does not edit the booking link on Google yet (knowledge/facts 2.1).
 - Holiday card: "Christmas Day 25 December 2026, Boxing Day moved to Monday 28, New Year 1 January." Row 29 (the Boxing Day holiday moves to Monday 28 December 2026).
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card line | "No draft. You get a checklist and decide whether anyone replies." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I2 | Card title | "The relaxation room" | A | none | A short label for the line under it. |
+| I3 | Card line | "Low light is fine if the photo stays sharp; Kabsi says when it is not." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I4 | Card title | "A couples package" | A | none | A short label for the line under it. |
+| I5 | Card line | "Price, minutes and an end date, as an offer post." | G | G7 | Post types Updates, Offers and Events; an offer post has a View Offer button; posts without a date range archive after 6 months. |
+| I6 | Card title | "A new treatment" | A | none | A short label for the line under it. |
+| I7 | Card line | "Its name, its length and the price you set." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I8 | Card title | "Long weekend hours" | A | none | A short label for the line under it. |
+| I9 | Card line | "Hours for Eid or National Day, posted once they are set." | T | H2; K2 (UAE dates estimated, the email says expected) | UAE holiday rules from u.ae; Islamic dates follow the moon. |
+| I10 | Card title | "Eid and National Day hours" | A | none | A short label for the line under it. |
+| I11 | Answer | "No, Kabsi writes only the facts you give it: the treatment, how long it takes and the price. It does not invent a benefit." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I12 | Answer | "No, Kabsi is a Manager on the spa's Google profile and nothing more. Check the booking link on Google when your page moves." | G | G12 | "You can also add your own link to your Business Profile." |
+| I13 | Answer | "When it names a therapist, it reaches you with a checklist and no draft. A holding reply is written only when you ask." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I14 | Question | "Where does the review card go in a spa?" | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I15 | Answer | "At reception, handed over as guests leave. Never offer a treatment or a discount for a review." | K | facts 09 (card placement, 7.1 to 7.8); facts 10 (ask everyone the same way, no incentive) | Where the review card goes for each trade; every customer asked the same way, never an incentive. |
+| I16 | Service | "Swedish massage" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I17 | Service | "Deep tissue massage" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I18 | Service | "Hot stone massage" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I19 | Service | "Couples massage" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I20 | Service | "Moroccan bath" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I21 | Service | "Body scrub" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I22 | Service | "Aromatherapy massage" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

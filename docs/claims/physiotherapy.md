@@ -99,3 +99,30 @@ Removed from the page: "'physical therapist' is protected too", "a business cann
 
 - Profile card "Book opens the first assessment": "Add your own booking link. Check it each time your booking page changes." Kabsi does not edit the booking link on Google yet (knowledge/facts 2.1).
 - Review card "Pain that did not improve": "A careful draft that names no treatment. An injury gets no draft." Facts 13, as above.
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card line | "No treatment named in the draft, and an injury gets no draft at all." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I2 | Card title | "The door from the street" | A | none | A short label for the line under it. |
+| I3 | Card line | "Your sign and entrance, so a first visit finds you." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I4 | Card title | "An evening clinic" | A | none | A short label for the line under it. |
+| I5 | Card line | "The day and hours of a new late session." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I6 | Card title | "A new physio joins" | A | none | A short label for the line under it. |
+| I7 | Card line | "Their name and what they treat, from your words." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I8 | Card title | "Home visit areas" | A | none | A short label for the line under it. |
+| I9 | Card line | "Which parts of town you cover, said plainly." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I10 | Answer | "No, Kabsi writes only the facts you give it, like what you treat and when you open. It promises nothing about results." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I11 | Answer | "No, Google does not allow free or discounted services in return for a review. Ask every patient the same way." | G | G9, G10 | Incentives for reviews are prohibited. |
+| I12 | Question | "Can a reply mention the exercises I gave?" | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I13 | Answer | "No, a reply stays general and never mentions a patient's care." | K | K1 (facts 09, 7.3) | Replies stay general: no personal details, never confirm someone is a patient or mention their care. |
+| I14 | Service | "Initial assessment" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I15 | Service | "Sports massage" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I16 | Service | "Back and neck pain" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I17 | Service | "Knee rehabilitation" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I18 | Service | "Rehab after surgery" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I19 | Service | "Home visits" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I20 | Service | "Acupuncture" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

@@ -30,6 +30,15 @@ export const carWash: Industry = {
   ],
   // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of docs/claims/car-wash.md,
   // whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Hand wash",
+    "Valet",
+    "Interior clean",
+    "Full detail",
+    "Ceramic coating",
+    "Engine bay clean",
+  ],
   profile: [
     {
       title: "Hours and open status, right",
@@ -40,12 +49,12 @@ export const carWash: Industry = {
       text: "Google lets you set the areas you cover, alongside your address.",
     },
     {
-      title: "A finished car, as a post",
-      text: "Kabsi checks your photo is sharp, then prepares a post for your yes.",
+      title: "Each wash with a price",
+      text: "Google can show a service with a price. Keep prices out of custom names.",
     },
     {
-      title: "Reviews about a scratch or wait",
-      text: "A wait gets one apology. Damage gets a calm draft, no argument, no refund promised.",
+      title: "How drivers can pay",
+      text: "Card, cash or an app: say it plainly in your description.",
     },
   ],
   categories: {
@@ -53,6 +62,62 @@ export const carWash: Industry = {
     more: ["Car detailing service"],
     line: "Add detailing as a second category only if you do it. Read the names in your own profile, because they can differ by country.",
   },
+  reviews: [
+    {
+      title: "A scratch after the wash",
+      text: "A calm draft: no argument, no fault admitted, no refund promised.",
+    },
+    {
+      title: "A long queue",
+      text: "One apology for the wait, and nothing it cannot keep.",
+    },
+    {
+      title: "A claim or a legal threat",
+      text: "No draft: a legal threat comes to you with a checklist.",
+    },
+  ],
+  holidays: [
+    {
+      title: "National Day weekend",
+      text: "Kabsi asks five days before 2 and 3 December what your hours are.",
+    },
+    {
+      title: "Eid al-Fitr",
+      text: "1 to 3 Shawwal, by the moon. Say which days you open.",
+    },
+    {
+      title: "Washing after iftar",
+      text: "Later Ramadan hours become special hours once you say yes.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "A finished car, as a post",
+      text: "Kabsi checks your photo is sharp, then prepares a post for your yes.",
+    },
+    {
+      title: "The bay from the road",
+      text: "Show the entrance and the queue lane, so drivers know where to turn.",
+    },
+    {
+      title: "Interior detail, close",
+      text: "Seats and dashboard after a valet, in good light.",
+    },
+  ],
+  posts: [
+    {
+      title: "Wash prices this month",
+      text: "Your price list, posted exactly as you send it.",
+    },
+    {
+      title: "Open late in summer",
+      text: "The evening hours you keep, as a post.",
+    },
+    {
+      title: "A detailing package",
+      text: "An offer post with what it includes and an end date.",
+    },
+  ],
   page: {
     query: "car wash Google Business Profile",
     title: "Car wash Google Business Profile help | Kabsi",
@@ -81,7 +146,7 @@ export const carWash: Industry = {
     jobs: [
       {
         title: "Open status and hours",
-        text: "Checked every day. When Google shows something else, you choose.",
+        text: "Read daily. If Google differs, you pick which stays.",
       },
       {
         title: "Your best work, as posts",
@@ -92,7 +157,6 @@ export const carWash: Industry = {
         text: "A review about a scratch gets a calm draft with no argument, for your yes.",
       },
     ],
-    nearby: { kind: "car wash", term: "car wash" },
     ai: {
       question: "Which car wash in Dubai Marina does interior detailing on Fridays?",
       answer:
@@ -108,7 +172,7 @@ export const carWash: Industry = {
     },
     {
       q: "Will Kabsi post our prices?",
-      a: "Only prices you give it, in a post you approve. Kabsi never invents a price or an offer.",
+      a: "Yes, the prices you send, exactly as written, in a post you approve.",
     },
     {
       q: "Google says we are closed. What can I do?",
@@ -119,8 +183,8 @@ export const carWash: Industry = {
       a: "Google lets a business that travels to customers set a service area. Kabsi checks the area Google shows every day.",
     },
     {
-      q: "Can my shift manager approve replies?",
-      a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything.",
+      q: "Where does the review card go at a car wash?",
+      a: "Where customers pay or collect their keys, offered to everyone the same way.",
     },
   ],
   guides: [

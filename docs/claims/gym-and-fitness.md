@@ -94,3 +94,33 @@ Removed from the page: the five long tasks, the HIIT with Karim example, the equ
 ### Industries 3: fixed after the independent check (5 Nov 2026)
 
 - Answer: "prepares review replies" replaces "drafts every reply", because a high risk review gets no draft (facts 13, "What happens with hard reviews?").
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card line | "An injury gets no draft: a checklist reaches you first." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I2 | Card line | "UAE private sector days shrink by two hours, so settle class times early." | T | H3 | "During the holy month of Ramadan, working hours are reduced by 2 hours, every day." (private sector) |
+| I3 | Card title | "The changing rooms, clean" | A | none | A short label for the line under it. |
+| I4 | Card line | "Empty, bright and tidy, never with anyone in them." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I5 | Card title | "A new class and coach" | A | none | A short label for the line under it. |
+| I6 | Card line | "Day, time and the coach's name, as one post." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I7 | Card title | "A free first session" | A | none | A short label for the line under it. |
+| I8 | Card line | "An offer post with an end date, never in return for a review." | G | G7 | Post types Updates, Offers and Events; an offer post has a View Offer button; posts without a date range archive after 6 months. |
+| I9 | Card title | "The holiday timetable" | A | none | A short label for the line under it. |
+| I10 | Card line | "Which classes run over a long weekend, once you confirm." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I11 | Card title | "Holiday opening, asked early" | A | none | A short label for the line under it. |
+| I12 | Question | "A member says she hurt herself here; how does Kabsi handle it?" | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I13 | Question | "Will a reply mention someone's weight or results?" | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I14 | Answer | "No, replies thank members and pass on praise, and say nothing about bodies or results." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I15 | Question | "Where does the review card go in a gym?" | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I16 | Answer | "At reception, offered the same way to everyone after a class." | K | facts 09 (card placement, 7.1 to 7.8); facts 10 (ask everyone the same way, no incentive) | Where the review card goes for each trade; every customer asked the same way, never an incentive. |
+| I17 | Service | "Personal training" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I18 | Service | "Group classes" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I19 | Service | "Strength coaching" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I20 | Service | "Day pass" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I21 | Service | "Boxing classes" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I22 | Service | "Open gym" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I23 | Service | "Small group training" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

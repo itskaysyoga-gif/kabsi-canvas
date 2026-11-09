@@ -84,3 +84,46 @@ from the answer (both stay in the jobs). The old tasks were not shown and are de
 ### Industries 3: fixed after the independent check (5 Nov 2026)
 
 - Answer: "prepares review replies" replaces "drafts every reply", because a high risk review gets no draft (facts 13, "What happens with hard reviews?").
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card title | "Dietary options, said plainly" | A | none | A short label for the line under it. |
+| I2 | Card line | "Vegetarian or halal? Say it in your description, in your words." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I3 | Card title | "Praise for a dish" | A | none | A short label for the line under it. |
+| I4 | Card line | "The reply names the dish back and adds nothing else." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I5 | Card title | "Slow service on a busy night" | A | none | A short label for the line under it. |
+| I6 | Card line | "One apology, no excuse, no promise about next time." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I7 | Card title | "Feeling ill after eating" | A | none | A short label for the line under it. |
+| I8 | Card line | "A hygiene matter: no draft and a short checklist." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I9 | Card title | "Christmas Eve and New Year's Eve" | A | none | A short label for the line under it. |
+| I10 | Card line | "Different hours on those nights are special hours, set on your yes." | G | G4 | Special hours keep regular hours for holidays and exceptional days; up to 6 days closed fits special hours, 7 or more Temporarily closed. |
+| I11 | Card title | "Bank holiday Mondays" | A | none | A short label for the line under it. |
+| I12 | Card line | "Kabsi asks five days before each: open, closed or other hours." | K | K2 (docs/holidays.md); facts 04 "Holiday hours" | Kabsi asks five days before a public holiday: normal hours, closed or custom hours; set once the owner says yes. |
+| I13 | Card title | "A private hire night" | A | none | A short label for the line under it. |
+| I14 | Card line | "Closed to the public for one evening is special hours." | G | G4 | Special hours keep regular hours for holidays and exceptional days; up to 6 days closed fits special hours, 7 or more Temporarily closed. |
+| I15 | Card title | "A dish from the pass" | A | none | A short label for the line under it. |
+| I16 | Card line | "Plated, in daylight, one dish to a photo." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I17 | Card title | "The menu, readable" | A | none | A short label for the line under it. |
+| I18 | Card line | "A straight photo of the printed menu, every page in focus." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I19 | Card title | "The dining room" | A | none | A short label for the line under it. |
+| I20 | Card line | "Set tables before service show what an evening looks like." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I21 | Card title | "A new dish" | A | none | A short label for the line under it. |
+| I22 | Card line | "Its name and one line from you, with no invented price." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I23 | Card title | "Sunday lunch" | A | none | A short label for the line under it. |
+| I24 | Card line | "What is on and the hours it is served." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I25 | Card title | "Christmas bookings open" | A | none | A short label for the line under it. |
+| I26 | Card line | "The dates you take parties, as a dated post." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I27 | Answer | "No, Kabsi replies on Google only, where every review gets a draft." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I28 | Answer | "Yes, five days before each bank holiday, Christmas included, Kabsi asks what you will do and sets special hours once you say yes." | K | K2 (docs/holidays.md); facts 04 "Holiday hours" | Kabsi asks five days before a public holiday: normal hours, closed or custom hours; set once the owner says yes. |
+| I29 | Question | "Where does the review QR code go in a restaurant?" | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I30 | Answer | "On tables, at the host stand or till, on the bill folder or the takeaway bag." | K | facts 09 (card placement, 7.1 to 7.8); facts 10 (ask everyone the same way, no incentive) | Where the review card goes for each trade; every customer asked the same way, never an incentive. |
+| I31 | Service | "Dine in" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I32 | Service | "Takeaway" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I33 | Service | "Private dining" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I34 | Service | "Set lunch" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I35 | Service | "Group bookings" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I36 | Service | "Children's menu" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

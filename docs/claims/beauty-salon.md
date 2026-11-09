@@ -46,3 +46,38 @@ category seen on live profiles, A is wording or an invented Example.
 ## Photos
 
 The wide photo (a makeup artist at a lit mirror) has no readable name, logo or writing, so nothing is blurred. The tall photo (a stylist blow drying) had an exit sign, product boxes on a shelf and two packs on the counter: each was blurred before cropping (docs/PHOTOS.md).
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card title | "Bridal packages as offers" | A | none | A short label for the line under it. |
+| I2 | Card line | "An offer post carries a View Offer button. Give each one an end date." | G | G7 | Post types Updates, Offers and Events; an offer post has a View Offer button; posts without a date range archive after 6 months. |
+| I3 | Card title | "Hours on Google, read daily" | A | none | A short label for the line under it. |
+| I4 | Card line | "Kabsi reads your hours every day and asks when Google shows others." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I5 | Card title | "Visits to brides at home" | A | none | A short label for the line under it. |
+| I6 | Card line | "If you travel to them, set a service area beside your address." | G | G16 | A business that travels to customers can set a service area and hide its address. |
+| I7 | Card line | "A skin reaction is a health matter: no draft, a checklist instead." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I8 | Card title | "Later nights in Ramadan" | A | none | A short label for the line under it. |
+| I9 | Card line | "Evening hours go on Google as special hours, after your yes." | G | G4 | Special hours keep regular hours for holidays and exceptional days; up to 6 days closed fits special hours, 7 or more Temporarily closed. |
+| I10 | Card title | "Threading and brows, close" | A | none | A short label for the line under it. |
+| I11 | Card line | "One brow, sharp and well lit, with no filter over the skin." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I12 | Card title | "A new facial on the menu" | A | none | A short label for the line under it. |
+| I13 | Card line | "What it is and how long it takes, in your words." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I14 | Card title | "Makeup for Eid" | A | none | A short label for the line under it. |
+| I15 | Card line | "A dated post for the days you take Eid bookings." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I16 | Card title | "Bridal slots still open" | A | none | A short label for the line under it. |
+| I17 | Card line | "Which Fridays have room, posted with the dates." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I18 | Line | "Clients book around work, so Kabsi reads the hours on Google each day and compares them with yours." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I19 | Card title | "Eid and holiday hours in time" | A | none | A short label for the line under it. |
+| I20 | Answer | "It waits for you with a short checklist and no draft. You choose to reply, ask for a holding reply, or leave it." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I21 | Answer | "No, clients still book the way they do today; Kabsi only looks after your Google profile." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I22 | Service | "Facials" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I23 | Service | "Full leg wax" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I24 | Service | "Bridal makeup" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I25 | Service | "Party makeup" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I26 | Service | "Eyebrow shaping" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I27 | Service | "Henna" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I28 | Service | "Manicure and pedicure" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

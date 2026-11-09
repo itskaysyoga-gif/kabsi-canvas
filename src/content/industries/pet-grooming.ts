@@ -30,22 +30,32 @@ export const petGrooming: Industry = {
   ],
   // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
   // docs/claims/pet-grooming.md, whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Full groom",
+    "Bath and brush",
+    "Nail clipping",
+    "Puppy groom",
+    "De-shedding",
+    "Hand stripping",
+    "Mobile grooming",
+  ],
   profile: [
-    {
-      title: "The best photo you have",
-      text: "A clean, happy dog, sent with one line, becomes a post for your yes.",
-    },
     {
       title: "If you travel to customers",
       text: "Set a service area on Google, and hide an address customers cannot visit.",
     },
     {
-      title: "A review about a shaved coat",
-      text: "A careful draft that admits nothing and asks the owner to get in touch.",
+      title: "Each groom with a price",
+      text: "Bath, full groom, nail trim: each can show a price on Google.",
     },
     {
-      title: "A nick or an injury",
-      text: "No draft, a short checklist, and a neutral holding reply only if you ask.",
+      title: "Shop days and van days",
+      text: "Shop hours on Google; say your visit days in the description.",
+    },
+    {
+      title: "The breeds you groom",
+      text: "Big dogs, cats or hand stripped coats: say what you take in your description.",
     },
   ],
   categories: {
@@ -53,6 +63,58 @@ export const petGrooming: Industry = {
     more: [],
     line: "Choose the category that matches what most of your work is.",
   },
+  reviews: [
+    {
+      title: "A review about a shaved coat",
+      text: "A careful draft that admits nothing and asks the owner to get in touch.",
+    },
+    {
+      title: "A nick or an injury",
+      text: "Safety first: no draft, a checklist, and you decide what happens.",
+    },
+    {
+      title: "Thanks for a calm groom",
+      text: "The reply thanks them and names the groomer if listed.",
+    },
+  ],
+  holidays: [
+    {
+      title: "Eid al-Adha",
+      text: "10 to 12 Dhu al-Hijjah, set by the moon. Kabsi asks five days ahead.",
+    },
+    {
+      title: "National Day in Dubai",
+      text: "On 2 and 3 December your grooming hours go on Google after your yes.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "The best photo you have",
+      text: "A clean, happy dog, sent with one line, becomes a post for your yes.",
+    },
+    {
+      title: "Before and after the groom",
+      text: "Two photos in the same light show the work.",
+    },
+    {
+      title: "The grooming table",
+      text: "Clean and ready, with no pet waiting.",
+    },
+  ],
+  posts: [
+    {
+      title: "Summer trims",
+      text: "Short cuts for hot months, in your words.",
+    },
+    {
+      title: "Free slots this week",
+      text: "A dated update for the gaps in the diary.",
+    },
+    {
+      title: "Nail trims without booking",
+      text: "If you take them, say which days.",
+    },
+  ],
   page: {
     query: "pet groomer Google Business Profile",
     title: "Pet groomer Google Business Profile help | Kabsi",
@@ -87,11 +149,10 @@ export const petGrooming: Industry = {
         text: "Kabsi checks your service area and hours every day, and asks when they differ.",
       },
       {
-        title: "Care with hard reviews",
+        title: "Hard reviews, handled with care",
         text: "A review about a nick or an injury gets no draft and a short checklist.",
       },
     ],
-    nearby: { kind: "salon", term: "pet groomer" },
     ai: {
       question: "Which dog groomer in Al Barsha, Dubai comes to your home?",
       answer:
@@ -107,19 +168,19 @@ export const petGrooming: Industry = {
     },
     {
       q: "What does Kabsi say to a review about a nick?",
-      a: "An injury is a safety matter: no draft and a short checklist. Kabsi writes a neutral holding reply only if you ask.",
+      a: "A nick is a safety matter, so it gets no draft and a checklist. A holding reply comes only on request.",
     },
     {
       q: "Can Kabsi post photos of the pets I groom?",
-      a: "Yes, photos you send and approve. Ask the owner first if you like.",
+      a: "Yes, the photos you send, after your yes. Ask the owner first if you like.",
     },
     {
       q: "Can Kabsi set our Eid hours?",
-      a: "Yes. Before each public holiday, Kabsi asks what you will do and sets special hours once you say yes.",
+      a: "Yes, Kabsi asks five days before Eid and sets the special hours you choose.",
     },
     {
       q: "Does Kabsi take bookings?",
-      a: "No. Kabsi works only with your Google profile. Your booking link and phone stay yours.",
+      a: "No, bookings stay on your phone or link; Kabsi looks after the Google profile.",
     },
   ],
   guides: [

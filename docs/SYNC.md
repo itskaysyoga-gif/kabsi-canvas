@@ -150,6 +150,7 @@ The shared lists (never-say names and claims, the dash and exclamation mark rule
 | `npm run check:tokens` | Design tokens (K-108) |
 | `node scripts/build-kb.mjs --check` and `tests/knowledge-build.test.ts` | The three built facts files match `knowledge/facts/` |
 | `tests/sitemap.test.ts` | The sitemap equals the routes and the industry content |
+| `tests/industry1-dup.test.ts` and `scripts/industry-dup.mjs` | The 21 industry pages: each at least 70 percent its own text, no pair above 35 percent identical sentences (R-144; the same measure runs on the served pages in `tests/e2e/public.spec.ts`) |
 
 ## 12. How to walk this map in a pull request
 

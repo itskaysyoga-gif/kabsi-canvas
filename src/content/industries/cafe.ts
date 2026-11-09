@@ -33,6 +33,15 @@ export const cafe: Industry = {
   ],
   // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of docs/claims/cafe.md,
   // whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Breakfast",
+    "Brunch",
+    "Takeaway coffee",
+    "Cakes and pastries",
+    "Oat and soy milk",
+    "Afternoon tea",
+  ],
   profile: [
     {
       title: "Opening time to the minute",
@@ -62,7 +71,7 @@ export const cafe: Industry = {
     },
     {
       title: "Feeling unwell after a meal",
-      text: "No draft: a short checklist, and a neutral holding reply only if you ask.",
+      text: "Illness after food gets no draft; a checklist comes to you.",
     },
   ],
   categories: {
@@ -73,7 +82,7 @@ export const cafe: Industry = {
   holidays: [
     {
       title: "Ramadan, UAE",
-      text: "Private sector hours drop by two a day. Kabsi sets yours once you say yes.",
+      text: "UAE private sector days run two hours shorter; your hours follow your yes.",
     },
     {
       title: "England and Wales bank holidays",
@@ -94,8 +103,8 @@ export const cafe: Industry = {
       text: "What is on show at ten answers 'is there food' before anyone asks.",
     },
     {
-      title: "Post ideas",
-      text: "A seasonal drink, a new blend, wifi hours, bank holiday opening.",
+      title: "The room at a quiet hour",
+      text: "Tables, light and the counter, with no customers in the frame.",
     },
   ],
   story: {
@@ -118,6 +127,20 @@ export const cafe: Industry = {
       },
     ],
   },
+  posts: [
+    {
+      title: "A seasonal drink",
+      text: "Iced, spiced or new, with the dates it is on.",
+    },
+    {
+      title: "A new blend",
+      text: "Where the beans come from, if you tell Kabsi.",
+    },
+    {
+      title: "Laptop hours",
+      text: "When the room is quiet enough to work, in your words.",
+    },
+  ],
   page: {
     query: "cafe Google Business Profile",
     title: "Cafe Google Business Profile help | Kabsi",
@@ -156,7 +179,6 @@ export const cafe: Industry = {
         text: "In the language of the review, ready for your yes.",
       },
     ],
-    nearby: { kind: "cafe", term: "cafe" },
     ai: {
       question: "Which cafe near Brick Lane, London opens before 8 am?",
       answer:
@@ -172,19 +194,19 @@ export const cafe: Industry = {
     },
     {
       q: "Will Kabsi change my menu prices on Google?",
-      a: "No. Kabsi does not edit prices on Google today, and nothing reaches Google until you approve it.",
+      a: "No, menu prices on Google are yours to edit; Kabsi only posts prices you send.",
     },
     {
       q: "Does Kabsi post to Instagram or my delivery platforms?",
-      a: "No. Kabsi works with your Google profile only. It does not post anywhere else and it does not manage your delivery platforms.",
+      a: "No, Kabsi works with your Google profile only. It does not post anywhere else and it does not manage your delivery platforms.",
     },
     {
-      q: "A customer says they were ill after eating here. What does Kabsi do?",
-      a: "It comes to you with no draft and a short checklist. Kabsi writes a neutral holding reply only if you ask.",
+      q: "A customer says they were ill after eating here; how is that handled?",
+      a: "No draft. A short checklist reaches you, and a holding reply is written only when you ask for one.",
     },
     {
       q: "Can Kabsi reply to reviews in other languages?",
-      a: "Yes. Each draft is written in the language of the review, and you approve it like any other.",
+      a: "Yes, each draft is written in the language of the review, and you approve it like any other.",
     },
   ],
   guides: [

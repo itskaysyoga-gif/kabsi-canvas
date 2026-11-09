@@ -30,22 +30,31 @@ export const florist: Industry = {
   ],
   // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of docs/claims/florist.md,
   // whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Bouquets",
+    "Wedding flowers",
+    "Funeral flowers",
+    "Event flowers",
+    "Plants",
+    "Flower subscriptions",
+  ],
   profile: [
     {
       title: "The phone number, yours",
       text: "Orders come by phone. Kabsi compares phone, hours and website with yours every day.",
     },
     {
-      title: "Busy days, their own hours",
-      text: "Kabsi asks before each public holiday and sets special hours once you say yes.",
+      title: "Bouquets with a price",
+      text: "Google can show each bouquet as a service with a price.",
     },
     {
-      title: "An arrangement, as a post",
-      text: "A photo of an arrangement with one line becomes a post for your yes.",
+      title: "If you deliver, say where",
+      text: "Name the areas in your description so callers know before they ring.",
     },
     {
-      title: "Weddings and birthdays",
-      text: "A warm reply thanks the customer for the occasion they named, adding nothing else.",
+      title: "Same day orders, said clearly",
+      text: "If you take them, give the cut off time in your description.",
     },
   ],
   categories: {
@@ -53,6 +62,62 @@ export const florist: Industry = {
     more: [],
     line: "Pick the category for most of your work; names can differ by country. Say in your description and posts if you deliver.",
   },
+  reviews: [
+    {
+      title: "Weddings and birthdays",
+      text: "A warm reply thanks the customer for the occasion they named, adding nothing else.",
+    },
+    {
+      title: "A funeral order",
+      text: "Brief and gentle, with nothing the customer did not share.",
+    },
+    {
+      title: "A threat to take it further",
+      text: "No draft for a legal threat; the checklist reaches you first.",
+    },
+  ],
+  holidays: [
+    {
+      title: "Busy days, their own hours",
+      text: "Kabsi asks before each public holiday and sets special hours once you say yes.",
+    },
+    {
+      title: "Valentine's week",
+      text: "Opening early that week is special hours, set from what you say.",
+    },
+    {
+      title: "Christmas Eve",
+      text: "Short hours that day go on Google as special hours.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "An arrangement, as a post",
+      text: "A photo of an arrangement with one line becomes a post for your yes.",
+    },
+    {
+      title: "The bench at work",
+      text: "Stems, ribbon and tools on the table, in daylight.",
+    },
+    {
+      title: "The shopfront in bloom",
+      text: "Buckets by the door help people recognise the shop.",
+    },
+  ],
+  posts: [
+    {
+      title: "Valentine's Day orders",
+      text: "The last day to order, with its date in the post.",
+    },
+    {
+      title: "Mother's Day",
+      text: "What you have ready and when orders close.",
+    },
+    {
+      title: "Sympathy flowers",
+      text: "A quiet post that you make them, with no sales words.",
+    },
+  ],
   page: {
     query: "florist Google Business Profile",
     title: "Florist Google Business Profile help | Kabsi",
@@ -91,7 +156,6 @@ export const florist: Industry = {
         text: "Warm for a wedding, gentle for a funeral, adding nothing the customer did not say.",
       },
     ],
-    nearby: { kind: "shop", term: "florist" },
     ai: {
       question: "Which florist in Clifton, Bristol does same day bouquets?",
       answer: "Bloom and Twine in Clifton makes same day bouquets when you order by 1 pm.",
@@ -102,7 +166,7 @@ export const florist: Industry = {
   faqs: [
     {
       q: "Can Kabsi set our Valentine's Day hours?",
-      a: "Yes. Tell Kabsi the hours, and it sets them as special hours once you say yes. Before public holidays, Kabsi asks you first.",
+      a: "Yes, tell Kabsi the hours, and it sets them as special hours once you say yes. Before public holidays, Kabsi asks you first.",
     },
     {
       q: "How does Kabsi reply to a review after a funeral?",
@@ -110,20 +174,20 @@ export const florist: Industry = {
     },
     {
       q: "Will Kabsi post our arrangements?",
-      a: "Yes, photos you send and approve. Kabsi checks each photo is sharp and well lit first.",
+      a: "Yes, send the photo; Kabsi checks it is sharp and bright, then drafts the post.",
     },
     {
       q: "Does Kabsi take flower orders?",
-      a: "No. Kabsi works only with your Google profile. Orders stay with you.",
+      a: "No, orders stay with you by phone or online; Kabsi looks after the Google profile.",
     },
     {
-      q: "Can my shop manager approve posts?",
-      a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything.",
+      q: "Where does the review card go for a florist?",
+      a: "Tucked into each bouquet or delivery, or at the counter.",
     },
   ],
   guides: [
+    "keep-your-hours-and-details-the-same-everywhere",
     "google-posts-for-local-businesses",
-    "how-to-set-holiday-hours-on-google",
-    "how-to-reply-to-google-reviews",
+    "how-to-respond-to-negative-google-reviews",
   ],
 };

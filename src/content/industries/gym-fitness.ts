@@ -31,10 +31,20 @@ export const gymFitness: Industry = {
     "crossfit",
     "day pass gym",
     "24 hour gym",
-    "pilates classes",
+    "fitness classes near me",
   ],
   // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
   // docs/claims/gym-and-fitness.md, whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Personal training",
+    "Group classes",
+    "Strength coaching",
+    "Day pass",
+    "Boxing classes",
+    "Open gym",
+    "Small group training",
+  ],
   profile: [
     {
       title: "Each class, with day and coach",
@@ -64,7 +74,7 @@ export const gymFitness: Industry = {
     },
     {
       title: "An injury in the gym",
-      text: "No draft: a short checklist, and a neutral holding reply only if you ask.",
+      text: "An injury gets no draft: a checklist reaches you first.",
     },
   ],
   categories: {
@@ -75,7 +85,7 @@ export const gymFitness: Industry = {
   holidays: [
     {
       title: "Ramadan, UAE",
-      text: "Private sector hours drop by two a day. Settle gym hours and class times beforehand.",
+      text: "UAE private sector days shrink by two hours, so settle class times early.",
     },
     {
       title: "UAE National Day",
@@ -96,8 +106,8 @@ export const gymFitness: Industry = {
       text: "In a tower or upstairs? Photograph the entrance and lift sign for new members.",
     },
     {
-      title: "Post ideas",
-      text: "A new class and coach, a free first session with its end date, holiday hours.",
+      title: "The changing rooms, clean",
+      text: "Empty, bright and tidy, never with anyone in them.",
     },
   ],
   story: {
@@ -120,6 +130,20 @@ export const gymFitness: Industry = {
       },
     ],
   },
+  posts: [
+    {
+      title: "A new class and coach",
+      text: "Day, time and the coach's name, as one post.",
+    },
+    {
+      title: "A free first session",
+      text: "An offer post with an end date, never in return for a review.",
+    },
+    {
+      title: "The holiday timetable",
+      text: "Which classes run over a long weekend, once you confirm.",
+    },
+  ],
   page: {
     query: "gym Google Business Profile",
     title: "Gym Google Business Profile help | Kabsi",
@@ -147,7 +171,7 @@ export const gymFitness: Industry = {
     jobs: [
       { title: "Classes, as posts", text: "A new class with its real dates, ready for your yes." },
       {
-        title: "Holiday hours, asked ahead",
+        title: "Holiday opening, asked early",
         text: "Before each public holiday, Kabsi asks and sets your answer.",
       },
       {
@@ -155,7 +179,6 @@ export const gymFitness: Industry = {
         text: "Coaches thanked by name only when the review names them.",
       },
     ],
-    nearby: { kind: "gym", term: "gym" },
     ai: {
       question: "Which gym in Dubai Marina has a 6 am strength class?",
       answer: "Harbour Strength Studio in Dubai Marina runs a 6 am strength class every weekday.",
@@ -180,16 +203,16 @@ export const gymFitness: Industry = {
       a: "Google has an offer post for it. It does not allow a reward for a review, like a free month for five stars.",
     },
     {
-      q: "A member says she hurt herself here. What does Kabsi do?",
+      q: "A member says she hurt herself here; how does Kabsi handle it?",
       a: "No draft: a short checklist comes to you. Kabsi writes a neutral holding reply only if you ask. Nothing is published until you approve.",
     },
     {
-      q: "Does Kabsi see my members?",
-      a: "No. Kabsi has Manager access to your Google profile only. It never connects to your membership system and never receives a member's number.",
+      q: "Will a reply mention someone's weight or results?",
+      a: "No, replies thank members and pass on praise, and say nothing about bodies or results.",
     },
     {
-      q: "Can my head coach approve posts?",
-      a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything.",
+      q: "Where does the review card go in a gym?",
+      a: "At reception, offered the same way to everyone after a class.",
     },
   ],
   guides: [

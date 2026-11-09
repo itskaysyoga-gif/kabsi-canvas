@@ -35,6 +35,16 @@ export const spaMassage: Industry = {
   ],
   // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
   // docs/claims/spa-and-massage.md, whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Swedish massage",
+    "Deep tissue massage",
+    "Hot stone massage",
+    "Couples massage",
+    "Moroccan bath",
+    "Body scrub",
+    "Aromatherapy massage",
+  ],
   profile: [
     {
       title: "Each treatment, length and price",
@@ -64,7 +74,7 @@ export const spaMassage: Industry = {
     },
     {
       title: "Pain or injury after treatment",
-      text: "No draft: a short checklist, and a neutral holding reply only if you ask.",
+      text: "No draft. You get a checklist and decide whether anyone replies.",
     },
   ],
   categories: {
@@ -96,8 +106,8 @@ export const spaMassage: Industry = {
       text: "In a hotel or tower, a photo of the entrance and lift sign helps.",
     },
     {
-      title: "Post ideas",
-      text: "A couples package with an end date, a new treatment, long weekend hours.",
+      title: "The relaxation room",
+      text: "Low light is fine if the photo stays sharp; Kabsi says when it is not.",
     },
   ],
   story: {
@@ -124,6 +134,20 @@ export const spaMassage: Industry = {
       },
     ],
   },
+  posts: [
+    {
+      title: "A couples package",
+      text: "Price, minutes and an end date, as an offer post.",
+    },
+    {
+      title: "A new treatment",
+      text: "Its name, its length and the price you set.",
+    },
+    {
+      title: "Long weekend hours",
+      text: "Hours for Eid or National Day, posted once they are set.",
+    },
+  ],
   page: {
     query: "spa Google Business Profile",
     title: "Spa Google Business Profile help | Kabsi",
@@ -150,7 +174,7 @@ export const spaMassage: Industry = {
     },
     jobs: [
       {
-        title: "Holiday hours, asked ahead",
+        title: "Eid and National Day hours",
         text: "Before Eid and public holidays, Kabsi asks and sets your answer once you say yes.",
       },
       { title: "Calm replies", text: "Replies never describe what a treatment does for the body." },
@@ -159,7 +183,6 @@ export const spaMassage: Industry = {
         text: "A photo of the room and a line become a post for your yes.",
       },
     ],
-    nearby: { kind: "spa", term: "spa" },
     ai: {
       question: "Which spa in Jumeirah, Dubai is open late during Ramadan?",
       answer:
@@ -178,23 +201,23 @@ export const spaMassage: Industry = {
   faqs: [
     {
       q: "Can Kabsi say what a treatment does for the body?",
-      a: "No. Kabsi writes only the facts you give it: the treatment, how long it takes and the price. It does not invent a benefit.",
+      a: "No, Kabsi writes only the facts you give it: the treatment, how long it takes and the price. It does not invent a benefit.",
     },
     {
       q: "Does Kabsi connect to my booking system?",
-      a: "No. Kabsi has Manager access to your Google profile only, not your bookings or clients. Check the booking link on Google when your page moves.",
+      a: "No, Kabsi is a Manager on the spa's Google profile and nothing more. Check the booking link on Google when your page moves.",
     },
     {
       q: "My spa opens later in Ramadan. How does Google show that?",
       a: "You send Kabsi the hours and it prepares them as special hours, so your regular hours stay as they are. You approve them first.",
     },
     {
-      q: "What if I want to remove Kabsi?",
-      a: "You can remove Kabsi any time. On Google: your profile, Business Profile settings, People and access, Kabsi Clients, Remove. Kabsi loses access at once.",
+      q: "Can Kabsi reply to a review that complains about a therapist?",
+      a: "When it names a therapist, it reaches you with a checklist and no draft. A holding reply is written only when you ask.",
     },
     {
-      q: "Can Kabsi reply to a review that complains about a therapist?",
-      a: "If it names the therapist, it comes with no draft and a short checklist. Kabsi writes a neutral holding reply only if you ask.",
+      q: "Where does the review card go in a spa?",
+      a: "At reception, handed over as guests leave. Never offer a treatment or a discount for a review.",
     },
   ],
   guides: [

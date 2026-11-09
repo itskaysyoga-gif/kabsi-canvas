@@ -141,6 +141,7 @@ describe("every public page on Design 9 (Web 5 part D)", () => {
     expect(read("src/components/kabsi/d8-pricing.tsx")).toContain(
       '<StepsLine id="pricing-steps-h" />',
     );
-    expect(read("src/components/kabsi/d9-industry.tsx")).toContain("<PhotoToPost example=");
+    // Industry 1 (R-144): the band also takes the trade's own photo cards, so the props sit on their own lines.
+    expect(read("src/components/kabsi/d9-industry.tsx")).toMatch(/<PhotoToPost\s+example=/);
   });
 });

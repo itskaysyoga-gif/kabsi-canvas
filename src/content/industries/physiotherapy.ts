@@ -34,6 +34,16 @@ export const physiotherapy: Industry = {
   ],
   // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
   // docs/claims/physiotherapy.md, whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Initial assessment",
+    "Sports massage",
+    "Back and neck pain",
+    "Knee rehabilitation",
+    "Rehab after surgery",
+    "Home visits",
+    "Acupuncture",
+  ],
   profile: [
     {
       title: "What you treat, in their words",
@@ -59,7 +69,7 @@ export const physiotherapy: Industry = {
     },
     {
       title: "Pain that did not improve",
-      text: "A careful draft that names no treatment. An injury gets no draft.",
+      text: "No treatment named in the draft, and an injury gets no draft at all.",
     },
     {
       title: "Times, parking and the waiting room",
@@ -95,8 +105,8 @@ export const physiotherapy: Industry = {
       text: "Patients want to know who they will meet. Good light, and ask each physio first.",
     },
     {
-      title: "Post ideas",
-      text: "A Thursday evening clinic, a new physio, home visit areas, bank holiday hours.",
+      title: "The door from the street",
+      text: "Your sign and entrance, so a first visit finds you.",
     },
   ],
   story: {
@@ -119,6 +129,20 @@ export const physiotherapy: Industry = {
       },
     ],
   },
+  posts: [
+    {
+      title: "An evening clinic",
+      text: "The day and hours of a new late session.",
+    },
+    {
+      title: "A new physio joins",
+      text: "Their name and what they treat, from your words.",
+    },
+    {
+      title: "Home visit areas",
+      text: "Which parts of town you cover, said plainly.",
+    },
+  ],
   page: {
     query: "physiotherapist Google Business Profile",
     title: "Physiotherapist Google Business Profile help | Kabsi",
@@ -157,7 +181,6 @@ export const physiotherapy: Industry = {
         text: "A new physio or a new session time becomes a post for your yes.",
       },
     ],
-    nearby: { kind: "clinic", term: "physio" },
     ai: {
       question: "Which physio in Didsbury, Manchester has Saturday appointments?",
       answer:
@@ -176,11 +199,7 @@ export const physiotherapy: Industry = {
   faqs: [
     {
       q: "Can Kabsi say how many sessions a patient needs?",
-      a: "No. Kabsi writes only the facts you give it, like what you treat and when you open. It promises nothing about results.",
-    },
-    {
-      q: "Does Kabsi see patient notes or bookings?",
-      a: "No. Kabsi has Manager access to your Google profile only. It never connects to your clinic system and never sends patient details on WhatsApp.",
+      a: "No, Kabsi writes only the facts you give it, like what you treat and when you open. It promises nothing about results.",
     },
     {
       q: "Does my profile need to say whether a GP referral is needed?",
@@ -188,11 +207,15 @@ export const physiotherapy: Industry = {
     },
     {
       q: "Can I give a free assessment to anyone who leaves a review?",
-      a: "No. Google does not allow free or discounted services in return for a review. Ask every patient the same way.",
+      a: "No, Google does not allow free or discounted services in return for a review. Ask every patient the same way.",
     },
     {
       q: "Can Kabsi reply to a review that names a treatment?",
       a: "Yes: a careful draft that does not repeat the treatment. An injury gets no draft and a short checklist. You approve or write every reply.",
+    },
+    {
+      q: "Can a reply mention the exercises I gave?",
+      a: "No, a reply stays general and never mentions a patient's care.",
     },
   ],
   guides: [

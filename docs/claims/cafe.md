@@ -101,3 +101,31 @@ Removed from the page: photos of the menu and the best dishes (row 5); the lapto
 
 - Profile card "The order link": "Google can show an order link. Check it each time you change providers." Rows 10 and 11 (G14); replaces "the link follows once you say yes", because Kabsi does not edit the booking or order link on Google yet (knowledge/facts 2.1).
 - Answer: "... and prepares review replies." (was "drafts every reply": a review about illness gets no draft, facts 13).
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card line | "Illness after food gets no draft; a checklist comes to you." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I2 | Card line | "UAE private sector days run two hours shorter; your hours follow your yes." | T | H3 | "During the holy month of Ramadan, working hours are reduced by 2 hours, every day." (private sector) |
+| I3 | Card title | "The room at a quiet hour" | A | none | A short label for the line under it. |
+| I4 | Card line | "Tables, light and the counter, with no customers in the frame." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I5 | Card title | "A seasonal drink" | A | none | A short label for the line under it. |
+| I6 | Card line | "Iced, spiced or new, with the dates it is on." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I7 | Card title | "A new blend" | A | none | A short label for the line under it. |
+| I8 | Card line | "Where the beans come from, if you tell Kabsi." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I9 | Card title | "Laptop hours" | A | none | A short label for the line under it. |
+| I10 | Card line | "When the room is quiet enough to work, in your words." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I11 | Answer | "No, menu prices on Google are yours to edit; Kabsi only posts prices you send." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I12 | Answer | "No, Kabsi works with your Google profile only. It does not post anywhere else and it does not manage your delivery platforms." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I13 | Question | "A customer says they were ill after eating here; how is that handled?" | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I14 | Answer | "No draft. A short checklist reaches you, and a holding reply is written only when you ask for one." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I15 | Answer | "Yes, each draft is written in the language of the review, and you approve it like any other." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I16 | Service | "Breakfast" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I17 | Service | "Brunch" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I18 | Service | "Takeaway coffee" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I19 | Service | "Cakes and pastries" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I20 | Service | "Oat and soy milk" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I21 | Service | "Afternoon tea" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

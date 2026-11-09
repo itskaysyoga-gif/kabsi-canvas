@@ -104,3 +104,31 @@ Removed from the page: the holiday task (its facts stay in the holidays cards), 
 ### Industries 3: fixed after the independent check (5 Nov 2026)
 
 - FAQ: "An injury, a safety problem or a complaint naming a team member gets no draft, a short checklist, and a holding reply only if asked." Facts 13: only a complaint that names a team member is high risk.
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card line | "No draft for an injury or safety problem; a checklist goes to you." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I2 | Card title | "The waiting room" | A | none | A short label for the line under it. |
+| I3 | Card line | "Chairs, light and the front desk, empty and calm." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I4 | Card title | "Saturday check-ups" | A | none | A short label for the line under it. |
+| I5 | Card line | "The days and times, when your clinic offers them." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I6 | Card title | "What to do in an emergency" | A | none | A short label for the line under it. |
+| I7 | Card line | "Your urgent line and hours, in one plain post." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I8 | Card title | "A new dentist joining" | A | none | A short label for the line under it. |
+| I9 | Card line | "Their name, the day they start and the treatments they do." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I10 | Card title | "Holiday closures, asked first" | A | none | A short label for the line under it. |
+| I11 | Question | "Where does the review card go in a dental clinic?" | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I12 | Answer | "At reception, on appointment cards or aftercare sheets, or in a follow-up email." | K | facts 09 (card placement, 7.1 to 7.8); facts 10 (ask everyone the same way, no incentive) | Where the review card goes for each trade; every customer asked the same way, never an incentive. |
+| I13 | Question | "Will a reply say which dentist a patient saw?" | K | K1 (facts 09, 7.3) | Replies stay general: no personal details, never confirm someone is a patient or mention their care. |
+| I14 | Answer | "No, a reply never confirms someone is a patient, so it never says who treated them." | K | K1 (facts 09, 7.3) | Replies stay general: no personal details, never confirm someone is a patient or mention their care. |
+| I15 | Service | "Check-up and clean" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I16 | Service | "Hygienist visit" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I17 | Service | "Fillings" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I18 | Service | "Teeth whitening" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I19 | Service | "Root canal treatment" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I20 | Service | "Emergency appointment" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I21 | Service | "Children's dentistry" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

@@ -106,3 +106,27 @@ Removed from the page: the reply task (its rule stays in the reviews cards and t
 
 - Profile card "The Book button": "Your own consultation page. Check the link each time you change systems." Kabsi does not edit the booking link on Google yet (knowledge/facts 2.1).
 - Review card "How a treatment turned out": "A careful draft that names no treatment. A reaction or injury gets no draft." Facts 13: every review of a medical business is at least medium (a careful draft); injury and allergy are high (no draft).
+
+## Industry 1 (9 Nov 2026, R-144): the new and changed lines
+
+Lane R decision R-144: each industry page mostly its own text. New groups on this page: what the trade can list (services, as chips), the photos that work (beside the Example post), posts it can make, what customers write about, and hours and holidays, plus rewritten lines that read the same on other pages. Type and source as in README. A card title (short label) is wording only; its line carries the claim. Every new line was read against the facts on 9 Nov 2026; no number, customer claim or ranking promise was added.
+
+| # | Where | Sentence on the page | Type | Source | What the source says |
+| - | ----- | -------------------- | ---- | ------ | -------------------- |
+| I1 | Card line | "A careful draft without the treatment's name; a reaction or injury gets no draft." | K | facts 13 "What happens with hard reviews?"; README K3 | A review about health, injury, safety, a legal threat or a named team member reaches the owner with no draft and a short checklist; a neutral holding reply only if asked. |
+| I2 | Card line | "Private sector days are two hours shorter in the UAE; match doctors' hours to them." | T | H3 | "During the holy month of Ramadan, working hours are reduced by 2 hours, every day." (private sector) |
+| I3 | Card title | "The waiting area" | A | none | A short label for the line under it. |
+| I4 | Card line | "Calm and bright, with no patient in view." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I5 | Card title | "A new consultation day" | A | none | A short label for the line under it. |
+| I6 | Card line | "The doctor and the day, as a dated post." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I7 | Card title | "A doctor joins the clinic" | A | none | A short label for the line under it. |
+| I8 | Card line | "Their name and what they see patients for." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I9 | Card title | "Closed for Eid" | A | none | A short label for the line under it. |
+| I10 | Card line | "The days closed and how to reach you for urgent problems." | A | none | Advice or wording about the trade. Not a claim about the world. |
+| I11 | Answer | "No, drafts stay calm and general: no medical claims, no personal details and no admission of fault. Kabsi never sends patient details on WhatsApp." | K | facts 04 (posts, photos, approvals); facts 13 | Kabsi prepares posts, photo uploads and hours from what the owner sends; nothing reaches Google until the owner approves; Kabsi never invents a price or an offer. |
+| I12 | Service | "Skin consultation" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I13 | Service | "Chemical peel" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I14 | Service | "Laser hair removal" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I15 | Service | "Microneedling" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I16 | Service | "Mole check" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |
+| I17 | Service | "Acne consultation" | A | none | A service name a business of this kind can list (Example, not a full list); shown as chips under "What a [trade] can list". |

@@ -14,6 +14,7 @@ import {
   ThumbsUp,
   type LucideIcon,
 } from "lucide-react";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { CONTACT_EMAIL, TRIAL_LINE } from "@/lib/site";
 import { useFoundingPlaces } from "@/lib/public-api";
@@ -128,7 +129,14 @@ function WatchVisual() {
 /** Industries 2: an industry page passes its tall photo and its own Example post. */
 export type PhotoPostExample = { photo: Photo; owner: string; quote: string; alt?: string };
 
-export function PhotoToPost({ example }: { example?: PhotoPostExample } = {}) {
+/**
+ * Industry 1 (R-144): an industry page passes its own left column (its photos and posts) in place of Home's three
+ * points, and the post's state list is left out there, so the band is the trade's own text.
+ */
+export function PhotoToPost({
+  example,
+  intro,
+}: { example?: PhotoPostExample; intro?: ReactNode } = {}) {
   const p = D9_PHOTO;
   return (
     <section aria-labelledby="photo-h" className="theme-dark bg-band">
@@ -138,21 +146,29 @@ export function PhotoToPost({ example }: { example?: PhotoPostExample } = {}) {
           sectionY,
         )}
       >
-        <div>
-          <YellowLabel>{p.label}</YellowLabel>
-          <h2 id="photo-h" className="mt-4 text-h2">
-            {p.title} <span className="text-phrase">{p.titleMark}</span>
-          </h2>
-          <p className="mt-4 max-w-[34rem] text-body text-text-2 sm:text-lead">{p.line}</p>
-          <NumberedPoints points={p.points} className="mt-6" />
-        </div>
-        <PhotoVisual example={example} />
+        {intro ?? (
+          <div>
+            <YellowLabel>{p.label}</YellowLabel>
+            <h2 id="photo-h" className="mt-4 text-h2">
+              {p.title} <span className="text-phrase">{p.titleMark}</span>
+            </h2>
+            <p className="mt-4 max-w-[34rem] text-body text-text-2 sm:text-lead">{p.line}</p>
+            <NumberedPoints points={p.points} className="mt-6" />
+          </div>
+        )}
+        <PhotoVisual example={example} states={!intro} />
       </div>
     </section>
   );
 }
 
-function PhotoVisual({ example }: { example?: PhotoPostExample | undefined }) {
+function PhotoVisual({
+  example,
+  states = true,
+}: {
+  example?: PhotoPostExample | undefined;
+  states?: boolean;
+}) {
   const p = D9_PHOTO;
   const photo = example?.photo ?? PHOTOS.salonStudio;
   const owner = example?.owner ?? p.ownerLine;
@@ -194,31 +210,33 @@ function PhotoVisual({ example }: { example?: PhotoPostExample | undefined }) {
             className="aspect-[4/3] w-full rounded-[0.375rem] object-cover object-[50%_30%]"
           />
           <p className="px-1 pt-1 text-chat">{owner}</p>
-          <p className="px-1 text-end text-chat-meta text-wa-time-out">12:31</p>
+          {states && <p className="px-1 text-end text-chat-meta text-wa-time-out">12:31</p>}
         </div>
         <div className="mt-2 w-[92%] rounded-bubble rounded-ss-none bg-wa-in px-2.5 py-1.5 text-chat shadow-bubble">
           {p.ready}
           <span className="mt-0.5 block italic">'{quote}'</span>
-          <span className="block text-end text-chat-meta text-wa-time-out">12:32</span>
+          {states && <span className="block text-end text-chat-meta text-wa-time-out">12:32</span>}
         </div>
         <div className="-ms-1.5 w-[96%]">
           <PictureButtons labels={p.buttons} />
         </div>
-        <ol
-          className="mt-2.5 space-y-1 rounded-bubble bg-wa-in p-2 text-chat-meta font-bold"
-          aria-label="Where the post is"
-        >
-          {p.states.map((s) => (
-            <li key={s} className="flex items-center gap-1.5">
-              <CircleCheck className="size-3.5 text-kb-green-ink" aria-hidden />
-              {s}
-            </li>
-          ))}
-        </ol>
+        {states && (
+          <ol
+            className="mt-2.5 space-y-1 rounded-bubble bg-wa-in p-2 text-chat-meta font-bold"
+            aria-label="Where the post is"
+          >
+            {p.states.map((s) => (
+              <li key={s} className="flex items-center gap-1.5">
+                <CircleCheck className="size-3.5 text-kb-green-ink" aria-hidden />
+                {s}
+              </li>
+            ))}
+          </ol>
+        )}
       </div>
       <figcaption className="sr-only">
         {example
-          ? `Example: the owner sends a photo with the line '${owner}' on WhatsApp, Kabsi prepares the Google post '${quote}' with that photo, the owner approves it, and it goes from Approved to Sent to Google to Live on Google.`
+          ? `Example: the owner sends a photo with the line '${owner}' on WhatsApp and Kabsi prepares the Google post '${quote}' with that photo, for the owner's yes.`
           : p.caption}
       </figcaption>
     </figure>
@@ -400,27 +418,48 @@ export function NearbyMap({ example }: { example?: NearbyExample | undefined } =
 }
 
 /** Industries 2: an industry page's own question and answer (Example). */
-export type AiExample = { question: string; answer: string; sources: readonly string[] };
+export type AiExample = {
+  question: string;
+  answer: string;
+  sources: readonly string[];
+  /** Industry 1: an industry page names its Example business in the title and the date line. */
+  title?: string;
+  date?: string;
+};
 
-export function AiAnswer({ example }: { example?: AiExample | undefined } = {}) {
+export function AiAnswer({
+  example,
+  compact = false,
+}: {
+  example?: AiExample | undefined;
+  /** Industry 1 (R-144): the assistant and the date as one line ("Asked ChatGPT on [date]", R-143), not three rows. */
+  compact?: boolean;
+} = {}) {
   const a = { ...D9_SHOW_UP.ai, ...(example ?? {}) };
   return (
     <figure className="flex flex-col rounded-panel border border-line bg-surface-1 p-4 sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-title">{a.title}</h3>
-          <p className="text-label text-text-2">{a.label2}</p>
+          {!compact && <p className="text-label text-text-2">{a.label2}</p>}
         </div>
         <ExampleBadge />
       </div>
-      <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-small">
-        <dt className="text-text-2">Question</dt>
-        <dd className="font-semibold">{a.question}</dd>
-        <dt className="text-text-2">Assistant</dt>
-        <dd>{a.assistant}</dd>
-        <dt className="text-text-2">Asked on</dt>
-        <dd>{a.date}</dd>
-      </dl>
+      {compact ? (
+        <div className="mt-4 text-small">
+          <p className="font-semibold">{a.question}</p>
+          <p className="mt-1 text-text-2">{`Asked ${a.assistant} on ${a.date}.`}</p>
+        </div>
+      ) : (
+        <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-small">
+          <dt className="text-text-2">Question</dt>
+          <dd className="font-semibold">{a.question}</dd>
+          <dt className="text-text-2">Assistant</dt>
+          <dd>{a.assistant}</dd>
+          <dt className="text-text-2">Asked on</dt>
+          <dd>{a.date}</dd>
+        </dl>
+      )}
       <blockquote className="mt-4 rounded-inner bg-surface-2 p-4 font-display text-title font-semibold">
         {a.answer}
       </blockquote>

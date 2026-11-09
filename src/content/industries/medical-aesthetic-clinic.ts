@@ -34,6 +34,15 @@ export const medicalAestheticClinic: Industry = {
   ],
   // Industries 3 (master plan 30.33 item 2): every block is a short card. Each line keeps a fact of
   // docs/claims/medical-and-aesthetic-clinic.md, whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Skin consultation",
+    "Chemical peel",
+    "Laser hair removal",
+    "Microneedling",
+    "Mole check",
+    "Acne consultation",
+  ],
   profile: [
     {
       title: "Treatments your doctors really offer",
@@ -59,7 +68,7 @@ export const medicalAestheticClinic: Industry = {
     },
     {
       title: "How a treatment turned out",
-      text: "A careful draft that names no treatment. A reaction or injury gets no draft.",
+      text: "A careful draft without the treatment's name; a reaction or injury gets no draft.",
     },
     {
       title: "A cancelled or moved appointment",
@@ -78,7 +87,7 @@ export const medicalAestheticClinic: Industry = {
     },
     {
       title: "Ramadan, UAE",
-      text: "Private sector hours drop by two a day. Check doctors' hours against the shorter day.",
+      text: "Private sector days are two hours shorter in the UAE; match doctors' hours to them.",
     },
     {
       title: "Closed a week or more",
@@ -95,8 +104,8 @@ export const medicalAestheticClinic: Industry = {
       text: "In a tower, photos of the sign and lift button save a missed appointment.",
     },
     {
-      title: "Post ideas",
-      text: "A new consultation day, a new doctor, closed for Eid, how to book.",
+      title: "The waiting area",
+      text: "Calm and bright, with no patient in view.",
     },
   ],
   story: {
@@ -119,6 +128,20 @@ export const medicalAestheticClinic: Industry = {
       },
     ],
   },
+  posts: [
+    {
+      title: "A new consultation day",
+      text: "The doctor and the day, as a dated post.",
+    },
+    {
+      title: "A doctor joins the clinic",
+      text: "Their name and what they see patients for.",
+    },
+    {
+      title: "Closed for Eid",
+      text: "The days closed and how to reach you for urgent problems.",
+    },
+  ],
   page: {
     query: "aesthetic clinic Google Business Profile",
     title: "Aesthetic clinic Google Business Profile help | Kabsi",
@@ -157,7 +180,6 @@ export const medicalAestheticClinic: Industry = {
         text: "When Google shows something else, you choose which stays.",
       },
     ],
-    nearby: { kind: "clinic", term: "skin clinic" },
     ai: {
       question: "Which skin clinic in Marylebone, London has evening consultations?",
       answer:
@@ -176,7 +198,7 @@ export const medicalAestheticClinic: Industry = {
   faqs: [
     {
       q: "Will Kabsi ever put a patient's name or treatment in a reply?",
-      a: "No. Drafts stay calm and general: no medical claims, no personal details and no admission of fault. Kabsi never sends patient details on WhatsApp.",
+      a: "No, drafts stay calm and general: no medical claims, no personal details and no admission of fault. Kabsi never sends patient details on WhatsApp.",
     },
     {
       q: "Can a clinic's post name Botox?",

@@ -30,6 +30,15 @@ export const restaurant: Industry = {
   ],
   // Industries 3 (master plan 30.33 item 2): the two old guide sections as short cards. Each line keeps a fact of
   // docs/claims/restaurant.md, whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Dine in",
+    "Takeaway",
+    "Private dining",
+    "Set lunch",
+    "Group bookings",
+    "Children's menu",
+  ],
   profile: [
     {
       title: "The menu, as on the table",
@@ -40,12 +49,68 @@ export const restaurant: Industry = {
       text: "Google lets you set more hours, such as the kitchen or takeaway.",
     },
     {
-      title: "Special hours for odd days",
-      text: "A bank holiday, Christmas Eve, New Year's Eve, a private hire.",
+      title: "Dietary options, said plainly",
+      text: "Vegetarian or halal? Say it in your description, in your words.",
     },
     {
       title: "The booking link",
       text: "Your own link lets people book a table. Check it when you change systems.",
+    },
+  ],
+  reviews: [
+    {
+      title: "Praise for a dish",
+      text: "The reply names the dish back and adds nothing else.",
+    },
+    {
+      title: "Slow service on a busy night",
+      text: "One apology, no excuse, no promise about next time.",
+    },
+    {
+      title: "Feeling ill after eating",
+      text: "A hygiene matter: no draft and a short checklist.",
+    },
+  ],
+  holidays: [
+    {
+      title: "Christmas Eve and New Year's Eve",
+      text: "Different hours on those nights are special hours, set on your yes.",
+    },
+    {
+      title: "Bank holiday Mondays",
+      text: "Kabsi asks five days before each: open, closed or other hours.",
+    },
+    {
+      title: "A private hire night",
+      text: "Closed to the public for one evening is special hours.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "A dish from the pass",
+      text: "Plated, in daylight, one dish to a photo.",
+    },
+    {
+      title: "The menu, readable",
+      text: "A straight photo of the printed menu, every page in focus.",
+    },
+    {
+      title: "The dining room",
+      text: "Set tables before service show what an evening looks like.",
+    },
+  ],
+  posts: [
+    {
+      title: "A new dish",
+      text: "Its name and one line from you, with no invented price.",
+    },
+    {
+      title: "Sunday lunch",
+      text: "What is on and the hours it is served.",
+    },
+    {
+      title: "Christmas bookings open",
+      text: "The dates you take parties, as a dated post.",
     },
   ],
   page: {
@@ -86,7 +151,6 @@ export const restaurant: Industry = {
         text: "Five days ahead, Kabsi asks what you will do, then sets it after your yes.",
       },
     ],
-    nearby: { kind: "restaurant", term: "restaurant" },
     ai: {
       question: "Which restaurant in the Northern Quarter, Manchester serves a Sunday roast?",
       answer:
@@ -102,11 +166,7 @@ export const restaurant: Industry = {
     },
     {
       q: "We get reviews on booking and delivery sites too. Does Kabsi reply there?",
-      a: "No. Kabsi works only with your Google profile. Reviews people leave on Google, Kabsi does reply to.",
-    },
-    {
-      q: "My manager runs the floor. Can they approve instead of me?",
-      a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything that goes out.",
+      a: "No, Kabsi replies on Google only, where every review gets a draft.",
     },
     {
       q: "Can Kabsi promise we come up first for 'restaurants near me'?",
@@ -114,7 +174,11 @@ export const restaurant: Industry = {
     },
     {
       q: "Can Kabsi set our Christmas hours?",
-      a: "Yes. Five days before each bank holiday, Christmas included, Kabsi asks what you will do and sets special hours once you say yes.",
+      a: "Yes, five days before each bank holiday, Christmas included, Kabsi asks what you will do and sets special hours once you say yes.",
+    },
+    {
+      q: "Where does the review QR code go in a restaurant?",
+      a: "On tables, at the host stand or till, on the bill folder or the takeaway bag.",
     },
   ],
   guides: [

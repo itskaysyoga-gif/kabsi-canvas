@@ -24,6 +24,17 @@ export const nailSalon: Industry = {
   searches: ["nail salon near me", "gel nails", "manicure", "acrylic nails", "nail art"],
   // Industries 3 (master plan 30.33 item 2): the two old guide sections as short cards. Each line keeps a fact of
   // docs/claims/nail-salon.md, whose "Industries 3" section maps it to its row.
+  // Industry 1 (R-144): the services this trade lists on Google (Example names, not a full list).
+  services: [
+    "Gel manicure",
+    "Acrylic full set",
+    "Infills",
+    "Gel removal",
+    "Pedicure",
+    "Nail art",
+    "Builder gel",
+    "Paraffin hand treatment",
+  ],
   profile: [
     {
       title: "Designs, season by season",
@@ -31,17 +42,78 @@ export const nailSalon: Industry = {
     },
     {
       title: "Photos true to the nail",
-      text: "In focus, well lit, no heavy filters. Kabsi checks each photo first.",
+      text: "Google asks for no heavy filters. Kabsi flags a dark or blurry shot.",
     },
     {
-      title: "Prices and the right category",
-      text: "A price in a service name is rejected. Google's example: Nail salon, not Salon.",
+      title: "A price on each service",
+      text: "Gel, acrylic, infills: price each one, and keep prices out of custom names.",
     },
+    {
+      title: "Walk-ins or appointments",
+      text: "Say which in your description, and on which days.",
+    },
+  ],
+  reviews: [
     {
       title: "The technician, by name",
       text: "When a review names them, the reply thanks them. Only team list names are used.",
     },
+    {
+      title: "A set that lifted early",
+      text: "A calm draft that asks the client to get in touch with the salon.",
+    },
+    {
+      title: "Redness or an infection",
+      text: "A health matter: no draft, and Kabsi waits for you to decide.",
+    },
   ],
+  holidays: [
+    {
+      title: "Saturdays before Christmas",
+      text: "Party nails fill the diary. Extra hours go on Google as special hours.",
+    },
+    {
+      title: "Bank holidays in England",
+      text: "Kabsi asks five days before each one: open, closed or other hours.",
+    },
+    {
+      title: "Valentine's and Mother's Day",
+      text: "Busy Saturdays; extra hours become special hours once you approve.",
+    },
+  ],
+  photoCards: [
+    {
+      title: "Hands on a plain surface",
+      text: "Daylight, no clutter, the set in sharp focus.",
+    },
+    {
+      title: "Close on the nail art",
+      text: "Fill the frame with the design. Kabsi flags a photo under 720 pixels.",
+    },
+    {
+      title: "The colour wall",
+      text: "Your polish shelf shows clients what they can choose.",
+    },
+  ],
+  posts: [
+    {
+      title: "Seasonal sets",
+      text: "Autumn shades, Christmas glitter, summer brights: one photo and one line each.",
+    },
+    {
+      title: "A new technician starts",
+      text: "Who they are and the work they love, for your yes.",
+    },
+    {
+      title: "Removals and infills",
+      text: "Say which you offer and how long each takes, in your words.",
+    },
+  ],
+  categories: {
+    primary: "Nail salon",
+    more: ["Beauty salon"],
+    line: "Google's own example picks Nail salon over Salon. Add Beauty salon only if you also do lashes or facials.",
+  },
   page: {
     query: "nail salon Google Business Profile",
     title: "Nail salon Google Business Profile help | Kabsi",
@@ -80,7 +152,6 @@ export const nailSalon: Industry = {
         text: "A review about a reaction gets a short checklist and no draft, so you decide.",
       },
     ],
-    nearby: { kind: "salon", term: "nail salon" },
     ai: {
       question: "Which nail salon in Brighton does gel extensions on a Sunday?",
       answer:
@@ -99,7 +170,7 @@ export const nailSalon: Industry = {
   faqs: [
     {
       q: "Will Kabsi change my prices on Google without asking?",
-      a: "No. Kabsi does not edit prices on Google today, and nothing reaches Google until you approve it.",
+      a: "No, Kabsi does not edit prices on Google today, and nothing reaches Google until you approve it.",
     },
     {
       q: "What happens with a review about a reaction or an infection?",
@@ -107,11 +178,11 @@ export const nailSalon: Industry = {
     },
     {
       q: "Does Kabsi message my clients?",
-      a: "No. Kabsi talks only to you. It gives you a review link and a QR card to share after a real visit.",
+      a: "No, Kabsi writes to you, the salon owner. You give clients the review link or QR card when their nails are done.",
     },
     {
       q: "Can I create a category called 'nail bar'?",
-      a: "No. Google does not let a business create its own category. Pick the most specific one from Google's list.",
+      a: "No, Google does not let a business create its own category. Pick the most specific one from Google's list.",
     },
     {
       q: "Will Kabsi post a client's hands?",
