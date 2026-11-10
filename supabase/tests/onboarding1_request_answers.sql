@@ -1,7 +1,8 @@
 -- Onboarding 1 (10 Nov 2026, master plan 30.48, R-145): the two optional questions at signup.
 --   Optional and skippable; saved and changed (the date of the first answer is kept, a cleared answer loses it); the app name
 --   only goes with a booking app; another business cannot read or write them; the staff view gives counts only, leaves out
---   demo businesses, and gives Gate 3's rule (3 or more of the first 10 opens it, fewer than 2 keeps it off).
+--   demo businesses, and gives Gate 3's rule (3 or more of the first 10 opens it, fewer than 2 keeps it off; Tidy 2: exactly 2
+--   grows the window to the first 20, where 5 open it).
 begin;
 create extension if not exists pgtap with schema extensions;
 select * from no_plan();
@@ -126,15 +127,37 @@ select is((select string_agg((e ->> 'business') || ':' || (e ->> 'position') || 
 select is((select count(*)::int from (select public.staff_request_answers() as j) r1 where j::text ~* '(email|phone|whatsapp number|@)'), 0, 'the counts carry no email or phone');
 reset role;
 
--- Fewer than 2 of the first 10: it stays off. Exactly 2: neither. Fewer than 10 answered: still collecting.
+-- Fewer than 2 of the first 10: it stays off. Exactly 2: the window grows to 20 (Tidy 2, 30.49 item 3). Fewer than 10 answered: still collecting.
 update public.locations set early_access_whatsapp = false where name in ('Answer 1', 'Answer 7');
 select tests.act_as('00000000-0000-4000-8000-0000000000a3');
 select is((select public.staff_request_answers() #>> '{gate3,first_ten_qualifying}') || '/' || (public.staff_request_answers() #>> '{gate3,verdict}'), '1/off', 'Gate 3: 1 of 10 keeps it off');
 reset role;
 update public.locations set early_access_whatsapp = true where name = 'Answer 1';
 select tests.act_as('00000000-0000-4000-8000-0000000000a3');
-select is((select public.staff_request_answers() #>> '{gate3,verdict}'), 'between', 'Gate 3: exactly 2 of 10 is neither open nor off');
+select is((select public.staff_request_answers() #>> '{gate3,verdict}'), 'extended', 'Gate 3: exactly 2 of the first 10 grows the window to the first 20 (Answer 11 is the third of 11, 5 are needed of 20)');
 reset role;
+
+-- Tidy 2 (30.49 item 3): the window of 20. Nine more businesses answer after the eleven, so the 20 are complete.
+insert into public.locations (id, name, place_id) select ('00000000-0000-4000-8000-00000000c1' || lpad(n::text, 2, '0'))::uuid, 'Answer ' || n, 'ans-' || n from generate_series(13, 21) n;
+update public.locations set request_tracking = 'chats', request_tracking_at = now() - make_interval(days => 22 - substring(name from 8)::int),
+  early_access_whatsapp = (name in ('Answer 13', 'Answer 14')), early_access_at = now() - make_interval(days => 22 - substring(name from 8)::int)
+ where name in ('Answer 13', 'Answer 14', 'Answer 15', 'Answer 16', 'Answer 17', 'Answer 18', 'Answer 19', 'Answer 20');
+select tests.act_as('00000000-0000-4000-8000-0000000000a3');
+select is((select (j #>> '{gate3,first_twenty_answered}') || '/' || (j #>> '{gate3,first_twenty_qualifying}') || '/' || (j #>> '{gate3,window}') || '/' || (j #>> '{gate3,verdict}') from (select public.staff_request_answers() as j) r1),
+  '19/5/20/open', 'Gate 3: 2 of the first 10, then 5 of the first 20 (Answer 11, 13 and 14 join Answer 1 and 4): it opens');
+reset role;
+update public.locations set early_access_whatsapp = false where name = 'Answer 14';
+select tests.act_as('00000000-0000-4000-8000-0000000000a3');
+select is((select (j #>> '{gate3,first_twenty_answered}') || '/' || (j #>> '{gate3,first_twenty_qualifying}') || '/' || (j #>> '{gate3,verdict}') from (select public.staff_request_answers() as j) r1),
+  '19/4/extended', 'Gate 3: 4 of 19, the twenty are not complete: still collecting');
+reset role;
+update public.locations set request_tracking = 'memory', request_tracking_at = now() - interval '1 day', early_access_whatsapp = false, early_access_at = now() - interval '1 day' where name = 'Answer 21';
+select tests.act_as('00000000-0000-4000-8000-0000000000a3');
+select is((select (j #>> '{gate3,first_twenty_answered}') || '/' || (j #>> '{gate3,first_twenty_qualifying}') || '/' || (j #>> '{gate3,verdict}') from (select public.staff_request_answers() as j) r1),
+  '20/4/off', 'Gate 3: 4 of the first 20 keeps the request book off');
+reset role;
+update public.locations set request_tracking = null, request_tracking_at = null, early_access_whatsapp = null, early_access_at = null
+ where name in ('Answer 13', 'Answer 14', 'Answer 15', 'Answer 16', 'Answer 17', 'Answer 18', 'Answer 19', 'Answer 20', 'Answer 21');
 update public.locations set request_tracking = null, request_tracking_at = null, early_access_whatsapp = null, early_access_at = null
  where name in ('Answer 6', 'Answer 7', 'Answer 8', 'Answer 9', 'Answer 10', 'Answer 11');
 select tests.act_as('00000000-0000-4000-8000-0000000000a3');

@@ -58,8 +58,8 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 ## Recent entries (newest first)
 
 - 10 Nov 2026, Tidy 2 part 0 (R-146, R-147, docs only): master plan 30.49 (Harvey from the public kabsi-harvey-run with encrypted data, first tier beauty and food, launch open to all 21 industries, the Gate 3 tie rule, Nora's name rule, the Kapso delivery check); plan index rows R-144, R-146, R-147, now 37 KB; SYNC Harvey rows. `2026-11-10-tidy2.md`.
+- 10 Nov 2026, Tidy 2 part 2 (R-147 item 3): the Gate 3 tie rule: exactly 2 of the first 10 counts the first 20, 5 of 20 opens, fewer keeps the request book off; staff line, build plan and COPY updated; migration 20261110063755 applied and read back. `2026-11-10-tidy2.md`.
 - 10 Nov 2026, Tidy 2 part 1 (R-147 item 4): Nora's evaluation checks count Google's own product name in the answer's language (Spanish Perfil de Empresa de Google and the other languages) as Google Business Profile; no live rerun, sc05's stub reference updated. `2026-11-10-tidy2.md`.
-- 10 Nov 2026, Onboarding 1 (R-145, PR 541): two optional questions after the business is chosen (how requests are kept track of; early access to new WhatsApp tools), skippable, editable in About your business, stored on the location, nothing sent; staff counts on Businesses for Gate 3; plan 30.48, gates, privacy, facts 11, SYNC walked; migration 20261110035354 applied and read back. `2026-11-10-onboarding1.md`.
 - Older entries (Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
 
 ## How a session updates this page
