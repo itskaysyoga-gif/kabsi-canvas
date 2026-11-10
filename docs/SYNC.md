@@ -18,7 +18,7 @@ Master plan 30.45 item 6 (R-141). This is the map of every surface that states a
 | R | Another repository or an outside account | The row says whose hands |
 | H | By hand, in an outside tool | The row says whose hands |
 
-Owners: **Rashid** (runs Kabsi; the lane R chat decides on his authority, R-41), **Hussein** (the Creem account only), **Build** (a build session in this repository), **Harvey** (kabsi-harvey, the contact list builder).
+Owners: **Rashid** (runs Kabsi; the lane R chat decides on his authority, R-41), **Hussein** (the Creem account only), **Build** (a build session in this repository), **Harvey** (the contact list builder: runs from the public repository `kabsi-harvey-run` with its data encrypted; `kabsi-harvey` is the private archive, R-146).
 
 ## 2. The numbers and names that live in one place
 
@@ -99,7 +99,7 @@ Every page below is read at 390 px and 1440 px in the truth pass. The copy of ev
 | Kapso templates (Utility): the account and approval notices, the staff alert, the billing notice | The words Meta approved | Text in `supabase/functions/_shared/whatsapp/templates.ts` (name, body, example); approved copy lives at Kapso and Meta | K: a new name and version, resubmitted; the sender switches on its hourly status read | Rashid |
 | Kabsi's WhatsApp profile (display name, about, address, description, photo) | Who Kabsi is on WhatsApp | Kapso project Kabsi.co, WhatsApp Business profile | H (Rashid; display name waits for Meta) | Rashid |
 | Outbound emails (first email, follow-up, yes reply, footer, signature) | The offer: the free Google check and Google care only (no Founding 25 since Sync 2b, R-142); the reply to a yes adds the founding price sentence (`FOUNDING_SENTENCE` in `email/lifecycle-copy.ts`); why you got this | `supabase/functions/_shared/outbound/rules.ts` (`emailOne`, `followUp`, `SIGNATURE`, `FOOTER`), `inbox.ts` (`yesReply`), `docs/COPY.md` section 65 | C then T; Rashid approves every email in the daily batch at `/staff/outbound` | Rashid |
-| Outbound list and counts | Who may be written to: UK registered companies active on Companies House, own-domain email (30.45 item 5; opens only when Rashid says start, after card payments open; the UAE and every other country stay off: `OPEN_COUNTRIES` in `outbound/rules.ts` and the database check on `open_countries` hold only GB); the six salon industries first (`SALON_INDUSTRIES`, R-142) | `kabsi-harvey` builds the list; `outbound-prepare` checks it | R (Harvey), H | Rashid, Harvey |
+| Outbound list and counts | Who may be written to: UK registered companies active on Companies House, own-domain email (30.45 item 5; opens only when Rashid says start, after card payments open; the UAE and every other country stay off: `OPEN_COUNTRIES` in `outbound/rules.ts` and the database check on `open_countries` hold only GB); the six salon industries first (`SALON_INDUSTRIES`, R-142) | Harvey (`kabsi-harvey-run`, R-146) builds the list; `outbound-prepare` checks it | R (Harvey), H | Rashid, Harvey |
 
 ## 8. The signed-in app, staff area and billing
 
@@ -118,9 +118,9 @@ Every page below is read at 390 px and 1440 px in the truth pass. The copy of ev
 
 | Surface | What it states | Where it lives | Updated by | Owner |
 |---|---|---|---|---|
-| kabsi-harvey | The list of businesses, its own policy register and dashboard (refresh from 1 Dec 2026, Monday, Wednesday and Friday, 30.45 item 7) | Private repository `kabsi-harvey`, a daily scheduled run | R | Rashid, Harvey |
+| Harvey (`kabsi-harvey-run`, `kabsi-harvey`) | The list of businesses, its own policy register and dashboard (refresh from 1 Dec 2026, Monday, Wednesday and Friday, 30.45 item 7). Harvey's first tier is beauty (hair salon, barbershop, beauty salon, nail salon, lash and brow studio, spa and massage) and food (restaurant, cafe); the launch stays open to all 21 industries (30.49, R-146) | Public repository `kabsi-harvey-run`, a daily scheduled run, its data encrypted; the private repository `kabsi-harvey` is the archive | R | Rashid, Harvey |
 | kabsi-design-studio | Design 9 and later designs, Example businesses, image and email designs | Lovable project synced to GitHub as `kabsi-design-studio` | R: a design is ported by a session here; it never ships by itself | Rashid |
-| Meta ads and video scripts | Ad copy, video scripts, the caption "AI characters. Example business." on any video with an AI character; real Kabsi screens only; organic now, paid after the launch gate (R-127, R-128) | Lane R's notes and Creatify; shot sheets in `docs/marketing/` are older working notes | H (lane V, Rashid) | Rashid |
+| Meta ads and video scripts | Ad copy, video scripts, the caption "AI characters. Example business." on any video with an AI character; real Kabsi screens only; organic now, paid after the launch gate (R-127, R-128); the first ads aim at beauty and food businesses, and the launch stays open to all 21 industries (30.49, R-146) | Lane R's notes and Creatify; shot sheets in `docs/marketing/` are older working notes | H (lane V, Rashid) | Rashid |
 | Kabsi's Instagram and Facebook | Profile text, posts | The accounts; links only through `SOCIAL_LINKS` | H | Rashid |
 | Kabsi's Google profile | Kabsi's own business profile text | Google Business Profile of Kabsi (second Kabsi Google account) | H | Rashid |
 | Anthropic, Resend, Zoho, DataForSEO, Vercel, Supabase, Sentry consoles | Settings, not wording; listed in `docs/SECRETS.md` and `docs/THIRD-PARTY.md` | Each console | H | Rashid |
