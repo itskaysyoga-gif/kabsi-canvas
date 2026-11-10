@@ -6,9 +6,10 @@
 // The pack's words win over Kabsi's own product words: where the pack names a trial, "trial" is the business's own. A message is about Kabsi itself
 // only when it names Kabsi, the plan, billing or the owner's own trial; then it is never the request book's.
 import type { Pack } from "./packs/schema.ts";
+import type { Kind } from "./types.ts";
 import { normalizeVocabulary } from "./normalize/vocabulary.ts";
 
-export const ROUTE_VERSION = 1;
+export const ROUTE_VERSION = 2;
 
 /** Names Kabsi itself: Kabsi, the plan, billing, or the owner's own trial ("my trial", "our free trial"). */
 const KABSI = /\b(?:kabsi|kabsi's|billing|(?:my|our|kabsi'?s?) (?:bill|invoices?|receipts?|subscription|card|refund|payment)|(?:my|our|the|your|which|kabsi'?s?) (?:plan|plans|pro plan|essentials plan)|(?:my|our) (?:free )?trial)\b/i;
@@ -133,4 +134,39 @@ export function packWordWins(text: string, pack: Pick<Pack, "services">): boolea
   const n = nameLength(ws);
   if (kabsiJob(text) && !(n && ACTION_ANY.test(ws.slice(n).join(" ")))) return false;
   return hasService(text, pack);
+}
+
+/**
+ * RB-T (R-150 item 8, closing RB-F4's open question): at a business with the book on, a question about the owner's account,
+ * their data, privacy, price, plan, bill, login or Kabsi itself goes to Nora, read by code before the off-topic line, with
+ * no router call. "Is my data safe?" is the test case. A question about prices or costs that uses one of the pack's own
+ * service words is the business's own ("how much is a manicure") and is never caught here; a message about a customer
+ * ("Maya asked about the price") is read by bookIntent first and never reaches this check.
+ */
+const ACCOUNT = /\b(?:account|accounts|data|data safe|data secure|privacy|private|gdpr|personal data|delete my|my details|secure|security|safe|log ?in|logging in|log ?out|sign ?in|signing in|sign ?out|password|two step|2fa|verification code|bill|billing|billed|invoice|invoices|receipt|charged|charge me|refund|payment|my card)\b/i;
+/** Words that are Kabsi's when the pack does not use them ("plan", "trial", "price"), and the business's when it does. */
+const SOFT = /\b(?:plan|plans|essentials|pro plan|upgrade|downgrade|subscription|subscribe|trial|pay|price|prices|pricing|cost|costs|how much|fee|fees)\b/i;
+/** A message asked as a question: a question word first, or a question mark. */
+const ASKED = /^(?:what|what's|whats|how|why|when|where|which|who|is|are|do|does|did|can|could|would|should|will|am|was|were|has|have|tell me)\b|\?\s*$/i;
+
+export function kabsiQuestion(text: string, pack: Pick<Pack, "services">): boolean {
+  const t = text.trim();
+  if (!t || t.length > 300 || /\n/.test(t) || !ASKED.test(t)) return false;
+  // Kabsi's own jobs (reviews, posts, Google, hours) keep their way: the router and Kabsi's tools.
+  if (kabsiJob(t) && !namesKabsi(t)) return false;
+  if (ACCOUNT.test(t) || namesKabsi(t)) return true;
+  return SOFT.test(t) && !hasService(t, pack);
+}
+
+/** Words that make a message about a customer an enquiry (asked about, a price) rather than the pack's usual kind. */
+const ENQUIRY = /\b(?:(?:asked|asking|asks|ask)\s+(?:about|if|whether|for (?:a |the )?(?:price|prices|quote|cost))|enquir(?:ed|ing|y|es)|inquir(?:ed|ing|y|es)|wants? to know|wanted to know|price|prices|pricing|how much|quote|cost|costs)\b/i;
+
+/**
+ * RB-T: the kind a message about a customer is proposed as, when it is not the pack's default. At a business whose usual
+ * kind is an appointment or a job, "Dina asked about a keratin price" is an enquiry (a pack with enquiries only). Null: the
+ * pack's default.
+ */
+export function enquiryKind(text: string, pack: Pick<Pack, "kinds" | "defaultKind">): Kind | null {
+  if (pack.defaultKind === "enquiry" || !pack.kinds.includes("enquiry")) return null;
+  return ENQUIRY.test(text) ? "enquiry" : null;
 }

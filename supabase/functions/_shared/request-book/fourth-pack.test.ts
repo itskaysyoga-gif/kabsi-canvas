@@ -5,6 +5,9 @@ import { assert, assertEquals, assertNotMatch, assertStringIncludes } from "jsr:
 import { PACKS } from "./packs/index.ts";
 import { validatePack, type Pack } from "./packs/schema.ts";
 import { tutorV1 } from "./packs/test-fixtures/tutor.v1.ts";
+import { foodV1 } from "./packs/test-fixtures/food.v1.ts";
+import { INDUSTRY_PACKS, NO_PACK_EVER, packForIndustry } from "./packs/industries.ts";
+import { enquiryKind } from "./route.ts";
 import { typedAdapter, type IntakeContext } from "./intake/adapter.ts";
 import { normalizeMessage } from "./normalize/index.ts";
 import { statusDecision } from "./policy.ts";
@@ -37,7 +40,8 @@ const row = (kind: RequestRow["kind"], status: string, outcome: string | null = 
 
 const NOW = new Date("2026-11-08T10:00:00Z");
 
-for (const pack of [tutorV1, repairs]) {
+// RB-T: the food pack (restaurants, cafes, bakeries) is the fourth pack in test, beside the two fixtures that prove the design.
+for (const pack of [tutorV1, repairs, foodV1]) {
   Deno.test(`fourth pack ${pack.id}: passes the one schema without any change to it`, () => {
     assertEquals(validatePack(pack), []);
     assertEquals(JSON.parse(JSON.stringify(pack)), pack);
@@ -88,9 +92,65 @@ Deno.test("fourth pack: no shared file names a pack, so no shared file had to ch
   for (const f of shared) {
     const src = await Deno.readTextFile(new URL(f, dir));
     assertNotMatch(src, /\b(tutor|tutoring|repairs)\b/i, f);
-    for (const p of [...PACKS, tutorV1, repairs]) {
+    for (const p of [...PACKS, tutorV1, repairs, foodV1]) {
       if (f === "packs/index.ts") continue; // the one list of shipped packs, one line each
       assertNotMatch(src, new RegExp(`["'\`]${p.id}["'\`]`), `${f} names pack ${p.id}`);
     }
   }
+});
+
+// ─── RB-T: the food pack, in test only (master plan 30.50 item 8).
+
+Deno.test("food pack: in test only, never shipped, and it needed no change to any shared file", () => {
+  assertEquals(validatePack(foodV1), []);
+  assert(!PACKS.some((p) => p.id === "food"), "food is not in PACKS, so no business can switch it on");
+  assertEquals(foodV1.kinds, ["appointment", "job", "enquiry"]);
+});
+
+Deno.test("food pack: a table request, a cake order and a catering enquiry read through the shared normalizers", () => {
+  const ctx = { country: "GB", timeZone: "Europe/London", now: NOW, pack: foodV1 };
+  const table = normalizeMessage("Table for 4 Friday 8pm, Sara", ctx);
+  assertEquals(table.services.status === "ok" && table.services.matches.map((m) => m.key), ["table"]);
+  assertEquals(table.when.status, "ok");
+  const cake = normalizeMessage("Maya chocolate cake for Saturday 2pm, 07911 123456", ctx);
+  assertEquals(cake.services.status === "ok" && cake.services.matches.map((m) => m.key), ["cake"]);
+  assertEquals(cake.phone.status, "ok");
+  const catering = normalizeMessage("Omar asked about catering for 30 people", ctx);
+  assertEquals(catering.services.status === "ok" && catering.services.matches.map((m) => m.key), ["catering"]);
+  // An enquiry at a food business is proposed as an enquiry; a table request stays the pack's usual kind.
+  assertEquals(enquiryKind("Omar asked about catering for 30 people", foodV1), "enquiry");
+  assertEquals(enquiryKind("Lina asked if the cake is gluten free", foodV1), "enquiry");
+  assertEquals(enquiryKind("Table for 4 Friday 8pm, Sara", foodV1), null);
+  // The proposal names the kind in the pack's words, with Save and Change.
+  const ctxR: ReplyContext = { pack: foodV1, timeZone: "Europe/London", now: NOW };
+  const p = proposalReply({ kind: "appointment", name: "Sara", summary: "Table", norm: table }, ctxR);
+  assertEquals(p.buttons, ["Save", "Change"]);
+  assertStringIncludes(p.body, "Table");
+  const o = proposalReply({ kind: "job", name: "Maya", summary: "Cake", norm: cake }, ctxR);
+  assertStringIncludes(o.body, "Order");
+});
+
+Deno.test("food pack: every order status reads in the pack's words, and an order can be ready and collected", () => {
+  const ctx: ReplyContext = { pack: foodV1, timeZone: "Europe/London", now: NOW };
+  assertStringIncludes(statusChangedReply(row("job", "ready"), ctx).body, "Ready");
+  assertStringIncludes(summaryReply(row("job", "closed", "completed"), ctx).body, "Status: Collected");
+  assertStringIncludes(summaryReply(row("job", "closed", "no_show"), ctx).body, "Status: Not collected");
+  assertStringIncludes(summaryReply(row("appointment", "requested"), ctx).body, "Status: Requested");
+});
+
+// ─── RB-T: one table maps each of the 21 industries to a pack or to none.
+
+Deno.test("industries: 21, each a shipped pack, the food test pack, or none; clinics none", () => {
+  assertEquals(Object.keys(INDUSTRY_PACKS).length, 21);
+  const known = new Set([...PACKS.map((p) => p.id), foodV1.id]);
+  for (const [slug, pack] of Object.entries(INDUSTRY_PACKS)) if (pack !== null) assert(known.has(pack), `${slug} maps to ${pack}`);
+  for (const slug of NO_PACK_EVER) assertEquals(packForIndustry(slug), null, slug);
+  assertEquals(packForIndustry("dental-clinic"), null);
+  assertEquals(packForIndustry("restaurant"), "food");
+  assertEquals(packForIndustry("cafe"), "food");
+  assertEquals(packForIndustry("bakery"), "food");
+  assertEquals(packForIndustry("hair-salon"), "salon");
+  assertEquals(packForIndustry("gym-and-fitness"), "gym");
+  assertEquals(packForIndustry("auto-repair"), "garage");
+  assertEquals(packForIndustry("not-an-industry"), null);
 });

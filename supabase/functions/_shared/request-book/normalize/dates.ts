@@ -6,11 +6,14 @@
 //
 // Bare hours (no am or pm): 8 to 12 are read as written (8:00 to 12:00), 13 to 23 are 24 hour times, 0 is midnight, and
 // 1 to 7 are ambiguous between the morning and the afternoon. Changing that rule changes DATES_VERSION.
+// Version 2 (RB-T): a day part written with a bare hour says which half of the day it is, so the words state it:
+// "tonight at 9" and "Saturday evening 9" are 21:00, "afternoon 3" is 15:00, "morning 7" is 07:00. Before, the day part
+// was set aside and "tonight at 9" read as 09:00. A number followed by people words ("la 5 shakhes") is never an hour, and an hour at the end of a sentence ("at 8.") is read.
 import { readable } from "./digits.ts";
 import { correctWords } from "./fuzzy.ts";
 import type { Evidence } from "./result.ts";
 
-export const DATES_VERSION = 1;
+export const DATES_VERSION = 2;
 
 export type DayPart = "morning" | "afternoon" | "evening";
 
@@ -206,7 +209,8 @@ function findTime(t: string): { reads: Hour; start: number; end: number; marked:
     return { reads: bare(h, mi), start, end, marked: false };
   }
   // A bare hour needs a word that says it is a time: "at 3", "l 10", "el 10", "3 o'clock", or a day word before it (handled by the caller).
-  const w = /(^|[^a-z0-9])(?:at|l|el|la|around|about|@)\s*(\d{1,2})(?![0-9:.\/])(?:\s*o'?clock)?(?![a-z0-9])/.exec(t);
+  // Version 2 (RB-T): a number of people is never an hour ("la 5 shakhes", "for 4 people").
+  const w = /(^|[^a-z0-9])(?:at|l|el|la|around|about|@)\s*(\d{1,2})(?![0-9:\/]|\.\d)(?:\s*o'?clock)?(?![a-z0-9])(?!\s*(?:people|persons?|pax|guests|ppl|adults|kids|shakhes|shakhs|ashkhas|nafar)\b)/.exec(t);
   if (w) {
     const h = Number(w[2]);
     const start = w.index + (w[1]?.length ?? 0);
@@ -215,6 +219,18 @@ function findTime(t: string): { reads: Hour; start: number; end: number; marked:
     return { reads: bare(h, 0), start, end, marked: false };
   }
   return null;
+}
+
+/** The readings of a bare hour that fit the day part written with it; one reading when only one fits. */
+function inHalf(reads: Hour, half: DayPart): Hour {
+  const fit = reads.map(({ hh, mm }) => {
+    if (half === "morning") return hh < 12 ? { hh, mm } : null;
+    if (half === "afternoon") return hh >= 1 && hh <= 7 ? { hh: hh + 12, mm } : hh >= 12 && hh <= 19 ? { hh, mm } : null;
+    return hh >= 1 && hh <= 11 ? { hh: hh + 12, mm } : hh >= 17 ? { hh, mm } : null;
+  }).filter((x): x is { hh: number; mm: number } => x !== null);
+  const one = [...new Map(fit.map((x) => [`${x.hh}:${x.mm}`, x])).values()];
+  // Words that contradict the hour ("morning 18") keep the readings as written: never a guess.
+  return one.length ? one : reads;
 }
 
 function bare(h: number, mi: number): Hour {
@@ -327,6 +343,9 @@ function whenIn(t: string, ctx: { now: Date; timeZone: string }): WhenResult {
   }
   const part = phrase(t, Object.keys(DAY_PARTS));
   const dayPart = part ? DAY_PARTS[part.value]! : null;
+  // Version 2: a bare hour (no am or pm) takes the half of the day its words name ("tonight", an afternoon or evening word).
+  const half = dayPart ?? (/\btonight\b/.test(t) ? "evening" : null);
+  if (time && !time.marked && half) time = { ...time, reads: inHalf(time.reads, half) };
 
   if (!day && !time && !dayPart) return { status: "unknown", reason: "no_date_or_time", version: v };
   if (day && day.days.length === 0) return { status: "unknown", reason: "not_a_real_date", version: v };
