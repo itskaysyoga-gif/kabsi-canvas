@@ -10,6 +10,7 @@
 //   "Maya booked a trial Monday 6"                    an enquiry that became an appointment or a job
 //   "not highlights, a trim", "3 not Corolla, Civic"  a correction of the request touched last, or of that number
 //   "undo"                                            the latest change, inside 10 minutes
+//   "reopen 4"                                        a closed request back to where it was (asked first)
 //   "what's open", "what's unconfirmed", "what's ready", "who asked about a trial this week"
 // Anything else is null, and the message goes the way it went before.
 import type { Pack } from "./packs/schema.ts";
@@ -21,6 +22,8 @@ import { formatDay } from "./replies/words.ts";
 export const COMMANDS_VERSION = 1;
 
 export type Target = { number: number } | { name: string };
+/** The key a status item carries for "reopen N": not a status of any kind; the database names the status to go back to. */
+export const REOPEN = "reopen";
 export type StatusItem = { target: Target; keys: string[] };
 export type Since = "today" | "week" | "month";
 
@@ -47,7 +50,8 @@ const EVERYDAY: [string, string[]][] = [
   ["came", ["attended"]], ["came in", ["attended"]], ["showed up", ["attended"]], ["attended", ["attended"]],
   ["no show", ["no_show"]], ["noshow", ["no_show"]], ["did not come", ["no_show"]], ["didnt come", ["no_show"]],
   ["did not show", ["no_show"]], ["didnt show", ["no_show"]], ["missed", ["no_show"]],
-  ["cancel", ["cancelled"]], ["cancelled", ["cancelled"]], ["canceled", ["cancelled"]],
+  // RB-T: an enquiry cannot be cancelled; "cancel" on an enquiry closes it as lost (asked first, like every ending).
+  ["cancel", ["cancelled", "lost"]], ["cancelled", ["cancelled", "lost"]], ["canceled", ["cancelled", "lost"]],
   ["contacted", ["contacted"]], ["called back", ["contacted"]],
   ["lost", ["lost"]], ["not interested", ["lost"]],
 ];
@@ -141,6 +145,9 @@ export function parseBookCommand(text: string, pack: Pack): BookCommand | null {
   const c = clean(text);
   if (!c || c.length > 300) return null;
   if (/^undo(?: (?:that|it|last|the last one))?$/.test(c)) return { k: "undo" };
+  // RB-T: "reopen 4" puts a closed request back where it was. The database decides where, and the owner is asked first.
+  const ro = /^reopen\s+(?:request\s+)?(#?\d{1,9})$/.exec(c);
+  if (ro) return { k: "status", items: [{ target: { number: numbersOf(ro[1]!)[0]! }, keys: [REOPEN] }] };
 
   // Lists and questions about what is open. No model for the usual phrases.
   const kp = plurals(pack).join("|");

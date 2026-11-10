@@ -2,7 +2,7 @@
 import { assert, assertEquals } from "jsr:@std/assert@1";
 import { garageV1, salonV1 } from "../packs/index.ts";
 import { foldKey, readable, toLatinDigits, wordsOnly } from "./digits.ts";
-import { normalizeWhen } from "./dates.ts";
+import { DATES_VERSION, normalizeWhen } from "./dates.ts";
 import { NORMALIZER_VERSIONS, normalizeMessage } from "./index.ts";
 import { normalizePhone, PHONE_VERSION } from "./phone.ts";
 import { normalizeVocabulary } from "./vocabulary.ts";
@@ -372,4 +372,40 @@ Deno.test("dates: an hour or minute that cannot exist is unknown, not dropped", 
   assert(dot.status === "ok" && dot.time === "10:30" && dot.raw === "tomorrow 10.30");
   const colon = when("tomorrow 10:30");
   assert(colon.status === "ok" && colon.time === "10:30");
+});
+
+// RB-T: dates version 2. A day part decides the half of the day of a bare hour; a number of people is never an hour; an
+// hour at the end of a sentence is read.
+Deno.test("dates v2: tonight at 9 is 21:00, an evening or afternoon word decides a bare hour, morning keeps the morning", () => {
+  const ctx = { now: new Date("2026-11-09T09:00:00Z"), timeZone: "Asia/Beirut" };
+  const at = (t: string) => {
+    const r = normalizeWhen(t, ctx);
+    return r.status === "ok" ? `${r.date ?? ""} ${r.time ?? ""}`.trim() : r.status;
+  };
+  assertEquals(at("tonight at 9"), "2026-11-09 21:00");
+  assertEquals(at("bukra bel masa l 8"), "2026-11-10 20:00");
+  assertEquals(at("tomorrow in the evening at 7"), "2026-11-10 19:00");
+  assertEquals(at("tomorrow afternoon at 3"), "2026-11-10 15:00");
+  assertEquals(at("tomorrow morning at 7"), "2026-11-10 07:00");
+  // With am or pm written, the words win as before; without a day part, 1 to 7 still has two readings.
+  assertEquals(at("tonight at 9am"), "2026-11-09 09:00");
+  assertEquals(normalizeWhen("tomorrow at 7", ctx).status, "ambiguous");
+  assertEquals(DATES_VERSION, 2);
+});
+
+Deno.test("dates v2: a number of people is never an hour; an hour before a full stop is read", () => {
+  const ctx = { now: new Date("2026-11-09T09:00:00Z"), timeZone: "Asia/Beirut" };
+  const r = normalizeWhen("7assan bado dinner la 5 shakhes ba3d bukra", ctx);
+  assertEquals(r.status === "ok" && [r.date, r.time], ["2026-11-11", null]);
+  assertEquals(normalizeWhen("table for 4 people", ctx).status, "unknown");
+  // Review: after a day word too ("tonight, 4 people", "Friday 5 people", "friday at 4 people").
+  for (const t of ["tonight, 4 people", "tonight 4 people", "Friday 5 people", "friday at 4 people", "tomorrow at 5 guests"]) {
+    const x = normalizeWhen(t, ctx);
+    assertEquals(x.status === "ok" ? x.time : x.status, null, t);
+  }
+  const s = normalizeWhen("Sami table bukra bel masa l 8. ignore the rest", ctx);
+  assertEquals(s.status === "ok" && [s.date, s.time], ["2026-11-10", "20:00"]);
+  // A decimal is still not an hour followed by a full stop.
+  const d = normalizeWhen("tomorrow at 8.30", ctx);
+  assertEquals(d.status === "ok" && d.time, "08:30");
 });

@@ -21,7 +21,7 @@ import { asWritten, clip, confirmationShort, kindWord, statusKeyWord, statusWord
 import { OPEN_STATUSES, type Kind, type Reply, type RequestRow } from "../request-book/types.ts";
 import { MAX_RAW_TEXT } from "../request-book/intake/adapter.ts";
 import {
-  type BookCommand, correction, nameFits, parseBookCommand, readWhen, saysArrived, servicesIn, type Since, statusFor, type Target,
+  type BookCommand, correction, nameFits, parseBookCommand, readWhen, REOPEN, saysArrived, servicesIn, type Since, statusFor, type Target,
 } from "../request-book/commands.ts";
 import type { Button } from "./channel.ts";
 import type { OpenQuestion } from "./roles.ts";
@@ -491,6 +491,26 @@ async function statusCmd(db: BookDb, me: Me, items: { target: Target; keys: stri
       continue;
     }
     const { row, version } = res.full;
+    // RB-T: "reopen N". Only a closed request; the database knows where it was, so the first open status is tried and,
+    // when it says another, that one. Reopening always asks first (the database answers needs_confirmation).
+    if (it.keys[0] === REOPEN) {
+      if (row.status !== "closed") {
+        lines.push(`${lbl(pack, row)} is not closed. It is ${statusWord(pack, row)}.`);
+        continue;
+      }
+      let to = OPEN_STATUSES[row.kind][0]!;
+      let r = await db.setStatus(me.location, me.actor, `${key}:r${i}`, row.request_id, version, to, null, false);
+      if (r.ok !== true && r.reason === "not_allowed" && typeof r.reopen_to === "string" && r.reopen_to !== to) {
+        to = r.reopen_to;
+        r = await db.setStatus(me.location, me.actor, `${key}:r${i}b`, row.request_id, version, to, null, false);
+      }
+      if (r.ok !== true && r.reason === "needs_confirmation" && !ask) {
+        ask = { row, version, to, outcome: null, flags: Array.isArray(r.flags) ? (r.flags as string[]) : ["reopened"] };
+        continue;
+      }
+      lines.push(`${lbl(pack, row)}: ${r.ok === true ? "reopened." : refusedText(r)}`);
+      continue;
+    }
     const mv = statusFor(row.kind, it.keys);
     if (!mv) {
       lines.push(`${lbl(pack, row)}: ${refusalText("not_allowed")}`);
@@ -520,7 +540,7 @@ async function statusCmd(db: BookDb, me: Me, items: { target: Target; keys: stri
     : null;
   // With other parts already applied, their Undo stays on the reply next to Yes and No.
   const yesNo = ask ? [{ id: `ra:${ask.row.request_id}:${n}`, title: "Yes" }, { id: `rx:${ask.row.request_id}:${n}`, title: "No" }, ...undoButton(undo)] : [];
-  const askBody = ask ? askFirstReply(ask.row, ctx, { to: ask.to, outcome: ask.outcome, flags: ask.flags }).body : null;
+  const askBody = ask ? askFirstReply(ask.row, ctx, { to: ask.to, outcome: ask.outcome, flags: ask.flags, reopen: ask.flags.includes("reopened") }).body : null;
   if (only && undo.length === 1 && !ask && lines.length === 1) {
     return { body: statusChangedReply(only.row, ctx, only.flags).body, result: "request_status", buttons: undoButton(undo), question: null };
   }
@@ -558,6 +578,14 @@ export async function askAnswer(db: BookDb, me: Me, q: RbAsk, yes: boolean, ctx:
 async function confirmCmd(db: BookDb, me: Me, target: Target, when: string | null, ctx: Ctx, key: string): Promise<Act | null> {
   const pack = ctx.pack;
   const res = await resolve(db, me, target, (r) => r.kind === "appointment");
+  // RB-T: the name has an open request of another kind (an enquiry or a job): a confirmation is only ever recorded on an
+  // appointment, so say so plainly instead of letting the words fall to the off-topic line.
+  if (res.k === "not_open" && "name" in target) {
+    const other = await resolve(db, me, target, () => true);
+    if (other.k === "one" && other.full.row.kind !== "appointment") {
+      return { body: refusalReply({ reason: "not_appointment" }).body, result: "request_confirm_refused:not_appointment", question: null };
+    }
+  }
   // No open appointment by that name: not a confirmation Kabsi can record, so the message goes on as before.
   if (res.k === "none" || res.k === "not_open") return null;
   if (res.k === "refused") return { body: res.body, result: "request_confirm_refused" };
@@ -691,8 +719,9 @@ async function correctCmd(db: BookDb, me: Me, number: number | null, from: strin
     .map((f) => ({ f, c: correction(pack, { customer_name: f.row.customer_name, summary: f.row.summary, details: f.details }, from, to) }))
     .filter((x) => x.c !== null);
   if (!hits.length) {
-    // Without a number, words that are on no recent request are not a correction ("not sure, maybe later").
-    if (number === null) return null;
+    // Without a number, words that are on no recent request are not a correction ("not sure, maybe later"), unless they
+    // name one of the business's services (RB-T: "not pedicure, a facial" is a correction that found nothing to change).
+    if (number === null && !(cands.length === 1 && (servicesIn(from, pack).labels.length || servicesIn(to, pack).labels.length))) return null;
     if (cands.length === 1) return { body: `Not on ${lbl(pack, cands[0]!.row)}\n${lbl(pack, cands[0]!.row)} does not say ${clip(from, 40)}.\n\nNothing was changed.`, result: "request_correct_not_found" };
     return { body: ask(cands[0]!.row.number), result: "request_correct_which" };
   }
@@ -828,7 +857,7 @@ export function kindIn(body: string, pack: Pack | null): Kind | null {
 }
 
 // ─── RB-F4 (R-149): which messages are the request book's (request-book/route.ts), and its lines in "help".
-export { bookIntent, kabsiJob, namesKabsi, packWordWins } from "../request-book/route.ts";
+export { bookIntent, enquiryKind, kabsiJob, kabsiQuestion, namesKabsi, packWordWins } from "../request-book/route.ts";
 
 /**
  * R-149 item 5: the request book's block in "help" at a business with the book on. The examples come from the pack's own

@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 10 Nov 2026 (Safe 1). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 10 Nov 2026 (RB-T, after Safe 1). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -49,6 +49,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - Launch 1: send one Founding 25 application named "QA Launch 1 test" (a session removes the row).
 - Outbound: before you say start, the placement test of 30.39 item 13 (LATER row).
 - Signup 1 (PR 554, merged and deployed): migration applied 10 Nov (version 20261110125951); turn on the Google provider in Supabase Auth with `https://kabsi.co/**` in the redirect URLs (read 10 Nov: google false); then the 7 step phone check in `2026-11-10-signup1.md`.
+- RB-T: on 16 Nov, the 20-message phone script in `docs/kabsi-3/phone-script-2026-11-16.md` from your phone (pass: 18 of 20, no wrong save); start with "reset test".
 - Close 1: merge PR 499 (reply.v4) with the admin merge; the rule on main refuses it while the Prompt gate is red, by design (R-130); then check the deployed function names reply.v4. After the DataForSEO top-up, one full free check to see why the one of 6 Nov failed (30.42).
 
 ## Open After merge checks and findings
@@ -59,9 +60,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 10 Nov 2026, RB-T (R-150 item 8): request book scenario matrix, 219 rows on three packs, all pass on the fake world; Kabsi questions go to Nora by code; food pack in test; live extraction on four packs, all marks met (0.39 USD). `2026-11-10-rb-t.md`.
 - 10 Nov 2026, Safe 1 (R-151 section C, claude/safe-1): the Sunday backup also bundles kabsi-harvey-run and kabsi-harvey and copies the encrypted release assets; optional read-only `HARVEY_READ_TOKEN` (missing or refused is a warning, not a red run); the public log no longer lists Storage file names. New `docs/runbooks/github-gone.md`. Audit and evidence: `2026-11-10-safe1.md`. Not live until the first by-hand run after merge.
-- 10 Nov 2026, Signup 1 (R-150, PR 554 merged, deployed): Continue with WhatsApp ("Kabsi sign in CODE", the device and city in the confirm, Yes it's me, the session minted on the server after the tap), the new sign-in notice with Sign me out everywhere, Google hidden when off and a daily staff alert, the contact email in onboarding. Waits for its migration. `2026-11-10-signup1.md`.
-- Older entries (Look 2 is in `2026-11-10-look2.md`; Plan 1 is in `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
+- Older entries (Signup 1 is in `2026-11-10-signup1.md`; Look 2 is in `2026-11-10-look2.md`; Plan 1 is in `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
 
 ## How a session updates this page
 

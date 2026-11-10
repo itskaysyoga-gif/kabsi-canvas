@@ -752,7 +752,21 @@ export class World {
         const q = mine(loc, id);
         if (!q) return no("not_found");
         if (version !== (q.version ?? 1)) return no("version_conflict", { row_version: q.version ?? 1 });
-        if (q.status === "closed") return no("not_allowed");
+        if (q.status === "closed") {
+          // RB-T: reopening, as request_set_status has it: owner or manager, never a conversion or a void, only back to where
+          // it was (the refusal names it), and always asked first.
+          if (!["owner", "manager"].includes(roleOf(loc, actor))) return no("forbidden");
+          if (q.outcome === "converted" || q.outcome === "voided") return no("not_reopenable");
+          const prev = [...w.activities].reverse().find((a) => a.request === q.id && a.type === "status_changed" && a.to === "closed")?.from ?? null;
+          if (!prev || to !== prev || outcome !== null) return no("not_allowed", { reopen_to: prev });
+          if (!ack) return no("needs_confirmation", { flags: ["reopened"] });
+          const fromOutcome = q.outcome ?? null;
+          q.status = to;
+          q.outcome = null;
+          q.version = (q.version ?? 1) + 1;
+          const a = act(loc, q, "status_changed", actor, "closed", to, fromOutcome, null, { flags: ["reopened"] });
+          return finish(loc, key, rp.hash, result(q, a, ["reopened"]));
+        }
         const ru = rule(q.kind, q.status, to, outcome, q.starts_at);
         if (ru.reason) return no(ru.reason);
         if (ru.owner && !["owner", "manager"].includes(roleOf(loc, actor))) return no("forbidden");

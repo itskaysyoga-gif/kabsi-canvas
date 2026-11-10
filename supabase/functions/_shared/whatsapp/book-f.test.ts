@@ -80,7 +80,7 @@ Deno.test("reader: status words from the pack and everyday words, by number or b
   ] });
   assert.equal((parseBookCommand("here 3, 4", garageV1) as { items: unknown[] }).items.length, 2);
   assert.deepEqual(parseBookCommand("3 not ready", garageV1), { k: "status", items: [{ target: { number: 3 }, keys: ["active"] }] });
-  assert.deepEqual(parseBookCommand("cancel 2", salonV1), { k: "status", items: [{ target: { number: 2 }, keys: ["cancelled"] }] });
+  assert.deepEqual(parseBookCommand("cancel 2", salonV1), { k: "status", items: [{ target: { number: 2 }, keys: ["cancelled", "lost"] }] });
   // Words that keep today's meaning, and messages that are new requests, are not commands.
   for (const t of ["cancel", "closed", "post", "ready", "Book Sarah for highlights Thursday afternoon", "Maya asked about a trial",
     "Ali Corolla brakes, car's here", "thanks", "stats", "review link", "it is ready", "what is it", "hours"]) {
