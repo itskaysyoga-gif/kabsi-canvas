@@ -20,6 +20,20 @@ export const FOUNDING_CONSENT = {
     "I approve the final text before it is published.",
 } as const;
 
+/**
+ * Founding 1 (R-151, master plan 30.51): the private invite. The page is /founding/<slug>; the slug is app_settings
+ * founding_invite_slug, 24 letters and digits. Kept equal to INVITE_SHAPE in src/lib/founding-invite.ts by tests/founding1.test.ts.
+ */
+export const INVITE_SHAPE = /^[A-Za-z0-9]{24}$/;
+/** True only when the given slug has the shape and equals the stored one. Compares every character, so the time taken does not say how many matched. */
+export function inviteMatches(given: unknown, stored: unknown): boolean {
+  if (typeof given !== "string" || typeof stored !== "string") return false;
+  if (!INVITE_SHAPE.test(given) || !INVITE_SHAPE.test(stored)) return false;
+  let diff = 0;
+  for (let i = 0; i < stored.length; i++) diff |= given.charCodeAt(i) ^ stored.charCodeAt(i);
+  return diff === 0;
+}
+
 const E164 = /^\+[1-9][0-9]{6,14}$/;
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
@@ -91,7 +105,7 @@ const longDate = (d: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric
 export function foundingLine(day: FoundingDay, business: string, endsAt: string | null, appUrl: string) {
   const end = endsAt ? longDate(endsAt) : "the last day of your free months";
   const plan = `${appUrl}/app/plan`;
-  const price = "Founding price: Essentials $19 a month or Pro $39 a month, kept while your subscription stays paid.";
+  const price = "Launch price: Essentials $19 a month or Pro $39 a month, kept while your subscription stays paid.";
   const lines: Record<FoundingDay, string[]> = {
     60: [
       `${business}: you are 60 days into your three free months of Kabsi Pro as one of the Founding 25.`,

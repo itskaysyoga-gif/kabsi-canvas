@@ -1,4 +1,4 @@
-// The public site's calls to Kabsi's Edge Functions (Web 2): the real Founding 25 and Founding Partner counts, the two
+// The public site's calls to Kabsi's Edge Functions (Web 2): the Founding 25 count (private since Founding 1) and the Founding Partner counts, the two
 // applications, and the free check. Every call sends the public anon JWT (D295); every write carries a Turnstile token.
 // Nothing here invents a number: a count that does not load stays null and the page shows no number.
 import { useEffect, useState } from "react";
@@ -50,12 +50,19 @@ const isPlaces = (v: unknown): v is FoundingPlaces =>
   typeof (v as FoundingPlaces).left === "number" &&
   typeof (v as FoundingPlaces).total === "number";
 
-/** Speed 2 part B: a plain same-origin GET (no preflight), answered from Vercel's edge (src/lib/founding-count.ts). */
+/**
+ * Founding 1 (R-151): the Founding 25 count, asked on kabsi.co's own address with the private invite slug. Without the
+ * current slug the answer is 404 and no number shows. Never cached (src/lib/founding-count.ts).
+ */
 export const FOUNDING_COUNT_PATH = "/api/founding-count";
 
-export async function loadFoundingPlaces(): Promise<FoundingPlaces | null> {
+export async function loadFoundingPlaces(slug: string): Promise<FoundingPlaces | null> {
   try {
-    const res = await fetch(FOUNDING_COUNT_PATH);
+    // The slug rides in a header, not the address, so no request log records it (Founding 1 review).
+    const res = await fetch(FOUNDING_COUNT_PATH, {
+      cache: "no-store",
+      headers: { "x-founding-invite": slug },
+    });
     if (!res.ok) return null;
     const v = (await res.json()) as unknown;
     return isPlaces(v) ? v : null;
@@ -73,21 +80,18 @@ export async function loadPartnerPlaces(): Promise<PartnerPlaces | null> {
   }
 }
 
-/** One fetch per page view for all the banners on it (GET /api/founding-count, kept 60 seconds at Vercel's edge). */
-let foundingOnce: Promise<FoundingPlaces | null> | null = null;
-export function useFoundingPlaces(): FoundingPlaces | null {
+/** The count for the invited page: one fetch per page view, nothing while it is unknown. */
+export function useFoundingPlaces(slug: string): FoundingPlaces | null {
   const [v, setV] = useState<FoundingPlaces | null>(null);
   useEffect(() => {
     let live = true;
-    foundingOnce ??= loadFoundingPlaces();
-    void foundingOnce.then((r) => {
+    void loadFoundingPlaces(slug).then((r) => {
       if (live) setV(r);
-      if (!r) foundingOnce = null;
     });
     return () => {
       live = false;
     };
-  }, []);
+  }, [slug]);
   return v;
 }
 
@@ -115,6 +119,8 @@ export const FOUNDING_CONSENT = {
 } as const;
 
 export type FoundingApplication = {
+  /** The private invite slug from the address (Founding 1): the server refuses an application without the current one. */
+  invite: string;
   business_name: string;
   country: "AE" | "GB" | "US";
   trade: FoundingTrade;

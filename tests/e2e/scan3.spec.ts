@@ -200,7 +200,6 @@ async function stub(page: Page, o: { business: Key; nearby?: "done" | "unavailab
       : json(route, { ...DONE, business: BUSINESSES[current].snapshot.name }),
   );
   await page.route("**/functions/v1/visibility/check/result", (route) => json(route, DONE));
-  await page.route("**/api/founding-count", (route) => json(route, { total: 25, left: 12 }));
   return calls;
 }
 
@@ -268,9 +267,6 @@ test.describe("Scan 3: the free check result", () => {
       ).toBeVisible();
       await expect(page.getByText("No card. Cancel any time.")).toBeVisible();
       await expect(page.getByText("Why Kabsi asks for Manager access")).toBeVisible();
-      await expect(
-        page.getByText("Or apply for Founding 25: three months of Pro, free"),
-      ).toBeVisible();
       const yellow = await main.evaluate(
         (el) =>
           [...el.querySelectorAll("a, button")].filter(
@@ -360,9 +356,7 @@ test.describe("Scan 3: the free check result", () => {
       "href",
       "/guides/add-manager-google-business-profile",
     );
-    await expect(
-      page.getByRole("link", { name: "Or apply for Founding 25: three months of Pro, free" }),
-    ).toHaveAttribute("href", "/founding");
+    await expect(page.getByText("Founding 25")).toHaveCount(0);
     await page.getByText("The full trial terms").click();
     await expect(page.getByText("When the 14 days start")).toBeVisible();
     await page.getByRole("button", { name: "Start your 14-day free trial" }).click();

@@ -16,7 +16,7 @@ on:
         required: true
       pages:
         description: "Paths, space separated"
-        default: "/ /pricing /scan /founding /for/hair-salon"
+        default: "/ /pricing /scan /for/hair-salon"
         required: true
 
 permissions:

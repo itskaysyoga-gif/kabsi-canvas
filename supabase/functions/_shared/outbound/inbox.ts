@@ -55,7 +55,7 @@ export function yesReply(business: string, code: string): string {
   const fb = SOCIAL_LINKS.find((s) => s.name === "Facebook")!.href.replace(/^https:\/\//, "");
   const ig = SOCIAL_LINKS.find((s) => s.name === "Instagram")!.href.replace(/^https:\/\//, "");
   // Lane R, 6 Nov 2026 (30.39 item 11): word for word; a template wrote it, so it is signed without Nora. R-142
-  // decision 4a (9 Nov 2026): the founding price sentence of COPY.md (the first 30 paying businesses), no Founding 25.
+  // decision 4a (9 Nov 2026): the launch price sentence of COPY.md (the first 30 paying businesses), no Founding 25.
   return [
     `Hi ${business} team,`,
     `Thanks. Here is the free check of ${possessive(business)} Google profile: kabsi.co/scan/${code}`,

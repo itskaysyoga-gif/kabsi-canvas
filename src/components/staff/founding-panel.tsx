@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fmtDate } from "@/lib/format";
+import { SITE_URL } from "@/lib/site";
 import {
   decideFounding,
+  founderInvite,
   linkFounding,
   loadFounding,
   TRADE_LABEL,
@@ -18,6 +20,75 @@ import { cn } from "@/lib/utils";
 // link from an accepted place to its business (Pro for 90 days from the day Google access works, no card), and the
 // day-45 kill gate: fewer than 10 of the 25 approving work at least once a week pauses new places.
 type Business = { id: string; name: string; organization_id?: string | null };
+
+/** The private invite link (Founding 1, R-151): shown only here, to staff. A new link makes the old one stop at once. */
+function InviteLink() {
+  const qc = useQueryClient();
+  const [shown, setShown] = useState(false);
+  const [note, setNote] = useState("");
+  const q = useQuery({
+    queryKey: ["staff-founding-invite"],
+    queryFn: () => founderInvite(false),
+    enabled: shown,
+    gcTime: 0,
+    staleTime: 0,
+  });
+  const rotate = useMutation({
+    mutationFn: async () => {
+      // A read still on its way must not land after the new link and put the old one back.
+      await qc.cancelQueries({ queryKey: ["staff-founding-invite"] });
+      return founderInvite(true);
+    },
+    onSuccess: (slug) => {
+      qc.setQueryData(["staff-founding-invite"], slug);
+      setShown(true);
+      setNote("New link made. The old link no longer works.");
+    },
+    onError: (e: Error) => setNote(e.message),
+  });
+  const link = q.data ? `${SITE_URL}/founding/${q.data}` : null;
+  const copy = () => {
+    if (!link) return;
+    void navigator.clipboard
+      .writeText(link)
+      .then(() => setNote("Link copied."))
+      .catch(() => setNote("Could not copy. Select the link and copy it."));
+  };
+  return (
+    <div className="mt-4 rounded-card bg-surface-2 p-4 text-small">
+      <p className="font-bold">Invite link</p>
+      <p className="mt-1 text-text-2">
+        Send it only by message or email to a business you want to invite. It is not on any public
+        page.
+      </p>
+      {shown && link && <p className="mt-2 break-all font-mono text-label">{link}</p>}
+      {shown && q.error && <p className="mt-2 text-bad">{String(q.error.message)}</p>}
+      <div className="mt-3 flex flex-wrap gap-2">
+        {!shown ? (
+          <Button onClick={() => setShown(true)}>Show the link</Button>
+        ) : (
+          <Button onClick={copy} disabled={!link}>
+            Copy the link
+          </Button>
+        )}
+        <Button
+          onClick={() => {
+            if (window.confirm("Make a new link? The old link stops working at once."))
+              rotate.mutate();
+          }}
+          disabled={rotate.isPending || q.isFetching}
+        >
+          Make a new link
+        </Button>
+      </div>
+      {note && (
+        <p role="status" className="mt-2 text-text-2">
+          {note}
+        </p>
+      )}
+    </div>
+  );
+}
 
 export function FoundingPanel({ businesses }: { businesses: Business[] }) {
   const q = useQuery({
@@ -53,6 +124,7 @@ export function FoundingPanel({ businesses }: { businesses: Business[] }) {
           {o.places.open_to_any ? " · open places go to any trade" : ""}
         </p>
       </div>
+      <InviteLink />
       <ul className="mt-3 grid grid-cols-2 gap-2 text-small sm:grid-cols-4">
         {(Object.keys(TRADE_LABEL) as FoundingTrade[]).map((t) => (
           <li key={t} className="rounded-card bg-surface-2 p-3">

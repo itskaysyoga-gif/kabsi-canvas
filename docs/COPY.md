@@ -1,5 +1,7 @@
 # Kabsi copy deck (docs/COPY.md), lane R chat, 25 Oct 2026
 
+**Changed by section 80 (the Founding task, 10 Nov 2026, lane R R-151, master plan 30.51):** Founding 25 is private. Every line in this deck that puts Founding 25 on a public page (the line above the header, the banner, the Home and Pricing cards, the About and footer links, the free check link, the share image) is retired, and "founding price" is "launch price" in every public line. Section 80 holds what replaces them. Where an older section still says otherwise, section 80 wins.
+
 Every line a mockup or Web 2 page carries, so no screen has placeholder text. Written to the kabsi-copy rules and master plan 24, 27, 28, 29 and 30. Web 2 builds from it and updates the facts to match (section 27 makes several facts lines out of date: the Weekly Care Report is now the Results Report, the pillars and H1 changed).
 
 Rules used throughout: sentence case; numbers as digits; ranges with "to"; no dashes, no exclamation marks; Google only as plain words, never in a headline graphic; never promise rankings, reviews, calls or customers (K-144); every example labelled Example; one main button per screen.
@@ -2210,3 +2212,25 @@ Only at a business with the request book on (the three test businesses); nothing
 - "not pedicure, a facial" when the last request has no pedicure: "Not on Appointment 4" then "Appointment 4 does not say pedicure." and "Nothing was changed."
 - "Dina asked about a keratin price" at a salon or garage: the proposal is titled "💬 *New enquiry*" (the pack's enquiry word) instead of the usual kind.
 - "Is my data safe?" and other questions about the account, data, privacy, price, plan, bill, login or Kabsi: Nora's answer, as for any question to Kabsi.
+
+## 80. Founding task: Founding 25 is private, and the launch price (10 Nov 2026, lane R R-151, master plan 30.51)
+
+Founding 25 leaves every public surface. Rashid offers it only by message and email, with a link that holds a secret. Nothing replaces the line above the header: no promo bar, no empty bar.
+
+**Retired lines (kept in git; not on any public page, in any public fact or in any llms file).** The slim line above the header ("Founding 25: three months of Kabsi Pro, free. [n] of 25 places left. Apply" and its hide button); the Founding 25 banner and the Pricing card ("Apply for a place"); the Home founder band's right side ("Founding 25. Three months of Kabsi Pro, free." with "[n] of 25 places left."); the About paragraph ("Founding 25 businesses talk to Rashid directly..."); the footer link "Founding 25"; the free check's "Or apply for Founding 25: three months of Pro, free"; the header link; the share image "founding.png"; the FAQPage data of /founding. The Home founder band is the photo, "From the founder", the quote and "Rashid Abou Hamzy, founder of Kabsi. hello@kabsi.co", and nothing beside it.
+
+**The launch price (replaces "founding price" in every public line).** The price is unchanged: the first 30 paying businesses, Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year, kept while they stay subscribed.
+- One sentence (Plan page, terms, FAQ, emails, facts): "The first 30 paying businesses pay the launch price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year."
+- On each plan card while places remain: "Launch price for the first 30 paying businesses: 19 US dollars a month, kept while you stay subscribed. Then 29." (and the same for Pro and yearly).
+- The Pricing block (one card, shown only while places remain, with the real count; no Founding 25 card beside it): label "The launch price", "The first 30 paying businesses pay less.", "They pay the launch price and keep it while they stay subscribed.", the prices, "[n] of 30 launch places left."
+- Home pricing preview: "Launch price $19 and $39 for the first 30 paying businesses." only while places remain.
+- Plan page: "Choose Pro, $39 a month, launch price" while places remain; a running plan shows "Launch price, kept while you stay subscribed."; the receipt email says "Launch price, kept while your subscription stays paid."
+- Terms section 8: "A business that joins by Kabsi's invitation and chooses a plan after its free months pays the launch price too."
+- Privacy: "If you apply for a place Rashid invited you to:" and "Applications for an invited place and to Kabsi Partners:" (the retention is unchanged: declined, deleted 90 days after the decision; waitlisted, 180 days; accepted, kept while in the program). Legal wording changes only with lane R: this is a name change, listed for lane R in the Founding task report.
+- Creem product names: "Kabsi Essentials, monthly, launch price" and the three like it (the list family is unchanged). The setup action renames the products Creem already holds.
+
+**Nora and the facts.** Public fact: "There is no public founding offer. A business that was invited should open the link in its invitation." Nora gives no /founding address, describes no terms and counts no places. Everything else about Founding 25 is in `knowledge/internal/2026-11-10-founding-25-private.md`.
+
+**The private page, /founding/<slug>** (only the invited see it; noindex and nofollow, no canonical, no share image, never cached; its words are the ones of sections 3 and 26, with "launch price" where it said "founding price"). Wrong or no slug: the real not-found page. Hero: "Founding 25: three months of Kabsi Pro, free." with "For 25 businesses. Kabsi does the Google work; you tell Rashid what to make better." and "By application. No card. After 90 days, choose a plan or stop, nothing is charged by itself." Its FAQ answer "What happens after 90 days?" says "You choose a plan at the launch price, kept while your subscription stays paid, or you stop. Nothing is charged by itself." The member messages (day 60, 85 and 90) keep their words, except "Founding price:" is "Launch price:" in them.
+
+**Staff** (staff page Programs, Founding 25 panel): "Invite link" with "Show the link", "Copy the link" and "Make a new link" (asks "Make a new link? The old link stops working at once."); then "New link made. The old link no longer works." and "Link copied."

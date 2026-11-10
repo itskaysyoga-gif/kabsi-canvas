@@ -24,6 +24,8 @@ const PIXEL_ID = (import.meta.env.VITE_META_PIXEL_ID ?? "").trim();
 // Pages a public visitor never sees as Kabsi marketing. isPrivatePath covers /app, /partner, /staff, /start, /login,
 // /a/ and /activate/.
 const NO_PIXEL = [
+  // Founding 1 (R-151): the private invite address holds a secret, so Meta never sees it.
+  /^\/founding\//,
   /^\/h\//,
   /^\/u\//,
   /^\/unsubscribe(\/|$)/,

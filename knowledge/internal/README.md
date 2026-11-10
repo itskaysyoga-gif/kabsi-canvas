@@ -21,4 +21,8 @@ No em dashes, en dashes or exclamation marks; no Arabic shown in public facts (R
 
 ## Notes
 
-None yet. When the first team-only note is needed, add it here as its own file and link it from this list.
+- [2026-11-09-moved-from-facts.md](2026-11-09-moved-from-facts.md): lines moved out of the public facts on 9 Nov 2026.
+- [2026-11-10-rb-f4-request-book-routing.md](2026-11-10-rb-f4-request-book-routing.md): request book messages on WhatsApp (RB-F4).
+- [2026-11-10-founding-25-private.md](2026-11-10-founding-25-private.md): Founding 25 is private since 10 Nov 2026 (R-151); the program text, the private link shape and the privacy rows, moved word for word.
+
+Add each new team-only note here as its own file and link it from this list.

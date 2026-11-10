@@ -20,8 +20,8 @@ export const PLAN_PRICES = {
   extraLocationMonthly: 15,
   extraLocationYearly: 150,
 } as const;
-// Price 1: the founding price for the first 30 paying businesses. Keep equal to FOUNDING_SENTENCE in src/lib/site.ts.
-export const FOUNDING_SENTENCE = "The first 30 paying businesses pay the founding price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year.";
+// Price 1, called the launch price in public since Founding 1 (R-151): the price for the first 30 paying businesses. Keep equal to FOUNDING_SENTENCE in src/lib/site.ts.
+export const FOUNDING_SENTENCE = "The first 30 paying businesses pay the launch price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year.";
 export const PRICES_SENTENCE = `Essentials is $${PLAN_PRICES.essentialsMonthly} a month or $${PLAN_PRICES.essentialsYearly} a year. Pro is $${PLAN_PRICES.proMonthly} a month or $${PLAN_PRICES.proYearly} a year. An extra location is $${PLAN_PRICES.extraLocationMonthly} a month or $${PLAN_PRICES.extraLocationYearly} a year. Prices are in US dollars, plus tax where it applies.`;
 // Keep equal to CARD_PAYMENTS_COMING in src/lib/plans.ts.
 export const CARD_PAYMENTS_COMING = "Card payments in US dollars are coming. Until they open there is nothing to pay.";

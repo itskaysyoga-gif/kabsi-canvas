@@ -36,7 +36,6 @@ import {
   getFreeCheck,
   joinWaitlist,
   startFreeCheck,
-  useFoundingPlaces,
   type FreeCheck,
   type StartedCheck,
 } from "@/lib/public-api";
@@ -899,16 +898,8 @@ function WouldDoCard({ lines }: { lines: { who: string; line: string }[] }) {
   );
 }
 
-/** The one primary button, when the trial starts, the full terms on request, Founding 25 as a quiet line. */
-function TrialCard({
-  onStart,
-  handoff,
-  founding,
-}: {
-  onStart: () => void;
-  handoff: string | null;
-  founding: boolean;
-}) {
+/** The one primary button, when the trial starts, the full terms on request. */
+function TrialCard({ onStart, handoff }: { onStart: () => void; handoff: string | null }) {
   return (
     <section
       aria-labelledby="trial-h"
@@ -954,16 +945,6 @@ function TrialCard({
           ))}
         </dl>
       </details>
-      {founding && (
-        <p className="mt-2 text-small text-text-2">
-          <SiteLink
-            to="/founding"
-            className="inline-flex min-h-11 items-center underline decoration-text-3 underline-offset-4 hover:decoration-text-1"
-          >
-            Or apply for Founding 25: three months of Pro, free
-          </SiteLink>
-        </p>
-      )}
     </section>
   );
 }
@@ -1010,8 +991,6 @@ export function LiveResult({
   change: { q: string; keyword: string | null; industry: string | null };
 }) {
   const navigate = useNavigate();
-  // Founding 25 shows only while places remain (the real count; nothing while it is unknown). Polish 2 review.
-  const f25 = useFoundingPlaces();
   const check = useCheck(started);
   // Only the mock mode's waiting list; "unavailable" (30.28) shows neither part.
   const waitlist = !!started && "state" in started && started.state === "waitlist";
@@ -1148,11 +1127,7 @@ export function LiveResult({
         </div>
 
         <aside className="space-y-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1">
-          <TrialCard
-            onStart={() => void startWeb()}
-            handoff={handoff}
-            founding={!!f25 && f25.left > 0}
-          />
+          <TrialCard onStart={() => void startWeb()} handoff={handoff} />
           <AccessCard />
           <SendReport
             placeId={s.place_id}

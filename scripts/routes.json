@@ -11,8 +11,6 @@
   { "path": "/terms", "page": "Terms", "wait": 800 },
   { "path": "/partners", "page": "Partners", "wait": 1500 },
   { "path": "/partners/terms", "page": "Partner terms", "wait": 800 },
-  { "path": "/founding", "page": "Founding 25", "wait": 1500 },
-  { "path": "/founding?state=sent", "page": "Founding 25, sent (development only)", "wait": 800 },
   { "path": "/manager-steps", "page": "Manager steps", "wait": 800 },
   { "path": "/manager-steps?state=pending", "page": "Manager steps, pending (development only)", "wait": 800 },
   { "path": "/scan", "page": "Free check", "wait": 800 },

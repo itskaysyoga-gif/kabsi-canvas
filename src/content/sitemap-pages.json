@@ -30,12 +30,6 @@
     "sources": ["src/routes/google-review-link.tsx"]
   },
   {
-    "path": "/founding",
-    "changefreq": "weekly",
-    "priority": "0.7",
-    "sources": ["src/routes/founding.tsx"]
-  },
-  {
     "path": "/for",
     "changefreq": "monthly",
     "priority": "0.7",

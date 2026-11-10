@@ -2,7 +2,7 @@
 // line are in d9-home.tsx, which loads this file after the page paints): the profile watch; a
 // photo to a Google post; reviews, holiday hours and the weekly report as one compact row; Where you show up (the
 // nearby map and one AI answer); you stay in control; pick your business; the pricing
-// preview; the founder with Founding 25; four questions; the closing free check. Every business is an Example. CSS
+// preview; the founder; four questions; the closing free check. Every business is an Example. CSS
 // only: nothing moves on load.
 import {
   CalendarDays,
@@ -17,7 +17,6 @@ import {
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { CONTACT_EMAIL, TRIAL_LINE } from "@/lib/site";
-import { useFoundingPlaces } from "@/lib/public-api";
 import { ExampleBadge, Faq, KabsiMark } from "./ui";
 import { FOUNDER, Img, PHOTOS, type Photo } from "./photos";
 import { MORE_PHOTOS } from "./photos-more";
@@ -26,7 +25,6 @@ import { Highlight } from "./highlight";
 import { SiteLink } from "./site-link";
 import { PLANS } from "./plans";
 import { useFoundingLeft } from "./founding-price";
-import { FOUNDING25_TOTAL } from "./founding-total";
 import { RankDot } from "./map";
 import { BAND_LABEL, type RankBand } from "./map-data";
 import { FAQ, HOME_FAQ } from "./faq-data";
@@ -585,7 +583,7 @@ function D9PickBusiness() {
   );
 }
 
-/* ---------- Pricing preview (the founding price line only while founding places remain) ---------- */
+/* ---------- Pricing preview (the launch price line only while launch places remain) ---------- */
 
 /** Industries 2: an industry page puts the headline's key phrase on the yellow bar. */
 export function PricingPreview({ marked = true }: { marked?: boolean } = {}) {
@@ -631,8 +629,8 @@ export function PricingPreview({ marked = true }: { marked?: boolean } = {}) {
         </ul>
         {left !== null && left > 0 && (
           <p className="mt-4 text-small font-semibold">
-            Founding price {PLANS.map((p) => `$${p.foundingMonthly}`).join(" and ")} for the first
-            30 paying businesses.
+            Launch price {PLANS.map((p) => `$${p.foundingMonthly}`).join(" and ")} for the first 30
+            paying businesses.
           </p>
         )}
         <p className="mt-2 text-small text-text-2">
@@ -643,18 +641,12 @@ export function PricingPreview({ marked = true }: { marked?: boolean } = {}) {
   );
 }
 
-/* ---------- The founder and Founding 25 (the real count only) ---------- */
+/* ---------- The founder (no invite-only offer on Home, Founding 1, R-151) ---------- */
 
 function FounderBand() {
-  const places = useFoundingPlaces();
   return (
     <section aria-labelledby="founder-h" className="theme-dark bg-band">
-      <div
-        className={cn(
-          "container-kb grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-16",
-          sectionY,
-        )}
-      >
+      <div className={cn("container-kb", sectionY)}>
         <figure className="flex gap-5 sm:gap-6">
           <img
             src={FOUNDER.large}
@@ -683,26 +675,6 @@ function FounderBand() {
             </figcaption>
           </div>
         </figure>
-        <div className="rounded-panel border border-line-strong p-5 sm:p-7">
-          <p data-qa-mask className="min-h-6 text-small font-bold text-text-2">
-            {places
-              ? places.left > 0
-                ? `${places.left} of ${places.total || FOUNDING25_TOTAL} places left.`
-                : "All 25 places are taken."
-              : null}
-          </p>
-          <h3 className="mt-1 text-h3">
-            Founding 25. <span className="text-phrase">Three months of Kabsi Pro, free.</span>
-          </h3>
-          <p className="mt-2 text-small text-text-2 sm:text-body">
-            By application, no card. After 90 days you choose a plan or stop. Nothing is charged by
-            itself.
-          </p>
-          <SiteLink to="/founding" className={cn(d9LinkCls, "mt-2 text-body")}>
-            Apply for a place
-            <D9Arrow />
-          </SiteLink>
-        </div>
       </div>
     </section>
   );

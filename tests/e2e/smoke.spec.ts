@@ -58,11 +58,18 @@ test.describe("smoke @smoke", () => {
     expect(typeof (await r.json()).left).toBe("number");
   });
 
-  // Speed 2 part B: the pages read the count on their own address (no preflight), kept at Vercel's edge.
-  test("the founding count answers on the site's own address", async ({ request }) => {
-    const r = await request.get("/api/founding-count");
-    expect(r.status()).toBe(200);
-    expect(typeof (await r.json()).left).toBe("number");
+  // Founding 1 (R-151): the Founding 25 count answers only to the private invite slug. Without one, or with a wrong one, 404.
+  test("the Founding 25 count and page stay private", async ({ request }) => {
+    for (const p of ["/api/founding-count", "/api/founding-count?slug=wrongwrongwrongwrongwr"]) {
+      const r = await request.get(p);
+      expect(r.status(), p).toBe(404);
+      expect(r.headers()["cache-control"], p).toBe("no-store");
+    }
+    for (const p of ["/founding", "/founding/wrongwrongwrongwrongwr"]) {
+      const r = await request.get(p);
+      expect(r.status(), p).toBe(404);
+      expect(await r.text(), p).not.toMatch(/Founding 25/);
+    }
   });
 
   test("the go.kabsi.co worker reads its store", async ({ request }) => {

@@ -136,7 +136,6 @@ describe("industry pages (Design 5, Web 2)", () => {
     const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
     const paths = [
       "/for",
-      "/founding",
       ...INDUSTRIES.map((i) => `/for/${i.slug}`),
       ...HOME_EXAMPLES.map((e) => e.to),
     ];

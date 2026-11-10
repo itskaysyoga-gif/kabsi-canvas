@@ -1,8 +1,9 @@
 // programs (master plan 30.17 section 1, 29.3, 30.15 section 5): the server side of /founding and /partners.
 // Public, no JWT (verify_jwt off): every write passes Turnstile and a rate limit, and the database functions it calls
 // are open to the service role only, so a browser never writes a table directly (plan 2.3).
-//   GET  /programs/founding   the real number of Founding 25 places left, with the mix (cached 5 minutes)
-//   POST /programs/founding   a Founding 25 application
+//   GET  /programs/founding (header x-founding-invite: SLUG)   the real number of Founding 25 places left, with the mix; only with the private
+//                             invite slug (Founding 1, R-151), else 404; never cached, so a rotated slug stops at once
+//   POST /programs/founding   a Founding 25 application; the body carries the same invite, else 404
 //   GET  /programs/partners   the Founding Partner places left (the first 20 approved)
 //   POST /programs/partners   a Kabsi Partners application ("Apply by email" on /partners; WhatsApp is PA2)
 // Staff alerts on WhatsApp (R-64) tell Rashid a new application is waiting; the staff page decides.
@@ -10,15 +11,33 @@ import { serve } from "../_shared/kabsi.ts";
 import { clientIp } from "../_shared/client-ip.ts";
 import { admin, captureError, CORS, fail, json, log, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { staffAlert } from "../_shared/billing.ts";
-import { checkFounding, checkPartner } from "../_shared/programs.ts";
+import { checkFounding, checkPartner, inviteMatches } from "../_shared/programs.ts";
 import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
 
 const CACHE = { "cache-control": "public, max-age=300" };
 
-async function count(fn: "founding_places" | "partner_places"): Promise<Response> {
+async function count(fn: "partner_places"): Promise<Response> {
   const { data, error } = await admin().rpc(fn);
   if (error || !data) return json({ error: "unavailable" }, 503);
   return json(data, 200, CACHE);
+}
+
+const NO_STORE = { "cache-control": "no-store" };
+
+/** Founding 1: true only for the current private invite slug (app_settings founding_invite_slug, read with the service role). */
+async function invited(given: unknown): Promise<boolean> {
+  if (typeof given !== "string" || given.length !== 24) return false;
+  const { data, error } = await admin().from("app_settings").select("value").eq("key", "founding_invite_slug").maybeSingle();
+  if (error) throw error;
+  return inviteMatches(given, data?.value);
+}
+const notFound = () => json({ error: "not_found" }, 404, NO_STORE);
+
+async function foundingCount(req: Request): Promise<Response> {
+  if (!(await invited(req.headers.get("x-founding-invite")))) return notFound();
+  const { data, error } = await admin().rpc("founding_places");
+  if (error || !data) return json({ error: "unavailable" }, 503, NO_STORE);
+  return json(data, 200, NO_STORE);
 }
 
 // Sec 1: the limits fail closed: a limiter outage stops applications (the insert would fail anyway) and the staff alert.
@@ -37,6 +56,8 @@ const known = (e: { message?: string } | null, code: string) => !!e?.message && 
 
 async function applyFounding(req: Request): Promise<Response> {
   const body = await req.json().catch(() => ({})) as Record<string, unknown>;
+  // Founding 1: an application needs the private invite, checked before anything else is read or counted.
+  if (!(await invited(body.invite))) return notFound();
   const stop = await gate(req, body, "founding");
   if (stop) return stop;
   const c = checkFounding(body);
@@ -82,7 +103,7 @@ serve(async (req) => {
   const founding = path.endsWith("/founding");
   const partners = path.endsWith("/partners");
   if (!founding && !partners) return json({ error: "not_found" }, 404);
-  if (req.method === "GET") return await count(founding ? "founding_places" : "partner_places");
+  if (req.method === "GET") return founding ? await foundingCount(req) : await count("partner_places");
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   return founding ? await applyFounding(req) : await applyPartner(req);
 });

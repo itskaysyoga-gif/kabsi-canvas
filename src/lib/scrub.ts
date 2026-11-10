@@ -21,12 +21,12 @@ export const SECRET_KEYS = [
 
 // Sec 1: one-time credentials and codes that ride in a page address. The path ones: email action links (/a/), holiday
 // links (/h/), staff photo links (/u/), card activation (/activate/), a saved free check (/scan/), a review page
-// (/review/) and a resumed setup (/start/resume/). The query and fragment ones: unsubscribe (t), card codes (code), and
+// (/review/), a resumed setup (/start/resume/) and the private invite page (/founding/, Founding 1, R-151). The query and fragment ones: unsubscribe (t), card codes (code), and
 // what a sign-in return can carry (access_token, refresh_token and the like). Each value becomes ":token" or "redacted".
 export const TOKEN_PATH_PATTERN =
-  "\\/(a|h|u|activate|scan|review|start\\/resume|unsubscribe)\\/[^\\/?#\\s\"'<>]+";
+  "\\/(a|h|u|activate|scan|review|start\\/resume|unsubscribe|founding)\\/[^\\/?#\\s\"'<>]+";
 export const TOKEN_QUERY_PATTERN =
-  "([?&#](?:t|token|code|otp|key|sig|access_token|refresh_token|provider_token|provider_refresh_token|id_token)=)[^&#\\s\"'<>]+";
+  "([?&#](?:t|token|code|otp|key|sig|access_token|refresh_token|provider_token|provider_refresh_token|id_token|slug|invite)=)[^&#\\s\"'<>]+";
 
 export function scrubUrl(value: string): string {
   return value

@@ -370,11 +370,6 @@ body:not(:has(.page-light)):has(.theme-dark),
     -webkit-font-smoothing: antialiased;
     scroll-padding-top: 5rem;
   }
-  /* The Founding 25 line, once the visitor hid it: set before the first paint by the line's own script, so the page
-     never shifts (Web 4). */
-  html.founding-line-hidden [data-founding-line] {
-    display: none;
-  }
   body {
     min-width: 320px;
     overflow-x: hidden;

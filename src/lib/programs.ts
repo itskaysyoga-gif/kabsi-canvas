@@ -112,6 +112,9 @@ async function rpc<T>(fn: string, args?: Record<string, unknown>): Promise<T> {
 }
 
 export const loadFounding = () => rpc<FoundingOverview>("staff_founding_overview");
+/** Founding 1 (R-151): the private invite slug, staff only. false reads it; true makes a new one and the old link stops at once. */
+export const founderInvite = (rotate: boolean) =>
+  rpc<string | null>("staff_founding_invite", { p_rotate: rotate });
 export const decideFounding = (
   id: string,
   status: "accepted" | "waitlisted" | "declined",

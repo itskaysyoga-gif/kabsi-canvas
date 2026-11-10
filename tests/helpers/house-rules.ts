@@ -5,8 +5,10 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { FOUNDING_PRICES, FOUNDING_TOTAL, PLAN_PRICES } from "../../src/lib/site";
-import { FOUNDING25_TOTAL } from "../../src/components/kabsi/founding-total";
 import { readText } from "./facts";
+
+/** How many Founding 25 places exist (30.17). Founding 25 is private since Founding 1 (R-151); no public file names it, so the guard keeps the number here. */
+const FOUNDING25_TOTAL = 25;
 
 // ─── the never-say lists (CLAUDE.md, kabsi-copy)
 
@@ -91,7 +93,7 @@ export function priceProblems(text: string): string[] {
     const essentials = /\bEssentials\b/.test(s);
     const pro = /\bPro\b/.test(s);
     const extra = /\bextra location/i.test(s);
-    const plan = /\b(founding price|list price|plan prices?)\b/i.test(s);
+    const plan = /\b(founding price|launch price|list price|plan prices?)\b/i.test(s);
     for (const m of s.matchAll(AMOUNT)) {
       const n = Number((m[1] ?? m[2]).replace(/,/g, ""));
       if (n === 0) continue; // "Tax $0.00" and "nothing to pay" are not a price
@@ -121,9 +123,9 @@ export function priceProblems(text: string): string[] {
 }
 
 /**
- * The founding place counts. "The first 30 paying businesses" and "x of 30 founding places" are the founding price
+ * The founding place counts. "The first 30 paying businesses" and "x of 30 launch places" (before 10 Nov 2026 "founding places") are the launch price
  * (FOUNDING_TOTAL in src/lib/site.ts); "Founding 25", "25 places left" and "taking 25 founding businesses" are the
- * applications (FOUNDING25_TOTAL in src/components/kabsi/founding-total.ts).
+ * applications (FOUNDING25_TOTAL above).
  */
 export function placeCountProblems(text: string): string[] {
   const out: string[] = [];
@@ -133,7 +135,7 @@ export function placeCountProblems(text: string): string[] {
     }
   };
   check(/first (\d+) paying businesses/gi, FOUNDING_TOTAL, "FOUNDING_TOTAL");
-  check(/(\d+) founding places/gi, FOUNDING_TOTAL, "FOUNDING_TOTAL");
+  check(/(\d+) (?:founding|launch) places/gi, FOUNDING_TOTAL, "FOUNDING_TOTAL");
   check(/\bFounding (\d+)\b/g, FOUNDING25_TOTAL, "FOUNDING25_TOTAL");
   check(/taking (\d+) founding businesses/gi, FOUNDING25_TOTAL, "FOUNDING25_TOTAL");
   check(

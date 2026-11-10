@@ -32,8 +32,8 @@ export function consentRow(b: ConsentInput): { row: Record<string, unknown> } | 
   const shown = method === "panel" ? (wording.panel ?? wording[rule]) : wording[rule];
   if (!shown) return { error: "bad_version" };
   const rawPage = typeof b.page === "string" ? b.page : "/";
-  // Only the path: never a query string or a token (email action links carry one in /a/<token>).
-  const page = (rawPage.split(/[?#]/)[0] || "/").replace(/^\/a\/[^/]+/, "/a/:token").slice(0, 300) || "/";
+  // Only the path: never a query string or a token (email action links carry one in /a/<token>; the private invite page holds one in /founding/<slug>, Founding 1).
+  const page = (rawPage.split(/[?#]/)[0] || "/").replace(/^\/a\/[^/]+/, "/a/:token").replace(/^\/founding\/[^/]+/, "/founding/:token").slice(0, 300) || "/";
   return {
     row: {
       visitor_id: visitor,

@@ -1,7 +1,7 @@
 // Owners 1: 90 questions the owner of a salon, barbershop, nail salon, spa, beauty or aesthetics business in Dubai or
 // Manchester would ask Nora. Same shape and rules as questions.ts (the 60, which stay as they are, so the "Nora gate (60
 // questions)" job keeps its name and its count); run-nora-eval.ts --with-28 asks these as well. Ten topics of nine
-// questions each: the price (also in dirhams and pounds), the trial, the founding places, card payments, WhatsApp, adding
+// questions each: the price (also in dirhams and pounds), the trial, the founding places (since 10 Nov 2026 no public offer: Nora says so), card payments, WhatsApp, adding
 // Kabsi as a Manager, what Kabsi never does, cancelling, data and deletion, and other trades. Mostly English, written the
 // way owners write; six in Arabic and two in French, each with a gloss. Every business detail in a question is invented.
 // Where the facts do not answer what an owner asks (a price in dirhams or pounds, the VAT rate, a pause, a manager on
@@ -23,10 +23,14 @@ const PRICES = /Essentials is \$29 a month or \$290 a year\. Pro is \$59 a month
 const NOT_AS_AVAILABLE = /Do not quote Essentials or Pro prices as available/;
 const CURRENCY =
   /Creem, Kabsi's merchant of record, prices products in US dollars or euros, not pounds or dirhams, so Kabsi shows no local-currency price and never a converted estimate/;
-const FOUNDING_PRICE =
-  /The first 30 paying businesses pay the founding price and keep it while they stay subscribed/;
-const FOUNDING_25 =
-  /three months of Kabsi Pro, free, for 25 businesses, by application, not first come/;
+const LAUNCH_PRICE =
+  /The first 30 paying businesses pay the launch price and keep it while they stay subscribed/;
+const NO_PUBLIC_OFFER =
+  /There is no public founding offer\. A business that was invited should open the link in its invitation\./;
+const NEVER_DESCRIBE_INVITE =
+  /Never give or guess an address for it, never describe the terms of an invitation or a free place/;
+const LAUNCH_PLACES = /\[n\] of 30 launch places left/;
+const NO_DISCOUNTS = /No discounts are listed\. For anything special, email hello@kabsi\.co/;
 const NOTHING_TO_PAY = /Until it opens there is nothing to pay/;
 const STOP = /Reply STOP at any time and nothing more is sent/;
 const GROUP_ID = /Kabsi Clients, ID 5481006796/;
@@ -45,7 +49,7 @@ export const QUESTIONS_OWNERS: Question[] = [
     must: [/\$29/, /\$59/],
     coming: true,
     reference:
-      "Essentials is $29 a month and Pro is $59 a month, or $290 and $590 a year, in US dollars, plus tax where it applies. The first 30 paying businesses pay the founding price, Essentials $19 or Pro $39 a month, and keep it while they stay subscribed. Card payments are not open yet, so neither plan can be bought and there is nothing to pay today. You can start with the 14 day trial, with no card.",
+      "Essentials is $29 a month and Pro is $59 a month, or $290 and $590 a year, in US dollars, plus tax where it applies. The first 30 paying businesses pay the launch price, Essentials $19 or Pro $39 a month, and keep it while they stay subscribed. Card payments are not open yet, so neither plan can be bought and there is nothing to pay today. You can start with the 14 day trial, with no card.",
   },
   {
     id: "o02",
@@ -108,17 +112,17 @@ export const QUESTIONS_OWNERS: Question[] = [
   {
     id: "o06",
     lang: "en",
-    topic: "the founding price for a second location",
-    ask: "if I get the founding price, is my second shop also on the founding price?",
+    topic: "the launch price for a second location",
+    ask: "if I get the launch price, is my second shop also on the launch price?",
     kb: [
-      /An extra location has one price for everyone, \$15 a month or \$150 a year, founding place or not/,
-      FOUNDING_PRICE,
+      /An extra location has one price for everyone, \$15 a month or \$150 a year, launch place or not/,
+      LAUNCH_PRICE,
       /Extra location \| \$15 a month or \$150 a year/,
     ],
     must: [/\$15/],
     coming: true,
     reference:
-      "No. The founding price is for the plan: Essentials $19 or Pro $39 a month for the first 30 paying businesses, kept while they stay subscribed. An extra location has one price for everyone, $15 a month or $150 a year, founding place or not. Card payments are not open yet, so there is nothing to pay today.",
+      "No. The launch price is for the plan: Essentials $19 or Pro $39 a month for the first 30 paying businesses, kept while they stay subscribed. An extra location has one price for everyone, $15 a month or $150 a year, launch place or not. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "o07",
@@ -149,12 +153,12 @@ export const QUESTIONS_OWNERS: Question[] = [
     lang: "en",
     topic: "a discount",
     ask: "any discount if i pay upfront? or a ramadan offer?",
-    kb: [/No discounts are listed\. For anything special, email hello@kabsi\.co/, FOUNDING_PRICE],
+    kb: [/No discounts are listed\. For anything special, email hello@kabsi\.co/, LAUNCH_PRICE],
     must: [MAIL],
     forbid: [/\d+\s?% off/i, YES],
     coming: true,
     reference:
-      "No discounts are listed. Yearly is ten months for the price of twelve, and the first 30 paying businesses pay the founding price and keep it while they stay subscribed. For anything special, email hello@kabsi.co. Card payments are not open yet, so there is nothing to pay today.",
+      "No discounts are listed. Yearly is ten months for the price of twelve, and the first 30 paying businesses pay the launch price and keep it while they stay subscribed. For anything special, email hello@kabsi.co. Card payments are not open yet, so there is nothing to pay today.",
   },
   // ── the free trial ───────────────────────────────────────────────────────────────────────────────────────────────
   {
@@ -256,115 +260,104 @@ export const QUESTIONS_OWNERS: Question[] = [
     reference:
       "After the trial there are 7 days of grace: Kabsi keeps watching and preparing replies but publishes nothing until a plan is chosen, and whatever is waiting stays waiting. Choose a plan and it can be approved. Your review link and QR code keep working with no plan.",
   },
-  // ── the founding places ──────────────────────────────────────────────────────────────────────────────────────────
+  // ── the founding places: no public offer since 10 Nov 2026 (R-151); the launch price stays ─────────────────────────
   {
     id: "o19",
     lang: "en",
-    topic: "Founding 25",
-    ask: "what is this founding 25 thing on your site",
-    kb: [
-      FOUNDING_25,
-      /It is for a business in the UAE, the UK or the US with a verified Google profile with at least 10 reviews/,
-      /The application page is kabsi\.co\/founding/,
-    ],
-    must: [/kabsi\.co\/founding/, /25/],
+    topic: "a rumour about free months",
+    ask: "someone told me you give 3 months free to 25 businesses. is that true?",
+    kb: [NO_PUBLIC_OFFER, NEVER_DESCRIBE_INVITE],
+    must: [/no public/i, /invitation/i],
+    forbid: [/\/founding/i, /for beauty and hair/i, /how to apply/i],
     reference:
-      "Founding 25 is three months of Kabsi Pro, free, for 25 businesses, by application, not first come. It is for a business in the UAE, the UK or the US with a verified Google profile with at least 10 reviews and a place customers visit, whose owner is on WhatsApp and says yes to a 2-minute check-in every two weeks and to a case study. You apply at kabsi.co/founding.",
+      "There is no public founding offer, so I cannot describe free months or places. A business that was invited should open the link in its invitation. If you were not invited and want to ask, write to hello@kabsi.co and a person will answer.",
   },
   {
     id: "o20",
     lang: "en",
-    topic: "Founding 25 with few reviews",
+    topic: "no public offer, few reviews",
     ask: "barbershop in Manchester, only 6 reviews on google. can I still apply for founding?",
-    kb: [
-      /It is for a business in the UAE, the UK or the US with a verified Google profile with at least 10 reviews/,
-      FOUNDING_PRICE,
-    ],
-    must: [/10 reviews/, MAIL],
+    kb: [NO_PUBLIC_OFFER, LAUNCH_PRICE, NO_DISCOUNTS],
+    must: [/no public/i, MAIL],
+    forbid: [/\/founding/i, /at least 10 reviews/i],
     coming: true,
     reference:
-      "Founding 25 asks for a verified Google profile with at least 10 reviews, so with 6 you do not meet that rule yet. You can start the 14 day trial with no card instead. The founding price, Essentials $19 or Pro $39 a month, is for the first 30 paying businesses once card payments open; they are not open yet. For your case, write to hello@kabsi.co.",
+      "There is no public founding offer, so there is nothing to apply for, and I cannot say what an invitation asks. If you were invited, open the link in your invitation. For anything else, write to hello@kabsi.co. The launch price, Essentials $19 or Pro $39 a month, is for the first 30 paying businesses; card payments are not open yet, so nothing can be bought today.",
   },
   {
     id: "o21",
     lang: "en",
-    topic: "Founding 25 against the founding price",
-    ask: "confused. founding 25 and founding price, same thing?",
-    kb: [FOUNDING_25, FOUNDING_PRICE],
-    must: [/25/, /30/],
+    topic: "an invitation against the launch price",
+    ask: "confused. founding 25 and launch price, same thing?",
+    kb: [NO_PUBLIC_OFFER, LAUNCH_PRICE],
+    must: [/no public/i, /30/],
+    forbid: [/\/founding/i, /three months|3 months/i],
     coming: true,
     reference:
-      "No, they are two things. Founding 25 is three months of Kabsi Pro, free, for 25 businesses chosen by application. The founding price is for the first 30 paying businesses: Essentials $19 or Pro $39 a month, kept while they stay subscribed. Card payments are not open yet, so nothing can be bought today.",
+      "No. There is no public founding offer, and I cannot describe an invitation. The launch price is public: the first 30 paying businesses pay Essentials $19 or Pro $39 a month and keep it while they stay subscribed. Card payments are not open yet, so nothing can be bought today.",
   },
   {
     id: "o22",
     lang: "en",
     topic: "places left for salons",
     ask: "how many founding places left for salons?",
-    kb: [
-      /The places: 10 for beauty and hair/,
-      /The number of places left shown anywhere is the real count/,
-    ],
-    must: [/kabsi\.co\/founding/],
+    kb: [NO_PUBLIC_OFFER, LAUNCH_PLACES, NEVER_DESCRIBE_INVITE],
+    must: [/no public/i],
+    forbid: [/\/founding/i, /for beauty and hair/i, /\b(10|5) places\b/i],
     reference:
-      "Founding 25 has 10 places for beauty and hair, 5 for food and drink, 5 for health and 5 for other trades. I cannot see the live count here, but kabsi.co/founding shows the real number of places left.",
+      "There is no public founding offer, so I have no places to count for it. What the pricing page shows is the launch price for the first 30 paying businesses, with the real number of launch places left. I cannot see that live count here. A business that was invited should open the link in its invitation.",
   },
   {
     id: "o23",
     lang: "en",
-    topic: "after the founding months",
+    topic: "after the free months",
     ask: "after the 3 months free do I have to pay full price?",
-    kb: [
-      /on day 90 the owner chooses a plan at the founding price/,
-      /Nothing is charged by itself, and the owner can leave any time/,
-    ],
-    must: [/\$19|\$39/],
+    kb: [NO_PUBLIC_OFFER, NEVER_DESCRIBE_INVITE, NOTHING_TO_PAY],
+    must: [/no public/i, /invitation|hello@kabsi\.co/i],
+    forbid: [/\/founding/i, /day 90/i, /90 days/i],
     coming: true,
     reference:
-      "No. On day 90 you choose a plan at the founding price, Essentials $19 or Pro $39 a month, kept while the subscription stays paid, or you stop. Nothing is charged by itself, and you can leave any time. Card payments are not open yet, so there is nothing to pay today.",
+      "There is no public founding offer, so I cannot describe its terms. If you were invited, the invitation or a person at Kabsi will tell you; you can write to hello@kabsi.co. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "o24",
     lang: "en",
     topic: "the case study",
     ask: "do I have to be named in the case study? I don't want my clients to know",
-    kb: [/named or anonymous; the owner approves the final text/],
-    must: [/anonymous/i],
+    kb: [NO_PUBLIC_OFFER, NEVER_DESCRIBE_INVITE],
+    must: [/invitation/i, MAIL],
+    forbid: [/\/founding/i, /approve the final text/i],
     reference:
-      "No. The case study can be named or anonymous, and it is anonymous unless you choose named. You approve the final text, and it uses only the numbers you choose to share.",
+      "I cannot describe the terms of an invitation, because there is no public founding offer. If you were invited, ask the person who invited you before you agree to anything, or write to hello@kabsi.co and say you do not want to be named.",
   },
   {
     id: "o25",
     lang: "en",
     topic: "the answer to an application",
     ask: "applied for founding 25 on sunday, how long until you answer?",
-    kb: [
-      /Kabsi answers within 2 working days/,
-      /The 90 days start when Kabsi's access to the Google profile works, with no card/,
-    ],
-    must: [/2 working days/],
+    kb: [NO_PUBLIC_OFFER, NEVER_DESCRIBE_INVITE, NO_DISCOUNTS],
+    must: [MAIL, /invitation/i],
+    forbid: [/\/founding/i, /2 working days/i],
     reference:
-      "Kabsi answers within 2 working days. If you get a place, the 90 days start when Kabsi's access to your Google profile works, with no card.",
+      "I cannot see applications from here, and there is no public founding offer. Open the link in your invitation if you have one. If you have no answer, write to hello@kabsi.co and a person will check.",
   },
   {
     id: "o26",
     lang: "ar",
-    topic: "Founding 25 for a nail salon",
+    topic: "an invited place for a nail salon",
     ask: "عندي صالون أظافر في دبي، أقدر أقدم على Founding 25؟",
     gloss: "I have a nail salon in Dubai. Can I apply for Founding 25?",
-    kb: [
-      /It is for a business in the UAE, the UK or the US with a verified Google profile with at least 10 reviews/,
-      /The places: 10 for beauty and hair/,
-    ],
-    must: [/kabsi\.co\/founding/],
+    kb: [NO_PUBLIC_OFFER, NEVER_DESCRIBE_INVITE, NO_DISCOUNTS],
+    must: [MAIL],
+    forbid: [/\/founding/i],
     reference:
-      "نعم، إذا كان ملفك على جوجل موثقا وفيه 10 تقييمات على الأقل ويزوره العملاء، وكنت على واتساب وتوافق على متابعة قصيرة كل أسبوعين وعلى دراسة حالة. البرنامج للإمارات والمملكة المتحدة والولايات المتحدة، وفيه 10 أماكن للتجميل والشعر. قدم على kabsi.co/founding.",
+      "لا يوجد عرض تأسيس عام، ولا أستطيع وصف شروط الدعوة. إذا وصلتك دعوة فافتح الرابط الموجود فيها. وإذا لم يعمل الرابط أو لم تصلك دعوة، اكتب إلى hello@kabsi.co وسيرد عليك شخص من فريق كابسي.",
   },
   {
     id: "o27",
     lang: "en",
-    topic: "keeping the founding price",
-    ask: "is the founding price locked forever even if you put prices up later",
+    topic: "keeping the launch price",
+    ask: "is the launch price locked forever even if you put prices up later",
     kb: [
       /Kabsi may change prices for future purchases\. A plan already paid for keeps its price\./,
       /Upgrades and downgrades stay at the price the business is on/,
@@ -372,7 +365,7 @@ export const QUESTIONS_OWNERS: Question[] = [
     forbid: [/\b(forever|for life|lifetime)\b/i],
     coming: true,
     reference:
-      "The first 30 paying businesses keep the founding price while they stay subscribed. Kabsi may change prices for future purchases, and a plan already paid for keeps its price. Upgrades and downgrades stay at the price the business is on. Card payments are not open yet, so nothing can be bought today.",
+      "The first 30 paying businesses keep the launch price while they stay subscribed. Kabsi may change prices for future purchases, and a plan already paid for keeps its price. Upgrades and downgrades stay at the price the business is on. Card payments are not open yet, so nothing can be bought today.",
   },
   // ── card payments, not open yet ──────────────────────────────────────────────────────────────────────────────────
   {
@@ -384,7 +377,7 @@ export const QUESTIONS_OWNERS: Question[] = [
     forbid: [YES],
     coming: true,
     reference:
-      "Not yet. Card payments in US dollars are not open yet, so there is nothing to pay today. The founding price goes to the first 30 paying businesses once card payments open. You can start the 14 day trial now, with no card.",
+      "Not yet. Card payments in US dollars are not open yet, so there is nothing to pay today. The launch price goes to the first 30 paying businesses once card payments open. You can start the 14 day trial now, with no card.",
   },
   {
     id: "o29",
@@ -881,7 +874,7 @@ export const QUESTIONS_OWNERS: Question[] = [
     ],
     must: [/pause/i, /Closed for a while/],
     reference:
-      "There is no pause. Cancel on the Plan page or on WhatsApp and your plan runs to the end of the period you paid for, then choose a plan again when you reopen. A founding price is kept only while the subscription stays paid. For the weeks you are closed, set Closed for a while under Hours, and Google shows it after your approval.",
+      "There is no pause. Cancel on the Plan page or on WhatsApp and your plan runs to the end of the period you paid for, then choose a plan again when you reopen. A launch price is kept only while the subscription stays paid. For the weeks you are closed, set Closed for a while under Hours, and Google shows it after your approval.",
   },
   {
     id: "o70",
@@ -1130,5 +1123,30 @@ export const QUESTIONS_OWNERS: Question[] = [
     must: [/Eid/],
     reference:
       "Yes. Five days before a public holiday, Kabsi asks you by email and in Kabsi under Hours whether you keep normal hours, close or set custom hours, and nothing changes on Google until you confirm. The UAE's holidays come from its official source. Eid depends on the moon, so Kabsi says expected and you can move the days up to three either way. Ramadan is asked once, before the month starts.",
+  },
+  // ── the founding places, added 10 Nov 2026 (R-151) ───────────────────────────────────────────────────────────────
+  {
+    id: "o91",
+    lang: "en",
+    topic: "is there a founding offer",
+    ask: "Is there a founding offer?",
+    kb: [NO_PUBLIC_OFFER, NEVER_DESCRIBE_INVITE, LAUNCH_PRICE],
+    must: [/no public/i, /invitation/i],
+    forbid: [/\/founding/i, /three months|3 months/i, /apply at|apply on|apply here/i],
+    coming: true,
+    reference:
+      "There is no public founding offer. A business that was invited should open the link in its invitation. What is public is the launch price: the first 30 paying businesses pay Essentials $19 or Pro $39 a month and keep it while they stay subscribed. Card payments are not open yet, so nothing can be bought today.",
+  },
+  {
+    id: "o92",
+    lang: "en",
+    topic: "I got an invite",
+    ask: "I got a Founding 25 invite, what now?",
+    kb: [NO_PUBLIC_OFFER, NEVER_DESCRIBE_INVITE, NO_DISCOUNTS],
+    must: [/invitation/i, MAIL],
+    forbid: [/\/founding/i, /three months|3 months/i, /2 working days/i],
+    coming: true,
+    reference:
+      "Open the link in your invitation. I do not have a link to give you, and I cannot describe the terms of an invitation, because there is no public founding offer. If the link does not work, write to hello@kabsi.co and a person will help. Card payments are not open yet, so nothing can be bought today, and your trial of Pro needs no card.",
   },
 ];

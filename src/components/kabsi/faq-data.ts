@@ -256,26 +256,6 @@ export const FAQ_GROUPS: FaqGroup[] = buildFaqGroups();
 /** Every FAQ answer on /faq, in order, for the FAQPage data. */
 export const FAQ_ALL = FAQ_GROUPS.flatMap((g) => g.items);
 
-/** "Questions about Founding 25" on /founding, and its FAQPage data. */
-export const FOUNDING_FAQ = [
-  {
-    q: "What happens after 90 days?",
-    a: "You choose a plan at the founding price, kept while your subscription stays paid, or you stop. Nothing is charged by itself.",
-  },
-  {
-    q: "What goes in a case study?",
-    a: "Your words, the work Kabsi did from its own records (replies published, posts, details fixed) and only the numbers you choose to share from your own Google screens. Named or anonymous, and you approve the final text.",
-  },
-  {
-    q: "Why by application?",
-    a: "So the 25 cover the kinds of business Kabsi serves, and every place goes to someone who will use it every week.",
-  },
-  {
-    q: "Can I leave before the 90 days end?",
-    a: "Any time. Remove Kabsi from your Google profile and tell Rashid.",
-  },
-];
-
 /** "Questions partners ask" on /partners, and its FAQPage data. */
 export const PARTNER_FAQ = [
   {

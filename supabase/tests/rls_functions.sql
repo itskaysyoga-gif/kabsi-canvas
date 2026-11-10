@@ -138,6 +138,8 @@ select throws_ok($$ select public.staff_grant_trial('00000000-0000-4000-8000-000
 -- Partners session: the Founding 25 and Kabsi Partners staff functions.
 select throws_ok($$ select public.staff_founding_decide('00000000-0000-4000-8000-0000000000c1', 'accepted') $$, '42501', null, 'staff_founding_decide refuses a non-staff user');
 select throws_ok($$ select public.staff_founding_link('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'staff_founding_link refuses a non-staff user');
+select throws_ok($$ select public.staff_founding_invite(false) $$, '42501', null, 'staff_founding_invite refuses a non-staff user (reading the slug)');
+select throws_ok($$ select public.staff_founding_invite(true) $$, '42501', null, 'staff_founding_invite refuses a non-staff user (rotating the slug)');
 select throws_ok($$ select public.staff_founding_overview() $$, '42501', null, 'staff_founding_overview refuses a non-staff user');
 -- Sec 1: the Founding 25 owner match and the Google writes stop switch are for Kabsi staff admins only.
 select ok(not has_function_privilege('authenticated', 'public.staff_founding_matches(uuid)', 'execute'), 'staff_founding_matches is closed to the browser (its staff admin check is tested in sec1_roles_approvals.sql)');

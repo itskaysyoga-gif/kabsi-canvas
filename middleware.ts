@@ -13,7 +13,6 @@ export const config = {
     "/how-it-works",
     "/scan",
     "/google-review-link",
-    "/founding",
     "/for",
     "/about",
     "/security",

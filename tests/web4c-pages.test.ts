@@ -4,7 +4,8 @@
 // answers follow the switch (decision 6).
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { FAQ_ALL, FAQ_GROUPS, FOUNDING_FAQ, PARTNER_FAQ } from "@/components/kabsi/faq-data";
+import { FAQ_ALL, FAQ_GROUPS, PARTNER_FAQ } from "@/components/kabsi/faq-data";
+import { FOUNDING_FAQ } from "@/components/kabsi/founding-private";
 import { faqJsonLd } from "@/lib/faq";
 import { KABSI_GROUP_ID, WHATSAPP_ON } from "@/lib/site";
 
@@ -56,14 +57,16 @@ describe("Founding 25 and Partners on Design 8", () => {
       expect(founding).toContain(n);
     expect(founding).toContain("With the country code, for example ${example}.");
   });
-  it("carries FAQPage data on /founding and /partners", () => {
+  it("carries FAQPage data on /partners, and none on the private invite page", () => {
     expect(FOUNDING_FAQ.length).toBe(4);
     expect(PARTNER_FAQ.length).toBe(6); // Partners 1 (R-148) added two questions
-    expect(read("src/routes/founding.tsx")).toContain("faqJsonLd(FOUNDING_FAQ)");
+    expect(read("src/routes/founding.$slug.tsx")).not.toMatch(
+      /faqJsonLd|jsonLd|rel: "canonical"|pageHead\(/,
+    );
     expect(read("src/routes/partners.tsx")).toContain("faqJsonLd(PARTNER_FAQ)");
   });
   it("keeps every page head free of page components (Lean 1)", () => {
-    for (const r of ["faq", "about", "security", "founding", "partners"]) {
+    for (const r of ["faq", "about", "security", "partners"]) {
       const head = read(`src/routes/${r}.tsx`);
       expect(head, r).toMatch(/hero-lines/);
       expect(head, r).toMatch(/crumbs:/);

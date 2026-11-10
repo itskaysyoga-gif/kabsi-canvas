@@ -226,10 +226,10 @@ function Page() {
             ${PLAN_PRICES.proYearly} a year, and an extra location is $
             {PLAN_PRICES.extraLocationMonthly} a month or ${PLAN_PRICES.extraLocationYearly} a year.
             Prices are in US dollars, plus tax where it applies, and the same in every country.{" "}
-            {FOUNDING_SENTENCE} A Founding 25 business that chooses a plan after its 90 days pays
-            the founding price too. You can start with a 14-day free trial of Pro, no card. Monthly
-            plans can be cancelled at any time and run to the end of the month you paid for. Yearly
-            plans are refundable within 14 days (section 10).
+            {FOUNDING_SENTENCE} A business that joins by Kabsi's invitation and chooses a plan after
+            its free months pays the launch price too. You can start with a 14-day free trial of
+            Pro, no card. Monthly plans can be cancelled at any time and run to the end of the month
+            you paid for. Yearly plans are refundable within 14 days (section 10).
           </li>
           <li>
             Cancelling on the Plan page or by asking Kabsi ends your plan at the end of the period

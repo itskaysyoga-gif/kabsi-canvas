@@ -9,8 +9,7 @@ import { setChrome, useScrolledPast, useSearchFlag } from "./page-signals";
 import { useAccountLink, type AccountState } from "@/components/auth/use-account-link";
 
 /**
- * The public header (Design 9; Site 2, master plan 30.34 item 4): sticky, so the slim Founding 25 line can sit above it
- * in the flow. How it works, Businesses (one link to /for), Pricing, Guides and About, then Log in or Dashboard, then
+ * The public header (Design 9; Site 2, master plan 30.34 item 4): sticky, at the top of every page. How it works, Businesses (one link to /for), Pricing, Guides and About, then Log in or Dashboard, then
  * "Free check", filled charcoal with ivory text so it leads the header without competing with the page's one yellow
  * action. No dropdowns; the active page is marked. Under 1024 px the links move into the phone menu (the same rows, no
  * nested rows); from 640 px "Free check" stays in the header.
@@ -87,7 +86,7 @@ export function SiteHeader() {
   useEffect(() => {
     setChrome({ menuOpen: open });
     if (!open) return;
-    // The menu starts under the header, wherever the header sits (under the Founding 25 line at the top of the page).
+    // The menu starts under the header, wherever the header sits.
     const place = () =>
       setMenuTop(Math.max(0, Math.round(header.current?.getBoundingClientRect().bottom ?? 64)));
     place();

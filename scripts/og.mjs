@@ -77,11 +77,6 @@ const cards = {
     p: "Your business on Google. Taken care of.",
     art: `<div class="ph" style="background-image:url(${photo("bakery-window")})"></div>`,
   },
-  founding: {
-    h: "Founding 25: three months of Kabsi Pro, free.",
-    p: "For 25 businesses, by application. No card.",
-    art: `<div class="big">25</div>`,
-  },
 };
 
 const page = (c) => `<!doctype html><html><head><meta charset="utf-8"><style>

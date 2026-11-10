@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { homeExample, type HomeExample } from "@/content/home-examples";
 import { industryCheck } from "@/content/industries";
-import { FoundingBanner } from "./d5-founding";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { CONTACT_EMAIL, TRIAL_LINE, WHATSAPP_ON, foundingPlacesLine } from "@/lib/site";
@@ -419,7 +418,6 @@ export function BelowHero({ example }: { example?: HomeExample | undefined }) {
       <TryTheStory key={example?.id} example={example} />
       <WorkDone example={example} />
       <KeepTheKeys />
-      <FoundingBanner className="section-y pb-0" />
       <ShortPricing />
       <FourQuestions />
     </>

@@ -13,7 +13,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as FaqRouteImport } from './routes/faq'
-import { Route as FoundingRouteImport } from './routes/founding'
 import { Route as GoogleProfileCheckRouteImport } from './routes/google-profile-check'
 import { Route as GoogleReviewLinkRouteImport } from './routes/google-review-link'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
@@ -40,6 +39,7 @@ import { Route as ApiSuggestRouteImport } from './routes/api.suggest'
 import { Route as BillingDoneRouteImport } from './routes/billing.done'
 import { Route as ForIndexRouteImport } from './routes/for.index'
 import { Route as ForTradeRouteImport } from './routes/for.$trade'
+import { Route as FoundingSlugRouteImport } from './routes/founding.$slug'
 import { Route as GuidesIndexRouteImport } from './routes/guides.index'
 import { Route as GuidesSlugRouteImport } from './routes/guides.$slug'
 import { Route as HTokenRouteImport } from './routes/h.$token'
@@ -84,11 +84,6 @@ const AboutRoute = AboutRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FoundingRoute = FoundingRouteImport.update({
-  id: '/founding',
-  path: '/founding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GoogleProfileCheckRoute = GoogleProfileCheckRouteImport.update({
@@ -219,6 +214,11 @@ const ForIndexRoute = ForIndexRouteImport.update({
 const ForTradeRoute = ForTradeRouteImport.update({
   id: '/for/$trade',
   path: '/for/$trade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FoundingSlugRoute = FoundingSlugRouteImport.update({
+  id: '/founding/$slug',
+  path: '/founding/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuidesIndexRoute = GuidesIndexRouteImport.update({
@@ -360,7 +360,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/faq': typeof FaqRoute
-  '/founding': typeof FoundingRoute
   '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -386,6 +385,7 @@ export interface FileRoutesByFullPath {
   '/api/suggest': typeof ApiSuggestRoute
   '/billing/done': typeof BillingDoneRoute
   '/for/$trade': typeof ForTradeRoute
+  '/founding/$slug': typeof FoundingSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/h/$token': typeof HTokenRoute
   '/partners/terms': typeof PartnersTermsRoute
@@ -418,7 +418,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/faq': typeof FaqRoute
-  '/founding': typeof FoundingRoute
   '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -442,6 +441,7 @@ export interface FileRoutesByTo {
   '/api/suggest': typeof ApiSuggestRoute
   '/billing/done': typeof BillingDoneRoute
   '/for/$trade': typeof ForTradeRoute
+  '/founding/$slug': typeof FoundingSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/h/$token': typeof HTokenRoute
   '/partners/terms': typeof PartnersTermsRoute
@@ -476,7 +476,6 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/faq': typeof FaqRoute
-  '/founding': typeof FoundingRoute
   '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -502,6 +501,7 @@ export interface FileRoutesById {
   '/api/suggest': typeof ApiSuggestRoute
   '/billing/done': typeof BillingDoneRoute
   '/for/$trade': typeof ForTradeRoute
+  '/founding/$slug': typeof FoundingSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/h/$token': typeof HTokenRoute
   '/partners_/terms': typeof PartnersTermsRoute
@@ -536,7 +536,6 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/faq'
-    | '/founding'
     | '/google-profile-check'
     | '/google-review-link'
     | '/how-it-works'
@@ -562,6 +561,7 @@ export interface FileRouteTypes {
     | '/api/suggest'
     | '/billing/done'
     | '/for/$trade'
+    | '/founding/$slug'
     | '/guides/$slug'
     | '/h/$token'
     | '/partners/terms'
@@ -594,7 +594,6 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/faq'
-    | '/founding'
     | '/google-profile-check'
     | '/google-review-link'
     | '/how-it-works'
@@ -618,6 +617,7 @@ export interface FileRouteTypes {
     | '/api/suggest'
     | '/billing/done'
     | '/for/$trade'
+    | '/founding/$slug'
     | '/guides/$slug'
     | '/h/$token'
     | '/partners/terms'
@@ -651,7 +651,6 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/about'
     | '/faq'
-    | '/founding'
     | '/google-profile-check'
     | '/google-review-link'
     | '/how-it-works'
@@ -677,6 +676,7 @@ export interface FileRouteTypes {
     | '/api/suggest'
     | '/billing/done'
     | '/for/$trade'
+    | '/founding/$slug'
     | '/guides/$slug'
     | '/h/$token'
     | '/partners_/terms'
@@ -711,7 +711,6 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   FaqRoute: typeof FaqRoute
-  FoundingRoute: typeof FoundingRoute
   GoogleProfileCheckRoute: typeof GoogleProfileCheckRoute
   GoogleReviewLinkRoute: typeof GoogleReviewLinkRoute
   HowItWorksRoute: typeof HowItWorksRoute
@@ -734,6 +733,7 @@ export interface RootRouteChildren {
   ApiSuggestRoute: typeof ApiSuggestRoute
   BillingDoneRoute: typeof BillingDoneRoute
   ForTradeRoute: typeof ForTradeRoute
+  FoundingSlugRoute: typeof FoundingSlugRoute
   GuidesSlugRoute: typeof GuidesSlugRoute
   HTokenRoute: typeof HTokenRoute
   PartnersTermsRoute: typeof PartnersTermsRoute
@@ -773,13 +773,6 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/founding': {
-      id: '/founding'
-      path: '/founding'
-      fullPath: '/founding'
-      preLoaderRoute: typeof FoundingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/google-profile-check': {
@@ -962,6 +955,13 @@ declare module '@tanstack/react-router' {
       path: '/for/$trade'
       fullPath: '/for/$trade'
       preLoaderRoute: typeof ForTradeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/founding/$slug': {
+      id: '/founding/$slug'
+      path: '/founding/$slug'
+      fullPath: '/founding/$slug'
+      preLoaderRoute: typeof FoundingSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guides/': {
@@ -1228,7 +1228,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   FaqRoute: FaqRoute,
-  FoundingRoute: FoundingRoute,
   GoogleProfileCheckRoute: GoogleProfileCheckRoute,
   GoogleReviewLinkRoute: GoogleReviewLinkRoute,
   HowItWorksRoute: HowItWorksRoute,
@@ -1251,6 +1250,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSuggestRoute: ApiSuggestRoute,
   BillingDoneRoute: BillingDoneRoute,
   ForTradeRoute: ForTradeRoute,
+  FoundingSlugRoute: FoundingSlugRoute,
   GuidesSlugRoute: GuidesSlugRoute,
   HTokenRoute: HTokenRoute,
   PartnersTermsRoute: PartnersTermsRoute,

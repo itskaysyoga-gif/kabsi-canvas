@@ -1,8 +1,7 @@
 // Polish 2 (lane R's decisions of 3 Nov 2026): the last marketing polish before ads.
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { EXAMPLE_RESULT, HERO_REPORT, HERO_STREAM } from "@/components/kabsi/d8-data";
-import { foundingLinePage } from "@/components/kabsi/founding-line";
 import { HOME_FAQ } from "@/components/kabsi/faq-data";
 import { industry as industryBySlug } from "@/content/industries";
 
@@ -43,24 +42,11 @@ describe("Polish 2", () => {
     expect(HERO_STREAM.map((m) => m.id)).toEqual(["hours", "review", "post"]);
     expect(HERO_REPORT.title).toBe("Your weekly report");
   });
-  it("shows the Founding 25 line only on Home, Pricing and the /for pages (master plan 30.24)", () => {
-    for (const p of ["/", "/pricing", "/for", "/for/barbershop", "/pricing/"])
-      expect(foundingLinePage(p), p).toBe(true);
-    for (const p of [
-      "/how-it-works",
-      "/about",
-      "/security",
-      "/terms",
-      "/privacy",
-      "/partners",
-      "/partners/terms",
-      "/login",
-      "/founding",
-      "/faq",
-      "/scan",
-      "/format",
-    ])
-      expect(foundingLinePage(p), p).toBe(false);
+  it("has no Founding 25 line above any header: Founding 25 is private (Founding 1, R-151; was master plan 30.24)", () => {
+    expect(existsSync("src/components/kabsi/founding-line.tsx")).toBe(false);
+    expect(readFileSync("src/components/kabsi/site-chrome.tsx", "utf8")).not.toContain(
+      "FoundingLine",
+    );
   });
   it("says the password point once on Home: in 'You stay in control.', not the questions (decision 8)", () => {
     expect(HOME_FAQ).not.toContain(1);

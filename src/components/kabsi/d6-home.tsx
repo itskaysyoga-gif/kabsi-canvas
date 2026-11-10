@@ -2,7 +2,7 @@
 // approved by lane R on 30 Oct 2026): light-led and editorial. Ivory reading areas, one
 // near-black band for the product story, yellow only for the main action, WhatsApp green only for WhatsApp and
 // done. The order is lane R's: the promise and the free check; the demonstration; four jobs; you stay in control;
-// the nearby check explained; pick your business; pricing preview; Founding 25 with the founder; four questions;
+// the nearby check explained; pick your business; pricing preview; four questions;
 // the closing free check. Every business, person and figure is an example.
 import {
   ArrowRight,
@@ -30,7 +30,6 @@ import { FAQ, HOME_FAQ } from "./faq-data";
 import { DemoProvider, DemoSteps, HeroDemo } from "./d6-demo";
 import { HERO_LINE, DEMO } from "./d6-data";
 import { PLANS } from "./plans";
-import { FOUNDING25_TOTAL } from "./founding-total";
 
 const linkCls =
   "press inline-flex min-h-11 items-center gap-1.5 font-semibold text-text-1 underline decoration-text-3 decoration-1 underline-offset-4 hover:decoration-text-1";
@@ -444,60 +443,6 @@ export function PricingPreview() {
   );
 }
 
-/* ---------- Founding 25, with the founder ---------- */
-
-export function FoundingWithFounder() {
-  // The real count (GET /api/founding-count); while it has not loaded, or did not load, no number shows.
-  const places = useFoundingPlaces();
-  const left = places?.left ?? null;
-  return (
-    <section aria-labelledby="f25-h" className="container-kb section-y">
-      {/* On a phone the founder and the places left share the first row; the words follow. */}
-      <div className="grid grid-cols-[auto_1fr] items-center gap-x-5 gap-y-6 rounded-panel border border-line bg-surface-1 p-6 shadow-rest sm:gap-8 sm:p-10 lg:grid-cols-[auto_1fr_auto] lg:gap-12">
-        <img
-          src={FOUNDER.large}
-          width={FOUNDER.w}
-          height={FOUNDER.h}
-          alt={FOUNDER.alt}
-          loading="lazy"
-          decoding="async"
-          className="size-20 rounded-full object-cover sm:size-36"
-        />
-        <div className="order-3 col-span-2 lg:order-none lg:col-span-1">
-          <h2 id="f25-h" className="text-h2">
-            Founding 25: three months of Kabsi Pro, free.
-          </h2>
-          <p className="mt-3 text-lead text-text-2">
-            Rashid Abou Hamzy, founder of Kabsi, reads every application himself.
-          </p>
-          <p className="mt-4 text-small text-text-2">
-            By application. No card. After 90 days, choose a plan or stop, nothing is charged by
-            itself.
-          </p>
-          <SiteLink to="/founding" className={cn(linkCls, "mt-3 text-body lg:hidden")}>
-            Apply for a place
-            <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />
-          </SiteLink>
-        </div>
-        <div className="order-2 lg:order-none lg:text-end">
-          {left !== null && (
-            <>
-              <p className="font-display text-h2 font-bold">
-                {left} of {places?.total ?? FOUNDING25_TOTAL}
-              </p>
-              <p className="text-small text-text-2">places left.</p>
-            </>
-          )}
-          <SiteLink to="/founding" className={cn(linkCls, "mt-2 hidden text-body lg:inline-flex")}>
-            Apply for a place
-            <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />
-          </SiteLink>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ---------- Four questions and the close ---------- */
 
 export function Questions() {
@@ -543,7 +488,6 @@ export function D6Home() {
       <Nearby />
       <PickBusiness />
       <PricingPreview />
-      <FoundingWithFounder />
       <Questions />
       <Closing />
     </>

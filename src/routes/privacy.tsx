@@ -196,9 +196,9 @@ function Page() {
           owners need. The note is not shared outside Kabsi.
         </p>
         <p>
-          <b>If you apply for a Founding 25 place:</b> your business name, country, kind of
-          business, WhatsApp number, why you want a place, whether we may name you in a case study,
-          and the words you agreed to for the check-ins.
+          <b>If you apply for a place Rashid invited you to:</b> your business name, country, kind
+          of business, WhatsApp number, why you want a place, whether we may name you in a case
+          study, and the words you agreed to for the check-ins.
         </p>
         <p>
           <b>If you write to us through a form:</b> what you enter (for example name, email,
@@ -472,11 +472,11 @@ function Page() {
             bought. For a trial or a plan, Kabsi also tells Meta from its own servers (the
             Conversions API), with your email and phone number scrambled by a one-way hash as Meta
             requires. A finished free check and a contact you give (the check's report sent to you,
-            or a Founding 25 application) also go from Kabsi's servers, only where your privacy
-            choice allows ad measurement, with the same event id as your browser's so Meta counts
-            each once. They carry only a hashed random visitor id and Meta's own browser cookies,
-            never your email, phone, name or business. If you came from a Click to WhatsApp ad,
-            Kabsi sends Meta the click id of that chat, so the ads learn which ones bring paying
+            or an application for an invited place) also go from Kabsi's servers, only where your
+            privacy choice allows ad measurement, with the same event id as your browser's so Meta
+            counts each once. They carry only a hashed random visitor id and Meta's own browser
+            cookies, never your email, phone, name or business. If you came from a Click to WhatsApp
+            ad, Kabsi sends Meta the click id of that chat, so the ads learn which ones bring paying
             owners. In the EU, the EEA, the UK, Switzerland, the United Arab Emirates and Saudi
             Arabia, and where the country is not known, a small bar at the bottom asks once, Accept
             or Only necessary, and nothing for ads loads before you accept. Elsewhere there is no
@@ -564,11 +564,12 @@ function Page() {
             Kabsi team can read them.
           </li>
           <li>
-            Applications to Founding 25 and Kabsi Partners: if we decline an application, we delete
-            it 90 days after we decided. If we put a Founding 25 application on the waiting list, we
-            delete it 180 days after we decided. An accepted place is kept while you are in the
-            program. A declined partner application that has a referral, commission or payout record
-            is kept only as long as that record needs it, and as tax and accounting law requires.
+            Applications for an invited place and to Kabsi Partners: if we decline an application,
+            we delete it 90 days after we decided. If we put an application for an invited place on
+            the waiting list, we delete it 180 days after we decided. An accepted place is kept
+            while you are in the program. A declined partner application that has a referral,
+            commission or payout record is kept only as long as that record needs it, and as tax and
+            accounting law requires.
           </li>
           <li>
             Visibility Map and AI Visibility results, and the competitors you pick: while you use

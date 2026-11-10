@@ -1,7 +1,7 @@
 // Pricing on Design 8 (Web 4b, lane R's approval of 1 Nov 2026; Polish 2 on 3 Nov: the calendar became one strip, each
 // card names its four most valuable built things and help is a small line): the hero with the 14 days, who each plan
-// is for, a comparison of built features only (PLAN_ROWS, Price 1), the trial from day 1 to cancelling, the founding
-// price and Founding 25 explained once each (the real counts only), and the billing questions. Every billing line is
+// is for, a comparison of built features only (PLAN_ROWS, Price 1), the trial from day 1 to cancelling, the launch
+// price explained once (the real count only), and the billing questions. Every billing line is
 // checked against knowledge/kabsi-facts.md (lane R decision 1; COPY.md 38).
 import { ArrowRight, Check, Minus } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -16,7 +16,6 @@ import {
   WORKING_HOURS,
   foundingPlacesLine,
 } from "@/lib/site";
-import { useFoundingPlaces } from "@/lib/public-api";
 import { ButtonLink, Faq, Segmented } from "./ui";
 import { SiteLink } from "./site-link";
 import { useSearchFlag } from "./page-signals";
@@ -26,7 +25,6 @@ import { Closing } from "./closing";
 import { StepsLine } from "./d9-hero";
 import { FOUNDING_TOTAL, PLAN_CHECKS, PLANS, PLAN_ROWS, planChecks } from "./plans";
 import { FoundingPriceLine, useFoundingLeft } from "./founding-price";
-import { FOUNDING25_TOTAL } from "./founding-total";
 import { PRICING_HERO } from "./hero-lines";
 import { BILLING_FAQ } from "./faq-data";
 import { useStartFree } from "@/components/auth/use-start-free";
@@ -130,8 +128,6 @@ export function D8Pricing() {
   const unit = yearly ? "a year" : "a month";
   // The real counts only (lane R decision 2): nothing shows while a count is unknown.
   const left = useFoundingLeft();
-  const places = useFoundingPlaces();
-  const f25Left = places?.left ?? null;
 
   return (
     <>
@@ -309,66 +305,33 @@ export function D8Pricing() {
         </div>
       </section>
 
-      <section aria-labelledby="offers-h" className="border-t border-line">
-        <div className="container-kb section-y">
-          <h2 id="offers-h" className="sr-only">
-            Founding offers
-          </h2>
-          <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
-            {/* The founding price shows only while places remain (facts, Price 1). */}
-            {left !== null && left > 0 && (
-              <div className="rounded-panel border border-line bg-surface-1 p-6 sm:p-8">
-                <p className="inline-flex rounded-full bg-kb-yellow px-3 py-1 text-label font-bold text-kb-black">
-                  The founding price
-                </p>
-                <p className="mt-2 font-display text-h3 font-bold">
-                  The first {FOUNDING_TOTAL} paying businesses pay less.
-                </p>
-                <p className="mt-3 text-body text-text-2">
-                  They pay the founding price and keep it while they stay subscribed.
-                </p>
-                <p className="mt-2 text-body text-text-2">
-                  Essentials ${FOUNDING_PRICES.essentialsMonthly} a month or $
-                  {FOUNDING_PRICES.essentialsYearly} a year. Pro ${FOUNDING_PRICES.proMonthly} a
-                  month or ${FOUNDING_PRICES.proYearly} a year.
-                </p>
-                <p className="mt-3 text-small font-bold">{foundingPlacesLine(left)}</p>
-              </div>
-            )}
-            <div className="theme-dark rounded-panel bg-band p-6 text-text-1 sm:p-8">
+      {/* The launch price shows only while places remain, with the real count (facts, Price 1). Founding 25 is private (Founding 1). */}
+      {left !== null && left > 0 && (
+        <section aria-labelledby="offers-h" className="border-t border-line">
+          <div className="container-kb section-y">
+            <div className="max-w-3xl rounded-panel border border-line bg-surface-1 p-6 sm:p-8">
+              <h2 id="offers-h" className="sr-only">
+                The launch price
+              </h2>
               <p className="inline-flex rounded-full bg-kb-yellow px-3 py-1 text-label font-bold text-kb-black">
-                Founding 25
+                The launch price
               </p>
               <p className="mt-2 font-display text-h3 font-bold">
-                Three months of Kabsi Pro, free, for {FOUNDING25_TOTAL} businesses.
+                The first {FOUNDING_TOTAL} paying businesses pay less.
               </p>
               <p className="mt-3 text-body text-text-2">
-                By application. Kabsi does the Google work; you tell Rashid what to make better.
+                They pay the launch price and keep it while they stay subscribed.
               </p>
               <p className="mt-2 text-body text-text-2">
-                After 90 days, choose a plan at the founding price or stop. Nothing is charged by
-                itself.
+                Essentials ${FOUNDING_PRICES.essentialsMonthly} a month or $
+                {FOUNDING_PRICES.essentialsYearly} a year. Pro ${FOUNDING_PRICES.proMonthly} a month
+                or ${FOUNDING_PRICES.proYearly} a year.
               </p>
-              {f25Left === 0 ? (
-                <p className="mt-3 text-body font-bold">All 25 places are taken.</p>
-              ) : (
-                <>
-                  {/* The real count only (decision 2): nothing while it is unknown. */}
-                  {f25Left !== null && (
-                    <p className="mt-3 text-body font-bold">
-                      {f25Left} of {places?.total ?? FOUNDING25_TOTAL} places left.
-                    </p>
-                  )}
-                  <SiteLink to="/founding" className={cn(linkCls, "mt-2 text-body")}>
-                    Apply for a place
-                    <ArrowRight className="size-4" aria-hidden />
-                  </SiteLink>
-                </>
-              )}
+              <p className="mt-3 text-small font-bold">{foundingPlacesLine(left)}</p>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section aria-labelledby="pfaq-h" className="border-t border-line bg-surface-1">
         <div className="container-kb section-y grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">

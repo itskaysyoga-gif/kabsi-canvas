@@ -8,9 +8,7 @@ import { gzipSync } from "node:zlib";
 
 const base = (process.argv[2] ?? "http://localhost:4173").replace(/\/$/, "");
 const paths =
-  process.argv.length > 3
-    ? process.argv.slice(3)
-    : ["/", "/pricing", "/scan", "/founding", "/for/hair-salon"];
+  process.argv.length > 3 ? process.argv.slice(3) : ["/", "/pricing", "/scan", "/for/hair-salon"];
 const kb = (n) => (n / 1024).toFixed(1);
 const browser = await chromium.launch({ args: ["--no-sandbox"] });
 for (const path of paths) {

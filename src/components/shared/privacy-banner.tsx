@@ -15,6 +15,7 @@ import {
   type ConsentState,
 } from "@/lib/consent";
 import { isPrivatePath } from "@/lib/telemetry";
+import { scrubUrl } from "@/lib/scrub";
 
 // The privacy bar and "Your privacy choices" (P0.6-01, master plan 20.4, docs/COPY.md shared pieces). First party, no
 // outside consent tool, no categories, no vendor list.
@@ -71,7 +72,7 @@ export function PrivacyBanner({ onMounted }: { onMounted?: () => void } = {}) {
         <Switch
           checked={on}
           onChange={(v) =>
-            void saveChoice("switch", { analytics: v, advertising: v }, pathname, "panel")
+            void saveChoice("switch", { analytics: v, advertising: v }, scrubUrl(pathname), "panel")
           }
           label={wording.panel!}
         />
@@ -89,7 +90,7 @@ export function PrivacyBanner({ onMounted }: { onMounted?: () => void } = {}) {
 
   const decide = (action: "accept" | "decline") => {
     const yes = action === "accept";
-    void saveChoice(action, { analytics: yes, advertising: yes }, pathname);
+    void saveChoice(action, { analytics: yes, advertising: yes }, scrubUrl(pathname));
   };
 
   return (
