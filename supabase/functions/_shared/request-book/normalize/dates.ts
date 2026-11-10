@@ -7,6 +7,7 @@
 // Bare hours (no am or pm): 8 to 12 are read as written (8:00 to 12:00), 13 to 23 are 24 hour times, 0 is midnight, and
 // 1 to 7 are ambiguous between the morning and the afternoon. Changing that rule changes DATES_VERSION.
 import { readable } from "./digits.ts";
+import { correctWords } from "./fuzzy.ts";
 import type { Evidence } from "./result.ts";
 
 export const DATES_VERSION = 1;
@@ -241,11 +242,53 @@ function hourAfterDay(t: string, dayEnd: number): { reads: Hour; start: number; 
  * The day and hour written in a message, resolved against `now` (the message time) in `timeZone` (the location's zone).
  * Returns unknown when nothing about a day or hour was written, or when what was written is not a real date or time.
  */
-export function normalizeWhen(text: string, ctx: { now: Date; timeZone: string }): WhenResult {
+export function normalizeWhen(text: string, ctx: { now: Date; timeZone: string; typosIn?: { start: number; end: number } | null }): WhenResult {
   const v = DATES_VERSION;
   if (!validZone(ctx.timeZone)) return { status: "unknown", reason: "bad_time_zone", version: v };
   if (!(ctx.now instanceof Date) || Number.isNaN(ctx.now.getTime())) return { status: "unknown", reason: "bad_time", version: v };
-  const t = readable(text);
+  // RB-F3: a misspelled day, month or time word ("thrsday", "agternoon") is read as the real word, with positions kept in
+  // what the owner typed. Two equally near days ("thuesday") give both readings, so the owner taps the one meant.
+  const variants = correctWords(readable(text), TIME_WORDS, KNOWN_EXACT, ctx.typosIn ?? null);
+  const results = variants.map((c) => {
+    const r = whenIn(c.text, ctx);
+    if (r.status === "unknown") return r;
+    const start = c.toOrig(r.start);
+    const end = c.toOrig(r.end);
+    return { ...r, start, end, raw: text.slice(start, end) };
+  });
+  if (results.length === 1) return results[0]!;
+  const read = results.filter((r): r is Exclude<WhenResult, { status: "unknown" }> => r.status !== "unknown");
+  if (read.length === 0) return results[0]!;
+  if (read.length === 1) return read[0]!;
+  const candidates: WhenCandidate[] = [];
+  for (const r of read) {
+    const cs = r.status === "ok" ? [{ date: r.date, time: r.time, startsAt: r.startsAt }] : r.candidates;
+    for (const c of cs) if (!candidates.some((x) => x.date === c.date && x.time === c.time && x.startsAt === c.startsAt)) candidates.push(c);
+  }
+  const first = read[0]!;
+  if (candidates.length === 1) return first;
+  return { status: "ambiguous", candidates, raw: first.raw, start: first.start, end: first.end, version: v };
+}
+
+/** The words a typo may be read as (RB-F3): full day names, the longer month names, and the time words. */
+const TIME_WORDS: { word: string; value: string }[] = [
+  ...["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+  // March, May, June and July are left out: "match", "man", "jane" and "jully" are too close to everyday words and names.
+  ...["january", "february", "april", "august", "september", "october", "november", "december"],
+  ...["morning", "afternoon", "evening", "tonight", "tomorrow", "today"],
+].map((w) => ({ word: w, value: w }));
+
+/** Words already read as they are, so they are never "corrected" into another one. */
+const KNOWN_EXACT = new Set<string>([
+  ...Object.keys(WEEKDAYS), ...Object.keys(MONTHS), ...TODAY, ...TOMORROW, ...Object.keys(DAY_PARTS),
+  "after", "about", "around", "maybe", "first", "fridays", "mondays", "sundays", "tuesdays", "wednesdays", "thursdays", "saturdays",
+  "mornings", "evenings", "afternoons", "monthly", "month", "months", "money", "march", "matches", "april", "these", "those", "there", "their",
+  "thanks", "think", "things", "through", "times", "tuesday's", "every", "event", "events", "even", "ever",
+]);
+
+/** The day and hour in one prepared text (positions in that text). */
+function whenIn(t: string, ctx: { now: Date; timeZone: string }): WhenResult {
+  const v = DATES_VERSION;
   const l = localParts(ctx.now, ctx.timeZone);
   const today: Ymd = { y: l.y, m: l.m, d: l.d };
 
@@ -269,7 +312,7 @@ export function normalizeWhen(text: string, ctx: { now: Date; timeZone: string }
   else if (part) spans.push(part);
   const start = Math.min(...spans.map((s) => s.start));
   const end = Math.max(...spans.map((s) => s.end));
-  const raw = text.slice(start, end);
+  const raw = t.slice(start, end);
 
   const days: (Ymd | null)[] = day ? day.days : [null];
   const times: ({ hh: number; mm: number } | null)[] = time ? time.reads : [null];

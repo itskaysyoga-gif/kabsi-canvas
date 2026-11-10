@@ -196,6 +196,14 @@ export const SAY = {
   noted: "Okay, nothing was changed.",
   onIt: "On it.",
   unclear: "I did not catch that. You can send \"help\" to see what you can do here, or \"talk to a person\".",
+  // RB-F3 (R-148 item 4): the staff-only "reset test" for the demo businesses.
+  resetAsk: (n: number, b: number) => `Reset test?\nThis removes the ${n} open ${n === 1 ? "request" : "requests"} you made at ${b === 1 ? "1 test business" : `${b} test businesses`}. Nothing else changes. Tap Confirm to go ahead.`,
+  resetDone: (n: number) => `Test reset\n${n} ${n === 1 ? "request was" : "requests were"} removed at the test businesses.`,
+  resetNone: "Nothing to reset\nYou have no open requests at the test businesses.",
+  resetStaffOnly: "Reset test is for Kabsi staff only\nNothing was changed.",
+  resetFailed: "Kabsi could not reset the test just now\nNothing was changed. Please send it again in a minute.",
+  // RB-F3 (R-148 item 5, WhatsApp's 2026 terms bar general-purpose assistants): a message that is not one of Kabsi's jobs.
+  offTopic: "Kabsi looks after your business on Google: review replies, your listing, photos and posts. Send \"help\" to see what you can send.",
   abuseNotice: "Kabsi will not reply to messages like this. If you need help, send \"talk to a person\".",
 
   // Media (18.3, 28.3).
@@ -229,7 +237,7 @@ export const SAY = {
   partnerSoon: "Partner tools on WhatsApp open soon. Your link, results and payouts will all be here.",
 
   // staff_admin (9.9, 29.7).
-  staffHelpText: "Staff commands: \"status\", \"waiting\", \"today\", \"pause\" or \"resume\" followed by a business name, \"partners\", \"payouts\".",
+  staffHelpText: "Staff commands: \"status\", \"waiting\", \"today\", \"pause\" or \"resume\" followed by a business name, \"partners\", \"payouts\", \"reset test\".",
   staffPartnersSoon: "Partner approvals arrive here once Kabsi Partners is built (PA1 and PA2).",
   staffPayoutsSoon: "The monthly payout list arrives here once the partner ledger is built (PA1).",
   staffPaused: (b: string) => `Paused: Kabsi sends ${b} nothing but urgent messages for 30 days.`,

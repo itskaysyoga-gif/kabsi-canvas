@@ -420,6 +420,8 @@ export const agentDb: AgentDb = {
   staffNumbers: () => rpc("whatsapp_staff_numbers", {}),
   staffSummary: () => rpc("whatsapp_staff_summary", {}),
   staffPause: (name, pause) => rpc("whatsapp_staff_pause", { p_name: name, p_pause: pause }),
+  // RB-F3: "reset test" (staff only): the database checks the phone's staff role and touches demo businesses only.
+  resetTest: (phone, confirm) => rpc("request_reset_test", { p_phone: phone, p_confirm: confirm }),
   handoff: async (phone, summary) => {
     await rpc("ops_emit", { p_kind: "whatsapp_handoff", p_channel: "customers", p_title: "WhatsApp: someone wants to talk to a person",
       p_body: `${summary}. Phone ending ${phone.slice(-4)}. Answer in the Kapso inbox.`, p_dedupe: `wa_handoff:${phone}:${new Date().toISOString().slice(0, 13)}` });

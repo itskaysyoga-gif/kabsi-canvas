@@ -44,13 +44,17 @@ export type OpenQuestion =
   // V4: the first message back during onboarding ("Can Kabsi send your setup steps and approvals here?").
   | { type: "setup"; location_id: string }
   // RB-E: a request book proposal waiting for Save. Ids only: the words stay in the proposal row (request_intakes), never here.
-  | { type: "rb_proposal"; location_id: string; intake_id: string; at: string }
+  | { type: "rb_proposal"; location_id: string; intake_id: string; at: string;
+      // RB-F3: the open request this draft looks like, asked about with "Update #N or add a new one?" (its nonce is in the button).
+      dup?: { request_id: string; number: number; version: number; nonce: string } }
   // RB-F: a change the database asked to be confirmed first (a skipped step, or one that ends a request), and the readings of
   // a time waiting for a tap. Ids, status codes and times only: no name and no customer's words.
   // The nonce is in the question's buttons, so an older button for the same request never answers a newer question.
   | { type: "rb_ask"; location_id: string; request_id: string; version: number; to: string; outcome: string | null; at: string; nonce: string }
   | { type: "rb_time"; location_id: string; request_id: string; version: number; action: "confirm" | "convert"; readings: string[]; services: string[];
-      at: string; nonce: string };
+      at: string; nonce: string }
+  // RB-F3: the confirm question of the staff-only "reset test" (its nonce is in the Confirm button; open 10 minutes).
+  | { type: "reset_test"; at: string; nonce: string };
 
 export type Who = { phone: string; roles: Role[]; conversation: Conversation | null };
 
@@ -68,7 +72,7 @@ export const TOOLS = {
     "hours", "post", "voice", "ask_customer", "person"],
   staff: ["help", "question", "switch", "photo", "voice", "ask_customer", "person"],
   partner: ["help", "question", "switch", "partner_tool", "person"],
-  staff_admin: ["help", "switch", "staff_status", "staff_waiting", "staff_today", "staff_pause", "staff_partners", "staff_payouts", "person"],
+  staff_admin: ["help", "switch", "staff_status", "staff_waiting", "staff_today", "staff_pause", "staff_partners", "staff_payouts", "staff_reset_test", "person"],
 } as const;
 export type RoleName = keyof typeof TOOLS;
 export type Tool = (typeof TOOLS)[RoleName][number];

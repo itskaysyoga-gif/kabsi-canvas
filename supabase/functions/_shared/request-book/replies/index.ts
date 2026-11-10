@@ -223,7 +223,7 @@ export function correctedReply(row: RequestRow, changes: FieldChange[], ctx: Rep
   const lines = changes.map((c) => `${fieldLabel(ctx.pack, c.field)} changed from ${shown(c.field, c.before, ctx)} to ${shown(c.field, c.after, ctx)}.`);
   // The note about the confirmations is part of the answer, so it is kept and the changes shrink to make room.
   const note = flags.includes("confirmations_cleared") ? ["The time changed, so both confirmations were cleared."] : [];
-  const body = fit([label(row, ctx.pack)], lines, note, BUTTON_BODY_MAX, 0, (n) => `and ${n} more ${n === 1 ? "change" : "changes"}`);
+  const body = fit([`${label(row, ctx.pack)} corrected`], lines, note, BUTTON_BODY_MAX, 0, (n) => `and ${n} more ${n === 1 ? "change" : "changes"}`);
   return finish(body, ["Undo"]);
 }
 

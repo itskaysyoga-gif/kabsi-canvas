@@ -25,7 +25,7 @@ export type Command =
   | { k: "onboarding"; action: OnboardingAction; locationId: string }
   | { k: "facts"; action: "yes" | "no"; locationId: string; month: string }
   // RB-E: the buttons under a request book proposal: Save, Change, or one of two or three readings (by its place in the list).
-  | { k: "request"; action: "save" | "change" | "pick"; intakeId: string; pick?: number }
+  | { k: "request"; action: "save" | "change" | "pick" | "update"; intakeId: string; pick?: number; nonce?: string }
   // RB-F: Yes and No under a question asked before a change (by request id), Undo (by activity ids, the latest first), and a
   // tapped time (by request id and its place in the list). The business is never read from the button.
   | { k: "rbook"; action: "ask_yes" | "ask_no" | "undo" | "time"; ids: string[]; pick?: number; nonce?: string }
@@ -79,6 +79,8 @@ const WORDS: [RegExp, string, string?][] = [
   [/^resume\s+(.{2,80})$/, "staff_resume"],
   [/^partners? approvals?$|^applications$/, "staff_partners"],
   [/^payout list$|^approve payouts$/, "staff_payouts"],
+  // RB-F3: staff only; it clears the sender's own open requests at the demo businesses after a Confirm tap.
+  [/^reset test$/, "staff_reset_test"],
   [/^(hours|close early|closed|closing|opening hours)\b.*$/, "hours"],
   [/^(post|new post)\b.*$/, "post"],
 ];
@@ -156,6 +158,8 @@ export function parseButton(id: string): Command {
   if (bill) return { k: "tool", tool: "billing", arg: `confirm:${bill[1]}` };
   // 13b part 2: the map's "Show me" and "Later" (m:s:<scan>, m:l), the owner's keyword confirm (v:y:<business>, v:c:<business>).
   // The morning digest's one-tap buttons (staff_admin only; the router checks the role).
+  const zr = /^zr:([a-z0-9]{8})$/.exec(id);
+  if (zr) return { k: "tool", tool: "staff_reset_test", arg: `confirm:${zr[1]}` };
   const st = /^s:(status|waiting|today)$/.exec(id);
   if (st) return { k: "tool", tool: `staff_${st[1]}` };
   const map = /^m:(s|l)(?::([0-9a-f-]{36}))?$/.exec(id);
@@ -173,6 +177,10 @@ export function parseButton(id: string): Command {
   // proposal; the business is never read from the button (agent.ts looks it up only in the phone's own businesses).
   const rq = /^r([sc]):([0-9a-f-]{36})$/.exec(id);
   if (rq) return { k: "request", action: rq[1] === "s" ? "save" : "change", intakeId: rq[2] };
+  // RB-F3: rdu:<proposal>:<nonce> "Update #N" under the question about a request that looks the same. The request it
+  // updates is the one the open question holds, never a number from the button.
+  const rdu = /^rdu:([0-9a-f-]{36}):([a-z0-9]{8})$/.exec(id);
+  if (rdu) return { k: "request", action: "update", intakeId: rdu[1], nonce: rdu[2] };
   const rp = /^rp:([0-9a-f-]{36}):([0-2])$/.exec(id);
   if (rp) return { k: "request", action: "pick", intakeId: rp[1], pick: Number(rp[2]) };
   const ra = /^r([ax]):([0-9a-f-]{36}):([a-z0-9]{8})$/.exec(id);
@@ -185,6 +193,22 @@ export function parseButton(id: string): Command {
   if (biz) return { k: "business_pick", locationId: biz[1] };
   return { k: "empty" };
 }
+
+/**
+ * RB-F3 (R-148 item 5): a message that asks Kabsi to be a general assistant (WhatsApp's 2026 terms bar general-purpose
+ * assistants on the Business Platform). Read by code: it gets one fixed line about what Kabsi does and "help", never a model
+ * answer. Posts, replies and reviews are Kabsi's own jobs and are never caught here.
+ */
+const OFF_TOPIC = [
+  /^(?:can you |could you |please )?(?:write|compose|make)\s+(?:me\s+)?(?:a|an|some)?\s*(?:poem|essay|story|song|lyrics|joke|letter|cv|resume|speech|code|script|program|homework|recipe|rap)\b/i,
+  /^(?:can you |could you |please )?translate\b/i,
+  /\b(?:tell me a joke|what(?:'s| is) the weather|weather (?:today|tomorrow|forecast)|capital of|who won|who is the president|meaning of life|do my homework|solve (?:this|the) (?:equation|problem)|in python|javascript code|chatgpt|stock price|bitcoin price)\b/i,
+];
+export const isOffTopic = (text: string | null | undefined): boolean => {
+  const t = (text ?? "").trim();
+  if (!t || /\b(?:posts?|reply|review|google|kabsi|listing|photos?|book|appointment|booking|request|instagram|facebook|menu|caption|customers?|clients?)\b/i.test(t)) return false;
+  return OFF_TOPIC.some((re) => re.test(t));
+};
 
 // A few words that are never answered (9.3 "abuse: one notice, then no reply").
 const ABUSE = /\b(fuck|f\*ck|shit|bitch|cunt|asshole|idiot|stupid bot)\b/i;

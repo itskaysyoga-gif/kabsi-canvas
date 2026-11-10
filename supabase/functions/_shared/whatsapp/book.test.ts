@@ -75,7 +75,7 @@ Deno.test("snapshot: an owner's message at a business with the book off goes to 
   const ai = d.ai!;
   d.ai = (system, user) => (systems.push(system), ai(system, user));
   const r = await receive(d, msg(w, TEST, { text: "Book Sarah for highlights Thursday afternoon" }));
-  assert.equal(r, "unclear");
+  assert.equal(r, "off_topic");
   assert.equal(systems.length, 1);
   assert.equal(await sha(systems[0]), BEFORE.owner);
   assert.equal(w.extractCalls.length, 0);
@@ -90,8 +90,8 @@ Deno.test("seam off: no setting, or a pack that is off, or no pack: today's beha
     (w: World) => w.packs.set(SALON, { pack: "plumber", version: 1, state: "test" })]) {
     const w = bookWorld();
     setup(w);
-    assert.equal(await send(w, TEST, { text: "Book Sarah for highlights Thursday afternoon" }), "unclear");
-    assert.equal(await send(w, TEST, { text: "1" }), "unclear");
+    assert.equal(await send(w, TEST, { text: "Book Sarah for highlights Thursday afternoon" }), "off_topic");
+    assert.equal(await send(w, TEST, { text: "1" }), "off_topic");
     assert.equal(await send(w, TEST, { text: "closed" }), "hours_no_day");
     assert.equal(w.extractCalls.length, 0);
     assert.equal(w.intakes.size + w.requests.length, 0);
@@ -108,7 +108,7 @@ Deno.test("seam off: Yawmiyati's stats and review link, and a typed yes, answer 
   assert.ok(w.actions.get(token)!.used);
   // Words and buttons never read the switch; free text reads it once, for that phone's own business only.
   assert.deepEqual(w.bookCalls, []);
-  assert.equal(await send(w, PHONES.owner, { text: "something new" }), "unclear");
+  assert.equal(await send(w, PHONES.owner, { text: "something new" }), "off_topic");
   assert.deepEqual(w.bookCalls, [`on:${BIZ.harbour}`]);
 });
 
@@ -119,7 +119,8 @@ Deno.test("capture: one proposal with Save and Change, nothing saved; Save makes
   assert.equal(await send(w, TEST, { text: "Book Sarah for highlights Thursday afternoon" }), "request_proposed");
   const p = last(w);
   assert.deepEqual(p.buttons, ["Save", "Change"]);
-  assert.match(p.body, /^Kabsi Test Salon \(owner\)/);
+  // RB-F3: no role head; the bold first line says what it is (one business on this phone, so no business name).
+  assert.match(p.body, /^\*📅 New appointment\*\n/);
   assert.match(p.body, /Name: Sarah/);
   assert.match(p.body, /Service: Highlights/);
   // RB-F2: the time in its clean form.
@@ -143,7 +144,7 @@ Deno.test("capture: one proposal with Save and Change, nothing saved; Save makes
   assert.equal(q.requested_window_text, "Thu 29 Oct afternoon");
   assert.equal(q.location, SALON);
   assert.equal(q.by, TEST_USER);
-  assert.match(last(w).body, /Appointment 1 saved\.\n#1 Sarah · Highlights · Thu 29 Oct afternoon, no time set · Requested/);
+  assert.match(last(w).body, /Appointment 1 saved\*( · [^\n]+)?\n#1 Sarah · Highlights · Thu 29 Oct afternoon, no time set · Requested/);
   // RB-F: Undo is offered for 10 minutes, by the creation's activity id.
   assert.deepEqual(last(w).buttons, ["Undo"]);
   // The key of the Save is the WhatsApp id of the tap.
@@ -179,7 +180,8 @@ Deno.test("capture: a second message before a tap revises the same proposal; Sav
   w.aiMap["Maya asked about a trial"] = tool("request_new");
   w.extractMap["Maya asked about a trial"] = quotes({ customer_name: "Maya", phone: null, interest: "a trial", when: null });
   w.aiMap["Saturday morning"] = '{"tool":"unclear","args":{},"lang":"en"}';
-  w.extractMap["Maya asked about a trial\nSaturday morning"] = quotes({ customer_name: "Maya", phone: null, interest: "a trial", when: "Saturday morning" });
+  // RB-F3: only the new words are read; the name and the interest stay as first read.
+  w.extractMap["Saturday morning"] = quotes({ customer_name: null, phone: null, interest: null, when: "Saturday morning" });
   assert.equal(await send(w, TEST, { text: "Maya asked about a trial" }), "request_proposed");
   const first = lastIntake(w);
   assert.equal(await send(w, TEST, { text: "Saturday morning" }), "request_revised");
@@ -237,7 +239,7 @@ Deno.test("capture: a message with nothing to read writes no proposal", async ()
   w.aiMap["ok thanks"] = tool("request_new");
   assert.equal(await send(w, TEST, { text: "ok thanks" }), "request_unread");
   assert.equal(w.intakes.size, 0);
-  assert.match(last(w).body, /could not read a request in that\. Nothing was saved/);
+  assert.match(last(w).body, /could not read a request in that\*\nNothing was saved/);
 });
 
 Deno.test("capture: Change keeps the proposal open for the next message; No drops it", async () => {
@@ -265,11 +267,11 @@ Deno.test("find: a name lists the matches with one question; a number shows the 
   w.aiMap["Sarah"] = tool("request_find", { name: "Sarah" });
   assert.equal(await send(w, TEST, { text: "Sarah" }), "request_find");
   const found = last(w).body;
-  assert.match(found, /2 found\. Which one\? Send its number\./);
+  assert.match(found, /2 found\*\nWhich one\? Send its number\./);
   assert.equal((found.match(/\?/g) ?? []).length, 1, "at most one question");
   assert.match(found, /This covers only what was entered in Kabsi/);
   assert.equal(await send(w, TEST, { text: "1" }), "request_summary");
-  assert.match(last(w).body, /Appointment 1 for Sarah\nHighlights\nWhen: Thu 29 Oct afternoon, no time set\nStatus: Requested/);
+  assert.match(last(w).body, /Appointment 1 for Sarah\*\nHighlights\nWhen: Thu 29 Oct afternoon, no time set\nStatus: Requested/);
   assert.equal(await send(w, TEST, { text: "request 2" }), "request_summary");
   assert.match(last(w).body, /Appointment 2 for Sarah/);
   assert.equal(await send(w, TEST, { text: "request 9" }), "request_summary");
@@ -281,7 +283,8 @@ Deno.test("find: a name lists the matches with one question; a number shows the 
   w.aiMap["who was that"] = tool("request_find", { name: "Sarah" });
   assert.equal(await send(w, TEST, { text: "who was that" }), "request_find");
   assert.match(last(w).body, /Send the name or the number of the request/);
-  assert.equal(w.bookCalls.filter((c) => c.startsWith("find:")).length, 2);
+  // Two searches the owner asked for, and RB-F3's duplicate check before each of the two proposals.
+  assert.equal(w.bookCalls.filter((c) => c.startsWith("find:")).length, 4);
 });
 
 // ─── The word table.
@@ -297,7 +300,7 @@ Deno.test("words: closed, cancel and post keep today's meaning alone and mean a 
   assert.match(last(w).body, /Appointment 1 for Sarah/);
   for (const t of ["cancel 1", "Cancel #1"]) {
     assert.equal(await send(w, TEST, { text: t }), "request_status_ask", t);
-    assert.match(last(w).body, /This closes Appointment 1 as Cancelled\.\nGo ahead\?/);
+    assert.match(last(w).body, /This closes Appointment 1 as Cancelled\*( · [^\n]+)?\nGo ahead\?/);
   }
   assert.equal(await send(w, TEST, { text: "cancel" }), "billing_stub");
   assert.equal(await send(w, TEST, { text: "post" }), "post_ask");
@@ -306,7 +309,7 @@ Deno.test("words: closed, cancel and post keep today's meaning alone and mean a 
   assert.match(await send(w, TEST, { text: "closed 1" }), /^hours_/);
   assert.equal(w.requests[0].status, "requested");
   // Staff words are unchanged.
-  assert.equal(await send(w, TEST, { text: "status" }), "unclear");
+  assert.equal(await send(w, TEST, { text: "status" }), "off_topic");
 });
 
 Deno.test("words: a number alone means that request only where the book is on", async () => {
@@ -315,7 +318,7 @@ Deno.test("words: a number alone means that request only where the book is on", 
   await send(w, TEST, { button: `rs:${lastIntake(w).id}` });
   assert.equal(await send(w, TEST, { text: "1" }), "request_summary");
   w.aiMap["1"] = '{"tool":"unclear","args":{},"lang":"en"}';
-  assert.equal(await send(w, PHONES.owner, { text: "1" }), "unclear");
+  assert.equal(await send(w, PHONES.owner, { text: "1" }), "off_topic");
   // The answer to Kabsi's own questions still comes first (Which one?).
   const a = w.alert(TEST, SALON), b = w.alert(TEST, SALON, "post_ready");
   assert.equal(await send(w, TEST, { text: "yes" }), "which_one");
@@ -351,7 +354,7 @@ Deno.test("words: with a draft open at another of the phone's businesses, a yes 
   const token = w.alert(TEST, GYM);
   w.conversation(TEST).active_location_id = GYM;
   assert.equal(await send(w, TEST, { text: "yes" }), "request_yes_tap_save");
-  assert.match(last(w).body, /^Kabsi Test Salon \(owner\)\n\nA request draft is waiting/);
+  assert.match(last(w).body, /^\*❓ A request draft is waiting\* · Kabsi Test Salon\n/);
   assert.equal(w.actions.get(token)!.used, false);
   await send(w, TEST, { button: `rs:${lastIntake(w).id}` });
   assert.equal(await send(w, TEST, { text: "yes" }), "approved");
@@ -367,7 +370,7 @@ Deno.test("capture: a message that adds nothing to the open draft does not chang
   w.extractMap["Book Sarah for highlights Thursday afternoon\nthanks"] = w.extractMap["Book Sarah for highlights Thursday afternoon"];
   assert.equal(await send(w, TEST, { text: "thanks" }), "request_still_waiting");
   assert.equal(intake.raw, raw);
-  assert.match(last(w).body, /still waiting\. Tap Save or Change/);
+  assert.match(last(w).body, /still waiting\*\nTap Save or Change/);
   // A Google question with a draft open keeps its meaning.
   w.aiMap["how many reviews this week"] = tool("stats", { days: "7" });
   assert.equal(await send(w, TEST, { text: "how many reviews this week" }), "stats");
@@ -380,7 +383,7 @@ Deno.test("failure: a database error gives a plain line, never silence, and no s
   const d = w.deps();
   d.book!.db.propose = () => Promise.reject(new Error("db down"));
   assert.equal(await receive(d, msg(w, TEST, { text: "Book Sarah for highlights Thursday afternoon" })), "request_db_error");
-  assert.match(last(w).body, /could not reach your request book just now\. Nothing new was saved/);
+  assert.match(last(w).body, /could not reach your request book just now\*\nNothing new was saved/);
   const e = w.deps();
   e.book!.db.get = () => Promise.reject(new Error("db down"));
   assert.equal(await receive(e, msg(w, TEST, { text: "request 1" })), "request_db_error");
@@ -410,8 +413,8 @@ Deno.test("words: forwarded text never saves and never reaches the request book 
   // F-1 with a request draft waiting (RB-F): the looks forwarded line, and the draft still waits.
   assert.equal(await send(w, TEST, { text: "Yes", forwarded: true }), "forwarded_yes");
   assert.match(last(w).body, /That looks forwarded, so I did not count it as your yes/);
-  assert.match(await send(w, TEST, { text: "Book Maya for a trim Friday", forwarded: true }), /^(unclear|nora)/);
-  assert.match(await send(w, TEST, { text: "1", forwarded: true }), /^(unclear|nora)/);
+  assert.match(await send(w, TEST, { text: "Book Maya for a trim Friday", forwarded: true }), /^(unclear|nora|off_topic)/);
+  assert.match(await send(w, TEST, { text: "1", forwarded: true }), /^(unclear|nora|off_topic)/);
   assert.equal(w.bookCalls.length, before);
   assert.equal(w.requests.length, 0);
   assert.equal(lastIntake(w).state, "pending");
@@ -490,9 +493,9 @@ Deno.test("switch: a phone with three businesses picks one through the existing 
   assert.equal(await send(w, TEST, { button: `b:${GYM}` }), "business_set");
   w.aiMap["Sarah"] = tool("request_find", { name: "Sarah" });
   assert.equal(await send(w, TEST, { text: "Sarah" }), "request_find");
-  assert.match(last(w).body, /^Kabsi Test Gym \(owner\)\n\nNothing found in Kabsi for that/);
+  assert.match(last(w).body, /^\*📋 Nothing found in Kabsi for that\* · Kabsi Test Gym\n/);
   assert.equal(await send(w, TEST, { text: "request 1" }), "request_summary");
-  assert.match(last(w).body, /^Kabsi Test Gym \(owner\)\n\nI cannot find that request/);
+  assert.match(last(w).body, /^\*💬 I cannot find that request\* · Kabsi Test Gym\n/);
   assert.doesNotMatch(last(w).body, /Sarah|Highlights|Salon/);
   const reads = w.bookCalls.filter((c) => /^(find|get):/.test(c)).slice(-2);
   assert.deepEqual(reads, [`find:${GYM}:${TEST_USER}`, `get:${GYM}:${TEST_USER}`]);
@@ -500,7 +503,7 @@ Deno.test("switch: a phone with three businesses picks one through the existing 
   await send(w, TEST, { text: "switch" });
   await send(w, TEST, { button: `b:${SALON}` });
   assert.equal(await send(w, TEST, { text: "request 1" }), "request_summary");
-  assert.match(last(w).body, /^Kabsi Test Salon \(owner\)\n\nAppointment 1 for Sarah/);
+  assert.match(last(w).body, /^\*📅 Appointment 1 for Sarah\* · Kabsi Test Salon\n/);
 });
 
 // ─── "On it".

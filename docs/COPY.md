@@ -2096,3 +2096,22 @@ Replaces section 10 and the Partners lines of sections 24, 38, 50 and 66 where t
 - Questions (section 10's four, then two new): "When do partner links switch on?" / "When card payments open. Applications are open now, and the first 20 approved are Founding Partners." · "Does Kabsi work with any review card?" / "Yes. Kabsi reads every new Google review, however it came in, and prepares a reply for the owner's yes."
 - Apply band: H2 "Earn 25% of every payment." (unchanged), "Kabsi Partners opens when card payments open." (unchanged). Form kinds: "Seller of NFC or QR review cards" first, then section 24's list.
 - Partner terms, section 5, a new rule: "Follow Google's review rules: no review gating or filtering (asking only happy customers), no rewards for reviews and no fake reviews. Breaking this rule ends the partnership and its payments." Section 6 adds review gating and fake reviews to what ends a partnership at once. The summary line "Never promise rankings, reviews or customers, and never say Kabsi works with Google." stays; a new summary line: "Follow Google's review rules: no gating, no rewards for reviews, no fake reviews." Updated "10 November 2026".
+
+## 75. RB-F3: typos, duplicates and the look of request book, switch and help replies (10 Nov 2026, WhatsApp, lane R R-148)
+
+WhatsApp only, free-form replies only. Approved templates do not change. Not public: the request book is on only for Kabsi's own test businesses. Before and after for each reply: `docs/progress/archive/2026-11-10-rb-f3.md`.
+
+The look (R-148 item 3), for every request book, switch and help reply:
+- The first line is bold, with one marker by what it is: 📅 appointment, 💬 enquiry, 🔧 job, ✅ saved or done, ⏳ needs confirmation, ↩️ undone, ❓ a question for the owner, 📋 a list. A first line of several sentences keeps only the first; the rest goes on the next line.
+- Short lines after it. The business name is in the first line ("... · Kabsi Test Salon") only when the phone has more than one business. No role in brackets: "(owner)" is gone from these replies. Other replies keep their head line as before.
+- Lists: one line per request: #, name, service, when, status (an appointment's status says which confirmation is held or missing, as before).
+
+New and changed lines:
+- A proposal's first line: "New appointment" (the pack's word: "New enquiry", "New job", "New visit"), shown as "*📅 New appointment*". Was "Appointment:".
+- A correction's first line: "Appointment 1 corrected" (was "Appointment 1").
+- A service that one typo could be read as two services: "Which service did you mean? Nothing is saved until you tap." with one button per service; with more than three: "That service could mean several things. Send it again. Nothing is saved yet."
+- Duplicate (R-148 item 2): "*Sarah already has 📅 #1, Highlights, Thu 12 Nov afternoon*" then "Update #1 or add a new one?" Buttons: "Update #1", "Add new". After Update when nothing differs: "Appointment 1 already says that" then "Nothing was changed, and the draft was not saved."
+- reset test (R-148 item 4, Kabsi staff only): "Reset test?" then "This removes the [n] open requests you made at [n] test businesses. Nothing else changes. Tap Confirm to go ahead." Button: "Confirm". Done: "Test reset" then "[n] requests were removed at the test businesses." None: "Nothing to reset" then "You have no open requests at the test businesses." Anyone else: "Reset test is for Kabsi staff only" then "Nothing was changed." A failure: "Kabsi could not reset the test just now" then "Nothing was changed. Please send it again in a minute."
+- The staff help line adds "reset test" to the list of staff commands. Staff help and partner help now start with "Kabsi staff tools" and "Your partner tools".
+- Off-topic (R-148 item 5, WhatsApp's 2026 terms bar general-purpose assistants): "Kabsi looks after your business on Google: review replies, your listing, photos and posts. Send "help" to see what you can send." It replaces the one short question a model wrote when nothing Kabsi does fits; Spanish and Arabic keep their unclear line, which already says "help".
+- Two changes undone together that read the same are shown once.

@@ -291,7 +291,7 @@ Deno.test("replies: a correction shows before and after in the pack's words, and
     { field: "stylist", before: "Rana", after: "Dina" },
   ], c, ["confirmations_cleared"]);
   assertEquals(r.body, [
-    "Appointment 12",
+    "Appointment 12 corrected",
     "service changed from Highlights to Trim.",
     "when changed from Thu 12 Nov 15:00 to Fri 13 Nov 11:00.",
     "next step changed from nothing to Call back.",
