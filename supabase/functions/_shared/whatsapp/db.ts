@@ -25,6 +25,7 @@ import { onboardingHooks } from "../onboarding/db.ts";
 import { sensitivity } from "../review-growth/sensitive.ts";
 import { sendSensitiveAlert } from "../review-growth/alerts.ts";
 import type { BookDb, BookDeps } from "./book.ts";
+import { signinDb } from "../wa-signin-db.ts";
 
 async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await admin().rpc(fn, args);
@@ -324,6 +325,8 @@ export async function agentDeps(): Promise<AgentDeps> {
     flush: () => flush(c.out!),
     billing: billingDeps,
     book: bookFor(key),
+    // Signup 1: Continue with WhatsApp and the new sign-in notice (the seam in agent.ts).
+    signin: signinDb(),
   };
 }
 

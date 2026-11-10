@@ -183,6 +183,8 @@ export async function sendEmail(o: {
   unsubscribeUrl?: string | null; stream?: Stream;
 }) {
   const db = admin();
+  // Signup 1: the placeholder sign-in address of an owner who signed up with WhatsApp is never mailed.
+  if (/@wa\.kabsi\.co$/i.test(o.to.trim())) return { skipped: "whatsapp_only" };
   // Demo workspace (P0.1-06, R-17): a demo business only ever emails the demo login. Nothing else is written or sent.
   if (o.locationId) {
     const { data: allowed, error: ae } = await db.rpc("email_allowed_for_location", { p_location: o.locationId, p_to: o.to });

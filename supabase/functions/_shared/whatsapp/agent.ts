@@ -19,6 +19,7 @@ import {
 } from "./book.ts";
 import { photoRefusal, voiceCheck } from "./media.ts";
 import { fromText, IN_SCOPE, LIST_RESULT, type ListMsg, markFor, type Msg, NAMES_BUSINESS, toMsg } from "./look.ts";
+import { type SigninDb, signinSeam } from "./signin.ts";
 import { MAX_BYTES } from "../photos/sniff.ts";
 import { notify, type Out, reply as sendReply } from "./outbox.ts";
 import type { SendState } from "./policy.ts";
@@ -151,6 +152,8 @@ export type AgentDeps = {
   onItMs?: number;
   /** RB-E: the request book (capture and find). Absent, or switched off for the business, and the agent is exactly as before. */
   book?: BookDeps;
+  /** Signup 1: Continue with WhatsApp and the new sign-in notice. Absent, and the three messages it reads go on as before. */
+  signin?: SigninDb;
 };
 
 const ABUSE_QUIET_MS = 24 * 3600_000;
@@ -238,6 +241,9 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     await sendReply(d.out, { ...t.s, stopped: false }, phone, say("stopped", t.lang));
     return "stopped";
   }
+  // Signup 1 (30.50 item 3): "Kabsi sign in CODE" and its two buttons, one exact pattern, before every other route.
+  const signin = await signinSeam(d, t.s, phone, t.m);
+  if (signin) return signin;
   if (cmd.k === "start") {
     // START is the person's own opt-in again (13b phone test, 25 Oct): every role comes back, not only the conversation.
     await d.db.start(phone);

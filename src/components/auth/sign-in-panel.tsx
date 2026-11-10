@@ -6,6 +6,9 @@ import { supabase } from "@/lib/supabase";
 import { continueWithGoogle, requestEmailCode, SignupError } from "@/lib/signup";
 import { emailTypoSuggestion } from "@/lib/email-typo";
 import { codeErrorWords, GOOGLE_UNAVAILABLE, IN_APP_LINE, OFFLINE } from "@/lib/sign-in-errors";
+import { WHATSAPP_ON } from "@/lib/site";
+import { googleSignInOn, isPhoneNow, waysOrder } from "@/lib/wa-signin";
+import { WhatsAppChoice, WhatsAppStep } from "@/components/auth/whatsapp-signin";
 
 // The approved line for an email that is not a full address (COPY.md 24, Design 4).
 const EMAIL_ERROR = "Check the email. It needs a full address, like name@shop.com.";
@@ -72,9 +75,10 @@ function GoogleChoice({
   );
 }
 
-/** The sign-up sheet's body, shared by /login and the "Save your snapshot and continue" sheet (P0.4-02, K-91; App 4):
- * "Continue with Google" first and "Continue with email" (a 6-digit code) second; in an in-app browser the email code
- * comes first and Google below it. No passwords. */
+/** The sign-up sheet's body, shared by /login and the "Save your snapshot and continue" sheet (P0.4-02, K-91; App 4;
+ * Signup 1): three ways. On a phone Continue with WhatsApp, Continue with Google, then the email code; on a desktop Google,
+ * WhatsApp, then the email code; in an in-app browser WhatsApp first, then the email code, then Google below it. Google is
+ * hidden when the provider is off in Supabase Auth. No passwords. */
 export function SignInPanel({
   next,
   onDone,
@@ -90,7 +94,21 @@ export function SignInPanel({
   /** Moves focus to the first field or button when the sheet appears (the log in page). */
   focusFirst?: boolean;
 }) {
-  const [step, setStep] = useState<"choose" | "email" | "code">(inApp ? "email" : start);
+  const [step, setStep] = useState<"choose" | "email" | "code" | "whatsapp">(
+    inApp ? "email" : start,
+  );
+  // Signup 1: Google only when Auth says the provider is on; the order by device, read after the first paint.
+  const [googleOk, setGoogleOk] = useState(true);
+  const [phone, setPhone] = useState(false);
+  useEffect(() => {
+    setPhone(isPhoneNow());
+    let live = true;
+    void googleSignInOn().then((on) => live && setGoogleOk(on));
+    return () => {
+      live = false;
+    };
+  }, []);
+  const waOn = WHATSAPP_ON;
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [token, setToken] = useState("");
@@ -239,7 +257,7 @@ export function SignInPanel({
             setStep("choose");
           }}
         >
-          Back to Continue with Google
+          {googleOk ? "Back to Continue with Google" : "Back to the other ways"}
         </button>
       )}
     </form>
@@ -249,28 +267,71 @@ export function SignInPanel({
     <div ref={root}>
       {step === "choose" ? (
         <div className="space-y-3">
-          <GoogleChoice inApp={false} busy={busy} onGoogle={() => void google()} />
-          <Button
-            variant="secondary"
-            full
-            disabled={busy}
-            onClick={() => {
-              setError("");
-              moved.current = true;
-              setStep("email");
-            }}
-          >
-            Continue with email
-          </Button>
-          <p className="pt-1 text-small text-text-2">
-            Google sign-in shares only your name and email address with Kabsi. It does not give
-            Kabsi access to your Business Profile.
-          </p>
+          {waysOrder(phone).map((way) =>
+            way === "google" ? (
+              googleOk ? (
+                <GoogleChoice key={way} inApp={false} busy={busy} onGoogle={() => void google()} />
+              ) : null
+            ) : way === "whatsapp" ? (
+              waOn ? (
+                <WhatsAppChoice
+                  key={way}
+                  busy={busy}
+                  onPick={() => {
+                    setError("");
+                    moved.current = true;
+                    setStep("whatsapp");
+                  }}
+                />
+              ) : null
+            ) : (
+              <Button
+                key={way}
+                variant="secondary"
+                full
+                disabled={busy}
+                onClick={() => {
+                  setError("");
+                  moved.current = true;
+                  setStep("email");
+                }}
+              >
+                Continue with email
+              </Button>
+            ),
+          )}
+          {googleOk ? (
+            <p className="pt-1 text-small text-text-2">
+              Google sign-in shares only your name and email address with Kabsi. It does not give
+              Kabsi access to your Business Profile.
+            </p>
+          ) : null}
         </div>
+      ) : step === "whatsapp" ? (
+        <WhatsAppStep
+          phone={phone}
+          onDone={onDone}
+          onBack={() => {
+            moved.current = true;
+            setStep(inApp ? "email" : "choose");
+          }}
+        />
       ) : step === "email" ? (
         <>
+          {inApp && waOn ? (
+            <div className="mb-6 border-b border-line pb-5">
+              <WhatsAppChoice
+                busy={busy}
+                onPick={() => {
+                  setError("");
+                  moved.current = true;
+                  setStep("whatsapp");
+                }}
+              />
+            </div>
+          ) : null}
           {emailForm}
-          {inApp ? (
+          {inApp && googleOk ? (
             <div className="mt-6 border-t border-line pt-5">
               <GoogleChoice inApp busy={busy} onGoogle={() => void google()} />
             </div>

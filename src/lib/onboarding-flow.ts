@@ -50,6 +50,7 @@ export type Screen =
   | "check" // the claimed free check, before anything is asked (stage 1)
   | "confirm" // is this your business, who looks after its Google profile (stage 2)
   | "questions" // two optional questions, right after the business is chosen (Onboarding 1, R-145; stage 2)
+  | "email" // "Where should receipts go?", only for an owner who signed up with WhatsApp (Signup 1; stage 2)
   | "whatsapp" // send Kabsi one message (stage 3)
   | "manager" // add Kabsi as a Manager: invite pending or accepted (stage 4)
   | "checked" // access works, the trial dates (end of stage 4)
@@ -62,6 +63,7 @@ export const STAGE_OF: Record<Screen, number> = {
   find: 1,
   confirm: 1,
   questions: 1,
+  email: 1,
   whatsapp: 2,
   manager: 3,
   checked: 4,
@@ -74,7 +76,9 @@ export type ScreenInput = {
   /** WHATSAPP_ON: Kabsi has a WhatsApp number. */
   whatsappOn: boolean;
   /** Choices the server does not keep: past the free check, past WhatsApp, past "Access works." (kept in this browser). */
-  seen: { check?: boolean; whatsapp?: boolean; checked?: boolean };
+  seen: { check?: boolean; whatsapp?: boolean; checked?: boolean; email?: boolean };
+  /** Signup 1: the owner signed up with WhatsApp and has given no contact email yet. */
+  askEmail?: boolean;
   now?: number;
 };
 
@@ -86,11 +90,18 @@ export function trialStartedToday(endsAt: string | null, now = Date.now()): bool
 }
 
 /** The next unfinished screen. Mirrors stageOf in the server's stages.ts, plus the screens only the website shows. */
-export function screenOf({ status, whatsappOn, seen, now = Date.now() }: ScreenInput): Screen {
+export function screenOf({
+  status,
+  whatsappOn,
+  seen,
+  askEmail = false,
+  now = Date.now(),
+}: ScreenInput): Screen {
   if (!status) return "find";
   if (!status.confirmed) return status.check && !seen.check ? "check" : "confirm";
   // Onboarding 1 (R-145): once, for a real business that is not yet through the four stages. Continue or Skip both end it.
   if (status.questions_done === false && !status.is_demo && !status.checked) return "questions";
+  if (askEmail && !seen.email && !status.is_demo) return "email";
   if (!status.whatsapp && !seen.whatsapp && whatsappOn) return "whatsapp";
   // While Kabsi has no WhatsApp number, stage 3 shows what Settings shows ("coming soon") until the owner moves on;
   // after the authorisation on stage 4 it is behind them.

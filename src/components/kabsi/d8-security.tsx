@@ -215,7 +215,7 @@ export function D8Security() {
             </Block>
             <Block title="How you sign in, and what we never ask">
               <ul>
-                <li>You sign in with Google or a one time code sent to your email.</li>
+                <li>You sign in with WhatsApp, Google or a one time code by email.</li>
                 <li>No passwords.</li>
                 <li>Kabsi never asks for your Google password or a Google verification code.</li>
                 <li>Kabsi stores no Google token of yours.</li>

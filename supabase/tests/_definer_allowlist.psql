@@ -126,6 +126,8 @@ insert into definer_allowlist (role, sig, reason, caller) values
   ('authenticated', 'whatsapp_connect_start(text)', 'owner page: membership/role', 'browser: lib/whatsapp-owner.ts'),
   ('authenticated', 'whatsapp_disconnect()', 'the caller''s own rows', 'browser: lib/whatsapp-owner.ts'),
   ('authenticated', 'whatsapp_owners_on()', 'one setting, no business data', 'browser: lib/read-timeout.ts lib/whatsapp-owner.ts'),
+  ('authenticated', 'contact_email_status()', 'the caller''s own row only (auth.uid()); Signup 1', 'browser: lib/wa-signin.ts'),
+  ('authenticated', 'set_contact_email(text)', 'writes the caller''s own row only (auth.uid()); Signup 1', 'browser: lib/wa-signin.ts'),
   ('authenticated', 'whatsapp_set_prefs(boolean,boolean)', 'the caller''s own rows', 'browser: lib/whatsapp-owner.ts'),
   ('authenticated', 'whatsapp_staff_code()', 'staff page: is_staff()', 'browser: components/staff/whatsapp-staff-code.tsx'),
   ('authenticated', 'whatsapp_status()', 'the caller''s own rows', 'browser: lib/read-timeout.ts lib/whatsapp-owner.ts');

@@ -9,6 +9,7 @@ import { listNumberWebhookIds, readHealth, readTemplateDetails, readWebhookDeliv
 import { buckets, DELIVERY_EMAIL_KIND, runDeliveryCheck, summarize } from "../_shared/whatsapp/delivery-check.ts";
 import { bestTier, NUMBER_EMAIL_KIND, NUMBER_EMAIL_TO, numberFromHealth, runCheck } from "../_shared/whatsapp/template-check.ts";
 import { notify } from "../_shared/notify.ts";
+import { runProviderCheck } from "../_shared/signin-provider-check.ts";
 
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { "content-type": "application/json" } });
 async function isInternal(req: Request) {
@@ -162,14 +163,39 @@ async function deliveriesCheck() {
   });
 }
 
+// Signup 1 (30.50 item 3d): Google sign-in in Supabase Auth, read from its public settings. Off or unreadable: one staff alert on
+// WhatsApp and one email to hello@kabsi.co a day. Read only.
+async function signinProviderCheck() {
+  return await runProviderCheck({
+    read: async () => {
+      const key = Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const r = await fetch(`${Deno.env.get("SUPABASE_URL")}/auth/v1/settings`, { headers: { apikey: key } });
+      if (!r.ok) throw new Error(`auth settings ${r.status}`);
+      return await r.json();
+    },
+    emit: async (a) => {
+      const r = await rest("rpc/ops_emit", { method: "POST", body: JSON.stringify({ p_kind: a.kind, p_channel: a.channel, p_title: a.title, p_body: a.body, p_dedupe: a.dedupe }) });
+      if (!r.ok) throw new Error(`ops_emit ${r.status}`);
+    },
+    email: async (m) => {
+      const r = await notify({ category: "internal", kind: "signin_provider_email", key: m.key, to: [{ email: NUMBER_EMAIL_TO, userId: null }],
+        content: { subject: m.subject, preheader: m.preheader, title: m.title, bodyHtml: m.html, text: m.text } });
+      if (r.failed > 0) throw new Error("signin_provider_email_failed");
+    },
+    now: () => new Date(),
+  });
+}
+
 /** The check of the daily call: the number and templates (Kapso 1) and the delivery log (Tidy 2). Each runs whatever the other does; a failure of either is loud. */
 async function dailyKapsoCheck() {
+  // Signup 1: the Google sign-in check rides on the same daily call; it never makes the Kapso checks fail.
+  const signin = await signinProviderCheck().catch((e) => ({ error: String((e as Error)?.message ?? e) }));
   const [numberAndTemplates, deliveries] = await Promise.allSettled([kapsoCheck(), deliveriesCheck()]);
   const why = (r: PromiseSettledResult<unknown>) => (r.status === "rejected" ? String((r.reason as Error)?.message ?? r.reason) : "");
   if (numberAndTemplates.status === "rejected" || deliveries.status === "rejected") {
     throw new Error([why(numberAndTemplates) && `number and templates: ${why(numberAndTemplates)}`, why(deliveries) && `deliveries: ${why(deliveries)}`].filter(Boolean).join("; "));
   }
-  return { ...numberAndTemplates.value, deliveries: deliveries.value };
+  return { ...numberAndTemplates.value, deliveries: deliveries.value, signin };
 }
 
 async function deliveriesWindow(body: { from?: string; to?: string }) {
@@ -196,6 +222,7 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => ({})) as { only?: string };
   if (body.only === "kapso") return json({ checks: { kapso: await dailyKapsoCheck() } });
   if (body.only === "kapso_deliveries") return json({ checks: { kapso_deliveries: await deliveriesWindow(body as { from?: string; to?: string }) } });
+  if (body.only === "signin") return json({ checks: { signin: await signinProviderCheck() } });
   if (body.only === "jobs") return json({ checks: { jobs_recent: await jobsFreshness() } });
   if (body.only === "invitation_places") return json({ checks: { invitation_places: await invitationPlacesCheck(String((body as { case?: string }).case ?? "")) } });
   if (body.only === "turnstile") return json({ checks: { turnstile: (await turnstileCheck()) ?? "not configured" } });

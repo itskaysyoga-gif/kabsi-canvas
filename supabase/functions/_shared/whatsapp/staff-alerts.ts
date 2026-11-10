@@ -36,6 +36,8 @@ const URGENT = new Set([
   "backup_failed",
   // Kapso 1: the daily WhatsApp number and template check found something wrong (items and states only)
   "whatsapp_check",
+  // Signup 1 (30.50 item 3d): the daily check found Google sign-in switched off in Supabase Auth
+  "signin_provider_off",
 ]);
 /** About the number itself: email only (9.9). */
 const NUMBER_ONLY = /^whatsapp_number/;

@@ -48,6 +48,8 @@ verify_jwt = true
 verify_jwt = true
 [functions.auth-code]         # sign-in code (P0.4-02): browser calls send the anon JWT; Turnstile, the code limits and the throwaway-domain check run in code
 verify_jwt = true
+[functions.auth-whatsapp]     # Continue with WhatsApp (Signup 1): off because the notices call from pg_cron carries only x-cron-secret; the browser calls are checked in code (Turnstile, the limits, the code and browser hashes)
+verify_jwt = false
 [functions.consent]           # privacy banner proof (P0.6-01): browser calls send the anon JWT or the session; validation and a rate limit run in code
 verify_jwt = true
 [functions.photos]            # photo engine (P0.5-01): process needs x-cron-secret (the job sends the anon JWT with it); the staff upload page sends the anon JWT; the link token, size and rate limits run in code
