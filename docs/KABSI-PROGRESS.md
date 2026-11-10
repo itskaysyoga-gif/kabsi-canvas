@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 9 Nov 2026 (Industry 1). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 10 Nov 2026 (Nora 2). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -57,12 +57,12 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 10 Nov 2026, Nora 2 (30.46 item 8): the 13 injection cases were already run live (Ready 2 F), so only the booking questions sc04 and sc05 ran: sc04 passes, sc05 fails on a literal name check; 0.717 USD, 2 runs, 3 Nora answers, 4 reply drafts. `2026-11-10-nora2.md`.
 - 9 Nov 2026, Industry 1 (R-144): the 21 industry pages mostly their own text: shared blocks cut to a line and a link, each trade's own services, photos, posts, reviews and hours; pairs 52.7 to 68.8 percent before, 23.6 to 31.9 after; own text 71.2 to 76.1 percent; a test holds both. `2026-11-09-industry1.md`.
 - 9 Nov 2026, Tidy 1 part 4 (R-143 item 8): this page back under 10 KB; nine older lines moved word for word. `2026-11-09-tidy1.md`.
 - 9 Nov 2026, Tidy 1 part 3 (R-143 item 6): the number's own findings of the daily Kapso check are also emailed to hello@kabsi.co once a day; template findings stay on WhatsApp. `2026-11-09-tidy1.md`.
 - 9 Nov 2026, Tidy 1 part 2 (R-143 item 3): card checkout only once Google access works (guard and test), the terms line dropped. `2026-11-09-tidy1.md`.
 - 9 Nov 2026, Tidy 1 part 1 (R-143 items 1, 2, 4, 5, 7): Creem lines in the future tense, "Asked ChatGPT on [date]", map location, renewals in facts 06 and 13. `2026-11-09-tidy1.md`.
-- 9 Nov 2026, SEO 1 (indexing health): old addresses one 301, footer link to /setup-call, robots fix; IndexNow already live (200); industry pairs report for lane R. `2026-11-09-seo1.md`.
 - Older entries (Tidy 1 part 0, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
 
 ## How a session updates this page
