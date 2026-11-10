@@ -16,6 +16,8 @@ Real cost is the cost the run itself printed (drafts, Nora's answers and the jud
 | 6 | 8 Nov 09:25 | [42466828844](https://github.com/itskaysyoga-gif/kabsi-canvas/actions/runs/42466828844) | C | Eval live on claude/credit-c after the fact fixes: the same 90 questions, judged. Attempt 1 stopped at the Deno download, no model call | 0.01 + 3.5 | 0 + 3.118 = 3.118 | 12.36 |
 | 7 | 8 Nov 09:35 | [42467514112](https://github.com/itskaysyoga-gif/kabsi-canvas/actions/runs/42467514112) | C | Eval live on claude/credit-c: the five questions that now ask for the new facts (o06, o32, o37, o41, o69), judged. Attempt 1 stopped at the Deno download, no model call | 0.01 + 0.6 | 0 + 0.475 = 0.475 | 12.83 |
 | 8 | 8 Nov 11:42 | [42476892914](https://github.com/itskaysyoga-gif/kabsi-canvas/actions/runs/42476892914) | Close 1 D | Eval live by hand on claude/close1-d after the Nora rule and fact fixes: the 90 owner questions o01 to o90, judged, replies none | 0.01 + 3.5 | 0 + 3.186 = 3.186 | 16.02 |
+| 9 | 10 Nov 03:52 | [42752218334](https://github.com/itskaysyoga-gif/kabsi-canvas/actions/runs/42752218334) | Nora 2 | Eval live by hand on claude/nora2: Nora's booking questions sc04 and sc05, judged (the reply part drafted 4 cases at its 0.01 budget) | 0.5 + 0.01 | 0.397 + 0.043 = 0.440 | 16.46 |
+| 10 | 10 Nov 03:55 | [42752519202](https://github.com/itskaysyoga-gif/kabsi-canvas/actions/runs/42752519202) | Nora 2 | Eval live by hand on claude/nora2: sc05 again after one clause in nora-rules.ts (taken back, it made the answer worse), judged, replies none | 0.5 + 0.01 | 0.277 + 0 = 0.277 | 16.74 |
 
 ## A. Baseline (run 1, main at 924e219)
 

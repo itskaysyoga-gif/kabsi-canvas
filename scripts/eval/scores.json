@@ -433,6 +433,43 @@
    },
    "overall": 4.85,
    "costUsd": 0.474532
+  },
+  {
+   "date": "2026-11-10T03:52:57.241Z",
+   "model": "anthropic:claude-sonnet-5-5",
+   "judge": "claude-haiku-4-5-20251001",
+   "cases": 2,
+   "ids": [
+    "sc04",
+    "sc05"
+   ],
+   "judged": 2,
+   "mean": {
+    "accurate": 5,
+    "helpful": 4.5,
+    "honest": 5,
+    "style": 5
+   },
+   "overall": 4.88,
+   "costUsd": 0.3966
+  },
+  {
+   "date": "2026-11-10T03:55:32.082Z",
+   "model": "anthropic:claude-sonnet-5-5",
+   "judge": "claude-haiku-4-5-20251001",
+   "cases": 1,
+   "ids": [
+    "sc05"
+   ],
+   "judged": 1,
+   "mean": {
+    "accurate": 2,
+    "helpful": 2,
+    "honest": 3,
+    "style": 2
+   },
+   "overall": 2.25,
+   "costUsd": 0.277431
   }
  ],
  "reply.v3": [
