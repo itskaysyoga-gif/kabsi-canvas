@@ -4,7 +4,10 @@
 import { fixtureRows } from "./fixture.ts";
 import { readPage } from "./page.ts";
 import { ordered, parseCsv, rowRefusal, toCandidate } from "./register.ts";
-import { dailyCap, domainOf, emailOne, emailOnPage, followUp, KIND_WORDS, localNine, localParts, nextWeekday, pickDetail, TIME_ZONES } from "./rules.ts";
+import {
+  dailyCap, domainOf, emailOne, emailOnPage, followUp, foundingInviteUrl, industryGroup, KIND_WORDS, localNine, localParts, nextWeekday, pickDetail,
+  TIME_ZONES,
+} from "./rules.ts";
 
 export type Settings = {
   sending_open: boolean; test_mode: boolean; open_countries: string[]; ramp_week1: number; ramp_week2: number; ramp_after: number;
@@ -32,6 +35,9 @@ export type PrepareDeps = {
   queuedFor(date: string): Promise<number>;
   sentThisMonth(): Promise<number>;
   insert(d: NewDraft): Promise<void>;
+  /** The private Founding 25 invite (R-151): app_settings founding_invite_slug and founding_places().left, read with
+   *  the service role. Null when either cannot be read. The slug is never logged or returned in the result. */
+  founding(): Promise<{ slug: string | null; left: number } | null>;
   testRecipients: string[];
   now: Date;
 };
@@ -64,6 +70,10 @@ export async function prepare(deps: PrepareDeps, opts: { today?: boolean } = {})
   const html = new Map(test ? fixtureRows(today.replace(/-/g, "")).map((r) => [r.company_id, r.html] as const) : []);
   const countries = test ? ["GB"] : s.open_countries;
 
+  // Built once per run, server side: the link while places remain, else null and the follow-up leaves the line out.
+  const f = await deps.founding().catch(() => null);
+  const invite = f ? foundingInviteUrl(f.slug, f.left) : null;
+
   let drafted = 0;
   let looked = 0;
   for (const r of rows) {
@@ -81,12 +91,12 @@ export async function prepare(deps: PrepareDeps, opts: { today?: boolean } = {})
     const read = test ? { html: html.get(c.company_id) ?? "" } : await deps.page(c.email_page_url);
     if ("refused" in read) { no(`page_${read.refused}`); continue; }
     if (!emailOnPage(read.html, c.email)) { no("email_not_on_page"); continue; }
-    const detail = pickDetail(read.html, deps.now);
+    const detail = pickDetail(read.html, deps.now, industryGroup(c.industry) ?? "beauty");
     if (!detail) { no("no_detail"); continue; }
     const tz = TIME_ZONES[c.country] ?? "Europe/London";
     const to = test ? deps.testRecipients[drafted % deps.testRecipients.length] : c.email;
     const one = emailOne({ business: c.business_name, kind: KIND_WORDS[c.industry], city: c.city, detail: detail.sentence });
-    const two = followUp({ business: c.business_name });
+    const two = followUp({ business: c.business_name, invite });
     await deps.insert({
       prospect: {
         harvey_company_id: c.company_id, country: c.country, industry: c.industry, city: c.city, business_name: c.business_name,

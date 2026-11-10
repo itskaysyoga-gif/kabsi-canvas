@@ -2,7 +2,7 @@
 // master plan 30.39). Pure: the caller fetches the file and the pages. Companies House comes from the register itself
 // (30.39 item 12): Harvey reads Companies House's free monthly Basic Company Data file (Open Government Licence) and
 // writes company_status and company_status_date (the file's date); there is no Companies House API key.
-import { INDUSTRY_ORDER, KIND_WORDS, nameOk, OPEN_COUNTRIES, ownDomain } from "./rules.ts";
+import { industryGroup, INDUSTRY_ORDER, KIND_WORDS, nameOk, OPEN_COUNTRIES, ownDomain } from "./rules.ts";
 
 /** RFC 4180 CSV: quoted fields, doubled quotes, newlines inside quotes. */
 export function parseCsv(text: string): Record<string, string>[] {
@@ -86,16 +86,27 @@ export function rowRefusal(r: Record<string, string>, openCountries: readonly st
   return null;
 }
 
-/** The six salon industries first, then the other trades, then Harvey's quality score, then the register's order. */
+/** The queue (Outbound 2, R-151 item 5): one beauty, one food, and so on. Inside each group the order stays as before:
+ *  the industry order, then Harvey's quality score, then the register's order. When one group runs out the other
+ *  continues. Rows outside the first tier come last, where rowRefusal counts them as "industry". */
 export function ordered(rows: Record<string, string>[]): Record<string, string>[] {
   const rank = (i: string) => {
     const k = INDUSTRY_ORDER.indexOf(i);
     return k < 0 ? 99 : k;
   };
-  return rows
+  const sorted = rows
     .map((r, i) => ({ r, i }))
     .sort((a, b) => rank(a.r.industry) - rank(b.r.industry) || Number(b.r.quality_score || 0) - Number(a.r.quality_score || 0) || a.i - b.i)
     .map((x) => x.r);
+  const beauty = sorted.filter((r) => industryGroup(r.industry) === "beauty");
+  const food = sorted.filter((r) => industryGroup(r.industry) === "food");
+  const rest = sorted.filter((r) => industryGroup(r.industry) === null);
+  const out: Record<string, string>[] = [];
+  for (let i = 0; i < Math.max(beauty.length, food.length); i++) {
+    if (i < beauty.length) out.push(beauty[i]);
+    if (i < food.length) out.push(food[i]);
+  }
+  return [...out, ...rest];
 }
 
 export function toCandidate(r: Record<string, string>): Candidate {

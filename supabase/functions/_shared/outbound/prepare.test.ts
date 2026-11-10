@@ -6,7 +6,7 @@ import { prepare, type PrepareDeps, type Settings } from "./prepare.ts";
 import { robotsAllows } from "./page.ts";
 import { COMPANY_FILE_MAX_DAYS, companyRefusal, ordered, parseCsv, rowRefusal, toCandidate } from "./register.ts";
 import {
-  dailyCap, emailOne, INDUSTRY_ORDER, KIND_WORDS, OPEN_COUNTRIES, SALON_INDUSTRIES, TIME_ZONES, emailOnPage, followUp, followUpDate, houseStyleOk, inWindow, isSuppressed, keysOf, linksOk, localParts,
+  dailyCap, emailOne, FOOD_INDUSTRIES, foundingInviteUrl, INDUSTRY_ORDER, inviteLine, KIND_WORDS, RAMP, withoutStaleInvite, OPEN_COUNTRIES, SALON_INDUSTRIES, TIME_ZONES, emailOnPage, followUp, followUpDate, houseStyleOk, inWindow, isSuppressed, keysOf, linksOk, localParts,
   nameOk, ownDomain, pickDetail, sha,
 } from "./rules.ts";
 import { possessive } from "../possessive.ts";
@@ -34,7 +34,7 @@ Deno.test("Email 1 and the follow-up are the templates of COPY.md, word for word
   assert.ok(linksOk(one.body, "first") && linksOk(two.body, "follow_up"), "only kabsi.co and kabsi.co/privacy");
 });
 
-Deno.test("Email 1 and the follow-up offer only the free Google check: no Founding 25 and no founding offer (R-142 4a)", () => {
+Deno.test("Email 1, and the follow-up without the invite, offer only the free Google check (R-142 4a)", () => {
   const one = emailOne({ business: "Rose Lane Salon", kind: "hair salons", city: "Exampleton", detail: "Your site lists your opening hours, and keeping Google's hours the same saves wasted trips." });
   const two = followUp({ business: "Rose Lane Salon" });
   for (const t of [one.subject, one.body, two.subject, two.body]) {
@@ -64,7 +64,7 @@ Deno.test("the six salon industries come first, in lane R's order, each with its
   assert.equal(KIND_WORDS["beauty salon and spa"], undefined, "the old joined code is split");
   for (const k of INDUSTRY_ORDER) assert.ok(KIND_WORDS[k], k);
   const csv = "company_id,industry,quality_score\n1,cafe,9\n2,spa and massage,1\n3,lash and brow studio,1\n4,beauty salon,1\n5,hair salon,1\n6,nail salon,1\n7,barbershop,1\n";
-  assert.deepEqual(ordered(parseCsv(csv)).map((r) => r.company_id), ["5", "7", "4", "6", "3", "2", "1"]);
+  assert.deepEqual(ordered(parseCsv(csv)).map((r) => r.company_id), ["5", "1", "7", "4", "6", "3", "2"], "one beauty, one food, then beauty continues");
 });
 
 Deno.test("links: Email 1 refuses anything but kabsi.co; a reply may carry a check link and the social pages", () => {
@@ -126,7 +126,7 @@ Deno.test("the register: own-domain email, UK registered company with a number, 
   assert.ok(ownDomain("hello@rose.example.com", "https://shop.rose.example.com/"));
   assert.ok(!nameOk("Salon — Rose"));
   const csv = 'company_id,business_name,industry,quality_score\n1,"Cafe, Ltd",cafe,5\n2,Rose,hair salon,1\n3,Barb,barbershop,9\n';
-  assert.deepEqual(ordered(parseCsv(csv)).map((r) => r.company_id), ["2", "3", "1"], "salons and barbers first");
+  assert.deepEqual(ordered(parseCsv(csv)).map((r) => r.company_id), ["2", "1", "3"], "a salon, then food, then a barber");
   assert.equal(parseCsv(csv)[0].business_name, "Cafe, Ltd");
 });
 
@@ -157,12 +157,17 @@ Deno.test("Companies House from Harvey's register: Active on a Basic Company Dat
   assert.equal(toCandidate(ok).company_status_date, "2026-10-01");
 });
 
-Deno.test("the ramp and the window", () => {
-  const s = { ramp_week1: 3, ramp_week2: 5, ramp_after: 10, started_on: "2026-12-01" };
-  assert.equal(dailyCap(s, "2026-12-03"), 3);
-  assert.equal(dailyCap(s, "2026-12-09"), 5);
-  assert.equal(dailyCap(s, "2026-12-20"), 10);
-  assert.equal(dailyCap({ ...s, started_on: null }, "2026-12-20"), 3);
+Deno.test("the ramp of R-151: 5 a day on days 1 to 7, then 10 from day 8, still 10 on day 30; 300 a month", () => {
+  assert.deepEqual({ ...RAMP }, { ramp_week1: 5, ramp_week2: 10, ramp_after: 10, monthly_cap: 300 });
+  const s = { ...RAMP, started_on: "2026-12-10" };
+  assert.equal(dailyCap(s, "2026-12-10"), 5, "day 1");
+  assert.equal(dailyCap(s, "2026-12-16"), 5, "day 7");
+  assert.equal(dailyCap(s, "2026-12-17"), 10, "day 8");
+  assert.equal(dailyCap(s, "2027-01-08"), 10, "day 30");
+  assert.equal(dailyCap({ ...s, started_on: null }, "2026-12-20"), 5, "before the start: week 1");
+});
+
+Deno.test("the window and the follow-up date", () => {
   assert.ok(inWindow(new Date("2026-11-06T09:30:00Z"), "Europe/London"));
   assert.ok(!inWindow(new Date("2026-11-06T17:00:00Z"), "Europe/London"), "17:00 is the end");
   assert.ok(!inWindow(new Date("2026-11-07T11:00:00Z"), "Europe/London"), "Saturday");
@@ -177,11 +182,11 @@ Deno.test("the ramp and the window", () => {
 function fakeDeps(over: Partial<PrepareDeps> & { settings?: () => Promise<Settings> } = {}) {
   const inserted: unknown[] = [];
   const base: PrepareDeps = {
-    settings: async () => ({ sending_open: false, test_mode: true, open_countries: [], ramp_week1: 3, ramp_week2: 5, ramp_after: 10, monthly_cap: 300, started_on: null, stopped_reason: null }),
+    settings: async () => ({ sending_open: false, test_mode: true, open_countries: [], ...RAMP, started_on: null, stopped_reason: null }),
     refreshSuppression: async () => {}, register: async () => { throw new Error("test mode never reads the register"); },
     page: async () => { throw new Error("test mode never reads a real page"); },
     eligible: async () => true, queuedFor: async () => 0, sentThisMonth: async () => 0,
-    insert: async (d) => void inserted.push(d), testRecipients: ["inbox@test.example.com"], now: NOW,
+    insert: async (d) => void inserted.push(d), founding: async () => null, testRecipients: ["inbox@test.example.com"], now: NOW,
   };
   return { deps: { ...base, ...over }, inserted };
 }
@@ -190,7 +195,7 @@ Deno.test("test mode: fixture businesses only, addressed to the test recipients,
   const { deps, inserted } = fakeDeps();
   const r = await prepare(deps);
   assert.equal(r.state, "test");
-  assert.equal(r.drafted, 3);
+  assert.equal(r.drafted, 3, "the 3 fixture businesses, under week 1's cap of 5");
   for (const d of inserted as { prospect: { email: string; test: boolean; company_status: string; company_status_date: string | null }; first: { to_address: string; send_after: string } }[]) {
     assert.match(d.prospect.email, /@[a-z]+\.example\.com$/);
     assert.deepEqual([d.prospect.company_status, d.prospect.company_status_date], ["test", null], "no file date shown for a test row");
@@ -206,7 +211,7 @@ Deno.test("locked, stopped, full, or no test recipients: nothing is drafted", as
   assert.equal((await prepare(locked.deps)).state, "locked");
   const stopped = fakeDeps({ settings: async () => ({ ...(await fakeDeps().deps.settings()), stopped_reason: "complaint" }) });
   assert.equal((await prepare(stopped.deps)).state, "stopped");
-  assert.equal((await prepare(fakeDeps({ queuedFor: async () => 3 }).deps)).state, "full");
+  assert.equal((await prepare(fakeDeps({ queuedFor: async () => 5 }).deps)).state, "full");
   assert.equal((await prepare(fakeDeps({ testRecipients: [] }).deps)).state, "no_test_recipients");
   assert.equal((await prepare(fakeDeps({ eligible: async () => false }).deps)).drafted, 0, "suppressed or known: no draft");
 });
@@ -228,7 +233,7 @@ Deno.test("open: only active registered companies whose page still shows the add
   pages[rows[2].email_page_url] = "<p>no address here</p>";
   const read: string[] = [];
   const { deps, inserted } = fakeDeps({
-    settings: async () => ({ sending_open: true, test_mode: true, open_countries: ["GB"], ramp_week1: 3, ramp_week2: 5, ramp_after: 10, monthly_cap: 300, started_on: "2026-11-02", stopped_reason: null }),
+    settings: async () => ({ sending_open: true, test_mode: true, open_countries: ["GB"], ...RAMP, started_on: "2026-11-02", stopped_reason: null }),
     register: async () => csv,
     page: async (u) => (read.push(u), { html: pages[u] ?? "" }),
   });
@@ -289,4 +294,121 @@ Deno.test("the possessive: a name ending in s takes only an apostrophe, in every
     }
     assert.ok(linksOk(one.body, "first") && linksOk(two.body, "follow_up"));
   }
+});
+
+// ─── Outbound 2 (R-151 item 5, master plan 30.51)
+
+Deno.test("all eight first tier industries pass, each with plain plural words; a ninth is refused", () => {
+  const ok = { company_id: "1", business_name: "Rose Lane Salon", industry: "hair salon", country: "GB", city: "Exampleton",
+    website: "https://rose.example.com", email: "hello@rose.example.com", email_page_url: "https://rose.example.com/contact",
+    company_type: "registered company", company_number: "01234567", company_status: "Active", company_status_date: "2026-11-01" };
+  const eight: Record<string, string> = {
+    "hair salon": "hair salons", "barbershop": "barbers", "beauty salon": "beauty salons", "nail salon": "nail salons",
+    "lash and brow studio": "lash and brow studios", "spa and massage": "spas and massage studios", "restaurant": "restaurants", "cafe": "cafes",
+  };
+  assert.deepEqual(KIND_WORDS, eight, "exactly the eight, nothing legacy");
+  assert.deepEqual([...FOOD_INDUSTRIES].sort(), ["cafe", "restaurant"]);
+  for (const k of Object.keys(eight)) assert.equal(rowRefusal({ ...ok, industry: k }, ["GB"], "2026-11-06"), null, k);
+  for (const k of ["clinic", "dentist", "gym", "vet", "car repair garage", "physiotherapist", "unknown", ""]) {
+    assert.equal(rowRefusal({ ...ok, industry: k }, ["GB"], "2026-11-06"), "industry", k);
+  }
+});
+
+Deno.test("the queue alternates beauty and food, keeping each group's own order; the other group continues when one runs out", () => {
+  const csv = [
+    "company_id,industry,quality_score",
+    "f1,restaurant,9", "b1,hair salon,1", "f2,cafe,1", "b2,barbershop,5", "x1,gym,9", "f3,restaurant,2", "f4,cafe,8", "b3,hair salon,7",
+  ].join("\n");
+  // Beauty in its old order: hair salons (b3 score 7, b1 score 1), then barbers (b2). Food: cafes (f4 8, f2 1), then
+  // restaurants (f1 9, f3 2). Rows outside the first tier come last and are refused there.
+  assert.deepEqual(ordered(parseCsv(csv)).map((r) => r.company_id), ["b3", "f4", "b1", "f2", "b2", "f1", "f3", "x1"]);
+  const onlyBeauty = "company_id,industry,quality_score\nb1,nail salon,1\nb2,hair salon,1";
+  assert.deepEqual(ordered(parseCsv(onlyBeauty)).map((r) => r.company_id), ["b2", "b1"]);
+});
+
+Deno.test("Email 1 for a restaurant or cafe reads right for food, sentence by sentence", () => {
+  const food = { business: "Harbour Kitchen", kind: KIND_WORDS["restaurant"], city: "Exampleton" };
+  const booked = pickDetail(`<a href="https://www.opentable.co.uk/r/harbour">Book a table</a>`, NOW, "food");
+  assert.equal(booked?.sentence, "I saw you take table bookings through OpenTable, so customers find you online already.");
+  assert.equal(pickDetail(`<a href="https://www.designmynight.com/x">Book</a>`, NOW, "food")?.sentence,
+    "I saw you take table bookings through DesignMyNight, so customers find you online already.");
+  assert.equal(pickDetail(`<a href="https://www.instagram.com/harbour.example/">ig</a>`, NOW, "food")?.sentence,
+    "Your Instagram shows your food, and the same photos could do well on your Google profile.");
+  assert.equal(pickDetail(`<a href="https://www.instagram.com/rose.example/">ig</a>`, NOW, "beauty")?.sentence,
+    "Your Instagram shows the work, and the same photos could do well on your Google profile.", "salons keep their line");
+  assert.equal(pickDetail(`<a href="https://booksy.com/x">Book</a>`, NOW)?.sentence,
+    "I saw you take bookings through Booksy, so customers find you online already.", "salons keep their line");
+  const one = emailOne({ ...food, detail: booked!.sentence });
+  assert.equal(one.body.split("\n\n")[1], "I came across Harbour Kitchen looking at restaurants in Exampleton. I saw you take table bookings through OpenTable, so customers find you online already.");
+  assert.equal(emailOne({ ...food, kind: KIND_WORDS["cafe"], detail: "x." }).body.split("\n\n")[1].includes("looking at cafes in Exampleton"), true);
+  for (const t of [one.subject, one.body]) {
+    assert.ok(!/salon|hair|nail|barber|beauty|treatment|appointment|the work/i.test(t), t);
+    assert.ok(houseStyleOk(t));
+  }
+});
+
+const FAKE_SLUG = "FakeSlug0000000000Test12"; // invented; the real slug lives only in app_settings
+
+Deno.test("the follow-up invite: built from the setting while places remain, left out when gone or missing", () => {
+  assert.equal(FAKE_SLUG.length, 24);
+  const url = foundingInviteUrl(FAKE_SLUG, 7);
+  assert.equal(url, `kabsi.co/founding/${FAKE_SLUG}`);
+  const withPlaces = followUp({ business: "Rose Lane Salon", invite: url });
+  const paras = withPlaces.body.split("\n\n");
+  assert.equal(paras[0], "Hi again. Happy to run that free check of Rose Lane Salon's Google profile if useful. A yes is enough, and if not, no worries.");
+  assert.equal(paras[1], inviteLine(url!));
+  assert.equal(paras[1], `I also have founding places open: three months of Kabsi Pro free, and you tell me what to make better. Details: kabsi.co/founding/${FAKE_SLUG}`);
+  assert.equal(paras[2], "Rashid Abou Hamzy, founder of Kabsi\nkabsi.co");
+  assert.ok(linksOk(withPlaces.body, "follow_up"), "the invite link is allowed in the follow-up");
+  assert.ok(!linksOk(withPlaces.body, "first"), "never in Email 1");
+  assert.ok(houseStyleOk(withPlaces.body));
+  assert.ok(!/\$|US dollars|price|\b25\b|\b19\b|\b39\b/i.test(withPlaces.body), "no price and no count");
+  const plain = followUp({ business: "Rose Lane Salon" }).body;
+  for (const [slug, left, why] of [[FAKE_SLUG, 0, "no places left"], [FAKE_SLUG, -1, "below zero"], [null, 5, "setting missing"], ["", 5, "empty"], ["short", 5, "bad shape"], [FAKE_SLUG, Number.NaN, "count unreadable"]] as const) {
+    const u = foundingInviteUrl(slug, left);
+    assert.equal(u, null, why);
+    assert.equal(followUp({ business: "Rose Lane Salon", invite: u }).body, plain, `${why}: the follow-up is the plain template`);
+  }
+  assert.ok(!/founding/i.test(plain));
+  assert.equal(linksOk("kabsi.co/founding/abc", "follow_up"), false, "only the 24 character shape");
+  assert.equal(linksOk(`kabsi.co/founding/${FAKE_SLUG}/x`, "follow_up"), false);
+});
+
+Deno.test("prepare puts the invite in the follow-up only, and no log line, result or error carries the slug", async () => {
+  const lines: string[] = [];
+  const orig = { log: console.log, info: console.info, warn: console.warn, error: console.error, debug: console.debug };
+  for (const k of Object.keys(orig) as (keyof typeof orig)[]) console[k] = (...a: unknown[]) => void lines.push(a.map((x) => typeof x === "string" ? x : JSON.stringify(x)).join(" "));
+  try {
+    const { deps, inserted } = fakeDeps({ founding: async () => ({ slug: FAKE_SLUG, left: 3 }) });
+    const r = await prepare(deps);
+    assert.equal(r.drafted, 3);
+    for (const d of inserted as { first: { body: string }; follow: { body: string }; prospect: Record<string, unknown> }[]) {
+      assert.ok(d.follow.body.includes(`kabsi.co/founding/${FAKE_SLUG}`), "Rashid sees the full link in the draft he approves");
+      assert.ok(!d.first.body.includes("founding"), "never in Email 1");
+      assert.ok(!JSON.stringify(d.prospect).includes(FAKE_SLUG), "never in the prospect row");
+    }
+    assert.ok(!JSON.stringify(r).includes(FAKE_SLUG), "the result, which the function logs, carries counts only");
+    const none = fakeDeps({ founding: async () => ({ slug: FAKE_SLUG, left: 0 }) });
+    await prepare(none.deps);
+    for (const d of none.inserted as { follow: { body: string } }[]) assert.ok(!d.follow.body.includes("founding"), "places gone");
+    const broken = fakeDeps({ founding: async () => { throw new Error("read failed"); } });
+    assert.equal((await prepare(broken.deps)).drafted, 3, "a failed read leaves the line out and drafting carries on");
+    const missing = fakeDeps({ founding: async () => ({ slug: null, left: 5 }) });
+    await prepare(missing.deps);
+    for (const d of missing.inserted as { follow: { body: string } }[]) assert.ok(!d.follow.body.includes("founding"), "setting missing");
+  } finally {
+    Object.assign(console, orig);
+  }
+  assert.ok(lines.every((l) => !l.includes(FAKE_SLUG)), "no slug in any log line");
+});
+
+Deno.test("at send time a stale invite line is left out and the rest of the approved text stays", () => {
+  const url = foundingInviteUrl(FAKE_SLUG, 2)!;
+  const body = followUp({ business: "Rose Lane Salon", invite: url }).body;
+  assert.equal(withoutStaleInvite(body, url), body, "still current: unchanged");
+  const plain = followUp({ business: "Rose Lane Salon" }).body;
+  assert.equal(withoutStaleInvite(body, null), plain, "places gone or setting missing");
+  assert.equal(withoutStaleInvite(body, "kabsi.co/founding/Other000000000000000Slug"), plain, "slug rotated");
+  assert.equal(withoutStaleInvite(body, url.toLowerCase()), plain, "a slug differing only in case is not the same");
+  assert.equal(withoutStaleInvite(plain, null), plain);
 });

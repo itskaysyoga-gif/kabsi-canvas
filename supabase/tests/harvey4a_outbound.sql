@@ -13,9 +13,9 @@ select ok(not has_table_privilege('authenticated', 'public.outbound_dashboard_co
   and not has_table_privilege('anon', 'public.outbound_dashboard_days', 'select')
   and has_table_privilege('service_role', 'public.outbound_dashboard_counts', 'select'), 'the counts views are for the service role');
 
--- The lock starts shut, in test mode, with the ramp of 30.39.
+-- The lock starts shut, in test mode, with the ramp of R-151 (Outbound 2, master plan 30.51).
 select is((select row(sending_open, test_mode, open_countries, ramp_week1, ramp_week2, ramp_after, monthly_cap, started_on)::text
-  from public.outbound_settings), row(false, true, '{}'::text[], 3, 5, 10, 300, null::date)::text, 'locked, test mode, 3/5/10, 300 a month');
+  from public.outbound_settings), row(false, true, '{}'::text[], 5, 10, 10, 300, null::date)::text, 'locked, test mode, 5/10/10, 300 a month');
 
 -- Only postgres (a lane R migration) may open sending; the service role may not.
 set local role service_role;
@@ -39,11 +39,18 @@ select ok(not public.outbound_is_suppressed('another@gmail.com'), 'never the who
 
 -- The ramp.
 update public.outbound_settings set started_on = current_date - 3;
-select is(public.outbound_daily_cap(current_date), 3, 'week 1: 3 a day');
-update public.outbound_settings set started_on = current_date - 9;
-select is(public.outbound_daily_cap(current_date), 5, 'week 2: 5 a day');
-update public.outbound_settings set started_on = current_date - 20;
-select is(public.outbound_daily_cap(current_date), 10, 'then 10 a day');
+select is(public.outbound_daily_cap(current_date), 5, 'week 1: 5 a day');
+update public.outbound_settings set started_on = current_date - 6;
+select is(public.outbound_daily_cap(current_date), 5, 'day 7: still 5');
+update public.outbound_settings set started_on = current_date - 7;
+select is(public.outbound_daily_cap(current_date), 10, 'day 8: 10 a day');
+update public.outbound_settings set started_on = current_date - 29;
+select is(public.outbound_daily_cap(current_date), 10, 'day 30: 10 a day');
+
+-- Outbound 2: only the follow-up may carry the Founding 25 invite link, in the slug's 24 character shape (fake slug).
+select ok(private.outbound_links_ok('Details: kabsi.co/founding/FakeSlug0000000000Test12', 'follow_up'), 'the follow-up may carry the invite link');
+select ok(not private.outbound_links_ok('Details: kabsi.co/founding/FakeSlug0000000000Test12', 'first'), 'Email 1 may not');
+select ok(not private.outbound_links_ok('kabsi.co/founding/short', 'follow_up'), 'only the 24 character shape');
 update public.outbound_settings set started_on = null;
 
 -- A draft with its follow-up; staff approve Email 1 and the follow-up is approved with it; a non-staff user is refused.
