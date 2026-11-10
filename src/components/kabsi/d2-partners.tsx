@@ -64,7 +64,11 @@ const GETS: [typeof QrIcon, string][] = [
 
 /** Who it is for: the first segment (R-148 item 1), then the rest of the earlier list. */
 const FIRST: [typeof QrIcon, string, string][] = [
-  [Nfc, "Sellers of NFC and QR review cards", "Your customers already want reviews. Kabsi answers each one."],
+  [
+    Nfc,
+    "Sellers of NFC and QR review cards",
+    "Your customers already want reviews. Kabsi answers each one.",
+  ],
   [Globe, "Web and social media freelancers", "You already look after how they look online."],
 ];
 
@@ -120,7 +124,9 @@ function ReviewCardVisual() {
           <Check className="size-4 text-ok" strokeWidth={2.5} aria-hidden />
           Kabsi
         </p>
-        <p className="mt-1 text-small font-semibold">New 5 star review. Reply ready for your yes.</p>
+        <p className="mt-1 text-small font-semibold">
+          New 5 star review. Reply ready for your yes.
+        </p>
       </div>
       <figcaption className="sr-only">
         An Example review card with a QR code, and the Kabsi message that follows a new review: a
