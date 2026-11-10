@@ -7,6 +7,7 @@
 // send uses the mock sender, which records and calls nobody. Database calls and senders are deps, so tests use fakes.
 import type { Button } from "./channel.ts";
 import type { Sender } from "./deliver.ts";
+import type { ListMsg } from "./look.ts";
 import { decide, digestBody, type DigestItem, inWindow, type SendState } from "./policy.ts";
 import { ref, type TemplateRef } from "./templates.ts";
 
@@ -42,20 +43,31 @@ const HELD_UNTIL = (now: Date) => new Date(now.getTime() + 30 * 86_400_000);
 const senderFor = (o: Out, s: SendState) => (s.live_ok && o.live.live ? o.live : o.mock);
 const doneState = (sender: Sender) => (sender.live ? "sent" : "mock_sent");
 
-/** An answer inside the window the person just opened. Recorded after it went, so the person never waits on the log. */
-export async function reply(o: Out, s: SendState, phone: string, body: string, buttons?: Button[], meta: { userId?: string | null; locationId?: string | null } = {}): Promise<string> {
+/** Look 2: the rows of a list as text, for a sender that cannot send a list message. */
+export const listAsText = (body: string, l: ListMsg, footer?: string) =>
+  `${body}\n\n${l.sections.flatMap((s) => [...(s.title ? [s.title] : []), ...s.rows.map((r) => [r.title, r.description].filter(Boolean).join(" · "))]).join("\n")}${footer ? `\n\n${footer}` : ""}`;
+
+/** An answer inside the window the person just opened. Recorded after it went, so the person never waits on the log.
+ *  Look 2: `extra` carries the footer of a message with buttons or a list, and the list itself. The record keeps the body
+ *  and the buttons as before. */
+export async function reply(o: Out, s: SendState, phone: string, body: string, buttons?: Button[], meta: { userId?: string | null; locationId?: string | null } = {},
+  extra: { footer?: string; list?: ListMsg } = {}): Promise<string> {
   const sender = senderFor(o, s);
   let providerId: string | null = null;
   let state = doneState(sender);
   let error: string | null = null;
   try {
-    const r = buttons?.length ? await sender.buttons(phone, body, buttons.slice(0, 3)) : await sender.text(phone, body);
+    const r = extra.list && !buttons?.length
+      ? (sender.list ? await sender.list(phone, body, extra.list, extra.footer) : await sender.text(phone, listAsText(body, extra.list, extra.footer)))
+      : buttons?.length ? await sender.buttons(phone, body, buttons.slice(0, 3), extra.footer) : await sender.text(phone, body);
     providerId = r.id;
   } catch (e) {
     state = "failed";
     error = String((e as Error)?.message ?? e).slice(0, 300);
   }
-  const id = await o.db.add({ phone, userId: meta.userId ?? null, locationId: meta.locationId ?? null, kind: "reply", body, buttons });
+  // The record keeps what the person saw: the body, then a list's rows and the footer (look 2), and the buttons as before.
+  const seen = extra.list ? listAsText(body, extra.list, extra.footer) : extra.footer ? `${body}\n\n${extra.footer}` : body;
+  const id = await o.db.add({ phone, userId: meta.userId ?? null, locationId: meta.locationId ?? null, kind: "reply", body: seen, buttons });
   if (id) await o.db.mark([id], state, { providerId, error });
   return state;
 }

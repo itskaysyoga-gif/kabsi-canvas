@@ -45,6 +45,8 @@ export type Inbound = {
   // F-1: Meta's message context marks a message the person forwarded (context.forwarded, or context.frequently_forwarded
   // past 5 forwards). A forwarded message is never the person's own yes, no, number answer or code (router.ts).
   forwarded: boolean;
+  /** Look 2: the words came from a tap on a request list row ("#12"). They open that request and never answer a question. */
+  listRow?: boolean;
 };
 export type StatusEvent = { messageId: string; status: "sent" | "delivered" | "read" | "failed"; error: string | null;
   /** RB-F: Meta's price facts for the message (statuses[].pricing), when the receipt carries them. No person, no text. */
@@ -80,13 +82,15 @@ export function parseWebhook(event: string | null, body: unknown): { messages: I
         messageId: id,
         timestamp: Number(m.timestamp ?? 0),
         type: str(m.type) ?? "unknown",
-        text: str(obj(m.text).body) ?? str(obj(m.button).text) ?? caption(m),
+        // Look 2: a row of a request list ("#12") reads as the owner typing "#12", so it opens the request by the same path.
+        text: str(obj(m.text).body) ?? str(obj(m.button).text) ?? caption(m) ?? listRowText(interactive),
         buttonId: button,
         mediaId: str(obj(m.image).id),
         media: mediaOf(m, k),
         contacts: contactsOf(m),
         referral: referralOf(m),
         forwarded: forwardedOf(m),
+        ...(listRowText(interactive) && !str(obj(m.text).body) ? { listRow: true } : {}),
       });
     } else if (["sent", "delivered", "read", "failed"].includes(String(k.status))) {
       const errs = (Array.isArray(k.statuses) ? (k.statuses as unknown[]) : []).flatMap((s) => (Array.isArray(obj(s).errors) ? (obj(s).errors as unknown[]) : []));
@@ -96,6 +100,12 @@ export function parseWebhook(event: string | null, body: unknown): { messages: I
     }
   }
   return { messages, statuses };
+}
+
+/** Look 2: the id of a request list row ("#12"), and nothing else, read as the words the owner would type. */
+function listRowText(interactive: Obj): string | null {
+  const id = str(obj(interactive.list_reply).id);
+  return id && /^#\d{1,9}$/.test(id) ? id : null;
 }
 
 /** RB-F: the last pricing object Meta put on the message's receipts: billable, category and the pricing model, nothing else. */

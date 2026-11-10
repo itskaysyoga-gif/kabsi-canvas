@@ -182,11 +182,11 @@ Deno.test("the owner's answer: nothing, an hours change, or a post in their own 
 // ─── photos
 Deno.test("the photo messages name what Kabsi did, the category, and ask one thing", () => {
   const ready = photoReadyBody({ business: "Harbour Lane Coffee", category: "INTERIOR", note: null, suitable: true, forOwner: false });
-  assertMatch(ready, /your photo is ready.*no location details/s);
-  assertMatch(ready, /as the inside\./);
+  assertMatch(ready, /^\*🖼️ Your photo is ready\* · Harbour Lane Coffee\n\n.*\nSaved with no location details\n/s);
+  assertMatch(ready, /\n\nGoes on Google as the inside\n/);
   assertMatch(ready, /Put it on your Google profile\?$/);
-  assertMatch(photoReadyBody({ business: "X", category: null, note: "This photo is dark.", suitable: false, forOwner: true }), /a photo from your team is ready.*something else.*Kabsi noticed: This photo is dark\./s);
-  assertMatch(photoRefusedBody("X", "This is not a photo Kabsi can use."), /could not use that photo\. This is not a photo Kabsi can use\. Please send another one\./);
+  assertMatch(photoReadyBody({ business: "X", category: null, note: "This photo is dark.", suitable: false, forOwner: true }), /^\*🖼️ A photo from your team\* · X\n\nGoes on Google as something else\nSent by your team\nKabsi noticed: This photo is dark\.\n\nPut it on your Google profile\?$/);
+  assertMatch(photoRefusedBody("X", "This is not a photo Kabsi can use."), /^\*🖼️ Could not use that photo\* · X\n\nThis is not a photo Kabsi can use\.\n\nPlease send another one\.$/);
   for (const t of [ready, CATEGORY_MENU, photoRefusedBody("X", null)]) assertNotMatch(t, BANNED);
   assertEquals(categoryLabel("TEAMS"), "your team");
 });
@@ -220,7 +220,7 @@ Deno.test("photo flow: ready, Edit picks the category, a new Yes, approved throu
   const oldYes = [...w.actions.values()].find((a) => a.type === "photo")!;
   // Edit: the menu, then a number.
   assertEquals(await tap(w, PHONES.owner, `pe:${PHOTO}`), "photo_edit");
-  assertMatch(lastTo(w, PHONES.owner).body, /What is it a photo of\?/);
+  assertMatch(lastTo(w, PHONES.owner).body, /^\*🖼️ What is the photo of\?\*\n\n1\. The outside\n/);
   assertEquals(await say(w, PHONES.owner, "3"), "photo_category_set");
   const again = lastTo(w, PHONES.owner);
   assertMatch(again.body, /as your team/);
@@ -230,7 +230,7 @@ Deno.test("photo flow: ready, Edit picks the category, a new Yes, approved throu
   assertEquals(await tap(w, PHONES.owner, `a:${oldYes.token}`), "refused:not_draft");
   const fresh = [...w.actions.values()].find((a) => a.type === "photo" && !a.stale)!;
   assertEquals(await tap(w, PHONES.owner, `a:${fresh.token}`), "approved");
-  assertMatch(lastTo(w, PHONES.owner).body, /Approved for Harbour Lane Coffee/);
+  assertMatch(lastTo(w, PHONES.owner).body, /^\*✅ Approved\* · Harbour Lane Coffee\n\nIt goes to Google in 10 seconds\./);
 });
 Deno.test("photo flow: Skip drops the photo and nothing is approved", async () => {
   const w = new World();
@@ -250,7 +250,7 @@ Deno.test("photo flow: a photo from staff asks the owner, never the staff phone,
   w.photoDrafts.set(PHOTO, { location: BIZ.harbour, state: "draft", category: "PRODUCT" });
   await reviewGrowthTick(w.deps(), growthDb([dueRow({ sender_role: "staff", category: "PRODUCT" })]));
   assertEquals(w.repliesTo(PHONES.staff).length, 0);
-  assertMatch(lastTo(w, PHONES.owner).body, /a photo from your team is ready/);
+  assertMatch(lastTo(w, PHONES.owner).body, /^\*🖼️ A photo from your team\* · Harbour Lane Coffee\n\n/);
   const a = [...w.actions.values()].find((x) => x.type === "photo")!;
   assertEquals(await tap(w, PHONES.staff, `ps:${a.token}`), "not_yours");
   assertEquals(await tap(w, PHONES.staff, `a:${a.token}`), "not_yours");
@@ -260,7 +260,7 @@ Deno.test("photo flow: a photo Kabsi could not use goes back to the sender with 
   const w = new World();
   open(w, PHONES.owner);
   await reviewGrowthTick(w.deps(), growthDb([dueRow({ state: "refused", note: "This is not a photo Kabsi can use." })]));
-  assertMatch(lastTo(w, PHONES.owner).body, /could not use that photo\. This is not a photo Kabsi can use\. Please send another one\./);
+  assertMatch(lastTo(w, PHONES.owner).body, /^\*🖼️ Could not use that photo\* · Harbour Lane Coffee\n\nThis is not a photo Kabsi can use\.\n\nPlease send another one\.$/);
   assertEquals(await reviewGrowthTick(w.deps(), growthDb([dueRow({ state: "refused" })])), { photos: 1, questions: 0 });
   assertEquals(w.repliesTo(PHONES.owner).length, 1); // the same dedupe key: nothing twice
 });
@@ -274,7 +274,7 @@ Deno.test("photo flow: a refused photo outside the 24-hour window sends no kabsi
   // The owner writes: the window opens and the held note goes out.
   await say(w, PHONES.owner, "hello");
   await flush(w.out());
-  assertMatch(w.repliesTo(PHONES.owner).map((x) => x.body).join("\n"), /could not use that photo\. This is not a photo Kabsi can use\./);
+  assertMatch(w.repliesTo(PHONES.owner).map((x) => x.body).join("\n"), /\*🖼️ Could not use that photo\* · Harbour Lane Coffee\n\nThis is not a photo Kabsi can use\./);
   assertEquals(w.sent.filter((x) => x.template === "kabsi_photo_ready").length, 0);
 });
 Deno.test("photo flow: a manager's Edit only works on their own business", async () => {

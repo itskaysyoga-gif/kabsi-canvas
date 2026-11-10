@@ -8,6 +8,7 @@
 import type { Counts, Line, WeekActivity } from "../care-report/compose.ts";
 import { updatesCount } from "../care-report/compose.ts";
 import { ACTION, type Finding, findingTask } from "../visibility/ai/accuracy-words.ts";
+import { MARK, render } from "../whatsapp/look.ts";
 
 export type Chip = { key: string; label: string; count: number };
 export type GrowthStats = { days: number; new_reviews: number; opens_message: number; opens_qr: number; opens_tag: number };
@@ -134,24 +135,26 @@ export function receipt(o: {
 }
 export type Receipt = ReturnType<typeof receipt>;
 
-/** The WhatsApp version: short, the work first. */
+/**
+ * The WhatsApp version, in look 2 (30.50 item 2): a receipt marker and "Your weekly report" (K-02) with the business, then the
+ * week, the work and the numbers one per line (a list), then the one next step. The work first.
+ */
 export function receiptText(o: {
   business: string; dates?: string | undefined; did: Chip[]; waiting: number; next: string | null;
   google: { example: boolean; lines: string[] } | null; growth: { line: string } | null;
   ai: { line: string; label: string } | null; rival: string | null;
   accuracy?: { line: string; action: string; label: string } | null;
 }): string {
-  const parts: string[] = [];
-  const list = o.did.map((c) => `${c.label.toLowerCase().replace(/\bgoogle\b/g, "Google")} ${c.count}`).join(", ");
-  parts.push(o.dates
-    ? (o.did.length ? `${o.business}, ${o.dates}. Kabsi did: ${list}.` : `${o.business}, ${o.dates}: a quiet week. Kabsi kept watching your Google profile.`)
-    : (o.did.length ? `${o.business}, this week Kabsi did: ${list}.` : `${o.business}, a quiet week. Kabsi kept watching your Google profile.`));
-  parts.push(o.waiting ? `Waiting for your yes: ${o.waiting}.` : "Nothing is waiting for your yes.");
-  if (o.next) parts.push(`Next step: ${o.next}.`.replace(/\.\.$/, "."));
-  if (o.google) parts.push(`From your Google profile${o.google.example ? " (example figures)" : ""}: ${o.google.lines.join(" ")}`);
-  if (o.growth) parts.push(o.growth.line);
-  if (o.rival) parts.push(o.rival);
-  if (o.ai) parts.push(`${o.ai.line} ${o.ai.label}`);
-  if (o.accuracy) parts.push(`${o.accuracy.line} ${o.accuracy.action} ${o.accuracy.label}`);
-  return parts.join("\n\n");
+  const facts: string[] = [];
+  if (o.dates) facts.push(o.dates);
+  if (o.did.length) for (const c of o.did) facts.push(`${c.label}: ${c.count}`);
+  else facts.push("A quiet week. Kabsi kept watching your Google profile.");
+  if (o.google) facts.push(...o.google.lines.map((l) => `${l.replace(/\.$/, "")}${o.google!.example ? " (example figures)" : ""}`));
+  if (o.growth) facts.push(o.growth.line);
+  if (o.rival) facts.push(o.rival);
+  if (o.ai) facts.push(`${o.ai.line} ${o.ai.label}`);
+  if (o.accuracy) facts.push(`${o.accuracy.line} ${o.accuracy.action} ${o.accuracy.label}`);
+  const wait = o.waiting ? `Waiting for your yes: ${o.waiting}.` : "Nothing is waiting for your yes.";
+  const end = o.next ? `${wait} Next step: ${o.next}.`.replace(/\.\.$/, ".") : wait;
+  return render({ mark: MARK.receipt, title: "Your weekly report", business: o.business, facts, end });
 }

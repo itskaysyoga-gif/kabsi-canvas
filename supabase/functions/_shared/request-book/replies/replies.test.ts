@@ -114,11 +114,11 @@ Deno.test("replies: unconfirmed means missing either confirmation, and the line 
   assertStringIncludes(list, "Needs confirmation from the salon");
   assertStringIncludes(list, "Needs confirmation from the salon and from the client");
   assertStringIncludes(list, "Confirmed by the client, as told to staff");
-  assertStringIncludes(list, "3 appointments still need a confirmation.");
+  assertEquals(list.split("\n")[0], "3 appointments to confirm");
   // The headline is only as strong as the rows: a row that holds both confirmations is not claimed to be missing one.
   const mixed = openListReply([row({ staff_confirmed: true, customer_confirmed: true }), row()], 0, c, { unconfirmed: true }).body;
-  assertStringIncludes(mixed, "2 open.");
-  assertNotMatch(mixed, /still need/);
+  assertEquals(mixed.split("\n")[0], "2 open");
+  assertNotMatch(mixed, /still need|to confirm/);
   assertStringIncludes(mixed, "Confirmed by the salon " + String.fromCharCode(0xb7) + " Confirmed by the client, as told to staff");
 });
 
@@ -126,7 +126,8 @@ Deno.test("replies: the words come from the pack", () => {
   const a = row({ kind: "job", status: "active", summary: "Brakes", number: 42 });
   assertStringIncludes(requestLine(a, ctx(garageV1)), "In the shop");
   assertStringIncludes(statusChangedReply(a, ctx(garageV1)).body, "Job 42");
-  assertStringIncludes(statusChangedReply(a, ctx(garageV1)).body, "is now In the shop.");
+  assertStringIncludes(statusChangedReply(a, ctx(garageV1)).body, "Job 42 updated\n");
+  assertStringIncludes(statusChangedReply(a, ctx(garageV1)).body, "\nStatus: In the shop");
   assertStringIncludes(statusChangedReply(a, ctx(tutorV1)).body, "Project");
   assertStringIncludes(statusChangedReply(a, ctx(tutorV1)).body, "Under way");
   const closed = row({ kind: "job", status: "closed", outcome: "completed" });
@@ -149,7 +150,7 @@ Deno.test("replies: a list says it covers only what was entered in Kabsi, shows 
   const rows = Array.from({ length: 15 }, (_, i) => row({ number: i + 1, customer_name: `Client ${i + 1}` }));
   const l = openListReply(rows, 7, c);
   assertEquals(MAX_ROWS, 15);
-  assertStringIncludes(l.body, "22 open.");
+  assertEquals(l.body.split("\n")[0], "22 open");
   assertStringIncludes(l.body, "and 7 more");
   assertStringIncludes(l.body, COVERS_NOTE);
   assertEquals(l.body.split("\n").filter((x) => x.startsWith("#")).length, 15);
@@ -160,20 +161,21 @@ Deno.test("replies: a list says it covers only what was entered in Kabsi, shows 
   const t = openListReply(twenty, 0, c);
   assertEquals(t.body.split("\n").filter((x) => x.startsWith("#")).length, 15);
   assertStringIncludes(t.body, "and 5 more");
-  assertStringIncludes(t.body, "20 open.");
+  assertEquals(t.body.split("\n")[0], "20 open");
 
   // Exactly 15 and none more: no "more" line.
   assertNotMatch(openListReply(rows, 0, c).body, /more/);
   // Nothing open still says what it covers.
-  assertEquals(openListReply([], 0, c).body, `Nothing is open.\n${COVERS_NOTE}`);
-  assertEquals(openListReply([], 0, c, { unconfirmed: true }).body, `No appointments are waiting for a confirmation.\n${COVERS_NOTE}`);
+  assertEquals(openListReply([], 0, c).body, `Nothing is open\n\n${COVERS_NOTE}`);
+  assertEquals(openListReply([], 0, c, { unconfirmed: true }).body, `No appointments waiting\n\n${COVERS_NOTE}`);
   assertEquals(openListReply([], 0, ctx(garageV1), { unconfirmed: true, kind: "job" }).body.startsWith("No jobs"), true);
   // A search that finds several says it too.
   const f = foundReply(rows.slice(0, 3), 0, c);
-  assertStringIncludes(f.body, "3 found. Which one? Send its number.");
-  assertStringIncludes(f.body, COVERS_NOTE);
+  assertEquals(f.body.split("\n")[0], "3 found");
+  assertStringIncludes(f.body, "\n\nWhich one? Tap it, or send its number.");
   assertStringIncludes(foundReply([], 0, c).body, COVERS_NOTE);
   assertStringIncludes(foundReply(rows.slice(0, 15), 4, c).body, "and 4 more");
+  assertStringIncludes(f.body, COVERS_NOTE);
 });
 
 Deno.test("replies: a list of more than one kind is grouped by the pack's own words, in the pack's order", () => {
@@ -266,17 +268,18 @@ Deno.test("replies: a skipped step asks first, in the pack's words, and says wha
   const c = ctx(garageV1);
   const waiting = row({ kind: "job", status: "waiting", number: 42 });
   const a = askFirstReply(waiting, c, { to: "ready", outcome: null, flags: ["arrival_not_recorded"] });
-  assertEquals(a.body, "Job 42 is still Waiting, and the step before Ready was never recorded.\nMark it Ready anyway?");
+  assertEquals(a.body, "Mark Job 42 anyway?\nSarah\nHighlights\n\nIt is still Waiting, and the step before Ready was never recorded. It would be Ready.");
   const done = askFirstReply(waiting, c, { to: "closed", outcome: "completed", flags: ["arrival_not_recorded"] });
-  assertStringIncludes(done.body, "Close it as Collected anyway?");
+  assertStringIncludes(done.body, "Close Job 42 anyway?\n");
+  assertStringIncludes(done.body, "It would be Collected.");
   const cancel = askFirstReply(row({ kind: "job", status: "active", number: 42 }), c, { to: "closed", outcome: "cancelled", flags: [] });
-  assertEquals(cancel.body, "This closes Job 42 as Cancelled.\nGo ahead?");
+  assertEquals(cancel.body, "Close Job 42?\nSarah\nHighlights\n\nIt closes as Cancelled.");
   const reopen = askFirstReply(row({ kind: "job", status: "closed", outcome: "completed", number: 42 }), c, { to: "ready", outcome: null, flags: ["reopened"], reopen: true });
-  assertEquals(reopen.body, "Job 42 is closed as Collected.\nReopen it?");
+  assertEquals(reopen.body, "Reopen Job 42?\nSarah\nHighlights\n\nIt is closed as Collected.");
   const att = askFirstReply(row({ number: 7, starts_at: null }), ctx(salonV1), { to: "closed", outcome: "attended", flags: ["attended_without_time"] });
-  assertEquals(att.body, "Appointment 7 has no time entered.\nClose it as Came in anyway?");
+  assertEquals(att.body, "Close Appointment 7 anyway?\nSarah\nHighlights\n\nIt has no time entered. It would close as Came in.");
   const early = askFirstReply(row({ number: 7 }), ctx(salonV1), { to: "closed", outcome: "no_show", flags: ["no_show_before_time"] });
-  assertEquals(early.body, "Appointment 7 has a time that has not come yet.\nClose it as No show anyway?");
+  assertEquals(early.body, "Close Appointment 7 anyway?\nSarah\nHighlights\n\nIt has a time that has not come yet. It would close as No show.");
   // A move that skipped a step and was applied after the owner's yes says so, and invents no step.
   const done2 = statusChangedReply(row({ kind: "job", status: "ready", number: 42 }), c, ["arrival_not_recorded"]);
   assertStringIncludes(done2.body, "The step before was never recorded, and Kabsi has not added one.");
@@ -292,10 +295,11 @@ Deno.test("replies: a correction shows before and after in the pack's words, and
   ], c, ["confirmations_cleared"]);
   assertEquals(r.body, [
     "Appointment 12 corrected",
-    "service changed from Highlights to Trim.",
-    "when changed from Thu 12 Nov 15:00 to Fri 13 Nov 11:00.",
-    "next step changed from nothing to Call back.",
-    "with changed from Rana to Dina.",
+    "Service: was Highlights, now Trim",
+    "When: was Thu 12 Nov 15:00, now Fri 13 Nov 11:00",
+    "Next step: was nothing, now Call back",
+    "With: was Rana, now Dina",
+    "",
     "The time changed, so both confirmations were cleared.",
   ].join("\n"));
   assertEquals(r.buttons, ["Undo"]);
@@ -305,7 +309,7 @@ Deno.test("replies: a conversion keeps the enquiry on record and records no conf
   const c = ctx(gymV1);
   const created = row({ kind: "appointment", number: 15, customer_name: "Maya", summary: "Trial" });
   const r = convertedReply({ kind: "enquiry", number: 12 }, created, c);
-  assertStringIncludes(r.body, "Enquiry 12 became Visit 15 for Maya.");
+  assertStringIncludes(r.body, "Enquiry 12 is now Visit 15\nMaya\n");
   assertStringIncludes(r.body, "The enquiry stays on record.");
   assertStringIncludes(r.body, "No confirmation has been recorded yet.");
   assertNotMatch(r.body, /Confirmed by/);
@@ -316,11 +320,11 @@ Deno.test("replies: confirmation, saved and undone replies are built from the re
   const c = ctx(salonV1);
   const after = row({ number: 9, staff_confirmed: true });
   const conf = confirmationReply(after, c).body;
-  assertStringIncludes(conf, "Appointment 9 updated.");
+  assertEquals(conf.split("\n")[0], "Appointment 9 updated");
   assertStringIncludes(conf, "Confirmed by the salon. Still needs confirmation from the client");
   assertNotMatch(conf, /Confirmed by the client/);
-  assertEquals(savedReply(row({ number: 3 }), c).body.split("\n")[0], "Appointment 3 saved.");
-  assertEquals(undoneReply(row({ number: 3, status: "closed", outcome: "attended" }), c).body, "Undone. Appointment 3 is back to Came in.");
+  assertEquals(savedReply(row({ number: 3 }), c).body.split("\n")[0], "Appointment 3 saved");
+  assertEquals(undoneReply(row({ number: 3, status: "closed", outcome: "attended" }), c).body, "Undone\nAppointment 3 is back to Came in.");
 });
 
 Deno.test("replies: every refusal is in words with what to do next, and shows no code, name or value", () => {
@@ -332,7 +336,7 @@ Deno.test("replies: every refusal is in words with what to do next, and shows no
     assert(r.body.endsWith(".") || r.body.endsWith("?"), code);
     assertEquals(r.buttons, undefined);
   }
-  assertEquals(refusalReply({ reason: "something_new" }).body, "That did not go through. Nothing was changed.");
+  assertEquals(refusalReply({ reason: "something_new" }).body, "Not done\n\nThat did not go through. Nothing was changed.");
   assertStringIncludes(refusalReply({ reason: "forbidden" }).body, "Only an owner or a manager");
   assertStringIncludes(refusalReply({ reason: "window_passed" }).body, "10 minutes");
 });
@@ -390,8 +394,8 @@ Deno.test("replies: a long list never loses its footer or its count; the rows ar
   assertEquals(Number(l.match(/and (\d+) more/)![1]) + shownRows, 55);
   // The same for a search with several hits.
   const f = foundReply(rows, 40, c).body;
-  assertStringIncludes(f, COVERS_NOTE);
   assertMatch(f, /and \d+ more/);
+  assertStringIncludes(f, COVERS_NOTE);
 });
 
 Deno.test("replies: a correction with many changes keeps its note about the confirmations and counts what it left out", () => {

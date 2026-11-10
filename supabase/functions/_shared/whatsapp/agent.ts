@@ -13,11 +13,12 @@ import { type Ai, isRequestTool, route } from "./intent.ts";
 import {
   BOOK_SAY, bookOn, type BookDeps, createInput, findReply, ON_IT_REQUEST_MS, type Pack, PROPOSAL_OPEN_MS, proposalButtons, readRequest, type Ref,
   refOf, refusalReply, requestSummary, rowOf, savedText, toEvidence,
-  type Act, arrivedLine, askAnswer, parseBookCommand, type RbAsk, type RbTime, runCommand, timePicked, undoButton, undoIds, kindIn, markOf, styleReply,
+  type Act, arrivedLine, askAnswer, parseBookCommand, type RbAsk, type RbTime, runCommand, timePicked, undoButton, undoIds, kindIn,
   correctedReplyOf, nonce, duplicateReply, findDuplicate, fullOf, pastServices, reviseRequest, updateChanges,
   bookHelp, bookIntent, kabsiJob, type Kind, KIND_KEY, namesKabsi, newKind, packAs, packWordWins, proposalKind,
 } from "./book.ts";
 import { photoRefusal, voiceCheck } from "./media.ts";
+import { fromText, IN_SCOPE, LIST_RESULT, type ListMsg, markFor, type Msg, NAMES_BUSINESS, toMsg } from "./look.ts";
 import { type SigninDb, signinSeam } from "./signin.ts";
 import { MAX_BYTES } from "../photos/sniff.ts";
 import { notify, type Out, reply as sendReply } from "./outbox.ts";
@@ -40,7 +41,7 @@ import { numbersText, stuckText, type Summary } from "./staff-alerts.ts";
 import { ASK_INTRO, reviewRequestLink, reviewRequestMessage } from "../review-growth/message.ts";
 import { type GrowthStats, growthLine } from "../review-growth/stats.ts";
 import { ANSWER_WINDOW_MS, readUpdate } from "../review-growth/monthly.ts";
-import { CATEGORY_MENU, categoryLabel, type PhotoCategory, pickCategory } from "../review-growth/photo.ts";
+import { categoryLabel, type PhotoCategory, pickCategory } from "../review-growth/photo.ts";
 import type { Transcript } from "../voice/transcribe.ts";
 import { CATALOGUE, extraKey, type Period, type Plan, planKey, type PriceFamily } from "../creem.ts";
 import type { FirstBack, OnboardingHooks } from "../onboarding/hooks.ts";
@@ -205,15 +206,28 @@ type Turn = {
 function say1(t: Turn, body: string, buttons?: Button[]) {
   return sendReply(t.d.out, t.s, t.phone, headed(t.head ?? null, body), buttons, { locationId: t.business?.location_id ?? null });
 }
-const answered = (t: Turn, body: string, result: string, buttons?: Button[]) =>
-  (t.style ? say1({ ...t, head: null }, styled(t, body, result), buttons) : say1(t, body, buttons)).then(() => result);
+/**
+ * Every reply to what the person wrote. Look 2 (30.50 item 2): a reply in scope (look.ts IN_SCOPE, or any request book
+ * reply) passes through look.ts, which gives it its marker, its bold title, its blocks, its footer and, for a list of
+ * requests, the list message; it carries no role head. Every other reply is sent as before, headed with its role. The
+ * buttons are passed on exactly as given.
+ */
+const answered = (t: Turn, body: string, result: string, buttons?: Button[], list?: ListMsg) => {
+  // A phone with no Kabsi role (a prospect talking to Nora) keeps its look; look 2 is for owners, their team, staff and partners.
+  if (!t.style && (!IN_SCOPE.test(result) || !domains(t.who).length)) return say1(t, body, buttons).then(() => result);
+  const m = lookMsg(t, body, result, buttons, list);
+  return sendReply(t.d.out, t.s, t.phone, m.body, buttons, { locationId: t.business?.location_id ?? null }, { footer: m.footer, list: m.list }).then(() => result);
+};
 /** RB-F3: a switch or help reply in the new look (no role head, the bold first line). */
 const plain = (t: Turn): Turn => ({ ...t, head: null, style: { pack: null } });
-/** RB-F3: the bold first line with its marker, and the business in it only when this phone has more than one. */
-function styled(t: Turn, body: string, result: string): string {
+/** Look 2: the reply as the sender sends it. The business follows the title only for a phone with several businesses,
+ *  or on a change to Google (look.ts NAMES_BUSINESS). */
+function lookMsg(t: Turn, body: string, result: string, buttons?: Button[], list?: ListMsg): Msg {
   const pack = t.style?.pack ?? null;
   const many = businesses(t.who).length > 1;
-  return styleReply(body, markOf(result, kindIn(body, pack)), many && t.business ? t.business.business : null);
+  // A switch says the business in its words, so it is not named again after the title.
+  const biz = t.business && (many || NAMES_BUSINESS.test(result)) && !/^(business_set|switched|role_set)$/.test(result) ? t.business.business : null;
+  return toMsg(fromText(body, markFor(result, kindIn(body, pack)), biz), { buttons: buttons?.length ?? 0, asList: LIST_RESULT.test(result), list });
 }
 
 async function run(t: Turn, cmd: Command): Promise<string> {
@@ -259,7 +273,8 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     return answered(t, SAY.forwardedYes, "forwarded_yes");
   }
   // F-1: a forwarded yes, no or number never answers Kabsi's own questions (the search, hours, the monthly question).
-  const fwdAnswer = cmd.k === "free" && !!cmd.forwardedAnswer;
+  // Look 2: a tapped request list row ("#12") is not an answer either: it opens that request.
+  const fwdAnswer = cmd.k === "free" && (!!cmd.forwardedAnswer || !!t.m.listRow);
 
   // RB-F2: the role and business questions hold a message for after the pick. Any message that is not their answer closes
   // them, and they close by themselves after 10 minutes, so an old question never captures a later message.
@@ -327,7 +342,7 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     if (cmd.k === "number") return photoCategoryPicked(t, oq, String(cmd.n));
     // Anything that is not a kind of photo is a new message, not an answer: the menu is closed and the message handled as usual.
     // F-1: forwarded words never answer the menu.
-    if (cmd.k === "free" && !t.m.forwarded && pickCategory(cmd.text)) return photoCategoryPicked(t, oq, cmd.text);
+    if (cmd.k === "free" && !t.m.forwarded && !t.m.listRow && pickCategory(cmd.text)) return photoCategoryPicked(t, oq, cmd.text);
     await d.db.setConv(phone, { open_question: null });
   }
   // V4: the onboarding buttons, the setup question typed as words, and the owner's yes to the monthly answer's facts.
@@ -335,7 +350,7 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   if (cmd.k === "facts") return factsButton(t, cmd.action, cmd.locationId, cmd.month);
   if (oq?.type === "setup") {
     // F-1: forwarded words never answer the setup question (setupReply reads more yes words than the router's list).
-    const typed = cmd.k === "yes" ? "yes" : cmd.k === "tool" && cmd.tool === "help" ? "help" : cmd.k === "free" && !t.m.forwarded ? setupReply(cmd.text) : null;
+    const typed = cmd.k === "yes" ? "yes" : cmd.k === "tool" && cmd.tool === "help" ? "help" : cmd.k === "free" && !t.m.forwarded && !t.m.listRow ? setupReply(cmd.text) : null;
     if (typed) return onboardingButton(t, typed === "yes" ? "yes" : typed, oq.location_id);
   }
   if (oq?.type === "update" && now - Date.parse(oq.at) < ANSWER_WINDOW_MS) {
@@ -399,6 +414,14 @@ async function withBusiness(t: Turn, toolName: string, pending: string | null, f
     await t.d.db.setConv(t.phone, { open_question: { type: "business", pending, options, ...keep, ...fwdMark(t), at: nowIso(t) } satisfies OpenQuestion });
     if (options.length <= 3) {
       return answered(plain(t), SAY.whichBusiness, "which_business", options.map((o) => ({ id: `b:${o.id}`, title: o.name.slice(0, 20) })));
+    }
+    // Look 2: up to 10 businesses are a list message whose rows are the same business buttons (b:<id>); typing the number still works.
+    if (options.length <= 10) {
+      return answered(plain(t), SAY.whichBusinessTap, "which_business", undefined,
+        { button: "Choose", sections: [{ rows: options.map((o, i) => {
+          const t = `${i + 1}. ${o.name}`;
+          return { id: `b:${o.id}`, title: t.length <= 24 ? t : `${t.slice(0, 21).trimEnd()}...` };
+        }) }] });
     }
     return answered(plain(t), SAY.whichBusinessList(options.map((o) => o.name)), "which_business");
   }
@@ -509,7 +532,7 @@ async function help(t: Turn): Promise<string> {
     const text = b?.role === "staff" ? SAY.staffHelp : SAY.ownerHelp;
     // RB-F4 (R-149 item 5): at a business with the request book on, its own block after the usual list.
     const pack = b && t.d.book ? (await bookOn(t.d.book.db, [b.location_id])).get(b.location_id) : undefined;
-    const block = pack ? `\n\n${bookHelp(pack, domains(t.who).includes("staff"))}` : "";
+    const block = pack ? `\n${bookHelp(pack, domains(t.who).includes("staff"))}` : "";
     return answered(plain({ ...t, business: b }), `${text}${block}`, "help");
   }
   // A phone that is not a customer meets Nora as Kabsi's assistant (9.2).
@@ -652,7 +675,7 @@ async function hours(t: Turn, text: string, asked: boolean): Promise<string> {
   const b = t.business!;
   const p = parseHours(text, new Date((t.d.now ?? Date.now)()), b.time_zone ?? "UTC");
   if (!p.ok) {
-    if (p.why === "permanent") return answered(t, SAY.hoursWeekly(b.business, `${t.d.appUrl}/app/hours`), "hours_weekly");
+    if (p.why === "permanent") return answered(t, SAY.hoursWeekly(`${t.d.appUrl}/app/hours`), "hours_weekly");
     // One short question back (9.3 "unclear times"); the answer is read with this message. Asked once only.
     const line = p.why === "no_times" ? SAY.hoursNeedTimes : p.why === "bad_time" ? SAY.hoursBadTime : p.why === "past" ? SAY.hoursPast
       : p.why === "too_far" ? SAY.hoursTooFar : SAY.hoursAsk;
@@ -661,19 +684,19 @@ async function hours(t: Turn, text: string, asked: boolean): Promise<string> {
   }
   const r = await t.d.db.hoursPrepare(b.location_id, b.user_id, p.change);
   if (!r.ok || !r.token) return prepareRefused(t, r.reason, "hours");
-  return answered(t, SAY.hoursShown(b.business, describeHours(p.change)), "hours_shown", [{ id: `a:${r.token}`, title: "Approve" }, { id: `e:${r.token}`, title: "Edit on kabsi.co" }]);
+  return answered(t, SAY.hoursShown(describeHours(p.change)), "hours_shown", [{ id: `a:${r.token}`, title: "Approve" }, { id: `e:${r.token}`, title: "Edit on kabsi.co" }]);
 }
 
 async function typedPost(t: Turn, raw: string): Promise<string> {
   const b = t.business!;
   // The post is the owner's own words after "post:"; anything else is asked for once, with an example.
   const m = /^\s*(?:new\s+)?post\s*:?\s+([\s\S]+)$/i.exec(raw);
-  if (!m) return answered(t, SAY.postAsk(b.business), "post_ask");
+  if (!m) return answered(t, SAY.postAsk(), "post_ask");
   const c = checkTypedPost(m[1]);
   if (!c.ok) return answered(t, SAY.postProblem(b.business, c.problems), "post_problem");
   const r = await t.d.db.postPrepare(b.location_id, b.user_id, c.text);
   if (!r.ok || !r.token) return prepareRefused(t, r.reason, "post");
-  return answered(t, SAY.postShown(b.business, (r.text ?? c.text).trim()), "post_shown", [{ id: `a:${r.token}`, title: "Approve" }, { id: `e:${r.token}`, title: "Edit on kabsi.co" }]);
+  return answered(t, SAY.postShown((r.text ?? c.text).trim()), "post_shown", [{ id: `a:${r.token}`, title: "Approve" }, { id: `e:${r.token}`, title: "Edit on kabsi.co" }]);
 }
 
 function prepareRefused(t: Turn, reason: string | undefined, what: "hours" | "post"): Promise<string> {
@@ -682,8 +705,8 @@ function prepareRefused(t: Turn, reason: string | undefined, what: "hours" | "po
   if (/not_allowed|not_member/.test(why)) return answered(t, SAY.approverOnly(b.business), `${what}_refused:${why}`);
   if (/location_not_active|concierge/.test(why)) return answered(t, SAY.notConnectedYet(b.business, `${t.d.appUrl}/app`), `${what}_refused:${why}`);
   if (/bad_dates/.test(why)) return answered(t, SAY.hoursAsk, `${what}_refused:${why}`);
-  if (/house_style|bad_post_text/.test(why)) return answered(t, SAY.postAsk(b.business), `${what}_refused:${why}`);
-  return answered(t, `Kabsi could not prepare this here. Open your Kabsi account to finish: ${t.d.appUrl}/app`, `${what}_refused:${why}`);
+  if (/house_style|bad_post_text/.test(why)) return answered(t, SAY.postAsk(), `${what}_refused:${why}`);
+  return answered(t, `Could not prepare this here\n\nOpen your Kabsi account to finish: ${t.d.appUrl}/app`, `${what}_refused:${why}`);
 }
 
 function lastReview(t: Turn): string | null {
@@ -697,14 +720,14 @@ async function exactReply(t: Turn, text: string): Promise<string> {
   if (!review) return answered(t, SAY.noRecentReview, "no_review");
   const r = await t.d.db.ownerDraft(b.user_id, review, text);
   if (!r.ok) return answered(t, r.reason === "not_draft" ? SAY.alreadyHandled : SAY.notYours, `exact_refused:${r.reason}`);
-  return showForYes(t, review, text, SAY.exactShown(b.business, text.trim()));
+  return showForYes(t, review, text, SAY.exactShown(text.trim()));
 }
 
 async function editDraft(t: Turn, instruction: string): Promise<string> {
   const b = t.business!;
   const review = lastReview(t);
   if (!review || !instruction.trim()) return answered(t, SAY.noRecentReview, "no_review");
-  await say1(t, SAY.editStarted);
+  await answered(t, SAY.editStarted, "edit_started");
   const r = await t.d.editDraft(review, instruction.slice(0, 500));
   if (!r.ok) return answered(t, SAY.alreadyHandled, `edit_refused:${r.reason}`);
   return showForYes(t, review, null, null);
@@ -715,7 +738,7 @@ async function showForYes(t: Turn, reviewId: string, text: string | null, body: 
   const b = t.business!;
   const a = await t.d.db.actionCreate(b.user_id, "review_reply", reviewId);
   if (!a.ok || !a.token) {
-    return answered(t, a.reason === "high_risk" ? "This review needs a careful look, so it is approved only in Kabsi." : SAY.alreadyHandled, `show_refused:${a.reason}`);
+    return answered(t, a.reason === "high_risk" ? "Approve this one in Kabsi\nThis review needs a careful look, so it is approved only in Kabsi." : SAY.alreadyHandled, `show_refused:${a.reason}`);
   }
   const shown = body ?? SAY.newDraft(b.business, (a.text ?? text ?? "").trim());
   return answered(t, shown, "shown_for_yes", [{ id: `a:${a.token}`, title: "Approve" }, { id: `e:${a.token}`, title: "Edit on kabsi.co" }]);
@@ -751,7 +774,7 @@ async function photoEdit(t: Turn, photoId: string): Promise<string> {
   if (!biz) return answered(t, SAY.notYours, "photo_edit_refused");
   await t.d.db.setConv(t.phone, { open_question: { type: "photo_category", photo_id: photoId, location_id: biz.location_id } satisfies OpenQuestion });
   // No business is named here: the menu says nothing about which one, and the confirmation names the photo's own business.
-  return answered(t, SAY.photoCategoryAsk(CATEGORY_MENU), "photo_edit");
+  return answered(t, SAY.photoCategoryAsk(), "photo_edit");
 }
 
 async function photoCategoryPicked(t: Turn, q: Extract<OpenQuestion, { type: "photo_category" }>, text: string): Promise<string> {
@@ -846,7 +869,7 @@ async function photoPost(t: Turn, mediaId: string, size: number | null, caption:
     // The sender may approve posts: the same token and binding to this draft as a typed post.
     const a = await t.d.db.actionCreate(b.user_id, "local_post", p.post_id);
     if (!a.ok || !a.token) return drop(prepareRefused(t, a.reason, "post"));
-    return answered(t, SAY.photoPostShown(b.business, (a.text ?? text.text).trim()), "photo_post_shown", buttons(a.token));
+    return answered(t, SAY.photoPostShown((a.text ?? text.text).trim()), "photo_post_shown", buttons(a.token));
   }
   // Staff (or anyone who may not approve posts): the owners and managers who may are asked; the sender never gets an Approve button.
   let asked = 0;
@@ -980,11 +1003,11 @@ async function approveToken(t: Turn, token: string): Promise<string> {
   const reason = a.reason ?? a.result;
   if (/not_member|not_allowed|approver_not_member/.test(reason)) return answered(tb, SAY.notYours, `refused:${reason}`);
   if (/not_draft|already|changed|expired/.test(reason)) return answered(tb, SAY.alreadyHandled, `refused:${reason}`);
-  if (reason === "high_risk") return answered(tb, "This review needs a careful look, so it is approved only in Kabsi.", "refused:high_risk");
+  if (reason === "high_risk") return answered(tb, "Approve this one in Kabsi\nThis review needs a careful look, so it is approved only in Kabsi.", "refused:high_risk");
   // Photo Post 1: Approve pressed before the photo engine finished with the post's photo. Nothing was used; Approve works again.
   if (/post_photo_missing/.test(reason)) return answered(tb, SAY.photoPostChecking, "refused:post_photo_missing");
-  if (reason === "plan_required") return answered(tb, `Your plan has ended, so nothing can be published. ${PAY_TODAY_LINE}`, "refused:plan_required");
-  return answered(tb, `Kabsi could not approve this here. Open Kabsi to finish: ${t.d.appUrl}/app`, `refused:${reason}`);
+  if (reason === "plan_required") return answered(tb, `Plan ended\nYour plan has ended, so nothing can be published. ${PAY_TODAY_LINE}`, "refused:plan_required");
+  return answered(tb, `Could not approve here\n\nOpen Kabsi to finish: ${t.d.appUrl}/app`, `refused:${reason}`);
 }
 
 async function yes(t: Turn): Promise<string> {
@@ -1002,7 +1025,7 @@ async function yes(t: Turn): Promise<string> {
   const options = items.slice(0, 9).map((i) => ({ token: i.token, label: label(i) }));
   await t.d.db.setConv(t.phone, { open_question: { type: "which", options } satisfies OpenQuestion });
   if (options.length <= 3) return answered(t, SAY.whichOne, "which_one", options.map((o) => ({ id: `w:${o.token}`, title: o.label })));
-  return answered(t, `${SAY.whichOne} Reply with the number.\n\n${options.map((o, i) => `${i + 1}. ${o.label}`).join("\n")}`, "which_one");
+  return answered(t, `${SAY.whichOne}\n${options.map((o, i) => `${i + 1}. ${o.label}`).join("\n")}\n\nReply with the number.`, "which_one");
 }
 
 async function openDigestItem(t: Turn, id: number): Promise<string> {
@@ -1433,7 +1456,7 @@ async function requestToolInner(t: Turn, bt: BookTurn, tool: string, arg: string
   }
   // RB-F: a job the owner's words say is already in is saved as in; the proposal says so before Save.
   const arrived = arrivedLine(rpack, r.ex.text);
-  const body = arrived ? r.ex.reply.body.replace(/\n(?=[^\n]*$)/, `\n${arrived}\n`) : r.ex.reply.body;
+  const body = arrived ? r.ex.reply.body.replace(/\n\n(?=[^\n]*$)/, `\n${arrived}\n\n`) : r.ex.reply.body;
   return said(tb, body, revising ? "request_revised" : "request_proposed", proposalButtons(r.ex.reply, r.ex, intake));
 }
 

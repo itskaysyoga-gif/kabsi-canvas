@@ -4,6 +4,7 @@
 // leaves Kabsi (K-146). The key is read from the environment only and never logged.
 import type { Button } from "./channel.ts";
 import { mockSender, type Sender } from "./deliver.ts";
+import type { ListMsg } from "./look.ts";
 import { assertSendable, sendName } from "./templates.ts";
 import type { StatusMap } from "./template-status.ts";
 
@@ -25,8 +26,14 @@ export async function pickSender(e: SenderEnv, statuses: () => Promise<StatusMap
   return {
     live: true,
     text: async (to, body) => ({ id: idOf(await client.messages.sendText({ phoneNumberId, to, body })) }),
-    buttons: async (to, body, buttons: Button[]) => ({
-      id: idOf(await client.messages.sendInteractiveButtons({ phoneNumberId, to, bodyText: body, buttons })),
+    // Look 2: the footer is the client's footerText (Kapso docs, TypeScript SDK, interactive messages; client 0.4.0's types).
+    buttons: async (to, body, buttons: Button[], footer?: string) => ({
+      id: idOf(await client.messages.sendInteractiveButtons({ phoneNumberId, to, bodyText: body, buttons, ...(footer ? { footerText: footer } : {}) })),
+    }),
+    // Look 2: a list message (sendInteractiveList: buttonText, sections of rows with id, title and description).
+    list: async (to, body, l: ListMsg, footer?: string) => ({
+      id: idOf(await client.messages.sendInteractiveList({ phoneNumberId, to, bodyText: body, buttonText: l.button,
+        sections: l.sections.map((s) => ({ ...(s.title ? { title: s.title } : {}), rows: s.rows })), ...(footer ? { footerText: footer } : {}) })),
     }),
     // Only Meta-approved templates, by name; the parameters are plain text (K-129 point 4).
     template: async (to, name, params) => (assertSendable(name), {

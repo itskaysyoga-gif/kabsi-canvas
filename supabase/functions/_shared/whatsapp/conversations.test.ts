@@ -62,11 +62,11 @@ const CASES: Case[] = [
   { name: "unknown: prices", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "prices", expect: "prices", reply: /29 US dollars.*59 US dollars.*first 30 paying businesses pay 19 or 39/s }] },
   { name: "unknown: start free", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "start free", expect: "trial", reply: /https:\/\/kabsi\.co\/login\?next=\/start/ }] },
   { name: "unknown: partner program", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "partner", expect: "partner_program", reply: /25 percent/ }] },
-  { name: "unknown: talk to a person", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "talk to a person", expect: "handoff", reply: /within one working day\. Working hours: Monday to Friday, 9:00 to 18:00, UAE time\./ }],
+  { name: "unknown: talk to a person", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "talk to a person", expect: "handoff", reply: /^A person will answer you\nHere on WhatsApp, within one working day\.\nWorking hours: Monday to Friday, 9:00 to 18:00, UAE time\.$/ }],
     check: (w) => assert.equal(w.handoffs.length, 1) },
   { name: "unknown: stats needs an account and shows no business data", tags: ["unknown", "privacy"], steps: [{ from: PHONES.unknown, text: "stats", expect: "needs_account", reply: /https:\/\/kabsi\.co\/login\?next=\/start/ }] },
   { name: "unknown: someone else's Approve button is no longer theirs", tags: ["unknown", "privacy", "25.5"], steps: [
-    { from: PHONES.unknown, button: (w) => `a:${w.alert(PHONES.owner, BIZ.harbour)}`, expect: "not_yours", reply: /no longer yours to approve/ }],
+    { from: PHONES.unknown, button: (w) => `a:${w.alert(PHONES.owner, BIZ.harbour)}`, expect: "not_yours", reply: /^No longer yours to approve\n\nNothing changed\.$/ }],
     check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("approve")).length, 0) },
   { name: "unknown: a staff command is never revealed", tags: ["unknown", "privacy"], steps: [{ from: PHONES.unknown, text: "status", expect: /^(greeting|unclear|nora)/ }],
     check: (w) => assert.doesNotMatch(w.sent.map((s) => s.body).join(" "), /Jobs failed/) },
@@ -153,7 +153,7 @@ const CASES: Case[] = [
   { name: "owner: QR", tags: ["owner"], steps: [{ from: PHONES.owner, text: "QR", expect: "qr", reply: /QR card/ }] },
   { name: "owner: no review link yet", tags: ["owner"], steps: [{ from: PHONES.plain, text: "review link", expect: "no_review_link", reply: /Corner Deli has no review link/ }] },
   { name: "owner: Approve names the business and offers Undo, with no AI call", tags: ["owner", "25.5", "speed"], steps: [
-    { from: PHONES.owner, button: (w) => `a:${w.alert(PHONES.owner, BIZ.harbour)}`, expect: "approved", reply: /Approved for Harbour Lane Coffee/, buttons: ["Undo"], ai: 0 }] },
+    { from: PHONES.owner, button: (w) => `a:${w.alert(PHONES.owner, BIZ.harbour)}`, expect: "approved", reply: /^\*✅ Approved\* · Harbour Lane Coffee\n\nIt goes to Google in 10 seconds\.\n\nPress Undo to stop it\.$/, buttons: ["Undo"], ai: 0 }] },
   { name: "owner: Approve twice publishes once", tags: ["owner", "9.3"], steps: [
     { from: PHONES.owner, button: "a:tok00000000000000000001", expect: "approved" },
     { from: PHONES.owner, button: "a:tok00000000000000000001", expect: "repeat", reply: /already handled/ }],
@@ -177,7 +177,7 @@ const CASES: Case[] = [
   // F-1: a forwarded "Yes" is never the owner's yes. Nothing is approved and the owner is asked to tap Yes or type it.
   { name: "owner: a forwarded Yes approves nothing; the typed Yes after it does", tags: ["owner", "25.5", "F-1"],
     setup: (w) => void w.alert(PHONES.owner, BIZ.harbour), steps: [
-      { from: PHONES.owner, text: "Yes", forwarded: true, expect: "forwarded_yes", reply: /^That looks forwarded, so I did not count it as your yes\. Tap Yes, or type it yourself\.$/, ai: 0 }],
+      { from: PHONES.owner, text: "Yes", forwarded: true, expect: "forwarded_yes", reply: /^\*❓ Not counted as your yes\*\n\nThat looks forwarded\.\n\nTap Yes, or type it yourself\.$/, ai: 0 }],
     check: (w) => {
       assert.equal(w.calls.filter((c) => c.startsWith("approve")).length, 0, "nothing approved");
       assert.equal(w.actions.get("tok00000000000000000001")!.used, false, "still waiting");
@@ -185,7 +185,7 @@ const CASES: Case[] = [
   { name: "owner: after a forwarded Yes, the owner's typed Yes approves", tags: ["owner", "25.5", "F-1"],
     setup: (w) => void w.alert(PHONES.owner, BIZ.harbour), steps: [
       { from: PHONES.owner, text: "yes", forwarded: true, expect: "forwarded_yes" },
-      { from: PHONES.owner, text: "yes", expect: "approved", reply: /Approved for Harbour Lane Coffee/ }] },
+      { from: PHONES.owner, text: "yes", expect: "approved", reply: /^\*✅ Approved\* · Harbour Lane Coffee\n\nIt goes to Google in 10 seconds\.\n\nPress Undo to stop it\.$/ }] },
   { name: "owner: after a forwarded Yes, the Approve button still works", tags: ["owner", "25.5", "F-1"],
     setup: (w) => void w.alert(PHONES.owner, BIZ.harbour), steps: [
       { from: PHONES.owner, text: "Yes", forwarded: true, expect: "forwarded_yes" },
@@ -227,7 +227,7 @@ const CASES: Case[] = [
   { name: "owner: no", tags: ["owner"], steps: [{ from: PHONES.owner, text: "no", expect: "no" }] },
   { name: "owner: exact reply is shown back for a Yes, nothing goes to Google before it", tags: ["owner", "9.3", "25.5"],
     setup: (w) => (w.conversation(PHONES.owner).last_task = { type: "review", review_id: "r-harbour-1", location_id: BIZ.harbour }),
-    steps: [{ from: PHONES.owner, text: "reply: Thank you so much for coming in, see you soon.", expect: "shown_for_yes", reply: /Harbour Lane Coffee: Kabsi will post this reply on Google after your yes/, buttons: ["Approve", "Edit on kabsi.co"] }],
+    steps: [{ from: PHONES.owner, text: "reply: Thank you so much for coming in, see you soon.", expect: "shown_for_yes", reply: /^\*⭐ Your reply for Google\* · Harbour Lane Coffee\n\n> Thank you so much for coming in, see you soon\.\n\nKabsi posts it on Google after your yes\.$/, buttons: ["Approve", "Edit on kabsi.co"] }],
     check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("approve")).length, 0) },
   { name: "owner: exact reply with no recent review asks which", tags: ["owner"], steps: [{ from: PHONES.owner, text: "reply: Thanks a lot", expect: "no_review" }] },
   { name: "owner: an exact reply to a high-risk review is approved only in the app", tags: ["owner", "9.3"],
@@ -235,9 +235,9 @@ const CASES: Case[] = [
     steps: [{ from: PHONES.owner, text: "reply: We are sorry to hear this.", expect: "show_refused:high_risk", reply: /approved only in Kabsi/ }] },
   { name: "owner: make it shorter goes to the intent router, then the new draft for a Yes", tags: ["owner", "9.3"],
     setup: (w) => { w.conversation(PHONES.owner).last_task = { type: "review", review_id: "r-harbour-1", location_id: BIZ.harbour }; w.aiMap["make it shorter"] = tool("edit_draft", { instruction: "make it shorter" }); },
-    steps: [{ from: PHONES.owner, text: "make it shorter", expect: "shown_for_yes", reply: /here is the new draft/, ai: 1 }],
+    steps: [{ from: PHONES.owner, text: "make it shorter", expect: "shown_for_yes", reply: /^\*⭐ New draft\* · Harbour Lane Coffee\n\n> .+\n\nPost this reply on Google\?$/, ai: 1 }],
     check: (w) => assert.ok(w.calls.includes("edit:r-harbour-1:make it shorter")) },
-  { name: "owner: a photo sent as an image is prepared, then asked Yes, Edit or Skip", tags: ["owner", "18.3", "V3"], steps: [{ from: PHONES.owner, media: img("m1"), expect: "photo", reply: /getting your photo ready/ }],
+  { name: "owner: a photo sent as an image is prepared, then asked Yes, Edit or Skip", tags: ["owner", "18.3", "V3"], steps: [{ from: PHONES.owner, media: img("m1"), expect: "photo", reply: /^\*🖼️ Photo received\*\n\nKabsi is getting it ready and will ask you here in a minute: Yes, Edit or Skip\./ }],
     check: (w) => assert.equal(w.photos.length, 1) },
   { name: "owner: a HEIC photo sent as a document", tags: ["owner", "18.3"], setup: (w) => w.mediaBytes.set("m-heic", ftyp("heic")),
     steps: [{ from: PHONES.owner, media: doc("m-heic", "image/heic", "IMG_0001.HEIC"), expect: "photo" }] },
@@ -246,9 +246,9 @@ const CASES: Case[] = [
   { name: "owner: a WebP sent as a document", tags: ["owner", "18.3"], setup: (w) => w.mediaBytes.set("m-webp", new TextEncoder().encode("RIFF\0\0\0\0WEBPVP8 ")),
     steps: [{ from: PHONES.owner, media: doc("m-webp", "image/webp", "dish.webp"), expect: "photo" }] },
   { name: "owner: an unreadable file is answered with Please send it as a photo", tags: ["owner", "18.3"], setup: (w) => w.mediaBytes.set("m-pdf", new TextEncoder().encode("%PDF-1.7 ...")),
-    steps: [{ from: PHONES.owner, media: doc("m-pdf", "image/jpeg", "photo.jpg"), expect: "photo_unreadable", reply: /^Harbour Lane Coffee \(owner\)\n\nPlease send it as a photo\.$/ }] },
+    steps: [{ from: PHONES.owner, media: doc("m-pdf", "image/jpeg", "photo.jpg"), expect: "photo_unreadable", reply: /^\*🖼️ Send it as a photo\*\n\nPlease send it as a photo\.$/ }] },
   { name: "owner: a PDF document is refused", tags: ["owner", "18.3"], steps: [{ from: PHONES.owner, media: doc("m-pdf2", "application/pdf", "menu.pdf"), expect: "file_refused", reply: /Please send it as a photo/ }] },
-  { name: "owner on Essentials: photos from WhatsApp work on both plans", tags: ["owner", "V3"], steps: [{ from: PHONES.plain, media: img("m2"), expect: "photo", reply: /getting your photo ready/ }],
+  { name: "owner on Essentials: photos from WhatsApp work on both plans", tags: ["owner", "V3"], steps: [{ from: PHONES.plain, media: img("m2"), expect: "photo", reply: /^\*🖼️ Photo received\*\n\nKabsi is getting it ready and will ask you here in a minute: Yes, Edit or Skip\./ }],
     check: (w) => assert.equal(w.photos.length, 1) },
   { name: "owner: a voice note says voice notes are off while no provider key is set, and keeps nothing", tags: ["owner", "28.3"], setup: (w) => w.mediaBytes.set("v1", ogg(30)),
     steps: [{ from: PHONES.owner, media: voice("v1"), expect: "voice_not_configured", reply: /Voice notes are not switched on yet/ }], check: (w) => assert.equal(w.transcribed.length, 1) },
@@ -278,22 +278,22 @@ const CASES: Case[] = [
   { name: "owner: ask a customer with no review link yet says where to make one", tags: ["owner", "V3"], steps: [{ from: PHONES.plain, text: "ask a customer", expect: "ask_no_link", reply: /no review link yet/ }] },
   { name: "staff: ask a customer is open to staff, the same message", tags: ["staff", "V3"], steps: [{ from: PHONES.staff, text: "ask a customer", expect: "ask_customer", head: /\(staff\)/ }] },
   { name: "owner: stats show link opens apart from reviews", tags: ["owner", "V3"], steps: [{ from: PHONES.owner, text: "stats", expect: "stats", reply: /8 times\. An open is not a review\./ }] },
-  { name: "owner: upgrade is the billing stub", tags: ["owner", "billing"], steps: [{ from: PHONES.owner, text: "upgrade", expect: "billing_stub", reply: /Billing is coming soon, reply 'talk to a person' for help/ }] },
+  { name: "owner: upgrade is the billing stub", tags: ["owner", "billing"], steps: [{ from: PHONES.owner, text: "upgrade", expect: "billing_stub", reply: /^\*❓ Billing is coming soon\*\n\nReply "talk to a person" for help\.$/ }] },
   { name: "owner: cancel is a billing question, not STOP", tags: ["owner", "billing"], steps: [{ from: PHONES.owner, text: "cancel", expect: "billing_stub" }],
     check: (w) => assert.equal(w.conversation(PHONES.owner).stopped_at, null) },
   { name: "owner: talk to a person, then free text waits for the person, a button still works", tags: ["owner", "9.9"], setup: (w) => void w.alert(PHONES.owner, BIZ.harbour),
     steps: [
-      { from: PHONES.owner, text: "talk to a person", expect: "handoff", head: /^Harbour Lane Coffee/, reply: /within 4 working hours/ },
+      { from: PHONES.owner, text: "talk to a person", expect: "handoff", head: /^\*✅ A person will answer you\*\n\n/, reply: /within 4 working hours/ },
       { from: PHONES.owner, text: "are you there", expect: "handoff_quiet", none: true },
       { from: PHONES.owner, button: "a:tok00000000000000000001", expect: "approved" }] },
   // 13b part 2 (30.10 point 7): hours and typed posts are drafted, shown back exactly and approved with a Yes.
   { name: "owner: hours alone gets one question with examples", tags: ["owner", "9.3", "hours"], steps: [{ from: PHONES.owner, text: "hours", expect: "hours_no_day", reply: /closed tomorrow/ }] },
   { name: "owner: closed tomorrow is shown back, then approved through the pipeline with Undo", tags: ["owner", "9.3", "hours", "30.10"], steps: [
-    { from: PHONES.owner, text: "closed tomorrow", expect: "hours_shown", head: /^Harbour Lane Coffee \(owner\)/, reply: /after your yes\.\n\nTuesday 27 October: closed all day\./, buttons: ["Approve", "Edit on kabsi.co"] },
+    { from: PHONES.owner, text: "closed tomorrow", expect: "hours_shown", head: /^\*🕒 New hours for Google\* · Harbour Lane Coffee\n\n/, reply: /\n\nTuesday 27 October: closed all day\.\n\nKabsi sets them on Google after your yes\.$/, buttons: ["Approve", "Edit on kabsi.co"] },
     { from: PHONES.owner, text: "yes", expect: "approved", reply: /goes to Google in 10 seconds/ }],
     check: (w) => { assert.deepEqual(w.calls.filter((c) => c.startsWith("hours:")), [`hours:${BIZ.harbour}:2026-10-27:2026-10-27:closed`]); assert.equal(w.calls.filter((c) => c.startsWith("approve")).length, 1); } },
   { name: "owner: close at 3 today asks for the opening time, then drafts both", tags: ["owner", "9.3", "hours"], setup: (w) => (w.aiMap["close at 3 today"] = tool("hours", { text: "close at 3 today" })), steps: [
-    { from: PHONES.owner, text: "close at 3 today", expect: "hours_no_times", reply: /What time do you open and close/, ai: 1 },
+    { from: PHONES.owner, text: "close at 3 today", expect: "hours_no_times", reply: /^\*🕒 What are the times\?\*\n\nFor example: "open 9am to 5pm"\.\n\nWhen do you open and close that day\?$/, ai: 1 },
     { from: PHONES.owner, text: "open 9 to 3", expect: "hours_shown", reply: /Monday 26 October: open 9am to 3pm\./ }],
     check: (w) => assert.deepEqual(w.calls.filter((c) => c.startsWith("hours:")), [`hours:${BIZ.harbour}:2026-10-26:2026-10-26:09:00-15:00`]) },
   { name: "owner: impossible times are caught", tags: ["owner", "9.3", "hours"], steps: [{ from: PHONES.owner, text: "closing 5pm to 1 tomorrow", expect: "hours_bad_time", reply: /closing time must come after/ }] },
@@ -301,21 +301,21 @@ const CASES: Case[] = [
   { name: "owner: date ranges in the business's own days", tags: ["owner", "9.3", "hours"], steps: [{ from: PHONES.owner, text: "closed 24 to 26 December", expect: "hours_shown", reply: /24 December to 26 December: closed all day/ }] },
   { name: "staff: hours are not theirs", tags: ["staff", "hours", "roles"], steps: [{ from: PHONES.staff, text: "closed tomorrow", expect: "not_for_staff" }], check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("hours:")).length, 0) },
   { name: "owner: a typed post is shown back exactly and approved", tags: ["owner", "9.3", "post", "30.10"], steps: [
-    { from: PHONES.owner, text: "post: Pumpkin spice lattes are back from Monday", expect: "post_shown", reply: /after your yes\.\n\n"Pumpkin spice lattes are back from Monday"/, buttons: ["Approve", "Edit on kabsi.co"] },
+    { from: PHONES.owner, text: "post: Pumpkin spice lattes are back from Monday", expect: "post_shown", reply: /^\*🖼️ Post for your Google profile\* · Harbour Lane Coffee\n\n> Pumpkin spice lattes are back from Monday\n\nKabsi posts it after your yes\.$/, buttons: ["Approve", "Edit on kabsi.co"] },
     { from: PHONES.owner, text: "yes", expect: "approved" }],
     check: (w) => assert.deepEqual(w.calls.filter((c) => c.startsWith("post:")), [`post:${BIZ.harbour}:Pumpkin spice lattes are back from Monday`]) },
   { name: "owner: a typed post with a phone number is refused with the reason", tags: ["owner", "post"], steps: [
-    { from: PHONES.owner, text: "post: Call us on 212 555 0177 for the lunch special today", expect: "post_problem", reply: /cannot post that as it is/ }],
+    { from: PHONES.owner, text: "post: Call us on 212 555 0177 for the lunch special today", expect: "post_problem", reply: /^\*🖼️ Kabsi cannot post that\*\n\nIt contains a phone number.*\n\nPlease send it again without that\.$/ }],
     check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("post:")).length, 0) },
   { name: "owner: two drafts waiting, a typed yes asks which one", tags: ["owner", "25.5", "post", "hours"], steps: [
     { from: PHONES.owner, text: "closed tomorrow", expect: "hours_shown" },
     { from: PHONES.owner, text: "post: Pumpkin spice lattes are back from Monday", expect: "post_shown" },
     { from: PHONES.owner, text: "yes", expect: "which_one", buttons: ["Hours: Harbour Lane", "Post: Harbour Lane C"] }] },
   // RB-F3 (R-148 item 5): nothing Kabsi does fits, so one fixed line about what Kabsi does and "help", never a question a model wrote.
-  { name: "owner: an unclear message gets the fixed line about what Kabsi does", tags: ["owner"], steps: [{ from: PHONES.owner, text: "the thing from before", expect: "off_topic", reply: /^\*❓ Kabsi cannot help with that\*\nKabsi looks after your business on Google: review replies, your listing, photos and posts\. Send "help"/, ai: 1 }] },
+  { name: "owner: an unclear message gets the fixed line about what Kabsi does", tags: ["owner"], steps: [{ from: PHONES.owner, text: "the thing from before", expect: "off_topic", reply: /^\*❓ Kabsi cannot help with that\*\n\nKabsi looks after your business on Google: review replies, your listing, photos and posts\.\n\nSend "help"/, ai: 1 }] },
   { name: "owner: a slow answer sends On it first", tags: ["owner", "speed"], setup: (w) => { w.aiSlow = true; w.onItFast = true; w.aiMap["can you put up the lunch special"] = tool("post", { text: "lunch special" }); },
     steps: [{ from: PHONES.owner, text: "can you put up the lunch special", expect: "post_ask", ai: 1 }],
-    check: (w) => { const r = w.repliesTo(PHONES.owner).map((s) => s.body); assert.match(r[0], /On it\.$/); assert.match(r[1], /starting with "post:"/); } },
+    check: (w) => { const r = w.repliesTo(PHONES.owner).map((s) => s.body); assert.match(r[0], /On it\.$/); assert.match(r[1], /^\*🖼️ Your photo or post\*\n\nSend the words of the post\.\nStart with "post:"/); } },
   { name: "owner: a quick answer sends no On it", tags: ["owner", "speed"], setup: (w) => (w.aiMap["can you put up the lunch special"] = tool("post", { text: "x" })),
     steps: [{ from: PHONES.owner, text: "can you put up the lunch special", expect: "post_ask", ai: 1 }],
     check: (w) => assert.equal(w.repliesTo(PHONES.owner).length, 1) },
@@ -372,40 +372,40 @@ const CASES: Case[] = [
         check: (w) => assert.deepEqual(w.calls.filter((c) => c.startsWith("portal")), [`portal:${BIZ.harbour}`, `portal:${BIZ.harbour}`]) },
       { name: "owner billing: cancel asks first, then cancels at the period end and offers Keep my plan", tags: ["owner", "billing"], setup: paid(),
         steps: [
-          { from: PHONES.owner, text: "cancel my plan", expect: "billing_cancel_ask", reply: /ends on 26 November 2026, and everything keeps working/, buttons: ["Confirm"] },
+          { from: PHONES.owner, text: "cancel my plan", expect: "billing_cancel_ask", reply: /^\*❓ Cancel your plan\?\*\n\nIt ends on 26 November 2026\.\nEverything keeps working until then\.$/, buttons: ["Confirm"] },
           { from: PHONES.owner, button: "k:cancel", expect: "billing_cancelled", reply: /Your plan ends on 26 November 2026/, buttons: ["Keep my plan"] },
           { from: PHONES.owner, button: "k:keep", expect: "billing_kept", reply: /carries on/ },
         ],
         check: (w) => assert.deepEqual(w.calls.filter((c) => /^(cancel|keep):/.test(c)), [`cancel:${BIZ.harbour}`, `keep:${BIZ.harbour}`]) },
       { name: "owner billing: upgrade shows the price and charges only after Confirm", tags: ["owner", "billing"], setup: paid(),
         steps: [
-          { from: PHONES.owner, text: "upgrade", expect: "billing_upgrade_ask", reply: /Switch to Pro for \$39 a month\?/, buttons: ["Confirm"] },
+          { from: PHONES.owner, text: "upgrade", expect: "billing_upgrade_ask", reply: /^\*❓ Switch to Pro\?\*\n\nPrice: \$39 a month\n/, buttons: ["Confirm"] },
           { from: PHONES.owner, button: "k:upgrade", expect: "billing_upgraded" },
           { from: PHONES.owner, text: "upgrade", expect: "billing_same_plan" },
         ],
         check: (w) => assert.deepEqual(w.calls.filter((c) => c.startsWith("change")), [`change:${BIZ.harbour}:pro`]) },
       { name: "owner billing: downgrade takes effect at renewal", tags: ["owner", "billing"], setup: paid("pro"),
         steps: [
-          { from: PHONES.owner, text: "downgrade", expect: "billing_downgrade_ask", reply: /\$19 a month from your next renewal, 26 November 2026/ },
+          { from: PHONES.owner, text: "downgrade", expect: "billing_downgrade_ask", reply: /^\*❓ Switch to Essentials\?\*\n\nPrice: \$19 a month\nFrom your next renewal, 26 November 2026\n/ },
           { from: PHONES.owner, button: "k:downgrade", expect: "billing_downgraded", reply: /Essentials starts on 26 November 2026/ },
         ] },
       // Price 1: a business on the list price is priced and changed at the list price; extra locations cost the same.
       { name: "owner billing: on the list price, upgrade shows 59 and downgrade 29", tags: ["owner", "billing", "price1"], setup: paid("essentials", "list"),
         steps: [
-          { from: PHONES.owner, text: "upgrade", expect: "billing_upgrade_ask", reply: /Switch to Pro for \$59 a month\?/, buttons: ["Confirm"] },
-          { from: PHONES.owner, text: "add a location", expect: "billing_add_ask", reply: /\$15 a month\?/ },
-          { from: PHONES.owner, text: "plan", expect: "billing_status", reply: /Kabsi Essentials, monthly\. It renews/ },
+          { from: PHONES.owner, text: "upgrade", expect: "billing_upgrade_ask", reply: /^\*❓ Switch to Pro\?\*\n\nPrice: \$59 a month\n/, buttons: ["Confirm"] },
+          { from: PHONES.owner, text: "add a location", expect: "billing_add_ask", reply: /^\*❓ Add a location\?\*\n\nPrice: \$15 a month\n/ },
+          { from: PHONES.owner, text: "plan", expect: "billing_status", reply: /^\*📋 Kabsi Essentials, monthly\*\n\nRenews on / },
         ] },
       { name: "owner billing: on the list price, Pro downgrades to Essentials at 29", tags: ["owner", "billing", "price1"], setup: paid("pro", "list"),
-        steps: [{ from: PHONES.owner, text: "downgrade", expect: "billing_downgrade_ask", reply: /\$29 a month from your next renewal/ }] },
+        steps: [{ from: PHONES.owner, text: "downgrade", expect: "billing_downgrade_ask", reply: /^\*❓ Switch to Essentials\?\*\n\nPrice: \$29 a month\nFrom your next renewal/ }] },
       { name: "owner billing: add a location shows the price, then the Creem payment link", tags: ["owner", "billing"], setup: paid(),
         steps: [
-          { from: PHONES.owner, text: "add a location", expect: "billing_add_ask", reply: /\$15 a month\? You pay for it on Creem's page/, buttons: ["Confirm"] },
-          { from: PHONES.owner, button: "k:add_location", expect: "billing_location_link", reply: /https:\/\/creem\.io\/test\/checkout\/prod_xm\/ch_extra\nKabsi adds it to your plan when the payment goes through\./ },
+          { from: PHONES.owner, text: "add a location", expect: "billing_add_ask", reply: /^\*❓ Add a location\?\*\n\nPrice: \$15 a month\nYou pay for it on Creem's page/, buttons: ["Confirm"] },
+          { from: PHONES.owner, button: "k:add_location", expect: "billing_location_link", reply: /^\*✅ Pay for the location\*\n\nhttps:\/\/creem\.io\/test\/checkout\/prod_xm\/ch_extra\n\nKabsi adds it to your plan when the payment goes through\.$/ },
         ],
         check: (w) => assert.deepEqual(w.calls.filter((c) => c.startsWith("add_location")), [`add_location:${BIZ.harbour}`]) },
       { name: "owner billing: plan shows the plan and the renewal", tags: ["owner", "billing"], setup: paid(),
-        steps: [{ from: PHONES.owner, text: "plan", expect: "billing_status", reply: /Kabsi Essentials, monthly\. It renews on 26 November 2026/ }] },
+        steps: [{ from: PHONES.owner, text: "plan", expect: "billing_status", reply: /^\*📋 Kabsi Essentials, monthly\*\n\nRenews on 26 November 2026\n\n/ }] },
       { name: "manager billing: a Confirm button from a manager's phone changes nothing", tags: ["manager", "billing"], setup: paid(),
         steps: [{ from: PHONES.manager, button: "k:cancel", expect: "billing_owner_only", reply: /Only the owner/ }],
         check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("cancel")).length, 0) },
@@ -418,7 +418,7 @@ const CASES: Case[] = [
     steps: [{ from: PHONES.manager, button: "a:tok00000000000000000001", expect: "not_yours" }], check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("approve")).length, 0) },
   { name: "manager removed: the phone sees no business data at once", tags: ["manager", "privacy"], setup: (w) => delete w.biz[0].members["00000000-0000-4000-8000-000000000102"],
     steps: [{ from: PHONES.manager, text: "stats", expect: "needs_account" }] },
-  { name: "staff: a photo is sent for the owner to approve", tags: ["staff", "18.3"], steps: [{ from: PHONES.staff, media: img("m3"), expect: "photo", head: /\(staff\)/, reply: /the owner is asked to approve it/ }] },
+  { name: "staff: a photo is sent for the owner to approve", tags: ["staff", "18.3"], steps: [{ from: PHONES.staff, media: img("m3"), expect: "photo", head: /^\*🖼️ Photo received\*\n\n/, reply: /the owner is asked to approve it/ }] },
   { name: "staff: stats are not for staff", tags: ["staff"], steps: [{ from: PHONES.staff, text: "stats", expect: "not_for_staff", reply: /photos and news/ }] },
   { name: "staff: help", tags: ["staff"], steps: [{ from: PHONES.staff, text: "help", expect: "help", reply: /photos here for the owner/ }] },
   { name: "staff: the owner's button is not theirs", tags: ["staff", "privacy"], steps: [{ from: PHONES.staff, button: (w) => `a:${w.alert(PHONES.owner, BIZ.harbour)}`, expect: "not_yours" }] },
@@ -443,7 +443,7 @@ const CASES: Case[] = [
 
   // ─── Two roles on one phone (29.7).
   { name: "two roles: help asks business or partner tools; the tap answers", tags: ["two_roles", "29.7"], steps: [
-    { from: PHONES.both, text: "help", expect: "which_role", reply: /Your business or your partner tools\?/, buttons: ["My business", "Partner tools"] },
+    { from: PHONES.both, text: "help", expect: "which_role", reply: /^\*❓ Business or partner tools\?\*$/, buttons: ["My business", "Partner tools"] },
     { from: PHONES.both, button: "r:partner", expect: "help", head: /^\*📋 Your partner tools\*\n/ }] },
   { name: "two roles: switch asks again", tags: ["two_roles"], setup: (w) => (w.conversation(PHONES.both).active_role = "partner"), steps: [{ from: PHONES.both, text: "switch", expect: "which_role" }] },
   { name: "two roles: a business tool needs no question and is headed", tags: ["two_roles"], steps: [{ from: PHONES.both, text: "stats", expect: "stats", head: /^Al Noor Salon \(owner\)/ }] },
@@ -454,7 +454,7 @@ const CASES: Case[] = [
   { name: "two roles: my link means the partner link when partner tools are chosen", tags: ["two_roles"], setup: (w) => (w.conversation(PHONES.both).active_role = "partner"),
     steps: [{ from: PHONES.both, text: "my link", expect: "partner_stub" }] },
   { name: "staff_admin and owner: status is staff, headed Kabsi staff", tags: ["staff_admin", "29.7"], steps: [{ from: PHONES.rashid, text: "status", expect: "staff_status", head: /^Kabsi staff/, reply: /Number quality/ }] },
-  { name: "staff_admin and owner: help asks business or staff tools", tags: ["staff_admin", "two_roles"], steps: [{ from: PHONES.rashid, text: "help", expect: "which_role", reply: /Kabsi staff tools/ }] },
+  { name: "staff_admin and owner: help asks business or staff tools", tags: ["staff_admin", "two_roles"], steps: [{ from: PHONES.rashid, text: "help", expect: "which_role", reply: /^\*❓ Business or staff tools\?\*$/ }] },
   { name: "staff_admin and owner: stats are the business's", tags: ["staff_admin"], steps: [{ from: PHONES.rashid, text: "stats", expect: "stats", head: /^Yawmiyati \(owner\)/ }] },
   { name: "staff_admin: waiting and today", tags: ["staff_admin", "9.9"], steps: [
     { from: PHONES.rashid, text: "waiting", expect: "staff_waiting", reply: /Hand-offs/ }, { from: PHONES.rashid, text: "today", expect: "staff_today", reply: /Last 24 hours: 2 new businesses.*Places today: 4 of 20\. DataForSEO: \$0\.90 of \$10 this month/s }] },

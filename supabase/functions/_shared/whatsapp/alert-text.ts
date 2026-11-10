@@ -3,6 +3,8 @@
 // environment access, and no Deno API: the `whatsapp` Edge Function sends it, and the public website draws the same message
 // in its "Example" mockups (src/components/marketing/mockups.tsx).
 
+import { MARK, quote, render } from "./look.ts";
+
 export const REVIEW_EXCERPT_MAX = 300;
 
 export type ReviewAlert = { business: string; stars: number; reviewer: string | null; text: string | null; draft: string | null };
@@ -19,19 +21,21 @@ export function excerpt(text: string | null, max = REVIEW_EXCERPT_MAX): string |
   return t.length <= max ? t : `${t.slice(0, max - 3).trimEnd()}...`;
 }
 
-/** The body of a review alert: business, stars, first name, up to 300 characters of the review, and the draft. */
-export function reviewAlertBody(a: ReviewAlert): string {
+/**
+ * The body of a review alert in look 2 (30.50 item 2): a star and "New 5-star review" with the business, then who wrote
+ * it, the review and Kabsi's draft as WhatsApp quote lines, then one question or status. `end` is that last line: the
+ * sender's question when the owner can approve here, or where to open it.
+ */
+export function reviewAlertBody(a: ReviewAlert, end?: string | null): string {
   const who = firstName(a.reviewer);
-  const lines = [`${a.business}: new ${a.stars}-star review${who ? ` from ${who}` : ""}.`];
-  const ex = excerpt(a.text);
-  if (ex) lines.push(`"${ex}"`);
-  if (a.draft) lines.push(`Kabsi's reply: ${a.draft}`);
-  else lines.push("This review needs a careful look. Open Kabsi to reply.");
-  return lines.join("\n\n").slice(0, 1024);
+  const facts = [...(who ? [`From ${who}`] : []), ...quote(excerpt(a.text)),
+    ...(a.draft ? ["Kabsi's reply:", ...quote(a.draft)] : ["This review needs a careful look. Open Kabsi to reply."])];
+  return render({ mark: MARK.review, title: `New ${a.stars}-star review`, business: a.business, facts, end: end ?? null }).slice(0, 1024);
 }
 
-export function postAlertBody(business: string, summary: string): string {
-  return `${business}: a post is ready for Google.\n\n${summary}`.slice(0, 1024);
+/** A prepared post in look 2: a picture, "Post ready for Google" with the business, the post as a quote, then `end`. */
+export function postAlertBody(business: string, summary: string, end?: string | null): string {
+  return render({ mark: MARK.picture, title: "Post ready for Google", business, facts: quote(summary), end: end ?? null }).slice(0, 1024);
 }
 
 export type Button = { id: string; title: string };
