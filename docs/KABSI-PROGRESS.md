@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 10 Nov 2026 (Signup 1). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 10 Nov 2026 (Founding 1). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -45,10 +45,10 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - Sentry (30.33 item 4): Settings, Subscription, set a pay-as-you-go budget of 5 US dollars for errors, so errors are not dropped before 30 Nov.
 - Ready 2: main's protection on (`docs/OPS-SETUP.md` step 7, 2 minutes); run `supabase/manual/20261107_ready2_qa_test_data_delete.sql` (expect 0s, demo_kept 2, demo_viewer_kept 1); did the staff phone get the alerts of 09:50 and 09:51 UTC?
 - App 5: may qa-staff@test.local be staff, for live staff runs? (LATER row)
-- Launch 1: send one Founding 25 application named "QA Launch 1 test" (a session removes the row).
+- Launch 1: Founding 25 is private (Founding 1): open the invite link (staff page, Programs, Founding 25, Show the link) and send one application named "QA Launch 1 test" (a session removes the row).
 - Outbound: before you say start, the placement test of 30.39 item 13 (LATER row).
 - Signup 1 (PR 554, merged and deployed): migration applied 10 Nov (version 20261110125951); turn on the Google provider in Supabase Auth with `https://kabsi.co/**` in the redirect URLs (read 10 Nov: google false); then the 7 step phone check in `2026-11-10-signup1.md`.
-- Close 1: merge PR 499 (reply.v4) with the admin merge; the rule on main refuses it while the Prompt gate is red, by design (R-130); then check the deployed function names reply.v4. After the DataForSEO top-up, one full free check to see why the one of 6 Nov failed (30.42).
+- Close 1: merge PR 499 (reply.v4) with the admin merge (the rule refuses it while the Prompt gate is red, R-130); then check the deployed function names reply.v4. After the DataForSEO top-up, one full free check (30.42).
 
 ## Open After merge checks and findings
 
@@ -58,8 +58,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 10 Nov 2026, Signup 1 (R-150, PR 554 merged, deployed): Continue with WhatsApp ("Kabsi sign in CODE", the device and city in the confirm, Yes it's me, the session minted on the server after the tap), the new sign-in notice with Sign me out everywhere, Google hidden when off and a daily staff alert, the contact email in onboarding. Waits for its migration. `2026-11-10-signup1.md`.
-- 10 Nov 2026, Look 2 (R-150 item 2): one render step (`whatsapp/look.ts`) for WhatsApp replies: three blocks (marker and bold title, facts one per line, one status or question), quote lines for reviews and drafts, standing notes in the footer, request lists as WhatsApp list messages (10 rows, then "and N more"); request book, help, switch, off topic and the Google care replies in the window; no button, route, approval path, template or model call changed. Phone check for Rashid in `2026-11-10-look2.md`.
+- 10 Nov 2026, Signup 1 (R-150, PR 554 merged, deployed): Continue with WhatsApp, the new sign-in notice with Sign me out everywhere, Google hidden when off, the contact email in onboarding. `2026-11-10-signup1.md`.
+- 10 Nov 2026, Founding 1 (R-151, master plan 30.51): Founding 25 is private. It left all 17 public surfaces found (40 inventoried: 17 removed, 13 renamed, 5 kept private, 5 checked); its page is /founding/<slug> only (404 without the secret, noindex, staff read and rotate the slug); the 19 and 39 price is the launch price in public; Nora says there is no public founding offer. Migration 20261110152512 applied. `2026-11-10-founding1.md`.
+- 10 Nov 2026, Look 2 (R-150 item 2): one render step (`whatsapp/look.ts`) gives every WhatsApp reply three blocks, quote lines, footers and list messages; no button, route, approval path, template or model call changed. Phone check in `2026-11-10-look2.md`.
 - Older entries (Plan 1 is in `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
 
 ## How a session updates this page
