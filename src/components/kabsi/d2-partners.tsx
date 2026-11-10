@@ -9,28 +9,15 @@ import {
   QrCode as QrIcon,
   Video,
 } from "lucide-react";
-import { useState, type FormEvent } from "react";
-import { WHATSAPP_ON, whatsappHref } from "@/lib/site";
-import { useLazyTurnstile } from "@/components/turnstile";
-import { ApiError, applyPartner, usePartnerPlaces, type PartnerKind } from "@/lib/public-api";
+import { WHATSAPP_ON } from "@/lib/site";
+import { usePartnerPlaces } from "@/lib/public-api";
 import { cn } from "@/lib/utils";
 import { QrCode } from "./d2-parts";
 import { SiteLink } from "./site-link";
 import { PageHero, popCls, stagger } from "./page-hero";
 import { PARTNERS_HERO } from "./hero-lines";
 import { PARTNER_FAQ } from "./faq-data";
-import {
-  Banner,
-  Button,
-  ButtonLink,
-  Card,
-  ExampleBadge,
-  Faq,
-  Field,
-  SectionHead,
-  WhatsAppGlyph,
-  buttonClass,
-} from "./ui";
+import { ButtonLink, Card, ExampleBadge, Faq, SectionHead } from "./ui";
 import { Marked, YellowLabel } from "@/components/kabsi/highlight";
 import { PHOTOS } from "./photos";
 import { SectionPhoto } from "./section-photo";
@@ -42,8 +29,8 @@ import { SectionPhoto } from "./section-photo";
 
 const STEPS = [
   {
-    title: "Apply now",
-    text: "Fill in the form or send a message. Kabsi replies with the next step.",
+    title: "Join in a few minutes",
+    text: "Sign in and answer five short questions. Your link and QR code are ready at once.",
   },
   {
     title: "Add your link to every card you sell",
@@ -146,8 +133,8 @@ export function PartnersPage() {
           ...PARTNERS_HERO,
           line: `${PARTNERS_HERO.line}${WHATSAPP_ON ? " Everything runs on WhatsApp." : ""}`,
         }}
-        under="You earn 25 percent of every payment, for as long as the business stays. Applications are open now."
-        action={<ApplyButtons />}
+        under="You earn 25 percent of every payment, for as long as the business stays. Join now: your link is ready at once."
+        action={<JoinButton />}
         visual={<ReviewCardVisual />}
       />
 
@@ -166,7 +153,7 @@ export function PartnersPage() {
             ))}
           </ol>
           <p className="mt-8 max-w-[40rem] text-body text-text-2">
-            Partner links switch on when card payments open. The first 20 approved partners are
+            Partner links switch on when card payments open. The first 20 partners Kabsi reviews are
             Founding Partners.
           </p>
           <h3 className="mt-12 text-h3">What partners get</h3>
@@ -247,8 +234,8 @@ export function PartnersPage() {
               The rules
             </h2>
             <p className="mt-4 text-body text-text-2">
-              The first 20 approved partners are Founding Partners: Kabsi Pro free for their own
-              business and a monthly call with Rashid.
+              The first 20 partners Kabsi reviews are Founding Partners: Kabsi Pro free for their
+              own business and a monthly call with Rashid.
               <span data-qa-mask>{places ? ` ${places.founding_left} places left.` : ""}</span>
             </p>
             <p className="mt-4 text-small">
@@ -302,17 +289,6 @@ export function PartnersPage() {
             <p className="mt-4 text-body text-text-2">
               Kabsi Partners opens when card payments open.
             </p>
-            {WHATSAPP_ON && (
-              <a
-                href={whatsappHref("partner")}
-                target="_blank"
-                rel="noreferrer"
-                className={`${buttonClass("secondary")} mt-6`}
-              >
-                <WhatsAppGlyph className="size-5" />
-                Apply on WhatsApp
-              </a>
-            )}
             <SiteLink
               to="/scan"
               className="press mt-4 flex min-h-11 items-center gap-1.5 text-body font-semibold text-text-1 underline decoration-text-3 decoration-1 underline-offset-4 hover:decoration-text-1"
@@ -321,169 +297,33 @@ export function PartnersPage() {
               <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />
             </SiteLink>
           </div>
-          <ApplyForm />
+          <Card>
+            <p className="text-body text-text-1">
+              Sign in, answer five short questions, and your link and QR code are ready at once.
+              Kabsi reviews each partner before their first payout.
+            </p>
+            <JoinButton className="mt-5" />
+            <p className="mt-4 text-small text-text-2">
+              Already a partner?{" "}
+              <SiteLink
+                to="/partner"
+                className="font-bold text-text-1 underline underline-offset-4"
+              >
+                Open your partner home
+              </SiteLink>
+            </p>
+          </Card>
         </div>
       </section>
     </>
   );
 }
 
-/** The two ways in: WhatsApp while Kabsi has a number, and the form at the foot of the page. */
-function ApplyButtons({ className }: { className?: string }) {
+/** Partners 2 (30.50 item 4): one way in, kabsi.co/partners/join. There is no application. */
+function JoinButton({ className }: { className?: string }) {
   return (
     <div className={`flex flex-col gap-3 sm:flex-row ${className ?? ""}`} data-main-cta>
-      {WHATSAPP_ON && (
-        <a
-          href={whatsappHref("partner")}
-          target="_blank"
-          rel="noreferrer"
-          className={buttonClass("primary")}
-        >
-          <WhatsAppGlyph className="size-5" />
-          Apply on WhatsApp
-        </a>
-      )}
-      <a href="#apply" className={buttonClass(WHATSAPP_ON ? "secondary" : "primary")}>
-        Apply by email
-      </a>
+      <ButtonLink to="/partners/join">Join Kabsi Partners</ButtonLink>
     </div>
-  );
-}
-
-const KINDS: [string, PartnerKind][] = [
-  // Partners 1 (R-148): the first segment. Stored as a reseller, so the application function needs no change.
-  ["Seller of NFC or QR review cards", "reseller"],
-  ["Business setup consultant", "agency"],
-  ["Accountant or bookkeeper", "accountant"],
-  ["Web or social media freelancer", "agency"],
-  ["POS or booking reseller", "reseller"],
-  ["Business group or coworking space", "business_group"],
-  ["Creator who speaks to small business owners", "creator"],
-  ["Something else", "other"],
-];
-
-/** "Apply by email": the application goes to POST programs/partners (Partners session); Rashid answers by email. */
-function ApplyForm() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [kind, setKind] = useState("");
-  const [terms, setTerms] = useState(false);
-  const [errors, setErrors] = useState<
-    Partial<Record<"name" | "email" | "kind" | "terms", string>>
-  >({});
-  // The bot check loads on the form's first touch, not at page start (Fix 1); Apply waits for its token.
-  const check = useLazyTurnstile();
-  const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
-  const [failure, setFailure] = useState<string | null>(null);
-  const submit = async (e: FormEvent) => {
-    e.preventDefault();
-    const err: typeof errors = {};
-    if (name.trim().length < 2) err.name = "Please write your name.";
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim()))
-      err.email = "Please write an email address we can reach you at.";
-    if (!kind) err.kind = "Please choose what you do.";
-    if (!terms) err.terms = "Please read and agree to the partner terms.";
-    setErrors(err);
-    setFailure(null);
-    if (Object.keys(err).length) return;
-    setState("sending");
-    const t = await check.take();
-    if (!t) {
-      setState("idle");
-      return;
-    }
-    try {
-      await applyPartner({
-        name: name.trim(),
-        email: email.trim(),
-        kind: KINDS.find(([l]) => l === kind)![1],
-        terms: true,
-        turnstile: t,
-      });
-      setState("sent");
-    } catch (x) {
-      const f = x instanceof ApiError ? x.field : undefined;
-      const message =
-        x instanceof Error ? x.message : "Something went wrong. Please try again in a minute.";
-      if (f === "name" || f === "email" || f === "kind" || f === "terms")
-        setErrors({ [f]: message });
-      else setFailure(message);
-      setState("idle");
-    }
-  };
-  if (state === "sent")
-    return (
-      <Banner tone="ok" title="Application sent.">
-        Kabsi replies with the next step.
-      </Banner>
-    );
-  return (
-    <form ref={check.area} onSubmit={(e) => void submit(e)} noValidate className="space-y-5">
-      <Field
-        label="Your name"
-        autoComplete="name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        error={errors.name ?? null}
-      />
-      <Field
-        label="Email"
-        type="email"
-        inputMode="email"
-        autoComplete="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        error={errors.email ?? null}
-      />
-      <div>
-        <label htmlFor="partner-kind" className="mb-2 block text-small font-bold text-text-1">
-          Who it suits
-        </label>
-        <select
-          id="partner-kind"
-          value={kind}
-          onChange={(e) => setKind(e.target.value)}
-          aria-invalid={errors.kind ? true : undefined}
-          aria-describedby={errors.kind ? "partner-kind-err" : undefined}
-          className={`h-13 w-full rounded-input border bg-surface-2 px-4 text-body text-text-1 ${errors.kind ? "border-bad ring-1 ring-bad" : "border-stroke"}`}
-        >
-          <option value="">Choose one</option>
-          {KINDS.map(([l]) => (
-            <option key={l}>{l}</option>
-          ))}
-        </select>
-        {errors.kind && (
-          <p id="partner-kind-err" className="mt-2 text-small font-semibold text-bad">
-            {errors.kind}
-          </p>
-        )}
-      </div>
-      <div>
-        <label className="flex min-h-11 cursor-pointer items-start gap-3 text-body text-text-1">
-          <input
-            type="checkbox"
-            checked={terms}
-            onChange={(e) => setTerms(e.target.checked)}
-            aria-invalid={errors.terms ? true : undefined}
-            className="mt-1 size-5 shrink-0 accent-kb-green"
-          />
-          <span>
-            I agree to the{" "}
-            <ButtonLink to="/partners/terms" variant="tertiary" className="inline min-h-0 p-0">
-              partner terms
-            </ButtonLink>
-            .
-          </span>
-        </label>
-        {errors.terms && (
-          <p className="mt-1 ms-8 text-small font-semibold text-bad">{errors.terms}</p>
-        )}
-      </div>
-      {check.widget}
-      {failure && <Banner tone="bad" title={failure} />}
-      <Button type="submit" variant="secondary" loading={state === "sending"} full>
-        Apply by email
-      </Button>
-    </form>
   );
 }

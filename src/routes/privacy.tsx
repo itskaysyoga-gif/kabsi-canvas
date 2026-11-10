@@ -182,13 +182,14 @@ function Page() {
           profile.
         </p>
         <p>
-          <b>If you apply to Kabsi Partners:</b> your name and email, country and city, what you do,
-          where you will share Kabsi and roughly how many local owners that reaches, one line on how
-          you will recommend it, your advertiser permit number if you give one, your WhatsApp
-          number, and the time you accepted the partner terms. When you choose how to be paid, your
-          payout details are kept encrypted in our database vault and shown only as the last 4
-          characters. We also keep the visits, scans, trials and payments that came through your
-          partner link or code, so we can pay you correctly.
+          <b>If you join Kabsi Partners:</b> your name and email, your country, what kind of partner
+          you are, how you will share Kabsi, your advertiser permit number if you give one, the
+          WhatsApp number your account confirmed, and the time and version of the partner terms you
+          accepted. A change of payout method is confirmed on that WhatsApp number, or with a code
+          sent to your email. When you choose how to be paid, your payout details are kept encrypted
+          in our database vault and shown only as the last 4 characters. We also keep the visits,
+          scans, trials and payments that came through your partner link or code, so we can pay you
+          correctly.
         </p>
         <p>
           <b>If you ask Nora for a person, or tell us what you need:</b> our team may write a short

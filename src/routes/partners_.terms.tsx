@@ -21,7 +21,8 @@ export const Route = createFileRoute("/partners_/terms")({
   component: Page,
 });
 
-const UPDATED = "10 November 2026";
+// Partners 2 (R-150 item 4): join at once, review at the first payout. Version 2026-11-10.2 (PARTNER_TERMS_VERSION).
+const UPDATED = "10 November 2026 (version 2026-11-10.2)";
 
 function Page() {
   return (
@@ -45,7 +46,7 @@ function Page() {
         <p>
           These terms are the agreement between you and Kabsi, an independent business operated by{" "}
           {OPERATOR_NAME}, for the Kabsi Partners program. They apply from the day you accept them
-          when you apply. Kabsi Partners opens when card payments open; until then nothing here is
+          when you join. Kabsi Partners opens when card payments open; until then nothing here is
           paid. The <Link to="/terms">terms of service</Link> and the{" "}
           <Link to="/privacy">privacy policy</Link> apply to everyone who uses Kabsi, partners
           included.
@@ -61,15 +62,16 @@ function Page() {
             Kabsi, you do not set prices and you do not run a customer's account.
           </li>
           <li>
-            Anyone can apply. Kabsi approves each partner and answers within 2 working days. A
-            decline is kind and says why, and you can apply again after 90 days.
+            Anyone can join at kabsi.co/partners/join. Your partner account, link and QR code start
+            at once. Kabsi reviews each partner before their first payout, and pays only a partner
+            who follows these terms.
           </li>
           <li>
             You are an independent partner, not an employee, agent or representative of Kabsi. You
             cannot sign for Kabsi or promise anything on its behalf.
           </li>
           <li>
-            The first 20 partners Kabsi approves are Founding Partners. They get a badge, Kabsi Pro
+            The first 20 partners Kabsi reviews are Founding Partners. They get a badge, Kabsi Pro
             free for their own business from day one, a monthly 20 minute call with the founder,
             first look at new features and a say in the partner kit. Their commission is the same as
             everyone's.

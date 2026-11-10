@@ -226,7 +226,8 @@ describe("no invented proof or number (plan 2.11, Web 2 item 4)", () => {
     expect(founding).toContain("useFoundingPlaces(slug)");
     expect(founding).toContain("applyFounding(");
     expect(founding).toContain("invite: slug");
-    expect(read("src/components/kabsi/d2-partners.tsx")).toContain("applyPartner(");
+    // Partners 2 (30.50 item 4): no application form; the Founding Partner count still comes from the function.
+    expect(read("src/components/kabsi/d2-partners.tsx")).toContain("usePartnerPlaces()");
   });
   it("labels every example, and the fixtures of the prototype are gone", () => {
     for (const gone of [

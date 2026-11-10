@@ -100,6 +100,7 @@ export function captureTouch(
   if (via && /^[A-Za-z0-9_-]{2,40}$/.test(via)) {
     const secure = window.location.protocol === "https:" ? "; Secure" : "";
     document.cookie = `${VIA_COOKIE}=${encodeURIComponent(via.toUpperCase())}; Max-Age=${VIA_DAYS * 86400}; Path=/; SameSite=Lax${secure}`;
+    countVisitOnce(via.toUpperCase());
   }
 
   if (!watching) {
@@ -110,6 +111,20 @@ export function captureTouch(
       writeStored(s);
     });
   }
+}
+
+// Partners 2 (30.50 item 6): a visit through a partner link is counted once per visit (the partner home shows visits).
+// Only the code goes to Kabsi, never the visitor or the page.
+function countVisitOnce(code: string) {
+  if (!/^P-[A-Z0-9]{3,20}$/.test(code)) return;
+  try {
+    const key = `kabsi_visit_${code}`;
+    if (window.sessionStorage.getItem(key)) return;
+    window.sessionStorage.setItem(key, "1");
+  } catch {
+    return;
+  }
+  void import("@/lib/public-api").then((m) => m.countPartnerVisit(code));
 }
 
 function keepAdIds(s: Stored) {

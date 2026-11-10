@@ -20,6 +20,7 @@ import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManagerStepsRouteImport } from './routes/manager-steps'
 import { Route as NoraPagesDotjsonRouteImport } from './routes/nora-pages[.]json'
+import { Route as PartnerRouteImport } from './routes/partner'
 import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -43,6 +44,7 @@ import { Route as FoundingSlugRouteImport } from './routes/founding.$slug'
 import { Route as GuidesIndexRouteImport } from './routes/guides.index'
 import { Route as GuidesSlugRouteImport } from './routes/guides.$slug'
 import { Route as HTokenRouteImport } from './routes/h.$token'
+import { Route as PartnersJoinRouteImport } from './routes/partners_.join'
 import { Route as PartnersTermsRouteImport } from './routes/partners_.terms'
 import { Route as ReviewCodeRouteImport } from './routes/review.$code'
 import { Route as ScanIndexRouteImport } from './routes/scan.index'
@@ -119,6 +121,11 @@ const ManagerStepsRoute = ManagerStepsRouteImport.update({
 const NoraPagesDotjsonRoute = NoraPagesDotjsonRouteImport.update({
   id: '/nora-pages.json',
   path: '/nora-pages.json',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartnerRoute = PartnerRouteImport.update({
+  id: '/partner',
+  path: '/partner',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PartnersRoute = PartnersRouteImport.update({
@@ -234,6 +241,11 @@ const GuidesSlugRoute = GuidesSlugRouteImport.update({
 const HTokenRoute = HTokenRouteImport.update({
   id: '/h/$token',
   path: '/h/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartnersJoinRoute = PartnersJoinRouteImport.update({
+  id: '/partners_/join',
+  path: '/partners/join',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PartnersTermsRoute = PartnersTermsRouteImport.update({
@@ -367,6 +379,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/manager-steps': typeof ManagerStepsRoute
   '/nora-pages.json': typeof NoraPagesDotjsonRoute
+  '/partner': typeof PartnerRoute
   '/partners': typeof PartnersRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -388,6 +401,7 @@ export interface FileRoutesByFullPath {
   '/founding/$slug': typeof FoundingSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/h/$token': typeof HTokenRoute
+  '/partners/join': typeof PartnersJoinRoute
   '/partners/terms': typeof PartnersTermsRoute
   '/review/$code': typeof ReviewCodeRoute
   '/scan/$code': typeof ScanCodeRoute
@@ -425,6 +439,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/manager-steps': typeof ManagerStepsRoute
   '/nora-pages.json': typeof NoraPagesDotjsonRoute
+  '/partner': typeof PartnerRoute
   '/partners': typeof PartnersRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -444,6 +459,7 @@ export interface FileRoutesByTo {
   '/founding/$slug': typeof FoundingSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/h/$token': typeof HTokenRoute
+  '/partners/join': typeof PartnersJoinRoute
   '/partners/terms': typeof PartnersTermsRoute
   '/review/$code': typeof ReviewCodeRoute
   '/scan/$code': typeof ScanCodeRoute
@@ -483,6 +499,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/manager-steps': typeof ManagerStepsRoute
   '/nora-pages.json': typeof NoraPagesDotjsonRoute
+  '/partner': typeof PartnerRoute
   '/partners': typeof PartnersRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -504,6 +521,7 @@ export interface FileRoutesById {
   '/founding/$slug': typeof FoundingSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/h/$token': typeof HTokenRoute
+  '/partners_/join': typeof PartnersJoinRoute
   '/partners_/terms': typeof PartnersTermsRoute
   '/review/$code': typeof ReviewCodeRoute
   '/scan/$code': typeof ScanCodeRoute
@@ -543,6 +561,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/manager-steps'
     | '/nora-pages.json'
+    | '/partner'
     | '/partners'
     | '/pricing'
     | '/privacy'
@@ -564,6 +583,7 @@ export interface FileRouteTypes {
     | '/founding/$slug'
     | '/guides/$slug'
     | '/h/$token'
+    | '/partners/join'
     | '/partners/terms'
     | '/review/$code'
     | '/scan/$code'
@@ -601,6 +621,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/manager-steps'
     | '/nora-pages.json'
+    | '/partner'
     | '/partners'
     | '/pricing'
     | '/privacy'
@@ -620,6 +641,7 @@ export interface FileRouteTypes {
     | '/founding/$slug'
     | '/guides/$slug'
     | '/h/$token'
+    | '/partners/join'
     | '/partners/terms'
     | '/review/$code'
     | '/scan/$code'
@@ -658,6 +680,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/manager-steps'
     | '/nora-pages.json'
+    | '/partner'
     | '/partners'
     | '/pricing'
     | '/privacy'
@@ -679,6 +702,7 @@ export interface FileRouteTypes {
     | '/founding/$slug'
     | '/guides/$slug'
     | '/h/$token'
+    | '/partners_/join'
     | '/partners_/terms'
     | '/review/$code'
     | '/scan/$code'
@@ -718,6 +742,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ManagerStepsRoute: typeof ManagerStepsRoute
   NoraPagesDotjsonRoute: typeof NoraPagesDotjsonRoute
+  PartnerRoute: typeof PartnerRoute
   PartnersRoute: typeof PartnersRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -736,6 +761,7 @@ export interface RootRouteChildren {
   FoundingSlugRoute: typeof FoundingSlugRoute
   GuidesSlugRoute: typeof GuidesSlugRoute
   HTokenRoute: typeof HTokenRoute
+  PartnersJoinRoute: typeof PartnersJoinRoute
   PartnersTermsRoute: typeof PartnersTermsRoute
   ReviewCodeRoute: typeof ReviewCodeRoute
   ScanCodeRoute: typeof ScanCodeRoute
@@ -822,6 +848,13 @@ declare module '@tanstack/react-router' {
       path: '/nora-pages.json'
       fullPath: '/nora-pages.json'
       preLoaderRoute: typeof NoraPagesDotjsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/partner': {
+      id: '/partner'
+      path: '/partner'
+      fullPath: '/partner'
+      preLoaderRoute: typeof PartnerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/partners': {
@@ -983,6 +1016,13 @@ declare module '@tanstack/react-router' {
       path: '/h/$token'
       fullPath: '/h/$token'
       preLoaderRoute: typeof HTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/partners_/join': {
+      id: '/partners_/join'
+      path: '/partners/join'
+      fullPath: '/partners/join'
+      preLoaderRoute: typeof PartnersJoinRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/partners_/terms': {
@@ -1235,6 +1275,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ManagerStepsRoute: ManagerStepsRoute,
   NoraPagesDotjsonRoute: NoraPagesDotjsonRoute,
+  PartnerRoute: PartnerRoute,
   PartnersRoute: PartnersRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
@@ -1253,6 +1294,7 @@ const rootRouteChildren: RootRouteChildren = {
   FoundingSlugRoute: FoundingSlugRoute,
   GuidesSlugRoute: GuidesSlugRoute,
   HTokenRoute: HTokenRoute,
+  PartnersJoinRoute: PartnersJoinRoute,
   PartnersTermsRoute: PartnersTermsRoute,
   ReviewCodeRoute: ReviewCodeRoute,
   ScanCodeRoute: ScanCodeRoute,

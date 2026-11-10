@@ -134,18 +134,6 @@ export type FoundingApplication = {
 export const applyFounding = (a: FoundingApplication) =>
   call<{ ok: true }>("programs/founding", { method: "POST", body: JSON.stringify(a) });
 
-export type PartnerKind =
-  "creator" | "agency" | "accountant" | "reseller" | "business_group" | "other";
-export type PartnerApplication = {
-  name: string;
-  email: string;
-  kind: PartnerKind;
-  terms: true;
-  turnstile: string;
-};
-export const applyPartner = (a: PartnerApplication) =>
-  call<{ ok: true }>("programs/partners", { method: "POST", body: JSON.stringify(a) });
-
 /* ---------- The free check (V4, POST and GET /visibility/check) ---------- */
 
 export type NearbyCard = {
@@ -288,5 +276,19 @@ export async function loadFoundingPriceLeft(): Promise<number | null> {
     return typeof v.left === "number" ? v.left : null;
   } catch {
     return null;
+  }
+}
+
+/** Partners 2: one visit through a partner link (?via=P-CODE), counted once per visit; the answer is never shown. */
+export async function countPartnerVisit(code: string): Promise<void> {
+  try {
+    await fetch(`${supabaseUrl}/functions/v1/programs/partner/visit`, {
+      method: "POST",
+      headers: { "content-type": "application/json", ...anonHeaders },
+      body: JSON.stringify({ code }),
+      keepalive: true,
+    });
+  } catch {
+    /* a visit that is not counted changes nothing for the visitor */
   }
 }
