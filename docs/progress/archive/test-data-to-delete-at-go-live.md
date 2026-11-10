@@ -14,6 +14,6 @@
 - QA account qa-owner@test.local and "QA Bakery". ("QA Partner", its member, invites and cards are removed earlier by the P0.8-01 removal files 2 and 3.)
 - Yawmiyati's three overlapping pro_6m plans, the pending pro_12m and three payments rows from 25 Sep tests; its test photos.
 - Nora test chats from 27 Sep (visitor ids starting qa-, chats with contact "Kay").
-- "Safa Chicken" (06ee2022-b1bc-40a4-9493-b46e2e055f1c) and the tarikhtube@gmail.com account.
+- "Safa Chicken" (06ee2022-b1bc-40a4-9493-b46e2e055f1c) and its owner's personal account.
 - A gmail.co typo account that never received its code.
 - Keep Yawmiyati (internal test only) and the demo workspace.

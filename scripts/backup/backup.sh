@@ -46,6 +46,28 @@ trap 'rm -rf "$PLAIN"' EXIT
 say() { printf '%s\n' "$*"; }
 have() { [ -n "${!1:-}" ]; }
 
+# Clean 4 (10 Nov 2026): one failed part of a big upload (R2 answered InvalidPart on 10 Nov) must not fail the whole weekly
+# run. An upload of one file is tried up to BACKUP_UPLOAD_TRIES (3) times with BACKUP_UPLOAD_PAUSE (20) seconds between
+# tries; the file is sent again from the start. After the last try the failure stops the run, as before.
+UPLOAD_TRIES="${BACKUP_UPLOAD_TRIES:-3}"
+UPLOAD_PAUSE="${BACKUP_UPLOAD_PAUSE:-20}"
+case "$UPLOAD_TRIES" in '' | *[!0-9]* | 0) UPLOAD_TRIES=3 ;; esac # a bad value must never mean "retry forever"
+with_retry() { # with_retry <what> <command...>
+  local what="$1" n=1
+  shift
+  until "$@"; do
+    if [ "$n" -ge "$UPLOAD_TRIES" ]; then
+      say "::${RETRY_GIVEUP_LEVEL:-error}::$what failed $n times; giving up"
+      return 1
+    fi
+    say "::warning::$what failed (try $n of $UPLOAD_TRIES); pausing ${UPLOAD_PAUSE}s, then sending it again"
+    sleep "$UPLOAD_PAUSE"
+    n=$((n + 1))
+  done
+  if [ "$n" -gt 1 ]; then say "$what went through on try $n"; fi
+  return 0
+}
+
 # The five secrets this workflow adds (SUPABASE_ACCESS_TOKEN is the sixth and already exists).
 MISSING=()
 for n in SUPABASE_DB_URL BACKUP_PASSPHRASE R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY; do
@@ -296,6 +318,21 @@ for f in "${FILES[@]}" manifest.json; do printf '  %-32s %10s bytes\n' "$f" "$(s
 for f in "${RELEASE_FILES[@]}"; do printf '  %-32s %10s bytes (already encrypted by Harvey)\n' "harvey-release/$f" "$(size "$RELEASE_DIR/$f")"; done
 
 if [ "$DRY_RUN" -eq 1 ]; then
+  # Proof of the upload retry (Clean 4): the same helper the upload uses, with two stand-in commands and no pause. One
+  # fails twice then works (the 10 Nov InvalidPart case: the run goes on), one never works (the run stops after the last try).
+  RETRY_COUNT="$W/retry-count"
+  : > "$RETRY_COUNT"
+  flaky() { echo x >> "$RETRY_COUNT"; [ "$(wc -l < "$RETRY_COUNT")" -ge 3 ]; }
+  never() { return 1; }
+  if ! (UPLOAD_TRIES=3 UPLOAD_PAUSE=0 with_retry "retry check, fails twice" flaky); then
+    say "::error::Dry run: the upload retry did not recover from two failed tries"
+    exit 1
+  fi
+  if (UPLOAD_TRIES=3 UPLOAD_PAUSE=0 RETRY_GIVEUP_LEVEL=notice with_retry "retry check, always fails" never); then
+    say "::error::Dry run: the upload retry did not stop after the last try"
+    exit 1
+  fi
+  say "Upload retry proved: a part that failed twice went through on the third try, and a part that never works stops the run after 3 tries."
   say "Dry run: nothing was uploaded. Would upload weekly/$STAMP/ to the bucket $BUCKET and keep the newest $KEEP sets."
   exit 0
 fi
@@ -307,12 +344,12 @@ export AWS_REQUEST_CHECKSUM_CALCULATION=when_required AWS_RESPONSE_CHECKSUM_VALI
 EP="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
 say "Upload"
 for f in "${FILES[@]}"; do
-  "$AWS" s3 cp --only-show-errors --endpoint-url "$EP" "$OUT/$f" "s3://$BUCKET/weekly/$STAMP/$f"
+  with_retry "Upload of $f" "$AWS" s3 cp --only-show-errors --endpoint-url "$EP" "$OUT/$f" "s3://$BUCKET/weekly/$STAMP/$f"
 done
 for f in "${RELEASE_FILES[@]}"; do
-  "$AWS" s3 cp --only-show-errors --endpoint-url "$EP" "$RELEASE_DIR/$f" "s3://$BUCKET/weekly/$STAMP/harvey-release/$f"
+  with_retry "Upload of harvey-release/$f" "$AWS" s3 cp --only-show-errors --endpoint-url "$EP" "$RELEASE_DIR/$f" "s3://$BUCKET/weekly/$STAMP/harvey-release/$f"
 done
-"$AWS" s3 cp --only-show-errors --endpoint-url "$EP" "$OUT/manifest.json" "s3://$BUCKET/weekly/$STAMP/manifest.json"
+with_retry "Upload of manifest.json" "$AWS" s3 cp --only-show-errors --endpoint-url "$EP" "$OUT/manifest.json" "s3://$BUCKET/weekly/$STAMP/manifest.json"
 
 # 5. Keep the newest KEEP sets. A set is a folder under weekly/; names sort by time.
 say "Prune"

@@ -27,6 +27,37 @@ describe("Sec 2: backup and restore", () => {
     expect(read(".github/workflows/backup.yml")).toMatch(/cron: "17 2 \* \* 0"/);
   });
 
+  // Clean 4: one failed part (R2 InvalidPart, 10 Nov) must not fail the whole weekly run.
+  it("sends each file up to 3 times with a pause, and every upload goes through the retry", () => {
+    const sh = read("scripts/backup/backup.sh");
+    expect(sh).toMatch(/UPLOAD_TRIES="\$\{BACKUP_UPLOAD_TRIES:-3\}"/);
+    expect(sh).toMatch(/UPLOAD_PAUSE="\$\{BACKUP_UPLOAD_PAUSE:-20\}"/);
+    const uploads = sh.split("\n").filter((l) => l.includes('"$AWS" s3 cp'));
+    expect(uploads).toHaveLength(3);
+    for (const l of uploads) expect(l.trim().startsWith("with_retry ")).toBe(true);
+    // The helper itself, run on its own: two failures then success; and three failures stop it.
+    const fn = sh.match(/with_retry\(\) \{[\s\S]*?\n\}\n/)?.[0] ?? "";
+    expect(fn).not.toBe("");
+    const run = (failures: number) =>
+      spawnSync(
+        "bash",
+        [
+          "-c",
+          `set -euo pipefail; say() { printf '%s\\n' "$*"; }; UPLOAD_TRIES=3; UPLOAD_PAUSE=0; N=0
+${fn}
+flaky() { N=$((N+1)); [ "$N" -gt ${failures} ]; }
+with_retry "stand-in" flaky; echo "tries=$N"`,
+        ],
+        { encoding: "utf8" },
+      );
+    const ok = run(2);
+    expect(ok.status).toBe(0);
+    expect(ok.stdout).toContain("tries=3");
+    const bad = run(3);
+    expect(bad.status).not.toBe(0);
+    expect(bad.stdout).toContain("failed 3 times; giving up");
+  });
+
   it("a pooler address passes through unchanged; a bad value is named, never printed", () => {
     const pooler =
       "postgresql://postgres.abcdefghijklmnopqrst:pw@aws-0-eu-central-1.pooler.supabase.com:5432/postgres";
