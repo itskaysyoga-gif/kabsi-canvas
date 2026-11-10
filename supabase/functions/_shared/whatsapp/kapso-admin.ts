@@ -7,9 +7,12 @@
 //   - templates: submit the utility templates (templates.ts, v2 names included) that are not there yet, and report each one's status.
 //   - templatestatus: read only. Each template's status and category as Meta has them now; nothing is submitted.
 //   - health: read the number's health and quality rating (hourly, from pg_cron).
+//   - deliveries (Tidy 2): read only. Kapso's log of webhook deliveries (the event, its state, the HTTP answer), as rows without any payload, and the ids
+//     of the webhooks on the number. Counts are made from them in delivery-check.ts.
 //   - automations: confirm no Kapso workflow or Kapso agent answers the number, so only Kabsi's own code replies.
 // Answers carry ids, names and statuses only. The network is a dep, so tests never call Kapso.
 import { allDefs, isReplacement, submission } from "./templates.ts";
+import { normalizeDelivery, type Delivery } from "./delivery-check.ts";
 
 const PLATFORM = "https://api.kapso.ai/platform/v1";
 const META = "https://api.kapso.ai/meta/whatsapp/v24.0";
@@ -18,6 +21,7 @@ export type KapsoEnv = { apiKey: string; phoneNumberId: string; wabaId?: string 
 type Obj = Record<string, unknown>;
 const obj = (v: unknown): Obj => (v && typeof v === "object" && !Array.isArray(v) ? (v as Obj) : {});
 const list = (v: unknown): Obj[] => (Array.isArray(v) ? v.map(obj) : Array.isArray(obj(v).data) ? (obj(v).data as unknown[]).map(obj) : []);
+const text = (v: unknown): string => (typeof v === "string" ? v : "");
 const unwrap = (v: unknown): Obj => (obj(v).data && !Array.isArray(obj(v).data) ? obj(obj(v).data) : obj(v));
 
 export class KapsoError extends Error {
@@ -234,4 +238,32 @@ export async function checkAutomations(env: KapsoEnv) {
   const agentFlags = Object.entries(n).filter(([k, v]) => /agent|auto_?reply|ai_/i.test(k) && v !== null && v !== false && v !== "" && !(Array.isArray(v) && !v.length))
     .map(([k]) => k);
   return { workflows: flows.length, answering_workflows: onNumber, agent_flags: agentFlags, clear: !onNumber.length && !agentFlags.length };
+}
+
+/** The ids of every webhook on the number (Kabsi's function and Kapso's own inbox one), for filtering the delivery log. Ids only. */
+export async function listNumberWebhookIds(env: KapsoEnv): Promise<string[]> {
+  const base = `${PLATFORM}/whatsapp/phone_numbers/${encodeURIComponent(env.phoneNumberId)}/webhooks`;
+  return list(await call(env, base)).map((w) => String(w.id ?? "")).filter(Boolean);
+}
+
+/** Read only (Tidy 2): Kapso's webhook delivery log for the period (`24h`, `7d` or `30d`, as Kapso takes it), newest first, paged by
+ *  cursor (100 a page, at most `maxPages`). Each row is reduced at once to the fields the check reads: nothing of a payload,
+ *  a phone number or a message is kept. `truncated` is true when more pages were left; `keys` are the field names Kapso's rows carry (names, no values). */
+export async function readWebhookDeliveries(env: KapsoEnv, period: "24h" | "7d" | "30d", maxPages = 30): Promise<{ rows: Delivery[]; truncated: boolean; keys: string[] }> {
+  const rows: Delivery[] = [];
+  let keys: string[] = [];
+  let after = "";
+  for (let page = 0; page < maxPages; page++) {
+    const q = new URLSearchParams({ period, limit: "100" });
+    if (after) q.set("after", after);
+    const res = obj(await call(env, `${PLATFORM}/webhook_deliveries?${q}`));
+    const got = list(res);
+    if (!keys.length && got.length) keys = Object.keys(got[0]).sort(); // field NAMES of the first row only, so a name the code does not read shows
+    for (const r of got) rows.push(normalizeDelivery(r));
+    const paging = obj(res.paging);
+    const next = text(obj(paging.cursors).after);
+    if (!paging.next || !next || next === after) return { rows, truncated: false, keys };
+    after = next;
+  }
+  return { rows, truncated: true, keys };
 }

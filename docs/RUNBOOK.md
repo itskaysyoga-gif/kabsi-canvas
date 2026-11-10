@@ -70,6 +70,12 @@ restricted or disconnected, or Kapso credit is under 5 US dollars.
    number check found N items", because a WhatsApp alert cannot arrive when the number is down; a template finding stays on
    WhatsApp only. Do not edit templates in a build session: lane R decides. To run it by
    hand: `select public.call_internal('health', '{"only":"kapso"}'::jsonb);` and read the answer in `net._http_response`.
+   Since Tidy 2 (R-147) the same daily call also reads Kapso's webhook delivery log for the number through Kapso's API with the same secret
+   (read only) and, when any delivery failed in the last 24 hours, raises one more staff alert "WhatsApp check found 1 item: webhook deliveries"
+   and one email to hello@kabsi.co ("Kabsi WhatsApp webhook deliveries failed"), with counts only (no phone number, no message text).
+   A failed delivery means Kapso sent a message or a receipt and Kabsi did not answer it with a 200. To look at an hour by hand, from the SQL editor:
+   `select public.call_internal('health', '{"only":"kapso_deliveries","from":"2026-11-10T04:00:00Z","to":"2026-11-10T05:00:00Z"}'::jsonb)`,
+   then read the answer from `net._http_response` (counts per 5 minutes, no alert is raised).
 
 **Over when:** a test message to and from Rashid's own phone works, and `WHATSAPP_LIVE` is back to `true` if you changed it.
 
