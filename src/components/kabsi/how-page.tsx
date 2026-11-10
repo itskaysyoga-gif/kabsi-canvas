@@ -4,7 +4,6 @@
 // Google, Live on Google or Did not go through, getting started with the real Manager recording (kabsi-canvas's own
 // wording), "You stay in control." and the closing check. Design 8's week timeline and the after-your-yes section are
 // replaced by the demonstration.
-import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { KABSI_GROUP_ID, MAIN_CTA, TRIAL_LINE } from "@/lib/site";
 import { SiteLink } from "./site-link";
@@ -13,14 +12,12 @@ import { VideoPlayer } from "./d5-access";
 import { ADD_KABSI } from "./access-video";
 import { Closing, Control } from "./closing";
 import { HOW_HERO } from "./hero-lines";
-import { YellowNumber } from "./d9-hero";
-import { HandlesGroups } from "./handles";
+import { D9Arrow, YellowNumber, d9LinkCls } from "./d9-hero";
+// Site 3a: the four groups live with Home's sections; How it works has no script budget, Home keeps them lazy.
+import { HandlesGroups } from "./d9-home-lower";
 import { DemoThreeCases, HowVisual } from "./d9-how";
 import { D9_HOW_LINE } from "./d9-data";
 import { Marked } from "@/components/kabsi/highlight";
-
-const linkCls =
-  "press inline-flex min-h-11 items-center gap-1.5 font-semibold text-text-1 underline decoration-text-3 decoration-1 underline-offset-4 hover:decoration-text-1";
 
 export function HowItWorksPage() {
   return (
@@ -49,9 +46,9 @@ export function HowItWorksPage() {
               <div className="md:mt-4">
                 <h3 className="text-title">Run the free check</h3>
                 <p className="mt-1 text-body text-text-2">About 30 seconds, no access needed.</p>
-                <SiteLink to="/scan" className={cn(linkCls, "text-body")}>
+                <SiteLink to="/scan" className={cn(d9LinkCls, "text-body")}>
                   {MAIN_CTA}
-                  <ArrowRight className="size-4" aria-hidden />
+                  <D9Arrow />
                 </SiteLink>
               </div>
             </li>
@@ -62,9 +59,9 @@ export function HowItWorksPage() {
                 <p className="mt-1 text-body text-text-2">
                   A few steps in your Google profile. No password, and you stay the owner.
                 </p>
-                <a href="#manager-h" className={cn(linkCls, "text-body")}>
+                <a href="#manager-h" className={cn(d9LinkCls, "text-body")}>
                   See the steps
-                  <ArrowRight className="size-4" aria-hidden />
+                  <D9Arrow />
                 </a>
               </div>
             </li>
@@ -92,9 +89,9 @@ export function HowItWorksPage() {
               In your Google profile: Business Profile settings, People and access, Add. Paste{" "}
               {KABSI_GROUP_ID}, keep Manager, then Add. No password, and you stay the owner.
             </p>
-            <SiteLink to="/security" className={cn(linkCls, "mt-2 text-body")}>
+            <SiteLink to="/security" className={cn(d9LinkCls, "mt-2 text-body")}>
               What Manager access means
-              <ArrowRight className="size-4" aria-hidden />
+              <D9Arrow />
             </SiteLink>
           </div>
           <div className="lg:pt-4">

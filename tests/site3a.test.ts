@@ -3,7 +3,7 @@
 // plans; words before numbers in the saved result; the offers table; no Founding 25 in DESIGN.md.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { D9_DEMO, D9_HANDLES, D9_THREE_STEPS } from "@/components/kabsi/d9-data";
+import { D9_DEMO, D9_HANDLES, D9_THREE_STEPS } from "@/components/kabsi/site3-data";
 import { nearbyWords, SAVED_NOT_KEPT } from "@/lib/scan-words";
 
 const read = (f: string) => readFileSync(f, "utf8");

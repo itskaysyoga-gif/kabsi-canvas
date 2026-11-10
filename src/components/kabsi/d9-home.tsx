@@ -68,7 +68,10 @@ const HomeLower = memo(function HomeLower() {
       typeof IntersectionObserver === "undefined"
         ? null
         : new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && go());
-    if (ref.current) io?.observe(ref.current);
+    // Site 3a: the hero is short on a phone, so the first lower section is on the first screen; its server HTML shows
+    // as it is, and the code wakes when the demonstration (data-wake) comes into view or the visitor acts (Speed gate).
+    const target = ref.current?.querySelector("[data-wake]") ?? ref.current;
+    if (target) io?.observe(target);
     for (const e of WAKE) window.addEventListener(e, go, { passive: true, once: true });
     function stop() {
       io?.disconnect();

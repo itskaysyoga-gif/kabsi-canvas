@@ -1,10 +1,21 @@
 // Home on Design 9 (Web 5 part B, master plan 30.24), below the first screen (Polish 4 part D: the hero is in
 // d9-home.tsx, which loads this file after the page paints). Site 3a (master plan 30.50 item 10, R-150) put it in this
-// order: one familiar problem (the profile watch), three steps, one WhatsApp demonstration in the Look 2 style, what
+// order: the familiar problem (the profile watch), three steps, one WhatsApp demonstration in the Look 2 style, what
 // Kabsi handles in four groups, you stay in control with a sample weekly report, the plans, four questions and the
 // closing free check. Every business is an Example. CSS only: nothing moves on load. PhotoToPost, NearbyMap and
 // AiAnswer stay here for the industry pages.
-import { Check, CircleCheck, KeyRound, Star, Store, ThumbsUp, type LucideIcon } from "lucide-react";
+import {
+  Check,
+  CircleCheck,
+  Clock,
+  Images,
+  KeyRound,
+  MessageSquareText,
+  Star,
+  Store,
+  ThumbsUp,
+  type LucideIcon,
+} from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { TRIAL_LINE } from "@/lib/site";
@@ -20,24 +31,14 @@ import { BAND_LABEL, type RankBand } from "./map-data";
 import { FAQ, HOME_FAQ } from "./faq-data";
 import { CONTROL_SHORT } from "./d8-data";
 import { D9Arrow, NumberedPoints, PictureButtons, YellowLabel, d9LinkCls } from "./d9-hero";
-import { HandlesGroups } from "./handles";
-import {
-  D9_BUSINESS,
-  D9_DEMO,
-  D9_MAP_POINTS,
-  D9_PHOTO,
-  D9_REPORT,
-  D9_SHOW_UP,
-  D9_THREE_STEPS,
-  D9_WATCH,
-  type Look2Message,
-} from "./d9-data";
+import { D9_DEMO, D9_HANDLES, D9_THREE_STEPS, type Look2Message } from "./site3-data";
+import { D9_BUSINESS, D9_MAP_POINTS, D9_PHOTO, D9_REPORT, D9_SHOW_UP, D9_WATCH } from "./d9-data";
 import { Marked } from "@/components/kabsi/highlight";
 
 /** Design 9's section rhythm on Home: py-10 on phones (keeps Home under 9,200 px at 390), 18 from 640 px, 28 from 1024 px. */
 const sectionY = "py-10 sm:py-18 lg:py-28";
 
-/* ---------- Profile watch ---------- */
+/* ---------- Profile watch: the one familiar problem ---------- */
 
 function ProfileWatch() {
   const w = D9_WATCH;
@@ -410,6 +411,52 @@ function ThreeSteps() {
   );
 }
 
+/* ---------- What Kabsi handles, in four groups (Site 3a; How it works shows it too) ---------- */
+
+const HANDLE_ICONS: Record<(typeof D9_HANDLES)[number]["id"], LucideIcon> = {
+  reviews: MessageSquareText,
+  details: Store,
+  posts: Images,
+  report: Clock,
+};
+
+export function HandlesGroups({
+  id = "handles-h",
+  title = "What Kabsi handles",
+  mark = "handles",
+  className,
+}: {
+  id?: string;
+  title?: string;
+  mark?: string;
+  className?: string;
+}) {
+  return (
+    <section aria-labelledby={id} className={cn("border-t border-line", className)}>
+      <div className="container-kb py-10 sm:py-18 lg:py-24">
+        <h2 id={id} className="text-h2">
+          <Marked text={title} mark={mark} />
+        </h2>
+        <ul className="mt-6 grid gap-x-8 gap-y-6 sm:mt-10 sm:grid-cols-2 lg:grid-cols-4">
+          {D9_HANDLES.map((h) => {
+            const Icon = HANDLE_ICONS[h.id];
+            return (
+              <li key={h.id} className="border-t-2 border-text-1 pt-4">
+                <p className="flex items-center gap-2 text-small font-semibold text-text-2">
+                  <Icon className="size-4 shrink-0 text-text-1" aria-hidden />
+                  {h.group}
+                </p>
+                <h3 className="mt-2 text-title">{h.title}</h3>
+                <p className="mt-1 text-body text-text-2">{h.text}</p>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
 /* ---------- The one WhatsApp demonstration, in the Look 2 style (Site 3a) ---------- */
 
 const MARKERS: Record<Look2Message["marker"], LucideIcon> = { review: Star, done: CircleCheck };
@@ -459,7 +506,7 @@ function Look2Bubble({ m }: { m: Look2Message }) {
 function Look2Demo() {
   const d = D9_DEMO;
   return (
-    <section aria-labelledby="demo-h" className="theme-dark bg-band">
+    <section aria-labelledby="demo-h" data-wake className="theme-dark bg-band">
       <div
         className={cn(
           "container-kb grid gap-8 lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-16",

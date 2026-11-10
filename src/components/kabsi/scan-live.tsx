@@ -9,7 +9,7 @@ import {
   ChevronDown,
   CircleAlert,
   CircleCheck,
-  CircleHelp,
+  CircleSlash,
   LoaderCircle,
   Mail,
   RotateCcw,
@@ -1092,7 +1092,7 @@ export function LiveResult({
                 <ul className="mt-1 divide-y divide-line">
                   {unchecked.map((f) => (
                     <li key={f.fact} className="flex gap-3 py-3">
-                      <CircleHelp className="mt-0.5 size-5 shrink-0 text-text-3" aria-hidden />
+                      <CircleSlash className="mt-0.5 size-5 shrink-0 text-text-3" aria-hidden />
                       <div className="min-w-0 flex-1">
                         <p className="flex flex-wrap items-baseline justify-between gap-x-4 text-body">
                           <span className="min-w-0 font-semibold">{f.fact}</span>
@@ -1514,7 +1514,7 @@ export function SavedFreeCheck({ code }: { code: string }) {
                 )}`}
             </p>
             <p className="mt-4 flex gap-3 rounded-inner bg-surface-2 p-4 text-body">
-              <CircleHelp className="mt-1 size-4 shrink-0" aria-hidden />
+              <CircleSlash className="mt-1 size-4 shrink-0" aria-hidden />
               <span>{SAVED_NOT_KEPT}</span>
             </p>
           </section>
