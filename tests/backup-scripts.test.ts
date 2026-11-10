@@ -134,7 +134,9 @@ describe("Sec 2: backup and restore", () => {
 
   it("a pull request run gets no HARVEY_READ_TOKEN and uses the stand-ins", () => {
     const wf = read(".github/workflows/backup.yml");
-    expect(wf).toMatch(/HARVEY_READ_TOKEN: \$\{\{ github\.event_name != 'pull_request' && secrets\.HARVEY_READ_TOKEN \|\| '' \}\}/);
+    expect(wf).toMatch(
+      /HARVEY_READ_TOKEN: \$\{\{ github\.event_name != 'pull_request' && secrets\.HARVEY_READ_TOKEN \|\| '' \}\}/,
+    );
     expect(wf).toMatch(/harvey-fixtures\.sh/);
     const fx = read("scripts/backup/harvey-fixtures.sh");
     expect(fx).toMatch(/plain-by-mistake\.csv/);
