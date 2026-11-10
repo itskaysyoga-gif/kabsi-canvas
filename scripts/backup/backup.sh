@@ -9,6 +9,10 @@
 #   weekly/<UTC stamp>/photos.tar.gz.age          every file in Supabase Storage
 #   weekly/<UTC stamp>/kabsi-canvas.bundle.age    a git bundle of every branch and tag of the repository
 #   weekly/<UTC stamp>/manifest.json              names, sizes, sha256 of the encrypted files, row counts. No customer data.
+#   weekly/<UTC stamp>/kabsi-harvey-run.bundle.age and kabsi-harvey.bundle.age   git bundles of the two Harvey repositories, all refs (Safe 1, R-151 section C)
+#   weekly/<UTC stamp>/harvey-release/<tag>/<asset>   the release assets of kabsi-harvey-run, copied as they are: Harvey
+#                                                  already encrypted them (AES-256, HARVEY_DB_KEY). Only files that end in .enc and start with
+#                                                  the openssl "Salted__" header are accepted; anything else is skipped and named in a warning
 # The manifest is uploaded last, so a set without one is unfinished and the restore drill ignores it.
 # The newest BACKUP_KEEP (3) sets are kept, 21 days of weekly sets (master plan 30.10 point 1: with the 7 day purge after a
 # business leaves, no copy of its Google data outlives 28 days); older ones are deleted only after the new set is uploaded.
@@ -16,6 +20,8 @@
 # Secrets (GitHub, Settings, Secrets and variables, Actions): SUPABASE_DB_URL, BACKUP_PASSPHRASE, R2_ACCOUNT_ID,
 # R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and SUPABASE_ACCESS_TOKEN (already there for deploy.yml). Values are never
 # printed. Nothing here uses set -x.
+# HARVEY_READ_TOKEN is optional: a fine-grained token with Contents read-only on kabsi-harvey-run and kabsi-harvey (both
+# private). If it is missing, expired or cannot read, the Harvey step logs a warning and the job still succeeds.
 #
 # --dry-run builds and encrypts everything it has the inputs for, proves the encryption by decrypting it again, prints
 # what it would upload and uploads nothing. A missing secret is reported by name and skipped instead of failing.
@@ -157,7 +163,12 @@ if have SUPABASE_ACCESS_TOKEN; then
   [ -n "$BUCKETS" ] || { say "::error::no Storage buckets were listed"; exit 1; }
   while IFS= read -r b; do
     say "  bucket $b"
-    supabase storage cp -r "ss:///$b" "$PLAIN/storage/$b" --experimental --project-ref "$REF" >/dev/null
+    # The CLI prints one line per file (names, some with a phone number inside) and this repository's logs are public, so
+    # its output goes to a file and a failure shows only the lines that do not name a file.
+    if ! supabase storage cp -r "ss:///$b" "$PLAIN/storage/$b" --experimental --project-ref "$REF" >/dev/null 2> "$W/storage.err"; then
+      say "::error::Copying the Storage bucket $b failed. The CLI's output is not printed because it names files (some hold a phone number); run the backup by hand to read it."
+      false
+    fi
   done <<< "$BUCKETS"
   OBJECTS="$(find "$PLAIN/storage" -type f | wc -l | tr -d ' ')"
   tar -C "$PLAIN" -czf "$PLAIN/photos.tar.gz" storage
@@ -167,11 +178,122 @@ else
   say "Storage skipped: SUPABASE_ACCESS_TOKEN is not set"
 fi
 
+# 4b. (after the database and the photos, so a slow or refused Harvey read can never starve them) The two Harvey repositories (Safe 1, R-151 section C: if the GitHub account is lost, Kabsi must survive). Both are
+# private, so the workflow's own token cannot read them: HARVEY_READ_TOKEN (read-only, optional) does. This step can never
+# fail the job: a missing or refused token, an unreadable repository or a release that cannot be read is a warning and the
+# set simply has no Harvey part this week. An encryption failure after a successful read is a real failure (seal exits).
+# The token goes to git and gh through the environment only (never a command line), and every message that could carry it
+# is passed through scrub first.
+HARVEY_OWNER="${HARVEY_OWNER:-itskaysyoga-gif}"
+HARVEY_RUN_SOURCE="${HARVEY_RUN_SOURCE:-https://github.com/$HARVEY_OWNER/kabsi-harvey-run.git}"
+HARVEY_SOURCE="${HARVEY_SOURCE:-https://github.com/$HARVEY_OWNER/kabsi-harvey.git}"
+GH="${GH_BIN:-gh}"
+RELEASE_DIR="$OUT/harvey-release"      # already encrypted by Harvey; uploaded as it is
+HARVEY_SKIPPED=()                      # what was not backed up and why (names only)
+HARVEY_REPOS='{}'
+RELEASE_FILES=()                       # paths relative to $RELEASE_DIR
+RELEASE_JSON='[]'
+scrub() { # stdin to stdout: web addresses (a download error can carry a signed one) and the token, in both forms, replaced
+  local t="${HARVEY_READ_TOKEN:-}" b=""
+  [ -z "$t" ] || b="$(printf 'x-access-token:%s' "$t" | base64 -w0)"
+  SCRUB_T="$t" SCRUB_B="$b" python3 -I -c '
+import os, re, sys
+text = re.sub(r"[a-z]+://\S+", "<address>", sys.stdin.read())
+for secret in (os.environ["SCRUB_T"], os.environ["SCRUB_B"]):
+    if secret:
+        text = text.replace(secret, "***")
+sys.stdout.write(text)'
+}
+harvey_warn() { say "::warning::Harvey backup: $1"; HARVEY_SKIPPED+=("$2"); }
+harvey_mirror() { # source, destination; the read-only token reaches git through the environment
+  if [[ "$1" == https://* ]]; then
+    GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.extraheader \
+      GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$HARVEY_READ_TOKEN" | base64 -w0)" \
+      GIT_TERMINAL_PROMPT=0 timeout 600 git clone --mirror --quiet "$1" "$2" 2> "$W/harvey.err"
+  else
+    timeout 600 git clone --mirror --quiet "$1" "$2" 2> "$W/harvey.err"
+  fi
+}
+harvey_bundle() { # name, source, out file. Returns 1 (never exits) when it cannot read.
+  local mirror="${PLAIN:?}/harvey-${1:?}.git"
+  harvey_mirror "$2" "$mirror" || { harvey_warn "$1 could not be read ($(head -n 1 "$W/harvey.err" | scrub | cut -c1-160)). Check that HARVEY_READ_TOKEN is valid and has Contents read on it. Not backed up this week." "$1"; return 1; }
+  git -C "$mirror" bundle create "$3" --all 2> "$W/harvey.err" || { harvey_warn "$1: the bundle could not be made. Not backed up this week." "$1"; return 1; }
+  rm -rf "${mirror:?}"
+  git bundle verify "$3" >/dev/null 2>&1 || { harvey_warn "$1: the bundle did not verify. Not backed up this week." "$1"; return 1; }
+  return 0
+}
+harvey_release() { # copies every release asset of kabsi-harvey-run as it is, and keeps only encrypted files
+  # REST only (gh api): the list of assets, then each one by its id with the octet-stream header.
+  local rows tag id name dir f
+  rows="$(GH_TOKEN="$HARVEY_READ_TOKEN" timeout 120 "$GH" api "repos/$HARVEY_OWNER/kabsi-harvey-run/releases" --paginate \
+    --jq '.[] | .tag_name as $t | .assets[] | [$t, (.id | tostring), .name] | @tsv' 2> "$W/harvey.err")" \
+    || { harvey_warn "the releases of kabsi-harvey-run could not be listed ($(head -n 1 "$W/harvey.err" | scrub | cut -c1-160)). Release assets not backed up this week." "kabsi-harvey-run releases"; return 1; }
+  [ -n "$rows" ] || { harvey_warn "kabsi-harvey-run has no release asset to copy." "kabsi-harvey-run releases"; return 1; }
+  while IFS=$'\t' read -r tag id name; do
+    # A tag or file name that could climb out of the folder is refused, never used in a path.
+    if ! [[ "$tag" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ && "$name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ && "$id" =~ ^[0-9]+$ ]]; then
+      harvey_warn "a release asset has a name this backup will not use. It was NOT copied." "release asset with an unusual name"
+      continue
+    fi
+    dir="${RELEASE_DIR:?}/${tag:?}"
+    mkdir -p "$dir"
+    f="$dir/${name:?}"
+    if ! GH_TOKEN="$HARVEY_READ_TOKEN" timeout 600 "$GH" api -H "Accept: application/octet-stream" "repos/$HARVEY_OWNER/kabsi-harvey-run/releases/assets/$id" > "$f" 2> "$W/harvey.err"; then
+      harvey_warn "release asset $tag/$name could not be downloaded ($(head -n 1 "$W/harvey.err" | scrub | cut -c1-160))." "release asset $tag/$name"
+      rm -f "${f:?}"
+      continue
+    fi
+    if [ "$(size "$f")" -gt "${HARVEY_ASSET_MAX_BYTES:-500000000}" ]; then
+      harvey_warn "release asset $tag/$name is larger than the cap of ${HARVEY_ASSET_MAX_BYTES:-500000000} bytes. It was NOT copied." "release asset $tag/$name"
+      rm -f "${f:?}"
+      continue
+    fi
+    # Only what Harvey encrypted leaves the runner: a .enc name and the openssl "Salted__" header (checked on the first
+    # 8 bytes, the content is never read or printed). Anything else is deleted here and named in a warning.
+    if [[ "$name" == *.enc ]] && [ "$(head -c 8 "$f" | LC_ALL=C tr -d '\000')" = "Salted__" ]; then
+      RELEASE_FILES+=("$tag/$name")
+    else
+      harvey_warn "release $tag has the file $name, which is not an encrypted .enc file. It was NOT copied." "release $tag/$name"
+      rm -f "${f:?}"
+    fi
+  done <<< "$rows"
+  [ "${#RELEASE_FILES[@]}" -gt 0 ] || return 1
+  return 0
+}
+
+say "Harvey repositories"
+if ! have HARVEY_READ_TOKEN; then
+  say "::warning::HARVEY_READ_TOKEN is not set, so the two Harvey repositories (kabsi-harvey-run, kabsi-harvey) and the release assets were not backed up. Add the token (docs/SECRETS.md). The job continues."
+  HARVEY_SKIPPED+=("HARVEY_READ_TOKEN not set")
+else
+  for spec in "kabsi-harvey-run:$HARVEY_RUN_SOURCE" "kabsi-harvey:$HARVEY_SOURCE"; do
+    hname="${spec%%:*}"; hsrc="${spec#*:}"
+    if harvey_bundle "$hname" "$hsrc" "$PLAIN/$hname.bundle"; then
+      hrefs="$(git ls-remote "$PLAIN/$hname.bundle" | wc -l | tr -d ' ')"
+      hhead="$(git ls-remote "$PLAIN/$hname.bundle" HEAD | cut -f1)"
+      seal "$hname.bundle" "$PLAIN/$hname.bundle" "$(jq -n --argjson n "$hrefs" --arg h "$hhead" '{refs: $n, head_sha: $h}')"
+      HARVEY_REPOS="$(jq --arg n "$hname" --argjson c "$hrefs" '.[$n] = {refs: $c}' <<< "$HARVEY_REPOS")"
+      say "  $hname: $hrefs refs"
+      rm -f "${PLAIN:?}/$hname.bundle"
+    fi
+  done
+  if harvey_release; then
+    for f in "${RELEASE_FILES[@]}"; do
+      RELEASE_JSON="$(jq --arg f "$f" --argjson s "$(size "$RELEASE_DIR/$f")" --arg h "$(sha "$RELEASE_DIR/$f")" \
+        '. + [{file: $f, bytes: $s, sha256: $h}]' <<< "$RELEASE_JSON")"
+      say "  release asset $f: $(size "$RELEASE_DIR/$f") bytes"
+    done
+  fi
+fi
+jq --argjson r "$HARVEY_REPOS" --argjson a "$RELEASE_JSON" --argjson s "$(printf '%s\n' "${HARVEY_SKIPPED[@]:-}" | jq -R . | jq -s 'map(select(length > 0))')" \
+  '. + {harvey: {repos: $r, release_assets: $a, skipped: $s}}' "$MANIFEST" > "$MANIFEST.tmp" && mv "$MANIFEST.tmp" "$MANIFEST" || false
+
 jq --arg t "$STAMP" --arg r "${GITHUB_RUN_ID:-local}" '. + {stamp: $t, run: $r, kind: "weekly"}' "$MANIFEST" > "$MANIFEST.tmp" && mv "$MANIFEST.tmp" "$MANIFEST"
 cp "$MANIFEST" "$OUT/manifest.json"
 
 say "Set $STAMP:"
 for f in "${FILES[@]}" manifest.json; do printf '  %-32s %10s bytes\n' "$f" "$(size "$OUT/$f")"; done
+for f in "${RELEASE_FILES[@]}"; do printf '  %-32s %10s bytes (already encrypted by Harvey)\n' "harvey-release/$f" "$(size "$RELEASE_DIR/$f")"; done
 
 if [ "$DRY_RUN" -eq 1 ]; then
   say "Dry run: nothing was uploaded. Would upload weekly/$STAMP/ to the bucket $BUCKET and keep the newest $KEEP sets."
@@ -184,9 +306,13 @@ export AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$R2_SECRET_A
 export AWS_REQUEST_CHECKSUM_CALCULATION=when_required AWS_RESPONSE_CHECKSUM_VALIDATION=when_required
 EP="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
 say "Upload"
-for f in "${FILES[@]}" manifest.json; do
+for f in "${FILES[@]}"; do
   "$AWS" s3 cp --only-show-errors --endpoint-url "$EP" "$OUT/$f" "s3://$BUCKET/weekly/$STAMP/$f"
 done
+for f in "${RELEASE_FILES[@]}"; do
+  "$AWS" s3 cp --only-show-errors --endpoint-url "$EP" "$RELEASE_DIR/$f" "s3://$BUCKET/weekly/$STAMP/harvey-release/$f"
+done
+"$AWS" s3 cp --only-show-errors --endpoint-url "$EP" "$OUT/manifest.json" "s3://$BUCKET/weekly/$STAMP/manifest.json"
 
 # 5. Keep the newest KEEP sets. A set is a folder under weekly/; names sort by time.
 say "Prune"
@@ -204,8 +330,12 @@ say "  $((TOTAL > KEEP ? KEEP : TOTAL)) sets kept"
 # 6. Tell the daily staff summary.
 RESULT="$W/result.json"
 jq -n --arg t "$STAMP" --arg r "${GITHUB_RUN_ID:-local}" --argjson m "$(cat "$MANIFEST")" \
-  '{ok: true, at: $t, run: $r, sets_kept: '"$KEEP"', files: ($m.files | map_values({encrypted_bytes}))}' > "$RESULT"
+  '{ok: true, at: $t, run: $r, sets_kept: '"$KEEP"', files: ($m.files | map_values({encrypted_bytes})), harvey: {repos: ($m.harvey.repos | keys), release_assets: ($m.harvey.release_assets | length), skipped: ($m.harvey.skipped | length)}}' > "$RESULT"
+BODY="The database, the Storage photos, the repository and the Harvey repositories were encrypted and stored in R2."
+if [ "${#HARVEY_SKIPPED[@]}" -gt 0 ]; then
+  BODY="The database, the Storage photos and the repository were encrypted and stored in R2. The Harvey part is incomplete: ${#HARVEY_SKIPPED[@]} item(s) skipped, read the run log (docs/runbooks/github-gone.md)."
+fi
 node scripts/ops/record-event.mjs --kind backup_done --channel daily --title "Weekly backup done" \
-  --body "The database, the Storage photos and the repository were encrypted and stored in R2." \
+  --body "$BODY" \
   --field "Set=$STAMP" --dedupe-key "backup_done:$STAMP" --setting backup_last --value-file "$RESULT" || true
 say "Done."

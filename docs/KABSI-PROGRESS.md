@@ -1,13 +1,13 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 10 Nov 2026 (Founding 1). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 10 Nov 2026 (Founding 1, Safe 1). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
 Files named in this list are in `docs/progress/archive/`.
 
-- Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati (first real reply and post removal verified, 23 Oct). kabsi.co on Vercel; Creem the only payment route (test mode). Evidence: `evidence.md`, `where-things-stand.md`.
-- Older status lines (26 Oct to 6 Nov 2026: Web 2 to Web 3, Go live 1, Scan 2 to Site 2, Launch 1 to 4, Speed 2, Harvey 4A and the Outbound test) are word for word in `2026-11-09-progress-moved.md`.
+- Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati (first real reply and post removal verified, 23 Oct). kabsi.co on Vercel; Creem the only payment route (test mode). Evidence: `evidence.md`.
+- Older status lines (26 Oct to 6 Nov 2026) are word for word in `2026-11-09-progress-moved.md`.
 - No customer is live yet. Before the first Meta ad (30.35 item 5): the DataForSEO top-up, Vercel Pro and the open lines of `docs/launch1/readiness.md`. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -26,8 +26,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Open for Rashid (as last recorded; the full table is `docs/progress/archive/steps-only-rashid-can-do.md`)
 
-- The lane R checklist of 7 Nov is Rashid's project doc `claude/kabsi-whats-left-2026-11-07.md` (not in this repository). In four lines: card payments stay closed until Creem's live setup; the first Meta ad waits for the DataForSEO top-up, Vercel Pro and the open lines of `docs/launch1/readiness.md`; the first paying business waits for Kapso Pro and the rest of 30.19 section 6; the dates that matter are the end of the promotional AI credit on 17 Nov and the Sentry budget before 30 Nov.
+- The lane R checklist of 7 Nov is Rashid's project doc `claude/kabsi-whats-left-2026-11-07.md` (not in this repository). In short: card payments wait for Creem's live setup; the first Meta ad for the DataForSEO top-up, Vercel Pro and `docs/launch1/readiness.md`; the first paying business for Kapso Pro and 30.19 section 6; dates: AI credit ends 17 Nov, Sentry budget before 30 Nov.
 - Phone test (13b part 1): passed 25 Oct (ladder above). 13b part 2: send START from the staff phone (it is stopped); delete the Supabase secrets SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET and the Supabase SENTRY_AUTH_TOKEN; run `supabase/manual/20261025_drop_slack_leftovers.sql` (expect `0 | 0 | 0 | 0`); remove the Kabsi app from Slack when you like.
+- Safe 1: make `HARVEY_READ_TOKEN` (`docs/OPS-SETUP.md` step 9); tick the checklist at the end of `docs/runbooks/github-gone.md`; kabsi-harvey still has a daily schedule and the register in its tree.
 - Sec 2: the backup secret, unused secrets, two-step logins (`docs/security/secrets-and-accounts.md`); the retention switch (`supabase/data/20261027_sec2_retention_on.sql`).
 - Supabase Auth: leaked-password protection; paste the four `emails/auth/*.html` templates again, rebuilt on 5 Nov with the WhatsApp line (steps in emails/auth/README.md).
 - Email 1: news.kabsi.co in Resend and Cloudflare before lifecycle emails go on (LATER row).
@@ -45,7 +46,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - Sentry (30.33 item 4): Settings, Subscription, set a pay-as-you-go budget of 5 US dollars for errors, so errors are not dropped before 30 Nov.
 - Ready 2: main's protection on (`docs/OPS-SETUP.md` step 7, 2 minutes); run `supabase/manual/20261107_ready2_qa_test_data_delete.sql` (expect 0s, demo_kept 2, demo_viewer_kept 1); did the staff phone get the alerts of 09:50 and 09:51 UTC?
 - App 5: may qa-staff@test.local be staff, for live staff runs? (LATER row)
-- Launch 1: Founding 25 is private (Founding 1): open the invite link (staff page, Programs, Founding 25, Show the link) and send one application named "QA Launch 1 test" (a session removes the row).
+- Launch 1: Founding 25 is private: open its invite link (staff, Programs, Founding 25, Show the link) and send one application named "QA Launch 1 test" (a session removes the row).
 - Outbound: before you say start, the placement test of 30.39 item 13 (LATER row).
 - Signup 1 (PR 554, merged and deployed): migration applied 10 Nov (version 20261110125951); turn on the Google provider in Supabase Auth with `https://kabsi.co/**` in the redirect URLs (read 10 Nov: google false); then the 7 step phone check in `2026-11-10-signup1.md`.
 - Close 1: merge PR 499 (reply.v4) with the admin merge (the rule refuses it while the Prompt gate is red, R-130); then check the deployed function names reply.v4. After the DataForSEO top-up, one full free check (30.42).
@@ -58,10 +59,10 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 10 Nov 2026, Signup 1 (R-150, PR 554 merged, deployed): Continue with WhatsApp, the new sign-in notice with Sign me out everywhere, Google hidden when off, the contact email in onboarding. `2026-11-10-signup1.md`.
-- 10 Nov 2026, Founding 1 (R-151, master plan 30.51): Founding 25 is private. It left all 17 public surfaces found (40 inventoried: 17 removed, 13 renamed, 5 kept private, 5 checked); its page is /founding/<slug> only (404 without the secret, noindex, staff read and rotate the slug); the 19 and 39 price is the launch price in public; Nora says there is no public founding offer. Migration 20261110152512 applied. `2026-11-10-founding1.md`.
-- 10 Nov 2026, Look 2 (R-150 item 2): one render step (`whatsapp/look.ts`) gives every WhatsApp reply three blocks, quote lines, footers and list messages; no button, route, approval path, template or model call changed. Phone check in `2026-11-10-look2.md`.
-- Older entries (Plan 1 is in `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
+- 10 Nov 2026, Founding 1 (R-151, master plan 30.51): Founding 25 is private: 40 surfaces inventoried (17 removed, 13 renamed, 5 kept private, 5 checked); its page is /founding/<slug> only (404 without the secret, noindex, staff rotate the slug); the 19 and 39 price is the launch price in public. Migration 20261110152512 applied. `2026-11-10-founding1.md`.
+- 10 Nov 2026, Safe 1 (R-151 section C, claude/safe-1): the Sunday backup also bundles kabsi-harvey-run and kabsi-harvey and copies the encrypted release assets; optional read-only `HARVEY_READ_TOKEN` (missing or refused is a warning, not a red run); the public log no longer lists Storage file names. New `docs/runbooks/github-gone.md`. Audit and evidence: `2026-11-10-safe1.md`. Not live until the first by-hand run after merge.
+- 10 Nov 2026, Signup 1 (R-150, PR 554 merged): Continue with WhatsApp, the sign-in notice, the contact email. `2026-11-10-signup1.md`.
+- Older entries (Look 2 is in `2026-11-10-look2.md`; Plan 1 is in `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
 
 ## How a session updates this page
 
