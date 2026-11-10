@@ -60,22 +60,14 @@ export class WaSigninError extends Error {
   }
 }
 
-const KEY = "kabsi.wa-signin";
-/** Kept in this tab only (sessionStorage), so a phone that comes back from WhatsApp to a reloaded tab still collects it. */
+// The secret lives only in this page's memory, never in browser storage (CodeQL, clear text storage): a tab the phone
+// reloads while WhatsApp is open starts again. Kept across a remount of the sheet within the same page.
+let kept: WaStart | null = null;
 export function keptStart(): WaStart | null {
-  try {
-    const v = JSON.parse(sessionStorage.getItem(KEY) ?? "null") as WaStart | null;
-    return v && typeof v.id === "string" && v.expiresAt > Date.now() ? v : null;
-  } catch {
-    return null;
-  }
+  return kept && kept.expiresAt > Date.now() ? kept : null;
 }
 export function forgetStart() {
-  try {
-    sessionStorage.removeItem(KEY);
-  } catch {
-    /* nothing kept */
-  }
+  kept = null;
 }
 
 async function geoToken(): Promise<string | null> {
@@ -123,11 +115,7 @@ export async function startWhatsapp(turnstile: string): Promise<WaStart> {
     expiresAt: Date.parse(body.expires_at ?? "") || Date.now() + 10 * 60_000,
     href: signinHref(WHATSAPP_DIGITS, body.code),
   };
-  try {
-    sessionStorage.setItem(KEY, JSON.stringify(start));
-  } catch {
-    /* private mode: this tab keeps it in memory */
-  }
+  kept = start;
   return start;
 }
 
