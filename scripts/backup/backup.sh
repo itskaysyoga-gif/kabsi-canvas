@@ -129,7 +129,56 @@ HEAD_SHA="$(git ls-remote "$PLAIN/kabsi-canvas.bundle" refs/heads/main | cut -f1
 seal kabsi-canvas.bundle "$PLAIN/kabsi-canvas.bundle" "$(jq -n --arg h "$HEAD_SHA" '{main_sha: $h}')"
 say "  main at $HEAD_SHA"
 
-# 1b. The two Harvey repositories (Safe 1, R-151 section C: if the GitHub account is lost, Kabsi must survive). Both are
+# 2. The database. Row counts are taken right after the dump; the restore drill compares them with a tolerance
+# because the live database keeps changing between the two.
+if have SUPABASE_DB_URL; then
+  say "Database dump"
+  # Sec 2: GitHub's runners have no IPv6 and the direct address answers on IPv6 only; db-url.mjs swaps it for the
+  # session pooler (IPv4). The resolved address is kept in this variable only, never printed.
+  SUPABASE_DB_URL="$(node scripts/backup/db-url.mjs)"
+  export SUPABASE_DB_URL
+  pg_dump --format=custom --compress=6 --no-owner --no-privileges \
+    --schema=public --schema=private --schema=auth --schema=storage --schema=supabase_migrations \
+    --file "$PLAIN/db.dump" "$SUPABASE_DB_URL"
+  psql "$SUPABASE_DB_URL" -At -F $'\t' -v ON_ERROR_STOP=1 -c "
+    select table_schema || '.' || table_name,
+           (xpath('/row/c/text()', query_to_xml(format('select count(*) as c from %I.%I', table_schema, table_name), false, true, '')))[1]::text
+      from information_schema.tables
+     where table_type = 'BASE TABLE' and table_schema in ('public', 'private', 'auth', 'storage')
+     order by 1" > "$PLAIN/row-counts.tsv"
+  [ -s "$PLAIN/row-counts.tsv" ] || { say "::error::no row counts came back"; exit 1; }
+  COUNTS="$(jq -R -s 'split("\n") | map(select(length > 0) | split("\t") | {(.[0]): (.[1] | tonumber)}) | add' "$PLAIN/row-counts.tsv")"
+  seal db.dump "$PLAIN/db.dump" "$(jq -n --argjson c "$COUNTS" '{row_counts: $c}')"
+  say "  $(printf '%s' "$COUNTS" | jq 'length') tables counted"
+else
+  say "Database dump skipped: SUPABASE_DB_URL is not set"
+fi
+
+# 3. Storage photos. The Supabase CLI fetches the project keys itself from SUPABASE_ACCESS_TOKEN, so the photos need
+# no secret of their own.
+if have SUPABASE_ACCESS_TOKEN; then
+  say "Storage"
+  mkdir -p "$PLAIN/storage"
+  BUCKETS="$(supabase storage ls ss:/// --experimental --project-ref "$REF" | sed 's#/*[[:space:]]*$##' | grep -v '^$' || true)"
+  [ -n "$BUCKETS" ] || { say "::error::no Storage buckets were listed"; exit 1; }
+  while IFS= read -r b; do
+    say "  bucket $b"
+    # The CLI prints one line per file (names, some with a phone number inside) and this repository's logs are public, so
+    # its output goes to a file and a failure shows only the lines that do not name a file.
+    if ! supabase storage cp -r "ss:///$b" "$PLAIN/storage/$b" --experimental --project-ref "$REF" >/dev/null 2> "$W/storage.err"; then
+      say "::error::Copying the Storage bucket $b failed. The CLI's output is not printed because it names files (some hold a phone number); run the backup by hand to read it."
+      false
+    fi
+  done <<< "$BUCKETS"
+  OBJECTS="$(find "$PLAIN/storage" -type f | wc -l | tr -d ' ')"
+  tar -C "$PLAIN" -czf "$PLAIN/photos.tar.gz" storage
+  seal photos.tar.gz "$PLAIN/photos.tar.gz" "$(jq -n --argjson n "$OBJECTS" --arg b "$(printf '%s' "$BUCKETS" | tr '\n' ' ')" '{objects: $n, buckets: $b}')"
+  say "  $OBJECTS files"
+else
+  say "Storage skipped: SUPABASE_ACCESS_TOKEN is not set"
+fi
+
+# 4b. (after the database and the photos, so a slow or refused Harvey read can never starve them) The two Harvey repositories (Safe 1, R-151 section C: if the GitHub account is lost, Kabsi must survive). Both are
 # private, so the workflow's own token cannot read them: HARVEY_READ_TOKEN (read-only, optional) does. This step can never
 # fail the job: a missing or refused token, an unreadable repository or a release that cannot be read is a warning and the
 # set simply has no Harvey part this week. An encryption failure after a successful read is a real failure (seal exits).
@@ -144,20 +193,25 @@ HARVEY_SKIPPED=()                      # what was not backed up and why (names o
 HARVEY_REPOS='{}'
 RELEASE_FILES=()                       # paths relative to $RELEASE_DIR
 RELEASE_JSON='[]'
-scrub() { # stdin to stdout, with the token and its base64 form replaced
-  local t="${HARVEY_READ_TOKEN:-}"
-  if [ -z "$t" ]; then cat; return; fi
-  local b; b="$(printf 'x-access-token:%s' "$t" | base64 -w0)"
-  sed -e "s|$t|***|g" -e "s|$b|***|g"
+scrub() { # stdin to stdout: web addresses (a download error can carry a signed one) and the token, in both forms, replaced
+  local t="${HARVEY_READ_TOKEN:-}" b=""
+  [ -z "$t" ] || b="$(printf 'x-access-token:%s' "$t" | base64 -w0)"
+  SCRUB_T="$t" SCRUB_B="$b" python3 -I -c '
+import os, re, sys
+text = re.sub(r"[a-z]+://\S+", "<address>", sys.stdin.read())
+for secret in (os.environ["SCRUB_T"], os.environ["SCRUB_B"]):
+    if secret:
+        text = text.replace(secret, "***")
+sys.stdout.write(text)'
 }
 harvey_warn() { say "::warning::Harvey backup: $1"; HARVEY_SKIPPED+=("$2"); }
 harvey_mirror() { # source, destination; the read-only token reaches git through the environment
   if [[ "$1" == https://* ]]; then
     GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.extraheader \
       GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$HARVEY_READ_TOKEN" | base64 -w0)" \
-      GIT_TERMINAL_PROMPT=0 git clone --mirror --quiet "$1" "$2" 2> "$W/harvey.err"
+      GIT_TERMINAL_PROMPT=0 timeout 600 git clone --mirror --quiet "$1" "$2" 2> "$W/harvey.err"
   else
-    git clone --mirror --quiet "$1" "$2" 2> "$W/harvey.err"
+    timeout 600 git clone --mirror --quiet "$1" "$2" 2> "$W/harvey.err"
   fi
 }
 harvey_bundle() { # name, source, out file. Returns 1 (never exits) when it cannot read.
@@ -171,21 +225,26 @@ harvey_bundle() { # name, source, out file. Returns 1 (never exits) when it cann
 harvey_release() { # copies every release asset of kabsi-harvey-run as it is, and keeps only encrypted files
   # REST only (gh api): the list of assets, then each one by its id with the octet-stream header.
   local rows tag id name dir f
-  rows="$(GH_TOKEN="$HARVEY_READ_TOKEN" "$GH" api "repos/$HARVEY_OWNER/kabsi-harvey-run/releases" --paginate \
+  rows="$(GH_TOKEN="$HARVEY_READ_TOKEN" timeout 120 "$GH" api "repos/$HARVEY_OWNER/kabsi-harvey-run/releases" --paginate \
     --jq '.[] | .tag_name as $t | .assets[] | [$t, (.id | tostring), .name] | @tsv' 2> "$W/harvey.err")" \
     || { harvey_warn "the releases of kabsi-harvey-run could not be listed ($(head -n 1 "$W/harvey.err" | scrub | cut -c1-160)). Release assets not backed up this week." "kabsi-harvey-run releases"; return 1; }
   [ -n "$rows" ] || { harvey_warn "kabsi-harvey-run has no release asset to copy." "kabsi-harvey-run releases"; return 1; }
   while IFS=$'\t' read -r tag id name; do
     # A tag or file name that could climb out of the folder is refused, never used in a path.
-    if ! [[ "$tag" =~ ^[A-Za-z0-9._-]+$ && "$name" =~ ^[A-Za-z0-9._-]+$ && "$id" =~ ^[0-9]+$ ]]; then
+    if ! [[ "$tag" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ && "$name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ && "$id" =~ ^[0-9]+$ ]]; then
       harvey_warn "a release asset has a name this backup will not use. It was NOT copied." "release asset with an unusual name"
       continue
     fi
     dir="${RELEASE_DIR:?}/${tag:?}"
     mkdir -p "$dir"
     f="$dir/${name:?}"
-    if ! GH_TOKEN="$HARVEY_READ_TOKEN" "$GH" api -H "Accept: application/octet-stream" "repos/$HARVEY_OWNER/kabsi-harvey-run/releases/assets/$id" > "$f" 2> "$W/harvey.err"; then
+    if ! GH_TOKEN="$HARVEY_READ_TOKEN" timeout 600 "$GH" api -H "Accept: application/octet-stream" "repos/$HARVEY_OWNER/kabsi-harvey-run/releases/assets/$id" > "$f" 2> "$W/harvey.err"; then
       harvey_warn "release asset $tag/$name could not be downloaded ($(head -n 1 "$W/harvey.err" | scrub | cut -c1-160))." "release asset $tag/$name"
+      rm -f "${f:?}"
+      continue
+    fi
+    if [ "$(size "$f")" -gt "${HARVEY_ASSET_MAX_BYTES:-500000000}" ]; then
+      harvey_warn "release asset $tag/$name is larger than the cap of ${HARVEY_ASSET_MAX_BYTES:-500000000} bytes. It was NOT copied." "release asset $tag/$name"
       rm -f "${f:?}"
       continue
     fi
@@ -227,57 +286,7 @@ else
   fi
 fi
 jq --argjson r "$HARVEY_REPOS" --argjson a "$RELEASE_JSON" --argjson s "$(printf '%s\n' "${HARVEY_SKIPPED[@]:-}" | jq -R . | jq -s 'map(select(length > 0))')" \
-  '. + {harvey: {repos: $r, release_assets: $a, skipped: $s}}' "$MANIFEST" > "$MANIFEST.tmp" && mv "$MANIFEST.tmp" "$MANIFEST"
-
-# 2. The database. Row counts are taken right after the dump; the restore drill compares them with a tolerance
-# because the live database keeps changing between the two.
-if have SUPABASE_DB_URL; then
-  say "Database dump"
-  # Sec 2: GitHub's runners have no IPv6 and the direct address answers on IPv6 only; db-url.mjs swaps it for the
-  # session pooler (IPv4). The resolved address is kept in this variable only, never printed.
-  SUPABASE_DB_URL="$(node scripts/backup/db-url.mjs)"
-  export SUPABASE_DB_URL
-  pg_dump --format=custom --compress=6 --no-owner --no-privileges \
-    --schema=public --schema=private --schema=auth --schema=storage --schema=supabase_migrations \
-    --file "$PLAIN/db.dump" "$SUPABASE_DB_URL"
-  psql "$SUPABASE_DB_URL" -At -F $'\t' -v ON_ERROR_STOP=1 -c "
-    select table_schema || '.' || table_name,
-           (xpath('/row/c/text()', query_to_xml(format('select count(*) as c from %I.%I', table_schema, table_name), false, true, '')))[1]::text
-      from information_schema.tables
-     where table_type = 'BASE TABLE' and table_schema in ('public', 'private', 'auth', 'storage')
-     order by 1" > "$PLAIN/row-counts.tsv"
-  [ -s "$PLAIN/row-counts.tsv" ] || { say "::error::no row counts came back"; exit 1; }
-  COUNTS="$(jq -R -s 'split("\n") | map(select(length > 0) | split("\t") | {(.[0]): (.[1] | tonumber)}) | add' "$PLAIN/row-counts.tsv")"
-  seal db.dump "$PLAIN/db.dump" "$(jq -n --argjson c "$COUNTS" '{row_counts: $c}')"
-  say "  $(printf '%s' "$COUNTS" | jq 'length') tables counted"
-else
-  say "Database dump skipped: SUPABASE_DB_URL is not set"
-fi
-
-# 3. Storage photos. The Supabase CLI fetches the project keys itself from SUPABASE_ACCESS_TOKEN, so the photos need
-# no secret of their own.
-if have SUPABASE_ACCESS_TOKEN; then
-  say "Storage"
-  mkdir -p "$PLAIN/storage"
-  BUCKETS="$(supabase storage ls ss:/// --experimental --project-ref "$REF" | sed 's#/*[[:space:]]*$##' | grep -v '^$' || true)"
-  [ -n "$BUCKETS" ] || { say "::error::no Storage buckets were listed"; exit 1; }
-  while IFS= read -r b; do
-    say "  bucket $b"
-    # The CLI prints one line per file (names, some with a phone number inside) and this repository's logs are public, so
-    # its output goes to a file and a failure shows only the lines that do not name a file.
-    if ! supabase storage cp -r "ss:///$b" "$PLAIN/storage/$b" --experimental --project-ref "$REF" >/dev/null 2> "$W/storage.err"; then
-      say "::error::Copying the Storage bucket $b failed. Last lines (file names left out):"
-      grep -v -e '^Downloading' -e '^A new version' -e '^We recommend' "$W/storage.err" | tail -n 5 | cut -c1-200 || true
-      false
-    fi
-  done <<< "$BUCKETS"
-  OBJECTS="$(find "$PLAIN/storage" -type f | wc -l | tr -d ' ')"
-  tar -C "$PLAIN" -czf "$PLAIN/photos.tar.gz" storage
-  seal photos.tar.gz "$PLAIN/photos.tar.gz" "$(jq -n --argjson n "$OBJECTS" --arg b "$(printf '%s' "$BUCKETS" | tr '\n' ' ')" '{objects: $n, buckets: $b}')"
-  say "  $OBJECTS files"
-else
-  say "Storage skipped: SUPABASE_ACCESS_TOKEN is not set"
-fi
+  '. + {harvey: {repos: $r, release_assets: $a, skipped: $s}}' "$MANIFEST" > "$MANIFEST.tmp" && mv "$MANIFEST.tmp" "$MANIFEST" || false
 
 jq --arg t "$STAMP" --arg r "${GITHUB_RUN_ID:-local}" '. + {stamp: $t, run: $r, kind: "weekly"}' "$MANIFEST" > "$MANIFEST.tmp" && mv "$MANIFEST.tmp" "$MANIFEST"
 cp "$MANIFEST" "$OUT/manifest.json"
@@ -322,7 +331,11 @@ say "  $((TOTAL > KEEP ? KEEP : TOTAL)) sets kept"
 RESULT="$W/result.json"
 jq -n --arg t "$STAMP" --arg r "${GITHUB_RUN_ID:-local}" --argjson m "$(cat "$MANIFEST")" \
   '{ok: true, at: $t, run: $r, sets_kept: '"$KEEP"', files: ($m.files | map_values({encrypted_bytes})), harvey: {repos: ($m.harvey.repos | keys), release_assets: ($m.harvey.release_assets | length), skipped: ($m.harvey.skipped | length)}}' > "$RESULT"
+BODY="The database, the Storage photos, the repository and the Harvey repositories were encrypted and stored in R2."
+if [ "${#HARVEY_SKIPPED[@]}" -gt 0 ]; then
+  BODY="The database, the Storage photos and the repository were encrypted and stored in R2. The Harvey part is incomplete: ${#HARVEY_SKIPPED[@]} item(s) skipped, read the run log (docs/runbooks/github-gone.md)."
+fi
 node scripts/ops/record-event.mjs --kind backup_done --channel daily --title "Weekly backup done" \
-  --body "The database, the Storage photos, the repository and the Harvey repositories were encrypted and stored in R2." \
+  --body "$BODY" \
   --field "Set=$STAMP" --dedupe-key "backup_done:$STAMP" --setting backup_last --value-file "$RESULT" || true
 say "Done."

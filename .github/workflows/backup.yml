@@ -77,6 +77,9 @@ jobs:
           EVENT: ${{ github.event_name }}
         run: |
           if [ "$EVENT" = "pull_request" ]; then
-            while IFS= read -r line; do export "$line"; done < <(bash scripts/backup/harvey-fixtures.sh "$RUNNER_TEMP/harvey-fixtures")
+            rm -rf "${RUNNER_TEMP:?}/harvey-fixtures"
+            bash scripts/backup/harvey-fixtures.sh "$RUNNER_TEMP/harvey-fixtures" > "$RUNNER_TEMP/harvey-fixtures.env"
+            [ "$(wc -l < "$RUNNER_TEMP/harvey-fixtures.env")" -eq 4 ] || { echo "::error::the Harvey stand-ins were not made"; exit 1; }
+            set -a; . "$RUNNER_TEMP/harvey-fixtures.env"; set +a
           fi
           if [ "$DRY" = "true" ]; then bash scripts/backup/backup.sh --dry-run; else bash scripts/backup/backup.sh; fi
