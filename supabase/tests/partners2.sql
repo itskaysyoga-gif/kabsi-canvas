@@ -186,7 +186,7 @@ select is((public.partner_home('00000000-0000-4000-8000-0000000030a1') ->> 'payo
 select is(public.partner_payout_request('00000000-0000-4000-8000-0000000030a1', 'paypal', 'pa@example.test', 'whatsapp') ->> 'result', 'not_yet', 'and cannot be set before');
 
 -- ─── 50 US dollars cleared, then the payout method behind a fresh confirm ─────────────────────────────────────────
-select pg_temp.event('p2_live_' || n, 'subscription.paid', pg_temp.org('00000000-0000-4000-8000-0000000030c3'),
+select pg_temp.event('p2_m_' || n, 'subscription.paid', pg_temp.org('00000000-0000-4000-8000-0000000030c3'),
   jsonb_build_object('object', jsonb_build_object('last_transaction', jsonb_build_object('id', 'p2_tx_m' || n, 'amount', 5900))),
   now() - interval '40 days', 'p2_tx_m' || n, 'live')
 from generate_series(1, 3) n;
