@@ -182,6 +182,16 @@ describe("where the questions come in the setup", () => {
   });
 });
 
+// The words of rendered markup: tags removed until none are left (the headline is split into spans).
+function textOf(markup: string): string {
+  let text = markup;
+  for (let before = ""; before !== text;) {
+    before = text;
+    text = text.replace(/<[^<>]*>/g, "");
+  }
+  return text;
+}
+
 describe("the screens", () => {
   const html = async (el: () => unknown, data?: [unknown[], unknown]) => {
     const qc = new QueryClient();
@@ -194,7 +204,7 @@ describe("the screens", () => {
     const out = await html(() =>
       createElement(RequestQuestionsStage, { locationId: LOC, onDone: async () => undefined }),
     );
-    const text = out.replace(/<[^>]+>/g, "");
+    const text = textOf(out);
     expect(text).toContain("Two quick questions");
     expect(text).toContain(
       "Both are optional. You can skip them, and change your answers any time in About your business.",
