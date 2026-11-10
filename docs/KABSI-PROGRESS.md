@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 10 Nov 2026 (Founding 1, Safe 1). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 10 Nov 2026 (Founding 1, RB-T, Safe 1). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -19,7 +19,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 | Number acquired | 23 Oct 2026 | +1 205-745-6874 connected in the Kapso project Kabsi.co; Kapso health check Passed 10:17 Beirut (master plan 9.8) |
 | Profile set | 23 Oct 2026 | Photo, about, email, address, website and description live; the display name "Kabsi" is waiting for Meta's approval (master plan 9.8) |
 | Webhook verified | 25 Oct 2026 | Rashid's live phone test: his 12 messages reached Kabsi's function through the registered Kapso webhook (Fix 1, request 49115); his chat export confirms them |
-| Templates approved | 29 Oct 2026 | Every account and approval notice has an approved Utility template (lane R, request 58250, 15:16 UTC): the 13 replacements and new names (access change, access lost, Google action, holiday question, profile change, map ready, updates waiting, photo ready, setup step, billing notice v3, staff alert v3, business update v2, work update v2) read APPROVED and UTILITY; the sender switches to them on its hourly status read. Earlier reads: 55390, 55676, 57544 |
+| Templates approved | 29 Oct 2026 | Every account and approval notice has an approved Utility template (lane R, request 58250): the 13 replacements and new names read APPROVED and UTILITY; the sender switches to them on its hourly status read. Earlier reads: 55390, 55676, 57544 |
 | Inbound tested | 25 Oct 2026 | Rashid's live test: 12 messages in, each handled (chat export); the suite (now 231 WhatsApp cases) passes in CI |
 | Outbound tested | 25 Oct 2026 | Rashid's live test: 11 replies delivered to his phone (chat export); 28 Oct: template `kabsi_staff_alert` delivered to the staff phone, request 55442 |
 | Owners switched on | 5 Nov 2026 | `whatsapp_owners_on` true at 04:32:11 UTC (Rashid's yes, Go live 1); `kabsi_work_update_v2` delivered to Yawmiyati's owner phone at 04:31:08 UTC (request 72591) |
@@ -48,8 +48,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - App 5: may qa-staff@test.local be staff, for live staff runs? (LATER row)
 - Launch 1: Founding 25 is private: open its invite link (staff, Programs, Founding 25, Show the link) and send one application named "QA Launch 1 test" (a session removes the row).
 - Outbound: before you say start, the placement test of 30.39 item 13 (LATER row).
-- Signup 1 (PR 554, merged and deployed): migration applied 10 Nov (version 20261110125951); turn on the Google provider in Supabase Auth with `https://kabsi.co/**` in the redirect URLs (read 10 Nov: google false); then the 7 step phone check in `2026-11-10-signup1.md`.
-- Close 1: merge PR 499 (reply.v4) with the admin merge (the rule refuses it while the Prompt gate is red, R-130); then check the deployed function names reply.v4. After the DataForSEO top-up, one full free check (30.42).
+- Signup 1 (PR 554, merged): turn on the Google provider in Supabase Auth with `https://kabsi.co/**` in the redirect URLs; then the 7 step phone check in `2026-11-10-signup1.md`.
+- RB-T: on 16 Nov, the 20-message phone script in `docs/kabsi-3/phone-script-2026-11-16.md` from your phone (pass: 18 of 20, no wrong save); start with "reset test".
+- Close 1: merge PR 499 (reply.v4) with the admin merge; the rule on main refuses it while the Prompt gate is red, by design (R-130); then check the deployed function names reply.v4. After the DataForSEO top-up, one full free check to see why the one of 6 Nov failed (30.42).
 
 ## Open After merge checks and findings
 
@@ -60,9 +61,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 ## Recent entries (newest first)
 
 - 10 Nov 2026, Founding 1 (R-151, master plan 30.51): Founding 25 is private: 40 surfaces inventoried (17 removed, 13 renamed, 5 kept private, 5 checked); its page is /founding/<slug> only (404 without the secret, noindex, staff rotate the slug); the 19 and 39 price is the launch price in public. Migration 20261110152512 applied. `2026-11-10-founding1.md`.
-- 10 Nov 2026, Safe 1 (R-151 section C, claude/safe-1): the Sunday backup also bundles kabsi-harvey-run and kabsi-harvey and copies the encrypted release assets; optional read-only `HARVEY_READ_TOKEN` (missing or refused is a warning, not a red run); the public log no longer lists Storage file names. New `docs/runbooks/github-gone.md`. Audit and evidence: `2026-11-10-safe1.md`. Not live until the first by-hand run after merge.
-- 10 Nov 2026, Signup 1 (R-150, PR 554 merged): Continue with WhatsApp, the sign-in notice, the contact email. `2026-11-10-signup1.md`.
-- Older entries (Look 2 is in `2026-11-10-look2.md`; Plan 1 is in `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
+- 10 Nov 2026, RB-T (R-150 item 8): request book scenario matrix, 219 rows on three packs, all pass on the fake world; Kabsi questions go to Nora by code; food pack in test; live extraction on four packs, all marks met (0.39 USD). `2026-11-10-rb-t.md`.
+- 10 Nov 2026, Safe 1 (R-151 section C, claude/safe-1): the Sunday backup also bundles kabsi-harvey-run and kabsi-harvey and copies the encrypted release assets; optional read-only `HARVEY_READ_TOKEN` ; the public log no longer lists Storage file names; `docs/runbooks/github-gone.md`. `2026-11-10-safe1.md`. Not live until the first by-hand run.
+- Older entries (Signup 1 is in `2026-11-10-signup1.md`; Look 2 is in `2026-11-10-look2.md`; Plan 1 is in `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
 
 ## How a session updates this page
 

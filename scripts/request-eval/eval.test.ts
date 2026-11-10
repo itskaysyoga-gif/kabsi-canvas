@@ -2,12 +2,12 @@
 // task asks for; the cases must agree with the code (an oracle that quotes exactly what each case names passes every
 // mark); the recorded answers of the hand run on the real model must pass the marks; and each mark must be able to fail.
 import { assert, assertEquals, assertFalse } from "jsr:@std/assert@1";
-import { getPack } from "../../supabase/functions/_shared/request-book/packs/index.ts";
 import {
   extractFields,
   type Extraction,
 } from "../../supabase/functions/_shared/request-book/extract.ts";
 import {
+  evalPack,
   loadSuite,
   marks,
   oracleAnswer,
@@ -24,7 +24,7 @@ const suite: Suite = await loadSuite();
 const ctxOf = (c: Case) => {
   const loc = suite.locations[c.location]!;
   return {
-    pack: getPack(c.pack, 1)!,
+    pack: evalPack(c.pack)!,
     country: loc.country,
     timeZone: loc.timeZone,
     now: new Date(suite.now),
@@ -47,7 +47,7 @@ Deno.test(
         );
     for (const c of suite.cases)
       assert(
-        getPack(c.pack, 1) &&
+        evalPack(c.pack) &&
           suite.locations[c.location] &&
           c.text.trim() !== "" &&
           c.id.startsWith(c.pack),

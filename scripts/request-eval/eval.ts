@@ -11,6 +11,8 @@
 //   5. any invented figure: 0
 //   6. no output implies a confirmation (or a booking) that was not stated: 0
 import { getPack } from "../../supabase/functions/_shared/request-book/packs/index.ts";
+import { foodV1 } from "../../supabase/functions/_shared/request-book/packs/test-fixtures/food.v1.ts";
+import type { Pack } from "../../supabase/functions/_shared/request-book/packs/schema.ts";
 import {
   buildPrompt,
   extractFields,
@@ -64,8 +66,13 @@ export async function loadSuite(): Promise<Suite> {
   return JSON.parse(await Deno.readTextFile(new URL("./cases.json", import.meta.url))) as Suite;
 }
 
+/** RB-T: the packs the evaluation reads: the shipped ones, and the food pack, which is in test only and never in PACKS. */
+const TEST_PACKS: readonly Pack[] = [foodV1];
+export const evalPack = (id: string): Pack | null =>
+  getPack(id, 1) ?? TEST_PACKS.find((p) => p.id === id) ?? null;
+
 const ctxOf = (suite: Suite, c: Case) => {
-  const pack = getPack(c.pack, 1);
+  const pack = evalPack(c.pack);
   if (!pack) throw new Error(`case ${c.id}: no pack ${c.pack}`);
   const loc = suite.locations[c.location];
   if (!loc) throw new Error(`case ${c.id}: no location ${c.location}`);

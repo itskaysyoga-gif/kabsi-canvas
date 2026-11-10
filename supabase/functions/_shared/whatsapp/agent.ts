@@ -15,7 +15,7 @@ import {
   refOf, refusalReply, requestSummary, rowOf, savedText, toEvidence,
   type Act, arrivedLine, askAnswer, parseBookCommand, type RbAsk, type RbTime, runCommand, timePicked, undoButton, undoIds, kindIn,
   correctedReplyOf, nonce, duplicateReply, findDuplicate, fullOf, pastServices, reviseRequest, updateChanges,
-  bookHelp, bookIntent, kabsiJob, type Kind, KIND_KEY, namesKabsi, newKind, packAs, packWordWins, proposalKind,
+  bookHelp, bookIntent, enquiryKind, kabsiJob, kabsiQuestion, type Kind, KIND_KEY, namesKabsi, newKind, packAs, packWordWins, proposalKind,
 } from "./book.ts";
 import { photoRefusal, voiceCheck } from "./media.ts";
 import { fromText, IN_SCOPE, LIST_RESULT, type ListMsg, markFor, type Msg, NAMES_BUSINESS, toMsg } from "./look.ts";
@@ -1368,6 +1368,9 @@ async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
     return await readWithOnIt(t, bt, () => requestTool(t, bt, "request_new", undefined, text));
   }
   if (packWord) return null;
+  // RB-T (R-150 item 8): a question about the account, data, privacy, price, plan, bill, login or Kabsi itself goes to
+  // Nora, read by code before the off-topic line and with no router call ("Is my data safe?").
+  if (cmd.k === "free" && packs.every((p) => kabsiQuestion(text, p))) return await askNora(b ? { ...t, business: b } : t, text);
   return await free(t, text, bt);
 }
 
@@ -1410,7 +1413,8 @@ async function requestToolInner(t: Turn, bt: BookTurn, tool: string, arg: string
   // A message the router could not place ("thanks", "ok") revises the draft only when it adds something to it.
   if (onlyIfNew && !revising) return null;
   // RB-F4: the kind the proposal is made as ("X booked Y" with no enquiry), kept by a revision of it.
-  const asKind: Kind | null = kind ?? (revising ? proposalKind(pack, before as Record<string, unknown>) : null);
+  // RB-T: at a business whose usual kind is not an enquiry, "Dina asked about a keratin price" is proposed as an enquiry.
+  const asKind: Kind | null = kind ?? (revising ? proposalKind(pack, before as Record<string, unknown>) : tool === "request_new" ? enquiryKind(text, pack) : null);
   const rpack = packAs(pack, asKind);
   const now = new Date((t.d.now ?? Date.now)());
   // RB-F3: the business's own past services are read like the pack's (typos included).
