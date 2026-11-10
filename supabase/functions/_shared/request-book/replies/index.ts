@@ -40,33 +40,26 @@ export function requestLine(row: RequestRow, ctx: ReplyContext, opts: { summaryM
 }
 
 /**
- * Look 2 (30.50 item 2): one request as facts, one per line: who, what, when, and its status. A label only where the
- * value does not explain itself. What an appointment still needs is the status line after them (confirmationShort).
+ * Look 2 (30.50 item 2): one request as facts, one per line. One request, one set of lines: the saved message, the detail
+ * view, a status change, a confirmation and a conversion all show these, in this order, with these labels: who, what,
+ * when (a date or a time explains itself, so it has no label), the status, what an appointment has and still needs, and
+ * the next step. Every sentence ends with a full stop.
  */
 export function requestFacts(row: RequestRow, ctx: ReplyContext, summaryMax = 160): string[] {
-  const when = whenText(row, ctx);
-  return [who(row), clip(row.summary, summaryMax), ...(when ? [when] : []), `Status: ${statusWord(ctx.pack, row)}`];
-}
-/** The status line after a request's facts: what an appointment still needs, when it needs anything. */
-const needs = (row: RequestRow, ctx: ReplyContext) => {
-  const c = confirmationShort(row, ctx.pack);
-  return c ? `\n\n${c}.` : "";
-};
-
-/** The whole state of one request, in one reply. */
-export function summaryReply(row: RequestRow, ctx: ReplyContext): Reply {
-  const lines = [label(row, ctx.pack), who(row), `${clip(row.summary, 300)}`];
-  const when = whenText(row, ctx);
-  lines.push(when ? `When: ${when}` : "When: no time entered");
-  lines.push(`Status: ${statusWord(ctx.pack, row)}`);
+  const lines = [who(row), clip(row.summary, summaryMax), whenText(row, ctx) ?? "No time entered", `Status: ${statusWord(ctx.pack, row)}`];
   const c = confirmationText(row, ctx.pack);
-  if (c) lines.push(c);
+  if (c) lines.push(`${c}.`);
   if (row.next_action) {
     const due = row.next_action_due_at ? ` by ${formatWhen(row.next_action_due_at, ctx.timeZone, ctx.now)}` : "";
     lines.push(`Next step: ${clip(row.next_action, 120)}${due}`);
   }
+  return lines;
+}
+
+/** The whole state of one request, in one reply: the same lines the saved message shows, then what the note says. */
+export function summaryReply(row: RequestRow, ctx: ReplyContext): Reply {
   const note = row.kind === "appointment" ? "This is a note in Kabsi. It is not entered in any other diary." : "This is what was entered in Kabsi.";
-  return finish(`${lines.join("\n")}\n\n${note}`);
+  return finish(`${label(row, ctx.pack)}\n${requestFacts(row, ctx).join("\n")}\n\n${note}`);
 }
 
 /**
@@ -178,7 +171,7 @@ export function proposalReply(p: ProposalView, ctx: ReplyContext): Reply {
 
 /** After Save. Undo stays offered for 10 minutes. */
 export function savedReply(row: RequestRow, ctx: ReplyContext): Reply {
-  return finish(`${label(row, ctx.pack)} saved\n${requestFacts(row, ctx).join("\n")}${needs(row, ctx)}`, ["Undo"]);
+  return finish(`${label(row, ctx.pack)} saved\n${requestFacts(row, ctx).join("\n")}`, ["Undo"]);
 }
 
 const FLAG_NOTE: Record<string, string> = {
@@ -194,7 +187,7 @@ export function statusChangedReply(row: RequestRow, ctx: ReplyContext, flags: st
   const notes = flags.map((f) => FLAG_NOTE[f]).filter(Boolean);
   const now = `${label(row, ctx.pack)} is now ${statusWord(ctx.pack, row)}`;
   const title = now.split(/\s+/).length <= 5 ? now : `${label(row, ctx.pack)} updated`;
-  const body = `${title}\n${requestFacts(row, ctx).join("\n")}${notes.length ? `\n\n${notes.join(" ")}` : needs(row, ctx)}`;
+  const body = `${title}\n${requestFacts(row, ctx).join("\n")}${notes.length ? `\n\n${notes.join(" ")}` : ""}`;
   return finish(body, ["Undo"]);
 }
 
@@ -225,8 +218,7 @@ export function askFirstReply(
 
 /** After a confirmation was recorded or cleared. The words are written from the record the database now holds. */
 export function confirmationReply(row: RequestRow, ctx: ReplyContext): Reply {
-  const c = confirmationText(row, ctx.pack) ?? "";
-  return finish(`${label(row, ctx.pack)} updated\n${requestFacts(row, ctx, 120).join("\n")}${c ? `\n\n${c}` : ""}`, ["Undo"]);
+  return finish(`${label(row, ctx.pack)} updated\n${requestFacts(row, ctx).join("\n")}`, ["Undo"]);
 }
 
 export type FieldChange = { field: string; before: unknown; after: unknown };
@@ -251,9 +243,9 @@ export function correctedReply(row: RequestRow, changes: FieldChange[], ctx: Rep
 export function convertedReply(enquiry: Pick<RequestRow, "kind" | "number">, created: RequestRow, ctx: ReplyContext): Reply {
   const body = [
     `${label(enquiry, ctx.pack)} is now ${label(created, ctx.pack)}`,
-    ...requestFacts(created, ctx, 120),
+    ...requestFacts(created, ctx),
     "",
-    `The enquiry stays on record.${created.kind === "appointment" ? " No confirmation has been recorded yet." : ""}`,
+    "The enquiry stays on record.",
   ].join("\n");
   return finish(body, ["Undo"]);
 }

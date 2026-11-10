@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 10 Nov 2026 (Founding 1, RB-T, Safe 1). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 10 Nov 2026 (Look 2b, Founding 1, RB-T). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -60,10 +60,10 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 10 Nov 2026, Look 2b (R-150 item 2): list rows are service, day and time, what is to confirm, whole parts only; one request shows one set of fact lines; Nora's WhatsApp answers are in the look 2 frame. No route, button, template or model call changed. `2026-11-10-look2b.md`.
 - 10 Nov 2026, Founding 1 (R-151, master plan 30.51): Founding 25 is private: 40 surfaces inventoried (17 removed, 13 renamed, 5 kept private, 5 checked); its page is /founding/<slug> only (404 without the secret, noindex, staff rotate the slug); the 19 and 39 price is the launch price in public. Migration 20261110152512 applied. `2026-11-10-founding1.md`.
 - 10 Nov 2026, RB-T (R-150 item 8): request book scenario matrix, 219 rows on three packs, all pass on the fake world; Kabsi questions go to Nora by code; food pack in test; live extraction on four packs, all marks met (0.39 USD). `2026-11-10-rb-t.md`.
-- 10 Nov 2026, Safe 1 (R-151 section C, claude/safe-1): the Sunday backup also bundles kabsi-harvey-run and kabsi-harvey and copies the encrypted release assets; optional read-only `HARVEY_READ_TOKEN` ; the public log no longer lists Storage file names; `docs/runbooks/github-gone.md`. `2026-11-10-safe1.md`. Not live until the first by-hand run.
-- Older entries (Signup 1 is in `2026-11-10-signup1.md`; Look 2 is in `2026-11-10-look2.md`; Plan 1 is in `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
+- Older entries (Safe 1 is in `2026-11-10-safe1.md`; Signup 1 is in `2026-11-10-signup1.md`; Look 2 is in `2026-11-10-look2.md`; Plan 1 is in `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
 
 ## How a session updates this page
 

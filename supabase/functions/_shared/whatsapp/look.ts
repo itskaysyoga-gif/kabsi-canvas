@@ -57,6 +57,29 @@ const clip = (s: string, n: number) => (s.length <= n ? s : `${s.slice(0, n - 3)
 const words = (s: string) => s.trim().split(/\s+/).filter(Boolean).length;
 const unstar = (s: string) => s.replace(/[*_~]/g, "");
 
+/** The most whole words of a text that fit in max characters: a word is never cut and the result never ends with "...". */
+export function wholeWords(text: string, max: number): string {
+  const ws = text.trim().split(/\s+/).filter(Boolean);
+  while (ws.length && ws.join(" ").length > max) ws.pop();
+  return ws.join(" ").replace(/[\s,;:·-]+$/, "");
+}
+
+/**
+ * A list row's description (72 characters) or any short line built from parts in order of worth: the parts joined with
+ * " · "; when they do not fit, the lowest part (the last) is dropped whole, then the next, and so on. A word is never cut
+ * and the line never ends with "...". Only when the first part alone is too long does it lose its last words.
+ */
+export function fitParts(parts: string[], max: number): string {
+  const p = parts.map((x) => x.trim()).filter(Boolean);
+  while (p.length > 1 && p.join(" · ").length > max) p.pop();
+  return p.length === 1 && p[0]!.length > max ? wholeWords(p[0]!, max) : p.join(" · ");
+}
+
+/** A list row's title (24 characters): "#12 Sarah", the name losing its last words, never a part of one, never "...". */
+export function rowTitle(number: string, name: string): string {
+  return wholeWords(`#${number} ${name}`, ROW_TITLE_MAX);
+}
+
 /** WhatsApp quote lines for a review or a draft: "> " before the text, on one line, so the whole text reads as one quote. */
 export function quote(text: string | null | undefined, max = 4000): string[] {
   const t = (text ?? "").replace(/\s+/g, " ").trim();
@@ -101,6 +124,31 @@ function splitFirst(line: string): { title: string; more: string } {
   const byColon = colon >= 0 && (!dot || colon < dot[1]!.length) ? /^((?:\S+\s+){2,}\S+:)\s+(\S.*)$/s.exec(line) : null;
   const cut = byColon ?? dot;
   return cut ? { title: cut[1]!.replace(/[.:]$/, ""), more: cut[2]! } : { title: line.replace(/\.$/, ""), more: "" };
+}
+
+/**
+ * Nora's answer in the frame (30.50 item 2): one marker and a bold title of five words or fewer, the answer exactly as
+ * Nora wrote it, then one question if she asked one. Only the frame is new: her words, and her prompt, do not change.
+ * The title is the frame's own ("Nora's answer"), never a sentence of hers cut to length.
+ */
+export const NORA_TITLE = "Nora's answer";
+export function noraLook(text: string, business: string | null = null): Look {
+  const lines = text.trim().split("\n").map((x) => x.trimEnd()).filter((x) => x.trim());
+  let end: string | null = null;
+  const last = lines.at(-1) ?? "";
+  if (lines.length && last.endsWith("?")) {
+    // The question is the last sentence when it stands after others on its line, else the whole last line.
+    const cut = /^(.+[.?])\s+(?<q>[^.?]+\?)$/s.exec(last);
+    const before = cut?.[1];
+    if (cut && before && !/\b(?:Dr|Mr|Mrs|Ms|St|No)\.$/.test(before)) {
+      lines[lines.length - 1] = before;
+      end = cut.groups!.q!.trim();
+    } else {
+      end = last.trim();
+      lines.pop();
+    }
+  }
+  return { mark: MARK.enquiry, title: NORA_TITLE, business, facts: lines, end };
 }
 
 /** A note at the end of a line ("Tap it to set that time. Nothing is changed until you tap.") split off as its own line. */
@@ -158,6 +206,33 @@ export function withFooter(l: Look, interactive: boolean): Look {
   return { ...l, end: parts.length > 1 ? parts[0]! : null, footer: note };
 }
 
+/** A part that says when: a date, a time, a day part or words kept with "no time set". */
+const WHEN = /\b(?:today|tomorrow|(?:mon|tues?|wed(?:nes)?|thu(?:rs)?|fri|sat(?:ur)?|sun)(?:day)?)\b|\d{1,2}:\d{2}|\b(?:morning|afternoon|evening|night)\b|\(as written\)|, no time set$|^no time entered$/i;
+const CONFIRM = /^(?:Needs confirmation from |Still needs confirmation from |To confirm: )/;
+
+/** "To confirm: salon, client": the sides that have not confirmed, plainly, in the order the request book names them. */
+export function toConfirm(part: string): string | null {
+  const m = /^(?:(?:Still n|N)eeds confirmation from (.+)|To confirm: (.+))$/.exec(part.trim());
+  if (!m) return null;
+  const sides = (m[1] ?? m[2]!).split(/\s+and from\s+|,\s*/).map((x) => x.replace(/^the /, "").trim()).filter(Boolean);
+  return sides.length ? `To confirm: ${sides.join(", ")}` : null;
+}
+
+/**
+ * The description of a request row from the parts of its line: the service, then the day and time (in a row "afternoon"
+ * stands without "no time set"), then what is to confirm, then the status where the line has one (a row under a status
+ * heading has none). A held confirmation ("Confirmed by the salon") is not part of it.
+ */
+export function rowDescription(parts: string[]): string {
+  const rest = parts.map((x) => x.trim()).filter(Boolean);
+  const confirm = rest.map(toConfirm).find((x) => x) ?? null;
+  const others = rest.filter((x) => !toConfirm(x) && !/^Confirmed by /.test(x) && !CONFIRM.test(x));
+  const service = others[0] ?? null;
+  const when = others.slice(1).find((x) => WHEN.test(x)) ?? null;
+  const status = others.slice(1).filter((x) => x !== when);
+  return fitParts([service ?? "", when ? when.replace(/, no time set$/, "") : "", confirm ?? "", ...status], ROW_DESC_MAX);
+}
+
 const ROW = /^#(\d{1,9})\s+(.+)$/;
 /** True when the facts hold one or more request rows ("#12 Sarah · Highlights · ..."). */
 export const hasRows = (l: Look) => (l.facts ?? []).some((f) => ROW.test(f.trim()));
@@ -184,7 +259,7 @@ export function toList(l: Look, extraMore = 0): { look: Look; list: ListMsg } | 
       // A group line before rows is a section title; anything else stays in the body.
       if (/\(\d+\)$/.test(f) || /^(?:Requested|Confirmed|Arrived|In progress|Waiting|Ready|Appointments|Enquiries|Jobs|Visits)\b/.test(f)) {
         // "Appointments, Requested (17)" is too long for a section title: the status and its count are kept.
-        sections.push({ title: clip(f.length > SECTION_TITLE_MAX && f.includes(", ") ? f.slice(f.lastIndexOf(", ") + 2) : f, SECTION_TITLE_MAX), rows: [] });
+        sections.push({ title: wholeWords(f.length > SECTION_TITLE_MAX && f.includes(", ") ? f.slice(f.lastIndexOf(", ") + 2) : f, SECTION_TITLE_MAX), rows: [] });
       } else other.push(f);
       continue;
     }
@@ -193,15 +268,11 @@ export function toList(l: Look, extraMore = 0): { look: Look; list: ListMsg } | 
       continue;
     }
     if (!sections.length) sections.push({ rows: [] });
-    // A row's description keeps what is still missing in full ("To confirm: the salon, the client"); the earlier parts shrink.
-    const [name, ...parts] = m[2]!.split(" · ").map((p) => p.replace(/^Needs confirmation from (.+?) and from (.+)$/, "To confirm: $1, $2").replace(/^Needs confirmation from (.+)$/, "To confirm: $1"));
-    const tail = parts.length > 1 && /^To confirm:/.test(parts.at(-1)!) ? parts.pop()! : null;
-    // The summary (the first part) shrinks first, so the time and the status stay whole.
-    const after = parts.slice(1).join(" · ");
-    const room = ROW_DESC_MAX - (tail ? tail.length + 3 : 0) - (after ? after.length + 3 : 0);
-    const head = parts.length ? clip(parts[0]!, Math.max(room, 12)) : null;
-    const rest = [...(head ? [head] : []), ...(after ? [after] : []), ...(tail ? [tail] : [])];
-    sections.at(-1)!.rows.push({ id: `#${m[1]}`, title: clip(`#${m[1]} ${name}`, ROW_TITLE_MAX), ...(rest.length ? { description: clip(rest.join(" · "), ROW_DESC_MAX) } : {}) });
+    // A row's description: the service, the day and time, what is to confirm, in that order. Anything else (a status, what
+    // is already confirmed) is not part of it. What does not fit in 72 characters is dropped whole from the end.
+    const [name, ...parts] = m[2]!.split(" \u00b7 ");
+    const description = rowDescription(parts);
+    sections.at(-1)!.rows.push({ id: `#${m[1]}`, title: rowTitle(m[1]!, name!), ...(description ? { description } : {}) });
     shown++;
   }
   if (!shown) return null;
@@ -265,6 +336,7 @@ type KindName = "appointment" | "enquiry" | "job";
 export function markFor(result: string, kind: KindName | null): string {
   const r = result.split(":")[0]!;
   const byKind = kind ? MARK[kind] : MARK.list;
+  if (r === "nora") return MARK.enquiry;
   if (/^hours_/.test(r)) return MARK.hours;
   if (/^(post_|photo|held_photo|video$|post_skip)/.test(r)) return MARK.picture;
   if (/^(shown_for_yes|no_review$|exact_|edit_(started|refused|draft)|show_refused|review_alert|new_draft)/.test(r)) return MARK.review;
@@ -280,7 +352,7 @@ export function markFor(result: string, kind: KindName | null): string {
 /** The replies in scope of look 2 (30.50 item 2): the request book, help, switch, off topic, and the Google care replies
  *  inside the window (a review and its draft, hours, photos and posts, billing and the hand-off). Others keep their look
  *  until a later session moves them (docs/LATER.md). */
-export const IN_SCOPE = /^(request_|reset_|forwarded_yes|help$|which_role|which_business|business_set|role_set|role_refused|switched|pick_closed|off_topic|hours_|post_|photo|held_photo|video$|file_refused|shown_for_yes|no_review$|exact_|edit_|show_refused|approved$|undone$|undo:|too_late$|repeat$|stale_button$|refused:|which_one$|yes_nothing$|not_yours$|billing_|handoff$)/;
+export const IN_SCOPE = /^(nora$|request_|reset_|forwarded_yes|help$|which_role|which_business|business_set|role_set|role_refused|switched|pick_closed|off_topic|hours_|post_|photo|held_photo|video$|file_refused|shown_for_yes|no_review$|exact_|edit_|show_refused|approved$|undone$|undo:|too_late$|repeat$|stale_button$|refused:|which_one$|yes_nothing$|not_yours$|billing_|handoff$)/;
 /** Replies about a change to Google: the business is always named after the title (say.ts: the business named first on
  *  anything that can change Google). */
 export const NAMES_BUSINESS = /^(hours_shown|post_shown|photo_post_shown|photo_category_set|shown_for_yes|approved)$/;

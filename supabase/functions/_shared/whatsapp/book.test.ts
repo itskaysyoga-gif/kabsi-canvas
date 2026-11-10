@@ -275,7 +275,7 @@ Deno.test("find: a name lists the matches with one question; a number shows the 
   assert.deepEqual(last(w).rowIds, ["#2", "#1"]);
   const foundAll = [found, last(w).footer ?? ""].join("\n");
   assert.equal(await send(w, TEST, { text: "1" }), "request_summary");
-  assert.match(last(w).body, /Appointment 1\*\n\nSarah\nHighlights\nWhen: Thu 29 Oct afternoon, no time set\nStatus: Requested/);
+  assert.match(last(w).body, /Appointment 1\*\n\nSarah\nHighlights\nThu 29 Oct afternoon, no time set\nStatus: Requested\nNeeds confirmation from the salon and from the client\.\n\nThis is a note in Kabsi/);
   assert.equal(await send(w, TEST, { text: "request 2" }), "request_summary");
   assert.match(last(w).body, /Appointment 2\*\n\nSarah\n/);
   assert.equal(await send(w, TEST, { text: "request 9" }), "request_summary");
