@@ -138,6 +138,8 @@ export type HandlerDeps = {
   ip: (req: Request) => string;
   sha256Hex: (text: string) => Promise<string>;
   hmacHex: (key: string, text: string) => Promise<string>;
+  /** The key the site's server signs the geo token with (geoSignKey); undefined when none is set, and the city is left out. */
+  geoKey: () => Promise<string | undefined>;
   randomBytes: (n: number) => Uint8Array;
   rateLimit: (key: string, max: number, windowSeconds: number, opts?: { failClosed?: boolean }) => Promise<boolean>;
   verifyTurnstile: (token: string | undefined, ip?: string) => Promise<boolean>;
@@ -155,6 +157,15 @@ export type HandlerDeps = {
 const HEX64 = /^[0-9a-f]{64}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const SECRET = /^[A-Za-z0-9_-]{43,64}$/;
+
+/** The geo signing key, the same on both sides with no new secret to paste: GEO_SIGN_KEY when set, else an HMAC of a fixed
+ *  label under the route key the database already shares with the site's server (SUGGEST_ROUTE_KEY on Vercel, Vault
+ *  'suggest_route_key' in Supabase). The label keeps the derived key apart from the route key itself. */
+export const GEO_KEY_LABEL = "kabsi geo sign v1";
+export async function geoSignKey(direct: string | undefined, routeKey: string | undefined, hmacHex: HandlerDeps["hmacHex"]): Promise<string | undefined> {
+  if (direct) return direct;
+  return routeKey ? await hmacHex(routeKey, GEO_KEY_LABEL) : undefined;
+}
 
 /** Reads the geo token the site's server signed (GET /api/geo?sign=1): "city|country|expiry" and its HMAC. Bad or old: nothing. */
 export async function readGeo(token: unknown, key: string | undefined, hmacHex: HandlerDeps["hmacHex"], now: number): Promise<{ city: string | null; country: string | null }> {
@@ -199,7 +210,7 @@ export function makeHandler(d: HandlerDeps) {
         return fail("rate_limited", "That is a lot of sign-in tries. Please try again in an hour.", 429);
       }
       const code = makeCode(d.randomBytes);
-      const geo = await readGeo(b["geo"], d.env("GEO_SIGN_KEY"), d.hmacHex, now());
+      const geo = await readGeo(b["geo"], await d.geoKey().catch(() => undefined), d.hmacHex, now());
       const device = deviceOf(req.headers.get("user-agent"));
       try {
         const id = await d.start({ codeHash: await codeHash(d, code), browserHash, ...device, ...geo });

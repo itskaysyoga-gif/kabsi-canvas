@@ -5,7 +5,7 @@
 import assert from "node:assert/strict";
 import {
   CARD_ALPHABET, codeHash, codeOf, type CheckResult, CODE_LIFE_MS, deviceName, deviceOf, type HandlerDeps, makeCode, makeHandler,
-  readGeo, signinHref, SIGNIN_SAY, type StartRow,
+  geoSignKey, readGeo, signinHref, SIGNIN_SAY, type StartRow,
 } from "./wa-signin.ts";
 import { signinSeam, type SigninDb } from "./whatsapp/signin.ts";
 import type { Inbound } from "./whatsapp/channel.ts";
@@ -39,7 +39,7 @@ class World {
 
   deps(): HandlerDeps {
     return {
-      env: (n) => this.env[n], ip: () => "203.0.113.9", sha256Hex, hmacHex,
+      env: (n) => this.env[n], ip: () => "203.0.113.9", sha256Hex, hmacHex, geoKey: async () => this.env.GEO_SIGN_KEY,
       randomBytes: (n) => crypto.getRandomValues(new Uint8Array(n)),
       rateLimit: async (key, max) => {
         const n = (this.limits.get(key) ?? 0) + 1;
@@ -164,6 +164,14 @@ Deno.test("signup1: browser and system in plain names, never guessed", () => {
   assert.equal(deviceName(deviceOf("Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/25.0 Chrome/121.0 Mobile Safari/537.36")), "Samsung Internet, Android");
   assert.equal(deviceName(deviceOf("curl/8.0")), "a new device");
   assert.equal(deviceName(deviceOf(null)), "a new device");
+});
+
+Deno.test("signup1: both sides derive the same geo key from the shared route key, never the route key itself", async () => {
+  const derived = await geoSignKey(undefined, "r".repeat(64), hmacHex);
+  assert.equal(derived, await hmacHex("r".repeat(64), "kabsi geo sign v1"));
+  assert.notEqual(derived, "r".repeat(64));
+  assert.equal(await geoSignKey("direct", "r".repeat(64), hmacHex), "direct");
+  assert.equal(await geoSignKey(undefined, undefined, hmacHex), undefined);
 });
 
 Deno.test("signup1: the city comes only from a signed, fresh geo token", async () => {

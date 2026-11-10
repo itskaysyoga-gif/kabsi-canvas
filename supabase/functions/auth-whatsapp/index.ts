@@ -9,7 +9,7 @@ import { serve } from "../_shared/kabsi.ts";
 import { clientIp } from "../_shared/client-ip.ts";
 import { admin, captureError, CORS, isInternal, json, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { BODY_LIMITS, withBodyCap } from "../_shared/body-cap.ts";
-import { makeHandler } from "../_shared/wa-signin.ts";
+import { geoSignKey, makeHandler } from "../_shared/wa-signin.ts";
 import { checkSignin, mintSession, startSignin } from "../_shared/wa-signin-db.ts";
 import { type NoticeRow, noticeEmail, sendSigninNotices } from "../_shared/whatsapp/signin.ts";
 import { agentDeps, whatsappCtx } from "../_shared/whatsapp/db.ts";
@@ -22,11 +22,22 @@ async function hmacHex(key: string, text: string): Promise<string> {
   return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+// The geo signing key: GEO_SIGN_KEY when set, else derived from the route key Vault already shares with the site's server.
+let geoKey: Promise<string | undefined> | null = null;
+const readGeoKey = () => {
+  geoKey ??= (async () => {
+    const { data } = await admin().rpc("internal_secret", { p_name: "suggest_route_key" });
+    return await geoSignKey(Deno.env.get("GEO_SIGN_KEY") || undefined, typeof data === "string" && data ? data : undefined, hmacHex);
+  })().catch(() => (geoKey = null, undefined));
+  return geoKey;
+};
+
 const browser = makeHandler({
   env: (name) => Deno.env.get(name),
   ip: (req) => clientIp(req),
   sha256Hex,
   hmacHex,
+  geoKey: readGeoKey,
   randomBytes: (n) => crypto.getRandomValues(new Uint8Array(n)),
   rateLimit,
   verifyTurnstile,

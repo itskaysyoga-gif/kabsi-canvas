@@ -47,7 +47,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - App 5: may qa-staff@test.local be staff, for live staff runs? (LATER row)
 - Launch 1: send one Founding 25 application named "QA Launch 1 test" (a session removes the row).
 - Outbound: before you say start, the placement test of 30.39 item 13 (LATER row).
-- Signup 1 (PR 554, draft): migration applied 10 Nov (version 20261110125951); turn on the Google provider in Supabase Auth with `https://kabsi.co/**` in the redirect URLs (read 10 Nov: google false); set `GEO_SIGN_KEY` in Vercel and Supabase secrets; then the 7 step phone check in `2026-11-10-signup1.md`.
+- Signup 1 (PR 554): migration applied 10 Nov (version 20261110125951); turn on the Google provider in Supabase Auth with `https://kabsi.co/**` in the redirect URLs (read 10 Nov: google false); then the 7 step phone check in `2026-11-10-signup1.md`.
 - Close 1: merge PR 499 (reply.v4) with the admin merge; the rule on main refuses it while the Prompt gate is red, by design (R-130); then check the deployed function names reply.v4. After the DataForSEO top-up, one full free check to see why the one of 6 Nov failed (30.42).
 
 ## Open After merge checks and findings
