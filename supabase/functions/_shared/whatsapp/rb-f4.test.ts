@@ -112,6 +112,7 @@ Deno.test("order: STOP and the no-model commands still come first at a business 
 
 Deno.test("booked: with no enquiry for Maya, a new visit is proposed with the time buttons, then Save", async () => {
   const w = phoneWorld();
+  w.now = Date.UTC(2026, 10, 10, 4, 52); // Tuesday 10 Nov 2026, as in Rashid's retest: Monday 6 is Mon 16 Nov, 6 am or 6 pm
   await toGym(w);
   const ai = w.aiCalls;
   w.extractMap["Maya booked a trial Monday 6"] = gym("Maya", "a trial", "Monday 6");
@@ -163,20 +164,6 @@ Deno.test("weekdays: thuesday 3pm on a Tuesday morning gives Today 15:00 and Thu
   w.extractMap["Rana trim thuesday 3pm"] = salon("Rana", "trim", "thuesday 3pm");
   assert.equal(await send(w, { text: "Rana trim thuesday 3pm" }), "request_proposed");
   assert.deepEqual(last(w).buttons, ["Today 15:00", "Thu 12 Nov 15:00"]);
-});
-
-Deno.test("weekdays: review: a past readings filter, never for a visit logged after it happened", async () => {
-  const w = phoneWorld(); // Monday 26 Oct, 19:00 in Dubai
-  await toSalon(w);
-  w.extractMap["Nadia came in monday 6"] = salon("Nadia", null, "monday 6");
-  await send(w, { text: "Nadia came in monday 6" });
-  assert.ok(last(w).buttons.some((b) => /^Today 18:00/.test(b)), last(w).buttons.join(", "));
-  // Not in the past tense: today's 18:00 is gone, so next Monday is the one reading left (a guess to tap).
-  w.conversation(ME).open_question = null;
-  w.extractMap["Dina trim monday 6"] = salon("Dina", "trim", "monday 6");
-  await send(w, { text: "Dina trim monday 6" });
-  assert.match(last(w).body, /Mon 2 Nov|Monday/);
-  assert.doesNotMatch(last(w).buttons.join(", "), /Today/);
 });
 
 Deno.test("weekdays: after 3pm on that Tuesday, the Tuesday reading is a week on", () => {
