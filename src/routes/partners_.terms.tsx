@@ -21,7 +21,7 @@ export const Route = createFileRoute("/partners_/terms")({
   component: Page,
 });
 
-const UPDATED = "26 October 2026";
+const UPDATED = "10 November 2026";
 
 function Page() {
   return (
@@ -33,6 +33,7 @@ function Page() {
         "You are paid on the 5th of each month, once at least $25 has cleared its 30-day hold.",
         "Say it is a paid partnership, every time.",
         "Never promise rankings, reviews or customers, and never say Kabsi works with Google.",
+        "Follow Google's review rules: no gating, no rewards for reviews, no fake reviews.",
         "Kabsi can end a partnership that breaks these rules.",
       ]}
     >
@@ -174,6 +175,12 @@ function Page() {
             customers for reviews.
           </li>
           <li>
+            Follow Google&apos;s review rules: no review gating or filtering (asking only happy
+            customers), no rewards for reviews and no fake reviews. This covers every card, stand,
+            link and message you sell or send. Breaking this rule ends the partnership and its
+            payments: commission not yet paid is withheld.
+          </li>
+          <li>
             No bulk or unsolicited WhatsApp, SMS or email. Send Kabsi to people yourself, one to
             one, from your own account.
           </li>
@@ -202,8 +209,8 @@ function Page() {
             and commission you have not been paid is withheld.
           </li>
           <li>
-            Any claim of a Google partnership, any incentive for reviews and any spam ends the
-            partnership at once.
+            Any claim of a Google partnership, any incentive for reviews, any review gating or
+            filtering, any fake review and any spam ends the partnership at once.
           </li>
           <li>
             You can leave at any time by sending "Leave the program" on WhatsApp. Your page then
