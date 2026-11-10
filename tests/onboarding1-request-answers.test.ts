@@ -293,17 +293,55 @@ describe("the screens", () => {
   });
 });
 
-describe("Gate 3's rule (master plan 30.48)", () => {
+describe("Gate 3's rule (master plan 30.48, tie rule 30.49 item 3)", () => {
   const g = (q: number, a: number, verdict: StaffRequestAnswers["gate3"]["verdict"]) =>
     gate3Line({ first_ten_answered: a, first_ten_qualifying: q, verdict });
+  const g20 = (q: number, a: number, verdict: StaffRequestAnswers["gate3"]["verdict"]) =>
+    gate3Line({
+      first_ten_answered: 10,
+      first_ten_qualifying: 2,
+      first_twenty_answered: a,
+      first_twenty_qualifying: q,
+      window: 20,
+      verdict,
+    });
   it("says the rule once and what it means now", () => {
     expect(g(3, 10, "open")).toContain(
-      "3 or more opens the next step. Fewer than 2 keeps it off. It is open.",
+      "3 or more opens the next step. Fewer than 2 keeps it off. Exactly 2 counts the first 20 instead, where 5 or more opens it. It is open.",
     );
     expect(g(1, 10, "off")).toContain("It stays off.");
-    expect(g(2, 10, "between")).toContain("Two is neither: lane R decides.");
     expect(g(1, 6, "collecting")).toContain("Still collecting.");
     expect(g(1, 6, "collecting")).toContain("(6 so far)");
+  });
+  it("exactly 2 of the first 10 counts the first 20, where 5 opens it", () => {
+    const wait = g20(3, 14, "extended");
+    expect(wait).toContain(
+      "Exactly 2 of the first 10 keep requests in chats, a notebook or memory and said yes",
+    );
+    expect(wait).toContain("the first 20 businesses that answered (14 so far): 3 keep requests");
+    expect(wait).toContain(
+      "5 or more of the 20 opens the next step. Fewer keeps it off. Still collecting.",
+    );
+    expect(g20(5, 17, "open")).toContain("It is open.");
+    expect(g20(4, 20, "off")).toContain("It stays off.");
+    expect(wait).not.toContain("lane R decides");
+  });
+  it("an older answer without the first 20 fields still reads", () => {
+    expect(
+      gate3Line({ first_ten_answered: 10, first_ten_qualifying: 2, verdict: "extended" }),
+    ).toContain("Still collecting.");
+  });
+  it("holds no dash or exclamation mark", () => {
+    for (const line of [
+      g(3, 10, "open"),
+      g(1, 10, "off"),
+      g(1, 6, "collecting"),
+      g20(3, 14, "extended"),
+      g20(5, 17, "open"),
+      g20(4, 20, "off"),
+    ]) {
+      expect(line).not.toMatch(/[\u2013\u2014!]/);
+    }
   });
   it("labels every choice", () => {
     expect(Object.keys(CHOICE_LABEL)).toEqual([

@@ -93,14 +93,23 @@ export async function loadRequestAnswers(locationId: string): Promise<RequestAns
 
 // ── Staff: counts only (Gate 3's evidence, master plan 30.48) ───────────────────────────────────────────────────────────────
 
-export type Gate3Verdict = "collecting" | "open" | "off" | "between";
+// Tidy 2 part 2 (30.49 item 3): "extended" is exactly 2 of the first 10, so the count now runs to the first 20.
+export type Gate3Verdict = "collecting" | "open" | "off" | "extended";
 export type StaffRequestAnswers = {
   generated_at: string;
   businesses: number;
   answered_any: number;
   tracking: Record<"answered" | TrackingChoice, number>;
   early_access: { answered: number; yes: number; no: number };
-  gate3: { first_ten_answered: number; first_ten_qualifying: number; verdict: Gate3Verdict };
+  gate3: {
+    first_ten_answered: number;
+    first_ten_qualifying: number;
+    /** Added by Tidy 2; a screen built before it reads only the first ten fields. */
+    first_twenty_answered?: number;
+    first_twenty_qualifying?: number;
+    window?: 10 | 20;
+    verdict: Gate3Verdict;
+  };
   qualifying: {
     position: number;
     business: string;
@@ -116,14 +125,28 @@ export async function loadStaffRequestAnswers(): Promise<StaffRequestAnswers> {
   return data as unknown as StaffRequestAnswers;
 }
 
-/** The one line the staff page shows for Gate 3. A rule of the master plan, said once. */
+/** The one line the staff page shows for Gate 3. A rule of the master plan (30.48 item 4, tie rule 30.49 item 3), said once.
+ *  First 10: 3 or more opens, fewer than 2 keeps it off, exactly 2 grows the count to the first 20, where 5 or more opens. */
 export function gate3Line(g: StaffRequestAnswers["gate3"]): string {
-  const head = `Of the first 10 businesses that answered (${g.first_ten_answered} so far): ${g.first_ten_qualifying} keep requests in chats, a notebook or memory and said yes.`;
-  const rule = "3 or more opens the next step. Fewer than 2 keeps it off.";
-  if (g.verdict === "open") return `${head} ${rule} It is open.`;
-  if (g.verdict === "off") return `${head} ${rule} It stays off.`;
-  if (g.verdict === "between") return `${head} ${rule} Two is neither: lane R decides.`;
-  return `${head} ${rule} Still collecting.`;
+  const keep = "keep requests in chats, a notebook or memory and said yes";
+  const rule =
+    "3 or more opens the next step. Fewer than 2 keeps it off. Exactly 2 counts the first 20 instead, where 5 or more opens it.";
+  const ten = `Of the first 10 businesses that answered (${g.first_ten_answered} so far): ${g.first_ten_qualifying} ${keep}.`;
+  if (
+    g.verdict === "extended" ||
+    (g.window === 20 && (g.verdict === "open" || g.verdict === "off"))
+  ) {
+    const n = g.first_twenty_answered ?? g.first_ten_answered;
+    const q = g.first_twenty_qualifying ?? g.first_ten_qualifying;
+    const head = `Exactly 2 of the first 10 ${keep}, so the count runs to the first 20 businesses that answered (${n} so far): ${q} ${keep}.`;
+    const tail = "5 or more of the 20 opens the next step. Fewer keeps it off.";
+    if (g.verdict === "open") return `${head} ${tail} It is open.`;
+    if (g.verdict === "off") return `${head} ${tail} It stays off.`;
+    return `${head} ${tail} Still collecting.`;
+  }
+  if (g.verdict === "open") return `${ten} ${rule} It is open.`;
+  if (g.verdict === "off") return `${ten} ${rule} It stays off.`;
+  return `${ten} ${rule} Still collecting.`;
 }
 
 export const CHOICE_LABEL: Record<string, string> = Object.fromEntries(TRACKING_CHOICES);
