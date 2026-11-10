@@ -239,9 +239,12 @@ Deno.test("update: a move the kind does not have is refused plainly; a name with
   assert.equal(await send(w, { text: "1 collected" }), "request_status_refused");
   assert.match(last(w).body, /Kabsi cannot make that change\*\nNothing was changed\./);
   assert.equal(s.status, "requested");
-  // "Nadia came in": nobody of that name in Kabsi, so it goes to the router as before (no change, nothing invented).
-  assert.equal(await send(w, { text: "Nadia came in" }), "off_topic");
-  assert.equal(w.aiCalls, 1);
+  // "Nadia came in": nobody of that name in Kabsi. RB-F4 (R-149 item 1): a person and what they did is the request book's,
+  // read as a new request with no router call; no existing request is changed and nothing is saved before a tap.
+  w.extractMap["Nadia came in"] = JSON.stringify({ fields: { customer_name: "Nadia", phone: null, service: null, when: null, stylist: null }, said: { agreed: null, already_arranged: null } });
+  assert.equal(await send(w, { text: "Nadia came in" }), "request_proposed");
+  assert.equal(w.aiCalls, 0);
+  assert.equal(s.status, "requested");
   // A number that is not there.
   assert.equal(await send(w, { text: "9 ready" }), "request_status_refused");
   assert.match(last(w).body, /#9: I cannot find that request/);

@@ -15,6 +15,7 @@ import {
   refOf, refusalReply, requestSummary, rowOf, savedText, toEvidence,
   type Act, arrivedLine, askAnswer, parseBookCommand, type RbAsk, type RbTime, runCommand, timePicked, undoButton, undoIds, kindIn, markOf, styleReply,
   correctedReplyOf, nonce, duplicateReply, findDuplicate, fullOf, pastServices, reviseRequest, updateChanges,
+  bookHelp, bookIntent, kabsiJob, type Kind, KIND_KEY, namesKabsi, newKind, packAs, packWordWins, proposalKind,
 } from "./book.ts";
 import { photoRefusal, voiceCheck } from "./media.ts";
 import { MAX_BYTES } from "../photos/sniff.ts";
@@ -499,7 +500,11 @@ async function help(t: Turn): Promise<string> {
   if (dom === "partner") return answered(plain(t), `Your partner tools\n${SAY.partnerSoon}`, "help");
   if (dom === "business") {
     const b = pickBusiness(t.who);
-    return answered(plain({ ...t, business: b }), b?.role === "staff" ? SAY.staffHelp : SAY.ownerHelp, "help");
+    const text = b?.role === "staff" ? SAY.staffHelp : SAY.ownerHelp;
+    // RB-F4 (R-149 item 5): at a business with the request book on, its own block after the usual list.
+    const pack = b && t.d.book ? (await bookOn(t.d.book.db, [b.location_id])).get(b.location_id) : undefined;
+    const block = pack ? `\n\n${bookHelp(pack, domains(t.who).includes("staff"))}` : "";
+    return answered(plain({ ...t, business: b }), `${text}${block}`, "help");
   }
   // A phone that is not a customer meets Nora as Kabsi's assistant (9.2).
   return answered(t, say("unknownHelp", t.lang), "help");
@@ -1213,6 +1218,27 @@ type RbQuestion = Extract<OpenQuestion, { type: "rb_proposal" }>;
 type BookTurn = { on: Map<string, Pack>; b: BusinessRole | null; proposal: RbQuestion | null; open: RbQuestion | null };
 type Said = { send: () => Promise<string> };
 const said = (t: Turn, body: string, result: string, buttons?: Button[]): Said => ({ send: () => answered(t, body, result, buttons) });
+/** A new request (never "only if new") always has an answer; null cannot happen there, and is kept safe as "unread". */
+const sendSaid = (s: Said | null): Promise<string> => (s ? s.send() : Promise.resolve("request_unread"));
+
+/** RB-F4: a request read by code goes straight to its one model call; "On it" still goes first when that takes a moment. */
+async function readWithOnIt(t: Turn, bt: BookTurn, work: () => Promise<Said | null>): Promise<string> {
+  const sleep = t.d.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+  const tb = bt.b ? { ...t, business: bt.b, head: head(t.who, "business", bt.b) } : t;
+  let settled = false;
+  let onIt: Promise<unknown> | null = null;
+  void sleep(ON_IT_REQUEST_MS).then(() => {
+    if (!settled) onIt = say1(tb, SAY.onIt);
+  });
+  let r: Said | null;
+  try {
+    r = await work();
+  } finally {
+    settled = true;
+  }
+  if (onIt) await onIt;
+  return await sendSaid(r);
+}
 const bookCtx = (t: Turn, b: BusinessRole, pack: Pack) => ({ pack, timeZone: b.time_zone ?? "UTC", now: new Date((t.d.now ?? Date.now)()) });
 /** RB-F3: a request book reply: no role head; the bold first line names the business only when the phone has more than one. */
 const withB = (t: Turn, b: BusinessRole, pack: Pack | null = null): Turn => ({ ...t, business: b, head: null, style: { pack } });
@@ -1243,6 +1269,9 @@ async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
   if (t.m.forwarded) return null;
   const text = (t.m.text ?? "").trim();
   const words = cmd.k === "free" || (cmd.k === "tool" && ["hours", "post", "billing"].includes(cmd.tool));
+  // RB-F4 (R-149 item 1): Kabsi's own product words typed alone ("trial", "prices") are the business's own when its pack
+  // has them (a gym's trial); with the book off, or a pack without them, they keep Kabsi's meaning.
+  const packWord = cmd.k === "tool" && ["trial", "prices"].includes(cmd.tool) && !t.m.forwarded;
   const ref: Ref | null = cmd.k === "number" ? { number: cmd.n, word: null } : words ? refOf(text) : null;
   const oq = t.who.conversation?.open_question;
   // RB-F2: while a proposal waits, a typed Save (also as a reply that quotes it) is the same as tapping Save, and a typed
@@ -1253,7 +1282,7 @@ async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
   // RB-F: a typed yes or no to a question asked before a change, or to the one reading of a time.
   if ((cmd.k === "yes" || cmd.k === "no") && (oq?.type === "rb_ask" || oq?.type === "rb_time")) return await bookAnswer(t, cmd.k === "yes", oq);
   const answer = yesNo !== null && oq?.type === "rb_proposal";
-  if (!ref && cmd.k !== "free" && !answer) return null;
+  if (!ref && cmd.k !== "free" && !answer && !packWord) return null;
   const bt = await bookCheck(t);
   if (!bt) return null;
   const db = t.d.book.db;
@@ -1291,6 +1320,9 @@ async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
       const act = await runCommand(db, { location: b.location_id, actor: b.user_id }, c, bookCtx(t, b, pack), t.m.messageId).catch(() => "error" as const);
       if (act === "error") return answered(withB(t, b, pack), BOOK_SAY.tryAgain, "request_db_error");
       if (act) return await bookAct(withB(t, b, pack), act);
+      // RB-F4 (R-149 item 2): "Maya booked a trial Monday 6" with no open enquiry for Maya is a new visit, appointment or
+      // job (by pack), proposed with Save and Change. Read by the same one model call as any new request; no router call.
+      if (c.k === "convert") return await readWithOnIt(t, bt, () => requestTool(t, bt, "request_new", undefined, text, false, newKind(pack)));
     }
   }
   if (ref) {
@@ -1300,20 +1332,27 @@ async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
     if (!reply) return answered(withB(t, b, bt.on.get(b.location_id)), BOOK_SAY.tryAgain, "request_db_error");
     return answered(withB(t, b, bt.on.get(b.location_id)), reply.body, ref.word ? `request_ref_${ref.word}` : "request_summary");
   }
+  // RB-F4 (R-149 item 1): a message about a person and what they want or did, a booking, or a name with one of the pack's
+  // services is the request book's, read by code before the off-topic guard and the router (no router call).
+  const packs = b ? [bt.on.get(b.location_id)!] : [...bt.on.values()];
+  if ((cmd.k === "free" || packWord) && packs.some((p) => bookIntent(text, p))) {
+    return await readWithOnIt(t, bt, () => requestTool(t, bt, "request_new", undefined, text));
+  }
+  if (packWord) return null;
   return await free(t, text, bt);
 }
 
 /** What a request tool answers, worked out before it is sent (so "On it" goes first when it takes a moment). */
-async function requestTool(t: Turn, bt: BookTurn, tool: string, arg: string | undefined, text: string, onlyIfNew = false): Promise<Said | null> {
+async function requestTool(t: Turn, bt: BookTurn, tool: string, arg: string | undefined, text: string, onlyIfNew = false, kind?: Kind): Promise<Said | null> {
   try {
-    return await requestToolInner(t, bt, tool, arg, text, onlyIfNew);
+    return await requestToolInner(t, bt, tool, arg, text, onlyIfNew, kind);
   } catch {
     // A database or model failure: a plain line, never silence. Nothing was saved; the owner sends it again.
     return said(bt.b ? withB(t, bt.b, bt.on.get(bt.b.location_id)) : t, BOOK_SAY.tryAgain, "request_db_error");
   }
 }
 
-async function requestToolInner(t: Turn, bt: BookTurn, tool: string, arg: string | undefined, text: string, onlyIfNew: boolean): Promise<Said | null> {
+async function requestToolInner(t: Turn, bt: BookTurn, tool: string, arg: string | undefined, text: string, onlyIfNew: boolean, kind?: Kind): Promise<Said | null> {
   const b = bt.b;
   // Several businesses and none chosen: the existing question, with the message kept for after the pick.
   if (!b) return { send: () => withBusiness(t, "help", text, () => Promise.resolve("which_business")) };
@@ -1329,7 +1368,8 @@ async function requestToolInner(t: Turn, bt: BookTurn, tool: string, arg: string
   let revising: string | null = null;
   let before: unknown = null;
   let oldText: string | null = null;
-  if (bt.proposal) {
+  // RB-F4: "X booked Y" made as a new visit or job (kind given) is its own proposal, never a change to one waiting.
+  if (bt.proposal && !kind) {
     const g = await db.intake(b.location_id, b.user_id, bt.proposal.intake_id).catch(() => null);
     if (g?.ok === true && g.state === "pending" && typeof g.raw_text === "string") {
       base = `${g.raw_text}\n${text}`;
@@ -1340,6 +1380,9 @@ async function requestToolInner(t: Turn, bt: BookTurn, tool: string, arg: string
   }
   // A message the router could not place ("thanks", "ok") revises the draft only when it adds something to it.
   if (onlyIfNew && !revising) return null;
+  // RB-F4: the kind the proposal is made as ("X booked Y" with no enquiry), kept by a revision of it.
+  const asKind: Kind | null = kind ?? (revising ? proposalKind(pack, before as Record<string, unknown>) : null);
+  const rpack = packAs(pack, asKind);
   const now = new Date((t.d.now ?? Date.now)());
   // RB-F3: the business's own past services are read like the pack's (typos included).
   const extraServices = await pastServices(db, b.location_id, b.user_id, pack);
@@ -1347,11 +1390,12 @@ async function requestToolInner(t: Turn, bt: BookTurn, tool: string, arg: string
   // RB-F3: a revision reads only the new words and keeps every field they do not give (reviseRequest); a proposal stored
   // before RB-F3 is read with both messages together, as before.
   const merged = revising && oldText !== null && before && typeof before === "object"
-    ? await reviseRequest(oldText, before as Record<string, unknown>, text, pack, rctx, t.d.book!.ask) : null;
+    ? await reviseRequest(oldText, before as Record<string, unknown>, text, rpack, rctx, t.d.book!.ask) : null;
   if (merged && onlyIfNew && (merged.ok ? merged.addsNothing : true)) return said(tb, BOOK_SAY.stillWaiting, "request_still_waiting");
-  const r = merged ?? await readRequest(base, pack, rctx, t.d.book!.ask);
+  const r = merged ?? await readRequest(base, rpack, rctx, t.d.book!.ask);
   if (!r.ok) return said(tb, r.reply.body, revising ? "request_revise_unread" : "request_unread");
   const evidence = toEvidence(r.ex);
+  if (rpack.defaultKind !== pack.defaultKind) evidence[KIND_KEY] = rpack.defaultKind;
   if (onlyIfNew && !merged && JSON.stringify(evidence) === JSON.stringify(before)) return said(tb, BOOK_SAY.stillWaiting, "request_still_waiting");
   let intake: string | null = null;
   if (revising) {
@@ -1382,7 +1426,7 @@ async function requestToolInner(t: Turn, bt: BookTurn, tool: string, arg: string
     }
   }
   // RB-F: a job the owner's words say is already in is saved as in; the proposal says so before Save.
-  const arrived = arrivedLine(pack, r.ex.text);
+  const arrived = arrivedLine(rpack, r.ex.text);
   const body = arrived ? r.ex.reply.body.replace(/\n(?=[^\n]*$)/, `\n${arrived}\n`) : r.ex.reply.body;
   return said(tb, body, revising ? "request_revised" : "request_proposed", proposalButtons(r.ex.reply, r.ex, intake));
 }
@@ -1593,7 +1637,7 @@ async function free(t: Turn, text: string, book?: BookTurn): Promise<string> {
   const stranger = role === "unknown" || role === "prospect";
   const tb0 = { ...t, business: b, head: head(who, dom, b) };
   // RB-F3 (R-148 item 5): a general-assistant ask gets the fixed line, before any model is asked.
-  if (isOffTopic(text) && !book?.proposal) return answered(tb0, offTopic(t.lang), "off_topic");
+  if (isOffTopic(text) && !book?.proposal) return answered(plain(tb0), offTopic(t.lang, !!book), "off_topic");
   // An unknown phone's first words: the greeting of 24.8 (it may have come from the site without the code).
   if (!t.d.ai) return answered(tb0, stranger ? say(t.first ? "greeting" : "unknownHelp", t.lang) : say("unclear", t.lang), "unclear_no_ai");
 
@@ -1608,6 +1652,16 @@ async function free(t: Turn, text: string, book?: BookTurn): Promise<string> {
   let rb: Said | null = null;
   try {
     r = await route(t.d.ai, role, text, book ? { requestBook: true } : {});
+    // RB-F4 (R-149 item 1): at a business with the book on, a question about "a trial" or "prices" that does not name
+    // Kabsi is the business's own enquiry when the pack has those words (no second router call: the one extraction call).
+    const packs = book ? (book.b ? [book.on.get(book.b.location_id)!] : [...book.on.values()]) : [];
+    if (book && r.command.k === "tool" && ["question", "trial", "prices"].includes(r.command.tool) && packs.some((p) => packWordWins(text, p))) {
+      r = { ...r, command: { k: "tool", tool: "request_new" } };
+    } else if (book && r.command.k === "tool" && r.command.tool === "question" && !namesKabsi(text) && !kabsiJob(text)) {
+      // A question about Kabsi itself names Kabsi, the plan, billing, the owner's own trial or one of Kabsi's jobs; anything
+      // else at a business with the book on gets the fixed line, never a model answer about Kabsi.
+      r = { ...r, command: { k: "free", text } };
+    }
     // RB-E: a request tool's answer is worked out before "On it" is settled, so "On it" covers the extraction too.
     rb = book && r.command.k === "tool" && isRequestTool(r.command.tool) ? await requestTool(t, book, r.command.tool, r.command.arg, text)
       : book?.proposal && r.command.k !== "tool" ? await requestTool(t, book, "request_new", undefined, text, true) : null;
@@ -1629,11 +1683,13 @@ async function free(t: Turn, text: string, book?: BookTurn): Promise<string> {
   if (stranger && t.first && !conv?.open_question) return answered(tb, say("greeting", lang), "greeting");
   if (stranger) return askNora(tb, text);
   // RB-F3 (R-148 item 5): nothing Kabsi does fits, so the fixed line about what Kabsi does, never a question a model wrote.
-  return answered(tb, offTopic(lang), "off_topic");
+  // RB-F4 (R-149 item 4): in the RB-F3 look, the business named only for a phone with several.
+  return answered(plain(tb), offTopic(lang, !!book), "off_topic");
 }
 
-/** RB-F3: the off-topic line; Spanish and Arabic keep their unclear line, which also says "help". */
-const offTopic = (lang: string) => (lang === "es" || lang === "ar" ? say("unclear", lang) : SAY.offTopic);
+/** RB-F3: the off-topic line; Spanish and Arabic keep their unclear line, which also says "help". RB-F4: the request book
+ *  is named where it is on. */
+const offTopic = (lang: string, book = false) => (lang === "es" || lang === "ar" ? say("unclear", lang) : book ? SAY.offTopicBook : SAY.offTopic);
 
 /** Nora answers from the public facts. Without a model, or when it fails, the plain unclear line. */
 async function askNora(t: Turn, question: string): Promise<string> {

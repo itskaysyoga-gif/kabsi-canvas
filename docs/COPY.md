@@ -2116,3 +2116,20 @@ New and changed lines:
 - The staff help line adds "reset test" to the list of staff commands. Staff help and partner help now start with "Kabsi staff tools" and "Your partner tools".
 - Off-topic (R-148 item 5, WhatsApp's 2026 terms bar general-purpose assistants): "Kabsi looks after your business on Google: review replies, your listing, photos and posts. Send "help" to see what you can send." It replaces the one short question a model wrote when nothing Kabsi does fits; Spanish and Arabic keep their unclear line, which already says "help".
 - Two changes undone together that read the same are shown once.
+
+## 76. RB-F4: request book messages reach the request book (10 Nov 2026, WhatsApp, lane R R-149)
+
+WhatsApp only, free-form replies only. Approved templates do not change. The request book is on only for Kabsi's own test businesses. Before and after: `docs/progress/archive/2026-11-10-rb-f4.md`.
+
+- Off-topic (R-149 item 4), in the RB-F3 look: "*❓ Kabsi cannot help with that*" then "Kabsi looks after your business on Google: review replies, your listing, photos and posts. Send "help" to see what you can send." At a business with the request book on, the second line is "Kabsi looks after your business on Google and keeps your request book: review replies, your listing, photos, posts and your customers' requests. Send "help" to see what you can send." The business follows the first line ("... · Kabsi Test Gym") only for a phone with several businesses; no "(owner)". Spanish and Arabic keep their unclear line, now with the bold first line.
+- help (R-149 item 5), at a business with the request book on, after the usual list and a blank line:
+  "For your request book:"
+  "a request in your words, for example "[the pack's first example, no phone number]"" (salon: "Book Sarah for highlights Thursday afternoon"; gym: "Maya asked about a trial"; garage: "Ali Corolla 2016 brakes squeaking, tomorrow 10")
+  ""what's open" or "what's unconfirmed""
+  ""who asked about [the pack's first service, lower case] this week""
+  ""[the pack's confirmation example]"" (salon: "Sarah confirmed Thursday 3"; others: "Sarah confirmed Friday 3")
+  ""3 ready", a number and what happened" (a pack with jobs) or ""3 came in", a number and what happened" (others)
+  ""undo" for your last change"
+  ""reset test" clears your test requests (Kabsi staff)" (Kabsi staff phones only)
+- "X booked Y" with no open enquiry (R-149 item 2): the usual proposal, with the first line of the kind it becomes: "*📅 New visit*" at a gym, "*📅 New appointment*" at a salon, "*🔧 New job*" at a garage.
+- Ambiguous weekdays (R-149 item 3): a typo that could be two days gives one button per day, the nearest date of each: "Today 15:00" (only while 3 pm is still ahead) and "Thu 12 Nov 15:00".

@@ -226,7 +226,7 @@ export { refusalReply, toEvidence };
 /** RB-F3: the reply after "Update #N" (the correction reply of RB-F). */
 export const correctedReplyOf = (row: RequestRow, shown: { field: string; before: unknown; after: unknown }[], ctx: Ctx, flags: string[]): string =>
   correctedReply(row, shown, ctx, flags).body;
-export type { Pack };
+export type { Kind, Pack };
 
 type Evidence = {
   kind?: string; raw?: string | null; normalized?: unknown; candidates?: { label: string; value: unknown }[];
@@ -260,9 +260,11 @@ export type Built = { ok: true; input: Json } | { ok: false; why: "needs_tap" | 
  * time are kept as the owner wrote them, with no time set.
  */
 export function createInput(pack: Pack, evidence: Json, intakeId: string, pick?: number, rawText?: string | null): Built {
-  const input: Json = { kind: pack.defaultKind satisfies Kind, entry_method: "typed", intake_id: intakeId };
+  // RB-F4: a proposal made from "X booked Y" with no open enquiry carries the kind it becomes (a visit, an appointment, a job).
+  const kind = proposalKind(pack, evidence);
+  const input: Json = { kind: kind satisfies Kind, entry_method: "typed", intake_id: intakeId };
   // RB-F: a job the owner's own words say is already in ("car's here") starts as in, not waiting. Read by code, never guessed.
-  if (pack.defaultKind === "job" && rawText && saysArrived(rawText)) input.initial_status = "active";
+  if (kind === "job" && rawText && saysArrived(rawText)) input.initial_status = "active";
   const details: Json = {};
   const missing: string[] = [];
   let picked = pick === undefined;
@@ -313,6 +315,15 @@ export function createInput(pack: Pack, evidence: Json, intakeId: string, pick?:
   if (Object.keys(details).length) input.details = details;
   return { ok: true, input };
 }
+
+/** RB-F4: the kind a proposal will be saved as: the one it carries (KIND_KEY) when the pack has it, else the pack's usual kind. */
+export const KIND_KEY = "_kind";
+export function proposalKind(pack: Pack, evidence: Json | null | undefined): Kind {
+  const k = evidence?.[KIND_KEY];
+  return typeof k === "string" && (pack.kinds as string[]).includes(k) ? (k as Kind) : pack.defaultKind;
+}
+/** The pack as read for a proposal of this kind: its first line says "New visit" and Save makes a visit. */
+export const packAs = (pack: Pack, kind: Kind | null | undefined): Pack => (kind && kind !== pack.defaultKind && pack.kinds.includes(kind) ? { ...pack, defaultKind: kind } : pack);
 
 // ─── Reads.
 
@@ -622,7 +633,7 @@ async function convertCmd(db: BookDb, me: Me, name: string, rest: string, ctx: C
   return await convertApply(db, me, f, input, ctx, key);
 }
 
-const newKind = (pack: Pack): Kind => pack.kinds.find((k) => k !== "enquiry") ?? "appointment";
+export const newKind = (pack: Pack): Kind => pack.kinds.find((k) => k !== "enquiry") ?? "appointment";
 
 async function convertApply(db: BookDb, me: Me, f: Full, input: Json, ctx: Ctx, key: string): Promise<Act> {
   const c = await db.convert(me.location, me.actor, key, f.row.request_id, f.version, input);
@@ -811,7 +822,7 @@ export function markOf(result: string, kind: Kind | null): string {
   const byKind = kind ? MARK[kind] : MARK.list;
   if (/undone|undo_refused|request_undo/.test(r)) return MARK.undone;
   if (/^request_(confirm|convert)_(guess|choose)$/.test(r)) return MARK.confirm;
-  if (/_(which|ask|choose|tap)$|which_|_tap_|still_waiting|request_change$|request_yes_tap_save|question_elsewhere|forwarded_yes|reset_ask|pick_closed/.test(r)) return MARK.ask;
+  if (/_(which|ask|choose|tap)$|which_|_tap_|still_waiting|request_change$|request_yes_tap_save|question_elsewhere|forwarded_yes|reset_ask|pick_closed|^off_topic$|^unclear/.test(r)) return MARK.ask;
   if (/^request_(open|unconfirmed|asked|find)$|which_business|^help$|^request_find/.test(r)) return MARK.list;
   if (/^request_(saved|status|status_many|status_acknowledged|confirmed|time_set|corrected|converted|dropped|ask_no|time_no|updated)$|^request_saved_replay$|role_set|business_set|^switched$|reset_done|^started$/.test(r)) return MARK.done;
   return byKind;
@@ -849,4 +860,29 @@ export function kindIn(body: string, pack: Pack | null): Kind | null {
   if (!pack) return null;
   const first = body.split("\n")[0]!.toLowerCase();
   return pack.kinds.find((k) => first.includes(kindWord(pack, k).toLowerCase())) ?? pack.defaultKind;
+}
+
+// ─── RB-F4 (R-149): which messages are the request book's (request-book/route.ts), and its lines in "help".
+export { bookIntent, kabsiJob, namesKabsi, packWordWins } from "../request-book/route.ts";
+
+/**
+ * R-149 item 5: the request book's block in "help" at a business with the book on. The examples come from the pack's own
+ * words; "reset test" is shown only to Kabsi staff (the book is on only at Kabsi's test businesses).
+ */
+export function bookHelp(pack: Pack, staff: boolean): string {
+  const first = pack.examples.find((e) => e.kind === pack.defaultKind && !/^(?:who|what|which)\b/i.test(e.text))?.text ?? pack.examples[0]?.text ?? "";
+  const example = first.replace(/,?\s*\+?\d[\d ]{6,}\d/g, "").replace(/\s{2,}/g, " ").trim();
+  const confirm = pack.examples.find((e) => /\bconfirmed\b/i.test(e.text))?.text ?? "Sarah confirmed Friday 3";
+  const about = (pack.services[0]?.label ?? "a price").toLowerCase();
+  const move = pack.kinds.includes("job") ? "3 ready" : "3 came in";
+  return [
+    "For your request book:",
+    `a request in your words, for example "${example}"`,
+    "\"what's open\" or \"what's unconfirmed\"",
+    `"who asked about ${about} this week"`,
+    `"${confirm}"`,
+    `"${move}", a number and what happened`,
+    "\"undo\" for your last change",
+    ...(staff ? ["\"reset test\" clears your test requests (Kabsi staff)"] : []),
+  ].join("\n");
 }
