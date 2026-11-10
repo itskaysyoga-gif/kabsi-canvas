@@ -57,10 +57,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 10 Nov 2026, Tidy 2 part 3 (R-147 item 5): the daily Kapso check also reads Kapso's webhook delivery log (read only, the existing secret) and alerts staff on WhatsApp and by email to hello@kabsi.co when deliveries failed in 24 hours, counts only; `kapso_deliveries` reads any hour by hand. `2026-11-10-tidy2.md`.
 - 10 Nov 2026, Tidy 2 part 0 (R-146, R-147, docs only): master plan 30.49 (Harvey from the public kabsi-harvey-run with encrypted data, first tier beauty and food, launch open to all 21 industries, the Gate 3 tie rule, Nora's name rule, the Kapso delivery check); plan index rows R-144, R-146, R-147, now 37 KB; SYNC Harvey rows. `2026-11-10-tidy2.md`.
-- 10 Nov 2026, RB-F2 (Rashid's first request book phone test): the logs show Save did save and no message reached Kabsi after 04:07:48 UTC; fixed the switch list, old role and business questions capturing messages (closed by any other message and after 10 minutes), typed Save and Change, "Sarah", "Thursday afternoon, no time set", and an unread time is asked about. `2026-11-10-rb-f2.md`.
-- 10 Nov 2026, Nora 2 (30.46 item 8): the 13 injection cases were already run live (Ready 2 F), so only the booking questions sc04 and sc05 ran: sc04 passes, sc05 fails on a literal name check; 0.717 USD, 2 runs, 3 Nora answers, 4 reply drafts. `2026-11-10-nora2.md`.
+- 10 Nov 2026, Tidy 2 part 3 (R-147 item 5): the daily Kapso check also reads Kapso's webhook delivery log (read only, the existing secret) and alerts staff on WhatsApp and by email to hello@kabsi.co when deliveries failed in 24 hours, counts only; `kapso_deliveries` reads any hour by hand. `2026-11-10-tidy2.md`.
+- 10 Nov 2026, Tidy 2 part 1 (R-147 item 4): Nora's evaluation checks count Google's own product name in the answer's language (Spanish Perfil de Empresa de Google and the other languages) as Google Business Profile; no live rerun, sc05's stub reference updated. `2026-11-10-tidy2.md`.
 - Older entries (Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
 
 ## How a session updates this page
