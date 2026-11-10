@@ -34,7 +34,7 @@ import { checkTypedPost } from "../posts/typed.ts";
 import { type CheckContext, checkPost } from "../posts/checks.ts";
 import { ref } from "./templates.ts";
 import { keywordFrom, type MapDetails, mapDetailsText } from "./map.ts";
-import { numbersText, type Summary } from "./staff-alerts.ts";
+import { numbersText, stuckText, type Summary } from "./staff-alerts.ts";
 import { ASK_INTRO, reviewRequestLink, reviewRequestMessage } from "../review-growth/message.ts";
 import { type GrowthStats, growthLine } from "../review-growth/stats.ts";
 import { ANSWER_WINDOW_MS, readUpdate } from "../review-growth/monthly.ts";
@@ -1158,9 +1158,13 @@ async function staff(t: Turn, name: string, arg: string | undefined): Promise<st
     case "staff_status":
     case "staff_waiting": {
       const n = await t.d.db.staffNumbers();
+      const stuck = stuckText({ publications_stuck: Number(n.publications_stuck ?? 0), publications_retrying: Number(n.publications_retrying ?? 0),
+        publications_waiting_google: Number(n.publications_waiting_google ?? 0), publications_need_look: Number(n.publications_need_look ?? 0) });
+      const todo = Number(n.publications_need_look ?? 0) ? " Open System health on the staff page for the ones that need a look." : "";
+      const held = Number(n.outbox_held ?? 0) ? ` ${n.outbox_held} WhatsApp ${Number(n.outbox_held) === 1 ? "message is" : "messages are"} held. Each goes out when that person next writes to Kabsi, and is deleted after 30 days.` : " No WhatsApp messages are held.";
       const body = name === "staff_status"
-        ? `Jobs failed in the last hour: ${n.jobs_failed_1h}. Jobs late: ${n.jobs_waiting}. Publications stuck: ${n.publications_stuck}. Number quality: ${n.number_quality ?? "not read yet"}.`
-        : `Hand-offs in the last 2 days: ${n.handoffs}. Publications stuck: ${n.publications_stuck}. WhatsApp messages held: ${n.outbox_held}.`;
+        ? `Jobs failed in the last hour: ${n.jobs_failed_1h}. Jobs late: ${n.jobs_waiting}. Number quality: ${n.number_quality ?? "not read yet"}. ${stuck}.${todo}`
+        : `Hand-offs in the last 2 days: ${n.handoffs}. ${stuck}.${todo}${held}`;
       return answered(t, body, name);
     }
     case "staff_pause":
