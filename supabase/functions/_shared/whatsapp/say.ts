@@ -203,7 +203,9 @@ export const SAY = {
   resetStaffOnly: "Reset test is for Kabsi staff only\nNothing was changed.",
   resetFailed: "Kabsi could not reset the test just now\nNothing was changed. Please send it again in a minute.",
   // RB-F3 (R-148 item 5, WhatsApp's 2026 terms bar general-purpose assistants): a message that is not one of Kabsi's jobs.
-  offTopic: "Kabsi looks after your business on Google: review replies, your listing, photos and posts. Send \"help\" to see what you can send.",
+  // RB-F4 (R-149 item 4): the off-topic line in the RB-F3 look; its first line is the bold one with ❓.
+  offTopic: "Kabsi cannot help with that\nKabsi looks after your business on Google: review replies, your listing, photos and posts. Send \"help\" to see what you can send.",
+  offTopicBook: "Kabsi cannot help with that\nKabsi looks after your business on Google and keeps your request book: review replies, your listing, photos, posts and your customers' requests. Send \"help\" to see what you can send.",
   abuseNotice: "Kabsi will not reply to messages like this. If you need help, send \"talk to a person\".",
 
   // Media (18.3, 28.3).

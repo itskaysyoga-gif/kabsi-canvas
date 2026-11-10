@@ -262,13 +262,40 @@ export function normalizeWhen(text: string, ctx: { now: Date; timeZone: string; 
   if (read.length === 1) return read[0]!;
   const candidates: WhenCandidate[] = [];
   for (const r of read) {
-    const cs = r.status === "ok" ? [{ date: r.date, time: r.time, startsAt: r.startsAt }] : r.candidates;
+    // RB-F4 (R-149 item 3): a typo that could be two days gives one reading per day it could mean, the nearest future date
+    // of each: today only when its time is still ahead, else a week on ("thuesday 3pm" on a Tuesday: today 15:00, Thursday).
+    const cs = r.status === "ok" ? [{ date: r.date, time: r.time, startsAt: r.startsAt }] : nearestPerDay(r.candidates, ctx.now);
     for (const c of cs) if (!candidates.some((x) => x.date === c.date && x.time === c.time && x.startsAt === c.startsAt)) candidates.push(c);
   }
   const first = read[0]!;
   if (candidates.length === 1) return first;
   return { status: "ambiguous", candidates, raw: first.raw, start: first.start, end: first.end, version: v };
 }
+
+/**
+ * RB-F4: of readings that differ only by a week (the same weekday and time: "tuesday" said on a Tuesday), the nearest one
+ * still ahead of now. A reading with no exact time counts as ahead (the day is not over). Other readings are kept.
+ */
+function nearestPerDay(cands: WhenCandidate[], now: Date): WhenCandidate[] {
+  const key = (c: WhenCandidate) => `${c.date ? weekdayOf(ymdOf(c.date)) : "-"}|${c.time ?? "-"}`;
+  const ahead = (c: WhenCandidate) => !c.startsAt || Date.parse(c.startsAt) > now.getTime();
+  const out: WhenCandidate[] = [];
+  const groups = new Map<string, WhenCandidate[]>();
+  for (const c of cands) groups.set(key(c), [...(groups.get(key(c)) ?? []), c]);
+  for (const g of groups.values()) {
+    const days = new Set(g.map((c) => c.date));
+    const weekApart = g.length === 2 && days.size === 2 && g.every((c) => c.date) &&
+      Math.abs(Date.parse(`${g[0]!.date}T00:00:00Z`) - Date.parse(`${g[1]!.date}T00:00:00Z`)) === 7 * 86_400_000;
+    if (!weekApart) {
+      out.push(...g);
+      continue;
+    }
+    const sorted = [...g].sort((x, y) => x.date!.localeCompare(y.date!));
+    out.push(sorted.find(ahead) ?? sorted[sorted.length - 1]!);
+  }
+  return out;
+}
+const ymdOf = (iso: string): Ymd => ({ y: Number(iso.slice(0, 4)), m: Number(iso.slice(5, 7)), d: Number(iso.slice(8, 10)) });
 
 /** The words a typo may be read as (RB-F3): full day names, the longer month names, and the time words. */
 const TIME_WORDS: { word: string; value: string }[] = [

@@ -312,7 +312,7 @@ const CASES: Case[] = [
     { from: PHONES.owner, text: "post: Pumpkin spice lattes are back from Monday", expect: "post_shown" },
     { from: PHONES.owner, text: "yes", expect: "which_one", buttons: ["Hours: Harbour Lane", "Post: Harbour Lane C"] }] },
   // RB-F3 (R-148 item 5): nothing Kabsi does fits, so one fixed line about what Kabsi does and "help", never a question a model wrote.
-  { name: "owner: an unclear message gets the fixed line about what Kabsi does", tags: ["owner"], steps: [{ from: PHONES.owner, text: "the thing from before", expect: "off_topic", reply: /^Harbour Lane Coffee \(owner\)\n\nKabsi looks after your business on Google: review replies, your listing, photos and posts\. Send "help"/, ai: 1 }] },
+  { name: "owner: an unclear message gets the fixed line about what Kabsi does", tags: ["owner"], steps: [{ from: PHONES.owner, text: "the thing from before", expect: "off_topic", reply: /^\*❓ Kabsi cannot help with that\*\nKabsi looks after your business on Google: review replies, your listing, photos and posts\. Send "help"/, ai: 1 }] },
   { name: "owner: a slow answer sends On it first", tags: ["owner", "speed"], setup: (w) => { w.aiSlow = true; w.onItFast = true; w.aiMap["can you put up the lunch special"] = tool("post", { text: "lunch special" }); },
     steps: [{ from: PHONES.owner, text: "can you put up the lunch special", expect: "post_ask", ai: 1 }],
     check: (w) => { const r = w.repliesTo(PHONES.owner).map((s) => s.body); assert.match(r[0], /On it\.$/); assert.match(r[1], /starting with "post:"/); } },
