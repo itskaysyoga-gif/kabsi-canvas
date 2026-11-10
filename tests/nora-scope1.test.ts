@@ -80,7 +80,8 @@ describe("the Eval 1 row: en02 and n71", () => {
 describe("Google's own product name in the answer's language", () => {
   const sc04 = QUESTIONS_SCOPE1.find((q) => q.id === "sc04")!;
   const sc05 = QUESTIONS_SCOPE1.find((q) => q.id === "sc05")!;
-  const es = (name: string) => `Kabsi cuida tu ${name}. No es un sistema de reservas y no guarda las reservas ni las solicitudes de tus clientes.`;
+  const es = (name: string) =>
+    `Kabsi cuida tu ${name}. No es un sistema de reservas y no guarda las reservas ni las solicitudes de tus clientes.`;
 
   it("passes the Spanish answer that Nora gave live on 10 Nov 2026, with Google's Spanish name", () => {
     expect(check(sc05, es("Perfil de Empresa de Google"), facts)).toEqual([]);
@@ -92,7 +93,9 @@ describe("Google's own product name in the answer's language", () => {
   });
   it("still fails a Spanish answer that names no profile at all, or one that is not Google's name", () => {
     expect(check(sc05, es("perfil"), facts).map((f) => f.kind)).toEqual(["must"]);
-    expect(check(sc05, es("perfil de empresa en Facebook"), facts).map((f) => f.kind)).toEqual(["must"]);
+    expect(check(sc05, es("perfil de empresa en Facebook"), facts).map((f) => f.kind)).toEqual([
+      "must",
+    ]);
     expect(check(sc05, es("Google Maps"), facts).map((f) => f.kind)).toEqual(["must"]);
   });
   it("still fails the other rule of the question: the booking sentence", () => {
@@ -100,14 +103,26 @@ describe("Google's own product name in the answer's language", () => {
     expect(check(sc05, wrong, facts).some((f) => f.kind === "must")).toBe(true);
   });
   it("counts Google's official names in the other languages, and the English answer still needs the English name", () => {
-    const names = ["Profil d'entreprise Google", "Fiche d’établissement Google", "Google Unternehmensprofil", "Perfil da Empresa no Google",
-      "Profilo dell'attività su Google", "Google Bedrijfsprofiel", "الملف التجاري على Google"];
+    const names = [
+      "Profil d'entreprise Google",
+      "Fiche d’établissement Google",
+      "Google Unternehmensprofil",
+      "Perfil da Empresa no Google",
+      "Profilo dell'attività su Google",
+      "Google Bedrijfsprofiel",
+      "الملف التجاري على Google",
+    ];
     for (const n of names) {
-      expect(withEnglishName(`Kabsi looks after your ${n}.`), n).toBe("Kabsi looks after your Google Business Profile.");
+      expect(withEnglishName(`Kabsi looks after your ${n}.`), n).toBe(
+        "Kabsi looks after your Google Business Profile.",
+      );
     }
-    const english = "Kabsi looks after your profile. It is not a booking system and does not keep your customers' bookings or requests.";
+    const english =
+      "Kabsi looks after your profile. It is not a booking system and does not keep your customers' bookings or requests.";
     expect(check(sc04, english, facts).map((f) => f.kind)).toEqual(["must"]);
-    expect(GOOGLE_PROFILE_NAMES.map((n) => n.lang)).toEqual(expect.arrayContaining(["en", "es", "fr", "ar"]));
+    expect(GOOGLE_PROFILE_NAMES.map((n) => n.lang)).toEqual(
+      expect.arrayContaining(["en", "es", "fr", "ar"]),
+    );
   });
   it("holds no dash or exclamation mark in its own lines", () => {
     const src = readText("scripts/nora-eval/google-names.ts");

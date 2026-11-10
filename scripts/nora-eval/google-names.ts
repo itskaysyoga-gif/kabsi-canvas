@@ -12,14 +12,43 @@
  *  straight or curly. The English name is first and stays the fixed point: every other name stands for it. */
 export const GOOGLE_PROFILE_NAMES: { lang: string; name: string; pattern: RegExp }[] = [
   { lang: "en", name: "Google Business Profile", pattern: /Google Business Profile/i },
-  { lang: "es", name: "Perfil de Empresa de Google", pattern: /Perfil de Empresa (?:de|en) Google/i },
+  {
+    lang: "es",
+    name: "Perfil de Empresa de Google",
+    pattern: /Perfil de Empresa (?:de|en) Google/i,
+  },
   { lang: "fr", name: "Profil d'entreprise Google", pattern: /Profil d['’]entreprise Google/i },
-  { lang: "fr", name: "Fiche d'établissement Google", pattern: /Fiche d['’][eé]tablissement Google/i },
-  { lang: "de", name: "Unternehmensprofil auf Google", pattern: /(?:Google[- ])?Unternehmensprofil(?: (?:auf|bei|von) Google)?/i },
-  { lang: "pt", name: "Perfil da Empresa no Google", pattern: /Perfil d[ae] Empresa (?:no|do|de) Google/i },
-  { lang: "it", name: "Profilo dell'attività su Google", pattern: /Profilo dell['’]attivit[aà] (?:su|di) Google/i },
-  { lang: "nl", name: "Bedrijfsprofiel op Google", pattern: /(?:Google[- ])?Bedrijfsprofiel(?: (?:op|van) Google)?/i },
-  { lang: "ar", name: "الملف التجاري على Google", pattern: /(?:الملف التجاري|ملف النشاط التجاري|ملف الأعمال|الملف الشخصي للنشاط التجاري) (?:على|في|من) (?:Google|جوجل|غوغل)/i },
+  {
+    lang: "fr",
+    name: "Fiche d'établissement Google",
+    pattern: /Fiche d['’][eé]tablissement Google/i,
+  },
+  {
+    lang: "de",
+    name: "Unternehmensprofil auf Google",
+    pattern: /(?:Google[- ])?Unternehmensprofil(?: (?:auf|bei|von) Google)?/i,
+  },
+  {
+    lang: "pt",
+    name: "Perfil da Empresa no Google",
+    pattern: /Perfil d[ae] Empresa (?:no|do|de) Google/i,
+  },
+  {
+    lang: "it",
+    name: "Profilo dell'attività su Google",
+    pattern: /Profilo dell['’]attivit[aà] (?:su|di) Google/i,
+  },
+  {
+    lang: "nl",
+    name: "Bedrijfsprofiel op Google",
+    pattern: /(?:Google[- ])?Bedrijfsprofiel(?: (?:op|van) Google)?/i,
+  },
+  {
+    lang: "ar",
+    name: "الملف التجاري على Google",
+    pattern:
+      /(?:الملف التجاري|ملف النشاط التجاري|ملف الأعمال|الملف الشخصي للنشاط التجاري) (?:على|في|من) (?:Google|جوجل|غوغل)/i,
+  },
 ];
 
 /** The answer with every official name in another language written as the English name, so a rule written for the English
@@ -27,7 +56,10 @@ export const GOOGLE_PROFILE_NAMES: { lang: string; name: string; pattern: RegExp
 export function withEnglishName(answer: string): string {
   let out = answer;
   for (const n of GOOGLE_PROFILE_NAMES.slice(1)) {
-    out = out.replace(new RegExp(n.pattern.source, `${n.pattern.flags.replace("g", "")}g`), "Google Business Profile");
+    out = out.replace(
+      new RegExp(n.pattern.source, `${n.pattern.flags.replace("g", "")}g`),
+      "Google Business Profile",
+    );
   }
   return out;
 }
