@@ -3,6 +3,7 @@
 // stays false.
 import { describe, expect, it } from "vitest";
 import { check, gate, numbersIn, passStub, runAll } from "../scripts/nora-eval/nora-eval.ts";
+import { GOOGLE_PROFILE_NAMES, withEnglishName } from "../scripts/nora-eval/google-names.ts";
 import { QUESTIONS } from "../scripts/nora-eval/questions.ts";
 import { QUESTIONS_28 } from "../scripts/nora-eval/questions-28.ts";
 import { QUESTIONS_SCOPE1 } from "../scripts/nora-eval/questions-scope1.ts";
@@ -72,5 +73,44 @@ describe("the Eval 1 row: en02 and n71", () => {
         facts,
       ),
     ).toEqual([]);
+  });
+});
+
+// Tidy 2 part 1 (30.49 item 4, R-147): Google's own product name in the answer's language counts as "Google Business Profile".
+describe("Google's own product name in the answer's language", () => {
+  const sc04 = QUESTIONS_SCOPE1.find((q) => q.id === "sc04")!;
+  const sc05 = QUESTIONS_SCOPE1.find((q) => q.id === "sc05")!;
+  const es = (name: string) => `Kabsi cuida tu ${name}. No es un sistema de reservas y no guarda las reservas ni las solicitudes de tus clientes.`;
+
+  it("passes the Spanish answer that Nora gave live on 10 Nov 2026, with Google's Spanish name", () => {
+    expect(check(sc05, es("Perfil de Empresa de Google"), facts)).toEqual([]);
+    expect(check(sc05, es("perfil de empresa de Google"), facts)).toEqual([]);
+    expect(check(sc05, es("Perfil de Empresa en Google"), facts)).toEqual([]);
+  });
+  it("still passes the English name inside a Spanish answer", () => {
+    expect(check(sc05, es("Google Business Profile"), facts)).toEqual([]);
+  });
+  it("still fails a Spanish answer that names no profile at all, or one that is not Google's name", () => {
+    expect(check(sc05, es("perfil"), facts).map((f) => f.kind)).toEqual(["must"]);
+    expect(check(sc05, es("perfil de empresa en Facebook"), facts).map((f) => f.kind)).toEqual(["must"]);
+    expect(check(sc05, es("Google Maps"), facts).map((f) => f.kind)).toEqual(["must"]);
+  });
+  it("still fails the other rule of the question: the booking sentence", () => {
+    const wrong = "Kabsi cuida tu Perfil de Empresa de Google y es tu asistente de reservas.";
+    expect(check(sc05, wrong, facts).some((f) => f.kind === "must")).toBe(true);
+  });
+  it("counts Google's official names in the other languages, and the English answer still needs the English name", () => {
+    const names = ["Profil d'entreprise Google", "Fiche d’établissement Google", "Google Unternehmensprofil", "Perfil da Empresa no Google",
+      "Profilo dell'attività su Google", "Google Bedrijfsprofiel", "الملف التجاري على Google"];
+    for (const n of names) {
+      expect(withEnglishName(`Kabsi looks after your ${n}.`), n).toBe("Kabsi looks after your Google Business Profile.");
+    }
+    const english = "Kabsi looks after your profile. It is not a booking system and does not keep your customers' bookings or requests.";
+    expect(check(sc04, english, facts).map((f) => f.kind)).toEqual(["must"]);
+    expect(GOOGLE_PROFILE_NAMES.map((n) => n.lang)).toEqual(expect.arrayContaining(["en", "es", "fr", "ar"]));
+  });
+  it("holds no dash or exclamation mark in its own lines", () => {
+    const src = readText("scripts/nora-eval/google-names.ts");
+    expect(src).not.toMatch(/[–—!]/);
   });
 });
