@@ -2199,3 +2199,14 @@ The words live in `supabase/functions/_shared/wa-signin.ts` (`SIGNIN_SAY`, `WHAT
 **Onboarding, an owner who signed up with WhatsApp.** Title "Where should receipts go?", line "Kabsi sends your weekly receipt and account emails here. It is optional now, and needed before a card payment." Field Email, **Save**, **Skip for now**. Checkout without it: "Add the email for your receipts first, then choose the plan again."
 
 **Staff (daily check).** WhatsApp alert "Sign-in check found 1 item: Google sign-in" and an email to hello@kabsi.co, "Kabsi Google sign-in is off".
+
+## 79. RB-T: request book lines the scenario matrix added (10 Nov 2026, WhatsApp, lane R R-150, master plan 30.50 item 8)
+
+Only at a business with the request book on (the three test businesses); nothing public. The rest of the request book's lines are sections 75 to 77.
+
+- "reopen 4" on a closed request: "❓ *Reopen Appointment 4?*", the client and the service, then "It is closed as Came in." Buttons **Yes** and **No**. After Yes: the request's facts and "It was closed."
+- "reopen 4" on an open request: "❓ *Not changed*" then "Appointment 4 is not closed. It is Requested."
+- "Maya confirmed Thursday 5pm" when Maya's open request is an enquiry or a job: "❓ *Not an appointment*" and the existing refusal line (only an appointment holds a confirmation).
+- "not pedicure, a facial" when the last request has no pedicure: "Not on Appointment 4" then "Appointment 4 does not say pedicure." and "Nothing was changed."
+- "Dina asked about a keratin price" at a salon or garage: the proposal is titled "💬 *New enquiry*" (the pack's enquiry word) instead of the usual kind.
+- "Is my data safe?" and other questions about the account, data, privacy, price, plan, bill, login or Kabsi: Nora's answer, as for any question to Kabsi.

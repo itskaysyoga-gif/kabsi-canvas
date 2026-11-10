@@ -68,7 +68,8 @@ export async function loadSuite(): Promise<Suite> {
 
 /** RB-T: the packs the evaluation reads: the shipped ones, and the food pack, which is in test only and never in PACKS. */
 const TEST_PACKS: readonly Pack[] = [foodV1];
-export const evalPack = (id: string): Pack | null => getPack(id, 1) ?? TEST_PACKS.find((p) => p.id === id) ?? null;
+export const evalPack = (id: string): Pack | null =>
+  getPack(id, 1) ?? TEST_PACKS.find((p) => p.id === id) ?? null;
 
 const ctxOf = (suite: Suite, c: Case) => {
   const pack = evalPack(c.pack);
