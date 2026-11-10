@@ -81,7 +81,10 @@ const bump = (m: Record<string, number>, k: string) => { m[k] = (m[k] ?? 0) + 1;
 /** The rows inside [from, to) as counts. `webhookIds`, when given and not empty, keeps only the deliveries of those webhooks
  *  (the webhooks on Kabsi's number); a row that names no webhook is kept, because the Kapso project holds only Kabsi's. */
 export function summarize(rows: Delivery[], from: Date, to: Date, webhookIds?: string[]): DeliverySummary {
-  const ids = new Set(webhookIds ?? []);
+  // The filter applies only when it matches some row: if the ids Kapso lists for the number are written differently from the ids on the rows, a
+  // filter that drops every row would read as an empty log (the Kapso project holds only Kabsi's webhooks, so no filter is the safe reading).
+  const wanted = new Set(webhookIds ?? []);
+  const ids = rows.some((d) => d.webhookId && wanted.has(d.webhookId)) ? wanted : new Set<string>();
   const s: DeliverySummary = {
     from: from.toISOString(), to: to.toISOString(), total: 0, ok: 0, failed: 0, waiting: 0, unknown: 0,
     failed_by_event: {}, failed_by_code: {}, statuses: {}, first_failed_at: null, last_failed_at: null, undated: 0,
@@ -181,14 +184,16 @@ export async function runDeliveryCheck(d: DeliveryCheckDeps): Promise<DeliveryCh
   } catch {
     read = null;
   }
+  // Rows that came back but none of which carries a time this code can read are a log that was not understood, the same as one that could not be read.
+  if (read && read.rows.length > 0 && read.rows.every((r) => r.at === null)) read = null;
   const summary = read ? summarize(read.rows, from, now, read.webhookIds) : null;
   const alert = summary ? deliveryAlertFor(summary, day) : {
     kind: DELIVERY_KIND, channel: "alerts" as const, title: "WhatsApp check found 1 item: webhook delivery log",
-    body: "webhook delivery log could not be read from Kapso", dedupe: `whatsapp_deliveries:${day}`,
+    body: "webhook delivery log could not be read from Kapso", dedupe: `whatsapp_deliveries_unread:${day}`,
   };
   const unreadText = "The daily WhatsApp check could not read Kapso's webhook delivery log. Check the webhook in Kapso.";
   const mail = summary ? deliveryEmailFor(summary, day) : {
-    key: `${DELIVERY_EMAIL_KIND}:${day}`, subject: "Kabsi WhatsApp webhook deliveries could not be read", preheader: "Check the webhook in Kapso.",
+    key: `${DELIVERY_EMAIL_KIND}_unread:${day}`, subject: "Kabsi WhatsApp webhook deliveries could not be read", preheader: "Check the webhook in Kapso.",
     title: "WhatsApp webhook deliveries", text: unreadText, html: `<p>${unreadText}</p>`,
   };
   // Each route is tried whatever the other does; a failure of either is loud (the call fails) and never hides the other.

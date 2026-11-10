@@ -256,7 +256,10 @@ export async function readWebhookDeliveries(env: KapsoEnv, period: "24h" | "7d" 
   for (let page = 0; page < maxPages; page++) {
     const q = new URLSearchParams({ period, limit: "100" });
     if (after) q.set("after", after);
-    const res = obj(await call(env, `${PLATFORM}/webhook_deliveries?${q}`));
+    const raw = await call(env, `${PLATFORM}/webhook_deliveries?${q}`);
+    const res = obj(raw);
+    // A body that holds no list at all is a body this code does not understand: a failure, never an empty log (a check that cannot read must not pass).
+    if (!Array.isArray(res.data) && !Array.isArray(raw)) throw new KapsoError(200, "GET /platform/v1/webhook_deliveries", "unexpected_shape");
     const got = list(res);
     if (!keys.length && got.length) keys = Object.keys(got[0]).sort(); // field NAMES of the first row only, so a name the code does not read shows
     for (const r of got) rows.push(normalizeDelivery(r));

@@ -113,6 +113,28 @@ Deno.test("a log that cannot be read is itself alerted, with no error text", asy
   assert.ok(!JSON.stringify([d.alerts, d.emails]).includes("secret-ish"));
 });
 
+Deno.test("a log that came back but was not understood is alerted as unread, under its own key", async () => {
+  // rows with no readable time
+  const d = deps([normalizeDelivery({ status: "failed", createdAt: "2026-11-10T04:10:00Z" })]);
+  const r = await runDeliveryCheck(d);
+  assert.equal(r.unread, true);
+  assert.equal(r.ok, false);
+  assert.equal((d.alerts[0] as { dedupe: string }).dedupe, "whatsapp_deliveries_unread:2026-11-10");
+  assert.equal((d.emails[0] as { key: string }).key, `${DELIVERY_EMAIL_KIND}_unread:2026-11-10`);
+});
+
+Deno.test("webhook ids written differently on the rows do not hide the log", () => {
+  const rows = [row(10, "failed", { webhook_id: "A-1" })];
+  assert.equal(summarize(rows, new Date(NOW.getTime() - 3_600_000), NOW, ["a1"]).failed, 1);
+});
+
+Deno.test("a 200 answer with no list in it is an error, not an empty log", async () => {
+  const f = (async () => new Response(JSON.stringify({ deliveries: [{ status: "failed" }] }), { status: 200 })) as typeof fetch;
+  await assert.rejects(() => readWebhookDeliveries({ apiKey: "k", phoneNumberId: "p", fetch: f }, "24h"), /unexpected_shape/);
+  const g = (async () => new Response(JSON.stringify({ data: [] }), { status: 200 })) as typeof fetch;
+  assert.deepEqual((await readWebhookDeliveries({ apiKey: "k", phoneNumberId: "p", fetch: g }, "24h")).rows, []);
+});
+
 Deno.test("a failure of one route is loud and does not hide the other", async () => {
   const d = deps([row(10, "failed")]);
   d.email = async () => { throw new Error("mail down"); };

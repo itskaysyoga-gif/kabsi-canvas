@@ -165,8 +165,10 @@ async function deliveriesCheck() {
 /** The check of the daily call: the number and templates (Kapso 1) and the delivery log (Tidy 2). Each runs whatever the other does; a failure of either is loud. */
 async function dailyKapsoCheck() {
   const [numberAndTemplates, deliveries] = await Promise.allSettled([kapsoCheck(), deliveriesCheck()]);
-  if (numberAndTemplates.status === "rejected") throw numberAndTemplates.reason;
-  if (deliveries.status === "rejected") throw deliveries.reason;
+  const why = (r: PromiseSettledResult<unknown>) => (r.status === "rejected" ? String((r.reason as Error)?.message ?? r.reason) : "");
+  if (numberAndTemplates.status === "rejected" || deliveries.status === "rejected") {
+    throw new Error([why(numberAndTemplates) && `number and templates: ${why(numberAndTemplates)}`, why(deliveries) && `deliveries: ${why(deliveries)}`].filter(Boolean).join("; "));
+  }
   return { ...numberAndTemplates.value, deliveries: deliveries.value };
 }
 
