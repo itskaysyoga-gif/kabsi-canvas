@@ -50,7 +50,7 @@ WebP copies at quality 72 (10 to 134 KB each, 1.7 MB in all). The originals, ren
 | restaurant-tables   | Warm lit tables, people beyond (portrait)             | Restaurants page, phone hero              | Warmly lit tables in a restaurant                    |
 | restaurant-kitchen  | Cooks at work in a dark open kitchen                  | Restaurants page, dark sections           | Cooks at work in a restaurant kitchen                |
 | restaurant-cooks    | Cooks under copper lamps at a counter                 | Restaurants page, trades row              | Cooks preparing orders at a restaurant counter       |
-| founder-rashid      | Rashid Abou Hamzy, square; since 5 Nov 2026 (Site 2) his own portrait, photos-2026-11-06/rashid-portrait.jpeg (800, 400) | About, the founder line, Founding 25      | Rashid Abou Hamzy, founder of Kabsi                  |
+| founder-rashid      | Rashid Abou Hamzy, square; since 5 Nov 2026 (Site 2) his own portrait, photos-2026-11-06/rashid-portrait.jpeg (800, 400) | About, the founder line, the private invited page | Rashid Abou Hamzy, founder of Kabsi                  |
 
 Left out on 26 Oct: a gym sign or logo in the frame (gym 1, gym 3, gym 4 is empty), a spa's own logo on the wall
 (spa working 2), an empty room (massage 2, spa 3), a supercar and tyre brand (auto 2), a needle close up (aesthetic 2),
@@ -69,7 +69,7 @@ Google's logo, the account photo and the owner's email blurred, a soft ring on e
 
 | File                          | Length | Size   | Use                                                                 |
 | ----------------------------- | ------ | ------ | ------------------------------------------------------------------- |
-| video/add-kabsi-manager.mp4   | 16 s   | 272 KB | The access steps component, /founding, onboarding, the access guide |
+| video/add-kabsi-manager.mp4   | 16 s   | 272 KB | The access steps component, the private invited page, onboarding, the access guide |
 | video/remove-kabsi-manager.mp4 | 9 s   | 165 KB | Security only (30.18), the access guide                             |
 | video/add-kabsi-desktop.mp4   | 15 s   | 275 KB | Manager steps from 768 px wide, the access guide (1280 x 720)       |
 

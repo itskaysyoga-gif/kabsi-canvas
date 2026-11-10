@@ -1,5 +1,5 @@
-// Home on Design 9 (Web 5 part B, master plan 30.24): the hero and the steps line here, everything below the first
-// screen in d9-home-lower.tsx.
+// Home on Design 9 (Web 5 part B, master plan 30.24): the hero here, everything below the first screen in
+// d9-home-lower.tsx (Site 3a, 30.50 item 10: the three steps follow the familiar problem there).
 //
 // Polish 4 part D (the script budget): the lower sections are their own chunk. The server renders them in full, so the
 // page arrives whole, with one H1 painted at once and nothing moving. In the browser their server HTML is kept as it is
@@ -7,7 +7,7 @@
 // their code loads and they are drawn again from it, the same size in the same place. A first visit's measurement
 // (Lighthouse) ends before any of that, so it reads only the first screen's code.
 import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { D9Hero, StepsLine } from "./d9-hero";
+import { D9Hero } from "./d9-hero";
 
 type Lower = typeof import("./d9-home-lower");
 let lower: Lower | null = null;
@@ -68,7 +68,10 @@ const HomeLower = memo(function HomeLower() {
       typeof IntersectionObserver === "undefined"
         ? null
         : new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && go());
-    if (ref.current) io?.observe(ref.current);
+    // Site 3a: the hero is short on a phone, so the first lower section is on the first screen; its server HTML shows
+    // as it is, and the code wakes when the demonstration (data-wake) comes into view or the visitor acts (Speed gate).
+    const target = ref.current?.querySelector("[data-wake]") ?? ref.current;
+    if (target) io?.observe(target);
     for (const e of WAKE) window.addEventListener(e, go, { passive: true, once: true });
     function stop() {
       io?.disconnect();
@@ -102,7 +105,6 @@ export function D9Home() {
   return (
     <>
       <D9Hero />
-      <StepsLine />
       <HomeLower />
     </>
   );

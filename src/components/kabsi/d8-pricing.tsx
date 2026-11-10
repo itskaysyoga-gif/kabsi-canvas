@@ -16,7 +16,8 @@ import {
   WORKING_HOURS,
   foundingPlacesLine,
 } from "@/lib/site";
-import { ButtonLink, Faq, Segmented } from "./ui";
+import { Faq, Segmented } from "./ui";
+import { startFreeHref } from "@/lib/start-free";
 import { SiteLink } from "./site-link";
 import { useSearchFlag } from "./page-signals";
 import { PageHero, popCls, stagger } from "./page-hero";
@@ -151,7 +152,34 @@ export function D8Pricing() {
               ]}
             />
           </div>
-          <ul className="mt-8 grid gap-4 lg:grid-cols-2 lg:gap-6">
+          {/* Site 3a (30.50 item 10, 30.51 item 3): the launch price for the first 30 paying businesses, with the real count
+              of places left, beside the plans. Shown only while places remain; nothing while the count is unknown. */}
+          {left !== null && left > 0 && (
+            <div
+              aria-labelledby="launch-h"
+              role="group"
+              className="mt-8 flex flex-col gap-3 rounded-panel border border-text-1 bg-surface-0 p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-6"
+            >
+              <div>
+                <p className="inline-flex rounded-full bg-kb-yellow px-3 py-1 text-label font-bold text-kb-black">
+                  The launch price
+                </p>
+                <p id="launch-h" className="mt-2 font-display text-h3 font-bold">
+                  The first {FOUNDING_TOTAL} paying businesses pay less.
+                </p>
+                <p className="mt-1 text-body text-text-2">
+                  They pay the launch price and keep it while they stay subscribed. Essentials $
+                  {FOUNDING_PRICES.essentialsMonthly} a month or ${FOUNDING_PRICES.essentialsYearly}{" "}
+                  a year. Pro ${FOUNDING_PRICES.proMonthly} a month or ${FOUNDING_PRICES.proYearly}{" "}
+                  a year.
+                </p>
+              </div>
+              <p className="shrink-0 font-display text-title font-bold sm:text-end">
+                {foundingPlacesLine(left)}
+              </p>
+            </div>
+          )}
+          <ul className="mt-6 grid gap-4 lg:grid-cols-2 lg:gap-6">
             {PLANS.map((p) => {
               const pro = p.id === "pro";
               return (
@@ -180,7 +208,7 @@ export function D8Pricing() {
                     plan={p.id}
                     yearly={yearly}
                     left={left}
-                    className="mt-1 text-small text-text-2"
+                    className="mt-1 text-small font-semibold text-text-1"
                   />
                   {/* Polish 2 (decision 5): the four most valuable built things; help is a small line. */}
                   {p.lead && <p className="mt-6 text-small font-bold">{p.lead}</p>}
@@ -210,15 +238,12 @@ export function D8Pricing() {
                   {/* Site 2 (30.34 item 4): the help line and the working hours are two lines, each under 25 words. */}
                   <p className="mt-5 text-label text-text-2">{p.help}</p>
                   <p className="mt-1 text-label text-text-2">{WORKING_HOURS}</p>
-                  <div className="mt-auto pt-6">
-                    <ButtonLink
-                      to={door.to}
-                      search={door.search}
-                      full
-                      variant={pro ? "primary" : "dark"}
-                    >
+                  {/* Site 3a: the free check is the page's one primary action, so Start free is a quiet link. */}
+                  <div className="mt-auto pt-5">
+                    <SiteLink to={startFreeHref(door)} className={cn(linkCls, "text-body")}>
                       Start free
-                    </ButtonLink>
+                      <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />
+                    </SiteLink>
                   </div>
                 </li>
               );
@@ -304,34 +329,6 @@ export function D8Pricing() {
           </ol>
         </div>
       </section>
-
-      {/* The launch price shows only while places remain, with the real count (facts, Price 1). Founding 25 is private (Founding 1). */}
-      {left !== null && left > 0 && (
-        <section aria-labelledby="offers-h" className="border-t border-line">
-          <div className="container-kb section-y">
-            <div className="max-w-3xl rounded-panel border border-line bg-surface-1 p-6 sm:p-8">
-              <h2 id="offers-h" className="sr-only">
-                The launch price
-              </h2>
-              <p className="inline-flex rounded-full bg-kb-yellow px-3 py-1 text-label font-bold text-kb-black">
-                The launch price
-              </p>
-              <p className="mt-2 font-display text-h3 font-bold">
-                The first {FOUNDING_TOTAL} paying businesses pay less.
-              </p>
-              <p className="mt-3 text-body text-text-2">
-                They pay the launch price and keep it while they stay subscribed.
-              </p>
-              <p className="mt-2 text-body text-text-2">
-                Essentials ${FOUNDING_PRICES.essentialsMonthly} a month or $
-                {FOUNDING_PRICES.essentialsYearly} a year. Pro ${FOUNDING_PRICES.proMonthly} a month
-                or ${FOUNDING_PRICES.proYearly} a year.
-              </p>
-              <p className="mt-3 text-small font-bold">{foundingPlacesLine(left)}</p>
-            </div>
-          </div>
-        </section>
-      )}
 
       <section aria-labelledby="pfaq-h" className="border-t border-line bg-surface-1">
         <div className="container-kb section-y grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
