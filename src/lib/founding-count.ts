@@ -22,11 +22,15 @@ export async function readFoundingCount(
 ): Promise<FoundingCountResult> {
   if (!isInviteShape(slug)) return { status: "not_found" };
   try {
-    const res = await fetcher(
-      `${supabaseUrl}/functions/v1/programs/founding?invite=${encodeURIComponent(slug)}`,
-      { headers: anonHeaders, signal: AbortSignal.timeout(5000) },
-    );
-    if (res.status === 404) return { status: "not_found" };
+    const res = await fetcher(`${supabaseUrl}/functions/v1/programs/founding`, {
+      headers: { ...anonHeaders, "x-founding-invite": slug },
+      signal: AbortSignal.timeout(5000),
+    });
+    // Only the function's own answer means "not the current slug"; a gateway 404 (the function is missing) is "unavailable".
+    if (res.status === 404) {
+      const j = (await res.json().catch(() => null)) as { error?: unknown } | null;
+      return j?.error === "not_found" ? { status: "not_found" } : { status: "unavailable" };
+    }
     const body = res.ok ? ((await res.json()) as unknown) : null;
     if (isCount(body)) return { status: "ok", body: body as { total: number; left: number } };
   } catch {

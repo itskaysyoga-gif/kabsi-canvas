@@ -34,7 +34,11 @@ function InviteLink() {
     staleTime: 0,
   });
   const rotate = useMutation({
-    mutationFn: () => founderInvite(true),
+    mutationFn: async () => {
+      // A read still on its way must not land after the new link and put the old one back.
+      await qc.cancelQueries({ queryKey: ["staff-founding-invite"] });
+      return founderInvite(true);
+    },
     onSuccess: (slug) => {
       qc.setQueryData(["staff-founding-invite"], slug);
       setShown(true);
@@ -72,7 +76,7 @@ function InviteLink() {
             if (window.confirm("Make a new link? The old link stops working at once."))
               rotate.mutate();
           }}
-          disabled={rotate.isPending}
+          disabled={rotate.isPending || q.isFetching}
         >
           Make a new link
         </Button>

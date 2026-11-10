@@ -58,8 +58,10 @@ export const FOUNDING_COUNT_PATH = "/api/founding-count";
 
 export async function loadFoundingPlaces(slug: string): Promise<FoundingPlaces | null> {
   try {
-    const res = await fetch(`${FOUNDING_COUNT_PATH}?slug=${encodeURIComponent(slug)}`, {
+    // The slug rides in a header, not the address, so no request log records it (Founding 1 review).
+    const res = await fetch(FOUNDING_COUNT_PATH, {
       cache: "no-store",
+      headers: { "x-founding-invite": slug },
     });
     if (!res.ok) return null;
     const v = (await res.json()) as unknown;

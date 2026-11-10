@@ -156,6 +156,12 @@ describe("the proof row", () => {
     });
   });
 
+  it("never keeps the private invite slug (Founding 1): /founding/<slug> is stored as /founding/:token", () => {
+    const r = consentRow({ ...base, page: "/founding/AbCdEfGhIjKlMnOpQrStUvWx?x=1#y" });
+    if ("error" in r) throw new Error(r.error);
+    expect(r.row.page).toBe("/founding/:token");
+  });
+
   it("refuses an unknown version, action, visitor or missing choices", () => {
     expect(consentRow({ ...base, version: "1999" })).toEqual({ error: "bad_version" });
     expect(consentRow({ ...base, action: "maybe" })).toEqual({ error: "bad_action" });

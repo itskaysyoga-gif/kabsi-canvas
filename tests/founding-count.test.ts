@@ -13,11 +13,15 @@ const answer = (body: unknown, status = 200) =>
 describe("Founding 1: the Founding 25 count through kabsi.co, only with the invite slug", () => {
   it("passes the count on with the slug, no-store and noindex, and no edge cache header", async () => {
     let asked = "";
-    const r = await foundingCountResponse(SLUG, (async (u: string) => {
+    let askedWith = "";
+    const r = await foundingCountResponse(SLUG, (async (u: string, init?: RequestInit) => {
       asked = String(u);
+      askedWith = (init?.headers as Record<string, string>)["x-founding-invite"] ?? "";
       return new Response(JSON.stringify(COUNT));
     }) as unknown as typeof fetch);
-    expect(asked).toMatch(/\/functions\/v1\/programs\/founding\?invite=AbCdEfGhIjKlMnOpQrStUvWx$/);
+    // The slug rides in a header, never in the address (so no request log keeps it).
+    expect(asked).toMatch(/\/functions\/v1\/programs\/founding$/);
+    expect(askedWith).toBe(SLUG);
     expect(r.status).toBe(200);
     expect(await r.json()).toEqual(COUNT);
     expect(r.headers.get("cache-control")).toBe("no-store");
@@ -39,6 +43,9 @@ describe("Founding 1: the Founding 25 count through kabsi.co, only with the invi
     expect(calls).toBe(0);
     const wrong = await foundingCountResponse(SLUG, counting);
     expect(wrong.status).toBe(404);
+    // A gateway 404 (the function is missing) is not "wrong slug": the page says unavailable, never not found, to a real invite.
+    const gone = await foundingCountResponse(SLUG, answer({ code: "NOT_FOUND" }, 404));
+    expect(gone.status).toBe(503);
     expect(calls).toBe(1);
     expect(await wrong.json()).toEqual({ error: "not_found" });
   });
@@ -71,10 +78,12 @@ describe("Founding 1: the Founding 25 count through kabsi.co, only with the invi
     } finally {
       globalThis.fetch = real;
     }
-    expect(calls).toEqual([[`${FOUNDING_COUNT_PATH}?slug=${SLUG}`, { cache: "no-store" }]]);
+    expect(calls).toEqual([
+      [FOUNDING_COUNT_PATH, { cache: "no-store", headers: { "x-founding-invite": SLUG } }],
+    ]);
     expect(FOUNDING_COUNT_PATH).toBe("/api/founding-count");
     expect(readFileSync("src/routes/api.founding-count.ts", "utf8")).toContain(
-      'searchParams.get("slug")',
+      'headers.get("x-founding-invite")',
     );
   });
 });

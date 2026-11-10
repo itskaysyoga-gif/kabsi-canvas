@@ -1,7 +1,7 @@
 // programs (master plan 30.17 section 1, 29.3, 30.15 section 5): the server side of /founding and /partners.
 // Public, no JWT (verify_jwt off): every write passes Turnstile and a rate limit, and the database functions it calls
 // are open to the service role only, so a browser never writes a table directly (plan 2.3).
-//   GET  /programs/founding?invite=SLUG   the real number of Founding 25 places left, with the mix; only with the private
+//   GET  /programs/founding (header x-founding-invite: SLUG)   the real number of Founding 25 places left, with the mix; only with the private
 //                             invite slug (Founding 1, R-151), else 404; never cached, so a rotated slug stops at once
 //   POST /programs/founding   a Founding 25 application; the body carries the same invite, else 404
 //   GET  /programs/partners   the Founding Partner places left (the first 20 approved)
@@ -34,7 +34,7 @@ async function invited(given: unknown): Promise<boolean> {
 const notFound = () => json({ error: "not_found" }, 404, NO_STORE);
 
 async function foundingCount(req: Request): Promise<Response> {
-  if (!(await invited(new URL(req.url).searchParams.get("invite")))) return notFound();
+  if (!(await invited(req.headers.get("x-founding-invite")))) return notFound();
   const { data, error } = await admin().rpc("founding_places");
   if (error || !data) return json({ error: "unavailable" }, 503, NO_STORE);
   return json(data, 200, NO_STORE);

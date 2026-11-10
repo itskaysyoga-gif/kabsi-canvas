@@ -49,6 +49,10 @@ describe("the slug never leaves kabsi.co", () => {
     expect(scrubString(`https://kabsi.co/api/founding-count?slug=${SLUG}`)).toBe(
       "https://kabsi.co/api/founding-count?slug=redacted",
     );
+    // The page's own server function is a POST, so its payload is never in an address.
+    expect(read("src/lib/founding-invite-server.ts")).toContain(
+      'createServerFn({ method: "POST" })',
+    );
     expect(
       scrubString(`https://x.supabase.co/functions/v1/programs/founding?invite=${SLUG}`),
     ).toContain("invite=redacted");
@@ -125,7 +129,7 @@ describe("the check on the server", () => {
 describe("the function and the database", () => {
   const fn = read("supabase/functions/programs/index.ts");
   it("the count and the application both need the invite, and answer 404 without it", () => {
-    expect(fn).toContain('invited(new URL(req.url).searchParams.get("invite"))');
+    expect(fn).toContain('invited(req.headers.get("x-founding-invite"))');
     expect(fn).toContain("invited(body.invite)");
     expect(fn).toMatch(/const notFound = \(\) => json\(\{ error: "not_found" \}, 404, NO_STORE\)/);
     // The invite is checked before the bot check or any application field is read.

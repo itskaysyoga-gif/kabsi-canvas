@@ -1,6 +1,6 @@
 // Founding 25 (master plan 30.17 section 1, COPY.md "Founding 25"), private since Founding 1 (R-151, master plan 30.51): the
 // page only the invited see, at /founding/<slug>, with the application. The count of places left is the real one (GET
-// /api/founding-count?slug=); while it has not loaded, or did not load, no number shows. The application posts to
+// /api/founding-count with the x-founding-invite header); while it has not loaded, or did not load, no number shows. The application posts to
 // programs/founding with the same slug. No public page carries this text or links here.
 import { CheckCircle2 } from "lucide-react";
 import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
