@@ -1,7 +1,7 @@
 // Staff alerts on WhatsApp (13b part 2, master plan 9.9, 26.9, 30.9 item 5): which events go at once, the plain text, the
 // morning digest and its hour.
 import assert from "node:assert/strict";
-import { alertText, digestDue, morningDigest, numbersText, plain, routeOf, type Summary } from "./staff-alerts.ts";
+import { alertText, digestDue, morningDigest, numbersText, plain, routeOf, stuckText, type Summary } from "./staff-alerts.ts";
 
 const S: Summary = {
   signups: 1, trials_started: 1, paid_new: 0, paid_total: 0, cancellations: 0, reviews_answered: 3, replies_waiting: 2, handoffs_waiting: 1,
@@ -43,4 +43,17 @@ Deno.test("the digest goes in the 08:00 hour in Beirut, summer and winter", () =
   assert.equal(digestDue(new Date("2026-10-24T06:02:00Z")).due, false);
   assert.equal(digestDue(new Date("2026-10-26T05:02:00Z")).due, false); // UTC+2 after 25 Oct
   assert.deepEqual(digestDue(new Date("2026-10-26T06:02:00Z")), { due: true, day: "2026-10-26" });
+});
+
+Deno.test("Ops 1: the digest says what to do about each stuck publication", () => {
+  const stuck = { ...S, handoffs_waiting: 0, replies_waiting: 0 };
+  assert.match(morningDigest({ ...stuck, publications_stuck: 5, publications_retrying: 3, publications_waiting_google: 2, publications_need_look: 0 }).body,
+    /^Morning\. 1 thing today: 5 publications stuck \(3 retrying, 2 waiting for Google\), number health good\./);
+  assert.match(morningDigest({ ...stuck, publications_stuck: 1, publications_need_look: 1 }).body, /1 publication stuck \(1 needs a look\)/);
+  assert.match(morningDigest({ ...stuck, publications_stuck: 3, publications_need_look: 3 }).body, /3 publications stuck \(3 need a look\)/);
+  // An older summary without the split still reads plainly.
+  assert.match(morningDigest({ ...stuck, publications_stuck: 2 }).body, /2 publications stuck,/);
+  assert.equal(stuckText({ ...S, publications_stuck: 0 }), "No publications stuck");
+  assert.doesNotMatch(morningDigest({ ...stuck, publications_stuck: 0 }).body, /stuck/);
+  assert.doesNotMatch(stuckText({ ...S, publications_stuck: 5, publications_retrying: 3, publications_waiting_google: 2 }), /[—–!]/);
 });
