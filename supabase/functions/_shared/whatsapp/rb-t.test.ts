@@ -155,3 +155,61 @@ Deno.test("RB-T: at a business with the book off (Yawmiyati), Is my data safe? g
   assert.equal(w.aiCalls, 1, "the router is asked, as before");
   assert.equal(w.noraCalls.length, 1);
 });
+
+// ─── Rashid's phone script for 16 Nov (docs/kabsi-3/phone-script-2026-11-16.md), run end to end on one fake world. The
+// phone starts as Rashid's does after "reset test": staff tools and four businesses, none chosen.
+const salonQ = (n: string | null, s: string | null, w: string | null) => ({ customer_name: n, phone: null, service: s, when: w, stylist: null });
+const gymQ = (n: string | null, s: string | null, w: string | null) => ({ customer_name: n, phone: null, interest: s, when: w, goal: null });
+const PHONE_SCRIPT: (Step & { n?: number })[] = [
+  { send: "switch", result: "which_role" }, { tap: "My business", result: "which_business" }, { send: "3", result: "business_set" },
+  { n: 1, send: "Book Sarah for highlights Thursday 3pm", quotes: salonQ("Sarah", "highlights", "Thursday 3pm"), result: "request_proposed", title: "📅 New appointment", buttons: ["Save", "Change"] },
+  { n: 2, tap: "Save", result: "request_saved", title: "✅ Appointment 1 saved", buttons: ["Undo"] },
+  { n: 3, send: "Sarah confirmed Thursday 3pm", result: "request_confirmed", buttons: ["Undo"] },
+  { n: 4, send: "not highlights, a trim", result: "request_corrected", title: "✅ Appointment 1 corrected", buttons: ["Undo"] },
+  { n: 5, send: "Dina asked about a keratin price", quotes: salonQ("Dina", "keratin", null), result: "request_proposed", title: "💬 New enquiry" },
+  { tap: "Save", result: "request_saved", title: "✅ Enquiry 2 saved" },
+  { n: 6, send: "Dina booked keratin Thursday 11am", result: "request_converted", buttons: ["Undo"] },
+  { n: 7, send: "what's open", result: "request_open", title: "📋 2 open" },
+  { n: 8, send: "Is my data safe?", result: "nora" },
+  { n: 9, send: "write me a poem", result: "off_topic", title: "❓ Kabsi cannot help with that" },
+  { n: 10, send: "#1", result: "request_summary", title: "📅 Appointment 1" },
+  { n: 11, send: "switch", result: "which_role" }, { tap: "My business", result: "which_business" }, { send: "2", result: "business_set" },
+  { n: 12, send: "Maya asked about a trial", quotes: gymQ("Maya", "a trial", null), result: "request_proposed", title: "💬 New enquiry" },
+  { tap: "Save", result: "request_saved", title: "✅ Enquiry 1 saved" },
+  { n: 13, send: "Maya booked a trial Thursday 6pm", result: "request_converted", buttons: ["Undo"] },
+  { n: 14, send: "who asked about a trial this week", result: "request_asked" },
+  { n: 15, send: "Omar asked about personal training", quotes: gymQ("Omar", "personal training", null), result: "request_proposed", title: "💬 New enquiry" },
+  { tap: "Save", result: "request_saved", title: "✅ Enquiry 3 saved" },
+  { send: "cancel 3", result: "request_status_ask", title: "❓ Close Enquiry 3?", buttons: ["Yes", "No"] },
+  { tap: "Yes", result: "request_status_acknowledged", says: "Status: Not joining" },
+  { n: 16, send: "switch", result: "which_role" }, { tap: "My business", result: "which_business" }, { send: "1", result: "business_set" },
+  { n: 17, send: "Ali Corolla brakes squeaking tomorrow 10am", quotes: { customer_name: "Ali", phone: null, problem: "brakes squeaking", when: "tomorrow 10am", car: "Corolla", registration: null },
+    result: "request_proposed", title: "🔧 New job" },
+  { tap: "Save", result: "request_saved", title: "✅ Job 1 saved" },
+  { n: 18, send: "1 ready", result: "request_status_ask", title: "❓ Mark Job 1 anyway?", buttons: ["Yes", "No"] },
+  { tap: "Yes", result: "request_status_acknowledged", says: "Status: Ready" },
+  { n: 19, send: "1 collected", result: "request_status", title: "✅ Job 1 is now Collected" },
+  { send: "reopen 1", result: "request_status_ask", title: "❓ Reopen Job 1?", buttons: ["Yes", "No"] },
+  { tap: "Yes", result: "request_status_acknowledged", says: "Status: Ready" },
+  { n: 20, send: "STOP", result: "stopped" }, { send: "START", result: "started" },
+];
+
+Deno.test("RB-T: the 20-message phone script for 16 Nov runs end to end, with no wrong save", async () => {
+  const w = phoneWorld();
+  for (const [i, st] of PHONE_SCRIPT.entries()) {
+    const at = `script ${i + 1} (${st.send ?? `tap ${st.tap}`})`;
+    const got = await step(w, st, at);
+    const reply = w.repliesTo(ME).at(-1);
+    if (Deno.env.get("RBT_SHOW")) console.log(`${at} -> ${got}\n${reply?.body}\n[${lastButtons(w).map((x) => x.title).join(", ")}] ${reply?.footer ?? ""} ${(reply?.rows ?? []).join(" | ")}`);
+    assert.equal(got, st.result, `${at}: ${got}. Reply: ${reply?.body}`);
+    if (st.title) assert.ok((reply?.body ?? "").split("\n")[0]!.startsWith(`*${st.title}*`), `${at}: ${reply?.body}`);
+    if (st.says) assert.ok((reply?.body ?? "").includes(st.says), `${at}: ${reply?.body}`);
+    if (st.buttons) assert.deepEqual(lastButtons(w).map((b) => b.title), st.buttons, at);
+  }
+  // Exactly the requests the script saved: two at the salon (Sarah, Dina's enquiry) plus Dina's appointment, three at the gym
+  // plus Maya's visit, one job at the garage. Nothing at Yawmiyati.
+  assert.equal(w.requests.filter((q) => q.location === SALON).length, 3);
+  assert.equal(w.requests.filter((q) => q.location === GYM).length, 3);
+  assert.equal(w.requests.filter((q) => q.location === GARAGE).length, 1);
+  assert.equal(new Set(PHONE_SCRIPT.filter((s) => s.n).map((s) => s.n)).size, 20);
+});
