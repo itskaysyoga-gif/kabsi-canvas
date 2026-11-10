@@ -92,4 +92,53 @@ describe("Sec 2: backup and restore", () => {
     expect(d).toMatch(/tar -xzf "\$W\/plain\/photos\.tar\.gz" -C "\$W\/plain\/restore"/);
     expect(d).toMatch(/seconds: \$secs/);
   });
+
+  // Safe 1 (R-151 section C): the Sunday job also backs up the two private Harvey repositories.
+  it("backs up both Harvey repositories and the release assets inside the existing Sunday job", () => {
+    const sh = read("scripts/backup/backup.sh");
+    const wf = read(".github/workflows/backup.yml");
+    expect(sh).toMatch(/kabsi-harvey-run:\$HARVEY_RUN_SOURCE/);
+    expect(sh).toMatch(/kabsi-harvey:\$HARVEY_SOURCE/);
+    expect(sh).toMatch(/bundle create "\$3" --all/);
+    expect(sh).toMatch(/seal "\$hname\.bundle"/);
+    expect(sh).toMatch(/s3:\/\/\$BUCKET\/weekly\/\$STAMP\/harvey-release\//);
+    // No new schedule and no new workflow: still one cron line in the job.
+    expect(wf.match(/cron:/g)).toHaveLength(1);
+  });
+
+  it("a missing or refused HARVEY_READ_TOKEN is a warning, never a failure", () => {
+    const sh = read("scripts/backup/backup.sh");
+    expect(sh).toMatch(/::warning::HARVEY_READ_TOKEN is not set/);
+    expect(sh).toMatch(/harvey_warn\(\) \{ say "::warning::Harvey backup/);
+    expect(sh).toMatch(/Not backed up this week/);
+    // The Harvey functions return 1 on a soft failure and never call exit.
+    const fns = sh.slice(sh.indexOf("harvey_mirror()"), sh.indexOf('say "Harvey repositories"'));
+    expect(fns).not.toMatch(/\bexit\b/);
+  });
+
+  it("only Harvey's own encrypted files are copied, and the token never reaches a command line or a log", () => {
+    const sh = read("scripts/backup/backup.sh");
+    expect(sh).toMatch(/\*\.enc \]\] && \[ "\$\(head -c 8 "\$f"/);
+    expect(sh).toMatch(/Salted__/);
+    // The token goes through the environment (GIT_CONFIG_*, GH_TOKEN) and every message is scrubbed.
+    expect(sh).toMatch(/GIT_CONFIG_VALUE_0=/);
+    expect(sh).toMatch(/GH_TOKEN="\$HARVEY_READ_TOKEN"/);
+    expect(sh).not.toMatch(/^\s*set -x/m);
+    expect(sh).not.toMatch(/(echo|say)[^\n]*\$\{?HARVEY_READ_TOKEN/);
+    // The only printf that names the token feeds base64 (the git header value), never a log line.
+    expect(sh).not.toMatch(/printf [^\n]*HARVEY_READ_TOKEN"(?! \| base64)/);
+    expect(sh.match(/harvey\.err" \| scrub/g)!.length).toBeGreaterThanOrEqual(3);
+    // The Storage download lines name files (some hold a phone number) and the repository is public.
+    expect(sh).toMatch(/2> "\$W\/storage\.err"/);
+  });
+
+  it("a pull request run gets no HARVEY_READ_TOKEN and uses the stand-ins", () => {
+    const wf = read(".github/workflows/backup.yml");
+    expect(wf).toMatch(
+      /HARVEY_READ_TOKEN: \$\{\{ github\.event_name != 'pull_request' && secrets\.HARVEY_READ_TOKEN \|\| '' \}\}/,
+    );
+    expect(wf).toMatch(/harvey-fixtures\.sh/);
+    const fx = read("scripts/backup/harvey-fixtures.sh");
+    expect(fx).toMatch(/plain-by-mistake\.csv/);
+  });
 });
