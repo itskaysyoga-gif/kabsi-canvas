@@ -165,6 +165,20 @@ Deno.test("weekdays: thuesday 3pm on a Tuesday morning gives Today 15:00 and Thu
   assert.deepEqual(last(w).buttons, ["Today 15:00", "Thu 12 Nov 15:00"]);
 });
 
+Deno.test("weekdays: review: a past readings filter, never for a visit logged after it happened", async () => {
+  const w = phoneWorld(); // Monday 26 Oct, 19:00 in Dubai
+  await toSalon(w);
+  w.extractMap["Nadia came in monday 6"] = salon("Nadia", null, "monday 6");
+  await send(w, { text: "Nadia came in monday 6" });
+  assert.ok(last(w).buttons.some((b) => /^Today 18:00/.test(b)), last(w).buttons.join(", "));
+  // Not in the past tense: today's 18:00 is gone, so next Monday is the one reading left (a guess to tap).
+  w.conversation(ME).open_question = null;
+  w.extractMap["Dina trim monday 6"] = salon("Dina", "trim", "monday 6");
+  await send(w, { text: "Dina trim monday 6" });
+  assert.match(last(w).body, /Mon 2 Nov|Monday/);
+  assert.doesNotMatch(last(w).buttons.join(", "), /Today/);
+});
+
 Deno.test("weekdays: after 3pm on that Tuesday, the Tuesday reading is a week on", () => {
   const ctx = { now: new Date(Date.UTC(2026, 10, 10, 12, 0)), timeZone: "Asia/Dubai", typosIn: { start: 0, end: 12 } };
   const r = normalizeWhen("thuesday 3pm", ctx);
@@ -293,6 +307,29 @@ const TABLE: [string, typeof G, boolean][] = [
   ["what is the weather today", S, NOT],
   ["how do reviews work", S, NOT],
   ["I want to cancel", G, NOT],
+  // The independent review's cases: posts, offers, hours and people who are not customers stay out of the book.
+  ["Discount for students this week", G, NOT],
+  ["Offer for new members", G, NOT],
+  ["Promo for Eid", S, NOT],
+  ["Approved for friday", S, NOT],
+  ["Done for today", R, NOT],
+  ["Ready for friday", R, NOT],
+  ["Add our new menu", S, NOT],
+  ["Add new offer", G, NOT],
+  ["add Christmas offer", S, NOT],
+  ["Add Ramadan timings", R, NOT],
+  ["Put down closed friday", S, NOT],
+  ["Note down that we close early", S, NOT],
+  ["Staff called in sick", S, NOT],
+  ["Bank called", S, NOT],
+  ["DHL came", R, NOT],
+  ["Supplier called about the delivery", R, NOT],
+  ["Maya wants a 3 month subscription", G, BOOK],
+  ["Ali wants an invoice", R, BOOK],
+  ["Maya saw our Instagram post and wants a trial", G, BOOK],
+  ["Sami found us on Google and wants a trial", G, BOOK],
+  ["add Sarah for a trim friday", S, BOOK],
+  ["Sarah for highlights friday", S, BOOK],
 ];
 
 Deno.test(`table: ${TABLE.length} phrases read as the request book's or not, by code`, () => {

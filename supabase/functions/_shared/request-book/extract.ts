@@ -439,7 +439,9 @@ function whenField(spec: Spec, w: WhenResult, ctx: ExtractContext, loc: Located 
   }
   // Two or more readings. RB-F4: a reading already past is set aside when a later one remains, as the commands do
   // ("Monday 6" said on a Monday evening is next Monday at 6), so a request is not left with more readings than buttons.
-  const later = w.candidates.filter((c) => !c.startsAt || Date.parse(c.startsAt) > ctx.now.getTime());
+  // Review: never when the words say it already happened ("Maya came in monday 6" may be today).
+  const past = /\b(?:came|called|rang|phoned|dropped|was|were|had|did|attended|visited|yesterday|last|ago|cancell?ed|showed)\b/i.test(message);
+  const later = past ? [] : w.candidates.filter((c) => !c.startsAt || Date.parse(c.startsAt) > ctx.now.getTime());
   const all = later.length ? later : w.candidates;
   const { keep, applied } = likelyPm(all, ctx.pack);
   const asValue = (c: WhenCand) => ({ date: c.date, time: c.time, starts_at: c.startsAt, day_part: null });

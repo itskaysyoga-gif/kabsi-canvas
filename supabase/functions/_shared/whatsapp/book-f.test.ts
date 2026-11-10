@@ -241,7 +241,8 @@ Deno.test("update: a move the kind does not have is refused plainly; a name with
   assert.equal(s.status, "requested");
   // "Nadia came in": nobody of that name in Kabsi. RB-F4 (R-149 item 1): a person and what they did is the request book's,
   // read as a new request with no router call; no existing request is changed and nothing is saved before a tap.
-  assert.match(await send(w, { text: "Nadia came in" }), /^request_/);
+  w.extractMap["Nadia came in"] = JSON.stringify({ fields: { customer_name: "Nadia", phone: null, service: null, when: null, stylist: null }, said: { agreed: null, already_arranged: null } });
+  assert.equal(await send(w, { text: "Nadia came in" }), "request_proposed");
   assert.equal(w.aiCalls, 0);
   assert.equal(s.status, "requested");
   // A number that is not there.
