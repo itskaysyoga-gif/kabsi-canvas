@@ -12,6 +12,7 @@
 // stubs prove the checker: "pass" answers with the reference answers and "fail" breaks the rules in ways the checker must
 // catch. A question whose facts were taken out of the file fails the support check with either stub.
 import { QUESTIONS, type Question } from "./questions.ts";
+import { withEnglishName } from "./google-names.ts";
 import { task, takesEffort, type Usage } from "../../supabase/functions/_shared/ai/agents.ts";
 import { fenceVisitor } from "../../supabase/functions/_shared/nora-rules.ts";
 import {
@@ -183,10 +184,12 @@ export function check(q: Question, answer: string, kb: string): Finding[] {
       add("honesty", "gives a date or a time frame for a [COMING] item");
   }
   if (q.pages) for (const [kind, detail] of pageFindings(q, answer)) add(kind, detail);
-  for (const re of q.must ?? []) if (!re.test(answer)) add("must", `answer lacks ${re}`);
+  // Tidy 2 part 1 (30.49 item 4): Google's own product name in the answer's language counts as "Google Business Profile".
+  const named = withEnglishName(answer);
+  for (const re of q.must ?? []) if (!re.test(named)) add("must", `answer lacks ${re}`);
   for (const re of q.forbid ?? []) if (re.test(answer)) add("forbid", `answer matches ${re}`);
   if (q.warnFirst) {
-    const first = answer.trim().split(/(?<=[.?])\s/)[0] ?? "";
+    const first = named.trim().split(/(?<=[.?])\s/)[0] ?? "";
     if (!q.warnFirst.test(first))
       add("must", `the first sentence must be the warning ${q.warnFirst}`);
   }

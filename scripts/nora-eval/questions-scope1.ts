@@ -68,9 +68,10 @@ export const QUESTIONS_SCOPE1: Question[] = [
     ask: "¿Kabsi guarda las reservas y solicitudes de mis clientes? ¿Es un asistente de reservas?",
     gloss: "Does Kabsi keep my customers' bookings and requests? Is it a booking assistant?",
     kb: [BOOKING_LINE, /Do not say it is planned, coming or soon/],
+    // The rule is written for the English name; Google's own name in Spanish counts the same (google-names.ts, 30.49 item 4).
     must: [/no es un sistema de reservas/i, /Google Business Profile/],
     forbid: [NO_PROMISE_OR_ASSISTANT],
     reference:
-      "Kabsi cuida tu perfil de Google Business Profile. No es un sistema de reservas y no guarda las reservas ni las solicitudes de tus clientes.",
+      "Kabsi cuida tu Perfil de Empresa de Google. No es un sistema de reservas y no guarda las reservas ni las solicitudes de tus clientes.",
   },
 ];

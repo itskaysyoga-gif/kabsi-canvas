@@ -78,7 +78,7 @@ Every page below is read at 390 px and 1440 px in the truth pass. The copy of ev
 | Facts file | The built facts Nora reads | `knowledge/kabsi-facts.md` | F, never by hand | Build |
 | llms files | The same facts for AI search | `public/llms-full.txt`, `src/content/llms-base.txt`, `knowledge/facts/llms.txt`; `/llms.txt` is a server route (`src/routes/llms[.]txt.ts`) that adds the public guides | F, never by hand | Build |
 | Nora's rules and link filter | How Nora answers, one page link at most, the help line | `supabase/functions/_shared/nora-rules.ts`, `nora-pages.ts`, `nora-contact.ts`, `src/routes/nora-pages[.]json.ts` | C then T | Build |
-| Nora's questions and the judge | 60 plus 90 questions that check the facts | `scripts/nora-eval/` | By hand when the facts change | Build |
+| Nora's questions and the judge | 60 plus 90 questions that check the facts; Google's own product name in the answer's language counts as "Google Business Profile" (`google-names.ts`, 30.49 item 4) | `scripts/nora-eval/` | By hand when the facts change | Build |
 | Team-only notes | Never reach Nora or the site | `knowledge/internal/` | By hand | Rashid |
 
 ## 6. Emails
