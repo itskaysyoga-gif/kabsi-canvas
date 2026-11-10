@@ -205,7 +205,7 @@ export const SAY = {
   resetAsk: (n: number, b: number) => `Reset test?\nThis removes the ${n} open ${n === 1 ? "request" : "requests"} you made at ${b === 1 ? "1 test business" : `${b} test businesses`}. Nothing else changes.\n\nTap Confirm to go ahead.`,
   resetDone: (n: number) => `Test reset\n${n} ${n === 1 ? "request was" : "requests were"} removed at the test businesses.`,
   resetNone: "Nothing to reset\nYou have no open requests at the test businesses.",
-  resetStaffOnly: "Reset test is for Kabsi staff only\nNothing was changed.",
+  resetStaffOnly: "Kabsi staff only\nReset test is for Kabsi staff only.\n\nNothing was changed.",
   resetFailed: "Kabsi could not reset the test just now\nNothing was changed. Please send it again in a minute.",
   // RB-F3 (R-148 item 5, WhatsApp's 2026 terms bar general-purpose assistants): a message that is not one of Kabsi's jobs.
   // RB-F4 (R-149 item 4): the off-topic line in the RB-F3 look; its first line is the bold one with ❓.

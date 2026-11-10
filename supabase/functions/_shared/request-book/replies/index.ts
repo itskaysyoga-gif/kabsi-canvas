@@ -121,7 +121,7 @@ export function foundReply(rows: RequestRow[], more: number, ctx: ReplyContext):
   const total = rows.length + more;
   if (total === 0) return finish(`Nothing found\nNothing in Kabsi matches that.\n\n${COVERS_NOTE}`);
   if (total === 1 && rows[0]) return summaryReply(rows[0], ctx);
-  return listReply(`${total} found`, rows, more, ctx, ["", "Which one? Tap it, or send its number."]);
+  return listReply(`${total} found`, rows, more, ctx, ["", `Which one? Tap it, or send its number. ${COVERS_NOTE}`]);
 }
 
 export type ProposalView = {

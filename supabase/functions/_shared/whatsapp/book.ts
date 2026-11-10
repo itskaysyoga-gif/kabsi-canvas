@@ -693,7 +693,7 @@ async function correctCmd(db: BookDb, me: Me, number: number | null, from: strin
   if (!hits.length) {
     // Without a number, words that are on no recent request are not a correction ("not sure, maybe later").
     if (number === null) return null;
-    if (cands.length === 1) return { body: `${lbl(pack, cands[0]!.row)} does not say ${clip(from, 40)}. Nothing was changed.`, result: "request_correct_not_found" };
+    if (cands.length === 1) return { body: `Not on ${lbl(pack, cands[0]!.row)}\n${lbl(pack, cands[0]!.row)} does not say ${clip(from, 40)}.\n\nNothing was changed.`, result: "request_correct_not_found" };
     return { body: ask(cands[0]!.row.number), result: "request_correct_which" };
   }
   if (hits.length > 1) return { body: ask(hits[0]!.f.row.number), result: "request_correct_which" };
@@ -764,9 +764,9 @@ async function askedCmd(db: BookDb, me: Me, about: string, since: Since | null, 
   const rows = (Array.isArray(r.rows) ? (r.rows as RequestRow[]) : [])
     .filter((x) => x.kind === "enquiry" && (!from || dayIn(x.created_at, ctx.timeZone) >= from));
   const when = since === "today" ? " today" : since === "week" ? " this week" : since === "month" ? " this month" : "";
-  if (!rows.length) return { body: `Nobody in Kabsi asked about ${clip(about, 40)}${when}.\n${COVERS_NOTE}`, result: "request_asked" };
+  if (!rows.length) return { body: `Nobody asked\nNobody in Kabsi asked about ${clip(about, 40)}${when}.\n\n${COVERS_NOTE}`, result: "request_asked" };
   const more = Number(r.more ?? 0);
-  const lines = [`${rows.length}${more ? " or more" : ""} asked about ${clip(about, 40)}${when}.`, ...rows.map((x) => requestLine(x, ctx)), COVERS_NOTE];
+  const lines = [`${rows.length}${more ? " or more" : ""} asked`, `About ${clip(about, 40)}${when}`, ...rows.map((x) => requestLine(x, ctx)), "", COVERS_NOTE];
   return { body: finish(lines.join("\n")).body, result: "request_asked" };
 }
 

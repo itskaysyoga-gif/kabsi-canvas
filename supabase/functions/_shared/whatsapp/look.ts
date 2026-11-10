@@ -182,7 +182,8 @@ export function toList(l: Look, extraMore = 0): { look: Look; list: ListMsg } | 
     if (!m) {
       // A group line before rows is a section title; anything else stays in the body.
       if (/\(\d+\)$/.test(f) || /^(?:Requested|Confirmed|Arrived|In progress|Waiting|Ready|Appointments|Enquiries|Jobs|Visits)\b/.test(f)) {
-        sections.push({ title: clip(f, SECTION_TITLE_MAX), rows: [] });
+        // "Appointments, Requested (17)" is too long for a section title: the status and its count are kept.
+        sections.push({ title: clip(f.length > SECTION_TITLE_MAX && f.includes(", ") ? f.slice(f.lastIndexOf(", ") + 2) : f, SECTION_TITLE_MAX), rows: [] });
       } else other.push(f);
       continue;
     }
@@ -191,7 +192,11 @@ export function toList(l: Look, extraMore = 0): { look: Look; list: ListMsg } | 
       continue;
     }
     if (!sections.length) sections.push({ rows: [] });
-    const [name, ...rest] = m[2]!.split(" · ");
+    // A row's description keeps what is still missing in full ("To confirm: the salon, the client"); the earlier parts shrink.
+    const [name, ...parts] = m[2]!.split(" · ").map((p) => p.replace(/^Needs confirmation from (.+?) and from (.+)$/, "To confirm: $1, $2").replace(/^Needs confirmation from (.+)$/, "To confirm: $1"));
+    const tail = parts.length > 1 && /^To confirm:/.test(parts.at(-1)!) ? parts.pop()! : null;
+    const room = ROW_DESC_MAX - (tail ? tail.length + 3 : 0);
+    const rest = parts.length ? [clip(parts.join(" · "), Math.max(room, 12)), ...(tail ? [tail] : [])] : tail ? [tail] : [];
     sections.at(-1)!.rows.push({ id: `#${m[1]}`, title: clip(`#${m[1]} ${name}`, ROW_TITLE_MAX), ...(rest.length ? { description: clip(rest.join(" · "), ROW_DESC_MAX) } : {}) });
     shown++;
   }

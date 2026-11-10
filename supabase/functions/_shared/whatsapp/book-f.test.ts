@@ -7,6 +7,7 @@ import { receive } from "./agent.ts";
 import { correction, packOf, parseBookCommand, readWhen, saysArrived, sinceDay } from "./book.ts";
 import { msg, PHONES, World } from "./world.test-helpers.ts";
 import { parseWebhook } from "./channel.ts";
+import type { ListMsg } from "./look.ts";
 
 const salonV1 = packOf("salon"), gymV1 = packOf("gym"), garageV1 = packOf("garage");
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
@@ -51,6 +52,17 @@ const last = (w: World, phone = TEST) => w.repliesTo(phone).at(-1)!;
 /** The button ids of the last reply to this phone, from the outbox. */
 const ids = (w: World, phone = TEST) => (w.outbox.filter((r) => r.phone === phone).at(-1)!.buttons as { id: string; title: string }[]).map((b) => b.id);
 const acts = (w: World, request: string) => w.activities.filter((a) => a.request === request);
+/** Look 2: the section titles of every list message sent from here on (SentMsg keeps a list's rows, not its sections). */
+function sectionsOf(w: World): (string | undefined)[][] {
+  const seen: (string | undefined)[][] = [];
+  const orig = w.sender.bind(w);
+  w.sender = (live: boolean) => {
+    const s = orig(live);
+    const list = s.list!;
+    return { ...s, list: (to: string, body: string, l: ListMsg, footer?: string) => (seen.push(l.sections.map((x) => x.title)), list(to, body, l, footer)) };
+  };
+  return seen;
+}
 const clean = (w: World) => w.repliesTo(TEST).forEach((r) => assert.doesNotMatch(r.body, HOUSE, r.body));
 
 // --- The command reader: code only, no model.
@@ -194,7 +206,7 @@ Deno.test("update: here 3 4, ready 2 gets one reply; the one skipped step is the
   assert.equal(await send(w, { text: "here 3, ready 1" }), "request_status_ask");
   assert.equal(j3.status, "active");
   assert.equal(j1.status, "waiting");
-  assert.match(last(w).body, /Job 3 is now In the shop\*\nJob 1 is still Waiting[\s\S]*Mark it Ready anyway\?/);
+  assert.match(last(w).body, /^\*❓ One more question\*\n\nJob 3 is now In the shop\.\nIt is still Waiting, and the step before Ready was never recorded\. It would be Ready\.\n\nMark Job 1 anyway\?$/u);
   assert.deepEqual(last(w).buttons, ["Yes", "No", "Undo"]);
   assert.equal(await send(w, { text: "yes" }), "request_status_acknowledged");
   assert.equal(j1.status, "ready");
@@ -215,7 +227,7 @@ Deno.test("update: cancel and lost ask first and are for an owner or a manager o
     await send(w, { text: "switch" });
     await send(w, { button: `b:${GYM}` });
     assert.equal(await send(w, { text: "Maya not interested" }), "request_status_ask");
-    assert.match(last(w).body, /This closes Enquiry 1 as Not joining\*/);
+    assert.match(last(w).body, /Close Enquiry 1\?\*( · [^\n]+)?\n\nMaya\nTrial\n\nIt closes as Not joining\./);
     assert.equal(await send(w, { button: ids(w)[0] }), "request_status_acknowledged");
     assert.equal(m.outcome, "lost");
   }
@@ -223,7 +235,7 @@ Deno.test("update: cancel and lost ask first and are for an owner or a manager o
   const w = world({ which: [SALON], role: "staff" });
   const s = await sarah(w);
   assert.equal(await send(w, { text: "cancel 1" }), "request_status_refused");
-  assert.match(last(w).body, /Only an owner or a manager can do that\*\nNothing was changed\./);
+  assert.match(last(w).body, /^\*❓ Not changed\*\n\nAppointment 1: Only an owner or a manager can do that\. Nothing was changed\.$/u);
   assert.equal(s.status, "requested");
   assert.equal(w.conversation(TEST).open_question, null);
   // Staff may still record what happened when it ends nothing early.
@@ -351,7 +363,7 @@ Deno.test("convert: Maya booked a trial Monday 6 closes the enquiry as converted
   // Nothing in between: no contacted step nobody stated, no confirmation.
   assert.deepEqual(acts(w, e.id).map((x) => x.type), ["created", "converted_out"]);
   assert.deepEqual(acts(w, v.id).map((x) => x.type), ["converted_in"]);
-  assert.match(last(w).body, /Enquiry 1 became Visit 2 for Maya\*( · [^\n]+)?\nThe enquiry stays on record\./);
+  assert.match(last(w).body, /^\*✅ Done\*( · [^\n]+)?\n\nEnquiry 1 is now Visit 2\.\nMaya\n[\s\S]*\n\nThe enquiry stays on record\./u);
   assert.match(last(w).body, /No confirmation has been recorded yet\./);
   // Undo puts the enquiry back and removes the visit, keeping the link.
   assert.equal(await send(w, { button: ids(w)[0] }), "request_undone");
@@ -372,7 +384,7 @@ Deno.test("correct: not highlights, a trim applies to the request touched in the
   w.now += 20 * 60_000;
   assert.equal(await send(w, { text: "not highlights, a trim" }), "request_corrected");
   assert.equal(s.summary, "Haircut");
-  assert.match(last(w).body, /Appointment 1 corrected\*( · [^\n]+)?\nservice changed from Highlights to Haircut\./);
+  assert.match(last(w).body, /Appointment 1 corrected\*( · [^\n]+)?\n\nService: was Highlights, now Haircut$/);
   assert.deepEqual(last(w).buttons, ["Undo"]);
   assert.equal(await send(w, { text: "undo" }), "request_undone");
   assert.equal(s.summary, "Highlights");
@@ -390,12 +402,12 @@ Deno.test("correct: not Corolla, Civic changes the car; unclear between two asks
   const a = await ali(w);
   assert.equal(await send(w, { text: "not Corolla, Civic" }), "request_corrected");
   assert.equal(a.details!.car, "Toyota Civic");
-  assert.match(last(w).body, /Job 1 corrected\*( · [^\n]+)?\ncar changed from Toyota Corolla to Toyota Civic\./);
+  assert.match(last(w).body, /Job 1 corrected\*( · [^\n]+)?\n\nCar: was Toyota Corolla, now Toyota Civic$/);
   // Words on no recent request, with no number: not a correction ("not sure, maybe later" goes the same way).
   assert.equal(await send(w, { text: "not Golf, Polo" }), "off_topic");
   assert.equal(await send(w, { text: "not sure, maybe later" }), "off_topic");
   assert.equal(await send(w, { text: "1 not Golf, Polo" }), "request_correct_not_found");
-  assert.match(last(w).body, /Job 1 does not say golf\*\nNothing was changed\./);
+  assert.match(last(w).body, /Job 1 does not say golf\.\n\nNothing was changed\./);
   const b = await ali(w, { car: "Honda Civic" });
   assert.equal(await send(w, { text: "not Civic, Jazz" }), "request_correct_which");
   assert.equal(a.details!.car, "Toyota Civic");
@@ -424,7 +436,7 @@ Deno.test("undo: 10 minutes, the latest effective change only, never twice, and 
   // The creation itself, then nothing of the book's is left to undo: "undo" keeps today's meaning.
   assert.equal(await send(w, { text: "undo" }), "request_undone");
   assert.equal(q.outcome, "voided");
-  assert.match(last(w).body, /Undone\*( · [^\n]+)?\nJob 1 was removed\./);
+  assert.match(last(w).body, /Undone\*( · [^\n]+)?\n\nJob 1 was removed\./);
   assert.notEqual(await send(w, { text: "undo" }), "request_undone");
   // After 10 minutes the button says so.
   const r = await ali(w);
@@ -432,7 +444,7 @@ Deno.test("undo: 10 minutes, the latest effective change only, never twice, and 
   const u = ids(w)[0]!;
   w.now += 11 * 60_000;
   assert.equal(await send(w, { button: u }), "request_undo_refused:window_passed");
-  assert.match(last(w).body, /Undo is open for 10 minutes and that time has passed\*\nNothing was changed\./);
+  assert.match(last(w).body, /^\*↩️ Too late to undo\*\n\nUndo is open for 10 minutes and that time has passed\. Nothing was changed\./u);
   assert.equal(r.status, "active");
   assert.equal(await send(w, { button: u }), "request_undo_refused:window_passed");
 });
@@ -458,11 +470,12 @@ Deno.test("save: Undo after Save; Ali Corolla brakes, car's here is saved as In 
   w.aiMap[text] = '{"tool":"request_new","args":{},"lang":"en"}';
   w.extractMap[text] = JSON.stringify({ fields: { customer_name: "Ali", phone: null, problem: "brakes", when: null, car: "Corolla", registration: null }, said: { agreed: null, already_arranged: null } });
   assert.equal(await send(w, { text }), "request_proposed");
-  assert.match(last(w).body, /Status: In the shop\nNothing is saved until you tap Save\./);
+  assert.match(last(w).body, /Status: In the shop$/);
+  assert.equal(last(w).footer, "Nothing is saved until you tap Save.");
   const intake = [...w.intakes.values()].at(-1)!;
   assert.equal(await send(w, { button: `rs:${intake.id}` }), "request_saved");
   assert.equal(w.requests[0].status, "active");
-  assert.match(last(w).body, /Job 1 saved\*( · [^\n]+)?\n#1 Ali · Brakes · In the shop/);
+  assert.match(last(w).body, /Job 1 saved\*( · [^\n]+)?\n\nAli\nBrakes\nStatus: In the shop$/);
   assert.deepEqual(last(w).buttons, ["Undo"]);
   // Ali's car is ready: one step, no question.
   assert.equal(await send(w, { text: "Ali's car is ready" }), "request_status");
@@ -473,6 +486,7 @@ Deno.test("save: Undo after Save; Ali Corolla brakes, car's here is saved as In 
 
 Deno.test("lists: what's open is grouped, 15 rows then a count, for this business only, covers only Kabsi, no model", async () => {
   const w = world({ which: [SALON, GARAGE] });
+  const sections = sectionsOf(w);
   for (let i = 0; i < 17; i++) await make(w, SALON, { kind: "appointment", customer_name: `Client ${i + 1}`, summary: "Haircut" });
   await make(w, SALON, { kind: "enquiry", customer_name: "Dina", summary: "Hair treatment" });
   await ali(w);
@@ -480,22 +494,27 @@ Deno.test("lists: what's open is grouped, 15 rows then a count, for this busines
   await send(w, { button: `b:${SALON}` });
   assert.equal(await send(w, { text: "what's open" }), "request_open");
   const body = last(w).body;
+  const open = last(w);
   assert.match(body, /^\*📋 18 open\* · Kabsi Test Salon\n/);
-  assert.match(body, /Appointments, Requested \(\d+\)/);
-  assert.match(body, /and 3 more/);
-  assert.match(body, /This covers only what was entered in Kabsi\.$/);
-  assert.doesNotMatch(body, /Ali|Brakes/, "the garage's job is not in the salon's list");
-  assert.equal((body.match(/^#\d+ /gm) ?? []).length, 15);
+  assert.equal(open.kind, "list");
+  assert.deepEqual(sections.at(-1), ["Requested (14)"]);
+  assert.match(body, /and 8 more/);
+  assert.equal(open.footer, "This covers only what was entered in Kabsi.");
+  assert.doesNotMatch([body, ...open.rows!].join("\n"), /Ali|Brakes/, "the garage's job is not in the salon's list");
+  assert.equal(open.rows!.length, 10);
+  assert.ok(open.rows!.every((r) => /^#\d+ Client \d+ · Haircut · /.test(r)), open.rows!.join("\n"));
+  assert.deepEqual(open.rowIds, open.rows!.map((r) => r.split(" ")[0]));
   assert.equal(w.aiCalls, 0);
   assert.equal(await send(w, { text: "what's unconfirmed" }), "request_unconfirmed");
-  assert.match(last(w).body, /17 appointments still need a confirmation\*/);
-  assert.match(last(w).body, /Needs confirmation from the salon and from the client/);
+  assert.match(last(w).body, /17 appointments to confirm\*/);
+  assert.equal(last(w).rows![0], "#17 Client 17 · Haircut · Requested · To confirm: the salon, the client");
   assert.equal(w.aiCalls, 0);
   clean(w);
 });
 
 Deno.test("lists: who asked about a trial this week; what's ready", async () => {
   const w = world({ which: [GYM, GARAGE] });
+  const sections = sectionsOf(w);
   await maya(w);
   w.now += 7 * 86400_000;
   await make(w, GYM, { kind: "enquiry", customer_name: "Hana", summary: "Trial" });
@@ -503,10 +522,11 @@ Deno.test("lists: who asked about a trial this week; what's ready", async () => 
   await send(w, { text: "switch" });
   await send(w, { button: `b:${GYM}` });
   assert.equal(await send(w, { text: "who asked about a trial this week" }), "request_asked");
-  assert.match(last(w).body, /1 asked about trial this week\*( · [^\n]+)?\n#2 Hana · Trial/);
-  assert.doesNotMatch(last(w).body, /Maya|Omar/);
+  assert.match(last(w).body, /^\*📋 1 asked\*( · [^\n]+)?\n\nAbout trial this week/u);
+  assert.deepEqual(last(w).rows, ["#2 Hana · Trial · Not contacted"]);
+  assert.doesNotMatch([last(w).body, ...last(w).rows!].join("\n"), /Maya|Omar/);
   assert.equal(await send(w, { text: "who asked about a trial" }), "request_asked");
-  assert.match(last(w).body, /2 asked about trial\*/);
+  assert.match(last(w).body, /2 asked\* · Kabsi Test Gym\n\nAbout trial\n/);
   await send(w, { text: "switch" });
   await send(w, { button: `b:${GARAGE}` });
   const j = await ali(w);
@@ -514,7 +534,9 @@ Deno.test("lists: who asked about a trial this week; what's ready", async () => 
   await w.bookDb().setStatus(GARAGE, TEST_USER, "seed:r2", j.id, 2, "ready", null, false);
   await ali(w);
   assert.equal(await send(w, { text: "what's ready" }), "request_open");
-  assert.match(last(w).body, /1 open\* · Kabsi Test Garage\nReady \(1\)\n#1 Ali/);
+  assert.match(last(w).body, /1 open\* · Kabsi Test Garage\n/);
+  assert.deepEqual(sections.at(-1), ["Ready (1)"]);
+  assert.deepEqual(last(w).rows, ["#1 Ali · Brakes"]);
 });
 
 // --- Isolation between the three businesses, and other phones.
@@ -553,7 +575,7 @@ Deno.test("F-1: a forwarded Yes never answers a question about a change, and the
   const q = await ali(w);
   await send(w, { text: "Ali's car is ready" });
   assert.equal(await send(w, { text: "Yes", forwarded: true }), "forwarded_yes");
-  assert.match(last(w).body, /That looks forwarded, so I did not count it as your yes/);
+  assert.match(last(w).body, /^\*❓ Not counted as your yes\*\n\nThat looks forwarded\./u);
   assert.equal(q.status, "waiting");
   assert.equal((w.conversation(TEST).open_question as { type: string }).type, "rb_ask");
   assert.equal(await send(w, { text: "Yes" }), "request_status_acknowledged");

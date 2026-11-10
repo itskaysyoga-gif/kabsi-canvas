@@ -310,7 +310,7 @@ Deno.test("reset test: staff only, asks with Confirm, then voids only this phone
 Deno.test("reset test: refused to a phone that is not Kabsi staff; an old Confirm after 10 minutes does nothing", async () => {
   const w = phoneWorld();
   assert.equal(await receive(w.deps(), msg(w, PHONES.owner, { text: "reset test" })), "reset_refused");
-  assert.match(w.repliesTo(PHONES.owner).at(-1)!.body, /^\*❓ One question\*\n\nReset test is for Kabsi staff only\.\n\nNothing was changed\.$/u);
+  assert.match(w.repliesTo(PHONES.owner).at(-1)!.body, /^\*❓ Kabsi staff only\*\n\nReset test is for Kabsi staff only\.\n\nNothing was changed\.$/u);
   assert.ok(!w.calls.some((c) => c.startsWith("reset_test")));
   await sarahSaved(w);
   assert.equal(await send(w, { text: "reset test" }), "reset_ask");
