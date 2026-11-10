@@ -138,11 +138,11 @@ export function noraLook(text: string, business: string | null = null): Look {
   const last = lines.at(-1) ?? "";
   if (lines.length && last.endsWith("?")) {
     // The question is the last sentence when it stands after others on its line, else the whole last line.
-    const cut = /^(.+[.?])\s+(?<q>[^.?]+\?)$/s.exec(last);
+    const cut = /^(.+[.?])\s+([^.?]+\?)$/s.exec(last);
     const before = cut?.[1];
     if (cut && before && !/\b(?:Dr|Mr|Mrs|Ms|St|No)\.$/.test(before)) {
       lines[lines.length - 1] = before;
-      end = cut.groups!.q!.trim();
+      end = cut[2]!.trim();
     } else {
       end = last.trim();
       lines.pop();
