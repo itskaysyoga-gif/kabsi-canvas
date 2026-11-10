@@ -11,7 +11,7 @@ import type { NormalizedMessage } from "../normalize/index.ts";
 import type { Kind, Refusal, Reply, RequestRow } from "../types.ts";
 import {
   BUTTON_BODY_MAX, BUTTON_TITLE_MAX, COVERS_NOTE, MAX_BUTTONS, MAX_ROWS, TEXT_BODY_MAX, clip, confirmationShort, confirmationText,
-  fieldLabel, formatDay, formatWhen, kindWord, statusKeyWord, statusWord, whenText, type ReplyContext,
+  fieldLabel, formatDay, formatWhen, kindWord, statusKeyWord, statusWord, whenText, windowLabel, type ReplyContext,
 } from "./words.ts";
 
 export { BUTTON_BODY_MAX, BUTTON_TITLE_MAX, COVERS_NOTE, MAX_BUTTONS, MAX_ROWS, TEXT_BODY_MAX };
@@ -141,8 +141,8 @@ export function proposalReply(p: ProposalView, ctx: ReplyContext): Reply {
   let readings: string[] = [];
   if (w.status === "ok") {
     if (w.startsAt) parts.push(formatWhen(w.startsAt, ctx.timeZone, ctx.now));
-    else if (w.date) parts.push(`${formatDay(w.date)}, ${w.dayPart ? `${w.dayPart}, no exact time` : "no time"}`);
-    else if (w.dayPart) parts.push(`${w.dayPart}, no exact time`);
+    // RB-F2: a day or a part of the day with no exact hour, in its clean form ("Thursday afternoon, no time set").
+    else if (w.date || (w.dayPart && !w.time)) parts.push(`${windowLabel(w.date, w.time ? null : w.dayPart, ctx)}, no time set`);
   } else if (w.status === "ambiguous") {
     readings = w.candidates.map((c) => readingLabel(c, ctx)).filter(Boolean);
     parts.push(readings.join(" or "));

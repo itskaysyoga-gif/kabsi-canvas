@@ -15,7 +15,7 @@ import { MODELS } from "../models.ts";
 import type { Pack, FieldTarget } from "./packs/schema.ts";
 import { latinDigit } from "./normalize/digits.ts";
 import { normalizeMessage, type NormalizedMessage, type WhenResult } from "./normalize/index.ts";
-import { clip, formatDay, formatWhen, kindWord, type ReplyContext } from "./replies/words.ts";
+import { asWritten, clip, formatDay, formatWhen, kindWord, type ReplyContext, windowLabel } from "./replies/words.ts";
 import { finish } from "./replies/index.ts";
 import { MAX_RAW_TEXT } from "./intake/adapter.ts";
 import type { Reply } from "./types.ts";
@@ -263,15 +263,26 @@ const base = (f: { key: string; label: string; target: FieldTarget }): Extracted
 
 type Spec = Pack["fields"][number];
 
+/**
+ * RB-F2: each word of a name written all in lower case gets a capital first letter, also after a hyphen or an apostrophe
+ * ("sarah" to "Sarah", "al-hassan" to "Al-Hassan"). A word with any capital already ("McKay", "DeShawn") is left as typed,
+ * and a script with no capitals is unchanged.
+ */
+export function nameCase(name: string): string {
+  return name.split(" ").map((w) => (w === w.toLowerCase() && w !== w.toUpperCase() ? w.replace(/(^|[-'\u2019])(\p{Ll})/gu, (_m, a: string, b: string) => a + b.toUpperCase()) : w)).join(" ");
+}
+
 function verbatimField(spec: Spec, loc: Located | null, why: string, maxWords: number | null): ExtractedField {
   const f = base(spec);
   if (!loc) return { ...f, validation: { passed: false, reason: why } };
   const text = collapse(loc.raw);
   if (maxWords !== null && text.split(" ").length > maxWords) return { ...f, validation: { passed: false, reason: "too_long_for_this_field" } };
   if (spec.target === "customer_name" && /^[\d\s+().\-]+$/.test(text)) return { ...f, validation: { passed: false, reason: "digits_only" } };
+  // RB-F2: a name starts with a capital letter, as typed words do ("sarah" is shown and saved as "Sarah"). The raw quote is kept.
+  const shown = spec.target === "customer_name" ? nameCase(text) : text;
   return {
-    ...f, kind: "stated", raw: loc.raw, start: loc.start, end: loc.end, quote_source: "model", normalized: text,
-    normalizer: { name: "verbatim", version: 1 }, validation: { passed: true, reason: null }, show: "plain", display: clip(text, 100),
+    ...f, kind: "stated", raw: loc.raw, start: loc.start, end: loc.end, quote_source: "model", normalized: shown,
+    normalizer: { name: "verbatim", version: 1 }, validation: { passed: true, reason: null }, show: "plain", display: clip(shown, 100),
   };
 }
 
@@ -370,6 +381,12 @@ function likelyPm(cands: WhenCand[], pack: Pack): { keep: WhenCand[]; applied: b
   return { keep, applied: keep.length < cands.length };
 }
 
+/** RB-F2: words about when that the date reader did not understand are never shown back as if they were read. */
+export const NOT_CLEAR_PREFIX = "not clear, you wrote ";
+const notClear = (words: string) => `${NOT_CLEAR_PREFIX}"${clip(words, 60)}"`;
+/** The question under a proposal whose time was not understood. No figure: the owner's own words are the only ones shown. */
+export const WHEN_NOT_CLEAR_ASK = "Which day and time did you mean? Send it again, for example Thursday afternoon. Or tap Save to keep the words as written, with no time set.";
+
 /**
  * A time is read only where the model's quote and the date reader agree: the quote is in the message and the reader found
  * a day or hour in those words. A day or hour the reader finds where the model quoted nothing is not used (a digit that
@@ -385,7 +402,7 @@ function whenField(spec: Spec, w: WhenResult, ctx: ExtractContext, loc: Located 
       const words = collapse(loc.raw);
       return {
         ...f, kind: "stated", raw: loc.raw, start: loc.start, end: loc.end, quote_source: "model", normalized: { text: words, starts_at: null }, normalizer: norm,
-        validation: { passed: false, reason: "words_only_not_read_as_a_time" }, show: "plain", display: `${clip(words, 60)}, no time set`,
+        validation: { passed: false, reason: "words_only_not_read_as_a_time" }, show: "plain", display: notClear(words),
       };
     }
     return { ...f, normalizer: norm, validation: { passed: false, reason: w.reason } };
@@ -396,18 +413,19 @@ function whenField(spec: Spec, w: WhenResult, ctx: ExtractContext, loc: Located 
     const words = collapse(loc.raw);
     return {
       ...f, kind: "stated", raw: loc.raw, start: loc.start, end: loc.end, quote_source: "model", normalized: { text: words, starts_at: null }, normalizer: norm,
-      validation: { passed: false, reason: "part_of_the_words_not_read" }, show: "plain", display: `${clip(words, 60)}, no time set`,
+      validation: { passed: false, reason: "part_of_the_words_not_read" }, show: "plain", display: notClear(words),
     };
   }
   const ev = { raw: w.raw, start: w.start, end: w.end, quote_source: "model" as QuoteSource };
   if (w.status === "ok") {
     let display: string | null = null;
+    // RB-F2: a day or a part of the day with no exact hour is shown, and saved, in its clean form ("Thursday afternoon").
+    const window = !w.startsAt && !w.time && (w.date || w.dayPart) ? windowLabel(w.date, w.dayPart, ctx) : null;
     if (w.startsAt) display = formatWhen(w.startsAt, ctx.timeZone, ctx.now) || null;
-    else if (w.date) display = `${formatDay(w.date)}, ${w.dayPart ? `${w.dayPart}, no exact time` : "no time"}`;
+    else if (window) display = `${window}, no time set`;
     else if (w.time) display = w.time;
-    else if (w.dayPart) display = `${w.dayPart}, no exact time`;
     return {
-      ...f, ...ev, kind: "stated", normalized: { date: w.date, time: w.time, starts_at: w.startsAt, day_part: w.dayPart }, normalizer: norm,
+      ...f, ...ev, kind: "stated", normalized: { date: w.date, time: w.time, starts_at: w.startsAt, day_part: w.dayPart, ...(window ? { text: window } : {}) }, normalizer: norm,
       validation: { passed: true, reason: null }, show: "plain", display,
     };
   }
@@ -591,7 +609,9 @@ export function replyFor(ex: Omit<Extraction, "reply"> | Extraction, ctx: ReplyC
   }
   if (ex.missingRequired.length) return finish(`${body}\nStill needed: ${ex.missingRequired.join(", ")}. Nothing is saved yet.`, ["Change"]);
   const guess = Object.values(ex.fields).some((f) => f.show === "guess");
-  const tail = guess ? "A question mark is a guess. Nothing is saved until you tap Save." : "Nothing is saved until you tap Save.";
+  // RB-F2: a time the date reader did not understand is asked about, never shown back as if it were read.
+  const unclear = Object.values(ex.fields).some((f) => f.target === "when" && f.show === "plain" && f.display?.startsWith(NOT_CLEAR_PREFIX));
+  const tail = [unclear ? WHEN_NOT_CLEAR_ASK : null, guess ? "A question mark is a guess." : null, "Nothing is saved until you tap Save."].filter(Boolean).join(" ");
   return finish(`${body}\n${tail}`, ["Save", "Change"]);
 }
 

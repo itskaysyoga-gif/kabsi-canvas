@@ -249,7 +249,8 @@ Deno.test("replies: a proposal shows what was read, leaves out what was not, and
   assertNotMatch(empty.body, /\+9|Today|Tomorrow|Thu|Fri/);
   // A day part has no exact time and the reply says so.
   const part = proposalReply({ kind: "appointment", name: "Sarah", summary: "Highlights", norm: read("Sarah highlights Thursday afternoon") }, c);
-  assertStringIncludes(part.body, "Thu 12 Nov, afternoon, no exact time");
+  // RB-F2: in its clean form.
+  assertStringIncludes(part.body, "Thursday afternoon, no time set");
   assertNotMatch(part.body, /\d\d:\d\d/);
   // Thursday 3 is the morning or the afternoon: two buttons, no Save.
   const amb = proposalReply({ kind: "appointment", name: "Maya", summary: "Trim", norm: read("Maya trim Thursday 3") }, c);

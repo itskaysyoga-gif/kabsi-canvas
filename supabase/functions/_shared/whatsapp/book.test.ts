@@ -122,7 +122,8 @@ Deno.test("capture: one proposal with Save and Change, nothing saved; Save makes
   assert.match(p.body, /^Kabsi Test Salon \(owner\)/);
   assert.match(p.body, /Name: Sarah/);
   assert.match(p.body, /Service: Highlights/);
-  assert.match(p.body, /Thu 29 Oct, afternoon, no exact time/);
+  // RB-F2: the time in its clean form.
+  assert.match(p.body, /When: Thursday afternoon, no time set/);
   assert.match(p.body, /Nothing is saved until you tap Save/);
   assert.equal(w.requests.length, 0);
   assert.equal(w.extractCalls.length, 1);

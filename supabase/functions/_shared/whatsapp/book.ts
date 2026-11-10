@@ -11,13 +11,13 @@
 //     tap finds the proposal already used and makes no second request;
 //   - no time is invented: words with no exact time are kept as words, with no time set;
 //   - every reply is built by code from the record (replies/), and says nothing the record does not hold.
-import { type Ask, type Extraction, extract, type ExtractRefusal, toEvidence } from "../request-book/extract.ts";
+import { type Ask, type Extraction, extract, type ExtractRefusal, nameCase, toEvidence } from "../request-book/extract.ts";
 import { getPack, type Pack } from "../request-book/packs/index.ts";
 import {
   askFirstReply, confirmationReply, convertedReply, correctedReply, COVERS_NOTE, finish, foundReply, openListReply, refusalReply, requestLine,
   savedReply, statusChangedReply, summaryReply, undoneReply,
 } from "../request-book/replies/index.ts";
-import { clip, confirmationShort, kindWord, statusKeyWord, statusWord, whenText } from "../request-book/replies/words.ts";
+import { asWritten, clip, confirmationShort, kindWord, statusKeyWord, statusWord, whenText } from "../request-book/replies/words.ts";
 import { OPEN_STATUSES, type Kind, type Reply, type RequestRow } from "../request-book/types.ts";
 import { MAX_RAW_TEXT } from "../request-book/intake/adapter.ts";
 import {
@@ -128,6 +128,7 @@ export type { Pack };
 
 type Evidence = {
   kind?: string; raw?: string | null; normalized?: unknown; candidates?: { label: string; value: unknown }[];
+  validation?: { passed?: boolean; reason?: string | null };
 };
 
 const words = (s: string) => s.replace(/\s+/g, " ").trim();
@@ -169,7 +170,7 @@ export function createInput(pack: Pack, evidence: Json, intakeId: string, pick?:
     }
     switch (spec.target) {
       case "customer_name":
-        if (typeof value === "string" && value.trim()) input.customer_name = words(value).slice(0, 200);
+        if (typeof value === "string" && value.trim()) input.customer_name = nameCase(words(value)).slice(0, 200);
         else if (spec.required) missing.push(spec.label);
         break;
       case "phone":
@@ -183,7 +184,11 @@ export function createInput(pack: Pack, evidence: Json, intakeId: string, pick?:
       }
       case "when": {
         const w = value as { starts_at?: string | null; text?: string } | null;
-        const said = e.raw ? words(e.raw) : w?.text ? words(w.text) : null;
+        // RB-F2: words the date reader understood are saved in their clean form ("Thursday afternoon"); words it did not
+        // understand are saved marked as written, so no later list shows them as if they had been read.
+        const read = !(e.kind === "stated" && e.validation?.passed === false && !w?.starts_at);
+        const raw = e.raw ? words(e.raw) : w?.text ? words(w.text) : null;
+        const said = read ? (w?.text ? words(w.text) : raw) : raw ? asWritten(raw.slice(0, 180)) : null;
         if (w?.starts_at) input.starts_at = w.starts_at;
         if (said) input.requested_window_text = said.slice(0, 200);
         break;
