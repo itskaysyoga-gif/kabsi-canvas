@@ -1,6 +1,6 @@
 # Kabsi copy deck (docs/COPY.md), lane R chat, 25 Oct 2026
 
-**Changed by section 79 (Founding 1, 10 Nov 2026, lane R R-151, master plan 30.51):** Founding 25 is private. Every line in this deck that puts Founding 25 on a public page (the line above the header, the banner, the Home and Pricing cards, the About and footer links, the free check link, the share image) is retired, and "founding price" is "launch price" in every public line. Section 79 holds what replaces them. Where an older section still says otherwise, section 79 wins.
+**Changed by section 79 (the Founding task, 10 Nov 2026, lane R R-151, master plan 30.51):** Founding 25 is private. Every line in this deck that puts Founding 25 on a public page (the line above the header, the banner, the Home and Pricing cards, the About and footer links, the free check link, the share image) is retired, and "founding price" is "launch price" in every public line. Section 79 holds what replaces them. Where an older section still says otherwise, section 79 wins.
 
 Every line a mockup or Web 2 page carries, so no screen has placeholder text. Written to the kabsi-copy rules and master plan 24, 27, 28, 29 and 30. Web 2 builds from it and updates the facts to match (section 27 makes several facts lines out of date: the Weekly Care Report is now the Results Report, the pillars and H1 changed).
 
@@ -2202,7 +2202,7 @@ The words live in `supabase/functions/_shared/wa-signin.ts` (`SIGNIN_SAY`, `WHAT
 
 **Staff (daily check).** WhatsApp alert "Sign-in check found 1 item: Google sign-in" and an email to hello@kabsi.co, "Kabsi Google sign-in is off".
 
-## 79. Founding 1: Founding 25 is private, and the launch price (10 Nov 2026, lane R R-151, master plan 30.51)
+## 79. Founding task: Founding 25 is private, and the launch price (10 Nov 2026, lane R R-151, master plan 30.51)
 
 Founding 25 leaves every public surface. Rashid offers it only by message and email, with a link that holds a secret. Nothing replaces the line above the header: no promo bar, no empty bar.
 
@@ -2215,7 +2215,7 @@ Founding 25 leaves every public surface. Rashid offers it only by message and em
 - Home pricing preview: "Launch price $19 and $39 for the first 30 paying businesses." only while places remain.
 - Plan page: "Choose Pro, $39 a month, launch price" while places remain; a running plan shows "Launch price, kept while you stay subscribed."; the receipt email says "Launch price, kept while your subscription stays paid."
 - Terms section 8: "A business that joins by Kabsi's invitation and chooses a plan after its free months pays the launch price too."
-- Privacy: "If you apply for a place Rashid invited you to:" and "Applications for an invited place and to Kabsi Partners:" (the retention is unchanged: declined, deleted 90 days after the decision; waitlisted, 180 days; accepted, kept while in the program). Legal wording changes only with lane R: this is a name change, listed for lane R in the Founding 1 report.
+- Privacy: "If you apply for a place Rashid invited you to:" and "Applications for an invited place and to Kabsi Partners:" (the retention is unchanged: declined, deleted 90 days after the decision; waitlisted, 180 days; accepted, kept while in the program). Legal wording changes only with lane R: this is a name change, listed for lane R in the Founding task report.
 - Creem product names: "Kabsi Essentials, monthly, launch price" and the three like it (the list family is unchanged). The setup action renames the products Creem already holds.
 
 **Nora and the facts.** Public fact: "There is no public founding offer. A business that was invited should open the link in its invitation." Nora gives no /founding address, describes no terms and counts no places. Everything else about Founding 25 is in `knowledge/internal/2026-11-10-founding-25-private.md`.

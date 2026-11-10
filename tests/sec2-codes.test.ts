@@ -52,7 +52,7 @@ describe("Sec 2: codes out of query strings", () => {
   });
 
   it("the scrubbers hide the unsubscribe token in a path", () => {
-    expect(read("src/lib/scrub.ts")).toContain("start\\\\/resume|unsubscribe)");
+    expect(read("src/lib/scrub.ts")).toContain("start\\\\/resume|unsubscribe|founding)");
   });
 });
 
