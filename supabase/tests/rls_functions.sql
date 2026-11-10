@@ -105,6 +105,11 @@ select throws_ok($$ select public.whatsapp_connect_start(repeat('Consent text sh
 select is(public.whatsapp_status() ->> 'state', 'none', 'whatsapp_status shows a stranger nothing of the owner''s');
 select is(public.whatsapp_set_prefs(false, true) ->> 'state', 'none', 'whatsapp_set_prefs changes nothing of the owner''s');
 select is(public.whatsapp_disconnect() ->> 'state', 'none', 'whatsapp_disconnect stops nothing of the owner''s');
+-- Signup 1: the contact email is per person; a stranger reads and writes only their own.
+select is(public.contact_email_status() ->> 'email', null, 'contact_email_status shows a stranger nothing of the owner''s');
+select is(public.set_contact_email('stranger@example.test') ->> 'ok', 'true', 'set_contact_email writes the stranger''s own row');
+select is((select email from public.account_contacts where user_id = '00000000-0000-4000-8000-0000000000a1'), null,
+  'the stranger cannot read the owner''s contact email');
 select throws_ok($$ select public.whatsapp_staff_code() $$, '42501', 'forbidden', 'whatsapp_staff_code refuses anyone who is not staff');
 -- A business already on Kabsi cannot be started again by someone else.
 select throws_ok($$ select public.start_location('victim-place', 'Hijack', 'x', 'US', 'UTC') $$, 'P0001', 'already_on_kabsi', 'start_location refuses a business that is already on Kabsi for someone else');
