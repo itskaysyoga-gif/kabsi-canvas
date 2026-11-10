@@ -1,5 +1,5 @@
 // Signup 1 (30.50 item 3): Continue with WhatsApp, end to end on a fake world. The fake store below keeps the same rules as
-// the SQL functions of migration 20261110120000 (wa_signin_start, _claim, _confirm, _check): the code's hash, 10 minutes,
+// the SQL functions of migration 20261110125951 (wa_signin_start, _claim, _confirm, _check): the code's hash, 10 minutes,
 // the first phone claims it, the tap from that phone only, the browser's secret, one use. Every refusal the card names is
 // here: expired, reused, wrong browser, forwarded, no tap, rate limit. No database, Kapso or Auth call.
 import assert from "node:assert/strict";
