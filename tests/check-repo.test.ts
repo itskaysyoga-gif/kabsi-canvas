@@ -85,13 +85,15 @@ describe("check-repo", () => {
       f("public/og/home.webp"),
       f("tests/e2e/baseline/m390/public.spec.ts/home.png"),
       f("tests/e2e/baseline/d1440/public.spec.ts/big.png", MAX_BYTES * 3),
+      f("tests/e2e/baseline/d1440/public.spec.ts/huge.png", 1024 * 1024 + 1),
+      f("constructor", MAX_BYTES + 1),
       f("tests/fixtures/photos/small.png"),
       f("docs/notes.md", MAX_BYTES),
       f("docs/big.md", MAX_BYTES + 1),
       f("supabase/functions/_shared/review-graphic/assets.ts", MAX_BYTES * 5),
       f("src/other-big.ts", MAX_BYTES + 1),
     ]);
-    expect(problems).toHaveLength(7);
+    expect(problems).toHaveLength(9);
     expect(
       problems.filter((p) => p.includes("docs/ holds no images")).map((p) => p.split(":")[0]),
     ).toEqual(["docs/app9/after-390.png", "docs/scan3/card.PDF", "docs/email-previews/logo.png"]);

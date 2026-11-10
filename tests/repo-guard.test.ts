@@ -14,20 +14,20 @@ import {
 
 type Tracked = { path: string; size: number };
 const files: Tracked[] = trackedFiles(new URL("..", import.meta.url).pathname);
-const VIDEO_AUDIO_RE = /\.(mp4|m4v|mov|webm|mkv|avi|mp3|wav|m4a|ogg)$/i;
 
 describe("repository guard", () => {
   it("holds no image, video or PDF under docs/", () => {
-    const found = files.filter(
-      (f) => f.path.startsWith("docs/") && (MEDIA_RE.test(f.path) || VIDEO_AUDIO_RE.test(f.path)),
-    );
+    const found = files.filter((f) => f.path.startsWith("docs/") && MEDIA_RE.test(f.path));
     expect(found.map((f) => f.path)).toEqual([]);
   });
 
   it("holds no file over 300 KB except the Playwright baselines and the named list", () => {
     expect(MAX_BYTES).toBe(300 * 1024);
     const big = files.filter(
-      (f) => f.size > MAX_BYTES && !f.path.startsWith(BASELINE_DIR) && !(f.path in SIZE_ALLOWLIST),
+      (f) =>
+        f.size > MAX_BYTES &&
+        !f.path.startsWith(BASELINE_DIR) &&
+        !Object.hasOwn(SIZE_ALLOWLIST, f.path),
     );
     expect(big.map((f) => `${f.path} (${f.size} bytes)`)).toEqual([]);
   });

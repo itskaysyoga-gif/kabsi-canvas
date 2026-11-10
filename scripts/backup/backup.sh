@@ -51,6 +51,7 @@ have() { [ -n "${!1:-}" ]; }
 # tries; the file is sent again from the start. After the last try the failure stops the run, as before.
 UPLOAD_TRIES="${BACKUP_UPLOAD_TRIES:-3}"
 UPLOAD_PAUSE="${BACKUP_UPLOAD_PAUSE:-20}"
+case "$UPLOAD_TRIES" in '' | *[!0-9]* | 0) UPLOAD_TRIES=3 ;; esac # a bad value must never mean "retry forever"
 with_retry() { # with_retry <what> <command...>
   local what="$1" n=1
   shift
@@ -323,15 +324,15 @@ if [ "$DRY_RUN" -eq 1 ]; then
   : > "$RETRY_COUNT"
   flaky() { echo x >> "$RETRY_COUNT"; [ "$(wc -l < "$RETRY_COUNT")" -ge 3 ]; }
   never() { return 1; }
-  if ! (UPLOAD_PAUSE=0 with_retry "retry check, fails twice" flaky); then
+  if ! (UPLOAD_TRIES=3 UPLOAD_PAUSE=0 with_retry "retry check, fails twice" flaky); then
     say "::error::Dry run: the upload retry did not recover from two failed tries"
     exit 1
   fi
-  if (UPLOAD_PAUSE=0 RETRY_GIVEUP_LEVEL=notice with_retry "retry check, always fails" never); then
+  if (UPLOAD_TRIES=3 UPLOAD_PAUSE=0 RETRY_GIVEUP_LEVEL=notice with_retry "retry check, always fails" never); then
     say "::error::Dry run: the upload retry did not stop after the last try"
     exit 1
   fi
-  say "Upload retry proved: a part that failed twice went through on the third try, and a part that never works stops the run after $UPLOAD_TRIES tries."
+  say "Upload retry proved: a part that failed twice went through on the third try, and a part that never works stops the run after 3 tries."
   say "Dry run: nothing was uploaded. Would upload weekly/$STAMP/ to the bucket $BUCKET and keep the newest $KEEP sets."
   exit 0
 fi

@@ -81,7 +81,7 @@ export function checkWorkflows(dir) {
 
 // Clean 2 and Clean 4: the folders that may hold binary media, the size limit and the files allowed over it.
 export const MEDIA_RE =
-  /\.(png|jpe?g|gif|webp|avif|svg|ico|bmp|tiff?|heic|pdf|mp4|m4v|mov|webm|mkv|avi|zip|gz|tgz|7z|rar)$/i;
+  /\.(png|jpe?g|jfif|gif|webp|avif|svg|ico|bmp|tiff?|heic|heif|jxl|psd|pdf|mp4|m4v|mov|webm|mkv|avi|wmv|flv|mpe?g|ogv|3gp|mp3|wav|m4a|ogg|zip|gz|tgz|tar|xz|bz2|7z|rar)$/i;
 // Clean 4 (10 Nov 2026): docs/ holds no image, PDF, video or zip at all (docs/email-previews is HTML and text only).
 export const MEDIA_DIRS = ["src/assets/", "public/", "tests/e2e/baseline/", "tests/fixtures/"];
 // Clean 4: no tracked file over 300 KB, except the Playwright baselines (screenshots the visual tests compare against)
@@ -90,6 +90,8 @@ export const MEDIA_DIRS = ["src/assets/", "public/", "tests/e2e/baseline/", "tes
 // pull request does not trip the guard. Evidence screenshots are looked at in the session, never committed.
 export const MAX_BYTES = 300 * 1024;
 export const BASELINE_DIR = "tests/e2e/baseline/";
+// The baselines are exempt from the 300 KB limit but keep the old 1 MB cap, so one huge screenshot still fails.
+export const BASELINE_MAX_BYTES = 1024 * 1024;
 export const SIZE_ALLOWLIST = {
   "supabase/functions/_shared/review-graphic/assets.ts":
     "generated font and wasm data (base64) for the review graphic; source code, rebuilt as the comment at its top says",
@@ -122,7 +124,8 @@ export function checkFiles(files) {
       problems.push(
         `${path}: images, PDFs, videos and zips may only be committed under ${MEDIA_DIRS.join(", ")}; write session screenshots to test-results/ or shots/ (not committed)`,
       );
-    if (size > MAX_BYTES && !path.startsWith(BASELINE_DIR) && !(path in SIZE_ALLOWLIST))
+    const limit = path.startsWith(BASELINE_DIR) ? BASELINE_MAX_BYTES : MAX_BYTES;
+    if (size > limit && !Object.hasOwn(SIZE_ALLOWLIST, path))
       problems.push(
         `${path}: ${size} bytes is over the 300 KB limit for one file (only the Playwright baselines and the named list in scripts/check-repo.mjs may be larger)`,
       );
