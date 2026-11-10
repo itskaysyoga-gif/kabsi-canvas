@@ -116,6 +116,29 @@ export function formatDay(ymd: string): string {
   return `${MONTH_DAY(p, "weekday")} ${MONTH_DAY(p, "day")} ${MONTH_DAY(p, "month")}`;
 }
 
+/**
+ * RB-F2: a day and a part of the day that the date reader understood, with no exact hour, in its clean form: "Thursday
+ * afternoon", "Tomorrow morning", "Today". A day more than 6 days away keeps its date ("Thu 26 Nov afternoon").
+ */
+export function windowLabel(date: string | null, dayPart: string | null, ctx: Pick<ReplyContext, "timeZone" | "now">): string {
+  const part = dayPart ?? "";
+  if (!date) return part ? part[0]!.toUpperCase() + part.slice(1) : "";
+  let day = formatDay(date);
+  try {
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: ctx.timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(ctx.now);
+    const gap = Math.round((Date.parse(`${date}T12:00:00Z`) - Date.parse(`${today}T12:00:00Z`)) / 86_400_000);
+    if (gap === 0) day = "Today";
+    else if (gap === 1) day = "Tomorrow";
+    else if (gap > 1 && gap <= 6) day = new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", weekday: "long" }).format(new Date(`${date}T12:00:00Z`));
+  } catch {
+    // An unknown zone keeps the plain date.
+  }
+  return part ? `${day} ${part}` : day;
+}
+
+/** RB-F2: what the owner wrote about when, kept because the date reader could not read it, shown as written and never as read. */
+export const asWritten = (words: string): string => `"${words}" (as written)`;
+
 /** The label of a request field as the pack names it, or a plain label for the fields every business has. */
 export function fieldLabel(pack: Pack, field: string): string {
   const byTarget: Record<string, string> = { summary: "summary", customer_name: "customer_name", requested_window_text: "when", starts_at: "when", ends_at: "when" };

@@ -149,6 +149,9 @@ export type AgentDeps = {
 };
 
 const ABUSE_QUIET_MS = 24 * 3600_000;
+/** RB-F2: how long "Your business or Kabsi staff tools?" and "Which business?" stay open for their answer. */
+const PICK_OPEN_MS = 10 * 60_000;
+const nowIso = (t: Turn) => new Date((t.d.now ?? Date.now)()).toISOString();
 const HANDOFF_QUIET_MS = 24 * 3600_000;
 
 /** One inbound message: stored once, then handled. Returns what was done (for the log and the suite). */
@@ -237,16 +240,37 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   // F-1: a forwarded yes, no or number never answers Kabsi's own questions (the search, hours, the monthly question).
   const fwdAnswer = cmd.k === "free" && !!cmd.forwardedAnswer;
 
+  // RB-F2: the role and business questions hold a message for after the pick. Any message that is not their answer closes
+  // them, and they close by themselves after 10 minutes, so an old question never captures a later message.
+  const pq = conv?.open_question;
+  if (pq && (pq.type === "role" || pq.type === "business")) {
+    const answers = pq.type === "role" ? cmd.k === "role_pick" : cmd.k === "business_pick" || cmd.k === "number";
+    const fresh = !!pq.at && now - Date.parse(pq.at) < PICK_OPEN_MS;
+    if (!answers || !fresh) {
+      await d.db.setConv(phone, { open_question: null });
+      // A late answer to a question that held something (a message, a photo, a switch): say so, never drop it in silence.
+      const held = pq.type === "role" ? !!pq.pending || !!pq.switch : !!pq.pending || !!pq.media;
+      if (answers && held) return answered(t, SAY.pickClosed, "pick_closed");
+      return run({ ...t, who: { ...who, conversation: { ...conv!, open_question: null } } }, cmd);
+    }
+  }
+
   // Answers to Kabsi's own questions: the role, the business, a digest number, "Which one?".
   if (cmd.k === "role_pick") {
     if (!domains(who).includes(cmd.to)) return answered(t, SAY.unclear, "role_refused");
-    const q = conv?.open_question;
-    await d.db.setConv(phone, { active_role: cmd.to, open_question: null });
-    const next: Who = { ...who, conversation: conv ? { ...conv, active_role: cmd.to, open_question: null } : conv };
+    // RB-F2: only the role question itself is closed by the pick; an old "My business" tap leaves any other question open.
+    // A pick of staff or partner tools closes every question, as before: a request draft question left open there could not
+    // be answered and would let a typed yes reach an approval elsewhere.
+    const q = conv?.open_question?.type === "role" ? conv.open_question : null;
+    const left = q || cmd.to !== "business" ? null : conv?.open_question ?? null;
+    await d.db.setConv(phone, left ? { active_role: cmd.to } : { active_role: cmd.to, open_question: null });
+    const next: Who = { ...who, conversation: conv ? { ...conv, active_role: cmd.to, open_question: left } : conv };
     if (q?.type === "role" && q.pending) {
       const m: Inbound = { ...t.m, text: q.pending, buttonId: null, media: null, forwarded: !!q.forwarded };
       return run({ ...t, who: next, m }, parse(m));
     }
+    // RB-F2: "switch", then "My business": with more than one business the numbered list comes at once.
+    if (q?.type === "role" && q.switch && cmd.to === "business" && businesses(who).length > 1) return switchBusiness({ ...t, who: next });
     return answered({ ...t, who: next }, SAY.switched(cmd.to === "business" ? "your business" : cmd.to === "partner" ? "your partner tools" : "Kabsi staff tools"), "role_set");
   }
   if (cmd.k === "business_pick") return pickedBusiness(t, cmd.locationId);
@@ -351,7 +375,7 @@ async function withBusiness(t: Turn, toolName: string, pending: string | null, f
   const b = pickBusiness(t.who);
   if (!b) {
     const options = list.map((x) => ({ id: x.location_id, name: x.business }));
-    await t.d.db.setConv(t.phone, { open_question: { type: "business", pending, options, ...keep, ...fwdMark(t) } satisfies OpenQuestion });
+    await t.d.db.setConv(t.phone, { open_question: { type: "business", pending, options, ...keep, ...fwdMark(t), at: nowIso(t) } satisfies OpenQuestion });
     if (options.length <= 3) {
       return answered(t, SAY.whichBusiness, "which_business", options.map((o) => ({ id: `b:${o.id}`, title: o.name.slice(0, 20) })));
     }
@@ -369,9 +393,11 @@ async function pickedBusiness(t: Turn, locationId: string): Promise<string> {
   const b = businesses(t.who).find((x) => x.location_id === locationId);
   // A business this phone is not bound to is never acted on or named (9.2).
   if (!b) return answered(t, SAY.notYours, "business_refused");
-  const q = t.who.conversation?.open_question;
-  await t.d.db.setConv(t.phone, { active_location_id: b.location_id, active_role: "business", open_question: null });
-  const conv = t.who.conversation ? { ...t.who.conversation, active_location_id: b.location_id, active_role: "business" as Domain, open_question: null } : null;
+  // RB-F2: only the business question itself is closed by the pick; an old business button leaves any other question open.
+  const q = t.who.conversation?.open_question?.type === "business" ? t.who.conversation.open_question : null;
+  const left = q ? null : t.who.conversation?.open_question ?? null;
+  await t.d.db.setConv(t.phone, q ? { active_location_id: b.location_id, active_role: "business", open_question: null } : { active_location_id: b.location_id, active_role: "business" });
+  const conv = t.who.conversation ? { ...t.who.conversation, active_location_id: b.location_id, active_role: "business" as Domain, open_question: left } : null;
   const next: Turn = { ...t, who: { ...t.who, conversation: conv } };
   if (q?.type === "business" && q.pending) {
     const m: Inbound = { ...t.m, text: q.pending, buttonId: null, media: null, forwarded: !!q.forwarded };
@@ -436,8 +462,8 @@ async function tool(t: Turn, name: string, arg: string | undefined, text: string
 // after the pick is still not a yes.
 const fwdMark = (t: Turn): { forwarded?: true } => (t.m.forwarded ? { forwarded: true } : {});
 
-async function askRole(t: Turn, options: Domain[], pending: string): Promise<string> {
-  await t.d.db.setConv(t.phone, { open_question: { type: "role", pending, options, ...fwdMark(t) } satisfies OpenQuestion });
+async function askRole(t: Turn, options: Domain[], pending: string, o: { switch?: true } = {}): Promise<string> {
+  await t.d.db.setConv(t.phone, { open_question: { type: "role", pending, options, ...fwdMark(t), at: nowIso(t), ...o } satisfies OpenQuestion });
   const title = (x: Domain) => (x === "business" ? "My business" : x === "partner" ? "Partner tools" : "Staff tools");
   const q = options.includes("partner") ? SAY.whichRole : SAY.whichRoleStaff;
   return answered(t, q, "which_role", options.slice(0, 3).map((x) => ({ id: `r:${x}`, title: title(x) })));
@@ -465,9 +491,13 @@ async function help(t: Turn): Promise<string> {
 
 async function switchCmd(t: Turn): Promise<string> {
   const d = domains(t.who);
-  if (d.length > 1) return askRole(t, d, "");
-  const list = businesses(t.who);
-  if (list.length < 2) return help(t);
+  if (d.length > 1) return askRole(t, d, "", { switch: true });
+  if (businesses(t.who).length < 2) return help(t);
+  return switchBusiness(t);
+}
+
+/** The list of the phone's businesses, with none active until one is picked. */
+async function switchBusiness(t: Turn): Promise<string> {
   await t.d.db.setConv(t.phone, { active_location_id: null });
   return withBusiness({ ...t, who: { ...t.who, conversation: t.who.conversation ? { ...t.who.conversation, active_location_id: null } : null } }, "switch", null,
     (tb) => answered(tb, SAY.switched(tb.business!.business), "switched"));
@@ -1159,6 +1189,10 @@ async function bookCheck(t: Turn): Promise<BookTurn | null> {
   return { on, b, proposal, open };
 }
 
+/** RB-F2: the typed words that work like the buttons under a proposal. Yes, ok and the other yes words are read as yes. */
+const PROPOSAL_WORDS: Record<string, "save" | "change"> = { "save": "save", "save it": "save", "save this": "save", "save please": "save", "please save": "save",
+  "change": "change", "change it": "change", "change this": "change" };
+
 /** The word rules of the request book. Returns null for anything that keeps today's meaning. */
 async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
   if (!t.d.book) return null;
@@ -1168,15 +1202,21 @@ async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
   const words = cmd.k === "free" || (cmd.k === "tool" && ["hours", "post", "billing"].includes(cmd.tool));
   const ref: Ref | null = cmd.k === "number" ? { number: cmd.n, word: null } : words ? refOf(text) : null;
   const oq = t.who.conversation?.open_question;
+  // RB-F2: while a proposal waits, a typed Save (also as a reply that quotes it) is the same as tapping Save, and a typed
+  // Change the same as tapping Change. Anywhere else the words keep their meaning.
+  // It goes through the same checks as a typed yes: the draft must be open for the business the owner is working on.
+  const typed = cmd.k === "free" && oq?.type === "rb_proposal" ? PROPOSAL_WORDS[text.toLowerCase().replace(/[.!,]+$/, "").replace(/\s+/g, " ").trim()] ?? null : null;
+  const yesNo: "yes" | "no" | null = cmd.k === "yes" || typed === "save" ? "yes" : cmd.k === "no" ? "no" : null;
   // RB-F: a typed yes or no to a question asked before a change, or to the one reading of a time.
   if ((cmd.k === "yes" || cmd.k === "no") && (oq?.type === "rb_ask" || oq?.type === "rb_time")) return await bookAnswer(t, cmd.k === "yes", oq);
-  const answer = (cmd.k === "yes" || cmd.k === "no") && oq?.type === "rb_proposal";
+  const answer = yesNo !== null && oq?.type === "rb_proposal";
   if (!ref && cmd.k !== "free" && !answer) return null;
   const bt = await bookCheck(t);
   if (!bt) return null;
   const db = t.d.book.db;
   const b = bt.b;
-  if (cmd.k === "yes" || cmd.k === "no") {
+  if (typed === "change" && b && bt.open) return await bookButton(t, { k: "request", action: "change", intakeId: bt.open.intake_id });
+  if (yesNo && answer) {
     // Yes saves only when a proposal is waiting here; otherwise it keeps its meaning (approve the last task). While a draft
     // is still open, a yes is never passed on to an approval waiting elsewhere (a Google reply or post).
     if (!b || !bt.open) {
@@ -1184,7 +1224,7 @@ async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
       const q = t.who.conversation?.open_question as RbQuestion;
       const qb = businesses(t.who).find((x) => x.location_id === q.location_id);
       const g = qb ? await db.intake(qb.location_id, qb.user_id, q.intake_id).catch(() => null) : null;
-      if (cmd.k === "yes" && g?.ok === true && g.state === "pending") return answered(withB(t, qb!), BOOK_SAY.tapSave, "request_yes_tap_save");
+      if (yesNo === "yes" && g?.ok === true && g.state === "pending") return answered(withB(t, qb!), BOOK_SAY.tapSave, "request_yes_tap_save");
       await t.d.db.setConv(t.phone, { open_question: null });
       return null;
     }
@@ -1195,7 +1235,7 @@ async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
       await t.d.db.setConv(t.phone, { open_question: null });
       return null;
     }
-    if (cmd.k === "yes") return await bookSave(tb, b, bt.on.get(b.location_id)!, bt.open.intake_id, undefined, g);
+    if (yesNo === "yes") return await bookSave(tb, b, bt.on.get(b.location_id)!, bt.open.intake_id, undefined, g);
     await db.discard(b.location_id, b.user_id, `discard:${t.m.messageId}`, bt.open.intake_id).catch(() => null);
     await t.d.db.setConv(t.phone, { open_question: null });
     return answered(tb, BOOK_SAY.dropped, "request_dropped");
