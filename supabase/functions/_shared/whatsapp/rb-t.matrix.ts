@@ -409,7 +409,8 @@ export const ROWS: Row[] = S.flatMap((s, i) => PACKS.map((p): Row => ({
 
 // The document keeps Arabic script out, as engineering-reference.md does: the rows hold it, the document names it.
 const ARABIC = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff\ufb50-\ufdff\ufe70-\ufeff]+(?:[\s\u0660-\u0669]+[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff\ufb50-\ufdff\ufe70-\ufeff\u0660-\u0669]+)*/g;
-const cell = (s: string) => s.replace(ARABIC, "(Arabic script, see the row)").replace(/\|/g, "\\|").replace(/\n/g, " ");
+const cell = (s: string) =>
+  s.replace(ARABIC, "(Arabic script, see the row)").replace(/\\/g, "\\\\").replace(/\|/g, "\\|").replace(/\n/g, " ");
 function stepText(st: Step): string {
   const what = st.tap ? `tap ${st.tap}` : `${st.fwd ? "forwarded " : ""}"${st.send ?? ""}"`;
   const wait = st.wait ? `after ${st.wait} min, ` : "";
