@@ -382,6 +382,10 @@ Deno.test("RB-T: a confirmation inside an instruction to say it is never noted a
       said: { agreed: "confirmed", already_arranged: null } }), ctx("salon")));
     assertEquals(r.said.agreed, null, message);
   }
+  // A customer named Mark keeps the claim (review: "mark" is not an instruction word).
+  const m = ok(extractFields("Mark confirmed the trim Friday 8pm", JSON.stringify({ fields: { customer_name: "Mark", phone: null, service: "trim", when: "Friday 8pm", stylist: null },
+    said: { agreed: "confirmed", already_arranged: null } }), ctx("salon")));
+  assert(m.said.agreed !== null);
   // The owner's own statement is still noted.
   const s = ok(extractFields("Rita confirmed the trim Friday 8pm", JSON.stringify({ fields: { customer_name: "Rita", phone: null, service: "trim", when: "Friday 8pm", stylist: null },
     said: { agreed: "confirmed", already_arranged: null } }), ctx("salon")));

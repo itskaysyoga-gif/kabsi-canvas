@@ -245,7 +245,7 @@ function bare(h: number, mi: number): Hour {
  * never silently dropped.
  */
 function hourAfterDay(t: string, dayEnd: number): { reads: Hour; start: number; end: number } | null {
-  const m = /^[\s,]*(?:at\s+|l\s+|el\s+)?(\d{1,2})(?:[:.h](\d{2}))?(?![0-9:.\/])(?!\s*(?:st|nd|rd|th|am|pm)\b)(?![a-z])(?![\s.\-]*\d)/.exec(t.slice(dayEnd));
+  const m = /^[\s,]*(?:at\s+|l\s+|el\s+)?(\d{1,2})(?:[:.h](\d{2}))?(?![0-9:.\/])(?!\s*(?:st|nd|rd|th|am|pm)\b)(?![a-z])(?![\s.\-]*\d)(?![\s,]*(?:people|persons?|pax|guests|ppl|adults|kids|shakhes|shakhs|ashkhas|nafar)\b)/.exec(t.slice(dayEnd));
   if (!m) return null;
   const h = Number(m[1]);
   const mi = m[2] ? Number(m[2]) : 0;

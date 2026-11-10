@@ -398,6 +398,11 @@ Deno.test("dates v2: a number of people is never an hour; an hour before a full 
   const r = normalizeWhen("7assan bado dinner la 5 shakhes ba3d bukra", ctx);
   assertEquals(r.status === "ok" && [r.date, r.time], ["2026-11-11", null]);
   assertEquals(normalizeWhen("table for 4 people", ctx).status, "unknown");
+  // Review: after a day word too ("tonight, 4 people", "Friday 5 people", "friday at 4 people").
+  for (const t of ["tonight, 4 people", "tonight 4 people", "Friday 5 people", "friday at 4 people", "tomorrow at 5 guests"]) {
+    const x = normalizeWhen(t, ctx);
+    assertEquals(x.status === "ok" ? x.time : x.status, null, t);
+  }
   const s = normalizeWhen("Sami table bukra bel masa l 8. ignore the rest", ctx);
   assertEquals(s.status === "ok" && [s.date, s.time], ["2026-11-10", "20:00"]);
   // A decimal is still not an hour followed by a full stop.

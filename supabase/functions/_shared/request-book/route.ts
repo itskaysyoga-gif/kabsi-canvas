@@ -143,9 +143,9 @@ export function packWordWins(text: string, pack: Pick<Pack, "services">): boolea
  * service words is the business's own ("how much is a manicure") and is never caught here; a message about a customer
  * ("Maya asked about the price") is read by bookIntent first and never reaches this check.
  */
-const ACCOUNT = /\b(?:account|accounts|data|data safe|data secure|privacy|private|gdpr|personal data|delete my|my details|secure|security|safe|log ?in|logging in|log ?out|sign ?in|signing in|sign ?out|password|two step|2fa|verification code|bill|billing|billed|invoice|invoices|receipt|charged|charge me|refund|payment|my card)\b/i;
+const ACCOUNT = /\b(?:account|accounts|data|data safe|data secure|privacy|private|gdpr|personal data|delete my|my details|secure|security|safe|log ?in|logging in|log ?out|password|two step|2fa|verification code|bill|billing|billed|invoice|invoices|charged|charge me|refund|payment|my card)\b/i;
 /** Words that are Kabsi's when the pack does not use them ("plan", "trial", "price"), and the business's when it does. */
-const SOFT = /\b(?:plan|plans|essentials|pro plan|upgrade|downgrade|subscription|subscribe|trial|pay|price|prices|pricing|cost|costs|how much|fee|fees)\b/i;
+const SOFT = /\b(?:plan|plans|essentials|pro plan|upgrade|downgrade|subscription|subscribe|trial|price|prices|pricing|cost|costs|how much|fee|fees)\b/i;
 /** A message asked as a question: a question word first, or a question mark. */
 const ASKED = /^(?:what|what's|whats|how|why|when|where|which|who|is|are|do|does|did|can|could|would|should|will|am|was|were|has|have|tell me)\b|\?\s*$/i;
 
@@ -154,12 +154,17 @@ export function kabsiQuestion(text: string, pack: Pick<Pack, "services">): boole
   if (!t || t.length > 300 || /\n/.test(t) || !ASKED.test(t)) return false;
   // Kabsi's own jobs (reviews, posts, Google, hours) keep their way: the router and Kabsi's tools.
   if (kabsiJob(t) && !namesKabsi(t)) return false;
+  // Review: a question about a named customer ("Did Maya ask about the price?", "Can Maya come at 5 and pay by card?")
+  // is not about Kabsi; a capitalised word after the first, other than Kabsi's own names, is taken as a person.
+  if (!namesKabsi(t) && t.split(/\s+/).slice(1).some((w) => /^[A-Z][a-z'-]+/.test(w) && !/^(?:I|I'm|I've|Kabsi|Google|WhatsApp|Pro|Essentials|Creem)\b/.test(w))) return false;
   if (ACCOUNT.test(t) || namesKabsi(t)) return true;
   return SOFT.test(t) && !hasService(t, pack);
 }
 
 /** Words that make a message about a customer an enquiry (asked about, a price) rather than the pack's usual kind. */
-const ENQUIRY = /\b(?:(?:asked|asking|asks|ask)\s+(?:about|if|whether|for (?:a |the )?(?:price|prices|quote|cost))|enquir(?:ed|ing|y|es)|inquir(?:ed|ing|y|es)|wants? to know|wanted to know|price|prices|pricing|how much|quote|cost|costs)\b/i;
+// Review: a bare price, cost or quote is not enough ("haircut Tuesday 5pm, price 30" stays an appointment); the words must
+// say the customer asked.
+const ENQUIRY = /\b(?:(?:asked|asking|asks|ask)\s+(?:about|if|whether|for (?:a |the )?(?:price|prices|quote|cost))|enquir(?:ed|ing|y|es)|inquir(?:ed|ing|y|es)|wants? to know|wanted to know|wants? (?:a |the )?(?:quote|price)|how much)\b/i;
 
 /**
  * RB-T: the kind a message about a customer is proposed as, when it is not the pack's default. At a business whose usual

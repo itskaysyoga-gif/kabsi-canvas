@@ -126,7 +126,11 @@ Deno.test("RB-T: a question about the account, data, privacy, price, plan, bill,
   for (const p of [salon, gym, garage]) for (const t of kabsi) assert.ok(kabsiQuestion(t, p), `${p.id}: ${t}`);
   const theirs: [string, typeof salon][] = [["how much is a manicure", salon], ["how much is a membership?", gym], ["what's the price of a pilates class", gym],
     ["how much for brakes?", garage], ["is the free trial still on?", gym], ["Maya asked about the price", gym], ["what's open", salon], ["is it any good", salon],
-    ["how are my reviews doing?", salon], ["can you post our new menu?", salon], ["what time do we open on Friday?", garage], ["Sarah wants highlights", salon]];
+    ["how are my reviews doing?", salon], ["can you post our new menu?", salon], ["what time do we open on Friday?", garage], ["Sarah wants highlights", salon],
+    // Review: questions about a named customer stay the book's (or the router's), never Nora's.
+    ["Can you book Maya in at 3pm tomorrow? she will pay by card", salon], ["Can you sign in Maya for Friday 6pm?", gym],
+    ["Can Maya come tomorrow at 5 and pay by card?", gym], ["Did Maya ask about the price?", salon], ["Did Maya ask about the price?", garage],
+    ["Did Sara get her receipt?", salon]];
   for (const [t, p] of theirs) assert.ok(!kabsiQuestion(t, p), `${p.id}: ${t}`);
   // Where the pack has no such word, the trial and the price are Kabsi's.
   assert.ok(kabsiQuestion("is the free trial still on?", salon));
@@ -140,7 +144,10 @@ Deno.test("RB-T: asked about or a price makes an enquiry where the usual kind is
   }
   assert.equal(enquiryKind("Karim asked about a clutch price", garage), "enquiry");
   assert.equal(enquiryKind("Tom wants a quote for tyres", garage), "enquiry");
-  for (const t of ["Sarah wants highlights Thursday", "Lina asked for a trim Friday 3pm", "Book Sarah for highlights"]) assert.equal(enquiryKind(t, salon), null, t);
+  for (const t of ["Sarah wants highlights Thursday", "Lina asked for a trim Friday 3pm", "Book Sarah for highlights", "Maya wants a haircut Tuesday 5pm, price 30"]) {
+    assert.equal(enquiryKind(t, salon), null, t);
+  }
+  assert.equal(enquiryKind("Ali's Corolla brake job tomorrow 9am, quote 200", garage), null);
   assert.equal(enquiryKind("Ali Corolla brakes tomorrow 10am", garage), null);
   assert.equal(enquiryKind("Maya asked about a trial", gym), null, "the gym's usual kind is already an enquiry");
 });
