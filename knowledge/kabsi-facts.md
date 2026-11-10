@@ -614,6 +614,12 @@ Where people pay or wait (counter, till, reception), on tables, on receipts, inv
 ### Copy 3: the partners page shows the rate only (5 Nov 2026, B-029 and B-030)
 
 The partners page and its Example show the rate and no dollar earnings: "25 percent of what each referred business pays, for as long as it pays." Step 1 reads "Apply on WhatsApp or by email". The earnings slider is gone. Kabsi Partners still opens when card payments open.
+
+### Partners 1: review card sellers first, and Google's review rules (10 Nov 2026, R-148)
+
+- Kabsi Partners speaks first to sellers of NFC and QR Google review cards, then to local web and social media freelancers. The line: "The card gets the reviews. Kabsi answers them." With a partner link, every card a partner sells comes with a 30-day Kabsi trial (the same 30-day Pro trial as above), and the partner earns 25 percent of every payment for as long as the business stays. Applications are open now; partner links switch on when card payments open. The first 20 approved are Founding Partners.
+- Kabsi works with any review card: it reads every new Google review, however it came in, and prepares a reply for the owner's yes.
+- A partner follows Google's review rules: no review gating or filtering (asking only happy customers), no rewards for reviews, no fake reviews. Breaking this rule ends the partnership and its payments. It is in the partner terms (section 5, updated 10 Nov 2026).
 ## 7. Industry notes
 
 Site examples are fictional and labelled. The same honesty rules apply to every trade. In every trade: ask every customer the same way, and never offer a discount, free item, gift or upgrade for a review.

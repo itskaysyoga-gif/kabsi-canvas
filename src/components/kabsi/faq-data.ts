@@ -288,4 +288,13 @@ export const PARTNER_FAQ = [
     q: "Can I see who joined?",
     a: "You see the trade and area. The name only if the owner says yes.",
   },
+  // Partners 1 (R-148, docs/COPY.md section 74).
+  {
+    q: "When do partner links switch on?",
+    a: "When card payments open. Applications are open now, and the first 20 approved are Founding Partners.",
+  },
+  {
+    q: "Does Kabsi work with any review card?",
+    a: "Yes. Kabsi reads every new Google review, however it came in, and prepares a reply for the owner's yes.",
+  },
 ];

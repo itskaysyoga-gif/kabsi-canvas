@@ -6,7 +6,7 @@ export const FOUNDING_TRADES = ["beauty_hair", "food", "health", "other"] as con
 export const FOUNDING_COUNTRIES = ["AE", "GB", "US"] as const;
 export const PARTNER_KINDS = ["creator", "agency", "accountant", "reseller", "business_group", "other"] as const;
 /** The version of /partners/terms an applicant agrees to. Change it when the terms change in a way that matters. */
-export const PARTNER_TERMS_VERSION = "2026-10-26";
+export const PARTNER_TERMS_VERSION = "2026-11-10"; // Partners 1 (R-148): the review rules line
 /**
  * The words the founding applicant agrees to, stored with the application (30.17 section 1). UX 1: the form asks "Named or
  * anonymous case study" (anonymous unless the owner picks named), and the stored words say which one they agreed to.
