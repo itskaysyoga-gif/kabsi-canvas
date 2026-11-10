@@ -71,7 +71,8 @@ describe("no app code in the first load of a public page", () => {
     // later, through a kept server HTML (no lazy boundary, no Suspense fallback, nothing blanked). The route's loader
     // awaits them, so the server render and an in-site visit to Home draw them at once.
     const d9 = read("src/components/kabsi/d9-home.tsx");
-    expect(d9).toMatch(/import \{ D9Hero, StepsLine \} from "\.\/d9-hero"/);
+    // Site 3a (30.50 item 10): Home's first screen is the hero alone; the three steps follow the familiar problem below.
+    expect(d9).toMatch(/import \{ D9Hero \} from "\.\/d9-hero"/);
     expect(d9).not.toMatch(/\blazy\(|<Suspense|from "\.\/d9-home-lower"/);
     expect(d9).toContain('import("./d9-home-lower")');
     expect(d9).toContain("dangerouslySetInnerHTML");

@@ -5,7 +5,8 @@
 import { ArrowRight } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { HERO_PRICE_LINE } from "@/lib/site";
+import { TRIAL_LINE } from "@/lib/site";
+import { ResultPreview } from "./result-preview";
 import { ExampleBadge, KabsiMark, WithWhatsAppMark } from "./ui";
 import { Img, PHOTOS, type Photo } from "./photos";
 import { ScanBox } from "./scan-box";
@@ -14,14 +15,7 @@ import { D9Title } from "./d9-title";
 import { YellowLabel, YellowNumber } from "./highlight";
 
 export { YellowLabel, YellowNumber };
-import {
-  D9_BUSINESS,
-  D9_HERO_LINE,
-  D9_HERO_STREAM,
-  D9_STEPS,
-  type D9Message,
-  type StepId,
-} from "./d9-data";
+import { D9_BUSINESS, D9_HERO_LINE, D9_STEPS, type D9Message, type StepId } from "./d9-data";
 
 export const d9LinkCls =
   "press inline-flex min-h-11 items-center gap-1.5 font-semibold text-text-1 underline decoration-text-3 decoration-1 underline-offset-4 hover:decoration-text-1";
@@ -32,6 +26,11 @@ export function D9Arrow() {
 
 /* ---------- Home hero ---------- */
 
+/**
+ * Site 3a (master plan 30.50 item 10, R-150): the hero is the free check. One action (the business search), one
+ * reassurance beside it (TRIAL_LINE), and "See how it works". From 1024 px the Example free check result stands on the
+ * salon photo, so the page shows what the check gives back. The WhatsApp demonstration is further down, once.
+ */
 export function D9Hero() {
   return (
     <section aria-labelledby="hero-title" data-hero className="relative isolate z-10">
@@ -43,43 +42,37 @@ export function D9Hero() {
           <p className="mt-4 max-w-[36rem] text-lead text-text-2 sm:mt-6">
             <WithWhatsAppMark text={D9_HERO_LINE} />
           </p>
-          {/* R-126 (COPY-01): the plan price and the trial, built from the constants, under the lead. */}
-          <p className="mt-2 max-w-[36rem] text-small text-text-2 sm:mt-3">{HERO_PRICE_LINE}</p>
-          {/* relative z-10: the suggestion list opens above the hero phone that follows (Web 4 review). */}
+          {/* relative z-10: the suggestion list opens above what follows (Web 4 review). */}
           <div className="relative z-10 mt-5 max-w-[36rem] sm:mt-7">
-            <ScanBox id="hero-scan" trialSeparate />
+            <ScanBox id="hero-scan" note={TRIAL_LINE} />
             <SiteLink to="/how-it-works" className={cn(d9LinkCls, "mt-1 text-body sm:mt-2")}>
               See how it works
               <D9Arrow />
             </SiteLink>
           </div>
         </div>
-        <HeroPhone />
+        <HeroResult />
       </div>
     </section>
   );
 }
 
-/** The Example phone over the salon photo (from 768 px). On a phone it shows the first two messages only. */
-function HeroPhone() {
+/** The Example free check result over the salon photo, from 1024 px only (the phone's first screen stays short). */
+function HeroResult() {
   return (
-    <div className="relative mx-auto w-full max-w-[30rem] lg:me-0">
+    <div className="relative mx-auto hidden w-full max-w-[30rem] py-8 lg:me-0 lg:block">
       <div
         aria-hidden
-        className="absolute inset-y-[6%] start-[22%] end-0 -z-10 hidden overflow-hidden rounded-panel md:block"
+        className="absolute inset-y-0 start-[30%] end-0 -z-10 overflow-hidden rounded-panel"
       >
         <Img
           photo={PHOTOS.salonTablet}
-          sizes="(min-width: 1024px) 28vw, 60vw"
+          sizes="28vw"
           decorative
           className="absolute inset-0 size-full object-cover object-[60%_50%]"
         />
       </div>
-      <D9Phone
-        items={D9_HERO_STREAM}
-        caption="Example messages from Kabsi to an invented salon: different hours on Google with Use my hours and Keep Google's, a post ready with the owner's photo, and a reply ready for a new review."
-        phoneLimit={2}
-      />
+      <ResultPreview className="me-[18%]" />
     </div>
   );
 }

@@ -34,14 +34,14 @@ export const Route = createFileRoute("/")({
       ...h,
       links: [
         ...h.links,
-        // The salon photo behind the hero phone shows from 768 px only, so only those screens preload it.
+        // The salon photo behind the hero's Example result shows from 1024 px only (Site 3a), so only those screens preload it.
         {
           rel: "preload",
           as: "image",
           href: PHOTOS.salonTablet.large,
           imageSrcSet: `${PHOTOS.salonTablet.small} 800w, ${PHOTOS.salonTablet.large} 1600w`,
-          imageSizes: "(min-width: 1024px) 28vw, 60vw",
-          media: "(min-width: 768px)",
+          imageSizes: "28vw",
+          media: "(min-width: 1024px)",
         },
       ],
     };

@@ -23,6 +23,22 @@ export function nearbyLead(term: string, rank: number | null): string {
     : `When someone searches for '${term}' near you, you are not in the first ${DEPTH} in this Google Maps check.`;
 }
 
+/**
+ * Site 3a (master plan 30.50 item 10): the saved result's main finding in words, before any number. The position itself
+ * follows in nearbyLead and nearbyCount. Never a promise: it says only where the business came up in this check.
+ */
+export function nearbyWords(term: string, rank: number | null): string {
+  if (rank != null && rank >= 1 && rank <= 3)
+    return `When someone nearby searches for '${term}', you come up near the top of Google Maps.`;
+  if (rank != null && rank >= 1 && rank <= DEPTH)
+    return `When someone nearby searches for '${term}', you come up on Google Maps, but not near the top.`;
+  return `When someone nearby searches for '${term}', you did not come up in this Google Maps check.`;
+}
+
+/** Site 3a: what a saved report keeps and what it does not, so nothing reads as missing when it was not kept. */
+export const SAVED_NOT_KEPT =
+  "This saved report keeps the nearby check and the AI answer. What Google shows on your profile is not kept, so Kabsi could not check it here. Run the free check again to see it.";
+
 /** "You appeared in the first three at 5 of 49 points around you." then Scan 2's usual-position sentence. */
 export function nearbyCount(
   top3: number,
@@ -81,7 +97,8 @@ const longDate = (iso: string) =>
   }).format(new Date(iso));
 
 /** The assistant's name as the owner reads it: ChatGPT, or Perplexity (Tidy 1, R-143 item 2). Anything else reads ChatGPT. */
-export const assistantName = (a: string | null | undefined) => (a === "Perplexity" ? "Perplexity" : "ChatGPT");
+export const assistantName = (a: string | null | undefined) =>
+  a === "Perplexity" ? "Perplexity" : "ChatGPT";
 
 /** "Asked ChatGPT on 5 November 2026" and its twin "Asked Perplexity on 5 November 2026" (R-143 item 2: no API words). */
 export const askedLead = (assistant: string | null | undefined, iso: string) =>

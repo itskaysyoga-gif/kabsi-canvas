@@ -9,6 +9,7 @@ import {
   ChevronDown,
   CircleAlert,
   CircleCheck,
+  CircleHelp,
   LoaderCircle,
   Mail,
   RotateCcw,
@@ -18,7 +19,7 @@ import {
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Turnstile } from "@/components/turnstile";
 import { cn } from "@/lib/utils";
-import { CONTACT_EMAIL, SCAN_LINE, WHATSAPP_DIGITS, WHATSAPP_ON } from "@/lib/site";
+import { CONTACT_EMAIL, SCAN_LINE, TRIAL_LINE, WHATSAPP_DIGITS, WHATSAPP_ON } from "@/lib/site";
 import {
   CheckError,
   TIPS_CONSENT_TEXT,
@@ -62,8 +63,10 @@ import {
   aiAskedLines,
   aiVerdict,
   mainFinding,
+  SAVED_NOT_KEPT,
   nearbyCount,
   nearbyLead,
+  nearbyWords,
   ord,
   reportHolds,
   wouldDo,
@@ -999,6 +1002,7 @@ export function LiveResult({
   const shownSearch = term ? (shownTerm(term, s.category ?? null, null)?.term ?? null) : null;
   const rows = foundRows(s);
   const fix = rows.filter((r) => !r.ok).length;
+  const unchecked = s.flags.filter((f) => f.tone === "neutral");
   const handoff =
     WHATSAPP_ON && check?.whatsapp_text
       ? `https://wa.me/${WHATSAPP_DIGITS}?text=${encodeURIComponent(check.whatsapp_text)}`
@@ -1056,7 +1060,9 @@ export function LiveResult({
             id="google"
             title="What Google shows about you"
             mark="Google shows"
-            summary={foundCount(fix, rows.length - fix)}
+            summary={`${foundCount(fix, rows.length - fix)}${
+              unchecked.length ? `, ${unchecked.length} Kabsi could not check` : ""
+            }`}
           >
             <ul className="divide-y divide-line">
               {rows.map((r) => (
@@ -1078,6 +1084,27 @@ export function LiveResult({
                 </li>
               ))}
             </ul>
+            {/* Site 3a (30.50 item 10): "Missing" is what Google shows nothing for; "Could not check" is what public
+                data cannot show, so Kabsi checks it once connected. Never merged. */}
+            {unchecked.length > 0 && (
+              <>
+                <h4 className="mt-4 text-title font-bold">What Kabsi could not check</h4>
+                <ul className="mt-1 divide-y divide-line">
+                  {unchecked.map((f) => (
+                    <li key={f.fact} className="flex gap-3 py-3">
+                      <CircleHelp className="mt-0.5 size-5 shrink-0 text-text-3" aria-hidden />
+                      <div className="min-w-0 flex-1">
+                        <p className="flex flex-wrap items-baseline justify-between gap-x-4 text-body">
+                          <span className="min-w-0 font-semibold">{f.fact}</span>
+                          <span className="font-semibold text-text-2">Could not check</span>
+                        </p>
+                        <p className="text-body text-text-2">{f.action}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
             <p className="mt-3 text-small text-text-2">
               Shown live from Google. Kabsi does not store it.
             </p>
@@ -1475,16 +1502,21 @@ export function SavedFreeCheck({ code }: { code: string }) {
             <h2 id="first-h" className="text-h3">
               <Marked text="The main thing we found" mark="main thing" />
             </h2>
-            <p className="mt-3 text-h3 font-bold">{nearbyLead(live.term, live.fast.rank)}</p>
-            {done && (
-              <p className="mt-2 text-lead text-text-2">
-                {nearbyCount(
+            {/* Site 3a (30.50 item 10): the finding in words first; the position and the count follow. */}
+            <p className="mt-3 text-h3 font-bold">{nearbyWords(live.term, live.fast.rank)}</p>
+            <p className="mt-2 text-lead text-text-2">
+              {nearbyLead(live.term, live.fast.rank)}
+              {done &&
+                ` ${nearbyCount(
                   done.top3,
                   done.points,
                   done.dots.map((d) => d.rank),
-                )}
-              </p>
-            )}
+                )}`}
+            </p>
+            <p className="mt-4 flex gap-3 rounded-inner bg-surface-2 p-4 text-body">
+              <CircleHelp className="mt-1 size-4 shrink-0" aria-hidden />
+              <span>{SAVED_NOT_KEPT}</span>
+            </p>
           </section>
           <WouldDoCard lines={wouldDo([])} />
           <h2 className="pt-4 text-h3">
@@ -1513,7 +1545,8 @@ export function SavedFreeCheck({ code }: { code: string }) {
             <h2 id="again-h" className="text-h3">
               Start with a <Highlight>free check.</Highlight>
             </h2>
-            <ScanBox className="mt-4" />
+            {/* Site 3a: the side column is narrow from 1024 px, so the box and its button stack there. */}
+            <ScanBox className="mt-4" stacked note={TRIAL_LINE} />
           </section>
           <AccessCard />
         </aside>
