@@ -108,7 +108,9 @@ begin
   if not found or r.state <> 'asked' or r.phone is distinct from p_phone or r.expires_at <= now() then
     return jsonb_build_object('result', 'unknown');
   end if;
-  select user_id into v_user from public.whatsapp_optins where phone = p_phone and state in ('active', 'stopped');
+  -- The phone's own account, whatever state its opt-in is in (active, stopped, or pending after Connect again): a phone that
+  -- belongs to an account never makes a new one, and never loses that account's binding (review finding 4).
+  select user_id into v_user from public.whatsapp_optins where phone = p_phone;
   if v_user is null then
     if p_new_user is null then return jsonb_build_object('result', 'need_user'); end if;
     if not exists (select 1 from auth.users where id = p_new_user and created_at > now() - interval '10 minutes')
@@ -152,6 +154,9 @@ begin
     return jsonb_build_object('result', 'take', 'user_id', r.user_id);
   end if;
   if r.expires_at <= now() then return jsonb_build_object('result', 'expired'); end if;
+  -- The starting browser sees the last 2 digits of the phone that claimed its code, so a code someone else sent first shows
+  -- up before any tap (review finding 3).
+  if r.state = 'asked' then return jsonb_build_object('result', 'asked', 'phone_end', right(r.phone, 2)); end if;
   return jsonb_build_object('result', r.state);
 end $$;
 

@@ -128,7 +128,8 @@ export const WHATSAPP_SIGNIN_CONSENT =
 
 export type StartRow = { codeHash: string; browserHash: string; browser: string | null; os: string | null; city: string | null; country: string | null };
 export type CheckResult =
-  | { result: "waiting" | "asked" | "expired" | "used" | "unknown" }
+  | { result: "waiting" | "expired" | "used" | "unknown" }
+  | { result: "asked"; phone_end?: string }
   | { result: "take"; user_id: string };
 export type Session = { access_token: string; refresh_token: string; expires_at: number | null };
 
@@ -218,6 +219,7 @@ export function makeHandler(d: HandlerDeps) {
       }
       // The wrong browser (any other secret) reads exactly like an unknown sign-in: nothing about it is told.
       const r = await d.check(id, await d.sha256Hex(secret));
+      if (r.result === "asked") return reply({ state: "asked", phone_end: /^\d{2}$/.test(r.phone_end ?? "") ? r.phone_end : null });
       if (r.result !== "take") return reply({ state: r.result });
       try {
         const session = await d.mint(r.user_id, req);

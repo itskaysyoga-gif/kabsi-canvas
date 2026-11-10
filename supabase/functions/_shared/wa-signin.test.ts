@@ -62,6 +62,7 @@ class World {
           return { result: "take", user_id: r.user! };
         }
         if (r.created + CODE_LIFE_MS <= this.now) return { result: "expired" };
+        if (r.state === "asked") return { result: "asked", phone_end: r.phone!.slice(-2) };
         return { result: r.state };
       },
       mint: async (user) => (this.minted.push(user), { access_token: `at-${user}`, refresh_token: `rt-${user}`, expires_at: null }),
@@ -128,7 +129,7 @@ async function browserStart(w: World, opts: { geo?: string | null; ua?: string }
 }
 async function browserCheck(w: World, id: string, secret: string) {
   const res = await makeHandler(w.deps())(new Request("https://f/auth-whatsapp/check", { method: "POST", body: JSON.stringify({ id, secret }) }));
-  return await res.json() as { state: string; session?: { access_token: string } };
+  return await res.json() as { state: string; phone_end?: string | null; session?: { access_token: string } };
 }
 const geoToken = async (city: string, country: string, exp: number, key = "geo-test-key") => {
   const body = `${encodeURIComponent(city)}|${country}|${exp}`;
@@ -191,7 +192,9 @@ Deno.test("signup1: the whole way, from the browser to the tap to the session", 
   assert.match(w.sent.at(-1)!.body, /Sign in on Chrome, Windows, near London\?/);
   assert.match(w.sent.at(-1)!.body, /Only tap if you started this on kabsi\.co just now\./);
   assert.deepEqual(w.sent.at(-1)!.buttons, ["Yes, it's me"]);
-  assert.equal((await browserCheck(w, body.id, secret)).state, "asked", "no tap: no session");
+  const asked = await browserCheck(w, body.id, secret);
+  assert.equal(asked.state, "asked", "no tap: no session");
+  assert.equal(asked.phone_end, "23", "the browser sees which phone claimed its code");
 
   assert.equal(await seam(w, OWNER, { button: yesId(w) }), "signin_confirmed");
   const done = await browserCheck(w, body.id, secret);

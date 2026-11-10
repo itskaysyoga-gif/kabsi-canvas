@@ -2146,7 +2146,7 @@ The words live in `supabase/functions/_shared/wa-signin.ts` (`SIGNIN_SAY`, `WHAT
 - Beside it, the consent (stored with the opt-in): "When you continue with WhatsApp, Kabsi uses your WhatsApp number to sign you in and sends WhatsApp messages to it: sign-in confirmations and new sign-in notices, and for your business an alert for each new review with the business name, the star rating, the reviewer's first name, the review text up to 300 characters and the draft reply. Meta (WhatsApp) and Kapso carry these messages. Reply STOP at any time to stop."
 - On a computer, a QR code with "Or scan this with your phone's camera."
 - "The message says **Kabsi sign in CODE**. It works for 10 minutes."
-- Status: "Waiting for your message on WhatsApp." then "Kabsi answered on WhatsApp. Tap Yes, it's me there."
+- Status: "Waiting for your message on WhatsApp." then "Kabsi answered the phone ending in 23 on WhatsApp. If that is your phone, tap Yes, it's me there. If not, close this page." (without the digits: "Kabsi answered on WhatsApp. Tap Yes, it's me there.")
 - Ended: "This sign-in has ended. Start again." or "The sign-in did not finish. Start again." with **Start again**.
 - Link: "Back to the other ways".
 

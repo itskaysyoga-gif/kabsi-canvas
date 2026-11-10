@@ -60,6 +60,7 @@ export function WhatsAppStep({
   );
   const [state, setState] = useState<WaState>("waiting");
   const [error, setError] = useState("");
+  const [phoneEnd, setPhoneEnd] = useState<string | null>(null);
   const [round, setRound] = useState(0);
   const busy = useRef(false);
 
@@ -83,7 +84,7 @@ export function WhatsAppStep({
     const tick = async () => {
       if (stop || document.visibilityState === "hidden") return;
       if (Date.now() > start.expiresAt + 2 * 60_000) return setState("expired");
-      const s = await checkWhatsapp(start);
+      const s = await checkWhatsapp(start, setPhoneEnd);
       if (stop) return;
       setState(s);
       if (s === "signed_in") {
@@ -163,7 +164,9 @@ export function WhatsAppStep({
           </p>
           <p className="text-small font-semibold text-text-1" role="status" aria-live="polite">
             {state === "asked"
-              ? "Kabsi answered on WhatsApp. Tap Yes, it's me there."
+              ? phoneEnd
+                ? `Kabsi answered the phone ending in ${phoneEnd} on WhatsApp. If that is your phone, tap Yes, it's me there. If not, close this page.`
+                : "Kabsi answered on WhatsApp. Tap Yes, it's me there."
               : "Waiting for your message on WhatsApp."}
           </p>
         </div>

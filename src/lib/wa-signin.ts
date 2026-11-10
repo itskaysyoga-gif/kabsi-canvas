@@ -134,7 +134,10 @@ export async function startWhatsapp(turnstile: string): Promise<WaStart> {
 export type WaState = "waiting" | "asked" | "expired" | "used" | "unknown" | "failed" | "signed_in";
 
 /** One check. When the owner has tapped "Yes, it's me", the session comes back once and this tab signs in. */
-export async function checkWhatsapp(s: Pick<WaStart, "id" | "secret">): Promise<WaState> {
+export async function checkWhatsapp(
+  s: Pick<WaStart, "id" | "secret">,
+  onPhoneEnd?: (end: string | null) => void,
+): Promise<WaState> {
   let res: Response;
   try {
     res = await fetch(`${supabaseUrl}/functions/v1/auth-whatsapp/check`, {
@@ -147,8 +150,14 @@ export async function checkWhatsapp(s: Pick<WaStart, "id" | "secret">): Promise<
   }
   const body = (await res.json().catch(() => ({}))) as {
     state?: WaState;
+    phone_end?: string | null;
     session?: { access_token: string; refresh_token: string };
   };
+  // Signup 1 (review finding 3): the last 2 digits of the phone that sent this tab's code, so a code someone else sent shows.
+  if (body.state === "asked")
+    onPhoneEnd?.(
+      typeof body.phone_end === "string" && /^\d{2}$/.test(body.phone_end) ? body.phone_end : null,
+    );
   if (body.state === "signed_in" && body.session) {
     const { error } = await supabase.auth.setSession(body.session);
     forgetStart();
