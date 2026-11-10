@@ -168,7 +168,6 @@ export const FALLBACK_PATHS = [
   "/how-it-works",
   "/scan",
   "/google-review-link",
-  "/founding",
   "/for",
   "/about",
   "/security",

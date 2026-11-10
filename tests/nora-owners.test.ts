@@ -19,11 +19,11 @@ const ALL = [
   ...QUESTIONS_OWNERS,
 ];
 
-describe("Nora's 90 owner questions", () => {
-  it("are 90, ids o01 to o90, unique and clear of every other set", () => {
-    expect(QUESTIONS_OWNERS).toHaveLength(90);
+describe("Nora's 92 owner questions", () => {
+  it("are 92, ids o01 to o92, unique and clear of every other set", () => {
+    expect(QUESTIONS_OWNERS).toHaveLength(92);
     expect(QUESTIONS_OWNERS.map((q) => q.id)).toEqual(
-      Array.from({ length: 90 }, (_, i) => `o${String(i + 1).padStart(2, "0")}`),
+      Array.from({ length: 92 }, (_, i) => `o${String(i + 1).padStart(2, "0")}`),
     );
     expect(new Set(ALL.map((q) => q.id)).size).toBe(ALL.length);
   });
@@ -50,9 +50,9 @@ describe("Nora's 90 owner questions", () => {
   it("pass the gate on the reference answers, alone and with the other 90", async () => {
     const one = await runAll(passStub, facts, { only: QUESTIONS_OWNERS });
     expect(one.score.findings).toEqual([]);
-    expect(gate(one.score, 90).pass).toBe(true);
+    expect(gate(one.score, 92).pass).toBe(true);
     const both = await runAll(passStub, facts, { only: ALL });
     expect(both.score.findings).toEqual([]);
-    expect(gate(both.score, 180).pass).toBe(true);
+    expect(gate(both.score, 182).pass).toBe(true);
   });
 });

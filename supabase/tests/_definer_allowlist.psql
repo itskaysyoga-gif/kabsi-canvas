@@ -92,6 +92,7 @@ insert into definer_allowlist (role, sig, reason, caller) values
   ('authenticated', 'staff_founding_check(uuid,text,boolean,text)', 'staff page: is_staff()', 'browser: components/staff/founding-checklist.tsx'),
   ('authenticated', 'staff_founding_checklist(uuid)', 'staff page: is_staff()', 'browser: components/staff/founding-checklist.tsx'),
   ('authenticated', 'staff_founding_decide(uuid,text,text)', 'staff page: is_staff()', 'browser: lib/programs.ts'),
+  ('authenticated', 'staff_founding_invite(boolean)', 'staff page: is_staff(); reads or rotates the private invite slug (Founding 1)', 'browser: components/staff/founding-panel.tsx'),
   ('authenticated', 'staff_founding_link(uuid,uuid)', 'staff page: is_staff()', 'browser: lib/programs.ts'),
   ('authenticated', 'staff_founding_overview()', 'staff page: is_staff()', 'browser: lib/programs.ts'),
   ('authenticated', 'staff_grant_trial(uuid,integer)', 'staff page: is_staff()', 'browser: components/staff/businesses-panel.tsx'),

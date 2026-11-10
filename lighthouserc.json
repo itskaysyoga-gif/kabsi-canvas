@@ -16,7 +16,6 @@
         "https://localhost:4174/privacy",
         "https://localhost:4174/terms",
         "https://localhost:4174/scan",
-        "https://localhost:4174/founding",
         "https://localhost:4174/for/hair-salon",
         "https://localhost:4174/for/florist"
       ],
@@ -35,7 +34,7 @@
           }
         },
         {
-          "matchingUrlPattern": "^https://localhost:4174/(how-it-works|faq|about|security|partners|guides|for|privacy|terms|founding|for/hair-salon|for/florist)$",
+          "matchingUrlPattern": "^https://localhost:4174/(how-it-works|faq|about|security|partners|guides|for|privacy|terms|for/hair-salon|for/florist)$",
           "assertions": {
             "categories:performance": ["warn", { "minScore": 0.9 }]
           }

@@ -163,7 +163,7 @@ export function receiptEmail(o: { business: string; plan: string; amount: number
   const rows: [string, string][] = [[o.plan, money(o.amount - o.tax)], ["Tax", money(o.tax)], [`Paid on ${paid}`, money(o.amount)]];
   const table = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px 0;">${rows.map(([k, v], i) =>
     `<tr><td class="kb-line" style="padding:10px 0;border-bottom:1px solid ${TOKENS.hairline};font-size:15px;${i === 2 ? "font-weight:700;" : ""}">${esc(k)}</td><td class="kb-line" align="right" style="padding:10px 0;border-bottom:1px solid ${TOKENS.hairline};font-size:15px;${i === 2 ? "font-weight:700;" : ""}">${esc(v)}</td></tr>`).join("")}</table>`;
-  const after = `Business: ${o.business}.${o.nextOn ? ` Next payment on ${dayMonth(o.nextOn, tz)}.` : ""}${o.founding ? " Founding price, kept while your subscription stays paid." : ""}`;
+  const after = `Business: ${o.business}.${o.nextOn ? ` Next payment on ${dayMonth(o.nextOn, tz)}.` : ""}${o.founding ? " Launch price, kept while your subscription stays paid." : ""}`;
   const mor = "Payments are processed by Creem, our merchant of record.";
   return {
     subject: `Receipt: ${o.plan}`, title: "Thank you. Your payment went through.", preheader: `${money(o.amount)} paid on ${paid}.`,

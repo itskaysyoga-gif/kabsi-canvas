@@ -214,8 +214,8 @@ export const PLAN_PRICES = {
 export const HERO_PRICE_LINE = `Plans from ${PLAN_PRICES.essentialsMonthly} US dollars a month. ${TRIAL_LINE}`;
 /**
  * Price 1 (master plan 30.20 section 6, Rashid's "yes 29/59" of 30 Oct 2026): the list prices above are for new
- * businesses; the first 30 paying businesses, and Founding 25, pay the founding price and keep it while they stay
- * subscribed. The places left come from billing-creem/founding; a line naming the founding price shows only while places
+ * businesses; the first 30 paying businesses, and Founding 25, pay the launch price (the founding price inside the code and the database) and keep it while they stay
+ * subscribed. The places left come from billing-creem/founding; a line naming the launch price shows only while places
  * remain. Never shown as a crossed-out price.
  */
 export const FOUNDING_PRICES = {
@@ -225,17 +225,17 @@ export const FOUNDING_PRICES = {
   proYearly: 390,
 } as const;
 export const FOUNDING_TOTAL = 30;
-/** The founding line on a plan card: "Founding price for the first 30 paying businesses: 19 US dollars a month, kept while
+/** The launch price line on a plan card: "Launch price for the first 30 paying businesses: 19 US dollars a month, kept while
  * you stay subscribed. Then 29." */
 export function foundingLine(plan: "essentials" | "pro", yearly: boolean): string {
   const k = `${plan}${yearly ? "Yearly" : "Monthly"}` as const;
-  return `Founding price for the first ${FOUNDING_TOTAL} paying businesses: ${FOUNDING_PRICES[k]} US dollars ${
+  return `Launch price for the first ${FOUNDING_TOTAL} paying businesses: ${FOUNDING_PRICES[k]} US dollars ${
     yearly ? "a year" : "a month"
   }, kept while you stay subscribed. Then ${PLAN_PRICES[k]}.`;
 }
 /** The places left, under the plan cards while any remain. */
 export const foundingPlacesLine = (left: number) =>
-  `${left} of ${FOUNDING_TOTAL} founding places left.`;
+  `${left} of ${FOUNDING_TOTAL} launch places left.`;
 /** The three lines under the plan cards (facts 4.1, 4.2, 4.5; Design 6 audit section 4). */
 export const PRICE_TAX_LINE = "Prices are in US dollars, plus tax where it applies.";
 export const PAY_TODAY_LINE = "Nothing to pay today. Card payments in US dollars are coming.";
@@ -252,8 +252,8 @@ export const HELP_LINES = {
 export const WORKING_HOURS = "Working hours: Monday to Friday, 9:00 to 18:00, UAE time.";
 /** The three prices in one sentence, worded once, for the Plan page, the Home card, the FAQ and the trial emails. */
 export const PRICES_SENTENCE = `Essentials is $${PLAN_PRICES.essentialsMonthly} a month or $${PLAN_PRICES.essentialsYearly} a year. Pro is $${PLAN_PRICES.proMonthly} a month or $${PLAN_PRICES.proYearly} a year. An extra location is $${PLAN_PRICES.extraLocationMonthly} a month or $${PLAN_PRICES.extraLocationYearly} a year. Prices are in US dollars, plus tax where it applies.`;
-/** The founding price in one sentence, for the Plan page, the FAQ, the terms and the emails. */
-export const FOUNDING_SENTENCE = `The first ${FOUNDING_TOTAL} paying businesses pay the founding price and keep it while they stay subscribed: Essentials $${FOUNDING_PRICES.essentialsMonthly} a month or $${FOUNDING_PRICES.essentialsYearly} a year, Pro $${FOUNDING_PRICES.proMonthly} a month or $${FOUNDING_PRICES.proYearly} a year.`;
+/** The launch price in one sentence, for the Plan page, the FAQ, the terms and the emails. */
+export const FOUNDING_SENTENCE = `The first ${FOUNDING_TOTAL} paying businesses pay the launch price and keep it while they stay subscribed: Essentials $${FOUNDING_PRICES.essentialsMonthly} a month or $${FOUNDING_PRICES.essentialsYearly} a year, Pro $${FOUNDING_PRICES.proMonthly} a month or $${FOUNDING_PRICES.proYearly} a year.`;
 /** The three rows the Plan page lists, worded from the same numbers. */
 export const PLAN_PRICE_ROWS = [
   {
@@ -305,7 +305,6 @@ export type ShareImage =
   | "industry"
   | "partner"
   | "about"
-  | "founding"
   /** Guides 3 and Style 1: each guide's own photo cover, public/og/guides/<slug>.jpg. */
   | `guides/${string}`
   /** Industries 3: each industry page's own photo card, public/og/industries/<slug>.jpg (scripts/industry-og.mjs). */

@@ -32,10 +32,10 @@ export type Period = "month" | "year";
 export type PriceFamily = "founding" | "list";
 export const PRODUCT_DESCRIPTION = "Your Google profile and reviews, managed from WhatsApp.";
 export const CATALOGUE: Record<ProductKey, { name: string; price: number; period: Period; plan: Plan | "extra" }> = {
-  essentials_month: { name: "Kabsi Essentials, monthly, founding price", price: 1900, period: "month", plan: "essentials" },
-  essentials_year: { name: "Kabsi Essentials, yearly, founding price", price: 19000, period: "year", plan: "essentials" },
-  pro_month: { name: "Kabsi Pro, monthly, founding price", price: 3900, period: "month", plan: "pro" },
-  pro_year: { name: "Kabsi Pro, yearly, founding price", price: 39000, period: "year", plan: "pro" },
+  essentials_month: { name: "Kabsi Essentials, monthly, launch price", price: 1900, period: "month", plan: "essentials" },
+  essentials_year: { name: "Kabsi Essentials, yearly, launch price", price: 19000, period: "year", plan: "essentials" },
+  pro_month: { name: "Kabsi Pro, monthly, launch price", price: 3900, period: "month", plan: "pro" },
+  pro_year: { name: "Kabsi Pro, yearly, launch price", price: 39000, period: "year", plan: "pro" },
   essentials_month_list: { name: "Kabsi Essentials, monthly", price: 2900, period: "month", plan: "essentials" },
   essentials_year_list: { name: "Kabsi Essentials, yearly", price: 29000, period: "year", plan: "essentials" },
   pro_month_list: { name: "Kabsi Pro, monthly", price: 5900, period: "month", plan: "pro" },

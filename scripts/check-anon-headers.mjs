@@ -22,7 +22,7 @@ const SITES = [
     target: /functions\/v1\/review-page/,
   },
   {
-    // Web 2: programs (Founding 25, Partners), visibility (the free check) and billing-creem/founding.
+    // Web 2: programs (the private Founding 25 invite, Partners), visibility (the free check) and billing-creem/founding.
     fn: "programs, visibility, billing-creem",
     file: "src/lib/public-api.ts",
     target: /functions\/v1\/\$\{path\}/,

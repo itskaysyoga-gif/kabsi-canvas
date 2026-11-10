@@ -40,14 +40,14 @@ describe("PLAN_PRICES", () => {
       "Essentials is $29 a month or $290 a year. Pro is $59 a month or $590 a year. An extra location is $15 a month or $150 a year. Prices are in US dollars, plus tax where it applies.",
     );
     expect(FOUNDING_SENTENCE).toBe(
-      "The first 30 paying businesses pay the founding price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year.",
+      "The first 30 paying businesses pay the launch price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year.",
     );
-    // No crossed-out price: the founding line says what is true and what follows.
+    // No crossed-out price: the launch price line says what is true and what follows.
     expect(foundingLine("essentials", false)).toBe(
-      "Founding price for the first 30 paying businesses: 19 US dollars a month, kept while you stay subscribed. Then 29.",
+      "Launch price for the first 30 paying businesses: 19 US dollars a month, kept while you stay subscribed. Then 29.",
     );
     expect(foundingLine("pro", true)).toBe(
-      "Founding price for the first 30 paying businesses: 390 US dollars a year, kept while you stay subscribed. Then 590.",
+      "Launch price for the first 30 paying businesses: 390 US dollars a year, kept while you stay subscribed. Then 590.",
     );
     expect(PLAN_PRICE_ROWS.map((r) => `${r.name}: ${r.price}`)).toEqual([
       "Kabsi Essentials: $29 a month or $290 a year",

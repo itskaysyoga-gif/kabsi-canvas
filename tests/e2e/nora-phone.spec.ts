@@ -7,7 +7,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { axeClean, noBanner } from "./helpers/page";
 
-const PAGES = ["/", "/how-it-works", "/pricing", "/scan", "/for/hair-salon", "/faq", "/founding"];
+const PAGES = ["/", "/how-it-works", "/pricing", "/scan", "/for/hair-salon", "/faq"];
 const SIZES = [
   { width: 360, height: 640 },
   { width: 390, height: 844 },

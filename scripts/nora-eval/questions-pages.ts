@@ -63,7 +63,7 @@ export const QUESTIONS_PAGES: Question[] = [
     must: [/\$59/, /\$590/],
     coming: true,
     reference:
-      "The website lists Essentials at $29 a month or $290 a year and Pro at $59 a month or $590 a year. The first 30 paying businesses pay the founding price, Essentials $19 or Pro $39 a month, and keep it while they stay subscribed. Those plans cannot be bought yet. Card payments are not open yet either, so there is nothing to pay today.",
+      "The website lists Essentials at $29 a month or $290 a year and Pro at $59 a month or $590 a year. The first 30 paying businesses pay the launch price, Essentials $19 or Pro $39 a month, and keep it while they stay subscribed. Those plans cannot be bought yet. Card payments are not open yet either, so there is nothing to pay today.",
   },
   {
     // A guide dated in the future is not in the list the website serves, so there is nothing to link: she must not name it.

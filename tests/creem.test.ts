@@ -393,7 +393,7 @@ describe("the products (10.2.3)", () => {
       1900, 19000, 3900, 39000, 2900, 29000, 5900, 59000, 1500, 15000,
     ]);
     expect(CATALOGUE.pro_year_list.name).toBe("Kabsi Pro, yearly");
-    expect(CATALOGUE.pro_year.name).toBe("Kabsi Pro, yearly, founding price");
+    expect(CATALOGUE.pro_year.name).toBe("Kabsi Pro, yearly, launch price");
     expect(PRODUCT_DESCRIPTION).toBe("Your Google profile and reviews, managed from WhatsApp.");
   });
   it("keeps a change in the price family the business is on (Price 1)", () => {

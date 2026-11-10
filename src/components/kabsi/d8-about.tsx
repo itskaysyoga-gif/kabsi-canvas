@@ -19,7 +19,6 @@ import { PageHero } from "./page-hero";
 import { Closing } from "./closing";
 import { ABOUT_HERO } from "./hero-lines";
 import { Marked } from "@/components/kabsi/highlight";
-import { SiteLink } from "./site-link";
 
 const WHY = [
   "Owners run the business all day. The Google profile waits.",
@@ -213,15 +212,6 @@ export function D8About() {
             {CONTACT_EMAIL}
           </a>
         </div>
-        <p className="mt-6 text-body text-text-2">
-          <SiteLink
-            to="/founding"
-            className="font-semibold text-text-1 underline underline-offset-4"
-          >
-            Founding 25
-          </SiteLink>{" "}
-          businesses talk to Rashid directly and tell him what to make better.
-        </p>
       </Section>
 
       <Closing />

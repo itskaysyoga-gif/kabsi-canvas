@@ -24,8 +24,9 @@ const ROUTES = [...new Set([...OTHERS, ...fromSitemap])].filter(Boolean);
 // Web 2 (27 Oct 2026) rebuilt the home page; its green tint is gone, so the list is empty.
 const KNOWN_AXE: Record<string, string[]> = {};
 
-// Home, Pricing, the free check (its result with the example business), Founding 25 and one industry page.
-const PICTURE = new Set(["/", "/pricing", "/scan", "/founding", "/for/hair-salon"]);
+// Home, Pricing, the free check (its result with the example business) and one industry page. (Founding 25 is private since
+// Founding 1, R-151, so it has no baseline; its 404 is checked below and in smoke.spec.ts.)
+const PICTURE = new Set(["/", "/pricing", "/scan", "/for/hair-salon"]);
 
 test.describe("public pages", () => {
   test.beforeEach(async ({ page }) => {
@@ -44,6 +45,20 @@ test.describe("public pages", () => {
       );
       expect(overflow, "horizontal scroll").toBeLessThanOrEqual(0);
       await axeClean(page, route, KNOWN_AXE[route] ?? []);
+      // Founding 1 (R-151): no public page names Founding 25 or links its address, and no empty bar sits above the header.
+      const html = await page.content();
+      expect(html, `${route} names Founding 25`).not.toMatch(/Founding 25/i);
+      expect(html, `${route} links /founding`).not.toMatch(/href="\/founding/);
+      expect(
+        await page.locator("[data-founding-line]").count(),
+        `${route} has a founding line`,
+      ).toBe(0);
+      const firstTop = await page.evaluate(
+        () => document.querySelector("header")?.getBoundingClientRect().top ?? 0,
+      );
+      expect(firstTop, `${route}: the header is the first thing on the page`).toBeLessThanOrEqual(
+        0.5,
+      );
       if (PICTURE.has(route)) {
         const name = (route === "/" ? "home" : route.slice(1).replaceAll("/", "-")) + ".png";
         await expect(page).toHaveScreenshot(name, { ...(await keep(page)), mask: MASKS(page) });

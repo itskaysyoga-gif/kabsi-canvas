@@ -171,7 +171,7 @@ You can. Kabsi saves the writing, drafts in the customer's language, catches eve
 Adding a Manager is Google's own way to give a service access, and Kabsi uses Google's official Business Profile APIs. It posts only what you approve and never filters or rewards reviewers.
 
 **Isn't Pro expensive?**
-Essentials is $29 a month or $290 a year and Pro is $59 a month or $590 a year, and you can cancel a monthly plan any time. The first 30 paying businesses pay the founding price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year. You can start with a 14-day Pro trial with no card, so you see the drafts before you pay. Card payments are coming; until they open there is nothing to pay.
+Essentials is $29 a month or $290 a year and Pro is $59 a month or $590 a year, and you can cancel a monthly plan any time. The first 30 paying businesses pay the launch price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year. You can start with a 14-day Pro trial with no card, so you see the drafts before you pay. Card payments are coming; until they open there is nothing to pay.
 
 **What if I pay and Google access takes time?**
 Your plan starts only when access works, so waiting costs you nothing.
@@ -319,7 +319,7 @@ No. NFC doesn't work through metal.
 ### Pricing and payment
 
 **How much is Kabsi?**
-Essentials is $29 a month or $290 a year. Pro is $59 a month or $590 a year. Extra locations are $15 a month or $150 a year. The first 30 paying businesses pay the founding price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year. There is a 14-day Pro trial with no card, and your review link and QR code are free for everyone. Card payments are coming; until they open there is nothing to pay.
+Essentials is $29 a month or $290 a year. Pro is $59 a month or $590 a year. Extra locations are $15 a month or $150 a year. The first 30 paying businesses pay the launch price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year. There is a 14-day Pro trial with no card, and your review link and QR code are free for everyone. Card payments are coming; until they open there is nothing to pay.
 
 **Is there a free trial?**
 Yes. 14 days, no card. It starts when Kabsi's access to your Google profile works.
@@ -331,7 +331,7 @@ No. There are two plans, Essentials and Pro, and a 14-day Pro trial with no card
 Yes, in US dollars.
 
 **Is there a monthly plan?**
-Yes. Essentials is $29 a month and Pro is $59 a month, and you can cancel any time. The yearly plans are $290 and $590 a year, two months free. The first 30 paying businesses pay the founding price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year. Card payments are coming; until they open there is nothing to pay.
+Yes. Essentials is $29 a month and Pro is $59 a month, and you can cancel any time. The yearly plans are $290 and $590 a year, two months free. The first 30 paying businesses pay the launch price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year. Card payments are coming; until they open there is nothing to pay.
 
 **How do I pay?**
 By card, in US dollars. Card payments are coming; until they open there is nothing to pay, and the trial needs no card.
@@ -453,8 +453,8 @@ No. Prices are in US dollars only, and Kabsi shows no converted price. A card in
 **Is VAT added in the UAE or the UK?**
 Prices are plus tax where it applies. Creem, the merchant of record, works out any sales tax or VAT at its checkout; Kabsi does not set the rate and does not state one. What the invoice or receipt shows, such as a company name or a VAT number, is shown on Creem's receipt; the detail is confirmed before card payments open. For your company's details, write to hello@kabsi.co before you pay.
 
-**Does the founding price cover my second branch?**
-No. The founding price is for the plan. An extra location has one price for everyone, $15 a month or $150 a year, founding place or not.
+**Does the launch price cover my second branch?**
+No. The launch price is for the plan. An extra location has one price for everyone, $15 a month or $150 a year, launch place or not.
 
 **Can I pay with Apple Pay, or in instalments with Tabby?**
 Cards work, through Creem's checkout. Creem lists Apple Pay and Google Pay as supported, so one may appear at checkout; what shows depends on the product, your country and your device, so it may appear and may not. Kabsi offers no pay-later plans such as Tabby. Card payments are not open yet.
@@ -466,7 +466,7 @@ Yes. Kabsi messages the phone number you opted in with, so the messages arrive i
 Yes, for what you let managers approve. In Settings, Team, turn a kind on (review replies, for example), and a manager who has opted in their own phone can approve, undo and edit those drafts on WhatsApp. Billing stays with the owner.
 
 **Can I pause my plan while we close for a season?**
-There is no pause. Cancel on the Plan page or on WhatsApp and the plan runs to the end of the period you paid for; choose a plan again when you reopen. A founding price is kept only while the subscription stays paid. For the weeks you are closed, set Closed for a while under Hours.
+There is no pause. Cancel on the Plan page or on WhatsApp and the plan runs to the end of the period you paid for; choose a plan again when you reopen. A launch price is kept only while the subscription stays paid. For the weeks you are closed, set Closed for a while under Hours.
 
 **Does Kabsi know UAE National Day and Eid?**
 Yes. Kabsi asks about UAE public holidays from the official UAE list: National Day is 2 and 3 December. Eid and the other Islamic holidays follow the moon, so their dates are estimates until they are announced. Kabsi asks five days before and never assumes your hours.

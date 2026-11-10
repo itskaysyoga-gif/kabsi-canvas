@@ -56,7 +56,7 @@ export const QUESTIONS: Question[] = [
     must: [/\$59/, /\$590/],
     coming: true,
     reference:
-      "The website lists Essentials at $29 a month or $290 a year and Pro at $59 a month or $590 a year. The first 30 paying businesses pay the founding price, Essentials $19 or Pro $39 a month, and keep it while they stay subscribed. Those plans cannot be bought yet. Card payments are not open yet either, so there is nothing to pay today.",
+      "The website lists Essentials at $29 a month or $290 a year and Pro at $59 a month or $590 a year. The first 30 paying businesses pay the launch price, Essentials $19 or Pro $39 a month, and keep it while they stay subscribed. Those plans cannot be bought yet. Card payments are not open yet either, so there is nothing to pay today.",
   },
   {
     id: "en02",
@@ -767,10 +767,10 @@ export const AMOUNTS: Record<string, string> = {
   $290: "Essentials yearly",
   $59: "Pro monthly",
   $590: "Pro yearly",
-  $19: "Essentials monthly, founding price",
-  $190: "Essentials yearly, founding price",
-  $39: "Pro monthly, founding price",
-  $390: "Pro yearly, founding price",
+  $19: "Essentials monthly, launch price",
+  $190: "Essentials yearly, launch price",
+  $39: "Pro monthly, launch price",
+  $390: "Pro yearly, launch price",
   $15: "extra location monthly",
   $150: "extra location yearly",
   $25: "partner payout minimum",

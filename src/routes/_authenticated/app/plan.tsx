@@ -219,7 +219,7 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
           : per
             ? p.extraLocationYearly
             : p.extraLocationMonthly;
-    return `$${n} ${per ? "a year" : "a month"}${founding && plan !== "extra" ? ", founding price" : ""}`;
+    return `$${n} ${per ? "a year" : "a month"}${founding && plan !== "extra" ? ", launch price" : ""}`;
   };
 
   const cancelLine = () =>
@@ -283,7 +283,7 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
               </p>
               {running && b.founding ? (
                 <p className="mt-1 text-small font-semibold text-text-1">
-                  Founding price, kept while you stay subscribed.
+                  Launch price, kept while you stay subscribed.
                 </p>
               ) : running ? null : (
                 <FoundingPriceLine plan={p.id} yearly={per} left={left} />
@@ -569,7 +569,7 @@ function StateBanner({
     return (
       <Banner tone="ok" title={`${name}.`}>
         Next payment on {longDate(b.current_period_end)}.
-        {founding ? " Founding price, kept while your subscription stays paid." : ""}
+        {founding ? " Launch price, kept while your subscription stays paid." : ""}
         {units}
       </Banner>
     );

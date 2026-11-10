@@ -43,13 +43,6 @@ export const SECURITY_HERO = {
   line: "Kabsi works as a Manager you add, never sees your password, publishes nothing without your yes, and is gone the moment you remove it.",
 } as const;
 
-/** Founding 25's hero (approved). */
-export const FOUNDING_HERO = {
-  title: "Founding 25: three months of Kabsi Pro, free.",
-  line: "For 25 businesses. Kabsi does the Google work; you tell Rashid what to make better.",
-  action: "Apply for a place",
-} as const;
-
 /** Partners' hero (approved). */
 export const PARTNERS_HERO = {
   title: "The card gets the reviews. Kabsi answers them.",

@@ -6,7 +6,6 @@ import { ButtonLink } from "./ui";
 import { setChrome, useChrome, useConsentOpen, usePhoneBarShown } from "./page-signals";
 import { SiteHeader } from "./site-header";
 import { SiteFooter } from "./site-footer";
-import { FoundingLine } from "./founding-line";
 import { DeferredAssistant, prefetchNora } from "@/components/assistant/deferred-assistant";
 import { SIGNED_OUT_EVENT, SIGNED_OUT_LINE, takeSignedOutReason } from "@/lib/signed-out";
 
@@ -34,9 +33,9 @@ function SignedOutLine() {
 }
 
 /**
- * Every public page: the Founding 25 line, the sticky header, main, footer and the phone bar. Design 6 (Web 3) made
- * the site light-led; Design 8 (Web 4, lane R 1 Nov 2026) adds the Founding 25 line above the header and puts Nora in
- * the phone bar on phones; Design 9 (Web 5 part A, master plan 30.24) simplifies the header, the phone menu and the
+ * Every public page: the sticky header, main, footer and the phone bar. Design 6 (Web 3) made the site light-led;
+ * Design 8 (Web 4, lane R 1 Nov 2026) put Nora in the phone bar on phones; Founding 1 (R-151, master plan 30.51) removed
+ * the Founding 25 line above the header, and nothing replaces it (no promo bar, no empty bar); Design 9 (Web 5 part A, master plan 30.24) simplifies the header, the phone menu and the
  * footer, and the phone bar keeps one action and Nora. The consent bar and "Your privacy choices"
  * are the site-wide ones (src/components/shared/privacy-banner.tsx, P0.6-01), loaded after the first paint.
  */
@@ -65,7 +64,6 @@ export function SiteShell({
       >
         Skip to content
       </a>
-      <FoundingLine />
       <SiteHeader />
       <SignedOutLine />
       <main id="main">{children}</main>

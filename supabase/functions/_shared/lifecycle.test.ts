@@ -185,7 +185,7 @@ Deno.test("prices and offer: Essentials, Pro and an extra location, card payment
   const ending = lifecycleEmail("trial_day11", LIFE_SAMPLE, ctx);
   assert.match(ending.text, /Pro is \$59 a month/);
   assert.match(ending.text, /Essentials is \$29 a month/);
-  assert.match(ending.text, /founding price and keep it while they stay subscribed: Essentials \$19 a month/);
+  assert.match(ending.text, /launch price and keep it while they stay subscribed: Essentials \$19 a month/);
   assert.doesNotMatch(ending.text, /search(es)? checked/);
   assert.match(ending.text, /plus tax where it applies/);
   assert.ok(ending.text.includes(CARD_PAYMENTS_COMING));

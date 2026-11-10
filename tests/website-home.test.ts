@@ -2,7 +2,7 @@
 // replaces the tests of the 22 Oct homepage (P0.8-13), whose components are gone. It keeps their rules: the claims rule
 // and the copy rules on every line a reader sees, no invented proof or number, hello@kabsi.co only, the operator named
 // with no city, Creem as the merchant of record, WhatsApp shown only when the one setting has a number.
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
@@ -49,7 +49,6 @@ const PUBLIC_FILES = [
     "terms",
     "partners",
     "partners_.terms",
-    "founding",
     "manager-steps",
     "scan.index",
     "scan.$code",
@@ -174,11 +173,12 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     expect(footer).not.toContain("GOOGLE_THIRD_PARTY_URL");
     expect(read("src/components/kabsi/d8-faq.tsx")).toContain("GOOGLE_THIRD_PARTY_URL");
   });
-  it("never types the Founding 25 count in the line above the header", () => {
-    const line = read("src/components/kabsi/founding-line.tsx");
-    expect(line).toContain("useFoundingPlaces()");
-    expect(line).toContain("places && places.left > 0 &&");
-    expect(line).not.toMatch(/\b\d+ places left/);
+  it("has no line above the header and no bar in its place (Founding 1, R-151)", () => {
+    expect(existsSync("src/components/kabsi/founding-line.tsx")).toBe(false);
+    const chrome = read("src/components/kabsi/site-chrome.tsx");
+    expect(chrome).not.toMatch(/FoundingLine|<FoundingBar|PromoBar|data-founding-line/);
+    expect(chrome.indexOf("<SiteHeader />")).toBeGreaterThan(chrome.indexOf("Skip to content"));
+    expect(read("src/styles.css")).not.toContain("founding-line");
   });
   it("say the access steps the same everywhere, with Add (on some screens, Invite)", () => {
     const access = read("src/components/kabsi/d5-access.tsx");
@@ -223,8 +223,9 @@ describe("no invented proof or number (plan 2.11, Web 2 item 4)", () => {
     expect(api).toContain('"programs/partners"');
     expect(api).toContain('"billing-creem/founding"');
     const founding = read("src/components/kabsi/d5-founding.tsx");
-    expect(founding).toContain("useFoundingPlaces()");
+    expect(founding).toContain("useFoundingPlaces(slug)");
     expect(founding).toContain("applyFounding(");
+    expect(founding).toContain("invite: slug");
     expect(read("src/components/kabsi/d2-partners.tsx")).toContain("applyPartner(");
   });
   it("labels every example, and the fixtures of the prototype are gone", () => {
@@ -314,17 +315,7 @@ describe("the head of every public page (30.16 section 4)", () => {
       if (/pageHead\(/.test(code))
         expect(code, r).toMatch(/image: "\w+"|image: `industries\/\$\{i\.slug\}`/);
     }
-    for (const img of [
-      "home",
-      "scan",
-      "pricing",
-      "tool",
-      "guide",
-      "industry",
-      "partner",
-      "about",
-      "founding",
-    ])
+    for (const img of ["home", "scan", "pricing", "tool", "guide", "industry", "partner", "about"])
       expect(readdirSync("public/og"), img).toContain(`${img}.png`);
   });
   it("gives Home the Organization data and the share image of the new brand line", () => {
@@ -338,11 +329,11 @@ describe("Home on Design 9 (Web 5 part B, master plan 30.24)", () => {
   const home =
     read("src/components/kabsi/d9-home.tsx") + read("src/components/kabsi/d9-home-lower.tsx");
   const data = read("src/components/kabsi/d8-data.ts");
-  it("never types a count: the Founding 25 count and the founding price come from the real readers", () => {
-    expect(home).toContain("useFoundingPlaces()");
+  it("never types a count: the launch price count comes from the real reader, and Home names no Founding 25", () => {
+    expect(home).not.toContain("useFoundingPlaces");
     expect(home).toContain("useFoundingLeft()");
     expect(home).toContain("left !== null && left > 0 &&");
-    expect(home + data).not.toMatch(/\b\d+ (of 25 )?places left/);
+    expect(home + data).not.toMatch(/\b\d+ (of 25 )?places left|Founding 25|\/founding(?![\w-])/);
   });
   it("uses lane R's hours buttons and marks nothing At launch (Go live 1)", () => {
     expect(data).toContain('buttons: ["Use my hours", "Keep Google\'s"]');

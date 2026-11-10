@@ -53,7 +53,10 @@ describe("Style 1 part A: guides with photos", () => {
 
 describe("Style 1 part B: the 30.32 look on every public page", () => {
   it("puts each hero's phrase on the bar once", async () => {
-    const h = await import("../src/components/kabsi/hero-lines");
+    const h = {
+      ...(await import("../src/components/kabsi/hero-lines")),
+      ...(await import("../src/components/kabsi/founding-private")),
+    };
     const pages: [string, string][] = [
       ["d4-free-check", h.CHECK_HERO.title],
       ["d8-faq", h.FAQ_HERO.title],

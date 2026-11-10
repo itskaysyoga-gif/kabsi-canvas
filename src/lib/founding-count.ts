@@ -1,43 +1,52 @@
-// Speed 2 part B (lane R, 6 Nov 2026): the Founding 25 count through kabsi.co. Home, /founding and Pricing asked the
-// programs function on Supabase straight from the browser, which cost a CORS preflight and Supabase's gateway (OPTIONS
-// 1,814 ms on Rashid's phone, 6 Nov). The page now asks GET /api/founding-count on its own address: no preflight, and
-// Vercel's edge answers from a copy for 60 seconds, then serves that copy while it fetches a new one. Only the server of
-// this route talks to Supabase. The count is public (the same JSON programs/founding returns); no visitor data is read.
-// A count that cannot be read is answered 503 and never cached, and the page shows no number, as before.
+// Founding 1 (R-151, master plan 30.51): the Founding 25 count answers only to the private invite slug. Speed 2 part B had
+// put the count on kabsi.co's own address and in Vercel's edge cache for 60 seconds; that cache is gone, because a copy kept
+// for a slug would let an old link work after staff rotate it. Every answer here is no-store and noindex. The count is the
+// same JSON programs/founding returns (programs.ts decides whether the slug is the current one); no visitor data is read.
+import { isInviteShape } from "./founding-invite";
 import { anonHeaders, supabaseUrl } from "./supabase-config";
 
-/** Fresh for 60 seconds at Vercel's edge, then served stale for up to 10 minutes while a new copy is fetched. */
-export const FOUNDING_COUNT_CDN_CACHE = "max-age=60, stale-while-revalidate=600";
+export type FoundingCountResult =
+  | { status: "ok"; body: { total: number; left: number } & Record<string, unknown> }
+  | { status: "not_found" }
+  | { status: "unavailable" };
 
 const isCount = (v: unknown): boolean => {
   const o = v as { total?: unknown; left?: unknown } | null;
   return !!o && typeof o.total === "number" && typeof o.left === "number" && o.left >= 0;
 };
 
-export async function foundingCountResponse(fetcher: typeof fetch = fetch): Promise<Response> {
-  const base = { "content-type": "application/json", "x-robots-tag": "noindex" };
+/** Asks the programs function for the count with the slug. "not_found" means the slug is not the current one. */
+export async function readFoundingCount(
+  slug: unknown,
+  fetcher: typeof fetch = fetch,
+): Promise<FoundingCountResult> {
+  if (!isInviteShape(slug)) return { status: "not_found" };
   try {
-    const res = await fetcher(`${supabaseUrl}/functions/v1/programs/founding`, {
-      headers: anonHeaders,
-      signal: AbortSignal.timeout(5000),
-    });
+    const res = await fetcher(
+      `${supabaseUrl}/functions/v1/programs/founding?invite=${encodeURIComponent(slug)}`,
+      { headers: anonHeaders, signal: AbortSignal.timeout(5000) },
+    );
+    if (res.status === 404) return { status: "not_found" };
     const body = res.ok ? ((await res.json()) as unknown) : null;
-    if (isCount(body)) {
-      return new Response(JSON.stringify(body), {
-        headers: {
-          ...base,
-          // The browser asks again on each page view and gets the edge's copy; Vercel's own header wins over the
-          // no-store that vercel.json puts on /api/* for the browser.
-          "cache-control": "public, max-age=0, must-revalidate",
-          "vercel-cdn-cache-control": FOUNDING_COUNT_CDN_CACHE,
-        },
-      });
-    }
+    if (isCount(body)) return { status: "ok", body: body as { total: number; left: number } };
   } catch {
-    /* falls through to the plain answer below */
+    /* falls through to unavailable */
   }
-  return new Response(JSON.stringify({ error: "unavailable" }), {
-    status: 503,
-    headers: { ...base, "cache-control": "no-store" },
-  });
+  return { status: "unavailable" };
+}
+
+export async function foundingCountResponse(
+  slug: unknown,
+  fetcher: typeof fetch = fetch,
+): Promise<Response> {
+  const headers = {
+    "content-type": "application/json",
+    "x-robots-tag": "noindex, nofollow",
+    "cache-control": "no-store",
+  };
+  const r = await readFoundingCount(slug, fetcher);
+  if (r.status === "ok") return new Response(JSON.stringify(r.body), { headers });
+  if (r.status === "not_found")
+    return new Response(JSON.stringify({ error: "not_found" }), { status: 404, headers });
+  return new Response(JSON.stringify({ error: "unavailable" }), { status: 503, headers });
 }

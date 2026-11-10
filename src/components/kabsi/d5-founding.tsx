@@ -1,7 +1,8 @@
-// Founding 25 (master plan 30.17 section 1, COPY.md "Founding 25"): the banner on Home, Pricing and every industry
-// page, and /founding with the application. The count of places left is the real one (GET /api/founding-count); while it
-// has not loaded, or did not load, no number shows. The application posts to programs/founding (Partners session).
-import { CheckCircle2, Sparkles } from "lucide-react";
+// Founding 25 (master plan 30.17 section 1, COPY.md "Founding 25"), private since Founding 1 (R-151, master plan 30.51): the
+// page only the invited see, at /founding/<slug>, with the application. The count of places left is the real one (GET
+// /api/founding-count?slug=); while it has not loaded, or did not load, no number shows. The application posts to
+// programs/founding with the same slug. No public page carries this text or links here.
+import { CheckCircle2 } from "lucide-react";
 import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useLazyTurnstile } from "@/components/turnstile";
@@ -18,60 +19,13 @@ import {
 import { getConsent, onConsentChange } from "@/lib/consent";
 import { useFlagState } from "./d2-parts";
 import { PageHero, popCls, stagger } from "./page-hero";
-import { FOUNDING_HERO } from "./hero-lines";
-import { FOUNDING_FAQ } from "./faq-data";
+import { FOUNDING25_UNDER, FOUNDING_FAQ, FOUNDING_HERO } from "./founding-private";
 import { FOUNDER, PHOTOS } from "./photos";
-import { FOUNDING25_TOTAL } from "./founding-total";
-import { Banner, Button, ButtonLink, Faq, Field, Segmented, StatusPill } from "./ui";
+import { Banner, Button, ButtonLink, Faq, Field, Segmented, StatusPill, buttonClass } from "./ui";
 import { Marked } from "@/components/kabsi/highlight";
 import { SectionPhoto } from "./section-photo";
 
-export { FOUNDING25_TOTAL };
-export const FOUNDING25_LINE =
-  "Founding 25: three months of Kabsi Pro, free, for 25 businesses. Kabsi does the Google work; you tell Rashid what to make better.";
-export const FOUNDING25_UNDER =
-  "By application. No card. After 90 days, choose a plan or stop, nothing is charged by itself.";
-
-/** The banner, the same on every page that carries it. Its button is never the page's yellow one. */
-export function FoundingBanner({ className }: { className?: string | undefined }) {
-  const places = useFoundingPlaces();
-  const left = places?.left ?? null;
-  return (
-    <section aria-label="Founding 25" className={cn("container-kb", className)}>
-      <div className="grid gap-5 rounded-panel border border-line-strong bg-surface-1 p-6 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12">
-        <div>
-          <p className="flex items-center gap-2 text-label font-bold text-text-2">
-            <Sparkles className="size-4" aria-hidden />
-            Founding 25
-          </p>
-          <p className="mt-3 max-w-[40rem] font-display text-h3 font-semibold text-text-1">
-            Three months of Kabsi Pro, free, for 25 businesses. Kabsi does the Google work; you tell
-            Rashid what to make better.
-          </p>
-          <p className="mt-3 text-small text-text-2">{FOUNDING25_UNDER}</p>
-        </div>
-        <div className="flex flex-col gap-3 lg:items-end">
-          {left === 0 ? (
-            <p className="text-body font-bold">All 25 places are taken.</p>
-          ) : (
-            <>
-              {left !== null && (
-                <p className="text-body font-bold">
-                  {left} of {places?.total ?? FOUNDING25_TOTAL} places left.
-                </p>
-              )}
-              <ButtonLink to="/founding" variant="secondary">
-                Apply for a place
-              </ButtonLink>
-            </>
-          )}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- /founding ---------- */
+/* ---------- /founding/<slug> ---------- */
 
 const STATES = ["open", "sent", "reviewing", "accepted", "waitlist", "full"] as const;
 type State = (typeof STATES)[number];
@@ -86,7 +40,7 @@ const WHO = [
 const GET = [
   "Kabsi Pro free for 90 days, from the day Google access works. No card.",
   "Rashid, the founder, helps you start: old reviews with no reply, wrong details, missing links.",
-  "Then the founding price if you choose a plan: $19 or $39 a month, kept while your subscription stays paid.",
+  "Then the launch price if you choose a plan: $19 or $39 a month, kept while your subscription stays paid.",
 ];
 
 const GIVE = [
@@ -138,9 +92,9 @@ function useVisitorCountry(): string | null {
   return country;
 }
 
-export function FoundingPage() {
+export function FoundingPage({ slug }: { slug: string }) {
   const [flagged, setState] = useFlagState<State>("open", STATES);
-  const places = useFoundingPlaces();
+  const places = useFoundingPlaces(slug);
   // All 25 taken: the form gives way to the "full" state (the server refuses past 25 in any case).
   const state: State = places?.left === 0 && flagged === "open" ? "full" : flagged;
   return (
@@ -151,9 +105,9 @@ export function FoundingPage() {
         under={FOUNDING25_UNDER}
         action={
           places?.left === 0 ? null : (
-            <ButtonLink to="/founding" hash="apply">
+            <a href="#apply" className={buttonClass("primary", "lg")}>
               {FOUNDING_HERO.action}
-            </ButtonLink>
+            </a>
           )
         }
         visual={<PlacesVisual places={places} />}
@@ -188,7 +142,7 @@ export function FoundingPage() {
         className="scroll-mt-20 border-t border-line"
       >
         <div className="container-kb section-y max-w-3xl">
-          {state === "open" && <Application onSent={() => setState("sent")} />}
+          {state === "open" && <Application slug={slug} onSent={() => setState("sent")} />}
           {state !== "open" && <Outcome state={state} />}
         </div>
       </section>
@@ -371,7 +325,7 @@ type Errors = Partial<
   Record<"business" | "country" | "trade" | "phone" | "why" | "checkIn", string>
 >;
 
-function Application({ onSent }: { onSent: () => void }) {
+function Application({ slug, onSent }: { slug: string; onSent: () => void }) {
   const [f, setF] = useState({
     business: "",
     country: "",
@@ -421,6 +375,7 @@ function Application({ onSent }: { onSent: () => void }) {
     }
     try {
       await applyFounding({
+        invite: slug,
         business_name: f.business.trim(),
         country: COUNTRIES.find((c) => c.label === f.country)!.code,
         trade: TRADES.find(([l]) => l === f.trade)![1],

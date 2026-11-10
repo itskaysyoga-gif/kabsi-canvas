@@ -11,8 +11,8 @@ const html = (init: ResponseInit = {}) =>
 const get = (path: string, method = "GET") => new Request(`https://kabsi.co${path}`, { method });
 
 describe("edge cache for public pages", () => {
-  it("keeps Home, Pricing, /scan, /founding and /for", () => {
-    for (const p of ["/", "/pricing", "/scan", "/founding", "/for", "/privacy"])
+  it("keeps Home, Pricing, /scan and /for", () => {
+    for (const p of ["/", "/pricing", "/scan", "/for", "/privacy"])
       expect(wantsEdgeCache(get(p), html()), p).toBe(true);
   });
 

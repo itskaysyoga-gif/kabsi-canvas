@@ -98,7 +98,7 @@ jobs:
       - name: Crawl kabsi.co
         run: node scripts/qa2/crawl.mjs --browser webkit --out qa2-out --concurrency 4 --full-widths 390,1440
       - name: Crawl kabsi.co as a visitor from the UK (the cookie bar)
-        run: node scripts/qa2/crawl.mjs --browser webkit --out qa2-out --geo GB --widths 320,390,1440 --only home,pricing,scan,scan-result,founding,for-hair-salon --full-widths 390
+        run: node scripts/qa2/crawl.mjs --browser webkit --out qa2-out --geo GB --widths 320,390,1440 --only home,pricing,scan,scan-result,for-hair-salon --full-widths 390
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
