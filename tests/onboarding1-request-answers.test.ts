@@ -115,6 +115,13 @@ describe("saved and changed", () => {
     ).toHaveLength(80);
   });
 
+  it("the cut never splits an emoji, so the request is always valid text", () => {
+    const name = `${"x".repeat(79)}😀😀`;
+    const sent = cleanAnswers({ tracking: "booking_app", app: name, early: null }).p_app!;
+    expect(Array.from(sent)).toHaveLength(80);
+    expect(() => encodeURIComponent(sent)).not.toThrow();
+  });
+
   it("reads a saved row back and knows when nothing changed", () => {
     const a = answersFromRow({
       request_tracking: "notebook",
@@ -309,7 +316,7 @@ describe("Gate 3's rule (master plan 30.48)", () => {
   });
 });
 
-describe("the migration (20261110035354)", () => {
+describe("the migrations (20261110035354 and 20261110041123)", () => {
   const sql = readFileSync(
     "supabase/migrations/20261110035354_onboarding1_request_answers.sql",
     "utf8",
@@ -346,6 +353,16 @@ describe("the migration (20261110035354)", () => {
     const save = fn("public.save_request_answers");
     expect(save).not.toMatch(/insert\s+into/i);
     expect(save).not.toMatch(/\bjobs\b|\bemails\b|notifications|whatsapp_|pg_net|http_post/i);
+  });
+  it("the follow-up migration keeps the choices out of the change log", () => {
+    const next = readFileSync(
+      "supabase/migrations/20261110041123_onboarding1_audit_booleans.sql",
+      "utf8",
+    );
+    const body = next.slice(next.indexOf("perform private.audit"), next.indexOf("return v_out"));
+    expect(body).toContain("answered_tracking");
+    expect(body).not.toMatch(/'request_tracking'|'early_access_whatsapp'/);
+    expect(next).not.toMatch(/\bdrop\s+(table|column|function)\b/i);
   });
   it("the staff function returns counts, business names and dates, and no email or phone", () => {
     const staff = fn("public.staff_request_answers");

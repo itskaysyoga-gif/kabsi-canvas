@@ -56,7 +56,8 @@ export function cleanAnswers(a: RequestAnswers): {
   p_app: string | null;
   p_early: boolean | null;
 } {
-  const app = a.tracking === "booking_app" ? a.app.trim().slice(0, APP_NAME_MAX) : "";
+  const app =
+    a.tracking === "booking_app" ? Array.from(a.app.trim()).slice(0, APP_NAME_MAX).join("") : "";
   return { p_tracking: a.tracking, p_app: app || null, p_early: a.early };
 }
 

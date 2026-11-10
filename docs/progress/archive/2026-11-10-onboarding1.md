@@ -24,6 +24,12 @@ Task Onboarding 1, lane R decision R-145 (master plan 30.48). Branch `claude/onb
 
 See `docs/LATER.md` (two rows added). The R-144 row is missing from the plan index and the index is over its size limit.
 
+## Independent review (a fresh agent given only the diff and the rules)
+
+No blocking defect against the eight rules. Fixed: (1) the change log kept the old and new choices, which contradicted "clearing an answer removes it"; a second additive migration `20261110041123_onboarding1_audit_booleans.sql` (applied, read back) makes the audit row say only whether each question is answered; (2) the 80 character cut counted UTF-16 units and could split an emoji, now cut by characters, with a test. Left as they are, for the record: the migration's four constraints are not idempotent (applied once, a replay would fail on "already exists", the same as the repository's other migrations); a business with a Google disconnect request still counts (only a deletion request leaves the count); the order of the first 10 moves if an owner clears an answer, because clearing clears its date (by the rule); Skip in a second tab could wipe answers saved a moment earlier in the first (the screen shows only while nothing was saved); a member with the staff role who reaches /start sees a failing Continue, as the existing confirm step does.
+
 ## Checks and evidence
+
+Filled in at the end of the session (below).
 
 Filled in at the end of the session (below).
