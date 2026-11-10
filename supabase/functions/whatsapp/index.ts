@@ -19,6 +19,7 @@ import { agentDeps, templateStatuses, whatsappCtx } from "../_shared/whatsapp/db
 import { handle, receive } from "../_shared/whatsapp/agent.ts";
 import type { Inbound } from "../_shared/whatsapp/channel.ts";
 import { flush, notify } from "../_shared/whatsapp/outbox.ts";
+import { outboxStatusUpdate } from "../_shared/whatsapp/outbox-status.ts";
 import { caseOf, needsActionBody } from "../_shared/whatsapp/google-action.ts";
 import { SAY } from "../_shared/whatsapp/say.ts";
 import { ref, sendName, TEMPLATE_STATUS_KEY } from "../_shared/whatsapp/templates.ts";
@@ -94,8 +95,9 @@ async function webhook(req: Request, opts: { background?: (p: Promise<unknown>) 
             await admin().from("whatsapp_message_pricing").upsert({ provider_id: s.messageId, billable: s.pricing.billable, category: s.pricing.category,
               pricing_model: s.pricing.model, recorded_at: new Date().toISOString() }).then(() => {}, () => {});
           }
-          await admin().from("whatsapp_outbox").update({ state: s.status === "failed" ? "failed" : "sent", error: s.error })
-            .eq("provider_id", s.messageId).in("state", ["sent", "held"]).then(() => {}, () => {});
+          // Ops 1: a status never turns a held message into a sent one (outbox-status.ts).
+          const u = outboxStatusUpdate(s.status, s.error);
+          if (u) await admin().from("whatsapp_outbox").update(u.set).eq("provider_id", s.messageId).in("state", u.whereStates).then(() => {}, () => {});
         },
       };
     },

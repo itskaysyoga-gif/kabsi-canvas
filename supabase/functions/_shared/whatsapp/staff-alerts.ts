@@ -68,7 +68,9 @@ export function alertText(e: OpsEvent): { body: string; summary: string } {
 
 export type Summary = {
   signups: number; trials_started: number; paid_new: number; paid_total: number; cancellations: number; reviews_answered: number;
-  replies_waiting: number; handoffs_waiting: number; publications_stuck: number; jobs_failed: number; errors_by_job: { job: string; n: number }[];
+  replies_waiting: number; handoffs_waiting: number; publications_stuck: number;
+  /** Ops 1: the stuck ones by what to do: a publish job is retrying them, Google is checking or needs action, or nothing is working on them. */
+  publications_retrying?: number; publications_waiting_google?: number; publications_need_look?: number; jobs_failed: number; errors_by_job: { job: string; n: number }[];
   ai_cost_micros: number; places_today: number; places_cap: number; dataforseo_micros: number; dataforseo_cap_usd: number;
   number_quality: string | null; number_messaging: string | null; alerts_24h: number;
 };
@@ -76,6 +78,17 @@ export type Summary = {
 const usd = (micros: number) => `$${(Number(micros) / 1e6).toFixed(2)}`;
 const n = (x: unknown) => Number(x ?? 0);
 const plural = (k: number, one: string, many: string) => `${k} ${k === 1 ? one : many}`;
+/** Ops 1: "5 publications stuck (3 retrying, 2 waiting for Google, 1 needs a look)": the count and what to do about each part. */
+export function stuckText(s: { publications_stuck: number; publications_retrying?: number; publications_waiting_google?: number; publications_need_look?: number }): string {
+  const total = n(s.publications_stuck);
+  if (!total) return "No publications stuck";
+  const parts = [
+    n(s.publications_retrying) ? `${n(s.publications_retrying)} retrying` : null,
+    n(s.publications_waiting_google) ? `${n(s.publications_waiting_google)} waiting for Google` : null,
+    n(s.publications_need_look) ? `${n(s.publications_need_look)} ${n(s.publications_need_look) === 1 ? "needs" : "need"} a look` : null,
+  ].filter(Boolean);
+  return `${plural(total, "publication", "publications")} stuck${parts.length ? ` (${parts.join(", ")})` : ""}`;
+}
 const health = (q: string | null, m: string | null) => {
   if (!q) return "number health not read yet";
   const good = ["GREEN", "HIGH"].includes(q.toUpperCase()) && !/BLOCKED/i.test(m ?? "");
@@ -86,7 +99,7 @@ const health = (q: string | null, m: string | null) => {
 export function morningDigest(s: Summary): { body: string; buttons: Button[] } {
   const things = [
     n(s.handoffs_waiting) ? plural(n(s.handoffs_waiting), "person wants to talk to someone", "people want to talk to someone") : null,
-    n(s.publications_stuck) ? plural(n(s.publications_stuck), "publication is stuck", "publications are stuck") : null,
+    n(s.publications_stuck) ? stuckText(s) : null,
     n(s.replies_waiting) ? plural(n(s.replies_waiting), "reply is waiting for an owner", "replies are waiting for owners") : null,
   ].filter(Boolean) as string[];
   const head = things.length
