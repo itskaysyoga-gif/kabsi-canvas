@@ -1,6 +1,6 @@
 // RB-D: the extraction step. The model quotes, code checks and fills. Every message here is fictional. The source holds
 // no Arabic script and no dash (a guard test reads the folder), so Arabic text is written as escapes.
-import { assert, assertEquals, assertFalse } from "jsr:@std/assert@1";
+import { assert, assertEquals, assertFalse, assertMatch } from "jsr:@std/assert@1";
 import { CLAIM_WORDS } from "./packs/schema.ts";
 import { getPack } from "./packs/index.ts";
 import {
@@ -171,20 +171,22 @@ Deno.test("bare hours: a day that is itself unclear stays two buttons, with the 
   assertFalse(r.saveReady);
 });
 
-Deno.test("when: words the date reader does not know are kept as written with no time set, never read as a time", () => {
+Deno.test("when: words the date reader does not know are kept as written, marked not clear and asked about, never read as a time", () => {
   const r = ok(extractFields("Priya wants lashes sometime next week", answer({ customer_name: "Priya", service: "lashes", when: "sometime next week" }), ctx("salon")));
   const w = r.fields["when"]!;
   assertEquals(w.kind, "stated");
   assertEquals(w.validation.reason, "words_only_not_read_as_a_time");
   assertEquals((w.normalized as { starts_at: unknown }).starts_at, null);
-  assertEquals(w.display, "sometime next week, no time set");
+  // RB-F2: shown as not clear, with a question, never as if it had been read.
+  assertEquals(w.display, 'not clear, you wrote "sometime next week"');
+  assertMatch(r.reply.body, /Which day and time did you mean\?/);
   // A date that cannot exist is never kept as words.
   const bad = ok(extractFields("Sophie pedicure on 31 feb", answer({ customer_name: "Sophie", service: "pedicure", when: "31 feb" }), ctx("salon")));
   assertEquals(bad.fields["when"]!.kind, "absent");
   // A time read next to words it did not read is kept whole as words, not as the part it understood.
   const part = ok(extractFields("Layla trim Thursday around three", answer({ customer_name: "Layla", service: "trim", when: "Thursday around three" }), ctx("salon")));
   assertEquals(part.fields["when"]!.validation.reason, "part_of_the_words_not_read");
-  assertEquals(part.fields["when"]!.display, "Thursday around three, no time set");
+  assertEquals(part.fields["when"]!.display, 'not clear, you wrote "Thursday around three"');
 });
 
 Deno.test("claims: what the owner said is noted with its quote and is never a confirmation in the record", () => {

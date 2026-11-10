@@ -122,7 +122,8 @@ Deno.test("capture: one proposal with Save and Change, nothing saved; Save makes
   assert.match(p.body, /^Kabsi Test Salon \(owner\)/);
   assert.match(p.body, /Name: Sarah/);
   assert.match(p.body, /Service: Highlights/);
-  assert.match(p.body, /Thu 29 Oct, afternoon, no exact time/);
+  // RB-F2: the time in its clean form.
+  assert.match(p.body, /When: Thursday afternoon, no time set/);
   assert.match(p.body, /Nothing is saved until you tap Save/);
   assert.equal(w.requests.length, 0);
   assert.equal(w.extractCalls.length, 1);
@@ -138,10 +139,11 @@ Deno.test("capture: one proposal with Save and Change, nothing saved; Save makes
   assert.equal(q.summary, "Highlights");
   // No time is invented: the words are kept, with no time set.
   assert.equal(q.starts_at, null);
-  assert.equal(q.requested_window_text, "Thursday afternoon");
+  // RB-F2: saved with its date, so a later list still names the right day.
+  assert.equal(q.requested_window_text, "Thu 29 Oct afternoon");
   assert.equal(q.location, SALON);
   assert.equal(q.by, TEST_USER);
-  assert.match(last(w).body, /Appointment 1 saved\.\n#1 Sarah · Highlights · Thursday afternoon, no time set · Requested/);
+  assert.match(last(w).body, /Appointment 1 saved\.\n#1 Sarah · Highlights · Thu 29 Oct afternoon, no time set · Requested/);
   // RB-F: Undo is offered for 10 minutes, by the creation's activity id.
   assert.deepEqual(last(w).buttons, ["Undo"]);
   // The key of the Save is the WhatsApp id of the tap.
@@ -267,7 +269,7 @@ Deno.test("find: a name lists the matches with one question; a number shows the 
   assert.equal((found.match(/\?/g) ?? []).length, 1, "at most one question");
   assert.match(found, /This covers only what was entered in Kabsi/);
   assert.equal(await send(w, TEST, { text: "1" }), "request_summary");
-  assert.match(last(w).body, /Appointment 1 for Sarah\nHighlights\nWhen: Thursday afternoon, no time set\nStatus: Requested/);
+  assert.match(last(w).body, /Appointment 1 for Sarah\nHighlights\nWhen: Thu 29 Oct afternoon, no time set\nStatus: Requested/);
   assert.equal(await send(w, TEST, { text: "request 2" }), "request_summary");
   assert.match(last(w).body, /Appointment 2 for Sarah/);
   assert.equal(await send(w, TEST, { text: "request 9" }), "request_summary");
