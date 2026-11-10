@@ -86,7 +86,11 @@ export type ExtractRefusal = { ok: false; reason: "empty" | "too_long" };
 export type AskRequest = { model: string; system: string; user: string; maxTokens: number };
 export type Ask = (req: AskRequest) => Promise<string>;
 
-export type ExtractContext = { pack: Pack; country: string | null; timeZone: string; now: Date };
+export type ExtractContext = {
+  pack: Pack; country: string | null; timeZone: string; now: Date;
+  /** RB-F3: the business's own past services (words its requests were saved with), matched like the pack's, typos included. */
+  extraServices?: Pack["services"];
+};
 
 // ---------------------------------------------------------------------------------------------------------------------
 // The prompt. Data first: the owner's text is fenced and the system prompt says it is data, never instructions.
@@ -463,10 +467,21 @@ function summaryField(spec: Spec, n: NormalizedMessage, loc: Located | null): Ex
   const inside = s.status === "ok" ? s.matches.filter((m) => overlaps(loc, m.start, m.end)) : [];
   const words = collapse(loc.raw);
   const norm = inside.length ? { name: "vocabulary", version: s.status === "ok" ? s.version : 1 } : { name: "verbatim", version: 1 };
-  const labels = inside.map((m) => m.label);
+  const labels = [...new Set(inside.map((m) => m.label))];
+  const keys = inside.map((m) => m.key);
+  // RB-F3: a typo equally near two services ("cut" and "colour" are never both near one word, but a pack could have it):
+  // the owner taps the one meant, and nothing is saved until then.
+  const tie = s.status === "ok" ? (s.ties ?? []).find((x) => overlaps(loc, x.start, x.end)) : undefined;
+  if (tie) {
+    const cands = tie.candidates.map((c) => ({ label: c.label, value: { text: words, services: [...keys, c.key], labels: [...labels, c.label] } }));
+    return {
+      ...f, kind: "ambiguous", raw: loc.raw, start: loc.start, end: loc.end, quote_source: "model", normalizer: { name: "vocabulary", version: s.status === "ok" ? s.version : 1 },
+      candidates: cands, validation: { passed: false, reason: "more_than_one_service" }, show: cands.length >= 2 && cands.length <= 3 ? "buttons" : "left_out",
+    };
+  }
   return {
-    ...f, kind: "stated", raw: loc.raw, start: loc.start, end: loc.end, quote_source: "model", normalized: { text: words, services: inside.map((m) => m.key) },
-    normalizer: norm, validation: { passed: true, reason: null }, show: "plain", display: clip(labels.length ? [...new Set(labels)].join(" and ") : words, 100),
+    ...f, kind: "stated", raw: loc.raw, start: loc.start, end: loc.end, quote_source: "model", normalized: { text: words, services: keys, ...(labels.length ? { labels } : {}) },
+    normalizer: norm, validation: { passed: true, reason: null }, show: "plain", display: clip(labels.length ? labels.join(" and ") : words, 100),
   };
 }
 
@@ -532,7 +547,8 @@ export function extractFields(text: string, modelText: string | null, ctx: Extra
   if (message === "") return { ok: false, reason: "empty" };
   if (message.length > MAX_RAW_TEXT) return { ok: false, reason: "too_long" };
   const pack = ctx.pack;
-  const n = normalizeMessage(message, { country: ctx.country, timeZone: ctx.timeZone, now: ctx.now, pack });
+  const vocab = ctx.extraServices?.length ? { services: [...pack.services, ...ctx.extraServices] } : pack;
+  const n = normalizeMessage(message, { country: ctx.country, timeZone: ctx.timeZone, now: ctx.now, pack: vocab });
   const q = readQuotes(pack, modelText);
   const mf = fold(message);
   const issues = [...q.issues];
@@ -599,15 +615,17 @@ export function replyFor(ex: Omit<Extraction, "reply"> | Extraction, ctx: ReplyC
   const customer = pack.words.customer.singular;
   if (ex.said.agreed) lines.push(`You said the ${customer} agreed. Kabsi records an agreement only when you tell it to.`);
   if (ex.said.already_arranged) lines.push("You said it is already arranged. Kabsi cannot check that, so this is only a request here.");
-  const head = `${kindWord(pack, pack.defaultKind)}: ${lines.length ? "" : "nothing readable yet"}`.trimEnd();
+  // RB-F3: the first line names what this is ("New appointment"); the agent makes it the bold first line with its marker.
+  const head = lines.length ? `New ${kindWord(pack, pack.defaultKind).toLowerCase()}` : `New ${kindWord(pack, pack.defaultKind).toLowerCase()}: nothing readable yet`;
   const body = [head, ...lines].filter(Boolean).join("\n");
 
   const ask = ex.askField ? ex.fields[ex.askField]! : null;
   if (ask) {
     if (ask.show === "buttons") {
-      const what = ask.target === "phone" ? "number" : "time";
+      const what = ask.target === "phone" ? "number" : ask.target === "summary" ? ask.label.toLowerCase() : "time";
       return finish(`${body}\nWhich ${what} did you mean? Nothing is saved until you tap.`, ask.candidates.map((c) => c.label));
     }
+    if (ask.target === "summary") return finish(`${body}\nThat ${ask.label.toLowerCase()} could mean several things. Send it again. Nothing is saved yet.`, ["Change"]);
     const eg = ask.target === "phone" ? "Send the one to use" : "Say the day and the hour again";
     return finish(`${body}\n${ask.target === "phone" ? "There is more than one number." : "That time could mean several things."} ${eg}. Nothing is saved yet.`, ["Change"]);
   }
@@ -641,7 +659,73 @@ export function toEvidence(ex: Extraction): Record<string, unknown> {
     out[k] = {
       kind: f.kind, raw: f.raw, start: f.start, end: f.end, quote_source: f.quote_source, normalized: f.normalized, normalizer: f.normalizer,
       candidates: f.candidates, validation: f.validation, owner_action: f.owner_action, needs_tap: f.needs_tap,
+      // RB-F3: what the owner was shown, so a later message that changes one field keeps the others as they were read.
+      show: f.show, display: f.display,
     };
   }
   return out;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// RB-F3: a second message that changes a proposal ("Highlights thursday afternoon", "Lina"). Only the new words are read
+// (one model call, as before); each field they give replaces that field, and every other field stays as it was read the
+// first time. Reading the two messages joined together read a day from one and a day part from the other, so a correct
+// time could show as not clear, and a time already read could be lost (Rashid's retest, 10 Nov 2026).
+
+type StoredField = {
+  kind?: FieldKind; raw?: string | null; start?: number | null; end?: number | null; quote_source?: QuoteSource | null; normalized?: unknown;
+  normalizer?: { name: string; version: number } | null; candidates?: Candidate[]; validation?: { passed: boolean; reason: string | null };
+  needs_tap?: boolean; show?: Show; display?: string | null;
+};
+
+/** True when every field of a stored proposal carries what was shown (proposals stored before RB-F3 do not). */
+export function canMerge(pack: Pack, before: Record<string, unknown> | null | undefined): boolean {
+  if (!before) return false;
+  return pack.fields.every((spec) => {
+    const e = before[spec.key] as StoredField | undefined;
+    return !e || e.kind === "absent" || (typeof e.show === "string" && (e.display !== undefined || e.show === "buttons" || e.show === "left_out"));
+  });
+}
+
+function fromStored(spec: Spec, e: StoredField | undefined): ExtractedField {
+  const f = base(spec);
+  if (!e || !e.kind || e.kind === "absent") return f;
+  return {
+    ...f, kind: e.kind, raw: e.raw ?? null, start: e.start ?? null, end: e.end ?? null, quote_source: e.quote_source ?? null, normalized: e.normalized ?? null,
+    normalizer: e.normalizer ?? null, candidates: e.candidates ?? [], validation: e.validation ?? { passed: false, reason: null }, needs_tap: !!e.needs_tap,
+    show: e.show ?? "left_out", display: e.display ?? null,
+  };
+}
+
+/**
+ * The proposal after a second message: `before` is the stored evidence of `oldText`, `next` the reading of the new words
+ * alone. Positions of the new fields are moved to point into the joined text (old text, a new line, the new words).
+ */
+export function mergeRevision(oldText: string, before: Record<string, unknown>, next: Extraction, ctx: ReplyContext): Extraction & { addsNothing: boolean } {
+  const pack = ctx.pack;
+  const offset = oldText.length + 1;
+  const fields: Record<string, ExtractedField> = {};
+  let added = false;
+  for (const spec of pack.fields) {
+    const n = next.fields[spec.key];
+    if (n && n.kind !== "absent") {
+      added = true;
+      fields[spec.key] = { ...n, start: n.start === null ? null : n.start + offset, end: n.end === null ? null : n.end + offset };
+    } else fields[spec.key] = fromStored(spec, before[spec.key] as StoredField | undefined);
+  }
+  const shift = (c: Claim | null) => (c ? { ...c, start: c.start + offset, end: c.end + offset } : null);
+  const said = { agreed: shift(next.said.agreed), already_arranged: shift(next.said.already_arranged) };
+  const all = Object.values(fields);
+  for (const f of all) f.needs_tap = f.kind === "inferred" || f.kind === "ambiguous";
+  const nothingToRead = all.every((f) => f.kind === "absent") && !said.agreed && !said.already_arranged;
+  const askField = all.find((f) => f.kind === "ambiguous")?.key ?? null;
+  const missingRequired = pack.fields.filter((s) => s.required && fields[s.key]!.kind === "absent").map((s) => s.label);
+  const saveReady = !nothingToRead && askField === null && missingRequired.length === 0;
+  const issues = next.issues.filter((i) => i !== "no_model_answer");
+  const ex: Extraction = {
+    version: EXTRACT_VERSION, text: `${oldText}\n${next.text}`, model: next.model, fields, said, nothingToRead, issues, askField, missingRequired, saveReady,
+    reply: { body: "" },
+  };
+  ex.reply = replyFor(ex, ctx);
+  return { ...ex, addsNothing: !added && !said.agreed && !said.already_arranged };
 }

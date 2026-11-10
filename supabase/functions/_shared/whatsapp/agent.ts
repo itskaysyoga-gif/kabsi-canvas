@@ -13,7 +13,8 @@ import { type Ai, isRequestTool, route } from "./intent.ts";
 import {
   BOOK_SAY, bookOn, type BookDeps, createInput, findReply, ON_IT_REQUEST_MS, type Pack, PROPOSAL_OPEN_MS, proposalButtons, readRequest, type Ref,
   refOf, refusalReply, requestSummary, rowOf, savedText, toEvidence,
-  type Act, arrivedLine, askAnswer, parseBookCommand, type RbAsk, type RbTime, runCommand, timePicked, undoButton, undoIds,
+  type Act, arrivedLine, askAnswer, parseBookCommand, type RbAsk, type RbTime, runCommand, timePicked, undoButton, undoIds, kindIn, markOf, styleReply,
+  correctedReplyOf, nonce, duplicateReply, findDuplicate, fullOf, pastServices, reviseRequest, updateChanges,
 } from "./book.ts";
 import { photoRefusal, voiceCheck } from "./media.ts";
 import { MAX_BYTES } from "../photos/sniff.ts";
@@ -24,7 +25,7 @@ import {
   type BusinessRole, businesses, type Domain, domainOf, domains, head, may, needsRoleChoice, type OpenQuestion, pickBusiness,
   roleFor, type RoleName, type Who,
 } from "./roles.ts";
-import { type Command, isAbuse, parse } from "./router.ts";
+import { type Command, isAbuse, isOffTopic, parse } from "./router.ts";
 import { guessLang, handoffReply, handoffTime, headed, postIssue, SAY, say } from "./say.ts";
 import { forWhatsApp, type Nora } from "./nora.ts";
 import { PAY_TODAY_LINE } from "../billing-words.ts";
@@ -95,6 +96,8 @@ export interface AgentDb {
   /** 9.9, 26.9: the last 24 hours and the budgets, for "today" and the morning digest. */
   staffSummary(): Promise<Summary>;
   staffPause(name: string, pause: boolean): Promise<{ ok: boolean; business?: string; matches?: string[] }>;
+  /** RB-F3: "reset test" (staff only): count, or void, the open requests this phone made at the demo businesses. */
+  resetTest?(phone: string, confirm: boolean): Promise<{ ok: boolean; open?: number; businesses?: number; voided?: number; reason?: string }>;
   handoff(phone: string, summary: string): Promise<void>;
   outboxGet(phone: string, ids: number[]): Promise<{ id: number; body: string; buttons: Button[]; location_id: string | null }[]>;
   releaseHeld(phone: string): Promise<number>;
@@ -189,6 +192,8 @@ export async function handle(d: AgentDeps, m: Inbound, o: { first?: boolean } = 
 
 type Turn = {
   d: AgentDeps; s: SendState; who: Who; phone: string; lang: string; m: Inbound; head?: string | null; business?: BusinessRole | null;
+  /** RB-F3: a request book, switch or help reply, in the new look (book.ts styleReply). */
+  style?: { pack: Pack | null };
   /** The person's first message to Kabsi: the only one that gets the welcome (QA 1, 25 Oct). */
   first?: boolean;
 };
@@ -196,7 +201,16 @@ type Turn = {
 function say1(t: Turn, body: string, buttons?: Button[]) {
   return sendReply(t.d.out, t.s, t.phone, headed(t.head ?? null, body), buttons, { locationId: t.business?.location_id ?? null });
 }
-const answered = (t: Turn, body: string, result: string, buttons?: Button[]) => say1(t, body, buttons).then(() => result);
+const answered = (t: Turn, body: string, result: string, buttons?: Button[]) =>
+  (t.style ? say1({ ...t, head: null }, styled(t, body, result), buttons) : say1(t, body, buttons)).then(() => result);
+/** RB-F3: a switch or help reply in the new look (no role head, the bold first line). */
+const plain = (t: Turn): Turn => ({ ...t, head: null, style: { pack: null } });
+/** RB-F3: the bold first line with its marker, and the business in it only when this phone has more than one. */
+function styled(t: Turn, body: string, result: string): string {
+  const pack = t.style?.pack ?? null;
+  const many = businesses(t.who).length > 1;
+  return styleReply(body, markOf(result, kindIn(body, pack)), many && t.business ? t.business.business : null);
+}
 
 async function run(t: Turn, cmd: Command): Promise<string> {
   const { d, who, phone } = t;
@@ -250,7 +264,7 @@ async function run(t: Turn, cmd: Command): Promise<string> {
       await d.db.setConv(phone, { open_question: null });
       // A late answer to a question that held something (a message, a photo, a switch): say so, never drop it in silence.
       const held = pq.type === "role" ? !!pq.pending || !!pq.switch : !!pq.pending || !!pq.media;
-      if (answers && held) return answered(t, SAY.pickClosed, "pick_closed");
+      if (answers && held) return answered(plain(t), SAY.pickClosed, "pick_closed");
       return run({ ...t, who: { ...who, conversation: { ...conv!, open_question: null } } }, cmd);
     }
   }
@@ -271,7 +285,7 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     }
     // RB-F2: "switch", then "My business": with more than one business the numbered list comes at once.
     if (q?.type === "role" && q.switch && cmd.to === "business" && businesses(who).length > 1) return switchBusiness({ ...t, who: next });
-    return answered({ ...t, who: next }, SAY.switched(cmd.to === "business" ? "your business" : cmd.to === "partner" ? "your partner tools" : "Kabsi staff tools"), "role_set");
+    return answered(plain({ ...t, who: next }), SAY.switched(cmd.to === "business" ? "your business" : cmd.to === "partner" ? "your partner tools" : "Kabsi staff tools"), "role_set");
   }
   if (cmd.k === "business_pick") return pickedBusiness(t, cmd.locationId);
   if (cmd.k === "number" && conv?.open_question) {
@@ -377,9 +391,9 @@ async function withBusiness(t: Turn, toolName: string, pending: string | null, f
     const options = list.map((x) => ({ id: x.location_id, name: x.business }));
     await t.d.db.setConv(t.phone, { open_question: { type: "business", pending, options, ...keep, ...fwdMark(t), at: nowIso(t) } satisfies OpenQuestion });
     if (options.length <= 3) {
-      return answered(t, SAY.whichBusiness, "which_business", options.map((o) => ({ id: `b:${o.id}`, title: o.name.slice(0, 20) })));
+      return answered(plain(t), SAY.whichBusiness, "which_business", options.map((o) => ({ id: `b:${o.id}`, title: o.name.slice(0, 20) })));
     }
-    return answered(t, SAY.whichBusinessList(options.map((o) => o.name)), "which_business");
+    return answered(plain(t), SAY.whichBusinessList(options.map((o) => o.name)), "which_business");
   }
   if (!may(b.role, toolName)) {
     const tb = { ...t, business: b, head: head(t.who, "business", b) };
@@ -409,7 +423,7 @@ async function pickedBusiness(t: Turn, locationId: string): Promise<string> {
     return run({ ...next, m: { ...t.m, text: m.caption, buttonId: null } },
       { k: "photo", media: { kind: "image", id: m.id, mime: m.mime ?? "image/jpeg", filename: null, size: m.size, voice: false } });
   }
-  return answered({ ...next, business: b, head: head(next.who, "business", b) }, SAY.switched(b.business), "business_set");
+  return answered(plain({ ...next, business: b }), SAY.switched(b.business), "business_set");
 }
 
 // ─── Tools by name, each checked against the role's list (29.7).
@@ -424,6 +438,8 @@ async function tool(t: Turn, name: string, arg: string | undefined, text: string
   if (ask) return askRole(t, ask, text);
 
   if (dom === "staff") {
+    // RB-F3: "reset test" is refused, plainly, to anyone who is not Kabsi staff; it changes nothing.
+    if (name === "staff_reset_test" && !domains(who).includes("staff")) return answered(plain(t), SAY.resetStaffOnly, "reset_refused");
     if (!domains(who).includes("staff")) return free(t, text); // never revealed to anyone else
     return staff({ ...t, head: head(who, "staff", null) }, name, arg);
   }
@@ -466,7 +482,7 @@ async function askRole(t: Turn, options: Domain[], pending: string, o: { switch?
   await t.d.db.setConv(t.phone, { open_question: { type: "role", pending, options, ...fwdMark(t), at: nowIso(t), ...o } satisfies OpenQuestion });
   const title = (x: Domain) => (x === "business" ? "My business" : x === "partner" ? "Partner tools" : "Staff tools");
   const q = options.includes("partner") ? SAY.whichRole : SAY.whichRoleStaff;
-  return answered(t, q, "which_role", options.slice(0, 3).map((x) => ({ id: `r:${x}`, title: title(x) })));
+  return answered(plain(t), q, "which_role", options.slice(0, 3).map((x) => ({ id: `r:${x}`, title: title(x) })));
 }
 
 function activeDomain(t: Turn): Domain | null {
@@ -478,12 +494,12 @@ function activeDomain(t: Turn): Domain | null {
 
 async function help(t: Turn): Promise<string> {
   const dom = activeDomain(t);
-  if (dom === "staff") return answered({ ...t, head: head(t.who, "staff", null) }, SAY.staffHelpText, "help");
-  if (dom === "partner") return answered({ ...t, head: head(t.who, "partner", null) }, SAY.partnerSoon, "help");
+  // RB-F3: help in the new look. Staff and partner tools say which tools these are in the first line.
+  if (dom === "staff") return answered(plain(t), `Kabsi staff tools\n${SAY.staffHelpText}`, "help");
+  if (dom === "partner") return answered(plain(t), `Your partner tools\n${SAY.partnerSoon}`, "help");
   if (dom === "business") {
     const b = pickBusiness(t.who);
-    const tb = { ...t, business: b, head: b ? head(t.who, "business", b) : null };
-    return answered(tb, b?.role === "staff" ? SAY.staffHelp : SAY.ownerHelp, "help");
+    return answered(plain({ ...t, business: b }), b?.role === "staff" ? SAY.staffHelp : SAY.ownerHelp, "help");
   }
   // A phone that is not a customer meets Nora as Kabsi's assistant (9.2).
   return answered(t, say("unknownHelp", t.lang), "help");
@@ -500,7 +516,7 @@ async function switchCmd(t: Turn): Promise<string> {
 async function switchBusiness(t: Turn): Promise<string> {
   await t.d.db.setConv(t.phone, { active_location_id: null });
   return withBusiness({ ...t, who: { ...t.who, conversation: t.who.conversation ? { ...t.who.conversation, active_location_id: null } : null } }, "switch", null,
-    (tb) => answered(tb, SAY.switched(tb.business!.business), "switched"));
+    (tb) => answered(plain(tb), SAY.switched(tb.business!.business), "switched"));
 }
 
 async function person(t: Turn): Promise<string> {
@@ -1154,10 +1170,32 @@ async function staff(t: Turn, name: string, arg: string | undefined): Promise<st
       if (!r.ok) return answered(t, SAY.staffNoMatch(r.matches ?? []), "staff_no_match");
       return answered(t, name === "staff_pause" ? SAY.staffPaused(r.business!) : SAY.staffResumed(r.business!), name);
     }
+    case "staff_reset_test": return await resetTest(t, arg);
     case "staff_partners": return answered(t, SAY.staffPartnersSoon, "staff_partners_stub");
     case "staff_payouts": return answered(t, SAY.staffPayoutsSoon, "staff_payouts_stub");
     default: return answered(t, SAY.staffHelpText, "staff_help");
   }
+}
+
+/** RB-F3 (R-148 item 4): "reset test", then Confirm. Only the sender's own open requests at the demo businesses. */
+async function resetTest(t: Turn, arg: string | undefined): Promise<string> {
+  const tp = plain(t);
+  if (!t.d.db.resetTest) return answered(tp, SAY.resetNone, "reset_none");
+  const q = t.who.conversation?.open_question;
+  if (arg?.startsWith("confirm:")) {
+    const fresh = q?.type === "reset_test" && q.nonce === arg.slice(8) && (t.d.now ?? Date.now)() - Date.parse(q.at) < PICK_OPEN_MS;
+    if (!fresh) return answered(tp, SAY.alreadyHandled, "reset_closed");
+    await t.d.db.setConv(t.phone, { open_question: null });
+    const r = await t.d.db.resetTest(t.phone, true).catch(() => null);
+    if (!r?.ok) return answered(tp, SAY.resetFailed, "reset_failed");
+    return answered(tp, SAY.resetDone(r.voided ?? 0), "reset_done");
+  }
+  const r = await t.d.db.resetTest(t.phone, false).catch(() => null);
+  if (!r?.ok) return answered(tp, r?.reason === "forbidden" ? SAY.resetStaffOnly : SAY.resetFailed, r?.reason === "forbidden" ? "reset_refused" : "reset_failed");
+  if (!r.open) return answered(tp, SAY.resetNone, "reset_none");
+  const n = nonce();
+  await t.d.db.setConv(t.phone, { open_question: { type: "reset_test", at: nowIso(t), nonce: n } satisfies OpenQuestion });
+  return answered(tp, SAY.resetAsk(r.open, r.businesses ?? 1), "reset_ask", [{ id: `zr:${n}`, title: "Confirm" }]);
 }
 
 // ─── The request book (RB-E): capture and find, for a business whose request book is on (book.ts).
@@ -1172,7 +1210,8 @@ type BookTurn = { on: Map<string, Pack>; b: BusinessRole | null; proposal: RbQue
 type Said = { send: () => Promise<string> };
 const said = (t: Turn, body: string, result: string, buttons?: Button[]): Said => ({ send: () => answered(t, body, result, buttons) });
 const bookCtx = (t: Turn, b: BusinessRole, pack: Pack) => ({ pack, timeZone: b.time_zone ?? "UTC", now: new Date((t.d.now ?? Date.now)()) });
-const withB = (t: Turn, b: BusinessRole): Turn => ({ ...t, business: b, head: head(t.who, "business", b) });
+/** RB-F3: a request book reply: no role head; the bold first line names the business only when the phone has more than one. */
+const withB = (t: Turn, b: BusinessRole, pack: Pack | null = null): Turn => ({ ...t, business: b, head: null, style: { pack } });
 
 /** The seam's one check: is the request book on for the active business (or, with none active, for any of the phone's own)? */
 async function bookCheck(t: Turn): Promise<BookTurn | null> {
@@ -1224,11 +1263,11 @@ async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
       const q = t.who.conversation?.open_question as RbQuestion;
       const qb = businesses(t.who).find((x) => x.location_id === q.location_id);
       const g = qb ? await db.intake(qb.location_id, qb.user_id, q.intake_id).catch(() => null) : null;
-      if (yesNo === "yes" && g?.ok === true && g.state === "pending") return answered(withB(t, qb!), BOOK_SAY.tapSave, "request_yes_tap_save");
+      if (yesNo === "yes" && g?.ok === true && g.state === "pending") return answered(withB(t, qb!, bt.on.get(qb!.location_id)), BOOK_SAY.tapSave, "request_yes_tap_save");
       await t.d.db.setConv(t.phone, { open_question: null });
       return null;
     }
-    const tb = withB(t, b);
+    const tb = withB(t, b, bt.on.get(b.location_id));
     const g = await db.intake(b.location_id, b.user_id, bt.open.intake_id).catch(() => null);
     if (g?.ok !== true || g.state !== "pending") {
       // The draft was already saved, dropped or has expired: the question is closed and the word keeps today's meaning.
@@ -1246,16 +1285,16 @@ async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
     const c = parseBookCommand(text, pack);
     if (c) {
       const act = await runCommand(db, { location: b.location_id, actor: b.user_id }, c, bookCtx(t, b, pack), t.m.messageId).catch(() => "error" as const);
-      if (act === "error") return answered(withB(t, b), BOOK_SAY.tryAgain, "request_db_error");
-      if (act) return await bookAct(withB(t, b), act);
+      if (act === "error") return answered(withB(t, b, pack), BOOK_SAY.tryAgain, "request_db_error");
+      if (act) return await bookAct(withB(t, b, pack), act);
     }
   }
   if (ref) {
     // A number at a phone with several businesses and none chosen: the existing question first, then the number again.
     if (!b) return withBusiness(t, "help", text, () => Promise.resolve("request_ref"));
     const reply = await requestSummary(db, b.location_id, b.user_id, ref, bookCtx(t, b, bt.on.get(b.location_id)!)).catch(() => null);
-    if (!reply) return answered(withB(t, b), BOOK_SAY.tryAgain, "request_db_error");
-    return answered(withB(t, b), reply.body, ref.word ? `request_ref_${ref.word}` : "request_summary");
+    if (!reply) return answered(withB(t, b, bt.on.get(b.location_id)), BOOK_SAY.tryAgain, "request_db_error");
+    return answered(withB(t, b, bt.on.get(b.location_id)), reply.body, ref.word ? `request_ref_${ref.word}` : "request_summary");
   }
   return await free(t, text, bt);
 }
@@ -1266,7 +1305,7 @@ async function requestTool(t: Turn, bt: BookTurn, tool: string, arg: string | un
     return await requestToolInner(t, bt, tool, arg, text, onlyIfNew);
   } catch {
     // A database or model failure: a plain line, never silence. Nothing was saved; the owner sends it again.
-    return said(bt.b ? withB(t, bt.b) : t, BOOK_SAY.tryAgain, "request_db_error");
+    return said(bt.b ? withB(t, bt.b, bt.on.get(bt.b.location_id)) : t, BOOK_SAY.tryAgain, "request_db_error");
   }
 }
 
@@ -1275,7 +1314,7 @@ async function requestToolInner(t: Turn, bt: BookTurn, tool: string, arg: string
   // Several businesses and none chosen: the existing question, with the message kept for after the pick.
   if (!b) return { send: () => withBusiness(t, "help", text, () => Promise.resolve("which_business")) };
   const pack = bt.on.get(b.location_id)!;
-  const tb = withB(t, b);
+  const tb = withB(t, b, pack);
   const db = t.d.book!.db;
   if (tool === "request_find") {
     const r = await findReply(db, b.location_id, b.user_id, arg, bookCtx(t, b, pack));
@@ -1285,20 +1324,31 @@ async function requestToolInner(t: Turn, bt: BookTurn, tool: string, arg: string
   let base = text;
   let revising: string | null = null;
   let before: unknown = null;
+  let oldText: string | null = null;
   if (bt.proposal) {
     const g = await db.intake(b.location_id, b.user_id, bt.proposal.intake_id).catch(() => null);
     if (g?.ok === true && g.state === "pending" && typeof g.raw_text === "string") {
       base = `${g.raw_text}\n${text}`;
+      oldText = g.raw_text;
       revising = bt.proposal.intake_id;
       before = g.field_evidence;
     }
   }
   // A message the router could not place ("thanks", "ok") revises the draft only when it adds something to it.
   if (onlyIfNew && !revising) return null;
-  const r = await readRequest(base, pack, { country: b.country, timeZone: b.time_zone ?? "UTC", now: new Date((t.d.now ?? Date.now)()) }, t.d.book!.ask);
+  const now = new Date((t.d.now ?? Date.now)());
+  // RB-F3: the business's own past services are read like the pack's (typos included).
+  const extraServices = await pastServices(db, b.location_id, b.user_id, pack);
+  const rctx = { country: b.country, timeZone: b.time_zone ?? "UTC", now, extraServices };
+  // RB-F3: a revision reads only the new words and keeps every field they do not give (reviseRequest); a proposal stored
+  // before RB-F3 is read with both messages together, as before.
+  const merged = revising && oldText !== null && before && typeof before === "object"
+    ? await reviseRequest(oldText, before as Record<string, unknown>, text, pack, rctx, t.d.book!.ask) : null;
+  if (merged && onlyIfNew && (merged.ok ? merged.addsNothing : true)) return said(tb, BOOK_SAY.stillWaiting, "request_still_waiting");
+  const r = merged ?? await readRequest(base, pack, rctx, t.d.book!.ask);
   if (!r.ok) return said(tb, r.reply.body, revising ? "request_revise_unread" : "request_unread");
   const evidence = toEvidence(r.ex);
-  if (onlyIfNew && JSON.stringify(evidence) === JSON.stringify(before)) return said(tb, BOOK_SAY.stillWaiting, "request_still_waiting");
+  if (onlyIfNew && !merged && JSON.stringify(evidence) === JSON.stringify(before)) return said(tb, BOOK_SAY.stillWaiting, "request_still_waiting");
   let intake: string | null = null;
   if (revising) {
     const v = await db.revise(b.location_id, b.user_id, `revise:${t.m.messageId}`, revising, r.ex.text, evidence);
@@ -1312,12 +1362,48 @@ async function requestToolInner(t: Turn, bt: BookTurn, tool: string, arg: string
     }
     intake = String(p.intake_id);
   }
-  const at = new Date((t.d.now ?? Date.now)()).toISOString();
+  const at = now.toISOString();
   await t.d.db.setConv(t.phone, { open_question: { type: "rb_proposal", location_id: b.location_id, intake_id: intake, at } satisfies OpenQuestion });
+  // RB-F3 (R-148 item 2): the same name, kind and service already open from the last 7 days: update it or add a new one.
+  if (r.ex.saveReady) {
+    const built = createInput(pack, evidence, intake, undefined, r.ex.text);
+    const dup = built.ok ? await findDuplicate(db, { location: b.location_id, actor: b.user_id }, built.input, now) : null;
+    if (dup) {
+      const d = duplicateReply(dup, intake, bookCtx(t, b, pack));
+      return said(tb, d.body, "request_duplicate", d.buttons);
+    }
+  }
   // RB-F: a job the owner's words say is already in is saved as in; the proposal says so before Save.
   const arrived = arrivedLine(pack, r.ex.text);
   const body = arrived ? r.ex.reply.body.replace(/\n(?=[^\n]*$)/, `\n${arrived}\n`) : r.ex.reply.body;
   return said(tb, body, revising ? "request_revised" : "request_proposed", proposalButtons(r.ex.reply, r.ex, intake));
+}
+
+/** RB-F3: "Update #N" under the duplicate question: the draft's service and time go onto request N, and the draft is dropped. */
+async function bookUpdate(tb: Turn, b: BusinessRole, pack: Pack, intakeId: string, number: number, g: Record<string, unknown>): Promise<string> {
+  const db = tb.d.book!.db;
+  if (g.state !== "pending") return answered(tb, g.state === "expired" ? BOOK_SAY.expired : SAY.alreadyHandled, `request_update_${g.state}`);
+  const built = createInput(pack, (g.field_evidence ?? {}) as Record<string, unknown>, intakeId, undefined, typeof g.raw_text === "string" ? g.raw_text : null);
+  if (!built.ok) return answered(tb, built.why === "needs_tap" ? BOOK_SAY.tapReading : `Still needed: ${built.missing.join(", ")}. Nothing is saved yet.`, `request_update_${built.why}`);
+  const f = fullOf(await db.get(b.location_id, b.user_id, String(number)));
+  if (!f) return answered(tb, refusalReply({ reason: "not_found" }).body, "request_update_refused:not_found");
+  const ctx = bookCtx(tb, b, pack);
+  const { changes, shown } = updateChanges(f.row, built.input);
+  const close = async () => {
+    await db.discard(b.location_id, b.user_id, `discard:${tb.m.messageId}`, intakeId).catch(() => null);
+    const q = tb.who.conversation?.open_question;
+    if (q?.type === "rb_proposal" && q.intake_id === intakeId) await tb.d.db.setConv(tb.phone, { open_question: null });
+  };
+  if (!shown.length) {
+    await close();
+    return answered(tb, `${pack.words.kinds[f.row.kind]?.singular ?? "Request"} ${f.row.number} already says that\nNothing was changed, and the draft was not saved.`, "request_update_same");
+  }
+  const r = await db.correct(b.location_id, b.user_id, `update:${tb.m.messageId}`, f.row.request_id, f.version, changes);
+  if (r.ok !== true) return answered(tb, refusalReply({ reason: String(r.reason ?? "unknown") }).body, `request_update_refused:${r.reason}`);
+  await close();
+  const after = fullOf(await db.get(b.location_id, b.user_id, String(number)).catch(() => ({}))) ?? f;
+  const flags = Array.isArray(r.flags) ? (r.flags as string[]) : [];
+  return answered(tb, correctedReplyOf(after.row, shown, ctx, flags), "request_updated", undoButton([String(r.activity_id)]));
 }
 
 /** Save, Change, or a reading under a proposal. The proposal is looked up only in the phone's own businesses. */
@@ -1332,8 +1418,9 @@ async function bookButton(t: Turn, cmd: Extract<Command, { k: "request" }>): Pro
   for (const b of order) {
     const g = await t.d.book.db.intake(b.location_id, b.user_id, cmd.intakeId).catch(() => null);
     if (g?.ok !== true) continue;
-    const tb = withB(t, b);
     const pack = on.get(b.location_id)!;
+    const tb = withB(t, b, pack);
+    if (cmd.action === "update") return await bookUpdate(tb, b, pack, cmd.intakeId, cmd.number ?? 0, g);
     if (cmd.action !== "change") return await bookSave(tb, b, pack, cmd.intakeId, cmd.pick, g);
     if (g.state !== "pending") return answered(tb, g.state === "expired" ? BOOK_SAY.expired : SAY.alreadyHandled, `request_change_${g.state}`);
     // Change: the proposal stays open for the next message, for its own business.
@@ -1407,7 +1494,7 @@ async function bookAnswer(t: Turn, yes: boolean, q: RbAsk | RbTime): Promise<str
     return null;
   }
   const active = pickBusiness(t.who);
-  const tb = withB(t, qb);
+  const tb = withB(t, qb, on.get(qb.location_id));
   // Another business is chosen now: the yes is held back, never counted there.
   if (active && active.location_id !== qb.location_id) return answered(tb, "A question about this business is waiting. Tap Yes or No on it.", "request_question_elsewhere");
   const me = { location: qb.location_id, actor: qb.user_id };
@@ -1438,7 +1525,7 @@ async function bookTap(t: Turn, cmd: Extract<Command, { k: "rbook" }>): Promise<
       const qb = list.find((x) => x.location_id === open.location_id);
       const on = qb ? await bookOn(t.d.book.db, [qb.location_id]) : new Map<string, Pack>();
       if (!qb || !on.size) return answered(t, SAY.alreadyHandled, "request_question_closed");
-      const tb = withB(t, qb);
+      const tb = withB(t, qb, on.get(qb.location_id));
       try {
         return await bookAct(tb, await timePicked(t.d.book.db, { location: qb.location_id, actor: qb.user_id }, open, cmd.pick ?? 0,
           bookCtx(t, qb, on.get(qb.location_id)!), t.m.messageId));
@@ -1450,7 +1537,7 @@ async function bookTap(t: Turn, cmd: Extract<Command, { k: "rbook" }>): Promise<
     const qb = list.find((x) => x.location_id === open.location_id);
     const on = qb ? await bookOn(t.d.book.db, [qb.location_id]) : new Map<string, Pack>();
     if (!qb || !on.size) return answered(t, SAY.alreadyHandled, "request_question_closed");
-    const tb = withB(t, qb);
+    const tb = withB(t, qb, on.get(qb.location_id));
     try {
       return await bookAct(tb, await askAnswer(t.d.book.db, { location: qb.location_id, actor: qb.user_id }, open, cmd.action === "ask_yes",
         bookCtx(t, qb, on.get(qb.location_id)!), t.m.messageId));
@@ -1464,7 +1551,7 @@ async function bookTap(t: Turn, cmd: Extract<Command, { k: "rbook" }>): Promise<
   const first = t.who.conversation?.active_location_id ?? null;
   const order = [...list].sort((x, y) => Number(y.location_id === first) - Number(x.location_id === first)).filter((x) => on.has(x.location_id));
   for (const b of order) {
-    const tb = withB(t, b);
+    const tb = withB(t, b, on.get(b.location_id));
     try {
       const act = await undoIds(t.d.book.db, { location: b.location_id, actor: b.user_id }, cmd.ids, bookCtx(t, b, on.get(b.location_id)!), t.m.messageId);
       if (act) return await bookAct(tb, act);
@@ -1487,6 +1574,8 @@ async function free(t: Turn, text: string, book?: BookTurn): Promise<string> {
   const role: RoleName = roleFor(who, dom, b);
   const stranger = role === "unknown" || role === "prospect";
   const tb0 = { ...t, business: b, head: head(who, dom, b) };
+  // RB-F3 (R-148 item 5): a general-assistant ask gets the fixed line, before any model is asked.
+  if (isOffTopic(text) && !book?.proposal) return answered(tb0, offTopic(t.lang), "off_topic");
   // An unknown phone's first words: the greeting of 24.8 (it may have come from the site without the code).
   if (!t.d.ai) return answered(tb0, stranger ? say(t.first ? "greeting" : "unknownHelp", t.lang) : say("unclear", t.lang), "unclear_no_ai");
 
@@ -1521,8 +1610,12 @@ async function free(t: Turn, text: string, book?: BookTurn): Promise<string> {
   // question for Nora, never the welcome again (QA 1: "what happens to my reviews if I cancel" got the welcome).
   if (stranger && t.first && !conv?.open_question) return answered(tb, say("greeting", lang), "greeting");
   if (stranger) return askNora(tb, text);
-  return answered(tb, r.question ?? say("unclear", lang), "unclear");
+  // RB-F3 (R-148 item 5): nothing Kabsi does fits, so the fixed line about what Kabsi does, never a question a model wrote.
+  return answered(tb, offTopic(lang), "off_topic");
 }
+
+/** RB-F3: the off-topic line; Spanish and Arabic keep their unclear line, which also says "help". */
+const offTopic = (lang: string) => (lang === "es" || lang === "ar" ? say("unclear", lang) : SAY.offTopic);
 
 /** Nora answers from the public facts. Without a model, or when it fails, the plain unclear line. */
 async function askNora(t: Turn, question: string): Promise<string> {

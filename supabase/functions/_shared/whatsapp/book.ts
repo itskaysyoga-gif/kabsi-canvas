@@ -11,7 +11,7 @@
 //     tap finds the proposal already used and makes no second request;
 //   - no time is invented: words with no exact time are kept as words, with no time set;
 //   - every reply is built by code from the record (replies/), and says nothing the record does not hold.
-import { type Ask, type Extraction, extract, type ExtractRefusal, nameCase, toEvidence } from "../request-book/extract.ts";
+import { type Ask, canMerge, type Extraction, extract, type ExtractRefusal, mergeRevision, nameCase, toEvidence } from "../request-book/extract.ts";
 import { getPack, type Pack } from "../request-book/packs/index.ts";
 import {
   askFirstReply, confirmationReply, convertedReply, correctedReply, COVERS_NOTE, finish, foundReply, openListReply, refusalReply, requestLine,
@@ -115,7 +115,7 @@ export function proposalButtons(reply: Reply, ex: Extraction, intakeId: string):
 export type Read = { ok: true; ex: Extraction } | { ok: false; reply: Reply };
 
 /** One message (or a proposal and the message that revises it) read into a proposal. A refusal or nothing read saves nothing. */
-export async function readRequest(text: string, pack: Pack, ctx: { country: string | null; timeZone: string; now: Date }, ask: Ask | null): Promise<Read> {
+export async function readRequest(text: string, pack: Pack, ctx: ReadCtx, ask: Ask | null): Promise<Read> {
   if (!ask) return { ok: false, reply: finish(BOOK_SAY.notRead) };
   const r: Extraction | ExtractRefusal = await extract(text.slice(0, MAX_RAW_TEXT), { pack, ...ctx }, ask);
   if ("ok" in r) return { ok: false, reply: finish(r.reason === "too_long" ? "That is too long to read in one message. Send the request on its own." : BOOK_SAY.notRead) };
@@ -123,7 +123,95 @@ export async function readRequest(text: string, pack: Pack, ctx: { country: stri
   return { ok: true, ex: r };
 }
 
+export type ReadCtx = { country: string | null; timeZone: string; now: Date; extraServices?: Pack["services"] };
+
+/**
+ * RB-F3: a second message that changes the proposal still waiting. Only the new words are read (the same one model call);
+ * the fields they give replace those fields and the rest stay as first read. Null when the stored proposal is from before
+ * RB-F3 (it lacks what was shown): the caller then reads both messages together, as before.
+ */
+export async function reviseRequest(oldText: string, before: Json, text: string, pack: Pack, ctx: ReadCtx, ask: Ask | null): Promise<(Read & { addsNothing?: boolean }) | null> {
+  if (!canMerge(pack, before)) return null;
+  if (!ask) return { ok: false, reply: finish(BOOK_SAY.notRead) };
+  const room = MAX_RAW_TEXT - oldText.length - 1;
+  if (room < 1) return { ok: false, reply: finish("That is too long to read in one message. Send the request on its own.") };
+  const r: Extraction | ExtractRefusal = await extract(text.slice(0, room), { pack, ...ctx }, ask);
+  if ("ok" in r) return { ok: false, reply: finish(r.reason === "too_long" ? "That is too long to read in one message. Send the request on its own." : BOOK_SAY.notRead) };
+  if (r.issues.includes("no_model_answer")) return { ok: false, reply: r.reply };
+  const m = mergeRevision(oldText, before, r, { pack, timeZone: ctx.timeZone, now: ctx.now });
+  const { addsNothing, ...ex } = m;
+  return { ok: true, ex, addsNothing };
+}
+
+/**
+ * RB-F3: the business's own services, from what its open requests were saved as, when the pack does not name them
+ * ("keratin smoothing"). Matched like the pack's spellings, typos included, and shown in the words the business uses.
+ */
+export async function pastServices(db: BookDb, location: string, actor: string, pack: Pack): Promise<Pack["services"]> {
+  const r = await db.listOpen(location, actor, {}).catch(() => null);
+  const rows = r && r.ok === true && Array.isArray(r.rows) ? (r.rows as RequestRow[]) : [];
+  const known = new Set(pack.services.flatMap((x) => [x.label.toLowerCase(), ...x.spellings]));
+  const out: Pack["services"] = [];
+  for (const row of rows) {
+    const text = words(String(row.summary ?? "")).toLowerCase();
+    const plain = text.replace(/[^a-z ]/g, "").trim();
+    if (!plain || plain !== text || plain.length < 4 || plain.split(" ").length > 3 || known.has(plain)) continue;
+    if (pack.services.some((x) => plain.includes(x.label.toLowerCase()))) continue;
+    known.add(plain);
+    out.push({ key: `past:${plain.replace(/ /g, "_")}`, label: plain[0]!.toUpperCase() + plain.slice(1), spellings: [plain] });
+  }
+  return out;
+}
+
+// ─── RB-F3 (R-148 item 2): the same customer asked again. An open request of the same kind for the same name and the same
+// service, made in the last 7 days, is shown before a second one is saved, and the owner picks: update it or add a new one.
+
+export const DUPLICATE_DAYS = 7;
+
+/** The open request this new one looks like, or null. Names match as whole names, letter case aside. */
+export async function findDuplicate(db: BookDb, me: { location: string; actor: string }, input: Json, now: Date): Promise<RequestRow | null> {
+  const name = typeof input.customer_name === "string" ? input.customer_name : null;
+  const summary = typeof input.summary === "string" ? input.summary : null;
+  if (!name || !summary) return null;
+  const r = await db.find(me.location, me.actor, { name }).catch(() => null);
+  const rows = r && r.ok === true && Array.isArray(r.rows) ? (r.rows as RequestRow[]) : [];
+  const fold = (x: string | null) => words(x ?? "").toLowerCase();
+  const since = now.getTime() - DUPLICATE_DAYS * 86_400_000;
+  return rows.find((x) => x.status !== "closed" && x.kind === input.kind && fold(x.customer_name) === fold(name) && fold(x.summary) === fold(summary)
+    && Date.parse(x.created_at) >= since) ?? null;
+}
+
+/** "Sarah already has 📅 #1, Highlights, Thu 12 Nov afternoon. Update #1 or add a new one?" with its two buttons. */
+export function duplicateReply(row: RequestRow, intakeId: string, ctx: Ctx): { body: string; buttons: Button[] } {
+  const when = row.starts_at ? formatWhenShort(row.starts_at, ctx) : row.requested_window_text ? clip(row.requested_window_text, 60) : null;
+  const what = [`#${row.number}`, clip(row.summary, 40), when].filter(Boolean).join(", ");
+  const body = `*${whoOf(row)} already has ${MARK[row.kind]} ${what}*\nUpdate #${row.number} or add a new one?`;
+  return { body, buttons: [{ id: `rdu:${intakeId}:${row.number}`, title: `Update #${row.number}`.slice(0, 20) }, { id: `rs:${intakeId}`, title: "Add new" }] };
+}
+
+const formatWhenShort = (iso: string, ctx: Ctx) => whenText({ starts_at: iso, requested_window_text: null }, ctx) ?? "";
+
+/** The changes the draft makes to the request it duplicates: its service and its time, where they differ. */
+export function updateChanges(row: RequestRow, input: Json): { changes: Json; shown: { field: string; before: unknown; after: unknown }[] } {
+  const changes: Json = {};
+  const shown: { field: string; before: unknown; after: unknown }[] = [];
+  const put = (field: keyof RequestRow & string, after: unknown) => {
+    const before = row[field];
+    if (after === undefined || after === null || after === before) return;
+    if (field === "starts_at" && typeof before === "string" && typeof after === "string" && Date.parse(before) === Date.parse(after)) return;
+    changes[field] = after;
+    shown.push({ field, before, after });
+  };
+  put("summary", input.summary);
+  put("starts_at", input.starts_at);
+  if (!input.starts_at) put("requested_window_text", input.requested_window_text);
+  return { changes, shown };
+}
+
 export { refusalReply, toEvidence };
+/** RB-F3: the reply after "Update #N" (the correction reply of RB-F). */
+export const correctedReplyOf = (row: RequestRow, shown: { field: string; before: unknown; after: unknown }[], ctx: Ctx, flags: string[]): string =>
+  correctedReply(row, shown, ctx, flags).body;
 export type { Pack };
 
 type Evidence = {
@@ -135,9 +223,11 @@ const words = (s: string) => s.replace(/\s+/g, " ").trim();
 
 /** What a saved request is for: the pack's service labels when it knows them, else the owner's words. */
 function summaryOf(pack: Pack, e: Evidence): string | null {
-  const n = e.normalized as { text?: string; services?: string[] } | null;
+  const n = e.normalized as { text?: string; services?: string[]; labels?: string[] } | null;
   if (!n) return null;
-  const labels = [...new Set((n.services ?? []).map((k) => pack.services.find((s) => s.key === k)?.label).filter((x): x is string => !!x))];
+  // RB-F3: the labels read with the words (the pack's, or the business's own past service) come first.
+  const stored = Array.isArray(n.labels) ? n.labels.filter((x): x is string => typeof x === "string" && x.trim() !== "") : [];
+  const labels = stored.length ? [...new Set(stored)] : [...new Set((n.services ?? []).map((k) => pack.services.find((s) => s.key === k)?.label).filter((x): x is string => !!x))];
   const text = labels.length ? labels.join(" and ") : words(n.text ?? "");
   return text ? text.slice(0, 1000) : null;
 }
@@ -609,7 +699,8 @@ export async function undoIds(db: BookDb, me: Me, ids: string[], ctx: Ctx, key: 
     return row.outcome === "voided" ? `Undone. ${lbl(ctx.pack, row)} was removed.` : undoneReply(row as RequestRow, ctx).body;
   });
   if (stop) lines.push(`The rest was not undone: ${refused(stop)}`);
-  return { body: lines.join("\n"), result: done.at(-1)!.replay ? "request_undone_replay" : stop ? "request_undone_partly" : "request_undone", question: null };
+  // RB-F3: two changes undone together (a time and its confirmation) read the same; the line is shown once.
+  return { body: [...new Set(lines)].join("\n"), result: done.at(-1)!.replay ? "request_undone_replay" : stop ? "request_undone_partly" : "request_undone", question: null };
 }
 
 // What's open, grouped for this business only. 15 rows, then how many more, and the note that it covers only Kabsi.
@@ -687,4 +778,54 @@ export function openGrouped(rows: RequestRow[], more: number, ctx: Ctx): Reply {
   if (more) lines.push("", `and ${more} more`);
   lines.push("", COVERS_NOTE);
   return finish(lines.join("\n"));
+}
+
+// ─── RB-F3 (R-148 item 3): how request book, switch and help replies look. Free-form replies only; approved templates do
+// not change. A bold first line with one marker, short lines after it, the business named in the first line only when the
+// phone has more than one, and no role in brackets.
+
+export const MARK = {
+  appointment: "\u{1F4C5}", enquiry: "\u{1F4AC}", job: "\u{1F527}", done: "✅", confirm: "⏳", undone: "↩️", ask: "❓", list: "\u{1F4CB}",
+} as const;
+
+/** The marker a reply gets, from what it did (its result code) and, for a request of one kind, that kind. */
+export function markOf(result: string, kind: Kind | null): string {
+  const r = result.split(":")[0]!;
+  const byKind = kind ? MARK[kind] : MARK.list;
+  if (/undone|undo_refused|request_undo/.test(r)) return MARK.undone;
+  if (/^request_(confirm|convert)_(guess|choose)$/.test(r)) return MARK.confirm;
+  if (/_(which|ask|choose|tap)$|which_|_tap_|still_waiting|request_change$|request_yes_tap_save|question_elsewhere|forwarded_yes|reset_ask|pick_closed/.test(r)) return MARK.ask;
+  if (/^request_(open|unconfirmed|asked|find)$|which_business|^help$|^request_find/.test(r)) return MARK.list;
+  if (/^request_(saved|status|status_many|status_acknowledged|confirmed|time_set|corrected|converted|dropped|ask_no|time_no|updated)$|^request_saved_replay$|role_set|business_set|^switched$|reset_done|^started$/.test(r)) return MARK.done;
+  return byKind;
+}
+
+/** The first line bold with its marker; a first line of several sentences keeps only the first, the rest goes below it. */
+export function styleReply(body: string, mark: string, business: string | null): string {
+  const text = body.trim();
+  if (text.startsWith("*")) return business ? withBusiness(text, business) : text;
+  const nl = text.indexOf("\n");
+  const firstLine = nl < 0 ? text : text.slice(0, nl);
+  const rest = nl < 0 ? "" : text.slice(nl + 1).replace(/^\n+/, "");
+  const cut = /^(.+?[.?]|(?:\S+\s+){2,}\S+:)\s+(\S.*)$/s.exec(firstLine);
+  let first = cut ? cut[1]! : firstLine;
+  const more = cut ? cut[2]! : "";
+  first = first.replace(/[.:]$/, "");
+  const head = `*${mark} ${first}*`;
+  const out = [business && !text.includes(business) ? `${head} · ${business}` : head, more, rest].filter(Boolean).join("\n");
+  return out;
+}
+
+const withBusiness = (text: string, business: string) => {
+  const nl = text.indexOf("\n");
+  const first = nl < 0 ? text : text.slice(0, nl);
+  if (first.includes(business)) return text;
+  return `${first} · ${business}${nl < 0 ? "" : text.slice(nl)}`;
+};
+
+/** The kind a reply is about: the kind its first line names, else the pack's usual kind. */
+export function kindIn(body: string, pack: Pack | null): Kind | null {
+  if (!pack) return null;
+  const first = body.split("\n")[0]!.toLowerCase();
+  return pack.kinds.find((k) => first.includes(kindWord(pack, k).toLowerCase())) ?? pack.defaultKind;
 }

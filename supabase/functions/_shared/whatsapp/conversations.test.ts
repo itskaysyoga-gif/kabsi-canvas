@@ -197,16 +197,16 @@ const CASES: Case[] = [
   { name: "owner: a forwarded number does not pick from Which one", tags: ["owner", "25.5", "F-1"],
     setup: (w) => { for (let i = 0; i < 4; i++) w.alert(PHONES.owner, BIZ.harbour, i % 2 ? "post_alert" : "review_alert"); }, steps: [
       { from: PHONES.owner, text: "yes", expect: "which_one" },
-      { from: PHONES.owner, text: "1", forwarded: true, expect: /^(unclear|nora|unclear_no_ai)/ }],
+      { from: PHONES.owner, text: "1", forwarded: true, expect: /^(unclear|nora|unclear_no_ai|off_topic)/ }],
     check: (w) => { assert.equal(w.calls.filter((c) => c.startsWith("approve")).length, 0); assert.equal((w.conversation(PHONES.owner).open_question as { type: string }).type, "which"); } },
   { name: "owner: a forwarded Yes or No does not answer the monthly question", tags: ["owner", "F-1"],
     setup: (w) => (w.conversation(PHONES.owner).open_question = { type: "update", location_id: BIZ.harbour, at: new Date(w.now).toISOString() }), steps: [
-      { from: PHONES.owner, text: "Yes", forwarded: true, expect: /^(unclear|nora|unclear_no_ai)/ },
-      { from: PHONES.owner, text: "No", forwarded: true, expect: /^(unclear|nora|unclear_no_ai)/ }],
+      { from: PHONES.owner, text: "Yes", forwarded: true, expect: /^(unclear|nora|unclear_no_ai|off_topic)/ },
+      { from: PHONES.owner, text: "No", forwarded: true, expect: /^(unclear|nora|unclear_no_ai|off_topic)/ }],
     check: (w) => { assert.equal(w.calls.filter((c) => c.startsWith("monthly_answered") || c.startsWith("post:")).length, 0); assert.equal((w.conversation(PHONES.owner).open_question as { type: string }).type, "update"); } },
   { name: "owner: a forwarded Yes does not become the search for the map", tags: ["owner", "F-1", "map"],
     setup: (w) => (w.conversation(PHONES.owner).open_question = { type: "keyword", location_id: BIZ.harbour, suggested: null }), steps: [
-      { from: PHONES.owner, text: "Yes", forwarded: true, expect: /^(unclear|nora|unclear_no_ai)/ }],
+      { from: PHONES.owner, text: "Yes", forwarded: true, expect: /^(unclear|nora|unclear_no_ai|off_topic)/ }],
     check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("keyword:")).length, 0) },
   { name: "owner: a forwarded STOP still stops", tags: ["owner", "9.5", "F-1"], steps: [
     { from: PHONES.owner, text: "STOP", forwarded: true, expect: "stopped" }], check: (w) => assert.equal(w.users[0].optin, "stopped") },
@@ -218,7 +218,7 @@ const CASES: Case[] = [
     { from: PHONES.newStaff, text: "status", expect: /^(greeting|unclear|nora|help)/ }],
     check: (w) => { assert.equal(w.staffAdmin.has(PHONES.newStaff), false, "not staff_admin"); assert.doesNotMatch(w.sent.map((s) => s.body).join(" "), /staff phone|Jobs failed/); } },
   { name: "owner: a forwarded Yes with nothing waiting takes the free-text path", tags: ["owner", "F-1"], steps: [
-    { from: PHONES.owner, text: "Yes", forwarded: true, expect: /^(unclear|nora|unclear_no_ai)/ }] },
+    { from: PHONES.owner, text: "Yes", forwarded: true, expect: /^(unclear|nora|unclear_no_ai|off_topic)/ }] },
   { name: "two roles: a forwarded Yes held for the role question is still not a yes after the pick", tags: ["two_roles", "F-1"], steps: [
     { from: PHONES.both, text: "Yes", forwarded: true, expect: "which_role" },
     // An approval arrives while the role question is open; the pick reads the held words again, still as forwarded.
@@ -311,14 +311,15 @@ const CASES: Case[] = [
     { from: PHONES.owner, text: "closed tomorrow", expect: "hours_shown" },
     { from: PHONES.owner, text: "post: Pumpkin spice lattes are back from Monday", expect: "post_shown" },
     { from: PHONES.owner, text: "yes", expect: "which_one", buttons: ["Hours: Harbour Lane", "Post: Harbour Lane C"] }] },
-  { name: "owner: an unclear message gets one short question", tags: ["owner"], steps: [{ from: PHONES.owner, text: "the thing from before", expect: "unclear", reply: /review link or your stats/, ai: 1 }] },
+  // RB-F3 (R-148 item 5): nothing Kabsi does fits, so one fixed line about what Kabsi does and "help", never a question a model wrote.
+  { name: "owner: an unclear message gets the fixed line about what Kabsi does", tags: ["owner"], steps: [{ from: PHONES.owner, text: "the thing from before", expect: "off_topic", reply: /^Harbour Lane Coffee \(owner\)\n\nKabsi looks after your business on Google: review replies, your listing, photos and posts\. Send "help"/, ai: 1 }] },
   { name: "owner: a slow answer sends On it first", tags: ["owner", "speed"], setup: (w) => { w.aiSlow = true; w.onItFast = true; w.aiMap["can you put up the lunch special"] = tool("post", { text: "lunch special" }); },
     steps: [{ from: PHONES.owner, text: "can you put up the lunch special", expect: "post_ask", ai: 1 }],
     check: (w) => { const r = w.repliesTo(PHONES.owner).map((s) => s.body); assert.match(r[0], /On it\.$/); assert.match(r[1], /starting with "post:"/); } },
   { name: "owner: a quick answer sends no On it", tags: ["owner", "speed"], setup: (w) => (w.aiMap["can you put up the lunch special"] = tool("post", { text: "x" })),
     steps: [{ from: PHONES.owner, text: "can you put up the lunch special", expect: "post_ask", ai: 1 }],
     check: (w) => assert.equal(w.repliesTo(PHONES.owner).length, 1) },
-  { name: "owner: help, headed", tags: ["owner"], steps: [{ from: PHONES.owner, text: "help", expect: "help", head: /^Harbour Lane Coffee \(owner\)/, reply: /review link/ }] },
+  { name: "owner: help, headed", tags: ["owner"], steps: [{ from: PHONES.owner, text: "help", expect: "help", head: /^\*📋 You can send\*\n/, reply: /review link/ }] },
   { name: "owner: STOP stops alerts too", tags: ["owner", "9.5"], steps: [
     { from: PHONES.owner, text: "STOP", expect: "stopped" }, { from: PHONES.owner, text: "stats", expect: "stopped_ignored", none: true }],
     check: (w) => assert.equal(w.users[0].optin, "stopped") },
@@ -354,7 +355,7 @@ const CASES: Case[] = [
   { name: "owner: Spanish talk to a person", lang: "es", tags: ["owner"], steps: [{ from: PHONES.owner, text: "hablar con una persona", expect: "handoff", reply: /Una persona de Kabsi/ }] },
   { name: "owner: Arabic review link", lang: "ar", tags: ["owner"], steps: [{ from: PHONES.owner, text: "رابط التقييم", expect: "review_link" }] },
   { name: "owner: a partner tool is refused", tags: ["owner", "29.7"], steps: [{ from: PHONES.owner, text: "kit", expect: "partner_refused", reply: /Partner tools are for Kabsi Partners/ }] },
-  { name: "owner: a staff command is never revealed", tags: ["owner", "29.7", "privacy"], steps: [{ from: PHONES.owner, text: "today", expect: /^unclear/ }] },
+  { name: "owner: a staff command is never revealed", tags: ["owner", "29.7", "privacy"], steps: [{ from: PHONES.owner, text: "today", expect: /^(unclear|off_topic)/ }] },
 
   // ─── Manager and staff (9.2 roles).
   { name: "manager: stats, headed as manager", tags: ["manager"], steps: [{ from: PHONES.manager, text: "stats", expect: "stats", head: /^Harbour Lane Coffee \(manager\)/ }] },
@@ -443,7 +444,7 @@ const CASES: Case[] = [
   // ─── Two roles on one phone (29.7).
   { name: "two roles: help asks business or partner tools; the tap answers", tags: ["two_roles", "29.7"], steps: [
     { from: PHONES.both, text: "help", expect: "which_role", reply: /Your business or your partner tools\?/, buttons: ["My business", "Partner tools"] },
-    { from: PHONES.both, button: "r:partner", expect: "help", head: /^Your partner tools/ }] },
+    { from: PHONES.both, button: "r:partner", expect: "help", head: /^\*📋 Your partner tools\*\n/ }] },
   { name: "two roles: switch asks again", tags: ["two_roles"], setup: (w) => (w.conversation(PHONES.both).active_role = "partner"), steps: [{ from: PHONES.both, text: "switch", expect: "which_role" }] },
   { name: "two roles: a business tool needs no question and is headed", tags: ["two_roles"], steps: [{ from: PHONES.both, text: "stats", expect: "stats", head: /^Al Noor Salon \(owner\)/ }] },
   { name: "two roles: a partner tool needs no question and is headed", tags: ["two_roles"], steps: [{ from: PHONES.both, text: "kit", expect: "partner_stub", head: /^Your partner tools/ }] },
@@ -461,7 +462,7 @@ const CASES: Case[] = [
     { from: PHONES.rashid, button: "s:waiting", expect: "staff_waiting", head: /^Kabsi staff/ }, { from: PHONES.rashid, button: "s:today", expect: "staff_today" },
     { from: PHONES.rashid, button: "s:status", expect: "staff_status" }] },
   { name: "the digest buttons reveal nothing to anyone else", tags: ["privacy", "9.9"], steps: [
-    { from: PHONES.owner, button: "s:status", expect: /^(unclear|nora)/, buttons: [] }, { from: PHONES.unknown, button: "s:today", expect: /^(greeting|unclear|nora|help)/ }],
+    { from: PHONES.owner, button: "s:status", expect: /^(unclear|nora|off_topic)/, buttons: [] }, { from: PHONES.unknown, button: "s:today", expect: /^(greeting|unclear|nora|help)/ }],
     check: (w) => assert.doesNotMatch(w.sent.map((m) => m.body).join(" "), /Jobs failed|Last 24 hours/) },
   { name: "staff_admin: pause a business by name", tags: ["staff_admin", "9.9"], steps: [{ from: PHONES.rashid, text: "pause Harbour", expect: "staff_pause", reply: /Paused: Kabsi sends Harbour Lane Coffee/ }],
     check: (w) => assert.ok(w.calls.includes(`pause:${BIZ.harbour}`)) },
@@ -473,7 +474,7 @@ const CASES: Case[] = [
   { name: "partner only: my link is a partner tool (stub until PA2)", tags: ["partner"], steps: [{ from: PHONES.partner, text: "my link", expect: "partner_stub", head: /^Your partner tools/ }] },
   { name: "partner only: an owner's button is not theirs", tags: ["partner", "privacy"], steps: [{ from: PHONES.partner, button: (w) => `a:${w.alert(PHONES.owner, BIZ.harbour)}`, expect: "not_yours" }] },
   { name: "partner only: a photo is not a partner tool", tags: ["partner"], steps: [{ from: PHONES.partner, media: img("m5"), expect: "needs_account" }] },
-  { name: "partner only: staff commands are never revealed", tags: ["partner", "privacy"], steps: [{ from: PHONES.partner, text: "status", expect: /^unclear/ }] },
+  { name: "partner only: staff commands are never revealed", tags: ["partner", "privacy"], steps: [{ from: PHONES.partner, text: "status", expect: /^(unclear|off_topic)/ }] },
 ];
 
 // ─── The sender (9.4, 9.5, 18.2).

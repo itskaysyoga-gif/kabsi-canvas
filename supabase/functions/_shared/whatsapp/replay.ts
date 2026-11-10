@@ -182,7 +182,7 @@ export const SCENARIOS: Record<string, Scenario> = {
   two_roles: {
     name: "two_roles", about: "A phone that is an owner and a partner is asked once which one a message is for (29.7, 13b step 3)", phones: [PHONES.two], ai: false, steps: [
       { note: "help asks which role", phone: PHONES.two, text: "help", expect: { result: "which_role", reply: /Your business or your partner tools\?/, buttons: ["My business", "Partner tools"], conv: { open_question: "role" } } },
-      { note: "tap My business: the question that waited is answered, headed", phone: PHONES.two, tap: { title: "My business" }, expect: { result: "help", head: `${JU} (owner)`, reply: /You can send:/, conv: { active_role: "business", open_question: null } } },
+      { note: "tap My business: the question that waited is answered, headed", phone: PHONES.two, tap: { title: "My business" }, expect: { result: "help", reply: /^\*\u{1F4CB} You can send\*\n/u, conv: { active_role: "business", open_question: null } } },
       { note: "stats is headed with the business and the role", phone: PHONES.two, text: "stats", expect: { result: "stats", head: `${JU} (owner)`, reply: /Juniper Hair Studio, the last 7 days/, never: nothing("Harbour Lane") } },
       { note: "a partner tool is not an owner tool", phone: PHONES.two, text: "payout", expect: { result: /^(partner_stub|partner_refused|free|unclear)/, never: nothing("Harbour Lane") } },
     ],
@@ -198,7 +198,7 @@ export const SCENARIOS: Record<string, Scenario> = {
       { note: "manager: stats", phone: PHONES.manager, text: "stats", expect: { result: "stats", head: `${HL} (manager)` } },
       { note: "manager: billing is owner only", phone: PHONES.manager, text: "upgrade", expect: { result: "billing_owner_only", reply: /Only the owner can change the plan and billing/ } },
       { note: "staff: stats is not for staff", phone: PHONES.staff, text: "stats", expect: { result: "not_for_staff", reply: /As staff you can send photos and news here/ } },
-      { note: "staff: help", phone: PHONES.staff, text: "help", expect: { result: "help", head: `${HL} (staff)`, reply: /send photos here for the owner to approve/ } },
+      { note: "staff: help", phone: PHONES.staff, text: "help", expect: { result: "help", reply: /^\*\u{1F4CB} You can send photos here for the owner to approve/u } },
     ],
   },
   unknown_phone: {

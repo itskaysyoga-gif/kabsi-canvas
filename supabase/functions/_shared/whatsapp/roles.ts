@@ -50,7 +50,9 @@ export type OpenQuestion =
   // The nonce is in the question's buttons, so an older button for the same request never answers a newer question.
   | { type: "rb_ask"; location_id: string; request_id: string; version: number; to: string; outcome: string | null; at: string; nonce: string }
   | { type: "rb_time"; location_id: string; request_id: string; version: number; action: "confirm" | "convert"; readings: string[]; services: string[];
-      at: string; nonce: string };
+      at: string; nonce: string }
+  // RB-F3: the confirm question of the staff-only "reset test" (its nonce is in the Confirm button; open 10 minutes).
+  | { type: "reset_test"; at: string; nonce: string };
 
 export type Who = { phone: string; roles: Role[]; conversation: Conversation | null };
 
@@ -68,7 +70,7 @@ export const TOOLS = {
     "hours", "post", "voice", "ask_customer", "person"],
   staff: ["help", "question", "switch", "photo", "voice", "ask_customer", "person"],
   partner: ["help", "question", "switch", "partner_tool", "person"],
-  staff_admin: ["help", "switch", "staff_status", "staff_waiting", "staff_today", "staff_pause", "staff_partners", "staff_payouts", "person"],
+  staff_admin: ["help", "switch", "staff_status", "staff_waiting", "staff_today", "staff_pause", "staff_partners", "staff_payouts", "staff_reset_test", "person"],
 } as const;
 export type RoleName = keyof typeof TOOLS;
 export type Tool = (typeof TOOLS)[RoleName][number];

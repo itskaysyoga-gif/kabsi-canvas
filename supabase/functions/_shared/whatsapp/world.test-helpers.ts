@@ -41,7 +41,7 @@ export const PHONES = {
   newStaff: "+12125550147",
 } as const;
 
-type Biz = { id: string; name: string; tz: string; country: string; pro: boolean; members: Record<string, "owner" | "manager" | "staff"> };
+type Biz = { id: string; name: string; tz: string; country: string; pro: boolean; members: Record<string, "owner" | "manager" | "staff">; demo?: boolean };
 type User = { id: string; phone: string | null; optin: "active" | "stopped" | "none" };
 // Fix 2: a post's Approve is bound to what was shown: its text, its photo and that photo's file (private.whatsapp_item).
 type Seen = { text: string; photo: string; file: string };
@@ -461,6 +461,21 @@ export class World {
         if (m.length !== 1) return { ok: false, matches: m.map((b) => b.name) };
         w.calls.push(`${pause ? "pause" : "resume"}:${m[0].id}`);
         return { ok: true, business: m[0].name };
+      },
+      // RB-F3: request_reset_test's rules: a staff phone only; open requests this phone's own users made at demo businesses.
+      async resetTest(phone, confirm) {
+        w.calls.push(`reset_test:${confirm}`);
+        if (!w.staffAdmin.has(phone)) return { ok: false, reason: "forbidden" };
+        const mine = new Set(w.users.filter((u) => u.phone === phone).map((u) => u.id));
+        const hits = w.requests.filter((x) => x.status !== "closed" && mine.has(x.by) && w.biz.find((b) => b.id === x.location)?.demo === true
+          && w.biz.find((b) => b.id === x.location)?.members[x.by] !== undefined);
+        if (!confirm) return { ok: true, open: hits.length, businesses: new Set(hits.map((x) => x.location)).size };
+        for (const x of hits) {
+          x.status = "closed";
+          x.outcome = "voided";
+          x.version = (x.version ?? 1) + 1;
+        }
+        return { ok: true, voided: hits.length };
       },
       async handoff(phone, summary) {
         w.handoffs.push(`${phone}:${summary}`);

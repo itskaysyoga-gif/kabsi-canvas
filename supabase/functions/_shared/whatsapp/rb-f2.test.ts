@@ -13,7 +13,8 @@ const ME = PHONES.rashid;
 const tool = (t: string) => JSON.stringify({ tool: t, args: {}, lang: "en" });
 const quotes = (fields: Record<string, string | null>) => JSON.stringify({ fields, said: { agreed: null, already_arranged: null } });
 const BOOK = "Book sarah for highlights thursday afternoon";
-const TYPO = "Book sarah for highlights thursday agternoon";
+// RB-F3: "agternoon" is now read as afternoon (one letter off); a word too far from any time word is still not read.
+const TYPO = "Book sarah for highlights thursday aftrnn";
 
 /** Rashid's phone as it was on 10 Nov: staff tools, Yawmiyati, and the three test businesses with the request book on. */
 function phoneWorld(): World {
@@ -30,7 +31,7 @@ function phoneWorld(): World {
   w.aiMap[BOOK] = tool("request_new");
   w.extractMap[BOOK] = quotes({ customer_name: "sarah", phone: null, service: "highlights", when: "thursday afternoon", stylist: null });
   w.aiMap[TYPO] = tool("request_new");
-  w.extractMap[TYPO] = quotes({ customer_name: "sarah", phone: null, service: "highlights", when: "thursday agternoon", stylist: null });
+  w.extractMap[TYPO] = quotes({ customer_name: "sarah", phone: null, service: "highlights", when: "thursday aftrnn", stylist: null });
   return w;
 }
 
@@ -52,12 +53,12 @@ async function toSalon(w: World) {
 Deno.test("a: switch, then My business, shows the numbered list of the four businesses; the number picks one", async () => {
   const w = phoneWorld();
   assert.equal(await send(w, { text: "switch" }), "which_role");
-  assert.equal(last(w).body, "Your business or Kabsi staff tools?");
+  assert.equal(last(w).body, "*❓ Your business or Kabsi staff tools?*");
   assert.deepEqual(last(w).buttons, ["My business", "Staff tools"]);
   assert.equal(await send(w, { button: "r:business" }), "which_business");
-  assert.equal(last(w).body, "Which business? Reply with the number.\n\n1. Kabsi Test Garage\n2. Kabsi Test Gym\n3. Kabsi Test Salon\n4. Yawmiyati");
+  assert.equal(last(w).body, "*❓ Which business?*\nReply with the number.\n1. Kabsi Test Garage\n2. Kabsi Test Gym\n3. Kabsi Test Salon\n4. Yawmiyati");
   assert.equal(await send(w, { text: "3" }), "business_set");
-  assert.match(last(w).body, /Done\. You are now working on Kabsi Test Salon\./);
+  assert.match(last(w).body, /^\*✅ Done\*\nYou are now working on Kabsi Test Salon\./);
   assert.equal(w.conversation(ME).active_location_id, SALON);
   // The second switch, after a business is active, lists them again rather than saying "your business".
   assert.equal(await send(w, { text: "switch" }), "which_role");
@@ -73,7 +74,7 @@ Deno.test("a: a phone with staff tools and one business: My business after switc
   const w = new World();
   assert.equal(await send(w, { text: "switch" }), "which_role");
   assert.equal(await send(w, { button: "r:business" }), "role_set");
-  assert.match(last(w).body, /Done\. You are now working on your business\./);
+  assert.match(last(w).body, /^\*✅ Done\*\nYou are now working on your business\./);
 });
 
 // ─── b. A business-or-staff question, or "Which business?", never captures a later message.
@@ -215,18 +216,18 @@ Deno.test("e: sarah is shown and saved as Sarah; thursday afternoon as Thursday 
   for (const s of w.repliesTo(ME)) assert.doesNotMatch(s.body, HOUSE);
 });
 
-Deno.test("e: thursday agternoon is not read: the proposal asks which day and time and never shows it as understood", async () => {
+Deno.test("e: thursday aftrnn is not read: the proposal asks which day and time and never shows it as understood", async () => {
   const w = phoneWorld();
   await toSalon(w);
   assert.equal(await send(w, { text: TYPO }), "request_proposed");
   const p = last(w).body;
-  assert.match(p, /When: not clear, you wrote "thursday agternoon"\n/);
+  assert.match(p, /When: not clear, you wrote "thursday aftrnn"\n/);
   assert.match(p, /Which day and time did you mean\? Send it again, for example Thursday afternoon\./);
-  assert.doesNotMatch(p, /agternoon, no time set/);
+  assert.doesNotMatch(p, /aftrnn, no time set/);
   // Saved anyway: the words are kept marked as written, never as a time that was read.
   assert.equal(await send(w, { text: "Save" }), "request_saved");
-  assert.equal(w.requests[0].requested_window_text, "\"thursday agternoon\" (as written)");
-  assert.match(last(w).body, /"thursday agternoon" \(as written\), no time set/);
+  assert.equal(w.requests[0].requested_window_text, "\"thursday aftrnn\" (as written)");
+  assert.match(last(w).body, /"thursday aftrnn" \(as written\), no time set/);
 });
 
 Deno.test("e: nameCase capitalises lower-case words only", () => {
@@ -276,7 +277,7 @@ Deno.test("review: a pick more than 10 minutes late says the question closed, ne
   assert.equal(await send(w, { text: BOOK }), "which_business");
   w.now += 11 * 60_000;
   assert.equal(await send(w, { text: "3" }), "pick_closed");
-  assert.match(last(w).body, /more than 10 minutes ago, so I did not use it\. Please send your message again\./);
+  assert.match(last(w).body, /more than 10 minutes ago, so I did not use it\*\nPlease send your message again\./);
   assert.equal(q(w), null);
   // A late tap on a role question asked by switch says the same.
   assert.equal(await send(w, { text: "switch" }), "which_role");
