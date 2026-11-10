@@ -52,6 +52,6 @@ export const FOUNDING_HERO = {
 
 /** Partners' hero (approved). */
 export const PARTNERS_HERO = {
-  title: "Earn 25% of every payment.",
-  line: "Recommend Kabsi to owners you know. You earn while the referred subscription stays paid. Kabsi Partners opens when card payments open.",
+  title: "The card gets the reviews. Kabsi answers them.",
+  line: "Your customers already care about Google. With your partner link, every card you sell comes with a 30 day Kabsi trial.",
 } as const;

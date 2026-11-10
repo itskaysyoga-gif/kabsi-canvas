@@ -58,7 +58,7 @@ describe("Founding 25 and Partners on Design 8", () => {
   });
   it("carries FAQPage data on /founding and /partners", () => {
     expect(FOUNDING_FAQ.length).toBe(4);
-    expect(PARTNER_FAQ.length).toBe(4);
+    expect(PARTNER_FAQ.length).toBe(6); // Partners 1 (R-148) added two questions
     expect(read("src/routes/founding.tsx")).toContain("faqJsonLd(FOUNDING_FAQ)");
     expect(read("src/routes/partners.tsx")).toContain("faqJsonLd(PARTNER_FAQ)");
   });
