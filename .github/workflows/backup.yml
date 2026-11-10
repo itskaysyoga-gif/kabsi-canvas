@@ -2,14 +2,21 @@ name: Backup
 
 # Ops 1 part B (R-66, master plan 19.1). Every Sunday: the database, the Storage photos and a git bundle of this
 # repository, each encrypted with age (passphrase mode, BACKUP_PASSPHRASE) and stored in the private Cloudflare R2
-# bucket kabsi-backups. The newest 3 weekly sets (21 days) are kept. The logic is scripts/backup/backup.sh; the exact clicks to
+# bucket kabsi-backups. Safe 1 (R-151 section C, if the GitHub account is lost): the same job also bundles the two
+# private Harvey repositories (kabsi-harvey-run, kabsi-harvey; all refs, encrypted the same way) and copies the release
+# assets of kabsi-harvey-run as they are (Harvey encrypted them already; only .enc files with the openssl header are
+# copied), under the same date prefix. They are read with the optional read-only HARVEY_READ_TOKEN; without it, or if it
+# cannot read, that part logs a warning and the job still succeeds. The newest 3 weekly sets (21 days) are kept. The logic is scripts/backup/backup.sh; the exact clicks to
 # set it up are in docs/OPS-SETUP.md, and what to do when it fails is in docs/RUNBOOK.md (Backups).
 #
 # Secrets (Settings, Secrets and variables, Actions): SUPABASE_DB_URL, BACKUP_PASSPHRASE, R2_ACCOUNT_ID,
-# R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY. SUPABASE_ACCESS_TOKEN is the one deploy.yml already uses. While none of the five
+# R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY. SUPABASE_ACCESS_TOKEN is the one deploy.yml already uses. HARVEY_READ_TOKEN is
+# optional (docs/SECRETS.md). While none of the five
 # exist the weekly run only warns that backups are not set up. A pull request that changes the backup code runs the
 # script as a dry run WITHOUT the secrets (the repository is bundled and encrypted with a throwaway passphrase), so a
-# change to the script can never read production through a pull request.
+# change to the script can never read production through a pull request. The Harvey part of that dry run uses the
+# stand-ins of scripts/backup/harvey-fixtures.sh (two tiny repositories and a stub release, one plain file that must be
+# refused), so the whole path is proved on every pull request without reading a private repository.
 
 on:
   schedule:
@@ -62,9 +69,17 @@ jobs:
           R2_ACCOUNT_ID: ${{ github.event_name != 'pull_request' && secrets.R2_ACCOUNT_ID || '' }}
           R2_ACCESS_KEY_ID: ${{ github.event_name != 'pull_request' && secrets.R2_ACCESS_KEY_ID || '' }}
           R2_SECRET_ACCESS_KEY: ${{ github.event_name != 'pull_request' && secrets.R2_SECRET_ACCESS_KEY || '' }}
+          HARVEY_READ_TOKEN: ${{ github.event_name != 'pull_request' && secrets.HARVEY_READ_TOKEN || '' }}
           SUPABASE_ACCESS_TOKEN: ${{ github.event_name != 'pull_request' && secrets.SUPABASE_ACCESS_TOKEN || '' }}
           GIT_SOURCE: ${{ github.server_url }}/${{ github.repository }}.git
           GITHUB_TOKEN: ${{ github.token }}
           DRY: ${{ github.event_name == 'pull_request' || inputs.dry_run }}
+          EVENT: ${{ github.event_name }}
         run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            rm -rf "${RUNNER_TEMP:?}/harvey-fixtures"
+            bash scripts/backup/harvey-fixtures.sh "$RUNNER_TEMP/harvey-fixtures" > "$RUNNER_TEMP/harvey-fixtures.env"
+            [ "$(wc -l < "$RUNNER_TEMP/harvey-fixtures.env")" -eq 4 ] || { echo "::error::the Harvey stand-ins were not made"; exit 1; }
+            set -a; . "$RUNNER_TEMP/harvey-fixtures.env"; set +a
+          fi
           if [ "$DRY" = "true" ]; then bash scripts/backup/backup.sh --dry-run; else bash scripts/backup/backup.sh; fi

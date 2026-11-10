@@ -145,3 +145,21 @@ SPF and DMARC passing. Still needed from you:
 2. Give the session an Outlook address to use for this test only (a new free outlook.com address is fine).
 3. Open mail-tester.com, copy the address it shows (it looks like test-xxxx@srv1.mail-tester.com) and give it to the
    session; it sends the emails there and reads the score. The target is 9 of 10 or better.
+
+## 9. HARVEY_READ_TOKEN: let the weekly backup copy the two Harvey repositories (Safe 1, R-151 section C)
+
+Both Harvey repositories are private, so the Backup workflow needs a read-only token to bundle them. Without it the backup
+still runs (it logs a warning and leaves the Harvey part out). About 3 minutes.
+
+1. GitHub, your avatar, **Settings**, **Developer settings**, **Personal access tokens**, **Fine-grained tokens**,
+   **Generate new token**. Token name: `kabsi-backup-harvey-read`. Expiration: 90 days. Resource owner: the account that owns
+   the repositories.
+2. **Repository access**, **Only select repositories**: `kabsi-harvey-run` and `kabsi-harvey`. Nothing else.
+3. **Permissions**, **Repository permissions**: **Contents: Read-only** (Metadata read-only is added by itself). No other
+   permission. **Generate token**, copy it (it is shown once).
+4. Save it in your password manager as "Kabsi Harvey read token", then GitHub, repository `kabsi-canvas`, **Settings**,
+   **Secrets and variables**, **Actions**, **New repository secret**. Name: `HARVEY_READ_TOKEN`. Value: the token.
+5. Prove it: **Actions**, **Backup**, **Run workflow**, tick the dry-run box. In the log under "Harvey repositories" expect
+   `kabsi-harvey-run: N refs`, `kabsi-harvey: N refs` and four `release asset data/...` lines, and no warning. A warning that
+   names the token means it is missing, expired or has no Contents read on one of the two repositories.
+6. Put a reminder to make a new token every 90 days (the weekly backup warns, and does not fail, when it stops working).

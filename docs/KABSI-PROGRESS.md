@@ -1,13 +1,13 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 10 Nov 2026 (RB-T). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 10 Nov 2026 (RB-T, after Safe 1). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
 Files named in this list are in `docs/progress/archive/`.
 
 - Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati (first real reply and post removal verified, 23 Oct). kabsi.co on Vercel; Creem the only payment route (test mode). Evidence: `evidence.md`, `where-things-stand.md`.
-- Older status lines (26 Oct to 6 Nov 2026: Web 2 to Web 3, Go live 1, Scan 2 to Site 2, Launch 1 to 4, Speed 2, Harvey 4A and the Outbound test) are word for word in `2026-11-09-progress-moved.md`.
+- Older status lines (26 Oct to 6 Nov 2026) are word for word in `2026-11-09-progress-moved.md`.
 - No customer is live yet. Before the first Meta ad (30.35 item 5): the DataForSEO top-up, Vercel Pro and the open lines of `docs/launch1/readiness.md`. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -28,6 +28,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 - The lane R checklist of 7 Nov is Rashid's project doc `claude/kabsi-whats-left-2026-11-07.md` (not in this repository). In four lines: card payments stay closed until Creem's live setup; the first Meta ad waits for the DataForSEO top-up, Vercel Pro and the open lines of `docs/launch1/readiness.md`; the first paying business waits for Kapso Pro and the rest of 30.19 section 6; the dates that matter are the end of the promotional AI credit on 17 Nov and the Sentry budget before 30 Nov.
 - Phone test (13b part 1): passed 25 Oct (ladder above). 13b part 2: send START from the staff phone (it is stopped); delete the Supabase secrets SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET and the Supabase SENTRY_AUTH_TOKEN; run `supabase/manual/20261025_drop_slack_leftovers.sql` (expect `0 | 0 | 0 | 0`); remove the Kabsi app from Slack when you like.
+- Safe 1: make `HARVEY_READ_TOKEN` (`docs/OPS-SETUP.md` step 9); tick the checklist at the end of `docs/runbooks/github-gone.md`; kabsi-harvey still has a daily schedule and the register in its tree.
 - Sec 2: the backup secret, unused secrets, two-step logins (`docs/security/secrets-and-accounts.md`); the retention switch (`supabase/data/20261027_sec2_retention_on.sql`).
 - Supabase Auth: leaked-password protection; paste the four `emails/auth/*.html` templates again, rebuilt on 5 Nov with the WhatsApp line (steps in emails/auth/README.md).
 - Email 1: news.kabsi.co in Resend and Cloudflare before lifecycle emails go on (LATER row).
@@ -59,9 +60,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 10 Nov 2026, RB-T (R-150 item 8): the request book scenario matrix (73 scenarios, 219 rows on salon, gym and garage, all pass on the fake world); account, data, price, plan and login questions go to Nora by code; the food pack in test and the 21-industry table; two live extraction runs on four packs, every pass mark met (0.39 USD). `2026-11-10-rb-t.md`.
-- 10 Nov 2026, Signup 1 (R-150, PR 554 merged, deployed): Continue with WhatsApp ("Kabsi sign in CODE", the device and city in the confirm, Yes it's me, the session minted on the server after the tap), the new sign-in notice with Sign me out everywhere, Google hidden when off and a daily staff alert, the contact email in onboarding. Waits for its migration. `2026-11-10-signup1.md`.
-- Older entries (Look 2 is in `2026-11-10-look2.md`, Plan 1 is in `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
+- 10 Nov 2026, RB-T (R-150 item 8): request book scenario matrix, 219 rows on three packs, all pass on the fake world; Kabsi questions go to Nora by code; food pack in test; live extraction on four packs, all marks met (0.39 USD). `2026-11-10-rb-t.md`.
+- 10 Nov 2026, Safe 1 (R-151 section C, claude/safe-1): the Sunday backup also bundles kabsi-harvey-run and kabsi-harvey and copies the encrypted release assets; optional read-only `HARVEY_READ_TOKEN` (missing or refused is a warning, not a red run); the public log no longer lists Storage file names. New `docs/runbooks/github-gone.md`. Audit and evidence: `2026-11-10-safe1.md`. Not live until the first by-hand run after merge.
+- Older entries (Signup 1 is in `2026-11-10-signup1.md`; Look 2 is in `2026-11-10-look2.md`; Plan 1 is in `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
 
 ## How a session updates this page
 
