@@ -142,6 +142,9 @@ function summaryOf(pack: Pack, e: Evidence): string | null {
   return text ? text.slice(0, 1000) : null;
 }
 
+// RB-F2: the name rule and the packs, for the agent's tests (book.ts stays the only file here that imports request-book).
+export { getPack, nameCase };
+
 export type Built = { ok: true; input: Json } | { ok: false; why: "needs_tap" | "missing"; missing: string[] };
 
 /**

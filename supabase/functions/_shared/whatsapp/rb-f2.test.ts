@@ -4,9 +4,7 @@
 import assert from "node:assert/strict";
 import { receive } from "./agent.ts";
 import { parseWebhook } from "./channel.ts";
-import { createInput } from "./book.ts";
-import { nameCase } from "../request-book/extract.ts";
-import { salonV1 } from "../request-book/packs/index.ts";
+import { createInput, getPack, nameCase } from "./book.ts";
 import { msg, PHONES, USERS, World } from "./world.test-helpers.ts";
 
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
@@ -241,7 +239,7 @@ Deno.test("e: nameCase capitalises lower-case words only", () => {
   assert.equal(nameCase("DJ"), "DJ");
   assert.equal(nameCase("ليلى"), "ليلى");
   // A proposal saved before RB-F2, with the name in lower case, is still saved with a capital.
-  const built = createInput(salonV1, { customer_name: { kind: "stated", normalized: "sarah" }, service: { kind: "stated", normalized: { text: "highlights", services: ["highlights"] } } }, id(500));
+  const built = createInput(getPack("salon", 1)!, { customer_name: { kind: "stated", normalized: "sarah" }, service: { kind: "stated", normalized: { text: "highlights", services: ["highlights"] } } }, id(500));
   assert.ok(built.ok);
   assert.equal(built.ok && built.input.customer_name, "Sarah");
 });
