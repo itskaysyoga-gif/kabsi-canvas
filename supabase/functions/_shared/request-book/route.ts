@@ -3,7 +3,7 @@
 //
 // At a business with the request book on, the order is: STOP and the commands that need no model, then the request book
 // (its commands, then a message about a person and what they want or did), then the off-topic guard, then everything else.
-// The pack's words win over Kabsi's own product words: at a gym, "trial" is the gym's trial. A message is about Kabsi itself
+// The pack's words win over Kabsi's own product words: where the pack names a trial, "trial" is the business's own. A message is about Kabsi itself
 // only when it names Kabsi, the plan, billing or the owner's own trial; then it is never the request book's.
 import type { Pack } from "./packs/schema.ts";
 import { normalizeVocabulary } from "./normalize/vocabulary.ts";
@@ -46,7 +46,7 @@ const SOMEONE = /^(?:someone|somebody|a (?:client|customer|member|guy|lady|man|w
 /** The words a booking starts with: "Book Sarah for highlights", "add Ali Corolla brakes", "new appointment for Maya". */
 const BOOK_FORM = /^(?:please\s+)?(?:can you\s+)?(?:book|add|pencil in|put down|note down|write down|new (?:appointment|booking|enquiry|inquiry|job|visit|request))\b\s+(?:in\s+|for\s+)?[a-z]/i;
 
-const words = (s: string) => s.replace(/[‘’ʼ`]/g, "'").trim().split(/\s+/).filter(Boolean);
+const words = (s: string) => s.replace(/[\u2018\u2019\u02bc`]/g, "'").trim().split(/\s+/).filter(Boolean);
 const bareWord = (w: string) => w.toLowerCase().replace(/^[^a-z']+|[^a-z']+$/g, "").replace(/'s$/, "");
 /** One or two words that could be a person's name: letters only, not a word that is never a name. */
 function nameLength(ws: string[]): number {

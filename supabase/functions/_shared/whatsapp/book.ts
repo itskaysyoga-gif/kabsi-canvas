@@ -226,7 +226,7 @@ export { refusalReply, toEvidence };
 /** RB-F3: the reply after "Update #N" (the correction reply of RB-F). */
 export const correctedReplyOf = (row: RequestRow, shown: { field: string; before: unknown; after: unknown }[], ctx: Ctx, flags: string[]): string =>
   correctedReply(row, shown, ctx, flags).body;
-export type { Pack };
+export type { Kind, Pack };
 
 type Evidence = {
   kind?: string; raw?: string | null; normalized?: unknown; candidates?: { label: string; value: unknown }[];

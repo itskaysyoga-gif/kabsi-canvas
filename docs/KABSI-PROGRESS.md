@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 10 Nov 2026 (RB-F3). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 10 Nov 2026 (RB-F4). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -57,11 +57,11 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 10 Nov 2026, RB-F4 (R-149): at a business with the request book on, a message about a person goes to the book before the off-topic line and the router (a gym's trial is the gym's), "X booked Y" with no enquiry proposes a new visit or job, typo weekdays give one button per day, the off-topic line in the new look, help lists the book; no model call added. `2026-11-10-rb-f4.md`.
 - 10 Nov 2026, RB-F3 (R-148): the request book reads typos (days, months, time words and services, near matches in clean form, ties as buttons), asks "Update #N or add a new one?" for the same client and service within 7 days, a revision keeps what it does not change, request book, switch and help replies get a bold first line with one marker and no "(owner)", staff-only "reset test" (migration 20261110074811 applied, read back), off-topic messages get one fixed line; no model call added. `2026-11-10-rb-f3.md`.
 - 10 Nov 2026, Partners 1 (R-148): /partners rebuilt for review card sellers first ("The card gets the reviews. Kabsi answers them."), the partner terms and facts 08 add Google's review rules (terms version 2026-11-10); the prospect list is in the private kabsi-harvey only. `2026-11-10-partners1.md`.
 - 10 Nov 2026, Tidy 2 part 3 (R-147 item 5): the daily Kapso check also reads Kapso's webhook delivery log (read only, the existing secret) and alerts staff on WhatsApp and by email to hello@kabsi.co when deliveries failed in 24 hours, counts only; `kapso_deliveries` reads any hour by hand; run live for 04:00 to 05:00 UTC: 48 delivered, 0 failed, none after 04:10, so those messages never reached Kapso's webhook. `2026-11-10-tidy2.md`.
-- 10 Nov 2026, Tidy 2 part 0 (R-146, R-147, docs only): master plan 30.49 (Harvey from the public kabsi-harvey-run with encrypted data, first tier beauty and food, launch open to all 21 industries, the Gate 3 tie rule, Nora's name rule, the Kapso delivery check); plan index rows R-144, R-146, R-147, now 37 KB; SYNC Harvey rows. `2026-11-10-tidy2.md`.
-- Older entries (Tidy 2 part 1 is in `2026-11-10-tidy2.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
+- Older entries (Tidy 2 parts 0 and 1 are in `2026-11-10-tidy2.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
 
 ## How a session updates this page
 

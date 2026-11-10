@@ -15,9 +15,8 @@ import {
   refOf, refusalReply, requestSummary, rowOf, savedText, toEvidence,
   type Act, arrivedLine, askAnswer, parseBookCommand, type RbAsk, type RbTime, runCommand, timePicked, undoButton, undoIds, kindIn, markOf, styleReply,
   correctedReplyOf, nonce, duplicateReply, findDuplicate, fullOf, pastServices, reviseRequest, updateChanges,
-  bookHelp, bookIntent, kabsiJob, KIND_KEY, namesKabsi, newKind, packAs, packWordWins, proposalKind,
+  bookHelp, bookIntent, kabsiJob, type Kind, KIND_KEY, namesKabsi, newKind, packAs, packWordWins, proposalKind,
 } from "./book.ts";
-import type { Kind } from "../request-book/types.ts";
 import { photoRefusal, voiceCheck } from "./media.ts";
 import { MAX_BYTES } from "../photos/sniff.ts";
 import { notify, type Out, reply as sendReply } from "./outbox.ts";
