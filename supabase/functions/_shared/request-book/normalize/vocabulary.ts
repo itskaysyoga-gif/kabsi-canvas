@@ -8,7 +8,7 @@ import type { Evidence } from "./result.ts";
 
 export const VOCABULARY_VERSION = 1;
 
-export type ServiceMatch = { key: string; label: string } & Evidence;
+export type ServiceMatch = { key: string; label: string; fuzzy?: true } & Evidence;
 
 /** RB-F3: words that are equally near two or more services. The owner is asked which one, never told. */
 export type ServiceTie = { candidates: { key: string; label: string }[] } & Evidence;
@@ -46,7 +46,7 @@ export function normalizeVocabulary(text: string, pack: Pick<Pack, "services">):
   // RB-F3: words that matched nothing exactly are read as the nearest service when they are a typo of one of its spellings
   // ("highlightss", "manicur"). Equally near different services is a tie, asked about. No near spelling: nothing is read.
   for (const f of nearHits(text, t, pack, kept)) {
-    if (f.candidates.length === 1) kept.push({ key: f.candidates[0]!.key, label: f.candidates[0]!.label, raw: f.raw, start: f.start, end: f.end, length: f.end - f.start });
+    if (f.candidates.length === 1) kept.push({ key: f.candidates[0]!.key, label: f.candidates[0]!.label, raw: f.raw, start: f.start, end: f.end, length: f.end - f.start, fuzzy: true });
     else ties.push(f);
   }
   if (kept.length === 0 && ties.length === 0) return { status: "unknown", reason: "no_known_service", version: VOCABULARY_VERSION };
@@ -56,6 +56,9 @@ export function normalizeVocabulary(text: string, pack: Pick<Pack, "services">):
   const matches = kept.filter((k) => !seen.has(k.key) && seen.add(k.key)).map(({ length: _l, ...m }) => m);
   return { status: "ok", matches, ...(ties.length ? { ties } : {}), version: VOCABULARY_VERSION };
 }
+
+const EVERYDAY = new Set(["message", "messages", "passage", "manager", "members", "tired", "brown", "shape", "board", "brave", "classic", "classy",
+  "prices", "priced", "facial", "colours", "trials", "treat", "touring", "visits", "visiting", "breaks", "breaking", "battery", "engines"]);
 
 /** Runs of 1 to 3 words outside the exact hits that are near a spelling, word by word, with the services they are nearest to. */
 function nearHits(text: string, t: string, pack: Pick<Pack, "services">, kept: { start: number; end: number }[]): ServiceTie[] {
@@ -78,7 +81,9 @@ function nearHits(text: string, t: string, pack: Pick<Pack, "services">, kept: {
           let total = 0;
           let typo = false;
           for (let k = 0; k < n; k++) {
-            const e = near(run[k]!.w, parts[k]!);
+            // RB-F3 review: a typo needs 6 letters or more, and everyday words that sit near a service are never read as one.
+            // (A run of two or three words needs only the usual rules: the other words already fit.)
+            const e = run[k]!.w === parts[k] ? 0 : n === 1 && (run[k]!.w.length < 6 || EVERYDAY.has(run[k]!.w)) ? null : near(run[k]!.w, parts[k]!);
             if (e === null) {
               total = -1;
               break;

@@ -216,7 +216,8 @@ Deno.test("W7 agent: a staff member's message steering the router to billing or 
   const w = new World();
   w.aiMap[HOSTILE_TEXT.W7] = JSON.stringify({ tool: "billing", args: {}, lang: "en" });
   const r = await receive(w.deps(), msg(w, PHONES.staff, { text: HOSTILE_TEXT.W7 }));
-  assert.equal(r, "unclear");
+  // RB-F3: refused either by the role list ("unclear") or, when the router places it nowhere, with the fixed off-topic line.
+  assert.ok(r === "unclear" || r === "off_topic", r);
   assert.ok(!w.calls.some((c) => c.startsWith("cancel:")));
 });
 

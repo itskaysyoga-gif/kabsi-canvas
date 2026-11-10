@@ -14,14 +14,18 @@ export const NORMALIZER_VERSIONS = {
   vocabulary: VOCABULARY_VERSION,
 } as const;
 
-export type NormalizeContext = { country: string | null; timeZone: string; now: Date; pack: Pick<Pack, "services"> };
+export type NormalizeContext = {
+  country: string | null; timeZone: string; now: Date; pack: Pick<Pack, "services">;
+  /** RB-F3: where the words about when are (the model's quote); typos of days and time words are read only there. */
+  whenTyposIn?: { start: number; end: number } | null;
+};
 export type NormalizedMessage = { phone: Normalized<string>; when: WhenResult; services: VocabularyResult };
 
 /** Every deterministic reading of one message. No model is involved. */
 export function normalizeMessage(text: string, ctx: NormalizeContext): NormalizedMessage {
   return {
     phone: normalizePhone(text, ctx.country),
-    when: normalizeWhen(text, { now: ctx.now, timeZone: ctx.timeZone }),
+    when: normalizeWhen(text, { now: ctx.now, timeZone: ctx.timeZone, typosIn: ctx.whenTyposIn ?? null }),
     services: normalizeVocabulary(text, ctx.pack),
   };
 }

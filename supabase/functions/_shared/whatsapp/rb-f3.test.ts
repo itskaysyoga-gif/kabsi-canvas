@@ -4,12 +4,8 @@
 // fakes. Customers are fictional. World time: Monday 26 Oct 2026, 19:00 in Dubai.
 import assert from "node:assert/strict";
 import { receive } from "./agent.ts";
-import { markOf, MARK, styleReply } from "./book.ts";
+import { editDistance, getPack, markOf, MARK, near, normalizeVocabulary, normalizeWhen, styleReply } from "./book.ts";
 import { isOffTopic } from "./router.ts";
-import { editDistance, near } from "../request-book/normalize/fuzzy.ts";
-import { normalizeWhen } from "../request-book/normalize/dates.ts";
-import { normalizeVocabulary } from "../request-book/normalize/vocabulary.ts";
-import { salonV1 } from "../request-book/packs/salon.v1.ts";
 import { msg, PHONES, USERS, World } from "./world.test-helpers.ts";
 
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
@@ -72,7 +68,7 @@ Deno.test("typos: tmrw and manicur read as Tomorrow and Manicure; tomoro and agt
   says(w, "Lina manicur tmrw agternoon", salon("Lina", "manicur", "tmrw agternoon"));
   assert.equal(await send(w, { text: "Lina manicur tmrw agternoon" }), "request_proposed");
   assert.match(last(w).body, /Service: Manicure\nWhen: Tomorrow afternoon, no time set/);
-  const r = normalizeWhen("Maya tomoro morning", DUBAI);
+  const r = normalizeWhen("Maya tomoro morning", { ...DUBAI, typosIn: { start: 5, end: 19 } });
   assert.equal(r.status === "ok" && r.date, "2026-10-27");
   assert.equal(r.status === "ok" && r.raw, "tomoro morning");
 });
@@ -104,9 +100,21 @@ Deno.test("typos: the rules keep names and everyday words as they are", () => {
   assert.equal(near("moving", "morning"), null);
   assert.equal(near("bfriday", "friday"), null);
   assert.equal(near("aftrnn", "afternoon"), null);
-  // "Jane", "match" and "Monda" are not read as a month or a day; a name beside a real day leaves that day as read.
-  const r = normalizeWhen("Book Jane for a match friday", DUBAI);
+  // "Jane" and "match" are not read as a month; a name beside a real day leaves that day as read.
+  const r = normalizeWhen("Book Jane for a match friday", { ...DUBAI, typosIn: { start: 0, end: 28 } });
   assert.equal(r.status === "ok" && r.raw, "friday");
+  // Review: a name outside the words quoted for when is never read as a day ("Sundar", "Frida"), so no time is invented.
+  const s1 = normalizeWhen("Sundar on friday at 2pm", { ...DUBAI, typosIn: { start: 7, end: 23 } });
+  assert.equal(s1.status === "ok" && s1.date, "2026-10-30");
+  const s2 = normalizeWhen("frida at 3pm", { ...DUBAI, typosIn: { start: 6, end: 12 } });
+  assert.equal(s2.status === "ok" && s2.date, null);
+  // Without the quoted range nothing is corrected at all.
+  assert.equal(normalizeWhen("thrsday afternoon", DUBAI).status === "ok" && (normalizeWhen("thrsday afternoon", DUBAI) as { date: string | null }).date, null);
+  // Review: everyday words near a service are not read as one ("message" is not massage, "brown" is not brows).
+  const m = normalizeVocabulary("she left a message for a cut", getPack("salon", 1)!);
+  assert.deepEqual(m.status === "ok" && m.matches.map((x) => x.label), ["Haircut"]);
+  const b = normalizeVocabulary("brown colour", getPack("salon", 1)!);
+  assert.deepEqual(b.status === "ok" && b.matches.map((x) => x.label), ["Colour"]);
   // A service tie (a pack where one typo is as near two services) is returned as a tie, never chosen.
   const tie = normalizeVocabulary("shampox", { services: [
     { key: "a", label: "Shampoo", spellings: ["shampoo"] }, { key: "b", label: "Shampoa", spellings: ["shampoa"] },
@@ -114,7 +122,7 @@ Deno.test("typos: the rules keep names and everyday words as they are", () => {
   assert.equal(tie.status, "ok");
   assert.equal(tie.status === "ok" && tie.ties?.[0]?.candidates.length, 2);
   assert.equal(tie.status === "ok" && tie.matches.length, 0);
-  const hit = normalizeVocabulary("highlightss", salonV1);
+  const hit = normalizeVocabulary("highlightss", getPack("salon", 1)!);
   assert.equal(hit.status === "ok" && hit.matches[0]?.label, "Highlights");
 });
 
@@ -182,13 +190,29 @@ Deno.test("duplicates: the same name, kind and service open within 7 days asks U
   assert.equal(w.requests.length, 1);
   // Update #1: the new time goes on #1, the draft is dropped, Undo is offered; no second Sarah.
   const intake = lastIntake(w);
-  assert.equal(await send(w, { button: `rdu:${intake.id}:1` }), "request_updated");
+  const update = lastIds(w)[0]!;
+  assert.match(update, new RegExp(`^rdu:${intake.id}:[a-z0-9]{8}$`));
+  assert.equal(await send(w, { button: update }), "request_updated");
   assert.equal(w.requests.length, 1);
   assert.equal(w.requests[0].requested_window_text, "Fri 30 Oct afternoon");
   assert.match(last(w).body, /^\*✅ Appointment 1 corrected\* · Kabsi Test Salon\nwhen changed from Thu 29 Oct afternoon to Fri 30 Oct afternoon\./u);
   assert.deepEqual(last(w).buttons, ["Undo"]);
   assert.equal(intake.state, "discarded");
   assert.equal(w.conversation(ME).open_question, null);
+});
+
+Deno.test("duplicates (review): an old Update tap after the draft changed to another name updates nothing", async () => {
+  const w = phoneWorld();
+  await sarahSaved(w);
+  says(w, "sarah highlights friday afternoon", salon("sarah", "highlights", "friday afternoon"));
+  assert.equal(await send(w, { text: "sarah highlights friday afternoon" }), "request_duplicate");
+  const update = lastIds(w)[0]!;
+  says(w, "actually Lina", salon("Lina", null, null));
+  assert.equal(await send(w, { text: "actually Lina" }), "request_revised");
+  assert.equal(await send(w, { button: update }), "request_update_closed");
+  assert.equal(w.requests[0].requested_window_text, "Thu 29 Oct afternoon");
+  // A made-up nonce for the same draft does nothing either.
+  assert.equal(await send(w, { button: `rdu:${lastIntake(w).id}:abcdefgh` }), "request_update_closed");
 });
 
 Deno.test("duplicates: Add new saves a second one; another service, a closed one or one older than 7 days asks nothing", async () => {

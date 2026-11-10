@@ -459,12 +459,19 @@ function whenField(spec: Spec, w: WhenResult, ctx: ExtractContext, loc: Located 
   };
 }
 
+const SMALL = new Set(["a", "an", "the", "for", "some", "and", "with", "of", "to", "her", "his", "my", "new", "full", "quick", "please"]);
+
 /** What the owner wants, as the model quoted it. The pack's vocabulary names the services inside those words; the words themselves are shown as written when it knows none. */
 function summaryField(spec: Spec, n: NormalizedMessage, loc: Located | null): ExtractedField {
   const f = base(spec);
   if (!loc) return { ...f, validation: { passed: false, reason: "not_written" } };
   const s = n.services;
-  const inside = s.status === "ok" ? s.matches.filter((m) => overlaps(loc, m.start, m.end)) : [];
+  const all = s.status === "ok" ? s.matches.filter((m) => overlaps(loc, m.start, m.end)) : [];
+  // RB-F3 review: a typo read as a service counts only when every other word of the quote is a service or a small word,
+  // so "she left a message for a cut" is never read as a massage.
+  const leftover = fold(loc.raw).text.split(/[^\p{L}\p{N}]+/u).filter(Boolean).filter((x) => !SMALL.has(x)
+    && !all.some((m) => fold(m.raw).text.split(/[^\p{L}\p{N}]+/u).includes(x)));
+  const inside = leftover.length ? all.filter((m) => !m.fuzzy) : all;
   const words = collapse(loc.raw);
   const norm = inside.length ? { name: "vocabulary", version: s.status === "ok" ? s.version : 1 } : { name: "verbatim", version: 1 };
   const labels = [...new Set(inside.map((m) => m.label))];
@@ -548,9 +555,13 @@ export function extractFields(text: string, modelText: string | null, ctx: Extra
   if (message.length > MAX_RAW_TEXT) return { ok: false, reason: "too_long" };
   const pack = ctx.pack;
   const vocab = ctx.extraServices?.length ? { services: [...pack.services, ...ctx.extraServices] } : pack;
-  const n = normalizeMessage(message, { country: ctx.country, timeZone: ctx.timeZone, now: ctx.now, pack: vocab });
   const q = readQuotes(pack, modelText);
   const mf = fold(message);
+  // RB-F3 review: typos of days and time words are read only inside the model's quote for when, never in a name.
+  const whenSpec = pack.fields.find((f) => f.target === "when");
+  const whenQuote = whenSpec ? q.fields[whenSpec.key] : null;
+  const whenTyposIn = whenQuote && whenQuote.trim() ? locate(message, mf, whenQuote) : null;
+  const n = normalizeMessage(message, { country: ctx.country, timeZone: ctx.timeZone, now: ctx.now, pack: vocab, whenTyposIn });
   const issues = [...q.issues];
 
   const fields: Record<string, ExtractedField> = {};

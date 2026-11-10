@@ -61,12 +61,15 @@ export function nearest<T>(typed: string, known: { word: string; value: T }[], s
  */
 export type Corrected = { text: string; toOrig: (i: number) => number; changed: boolean };
 
-export function correctWords(text: string, known: { word: string; value: string }[], exact: Set<string>): Corrected[] {
+export function correctWords(text: string, known: { word: string; value: string }[], exact: Set<string>, within?: { start: number; end: number } | null): Corrected[] {
+  // RB-F3 review: only words inside the range (the words the model quoted for this field) are read as typos, so a name
+  // elsewhere in the message ("Frida", "Sundar") is never turned into a day. No range: nothing is corrected.
+  if (!within) return [{ text, toOrig: (i) => i, changed: false }];
   // Each typed word that is not already a known or an everyday word, with its choices.
   const swaps: { start: number; end: number; choices: string[] }[] = [];
   for (const m of text.matchAll(/[a-z]+/g)) {
     const w = m[0];
-    if (exact.has(w) || w.length < 4) continue;
+    if (exact.has(w) || w.length < 4 || m.index! < within.start || m.index! + w.length > within.end) continue;
     const n = nearest(w, known);
     if (!n || n.distance === 0) continue;
     swaps.push({ start: m.index!, end: m.index! + w.length, choices: n.values.slice(0, 3) });

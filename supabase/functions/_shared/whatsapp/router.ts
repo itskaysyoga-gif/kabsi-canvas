@@ -25,7 +25,7 @@ export type Command =
   | { k: "onboarding"; action: OnboardingAction; locationId: string }
   | { k: "facts"; action: "yes" | "no"; locationId: string; month: string }
   // RB-E: the buttons under a request book proposal: Save, Change, or one of two or three readings (by its place in the list).
-  | { k: "request"; action: "save" | "change" | "pick" | "update"; intakeId: string; pick?: number; number?: number }
+  | { k: "request"; action: "save" | "change" | "pick" | "update"; intakeId: string; pick?: number; nonce?: string }
   // RB-F: Yes and No under a question asked before a change (by request id), Undo (by activity ids, the latest first), and a
   // tapped time (by request id and its place in the list). The business is never read from the button.
   | { k: "rbook"; action: "ask_yes" | "ask_no" | "undo" | "time"; ids: string[]; pick?: number; nonce?: string }
@@ -177,9 +177,10 @@ export function parseButton(id: string): Command {
   // proposal; the business is never read from the button (agent.ts looks it up only in the phone's own businesses).
   const rq = /^r([sc]):([0-9a-f-]{36})$/.exec(id);
   if (rq) return { k: "request", action: rq[1] === "s" ? "save" : "change", intakeId: rq[2] };
-  // RB-F3: rdu:<proposal>:<number> "Update #N" under the question about a request that looks the same.
-  const rdu = /^rdu:([0-9a-f-]{36}):(\d{1,9})$/.exec(id);
-  if (rdu) return { k: "request", action: "update", intakeId: rdu[1], number: Number(rdu[2]) };
+  // RB-F3: rdu:<proposal>:<nonce> "Update #N" under the question about a request that looks the same. The request it
+  // updates is the one the open question holds, never a number from the button.
+  const rdu = /^rdu:([0-9a-f-]{36}):([a-z0-9]{8})$/.exec(id);
+  if (rdu) return { k: "request", action: "update", intakeId: rdu[1], nonce: rdu[2] };
   const rp = /^rp:([0-9a-f-]{36}):([0-2])$/.exec(id);
   if (rp) return { k: "request", action: "pick", intakeId: rp[1], pick: Number(rp[2]) };
   const ra = /^r([ax]):([0-9a-f-]{36}):([a-z0-9]{8})$/.exec(id);
@@ -205,7 +206,7 @@ const OFF_TOPIC = [
 ];
 export const isOffTopic = (text: string | null | undefined): boolean => {
   const t = (text ?? "").trim();
-  if (!t || /\b(?:post|reply|review|google|kabsi|listing|photo|book|appointment|booking|request)\b/i.test(t)) return false;
+  if (!t || /\b(?:posts?|reply|review|google|kabsi|listing|photos?|book|appointment|booking|request|instagram|facebook|menu|caption|customers?|clients?)\b/i.test(t)) return false;
   return OFF_TOPIC.some((re) => re.test(t));
 };
 

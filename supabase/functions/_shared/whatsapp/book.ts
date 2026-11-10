@@ -182,11 +182,12 @@ export async function findDuplicate(db: BookDb, me: { location: string; actor: s
 }
 
 /** "Sarah already has 📅 #1, Highlights, Thu 12 Nov afternoon. Update #1 or add a new one?" with its two buttons. */
-export function duplicateReply(row: RequestRow, intakeId: string, ctx: Ctx): { body: string; buttons: Button[] } {
+export function duplicateReply(row: RequestRow, intakeId: string, nonceId: string, ctx: Ctx): { body: string; buttons: Button[] } {
   const when = row.starts_at ? formatWhenShort(row.starts_at, ctx) : row.requested_window_text ? clip(row.requested_window_text, 60) : null;
   const what = [`#${row.number}`, clip(row.summary, 40), when].filter(Boolean).join(", ");
-  const body = `*${whoOf(row)} already has ${MARK[row.kind]} ${what}*\nUpdate #${row.number} or add a new one?`;
-  return { body, buttons: [{ id: `rdu:${intakeId}:${row.number}`, title: `Update #${row.number}`.slice(0, 20) }, { id: `rs:${intakeId}`, title: "Add new" }] };
+  // A star or an underscore in a name would break WhatsApp's bold, so they are left out of this line.
+  const body = `*${whoOf(row).replace(/[*_~]/g, "")} already has ${MARK[row.kind]} ${what.replace(/[*_~]/g, "")}*\nUpdate #${row.number} or add a new one?`;
+  return { body, buttons: [{ id: `rdu:${intakeId}:${nonceId}`, title: `Update #${row.number}`.slice(0, 20) }, { id: `rs:${intakeId}`, title: "Add new" }] };
 }
 
 const formatWhenShort = (iso: string, ctx: Ctx) => whenText({ starts_at: iso, requested_window_text: null }, ctx) ?? "";
@@ -203,8 +204,21 @@ export function updateChanges(row: RequestRow, input: Json): { changes: Json; sh
     shown.push({ field, before, after });
   };
   put("summary", input.summary);
-  put("starts_at", input.starts_at);
-  if (!input.starts_at) put("requested_window_text", input.requested_window_text);
+  // RB-F3 review: the two time fields move together, so the record never holds a time from one draft and words from another.
+  const startsAt = (input.starts_at as string | undefined) ?? null;
+  const window = (input.requested_window_text as string | undefined) ?? null;
+  const timeChanged = !(startsAt === row.starts_at || (startsAt && row.starts_at && Date.parse(startsAt) === Date.parse(row.starts_at)))
+    || window !== row.requested_window_text;
+  if (timeChanged && (startsAt || window)) {
+    if (!(startsAt === row.starts_at || (startsAt && row.starts_at && Date.parse(startsAt) === Date.parse(row.starts_at)))) {
+      changes.starts_at = startsAt;
+      shown.push({ field: "starts_at", before: row.starts_at, after: startsAt });
+    }
+    if (window !== row.requested_window_text) {
+      changes.requested_window_text = window;
+      if (!startsAt) shown.push({ field: "requested_window_text", before: row.requested_window_text, after: window });
+    }
+  }
   return { changes, shown };
 }
 
@@ -234,6 +248,9 @@ function summaryOf(pack: Pack, e: Evidence): string | null {
 
 // RB-F2: the name rule and the packs, for the agent's tests (book.ts stays the only file here that imports request-book).
 export { getPack, nameCase };
+// RB-F3: the typo reader and the normalizers, for rb-f3.test.ts (the same rule: tests import request-book only through here).
+export { editDistance, near } from "../request-book/normalize/fuzzy.ts";
+export { normalizeVocabulary, normalizeWhen } from "../request-book/normalize/index.ts";
 
 export type Built = { ok: true; input: Json } | { ok: false; why: "needs_tap" | "missing"; missing: string[] };
 
@@ -807,7 +824,11 @@ export function styleReply(body: string, mark: string, business: string | null):
   const nl = text.indexOf("\n");
   const firstLine = nl < 0 ? text : text.slice(0, nl);
   const rest = nl < 0 ? "" : text.slice(nl + 1).replace(/^\n+/, "");
-  const cut = /^(.+?[.?]|(?:\S+\s+){2,}\S+:)\s+(\S.*)$/s.exec(firstLine);
+  // A sentence end before any colon, or a colon after three words or more; "Dr." and the like never end a sentence.
+  const colon = firstLine.indexOf(":");
+  const dot = /^(.+?(?<!\b(?:Dr|Mr|Mrs|Ms|St|No))[.?])\s+(\S.*)$/s.exec(firstLine);
+  const byColon = colon >= 0 && (!dot || colon < dot[1]!.length) ? /^((?:\S+\s+){2,}\S+:)\s+(\S.*)$/s.exec(firstLine) : null;
+  const cut = byColon ?? dot;
   let first = cut ? cut[1]! : firstLine;
   const more = cut ? cut[2]! : "";
   first = first.replace(/[.:]$/, "");

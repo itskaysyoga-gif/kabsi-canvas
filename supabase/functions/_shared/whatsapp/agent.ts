@@ -1369,7 +1369,11 @@ async function requestToolInner(t: Turn, bt: BookTurn, tool: string, arg: string
     const built = createInput(pack, evidence, intake, undefined, r.ex.text);
     const dup = built.ok ? await findDuplicate(db, { location: b.location_id, actor: b.user_id }, built.input, now) : null;
     if (dup) {
-      const d = duplicateReply(dup, intake, bookCtx(t, b, pack));
+      const full = fullOf(await db.get(b.location_id, b.user_id, String(dup.number)).catch(() => ({})));
+      const n = nonce();
+      await t.d.db.setConv(t.phone, { open_question: { type: "rb_proposal", location_id: b.location_id, intake_id: intake, at,
+        dup: { request_id: dup.request_id, number: dup.number, version: full?.version ?? 0, nonce: n } } satisfies OpenQuestion });
+      const d = duplicateReply(dup, intake, n, bookCtx(t, b, pack));
       return said(tb, d.body, "request_duplicate", d.buttons);
     }
   }
@@ -1380,13 +1384,23 @@ async function requestToolInner(t: Turn, bt: BookTurn, tool: string, arg: string
 }
 
 /** RB-F3: "Update #N" under the duplicate question: the draft's service and time go onto request N, and the draft is dropped. */
-async function bookUpdate(tb: Turn, b: BusinessRole, pack: Pack, intakeId: string, number: number, g: Record<string, unknown>): Promise<string> {
+async function bookUpdate(tb: Turn, b: BusinessRole, pack: Pack, intakeId: string, nonceId: string, g: Record<string, unknown>): Promise<string> {
   const db = tb.d.book!.db;
   if (g.state !== "pending") return answered(tb, g.state === "expired" ? BOOK_SAY.expired : SAY.alreadyHandled, `request_update_${g.state}`);
+  // RB-F3 review: the tap counts only for the question still open on this draft (its nonce), and the request it updates is
+  // the one that question named, checked again against the draft as it is now.
+  const q = tb.who.conversation?.open_question;
+  const dup = q?.type === "rb_proposal" && q.intake_id === intakeId && q.location_id === b.location_id && q.dup?.nonce === nonceId ? q.dup : null;
+  if (!dup) return answered(tb, SAY.alreadyHandled, "request_update_closed");
   const built = createInput(pack, (g.field_evidence ?? {}) as Record<string, unknown>, intakeId, undefined, typeof g.raw_text === "string" ? g.raw_text : null);
   if (!built.ok) return answered(tb, built.why === "needs_tap" ? BOOK_SAY.tapReading : `Still needed: ${built.missing.join(", ")}. Nothing is saved yet.`, `request_update_${built.why}`);
-  const f = fullOf(await db.get(b.location_id, b.user_id, String(number)));
-  if (!f) return answered(tb, refusalReply({ reason: "not_found" }).body, "request_update_refused:not_found");
+  const still = await findDuplicate(db, { location: b.location_id, actor: b.user_id }, built.input, new Date((tb.d.now ?? Date.now)()));
+  if (!still || still.request_id !== dup.request_id) return answered(tb, SAY.alreadyHandled, "request_update_closed");
+  const number = dup.number;
+  const got = fullOf(await db.get(b.location_id, b.user_id, String(number)));
+  if (!got || got.row.request_id !== dup.request_id) return answered(tb, refusalReply({ reason: "not_found" }).body, "request_update_refused:not_found");
+  // The version the owner was shown: a change since then is refused by the database (version_conflict), never overwritten.
+  const f = { ...got, version: dup.version || got.version };
   const ctx = bookCtx(tb, b, pack);
   const { changes, shown } = updateChanges(f.row, built.input);
   const close = async () => {
@@ -1420,7 +1434,7 @@ async function bookButton(t: Turn, cmd: Extract<Command, { k: "request" }>): Pro
     if (g?.ok !== true) continue;
     const pack = on.get(b.location_id)!;
     const tb = withB(t, b, pack);
-    if (cmd.action === "update") return await bookUpdate(tb, b, pack, cmd.intakeId, cmd.number ?? 0, g);
+    if (cmd.action === "update") return await bookUpdate(tb, b, pack, cmd.intakeId, cmd.nonce ?? "", g);
     if (cmd.action !== "change") return await bookSave(tb, b, pack, cmd.intakeId, cmd.pick, g);
     if (g.state !== "pending") return answered(tb, g.state === "expired" ? BOOK_SAY.expired : SAY.alreadyHandled, `request_change_${g.state}`);
     // Change: the proposal stays open for the next message, for its own business.

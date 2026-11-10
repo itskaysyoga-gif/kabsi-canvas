@@ -242,13 +242,13 @@ function hourAfterDay(t: string, dayEnd: number): { reads: Hour; start: number; 
  * The day and hour written in a message, resolved against `now` (the message time) in `timeZone` (the location's zone).
  * Returns unknown when nothing about a day or hour was written, or when what was written is not a real date or time.
  */
-export function normalizeWhen(text: string, ctx: { now: Date; timeZone: string }): WhenResult {
+export function normalizeWhen(text: string, ctx: { now: Date; timeZone: string; typosIn?: { start: number; end: number } | null }): WhenResult {
   const v = DATES_VERSION;
   if (!validZone(ctx.timeZone)) return { status: "unknown", reason: "bad_time_zone", version: v };
   if (!(ctx.now instanceof Date) || Number.isNaN(ctx.now.getTime())) return { status: "unknown", reason: "bad_time", version: v };
   // RB-F3: a misspelled day, month or time word ("thrsday", "agternoon") is read as the real word, with positions kept in
   // what the owner typed. Two equally near days ("thuesday") give both readings, so the owner taps the one meant.
-  const variants = correctWords(readable(text), TIME_WORDS, KNOWN_EXACT);
+  const variants = correctWords(readable(text), TIME_WORDS, KNOWN_EXACT, ctx.typosIn ?? null);
   const results = variants.map((c) => {
     const r = whenIn(c.text, ctx);
     if (r.status === "unknown") return r;
