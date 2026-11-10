@@ -1878,6 +1878,11 @@ Footer: "Why you got this: your business email is on your website. Reply 'no tha
 "Hi again. Happy to run that free check of <business>'s Google profile if useful. A yes is enough, and if not, no worries."
 then the same signature and footer.
 
+**Changed by Outbound 2 (10 Nov 2026, R-151 item 5, master plan 30.51).**
+- <kind> covers only the eight first tier industries: hair salons, barbers, beauty salons, nail salons, lash and brow studios, spas and massage studios, restaurants, cafes. Every other industry is refused (the clinics to vets list above is retired). The queue alternates one beauty business and one food business.
+- For a restaurant or cafe two detail sentences read for food: "I saw you take table bookings through <system>, so customers find you online already." and "Your Instagram shows your food, and the same photos could do well on your Google profile." The hours and updated sentences, Email 1's other lines and the follow-up stay as they are for both groups. Booking systems added for food: DesignMyNight, Tablein, Quandoo, TheFork.
+- While Founding 25 places remain (the count the private page uses), the follow-up adds one paragraph after its first line: "I also have founding places open: three months of Kabsi Pro free, and you tell me what to make better. Details: kabsi.co/founding/<slug>". The slug is the private setting, never written here. When no places remain or the setting is missing, the paragraph is left out. Email 1 never carries it.
+
 **Rashid's reply to a clear yes** (drafted for him by outbound-inbox from this template, never sent without his Send; lane R, 6 Nov 2026, word for word; no "Drafted with Nora", because a template wrote it):
 
 "Hi <business> team,
