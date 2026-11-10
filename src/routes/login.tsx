@@ -51,7 +51,8 @@ async function whereNext(next: string | undefined): Promise<string> {
   }
 }
 
-// Log in and sign up are the same sheet (P0.4-02, K-91): Continue with Google, or a 6-digit email code. No passwords.
+// Log in and sign up are the same sheet (P0.4-02, K-91; Signup 1): Continue with WhatsApp, Continue with Google, or a 6-digit
+// email code. No passwords.
 // App 4 (master plan 30.31 item 3) rebuilt the page on Design 9: the sheet on the left (alone on a phone) and, from
 // 1024 px, a quiet panel with three facts and an Example approval on WhatsApp. Google sends the owner back here; the
 // session is picked up from the address and the page moves on.
@@ -61,11 +62,14 @@ export const Route = createFileRoute("/login")({
     meta: [
       { title: "Log in | Kabsi" },
       { name: "robots", content: "noindex" },
-      { name: "description", content: "Log in to Kabsi with Google or a one-time email code." },
+      {
+        name: "description",
+        content: "Log in to Kabsi with WhatsApp, Google or a one-time email code.",
+      },
       { property: "og:title", content: "Log in | Kabsi" },
       {
         property: "og:description",
-        content: "Log in to Kabsi with Google or a one-time email code.",
+        content: "Log in to Kabsi with WhatsApp, Google or a one-time email code.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -30,7 +30,7 @@ export const Route = createFileRoute("/privacy")({
   component: Page,
 });
 
-const UPDATED = "9 November 2026";
+const UPDATED = "10 November 2026";
 
 // K-113.6, word for word. Set as raw HTML so the apostrophe stays a plain ' in the page source.
 const LIMITED_USE =
@@ -106,6 +106,10 @@ function Page() {
           <li>
             If you sign in with Google: Kabsi receives your name, email address and profile photo
             from Google.
+          </li>
+          <li>
+            If you sign in with WhatsApp: your WhatsApp number, and the contact email you give for
+            receipts if you give one (section 14).
           </li>
           <li>
             Your business name, address, country, time zone and Google identifiers (Place ID and
@@ -677,6 +681,25 @@ function Page() {
               location, phone or opening status are approved only on kabsi.co. Outside 24 hours from
               your last message we send only message templates Meta has approved. Reply STOP at any
               time (or a similar word such as UNSUBSCRIBE) and we stop at once and record it.
+            </p>
+            <p>
+              <b>Signing in with WhatsApp.</b> Continue with WhatsApp opens WhatsApp with a sign-in
+              message and a code that you send to Kabsi; Kabsi never sends you a code. Kabsi answers
+              with the browser, the system and the approximate city (country and city level, from
+              the address your browser connects from) of the device that started the sign-in, so you
+              can tell it is yours. They are shown to you in that message and not kept: Kabsi clears
+              them when you tap Yes, it&apos;s me or the 10 minutes end, and deletes the sign-in
+              record after a day. Kabsi never stores the address itself. The code and a secret held
+              by your browser are stored only as one-way hashes. Sending the message and tapping Yes
+              is also your opt-in to the alerts below, with the wording shown beside the button. An
+              account made this way has no email until you give a contact email for receipts.
+            </p>
+            <p>
+              <b>New sign-in notices.</b> When your WhatsApp is connected and someone signs in to
+              your account on the web, Kabsi sends you the browser and system of that sign-in on
+              WhatsApp, with a button to sign out everywhere; outside 24 hours from your last
+              message it comes by email instead. Kabsi keeps a record of each notice (when, and
+              whether it was sent) for 30 days.
             </p>
             <p>
               <b>What is sent.</b> The links on our site open WhatsApp with a short fixed message

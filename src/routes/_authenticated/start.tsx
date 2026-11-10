@@ -38,6 +38,8 @@ import type { HelpState } from "@/components/onboarding/need-a-hand";
 import type { HelpStep } from "@/lib/onboarding-help";
 import { WHATSAPP_ON } from "@/lib/site";
 import { track } from "@/lib/telemetry";
+import { contactEmailStatus } from "@/lib/wa-signin";
+import { ContactEmailStage } from "@/components/onboarding/contact-email";
 
 export const Route = createFileRoute("/_authenticated/start")({
   validateSearch: readStartSearch,
@@ -56,6 +58,7 @@ const HELP_STEP: Record<Screen, HelpStep> = {
   check: "snapshot",
   confirm: "find",
   questions: "find",
+  email: "find",
   whatsapp: "find",
   manager: "access",
   checked: "waiting",
@@ -80,6 +83,16 @@ function rememberChecked(id: string) {
   }
 }
 
+// Signup 1: "Skip for now" on the contact email is remembered in this browser, so setup does not ask again.
+const EMAIL_SKIP_KEY = "kabsi.onboarding.email-skipped";
+function emailSkipped() {
+  try {
+    return window.localStorage.getItem(EMAIL_SKIP_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 function StartPage() {
   const { code, new: startNew, preview: rawPreview } = Route.useSearch();
   const preview = import.meta.env.DEV ? rawPreview : undefined;
@@ -91,7 +104,15 @@ function StartPage() {
   const location = startNew ? null : (query.data ?? null);
 
   // Choices on this page the server does not keep: past the free check, past WhatsApp, past "Access works.".
-  const [seen, setSeen] = useState<{ check?: boolean; whatsapp?: boolean; checked?: boolean }>({});
+  const [seen, setSeen] = useState<{
+    check?: boolean;
+    whatsapp?: boolean;
+    checked?: boolean;
+    email?: boolean;
+  }>({});
+  // Signup 1: an owner who signed up with WhatsApp is asked once for the contact email.
+  const contact = useQuery({ queryKey: ["contact-email"], queryFn: contactEmailStatus });
+  const askEmail = !!contact.data?.needed && !contact.data.email && !emailSkipped();
   const checkedSeen = location ? seen.checked || seenChecked(location.id) : false;
   // Connected on this visit: "Connected" stays until the owner taps Next.
   const [waHold, setWaHold] = useState(preview === "wa-done");
@@ -112,6 +133,7 @@ function StartPage() {
         status: location ? (status.data ?? null) : null,
         whatsappOn,
         seen: { ...seen, checked: checkedSeen },
+        askEmail,
       });
 
   // Email 1: "Kabsi also sent it to your email." only once the setup email with the link went to this person.
@@ -256,6 +278,19 @@ function StartPage() {
       ) : null}
       {screen === "questions" && location ? (
         <RequestQuestionsStage locationId={location.id} onDone={refresh} />
+      ) : null}
+      {screen === "email" ? (
+        <ContactEmailStage
+          onDone={() => {
+            try {
+              window.localStorage.setItem(EMAIL_SKIP_KEY, "1");
+            } catch {
+              /* private mode: remembered for this page view */
+            }
+            setSeen((x) => ({ ...x, email: true }));
+            void contact.refetch();
+          }}
+        />
       ) : null}
       {screen === "whatsapp" && s ? (
         <WhatsAppStage

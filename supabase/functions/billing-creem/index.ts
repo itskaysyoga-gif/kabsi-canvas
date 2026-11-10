@@ -82,6 +82,12 @@ async function owner(req: Request): Promise<Response> {
     switch (b.op) {
       case "checkout":
         if (!plan) return fail("bad_request", "Which plan?");
+        // Signup 1 (30.50 item 3e): an owner who signed up with WhatsApp gives a contact email before a card payment.
+        if (/@wa\.kabsi\.co$/i.test(user.email ?? "")) {
+          const { data: c } = await admin().from("account_contacts").select("email").eq("user_id", user.id).maybeSingle();
+          if (!c?.email) return fail("email_needed", "Add the email for your receipts first, then choose the plan again.");
+          return json({ ok: true, url: await startCheckout(org, user.id, c.email as string, plan, period) });
+        }
         return json({ ok: true, url: await startCheckout(org, user.id, user.email ?? null, plan, period) });
       case "portal":
         return json({ ok: true, url: await portal(org) });

@@ -34,7 +34,8 @@ export function makeHandler(d: Deps) {
     if (req.method !== "POST") return fail("method_not_allowed", "Use POST.", 405);
     const b = (await req.json().catch(() => ({}))) as Record<string, unknown>;
     const email = (typeof b.email === "string" ? b.email : "").trim().toLowerCase();
-    if (!EMAIL_RE.test(email)) return fail("bad_email", "That email address doesn't look right.");
+    // Signup 1: the placeholder addresses of WhatsApp sign-ups (wa.kabsi.co) are not real inboxes and never get a code.
+    if (!EMAIL_RE.test(email) || email.endsWith("@wa.kabsi.co")) return fail("bad_email", "That email address doesn't look right.");
     const ip = d.ip(req);
     if (!(await d.verifyTurnstile(typeof b.turnstile === "string" && b.turnstile ? b.turnstile : undefined, ip))) {
       return fail("challenge_failed", "Please complete the check and try again.");

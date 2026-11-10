@@ -2133,3 +2133,36 @@ WhatsApp only, free-form replies only. Approved templates do not change. The req
   ""reset test" clears your test requests (Kabsi staff)" (Kabsi staff phones only)
 - "X booked Y" with no open enquiry (R-149 item 2): the usual proposal, with the first line of the kind it becomes: "*📅 New visit*" at a gym, "*📅 New appointment*" at a salon, "*🔧 New job*" at a garage.
 - Ambiguous weekdays (R-149 item 3): a typo that could be two days gives one button per day, the nearest date of each: "Today 15:00" (only while 3 pm is still ahead) and "Thu 12 Nov 15:00".
+
+## 77. Signup 1: Continue with WhatsApp and the new sign-in notice (10 Nov 2026, lane R R-150, master plan 30.50 item 3)
+
+The words live in `supabase/functions/_shared/wa-signin.ts` (`SIGNIN_SAY`, `WHATSAPP_SIGNIN_CONSENT`), `whatsapp/signin.ts` (the notice email), `src/components/auth/whatsapp-signin.tsx` and `src/components/onboarding/contact-email.tsx`. WhatsApp replies follow Reply look 2: one marker and a bold title, then one line, one button.
+
+**The log in page.** Three ways. On a phone: Continue with WhatsApp, Continue with Google, Continue with email. On a computer: Continue with Google, Continue with WhatsApp, Continue with email. In an in-app browser: Continue with WhatsApp, then the email form, then Google below it with the in-app line (section 51). Continue with Google and its line ("Google sign-in shares only your name and email address with Kabsi...") show only while Google sign-in is on. With Google off, the email form's back link says "Back to the other ways".
+
+**The WhatsApp step.**
+- Before the link: "Kabsi opens WhatsApp with a short sign-in message. You send it, then tap Yes on Kabsi's answer." Then the Turnstile check.
+- Main button: **Open WhatsApp** (opens wa.me with "Kabsi sign in CODE").
+- Beside it, the consent (stored with the opt-in): "When you continue with WhatsApp, Kabsi uses your WhatsApp number to sign you in and sends WhatsApp messages to it: sign-in confirmations and new sign-in notices, and for your business an alert for each new review with the business name, the star rating, the reviewer's first name, the review text up to 300 characters and the draft reply. Meta (WhatsApp) and Kapso carry these messages. Reply STOP at any time to stop."
+- On a computer, a QR code with "Or scan this with your phone's camera."
+- "The message says **Kabsi sign in CODE**. It works for 10 minutes."
+- Status: "Waiting for your message on WhatsApp." then "Kabsi answered on WhatsApp. Tap Yes, it's me there."
+- Ended: "This sign-in has ended. Start again." or "The sign-in did not finish. Start again." with **Start again**.
+- Link: "Back to the other ways".
+
+**On WhatsApp.**
+- Confirm: "❓ *Sign in on Chrome, Windows, near London?*" then "Only tap if you started this on kabsi.co just now." Button **Yes, it's me**. With no city known: "Sign in on Chrome, Windows?". With nothing known: "Sign in on a new device?".
+- After the tap: "✅ *Signed in*" then "Go back to your browser. It opens your Kabsi account by itself."
+- A wrong, used or old code, or a tap from another phone: "⏳ *This sign-in has ended*" then "Start again on kabsi.co."
+- Too many tries: "⏳ *Too many sign-in tries*" then "Wait 15 minutes, then start again on kabsi.co."
+- A forwarded sign-in message gets no answer.
+
+**The new sign-in notice.**
+- WhatsApp: "❓ *New sign-in on Chrome, Windows*" then "If this was not you, tap below. Every Kabsi sign-in on the web ends at once." Button **Sign me out everywhere**.
+- After the tap: "✅ *Signed out everywhere*" then "Log in again on kabsi.co when you need to."
+- An old notice: "⏳ *This notice has ended*" then "Write \"talk to a person\" and someone at Kabsi will help."
+- Email (outside the 24 hour window): subject "New sign-in on Chrome, Windows"; body "Someone signed in to your Kabsi account on Chrome, Windows. If this was you, there is nothing to do." and "If it was not you, reply to this email and Kabsi will sign you out everywhere."
+
+**Onboarding, an owner who signed up with WhatsApp.** Title "Where should receipts go?", line "Kabsi sends your weekly receipt and account emails here. It is optional now, and needed before a card payment." Field Email, **Save**, **Skip for now**. Checkout without it: "Add the email for your receipts first, then choose the plan again."
+
+**Staff (daily check).** WhatsApp alert "Sign-in check found 1 item: Google sign-in" and an email to hello@kabsi.co, "Kabsi Google sign-in is off".
