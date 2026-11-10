@@ -5,7 +5,8 @@ import { googleMode, invitationSearch, listAccountsOnce, refreshToken, searchTex
 import { languageOf, placeFromResults, streetPart } from "../_shared/invitations.ts";
 import { queueResponse, type QueueHealthRow } from "../_shared/queue-health.ts";
 import { secretMatches } from "../_shared/sec1/guards.ts";
-import { readHealth, readTemplateDetails } from "../_shared/whatsapp/kapso-admin.ts";
+import { listNumberWebhookIds, readHealth, readTemplateDetails, readWebhookDeliveries } from "../_shared/whatsapp/kapso-admin.ts";
+import { buckets, DELIVERY_EMAIL_KIND, runDeliveryCheck, summarize } from "../_shared/whatsapp/delivery-check.ts";
 import { bestTier, NUMBER_EMAIL_KIND, NUMBER_EMAIL_TO, numberFromHealth, runCheck } from "../_shared/whatsapp/template-check.ts";
 import { notify } from "../_shared/notify.ts";
 
@@ -130,11 +131,71 @@ async function kapsoCheck() {
   });
 }
 
+// Tidy 2 part 3 (30.49 item 5): Kapso's webhook delivery log for Kabsi's number, read only, through Kapso's API with the same secret.
+// Daily (inside {"only":"kapso"}): when any delivery failed in the last 24 hours, one staff alert on WhatsApp and one email to
+// hello@kabsi.co, counts only. By hand ({"only":"kapso_deliveries","from":"<ISO time>","to":"<ISO time>"}): the same counts for a stated
+// window, in 5 minute parts, with no alert. No phone number, message text or payload is read into the answer.
+function kapsoEnv() {
+  const apiKey = Deno.env.get("KAPSO_API_KEY") ?? "";
+  const phoneNumberId = Deno.env.get("KAPSO_PHONE_NUMBER_ID") ?? "";
+  if (!apiKey || !phoneNumberId) throw new Error("kapso_not_configured");
+  return { apiKey, phoneNumberId };
+}
+
+async function deliveriesCheck() {
+  return await runDeliveryCheck({
+    read: async (period) => {
+      const env = kapsoEnv();
+      const [log, webhookIds] = await Promise.all([readWebhookDeliveries(env, period), listNumberWebhookIds(env).catch(() => [])]);
+      return { rows: log.rows, webhookIds, truncated: log.truncated };
+    },
+    emit: async (a) => {
+      const r = await rest("rpc/ops_emit", { method: "POST", body: JSON.stringify({ p_kind: a.kind, p_channel: a.channel, p_title: a.title, p_body: a.body, p_dedupe: a.dedupe }) });
+      if (!r.ok) throw new Error(`ops_emit ${r.status}`);
+    },
+    email: async (m) => {
+      const r = await notify({ category: "internal", kind: DELIVERY_EMAIL_KIND, key: m.key, to: [{ email: NUMBER_EMAIL_TO, userId: null }],
+        content: { subject: m.subject, preheader: m.preheader, title: m.title, bodyHtml: m.html, text: m.text } });
+      if (r.failed > 0) throw new Error("delivery_email_failed");
+    },
+    now: () => new Date(),
+  });
+}
+
+/** The check of the daily call: the number and templates (Kapso 1) and the delivery log (Tidy 2). Each runs whatever the other does; a failure of either is loud. */
+async function dailyKapsoCheck() {
+  const [numberAndTemplates, deliveries] = await Promise.allSettled([kapsoCheck(), deliveriesCheck()]);
+  const why = (r: PromiseSettledResult<unknown>) => (r.status === "rejected" ? String((r.reason as Error)?.message ?? r.reason) : "");
+  if (numberAndTemplates.status === "rejected" || deliveries.status === "rejected") {
+    throw new Error([why(numberAndTemplates) && `number and templates: ${why(numberAndTemplates)}`, why(deliveries) && `deliveries: ${why(deliveries)}`].filter(Boolean).join("; "));
+  }
+  return { ...numberAndTemplates.value, deliveries: deliveries.value };
+}
+
+async function deliveriesWindow(body: { from?: string; to?: string }) {
+  const to = body.to ? new Date(body.to) : new Date();
+  const from = body.from ? new Date(body.from) : new Date(to.getTime() - 3_600_000);
+  if (!Number.isFinite(from.getTime()) || !Number.isFinite(to.getTime()) || from >= to) return { error: "bad_window" };
+  const age = Date.now() - from.getTime();
+  if (age > 30 * 86_400_000) return { error: "window_older_than_30_days" };
+  const env = kapsoEnv();
+  const period = age <= 24 * 3_600_000 ? "24h" : age <= 7 * 86_400_000 ? "7d" : "30d";
+  const [log, webhookIds] = await Promise.all([readWebhookDeliveries(env, period), listNumberWebhookIds(env).catch(() => [] as string[])]);
+  const rows = log.rows;
+  return {
+    period, rows_read: rows.length, truncated: log.truncated, webhooks_on_number: webhookIds.length,
+    summary: summarize(rows, from, to, webhookIds),
+    parts_of_5_minutes: buckets(rows, from, to, 5, webhookIds),
+    kapso_row_fields: log.keys,
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "GET" && new URL(req.url).pathname.replace(/\/+$/, "").endsWith("/queue")) return await queueCheck();
   if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
   const body = await req.json().catch(() => ({})) as { only?: string };
-  if (body.only === "kapso") return json({ checks: { kapso: await kapsoCheck() } });
+  if (body.only === "kapso") return json({ checks: { kapso: await dailyKapsoCheck() } });
+  if (body.only === "kapso_deliveries") return json({ checks: { kapso_deliveries: await deliveriesWindow(body as { from?: string; to?: string }) } });
   if (body.only === "jobs") return json({ checks: { jobs_recent: await jobsFreshness() } });
   if (body.only === "invitation_places") return json({ checks: { invitation_places: await invitationPlacesCheck(String((body as { case?: string }).case ?? "")) } });
   if (body.only === "turnstile") return json({ checks: { turnstile: (await turnstileCheck()) ?? "not configured" } });
