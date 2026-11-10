@@ -62,11 +62,11 @@ const CASES: Case[] = [
   { name: "unknown: prices", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "prices", expect: "prices", reply: /29 US dollars.*59 US dollars.*first 30 paying businesses pay 19 or 39/s }] },
   { name: "unknown: start free", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "start free", expect: "trial", reply: /https:\/\/kabsi\.co\/login\?next=\/start/ }] },
   { name: "unknown: partner program", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "partner", expect: "partner_program", reply: /25 percent/ }] },
-  { name: "unknown: talk to a person", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "talk to a person", expect: "handoff", reply: /^\*✅ A person will answer you\*\n\nHere on WhatsApp, within one working day\.\nWorking hours: Monday to Friday, 9:00 to 18:00, UAE time\.$/ }],
+  { name: "unknown: talk to a person", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "talk to a person", expect: "handoff", reply: /^A person will answer you\nHere on WhatsApp, within one working day\.\nWorking hours: Monday to Friday, 9:00 to 18:00, UAE time\.$/ }],
     check: (w) => assert.equal(w.handoffs.length, 1) },
   { name: "unknown: stats needs an account and shows no business data", tags: ["unknown", "privacy"], steps: [{ from: PHONES.unknown, text: "stats", expect: "needs_account", reply: /https:\/\/kabsi\.co\/login\?next=\/start/ }] },
   { name: "unknown: someone else's Approve button is no longer theirs", tags: ["unknown", "privacy", "25.5"], steps: [
-    { from: PHONES.unknown, button: (w) => `a:${w.alert(PHONES.owner, BIZ.harbour)}`, expect: "not_yours", reply: /^\*❓ No longer yours to approve\*\n\nNothing changed\.$/ }],
+    { from: PHONES.unknown, button: (w) => `a:${w.alert(PHONES.owner, BIZ.harbour)}`, expect: "not_yours", reply: /^No longer yours to approve\n\nNothing changed\.$/ }],
     check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("approve")).length, 0) },
   { name: "unknown: a staff command is never revealed", tags: ["unknown", "privacy"], steps: [{ from: PHONES.unknown, text: "status", expect: /^(greeting|unclear|nora)/ }],
     check: (w) => assert.doesNotMatch(w.sent.map((s) => s.body).join(" "), /Jobs failed/) },

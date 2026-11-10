@@ -128,7 +128,7 @@ Deno.test("update: by number with the pack's words, one reply each with Undo; no
   const q = await ali(w);
   assert.equal(await send(w, { text: "1 here" }), "request_status");
   assert.equal(q.status, "active");
-  assert.match(last(w).body, /^\*✅ Job 1 is now In the shop\*\n/);
+  assert.match(last(w).body, /^\*✅ Job 1 updated\*\n\nAli\nBrakes\nStatus: In the shop$/u);
   assert.deepEqual(last(w).buttons, ["Undo"]);
   assert.equal(await send(w, { text: "ready 1" }), "request_status");
   assert.equal(q.status, "ready");
@@ -146,7 +146,7 @@ Deno.test("update: by name; Ali's car is ready after a skipped step asks first, 
   const q = await ali(w);
   assert.equal(await send(w, { text: "Ali's car is ready" }), "request_status_ask");
   assert.equal(q.status, "waiting", "nothing changes before the yes");
-  assert.match(last(w).body, /Job 1 is still Waiting, and the step before Ready was never recorded\*\nMark it Ready anyway\?/);
+  assert.match(last(w).body, /^\*❓ Mark Job 1 anyway\?\*\n\nAli\nBrakes\n\nIt is still Waiting, and the step before Ready was never recorded\. It would be Ready\.$/u);
   assert.deepEqual(last(w).buttons, ["Yes", "No"]);
   assert.equal(await send(w, { text: "yes" }), "request_status_acknowledged");
   assert.equal(q.status, "ready");
@@ -185,7 +185,7 @@ Deno.test("update: here 3 4, ready 2 gets one reply; the one skipped step is the
   assert.equal(await send(w, { text: "here 3 4, ready 2" }), "request_status_many");
   assert.equal(w.repliesTo(TEST).length, before + 1, "one reply");
   assert.deepEqual([j3.status, j4.status, j2.status], ["active", "active", "ready"]);
-  assert.match(last(w).body, /Job 3 is now In the shop\*\nJob 4 is now In the shop\.\nJob 2 is now Ready\./);
+  assert.match(last(w).body, /^\*✅ Updated\*\n\nJob 3 is now In the shop\.\nJob 4 is now In the shop\.\nJob 2 is now Ready\.$/u);
   assert.deepEqual(last(w).buttons, ["Undo"]);
   // The Undo of a combined reply undoes all three, the latest first.
   assert.equal(await send(w, { button: ids(w)[0] }), "request_undone");
@@ -208,7 +208,7 @@ Deno.test("update: cancel and lost ask first and are for an owner or a manager o
     await send(w, { text: "switch" });
     await send(w, { button: `b:${SALON}` });
     assert.equal(await send(w, { text: "cancel 1" }), "request_status_ask", role);
-    assert.match(last(w).body, /This closes Appointment 1 as Cancelled\*( · [^\n]+)?\nGo ahead\?/);
+    assert.match(last(w).body, /Close Appointment 1\?\*( · [^\n]+)?\n\nSarah\nHighlights\n\nIt closes as Cancelled\./);
     assert.equal(s.status, "requested");
     assert.equal(await send(w, { text: "yes" }), "request_status_acknowledged");
     assert.equal(s.outcome, "cancelled");
@@ -237,7 +237,7 @@ Deno.test("update: a move the kind does not have is refused plainly; a name with
   const w = world({ which: [SALON] });
   const s = await sarah(w);
   assert.equal(await send(w, { text: "1 collected" }), "request_status_refused");
-  assert.match(last(w).body, /Kabsi cannot make that change\*\nNothing was changed\./);
+  assert.match(last(w).body, /^\*❓ Not changed\*\n\nAppointment 1: Kabsi cannot make that change\. Nothing was changed\.$/u);
   assert.equal(s.status, "requested");
   // "Nadia came in": nobody of that name in Kabsi. RB-F4 (R-149 item 1): a person and what they did is the request book's,
   // read as a new request with no router call; no existing request is changed and nothing is saved before a tap.
@@ -254,7 +254,7 @@ Deno.test("update: two open requests with the name ask which one, and change not
   const w = world({ which: [GARAGE] });
   const a = await ali(w), b = await ali(w);
   assert.equal(await send(w, { text: "Ali is ready" }), "request_status_which");
-  assert.match(last(w).body, /^\*❓ 2 open with that name\*\nWhich one\? Send its number with it, for example 2 ready\./);
+  assert.match(last(w).body, /^\*❓ Which one\?\*\n\n2 open with that name:\n#2 Ali · Brakes · Waiting\n#1 Ali · Brakes · Waiting\n\nSend its number with it, for example 2 ready\.$/u);
   assert.deepEqual([a.status, b.status], ["waiting", "waiting"]);
 });
 
@@ -264,7 +264,8 @@ Deno.test("confirm: Sarah confirmed Thursday 3 shows Thu 3 pm? with one tap, the
   const w = world({ which: [SALON] });
   const s = await sarah(w);
   assert.equal(await send(w, { text: "Sarah confirmed Thursday 3" }), "request_confirm_guess");
-  assert.match(last(w).body, /Appointment 1 for Sarah\*( · [^\n]+)?\nThu 3 pm\?\nTap it to set that time and record that the client confirmed\. Nothing is changed until you tap\./);
+  assert.match(last(w).body, /Appointment 1 for Sarah\*( · [^\n]+)?\n\nTime: Thu 3 pm\?\n\nTap it to set that time and record that the client confirmed\.$/);
+  assert.equal(last(w).footer, "Nothing is changed until you tap.");
   assert.deepEqual(last(w).buttons, ["Thu 3 pm"]);
   assert.equal(s.starts_at, null);
   assert.equal(s.customer_confirmed_at, null);
