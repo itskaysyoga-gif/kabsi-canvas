@@ -56,7 +56,8 @@ Deno.test("order: at the gym, Maya asked about a trial is the gym's enquiry, rea
   assert.equal(w.aiCalls, ai, "no router call");
   assert.equal(w.noraCalls.length, 0, "never a model answer about Kabsi's trial");
   assert.equal(w.extractCalls.length, 1);
-  assert.match(last(w).body, /^\*💬 New enquiry\* · Kabsi Test Gym\nName: Maya\nAsked about: Trial\n/);
+  assert.match(last(w).body, /^\*💬 New enquiry\* · Kabsi Test Gym\n\nName: Maya\nAsked about: Trial$/);
+  assert.equal(last(w).footer, "Nothing is saved until you tap Save.");
   assert.equal(await send(w, { button: `rs:${lastIntake(w).id}` }), "request_saved");
   assert.equal(w.requests[0].kind, "enquiry");
   assert.equal(w.requests[0].summary, "Trial");
@@ -119,7 +120,7 @@ Deno.test("booked: with no enquiry for Maya, a new visit is proposed with the ti
   assert.equal(await send(w, { text: "Maya booked a trial Monday 6" }), "request_proposed");
   assert.equal(w.aiCalls, ai, "no router call");
   const p = last(w).body;
-  assert.match(p, /^\*📅 New visit\* · Kabsi Test Gym\nName: Maya\nAsked about: Trial\n/);
+  assert.match(p, /^\*📅 New visit\* · Kabsi Test Gym\n\nName: Maya\nAsked about: Trial\n/);
   assert.match(p, /Which time did you mean\?/);
   assert.equal(last(w).buttons.length, 2);
   assert.equal(await send(w, { button: lastIds(w)[1]! }), "request_saved");
@@ -184,13 +185,13 @@ Deno.test("off topic: the RB-F3 look, with the business only for a phone with se
   await toGym(w);
   assert.equal(await send(w, { text: "write me a poem about the sea" }), "off_topic");
   const b = last(w).body;
-  assert.match(b, /^\*❓ Kabsi cannot help with that\* · Kabsi Test Gym\nKabsi looks after your business on Google and keeps your request book/);
+  assert.match(b, /^\*❓ Kabsi cannot help with that\* · Kabsi Test Gym\n\nKabsi looks after your business on Google and keeps your request book/);
   assert.doesNotMatch(b, /\(owner\)/);
   assert.doesNotMatch(b, HOUSE);
   // One business, the book off: no business in the line, no role head.
   const w2 = new World();
   assert.equal(await receive(w2.deps(), msg(w2, PHONES.owner, { text: "write me a poem about the sea" })), "off_topic");
-  assert.match(w2.repliesTo(PHONES.owner).at(-1)!.body, /^\*❓ Kabsi cannot help with that\*\nKabsi looks after your business on Google: review replies/);
+  assert.match(w2.repliesTo(PHONES.owner).at(-1)!.body, /^\*❓ Kabsi cannot help with that\*\n\nKabsi looks after your business on Google: review replies/);
 });
 
 Deno.test("off topic: an unclear message the router cannot place gets the same look", async () => {

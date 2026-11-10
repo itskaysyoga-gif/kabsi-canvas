@@ -64,7 +64,7 @@ for (const pack of [tutorV1, repairs]) {
     for (const kind of pack.kinds) {
       for (const s of OPEN_STATUSES[kind]) {
         assertStringIncludes(summaryReply(row(kind, s), ctx).body, `Status: ${pack.words.status[kind]![s]}`);
-        assertStringIncludes(statusChangedReply(row(kind, s), ctx).body, `is now ${pack.words.status[kind]![s]}.`);
+        assertEquals(statusChangedReply(row(kind, s), ctx).body.split("\n").includes(`Status: ${pack.words.status[kind]![s]}`), true);
       }
       for (const o of OUTCOMES[kind]) assertStringIncludes(summaryReply(row(kind, "closed", o), ctx).body, `Status: ${pack.words.status[kind]![o]}`);
       const list = openListReply([row(kind, OPEN_STATUSES[kind][0]!)], 0, ctx).body;

@@ -14,7 +14,7 @@
 import { type Ask, canMerge, type Extraction, extract, type ExtractRefusal, mergeRevision, nameCase, toEvidence } from "../request-book/extract.ts";
 import { getPack, type Pack } from "../request-book/packs/index.ts";
 import {
-  askFirstReply, confirmationReply, convertedReply, correctedReply, COVERS_NOTE, finish, foundReply, openListReply, refusalReply, requestLine,
+  askFirstReply, confirmationReply, convertedReply, correctedReply, COVERS_NOTE, finish, foundReply, openListReply, refusalReply, refusalText, requestLine,
   savedReply, statusChangedReply, summaryReply, undoneReply,
 } from "../request-book/replies/index.ts";
 import { asWritten, clip, confirmationShort, kindWord, statusKeyWord, statusWord, whenText } from "../request-book/replies/words.ts";
@@ -184,9 +184,13 @@ export async function findDuplicate(db: BookDb, me: { location: string; actor: s
 /** "Sarah already has 📅 #1, Highlights, Thu 12 Nov afternoon. Update #1 or add a new one?" with its two buttons. */
 export function duplicateReply(row: RequestRow, intakeId: string, nonceId: string, ctx: Ctx): { body: string; buttons: Button[] } {
   const when = row.starts_at ? formatWhenShort(row.starts_at, ctx) : row.requested_window_text ? clip(row.requested_window_text, 60) : null;
-  const what = [`#${row.number}`, clip(row.summary, 40), when].filter(Boolean).join(", ");
   // A star or an underscore in a name would break WhatsApp's bold, so they are left out of this line.
-  const body = `*${whoOf(row).replace(/[*_~]/g, "")} already has ${MARK[row.kind]} ${what.replace(/[*_~]/g, "")}*\nUpdate #${row.number} or add a new one?`;
+  // Look 2: the title names who and which request; the request's details are the facts; the question is last. A star or
+  // an underscore in a name would break WhatsApp's bold, so they are left out of the title.
+  const name = whoOf(row).replace(/[*_~]/g, "");
+  const title = `${name} already has #${row.number}`;
+  const facts = [clip(row.summary, 40), when].filter(Boolean).join("\n");
+  const body = `${title.split(/\s+/).length <= 5 ? title : `Already has #${row.number}`}\n${facts}\n\nUpdate #${row.number} or add a new one?`;
   return { body, buttons: [{ id: `rdu:${intakeId}:${nonceId}`, title: `Update #${row.number}`.slice(0, 20) }, { id: `rs:${intakeId}`, title: "Add new" }] };
 }
 
@@ -359,7 +363,7 @@ export async function requestSummary(db: BookDb, location: string, actor: string
   const row = rowOf(r);
   if (!row) return refusalReply({ reason: String(r.reason ?? "not_found") });
   const s = summaryReply(row, ctx);
-  return ref.word === "closed" ? finish(`${s.body}\n${BOOK_SAY.howEnded}`) : s;
+  return ref.word === "closed" ? finish(s.body.replace(/\n\n[^\n]*$/, `\n\n${BOOK_SAY.howEnded}`)) : s;
 }
 
 /** A name or a number: one request in full, several to choose from (one question), or none. */
@@ -404,6 +408,8 @@ export const undoButton = (ids: string[]): Button[] => (ids.length && ids.length
 const lbl = (pack: Pack, row: Pick<RequestRow, "kind" | "number">) => `${kindWord(pack, row.kind)} ${row.number}`;
 const whoOf = (row: Pick<RequestRow, "customer_name">) => clip(row.customer_name ?? "No name", 40);
 const refused = (r: Json) => refusalReply({ reason: String(r.reason ?? "unknown") }).body;
+/** A refusal's words alone, inside a longer line. */
+const refusedText = (r: Json) => refusalText(String(r.reason ?? "unknown"));
 const at = (now: Date) => now.toISOString();
 const sameInstant = (a: string | null, b: string | null) => !!a && !!b && Date.parse(a) === Date.parse(b);
 /** Eight hex characters for a question's buttons (unbiased: straight from a random UUID). */
@@ -433,7 +439,7 @@ async function resolve(db: BookDb, me: Me, target: Target, fits: (r: RequestRow)
 /** One question when a name fits several: send the number with the same words. */
 function which(rows: RequestRow[], example: string, ctx: Ctx, result: string): Act {
   const lines = rows.slice(0, 5).map((r) => requestLine(r, ctx));
-  return { body: [`${rows.length} open with that name. Which one? Send its number with it, for example ${rows[0]!.number} ${example}.`, ...lines].join("\n"), result };
+  return { body: [`Which one?`, `${rows.length} open with that name:`, ...lines, "", `Send its number with it, for example ${rows[0]!.number} ${example}.`].join("\n"), result };
 }
 
 const NOT_OPEN = "Nothing open in Kabsi has that name. Nothing was changed.";
@@ -475,7 +481,7 @@ async function statusCmd(db: BookDb, me: Me, items: { target: Target; keys: stri
       continue;
     }
     if (res.k === "refused") {
-      lines.push(`${tag}: ${res.body}`);
+      lines.push(`${tag}: ${res.body.split("\n\n").at(-1)}`);
       continue;
     }
     if (res.k === "many") {
@@ -487,7 +493,7 @@ async function statusCmd(db: BookDb, me: Me, items: { target: Target; keys: stri
     const { row, version } = res.full;
     const mv = statusFor(row.kind, it.keys);
     if (!mv) {
-      lines.push(`${lbl(pack, row)}: ${refusalReply({ reason: "not_allowed" }).body}`);
+      lines.push(`${lbl(pack, row)}: ${refusalText("not_allowed")}`);
       continue;
     }
     const r = await db.setStatus(me.location, me.actor, `${key}:s${i}`, row.request_id, version, mv.to, mv.outcome, false);
@@ -506,7 +512,7 @@ async function statusCmd(db: BookDb, me: Me, items: { target: Target; keys: stri
       lines.push(`${lbl(pack, row)} needs your yes first. Send it on its own.`);
       continue;
     }
-    lines.push(`${lbl(pack, row)}: ${refused(r)}`);
+    lines.push(`${lbl(pack, row)}: ${refusedText(r)}`);
   }
   const n = nonce();
   const question = ask
@@ -519,7 +525,9 @@ async function statusCmd(db: BookDb, me: Me, items: { target: Target; keys: stri
     return { body: statusChangedReply(only.row, ctx, only.flags).body, result: "request_status", buttons: undoButton(undo), question: null };
   }
   if (ask && !lines.length) return { body: askBody!, result: "request_status_ask", buttons: yesNo, question };
-  const body = [...lines, ...(askBody ? [askBody] : [])].join("\n");
+  // Look 2: what was done, one per line, under one title; a question about another part goes last, as the question.
+  const askParts = askBody ? askBody.split("\n\n") : [];
+  const body = [ask ? "One more question" : undo.length ? "Updated" : "Not changed", ...lines, ...(askParts.length ? [askParts.at(-1)!, "", askParts[0]!.split("\n")[0]!] : [])].join("\n");
   return { body: finish(body).body, result: ask ? "request_status_ask" : undo.length ? "request_status_many" : "request_status_refused",
     buttons: ask ? yesNo : undoButton(undo), question };
 }
@@ -562,17 +570,17 @@ async function confirmCmd(db: BookDb, me: Me, target: Target, when: string | nul
   // "Sarah confirmed she will pay": no day or hour at all, so not a confirmation of a time.
   if (r.k === "none") return null;
   if (r.k === "window") {
-    return { body: `${head}: say the day and the hour, for example Thursday 3pm. Nothing was changed.`, result: "request_confirm_no_time" };
+    return { body: `${head}\n\nSay the day and the hour, for example Thursday 3pm. Nothing was changed.`, result: "request_confirm_no_time" };
   }
   if (r.k === "one") return await confirmApply(db, me, f, r.startsAt, ctx, key);
   const n = nonce();
   const question: RbTime = { type: "rb_time", location_id: me.location, request_id: f.row.request_id, version: f.version, action: "confirm",
     readings: r.k === "guess" ? [r.startsAt] : r.readings.map((x) => x.startsAt), services: [], at: at(ctx.now), nonce: n };
   if (r.k === "guess") {
-    return { body: `${head}: ${r.label}?\nTap it to set that time and record that the ${customer} confirmed. Nothing is changed until you tap.`,
+    return { body: `${head}\nTime: ${r.label}?\n\nTap it to set that time and record that the ${customer} confirmed. Nothing is changed until you tap.`,
       result: "request_confirm_guess", buttons: [{ id: `rt:${f.row.request_id}:${n}:0`, title: r.label }], question };
   }
-  return { body: `${head}: which time did the ${customer} confirm? Nothing is changed until you tap.`, result: "request_confirm_choose",
+  return { body: `${head}\n\nWhich time did the ${customer} confirm? Nothing is changed until you tap.`, result: "request_confirm_choose",
     buttons: r.readings.map((x, i) => ({ id: `rt:${f.row.request_id}:${n}:${i}`, title: x.label })), question };
 }
 
@@ -598,7 +606,7 @@ async function confirmApply(db: BookDb, me: Me, f: Full, startsAt: string | null
   if (!after) return { body: refusalReply({ reason: "not_found" }).body, result: "request_confirm_gone", question: null };
   const lines = [confirmationReply(after.row, ctx).body];
   if (cleared) lines.push("The time changed, so the confirmations recorded for the old time were cleared.");
-  if (s.ok !== true) lines.push(`The time is set. The confirmation was not recorded: ${refused(s)}`);
+  if (s.ok !== true) lines.push(`The time is set. The confirmation was not recorded: ${refusedText(s)}`);
   return { body: finish(lines.join("\n")).body, result: s.ok === true ? "request_confirmed" : "request_time_set", buttons: undoButton(acts), question: null };
 }
 
@@ -618,12 +626,12 @@ async function convertCmd(db: BookDb, me: Me, name: string, rest: string, ctx: C
     const n = nonce();
     const question: RbTime = { type: "rb_time", location_id: me.location, request_id: f.row.request_id, version: f.version, action: "convert",
       readings: r.k === "guess" ? [r.startsAt] : r.readings.map((x) => x.startsAt), services: s.keys, at: at(ctx.now), nonce: n };
-    const head = `${lbl(pack, f.row)} for ${whoOf(f.row)} becomes ${/^[aeiou]/i.test(kindWord(pack, into)) ? "an" : "a"} ${kindWord(pack, into).toLowerCase()}`;
+    const head = `${lbl(pack, f.row)} becomes ${/^[aeiou]/i.test(kindWord(pack, into)) ? "an" : "a"} ${kindWord(pack, into).toLowerCase()}\n${whoOf(f.row)}`;
     if (r.k === "guess") {
-      return { body: `${head}: ${r.label}?\nTap it to save it at that time. Nothing is changed until you tap.`, result: "request_convert_guess",
+      return { body: `${head}\nTime: ${r.label}?\n\nTap it to save it at that time. Nothing is changed until you tap.`, result: "request_convert_guess",
         buttons: [{ id: `rt:${f.row.request_id}:${n}:0`, title: r.label }], question };
     }
-    return { body: `${head}. Which time did you mean? Nothing is changed until you tap.`, result: "request_convert_choose",
+    return { body: `${head}\n\nWhich time did you mean? Nothing is changed until you tap.`, result: "request_convert_choose",
       buttons: r.readings.map((x, i) => ({ id: `rt:${f.row.request_id}:${n}:${i}`, title: x.label })), question };
   }
   const input: Json = { kind: into };
@@ -685,7 +693,7 @@ async function correctCmd(db: BookDb, me: Me, number: number | null, from: strin
   if (!hits.length) {
     // Without a number, words that are on no recent request are not a correction ("not sure, maybe later").
     if (number === null) return null;
-    if (cands.length === 1) return { body: `${lbl(pack, cands[0]!.row)} does not say ${clip(from, 40)}. Nothing was changed.`, result: "request_correct_not_found" };
+    if (cands.length === 1) return { body: `Not on ${lbl(pack, cands[0]!.row)}\n${lbl(pack, cands[0]!.row)} does not say ${clip(from, 40)}.\n\nNothing was changed.`, result: "request_correct_not_found" };
     return { body: ask(cands[0]!.row.number), result: "request_correct_which" };
   }
   if (hits.length > 1) return { body: ask(hits[0]!.f.row.number), result: "request_correct_which" };
@@ -726,7 +734,7 @@ export async function undoIds(db: BookDb, me: Me, ids: string[], ctx: Ctx, key: 
     const row = { kind: d.kind as Kind, number: Number(d.number), status: String(d.status), outcome: (d.outcome as string | null) ?? null };
     return row.outcome === "voided" ? `Undone. ${lbl(ctx.pack, row)} was removed.` : undoneReply(row as RequestRow, ctx).body;
   });
-  if (stop) lines.push(`The rest was not undone: ${refused(stop)}`);
+  if (stop) lines.push(`The rest was not undone: ${refusedText(stop)}`);
   // RB-F3: two changes undone together (a time and its confirmation) read the same; the line is shown once.
   return { body: [...new Set(lines)].join("\n"), result: done.at(-1)!.replay ? "request_undone_replay" : stop ? "request_undone_partly" : "request_undone", question: null };
 }
@@ -756,9 +764,9 @@ async function askedCmd(db: BookDb, me: Me, about: string, since: Since | null, 
   const rows = (Array.isArray(r.rows) ? (r.rows as RequestRow[]) : [])
     .filter((x) => x.kind === "enquiry" && (!from || dayIn(x.created_at, ctx.timeZone) >= from));
   const when = since === "today" ? " today" : since === "week" ? " this week" : since === "month" ? " this month" : "";
-  if (!rows.length) return { body: `Nobody in Kabsi asked about ${clip(about, 40)}${when}.\n${COVERS_NOTE}`, result: "request_asked" };
+  if (!rows.length) return { body: `Nobody asked\nNobody in Kabsi asked about ${clip(about, 40)}${when}.\n\n${COVERS_NOTE}`, result: "request_asked" };
   const more = Number(r.more ?? 0);
-  const lines = [`${rows.length}${more ? " or more" : ""} asked about ${clip(about, 40)}${when}.`, ...rows.map((x) => requestLine(x, ctx)), COVERS_NOTE];
+  const lines = [`${rows.length}${more ? " or more" : ""} asked`, `About ${clip(about, 40)}${when}`, ...rows.map((x) => requestLine(x, ctx)), "", COVERS_NOTE];
   return { body: finish(lines.join("\n")).body, result: "request_asked" };
 }
 
@@ -808,52 +816,9 @@ export function openGrouped(rows: RequestRow[], more: number, ctx: Ctx): Reply {
   return finish(lines.join("\n"));
 }
 
-// ─── RB-F3 (R-148 item 3): how request book, switch and help replies look. Free-form replies only; approved templates do
-// not change. A bold first line with one marker, short lines after it, the business named in the first line only when the
-// phone has more than one, and no role in brackets.
-
-export const MARK = {
-  appointment: "\u{1F4C5}", enquiry: "\u{1F4AC}", job: "\u{1F527}", done: "✅", confirm: "⏳", undone: "↩️", ask: "❓", list: "\u{1F4CB}",
-} as const;
-
-/** The marker a reply gets, from what it did (its result code) and, for a request of one kind, that kind. */
-export function markOf(result: string, kind: Kind | null): string {
-  const r = result.split(":")[0]!;
-  const byKind = kind ? MARK[kind] : MARK.list;
-  if (/undone|undo_refused|request_undo/.test(r)) return MARK.undone;
-  if (/^request_(confirm|convert)_(guess|choose)$/.test(r)) return MARK.confirm;
-  if (/_(which|ask|choose|tap)$|which_|_tap_|still_waiting|request_change$|request_yes_tap_save|question_elsewhere|forwarded_yes|reset_ask|pick_closed|^off_topic$|^unclear/.test(r)) return MARK.ask;
-  if (/^request_(open|unconfirmed|asked|find)$|which_business|^help$|^request_find/.test(r)) return MARK.list;
-  if (/^request_(saved|status|status_many|status_acknowledged|confirmed|time_set|corrected|converted|dropped|ask_no|time_no|updated)$|^request_saved_replay$|role_set|business_set|^switched$|reset_done|^started$/.test(r)) return MARK.done;
-  return byKind;
-}
-
-/** The first line bold with its marker; a first line of several sentences keeps only the first, the rest goes below it. */
-export function styleReply(body: string, mark: string, business: string | null): string {
-  const text = body.trim();
-  if (text.startsWith("*")) return business ? withBusiness(text, business) : text;
-  const nl = text.indexOf("\n");
-  const firstLine = nl < 0 ? text : text.slice(0, nl);
-  const rest = nl < 0 ? "" : text.slice(nl + 1).replace(/^\n+/, "");
-  // A sentence end before any colon, or a colon after three words or more; "Dr." and the like never end a sentence.
-  const colon = firstLine.indexOf(":");
-  const dot = /^(.+?(?<!\b(?:Dr|Mr|Mrs|Ms|St|No))[.?])\s+(\S.*)$/s.exec(firstLine);
-  const byColon = colon >= 0 && (!dot || colon < dot[1]!.length) ? /^((?:\S+\s+){2,}\S+:)\s+(\S.*)$/s.exec(firstLine) : null;
-  const cut = byColon ?? dot;
-  let first = cut ? cut[1]! : firstLine;
-  const more = cut ? cut[2]! : "";
-  first = first.replace(/[.:]$/, "");
-  const head = `*${mark} ${first}*`;
-  const out = [business && !text.includes(business) ? `${head} · ${business}` : head, more, rest].filter(Boolean).join("\n");
-  return out;
-}
-
-const withBusiness = (text: string, business: string) => {
-  const nl = text.indexOf("\n");
-  const first = nl < 0 ? text : text.slice(0, nl);
-  if (first.includes(business)) return text;
-  return `${first} · ${business}${nl < 0 ? "" : text.slice(nl)}`;
-};
+// ─── RB-F3 (R-148 item 3), changed by look 2 (30.50 item 2): the markers and the look live in look.ts, the one render
+// step every reply in scope passes through. Re-exported here for the request book's callers and tests.
+export { MARK, markFor as markOf } from "./look.ts";
 
 /** The kind a reply is about: the kind its first line names, else the pack's usual kind. */
 export function kindIn(body: string, pack: Pack | null): Kind | null {
