@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 10 Nov 2026 (Ops 1, RB-F4). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 10 Nov 2026 (Plan 1). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -57,11 +57,10 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 10 Nov 2026, Plan 1 (R-150, docs only): master plan 30.50, the launch plan: Google care on WhatsApp only, Reply look 2, three sign-in ways with a new sign-in notice, partners join with no application, one partner program, cards counted as taps, the calendar (freeze 6 Dec, payments and Harvey 10 Dec, ads 12 Dec), the AI budget and the session order; five LATER rows. No code, facts or public wording changed. `2026-11-10-plan1.md`.
 - 10 Nov 2026, RB-F4 (R-149): at a business with the request book on, a message about a person goes to the book before the off-topic line and the router (a gym's trial is the gym's), "X booked Y" with no enquiry proposes a new visit or job, typo weekdays give one button per day, the off-topic line in the new look, help lists the book; no model call added. `2026-11-10-rb-f4.md`.
 - 10 Nov 2026, Ops 1: the "8 and 5 publications stuck" were demo rows scheduled for later (counting bug, fixed; the digest now says what to do about each); held WhatsApp messages were never released because Meta delivery statuses turned them into sent (fixed); migration 20261110090923. `2026-11-10-ops1.md`.
-- 10 Nov 2026, RB-F3 (R-148): the request book reads typos (days, months, time words and services, near matches in clean form, ties as buttons), asks "Update #N or add a new one?" for the same client and service within 7 days, a revision keeps what it does not change, request book, switch and help replies get a bold first line with one marker and no "(owner)", staff-only "reset test" (migration 20261110074811 applied, read back), off-topic messages get one fixed line; no model call added. `2026-11-10-rb-f3.md`.
-- 10 Nov 2026, Partners 1 (R-148): /partners rebuilt for review card sellers first ("The card gets the reviews. Kabsi answers them."), the partner terms and facts 08 add Google's review rules (terms version 2026-11-10); the prospect list is in the private kabsi-harvey only. `2026-11-10-partners1.md`.
-- Older entries (Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
+- Older entries (Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
 
 ## How a session updates this page
 
