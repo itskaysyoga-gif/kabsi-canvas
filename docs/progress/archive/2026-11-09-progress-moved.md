@@ -22,5 +22,6 @@ Files named in this list are in `docs/progress/archive/`.
 - 9 Nov 2026, Sync 2a (R-142, answers to Sync 1): part 0 plan 30.46 (PR 522); part 1 early access, booking words, no API, hand-off (PR 524); part 2 renewals retired, billing words, templates, Nora (PR 526); part 3 the 11 plain fixes, seven baselines (PR 529); live. `2026-11-09-sync2a.md`.
 
 - 9 Nov 2026, Tidy 1 part 0 (R-143, docs): master plan 30.47 and the R-143 row. `2026-11-09-tidy1.md`. (Moved from PROGRESS by Industry 1.)
-
-- 9 Nov 2026, SEO 1 (indexing health): old addresses one 301, footer link to /setup-call, robots fix; IndexNow already live (200); industry pairs report for lane R. `2026-11-09-seo1.md`. (Moved from PROGRESS by Onboarding 1.)
+- 9 Nov 2026, SEO 1 (indexing health): old addresses one 301, footer link to /setup-call, robots fix; IndexNow already live (200); industry pairs report for lane R. `2026-11-09-seo1.md`. (Moved from PROGRESS by Nora 2.)
+- 9 Nov 2026, Tidy 1 part 2 (R-143 item 3): card checkout only once Google access works (guard and test), the terms line dropped. `2026-11-09-tidy1.md`. (Moved from PROGRESS by Onboarding 1.)
+- 9 Nov 2026, Tidy 1 part 1 (R-143 items 1, 2, 4, 5, 7): Creem lines in the future tense, "Asked ChatGPT on [date]", map location, renewals in facts 06 and 13. `2026-11-09-tidy1.md`. (Moved from PROGRESS by Onboarding 1.)
