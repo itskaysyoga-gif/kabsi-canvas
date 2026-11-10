@@ -140,7 +140,7 @@ Deno.test("update: by number with the pack's words, one reply each with Undo; no
   const q = await ali(w);
   assert.equal(await send(w, { text: "1 here" }), "request_status");
   assert.equal(q.status, "active");
-  assert.match(last(w).body, /^\*✅ Job 1 updated\*\n\nAli\nBrakes\nStatus: In the shop$/u);
+  assert.match(last(w).body, /^\*✅ Job 1 updated\*\n\nAli\nBrakes\nNo time entered\nStatus: In the shop$/u);
   assert.deepEqual(last(w).buttons, ["Undo"]);
   assert.equal(await send(w, { text: "ready 1" }), "request_status");
   assert.equal(q.status, "ready");
@@ -364,7 +364,7 @@ Deno.test("convert: Maya booked a trial Monday 6 closes the enquiry as converted
   assert.deepEqual(acts(w, e.id).map((x) => x.type), ["created", "converted_out"]);
   assert.deepEqual(acts(w, v.id).map((x) => x.type), ["converted_in"]);
   assert.match(last(w).body, /^\*✅ Done\*( · [^\n]+)?\n\nEnquiry 1 is now Visit 2\.\nMaya\n[\s\S]*\n\nThe enquiry stays on record\./u);
-  assert.match(last(w).body, /No confirmation has been recorded yet\./);
+  assert.match(last(w).body, /Needs confirmation from the gym and from the member\.\n\nThe enquiry stays on record\.$/);
   // Undo puts the enquiry back and removes the visit, keeping the link.
   assert.equal(await send(w, { button: ids(w)[0] }), "request_undone");
   assert.equal(e.status, "new");
@@ -475,7 +475,7 @@ Deno.test("save: Undo after Save; Ali Corolla brakes, car's here is saved as In 
   const intake = [...w.intakes.values()].at(-1)!;
   assert.equal(await send(w, { button: `rs:${intake.id}` }), "request_saved");
   assert.equal(w.requests[0].status, "active");
-  assert.match(last(w).body, /Job 1 saved\*( · [^\n]+)?\n\nAli\nBrakes\nStatus: In the shop$/);
+  assert.match(last(w).body, /Job 1 saved\*( · [^\n]+)?\n\nAli\nBrakes\nNo time entered\nStatus: In the shop$/);
   assert.deepEqual(last(w).buttons, ["Undo"]);
   // Ali's car is ready: one step, no question.
   assert.equal(await send(w, { text: "Ali's car is ready" }), "request_status");
@@ -507,7 +507,7 @@ Deno.test("lists: what's open is grouped, 15 rows then a count, for this busines
   assert.equal(w.aiCalls, 0);
   assert.equal(await send(w, { text: "what's unconfirmed" }), "request_unconfirmed");
   assert.match(last(w).body, /17 appointments to confirm\*/);
-  assert.equal(last(w).rows![0], "#17 Client 17 · Haircut · Requested · To confirm: the salon, the client");
+  assert.equal(last(w).rows![0], "#17 Client 17 · Haircut · To confirm: salon, client · Requested");
   assert.equal(w.aiCalls, 0);
   clean(w);
 });

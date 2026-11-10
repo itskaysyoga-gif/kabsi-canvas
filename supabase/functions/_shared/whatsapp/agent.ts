@@ -18,7 +18,7 @@ import {
   bookHelp, bookIntent, enquiryKind, kabsiJob, kabsiQuestion, type Kind, KIND_KEY, namesKabsi, newKind, packAs, packWordWins, proposalKind,
 } from "./book.ts";
 import { photoRefusal, voiceCheck } from "./media.ts";
-import { fromText, IN_SCOPE, LIST_RESULT, type ListMsg, markFor, type Msg, NAMES_BUSINESS, toMsg } from "./look.ts";
+import { fromText, IN_SCOPE, LIST_RESULT, type ListMsg, markFor, type Msg, NAMES_BUSINESS, noraLook, ROW_TITLE_MAX, toMsg, wholeWords } from "./look.ts";
 import { type SigninDb, signinSeam } from "./signin.ts";
 import { MAX_BYTES } from "../photos/sniff.ts";
 import { notify, type Out, reply as sendReply } from "./outbox.ts";
@@ -227,7 +227,9 @@ function lookMsg(t: Turn, body: string, result: string, buttons?: Button[], list
   const many = businesses(t.who).length > 1;
   // A switch says the business in its words, so it is not named again after the title.
   const biz = t.business && (many || NAMES_BUSINESS.test(result)) && !/^(business_set|switched|role_set)$/.test(result) ? t.business.business : null;
-  return toMsg(fromText(body, markFor(result, kindIn(body, pack)), biz), { buttons: buttons?.length ?? 0, asList: LIST_RESULT.test(result), list });
+  // Nora's answer keeps her words exactly; only the frame is look 2 (look.ts noraLook).
+  const look = result === "nora" ? noraLook(body, biz) : fromText(body, markFor(result, kindIn(body, pack)), biz);
+  return toMsg(look, { buttons: buttons?.length ?? 0, asList: LIST_RESULT.test(result), list });
 }
 
 async function run(t: Turn, cmd: Command): Promise<string> {
@@ -419,8 +421,7 @@ async function withBusiness(t: Turn, toolName: string, pending: string | null, f
     if (options.length <= 10) {
       return answered(plain(t), SAY.whichBusinessTap, "which_business", undefined,
         { button: "Choose", sections: [{ rows: options.map((o, i) => {
-          const t = `${i + 1}. ${o.name}`;
-          return { id: `b:${o.id}`, title: t.length <= 24 ? t : `${t.slice(0, 21).trimEnd()}...` };
+          return { id: `b:${o.id}`, title: wholeWords(`${i + 1}. ${o.name}`, ROW_TITLE_MAX) };
         }) }] });
     }
     return answered(plain(t), SAY.whichBusinessList(options.map((o) => o.name)), "which_business");

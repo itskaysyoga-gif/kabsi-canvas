@@ -2,7 +2,7 @@
 // of say.ts in scope checked against them, the list message and its row taps, and a conversation on the fake world. No
 // database, no Kapso, no model call beyond the fakes.
 import assert from "node:assert/strict";
-import { fromText, IN_SCOPE, LIST_ROWS, lookProblems, MARK, markFor, MARKS, quote, render, toList, toMsg } from "./look.ts";
+import { fitParts, fromText, IN_SCOPE, LIST_ROWS, lookProblems, MARK, markFor, MARKS, noraLook, quote, render, rowDescription, toList, toMsg, wholeWords } from "./look.ts";
 import { SAY } from "./say.ts";
 import { parseWebhook } from "./channel.ts";
 import { parse } from "./router.ts";
@@ -120,7 +120,11 @@ Deno.test("markers: one per message, from the R-148 set and the four of item 2",
   for (const r of ["request_saved", "help", "switched", "off_topic", "hours_no_day", "post_ask", "photo", "billing_status", "handoff", "approved", "undone"]) {
     assert.ok(IN_SCOPE.test(r), r);
   }
-  for (const r of ["stats", "review_link", "prices", "nora", "keyword_set", "map_show"]) assert.ok(!IN_SCOPE.test(r), `${r} keeps its look`);
+  for (const r of ["stats", "review_link", "prices", "keyword_set", "map_show"]) assert.ok(!IN_SCOPE.test(r), `${r} keeps its look`);
+  // Look 2b: Nora's answer is in the frame (her words are not touched, look.ts noraLook).
+  assert.ok(IN_SCOPE.test("nora"));
+  assert.ok(!IN_SCOPE.test("nora_failed") && !IN_SCOPE.test("unclear_no_nora"), "her fallback lines keep their look");
+  assert.equal(markFor("nora", null), MARK.enquiry);
 });
 
 // Every in-scope line of say.ts, rendered as the agent renders it: the rules hold for each.
@@ -201,7 +205,7 @@ Deno.test("conversation: a proposal, Save, what's open as a list, and the row ta
   const intake = [...w.intakes.values()].at(-1)!;
   assert.equal(await send({ button: `rs:${intake.id}` }), "request_saved");
   assert.deepEqual(last().buttons, ["Undo"]);
-  assert.match(last().body, /^\*✅ Appointment 1 saved\* · Kabsi Test Salon\n\nSarah\nHighlights\nThu 29 Oct 15:00\nStatus: Requested\n\nNeeds confirmation from the salon and from the client\.$/);
+  assert.match(last().body, /^\*✅ Appointment 1 saved\* · Kabsi Test Salon\n\nSarah\nHighlights\nThu 29 Oct 15:00\nStatus: Requested\nNeeds confirmation from the salon and from the client\.$/);
   assert.equal(await send({ text: "what's open" }), "request_open");
   assert.equal(last().kind, "list");
   assert.deepEqual(last().rowIds, ["#1"]);
@@ -255,7 +259,10 @@ Deno.test("review 4: a list row keeps its time and what is missing; the summary 
   const l = fromText("1 open\n#12 Sarah · Full head highlights and a cut with toner and a blow dry · Thu 12 Nov 15:00 · Needs confirmation from the salon and from the client\n\nThis covers only what was entered in Kabsi.", MARK.list);
   const row = toMsg(l, { asList: true }).list!.sections[0]!.rows[0]!;
   assert.ok(row.description!.length <= 72, row.description);
-  assert.match(row.description!, /Thu 12 Nov 15:00 · To confirm: the salon, the client$/);
+  // The parts in order: service, day and time, what is to confirm. The lowest parts go whole, so the service alone stays.
+  assert.equal(row.description, "Full head highlights and a cut with toner and a blow dry");
+  const fits = toMsg(fromText("1 open\n#12 Sarah · Highlights · Thu 12 Nov 15:00 · Needs confirmation from the salon and from the client\n\nThis covers only what was entered in Kabsi.", MARK.list), { asList: true }).list!.sections[0]!.rows[0]!;
+  assert.equal(fits.description, "Highlights · Thu 12 Nov 15:00 · To confirm: salon, client");
 });
 
 Deno.test("review 5: the business list numbers its rows, so replying with the number still matches what is shown", async () => {
@@ -269,4 +276,138 @@ Deno.test("review 5: the business list numbers its rows, so replying with the nu
   assert.equal(s.kind, "list");
   assert.ok(s.rows!.every((r, i) => r.startsWith(`${i + 1}. `)), s.rows!.join("|"));
   assert.ok(s.rowIds!.every((x) => /^b:/.test(x)));
+});
+
+// ─── Look 2b: list rows. Service, then day and time, then what is to confirm; the lowest part goes whole; no word is cut and
+// nothing ends with "...". WhatsApp cuts a description at 72 characters and a title at 24.
+const rowOf = (line: string) => toMsg(fromText(`1 open\n${line}\n\nThis covers only what was entered in Kabsi.`, MARK.list), { asList: true }).list!.sections[0]!.rows[0]!;
+const CONFIRM_LINE = "Needs confirmation from the salon and from the client";
+
+Deno.test("look 2b: a row description is service, day and time, to confirm, in that order", () => {
+  const r = rowOf(`#12 Sarah · Highlights · Thu 12 Nov afternoon, no time set · ${CONFIRM_LINE}`);
+  // Rashid's phone check of 10 Nov showed "Highlights · Thu 12 Nov afternoon, no time set · To confirm: the salo...".
+  assert.equal(r.description, "Highlights · Thu 12 Nov afternoon · To confirm: salon, client");
+  assert.equal(r.title, "#12 Sarah");
+  // One side missing: just that one. Nothing missing: no part for it. No time: the part is left out.
+  assert.equal(rowOf("#3 Ali · Brakes · Thu 12 Nov 15:00 · Needs confirmation from the client").description, "Brakes · Thu 12 Nov 15:00 · To confirm: client");
+  assert.equal(rowOf("#3 Ali · Brakes · Thu 12 Nov 15:00 · Confirmed by the salon · Needs confirmation from the client").description, "Brakes · Thu 12 Nov 15:00 · To confirm: client");
+  assert.equal(rowOf(`#4 Dina · Facial · ${CONFIRM_LINE}`).description, "Facial · To confirm: salon, client");
+  assert.equal(rowOf("#5 Omar · Personal training").description, "Personal training");
+  // A row's time loses "no time set", and a part of the day stands alone.
+  assert.equal(rowOf("#6 Lina · Manicure · Tomorrow afternoon, no time set").description, "Manicure · Tomorrow afternoon");
+  assert.doesNotMatch(rowOf("#6 Lina · Manicure · Tomorrow afternoon, no time set").description!, /no time set/);
+  // A status the line carries is the lowest part.
+  assert.equal(rowOf("#7 Hana · Trial · Not contacted").description, "Trial · Not contacted");
+  assert.equal(rowOf(`#8 Sam · Haircut · Fri 13 Nov 10:00 · Requested · ${CONFIRM_LINE}`).description, "Haircut · Fri 13 Nov 10:00 · To confirm: salon, client · Requested");
+  // The gym's side is "the gym": the same plain words.
+  assert.equal(rowDescription(["Trial", "Mon 16 Nov 18:00", "Needs confirmation from the gym and from the member"]), "Trial · Mon 16 Nov 18:00 · To confirm: gym, member");
+});
+
+Deno.test("look 2b: a description of 71, 72 and 73 characters: the lowest part goes whole at 73", () => {
+  // service + " · " + "Thu 12 Nov 15:00" (16) + " · " + "To confirm: salon, client" (25) = service + 47.
+  const at = (n: number) => `${"a".repeat(n - 47)}`;
+  for (const [n, kept] of [[71, 3], [72, 3], [73, 2]] as const) {
+    const service = at(n);
+    const d = rowOf(`#1 Sarah · ${service} · Thu 12 Nov 15:00 · ${CONFIRM_LINE}`).description!;
+    assert.ok(d.length <= 72, `${n}: ${d.length}`);
+    assert.equal(d, kept === 3 ? `${service} · Thu 12 Nov 15:00 · To confirm: salon, client` : `${service} · Thu 12 Nov 15:00`, String(n));
+    assert.equal(d.split(" · ").length, kept, String(n));
+    assert.doesNotMatch(d, /\.\.\./);
+  }
+  // fitParts on its own: the same rule for any parts, limit 72.
+  assert.equal(fitParts(["a".repeat(30), "b".repeat(20), "c".repeat(20)], 72), `${"a".repeat(30)} · ${"b".repeat(20)}`);
+  assert.equal(fitParts(["a".repeat(30), "b".repeat(19), "c".repeat(17)], 72).length, 72);
+  assert.equal(fitParts(["Highlights", "", "To confirm: client"], 72), "Highlights · To confirm: client");
+});
+
+Deno.test("look 2b: with a long service name no word is cut and nothing ends with an ellipsis", () => {
+  const long = "Full head highlights and a cut with toner and a blow dry and a treatment";
+  assert.ok(long.length > 72 - 3);
+  const d = rowOf(`#12 Sarah · ${long} · Thu 12 Nov 15:00 · ${CONFIRM_LINE}`).description!;
+  assert.ok(d.length <= 72);
+  assert.doesNotMatch(d, /\.\.\./);
+  assert.ok(long.startsWith(d), "only whole leading words of the service remain");
+  assert.ok(long.split(" ").join(" ").startsWith(d.split(" ").slice(0, -1).join(" ")));
+  // A service of more than 72 characters loses its last words, never half of one.
+  const huge = Array.from({ length: 14 }, (_, i) => `word${i}xx`).join(" ");
+  const h = rowOf(`#2 Dina · ${huge} · Fri 13 Nov 10:00`).description!;
+  assert.ok(h.length <= 72 && huge.startsWith(h) && /word\d+xx$/.test(h), h);
+  // The same holds for every length from 40 to 90 characters of service, with a time and a confirmation after it.
+  for (let n = 40; n <= 90; n++) {
+    let service = "abcd";
+    while (`${service} abcd`.length <= n) service += " abcd";
+    const x = rowOf(`#3 Lina · ${service} · Thu 12 Nov 15:00 · ${CONFIRM_LINE}`).description!;
+    assert.ok(x.length <= 72, `${n}: ${x.length}`);
+    assert.doesNotMatch(x, /\.\.\.|[ ·]$/, String(n));
+    for (const part of x.split(" · ")) assert.ok(/^(abcd( abcd)*|Thu 12 Nov 15:00|To confirm: salon, client)$/.test(part), `${n}: ${part}`);
+  }
+});
+
+Deno.test("look 2b: a row title of 24 characters or fewer, whole words, no ellipsis; 23, 24 and 25 characters", () => {
+  const title = (name: string) => rowOf(`#12 ${name} · Haircut`).title;
+  // "#12 " is 4 characters.
+  assert.equal(title("Abcdefghij Klmnopqrs"), "#12 Abcdefghij Klmnopqrs"); // 24
+  assert.equal(title("Abcdefghij Klmnopqr"), "#12 Abcdefghij Klmnopqr"); // 23
+  assert.equal(title("Abcdefghij Klmnopqrst"), "#12 Abcdefghij"); // 25: the last word goes whole
+  assert.equal(title("Alexandra Montgomery-Smith"), "#12 Alexandra");
+  assert.equal(title("Wolfeschlegelsteinhausenberger"), "#12", "a single word too long is not cut");
+  assert.equal(wholeWords("12. Kabsi Test Garage and Tyres", 24), "12. Kabsi Test Garage");
+  for (const name of ["Sarah", "Maria del Carmen Fernandez Lopez", "Dr. Alexandrina Montgomery"]) {
+    const t = title(name);
+    assert.ok(t.length <= 24 && !/\.\.\./.test(t), t);
+    assert.ok(`#12 ${name}`.startsWith(t), t);
+  }
+});
+
+Deno.test("look 2b: the business list rows follow the same title rule", async () => {
+  const w = new World();
+  const biz = (n: number, name: string) => ({ id: `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`, name, tz: "Asia/Dubai", country: "AE", pro: false, members: { [USERS.rashid]: "owner" as const }, demo: true });
+  w.biz.push(biz(21, "Kabsi Test Garage and Tyres"), biz(22, "Kabsi Test Salon"), biz(23, "Kabsi Test Gym"), biz(24, "Harbour Lane Coffee"));
+  await receive(w.deps(), msg(w, PHONES.rashid, { text: "switch" }));
+  await receive(w.deps(), msg(w, PHONES.rashid, { button: "r:business" }));
+  const o = w.outbox.filter((x) => x.phone === PHONES.rashid).at(-1)!;
+  // The fake sender has no list message, so the rows are sent as numbered lines: the same titles.
+  assert.match(o.body, /\n2\. Kabsi Test Garage and\n/, o.body);
+  assert.doesNotMatch(o.body, /\.\.\./);
+});
+
+// ─── Look 2b: Nora in the frame.
+Deno.test("look 2b: Nora's answer is one marker, a bold title of five words or fewer, her words as she wrote them, then one question", () => {
+  const answer = "Nothing goes to Google without your yes. Every reply waits for you to approve it on WhatsApp or at your Kabsi account (kabsi.co/app).";
+  const body = toMsg(noraLook(answer, null)).body;
+  assert.equal(body, `*\u{1F4AC} Nora's answer*\n\n${answer}`);
+  assert.deepEqual(lookProblems({ body }), []);
+  // A question: block 3, taken off the end of her text, the words unchanged.
+  const withQ = "Kabsi does not store your Google password. Nothing is published without your yes. Do you want to know how approval works?";
+  const m = toMsg(noraLook(withQ, "Kabsi Test Salon"), {});
+  assert.equal(m.body, "*\u{1F4AC} Nora's answer* · Kabsi Test Salon\n\nKabsi does not store your Google password. Nothing is published without your yes.\n\nDo you want to know how approval works?");
+  assert.deepEqual(lookProblems(m), []);
+  // A question on its own line, and her own two paragraphs, keep their words.
+  const two = noraLook("Essentials is 9 pounds a month.\nPro is 19 pounds a month.\n\nWhich one fits your business?");
+  assert.deepEqual(two.facts, ["Essentials is 9 pounds a month.", "Pro is 19 pounds a month."]);
+  assert.equal(two.end, "Which one fits your business?");
+  // No role head, no marker twice, never more than three blocks, never a title of her sentence.
+  assert.ok(render(two).split("\n\n").length <= 3);
+  assert.ok(noraLook("Yes.").title.split(" ").length <= 5);
+  // Her words are the same words: the frame adds only the title, the marker and the blank lines.
+  const strip = (x: string) => x.replace(/\s+/g, " ").trim();
+  assert.equal(strip(render(noraLook(withQ)).split("\n\n").slice(1).join(" ")), strip(withQ));
+  // A "Dr." in her answer is not a sentence end for the question.
+  assert.equal(noraLook("Ask Dr. Smith?").end, "Ask Dr. Smith?");
+});
+
+Deno.test("look 2b: an owner's question for Nora is answered in the frame, with no role head", async () => {
+  const w = new World();
+  w.biz.push({ id: "00000000-0000-4000-8000-000000000011", name: "Kabsi Test Salon", tz: "Asia/Dubai", country: "AE", pro: false, members: { [USERS.rashid]: "owner" }, demo: true });
+  w.noraAnswer = "Nothing goes to Google without your yes. Do you want to see how to approve a reply?";
+  await receive(w.deps(), msg(w, PHONES.rashid, { text: "switch" }));
+  await receive(w.deps(), msg(w, PHONES.rashid, { button: "r:business" }));
+  const text = "is my data safe with Kabsi";
+  w.aiMap[text] = JSON.stringify({ tool: "question", args: { text }, lang: "en" });
+  assert.equal(await receive(w.deps(), msg(w, PHONES.rashid, { text })), "nora");
+  const out = w.repliesTo(PHONES.rashid).at(-1)!;
+  assert.equal(out.body, "*\u{1F4AC} Nora's answer*\n\nNothing goes to Google without your yes.\n\nDo you want to see how to approve a reply?");
+  assert.deepEqual(lookProblems({ body: out.body }), []);
+  assert.doesNotMatch(out.body, /Kabsi staff tools|Your business|^Nora:/m);
+  assert.equal(w.noraCalls.length, 1);
 });

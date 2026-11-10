@@ -46,9 +46,9 @@ const CASES: Case[] = [
   { name: "unknown: a first message that is a question gets the answer, not the welcome", tags: ["unknown", "nora"],
     setup: (w) => (w.aiMap["can kabsi post replies without asking me"] = tool("question", { text: "can kabsi post replies without asking me" })), steps: [
       { from: PHONES.unknown, text: "can kabsi post replies without asking me", expect: "nora", reply: /without your yes/, ai: 1 }] },
-  { name: "owner: a question about Kabsi goes to Nora, headed with the business", tags: ["owner", "nora"],
+  { name: "owner: a question about Kabsi goes to Nora, in the look 2 frame with no role head", tags: ["owner", "nora"],
     setup: (w) => (w.aiMap["what happens if I cancel"] = tool("question", { text: "what happens if I cancel" })), steps: [
-      { from: PHONES.owner, text: "what happens if I cancel", expect: "nora", head: /^Harbour Lane Coffee \(owner\)/, ai: 1 }] },
+      { from: PHONES.owner, text: "what happens if I cancel", expect: "nora", head: /^\*\u{1F4AC} Nora's answer\*\n\n/u, ai: 1 }] },
   { name: "unknown: Nora failing gives the plain unclear line", tags: ["unknown", "nora", "failure"],
     setup: (w) => { w.noraAnswer = "throw"; w.aiMap["is it safe"] = tool("question", { text: "is it safe" }); }, steps: [
       { from: PHONES.unknown, text: "is it safe", expect: "nora_failed", reply: /did not catch that/, ai: 1 }] },

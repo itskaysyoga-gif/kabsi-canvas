@@ -190,8 +190,9 @@ Deno.test("replies: a list of more than one kind is grouped by the pack's own wo
 Deno.test("replies: a request with no time says so, and the customer's own words are shown with that note", () => {
   const c = ctx(salonV1);
   assertStringIncludes(requestLine(row({ starts_at: null, requested_window_text: "Thursday afternoon" }), c), "Thursday afternoon, no time set");
-  assertStringIncludes(summaryReply(row({ starts_at: null }), c).body, "When: no time entered");
-  assertStringIncludes(summaryReply(row(), c).body, "When: Thu 12 Nov 15:00");
+  assertStringIncludes(summaryReply(row({ starts_at: null }), c).body, "\nNo time entered\n");
+  assertStringIncludes(summaryReply(row(), c).body, "\nThu 12 Nov 15:00\n");
+  assertNotMatch(summaryReply(row(), c).body, /When:/);
   assertEquals(formatWhen("2026-11-08T11:00:00.000Z", TZ, NOW), "Today 15:00");
   assertEquals(formatWhen("2026-11-09T06:00:00.000Z", TZ, NOW), "Tomorrow 10:00");
 });
@@ -311,9 +312,9 @@ Deno.test("replies: a conversion keeps the enquiry on record and records no conf
   const r = convertedReply({ kind: "enquiry", number: 12 }, created, c);
   assertStringIncludes(r.body, "Enquiry 12 is now Visit 15\nMaya\n");
   assertStringIncludes(r.body, "The enquiry stays on record.");
-  assertStringIncludes(r.body, "No confirmation has been recorded yet.");
+  assertStringIncludes(r.body, "Needs confirmation from the gym and from the member.");
   assertNotMatch(r.body, /Confirmed by/);
-  assertNotMatch(convertedReply({ kind: "enquiry", number: 12 }, row({ kind: "job", status: "waiting" }), ctx(garageV1)).body, /No confirmation/);
+  assertNotMatch(convertedReply({ kind: "enquiry", number: 12 }, row({ kind: "job", status: "waiting" }), ctx(garageV1)).body, /confirmation/);
 });
 
 Deno.test("replies: confirmation, saved and undone replies are built from the record the database holds", () => {
@@ -321,7 +322,7 @@ Deno.test("replies: confirmation, saved and undone replies are built from the re
   const after = row({ number: 9, staff_confirmed: true });
   const conf = confirmationReply(after, c).body;
   assertEquals(conf.split("\n")[0], "Appointment 9 updated");
-  assertStringIncludes(conf, "Confirmed by the salon. Still needs confirmation from the client");
+  assertStringIncludes(conf, "Confirmed by the salon. Still needs confirmation from the client.");
   assertNotMatch(conf, /Confirmed by the client/);
   assertEquals(savedReply(row({ number: 3 }), c).body.split("\n")[0], "Appointment 3 saved");
   assertEquals(undoneReply(row({ number: 3, status: "closed", outcome: "attended" }), c).body, "Undone\nAppointment 3 is back to Came in.");
@@ -415,4 +416,59 @@ Deno.test("replies: tomorrow is the next date on the business's calendar, not 24
   assertEquals(formatWhen("2027-03-14T03:00:00.000Z", ny, night), "Today 22:00");
   // A zone that is not a zone gives no text rather than an error.
   assertEquals(formatWhen("2027-03-14T14:00:00.000Z", "Not/AZone", night), "");
+});
+
+// Look 2b: one request, one set of lines. The saved message, the detail view and the other replies about the same request
+// show the same fact lines, in the same order, with the same labels; a date has no "When:" label.
+const factsOf = (body: string) => {
+  const blocks = body.split("\n\n");
+  return blocks[0]!.split("\n").slice(1);
+};
+Deno.test("look 2b: the saved message and the detail view show the same fact lines in the same order", () => {
+  const cases: [Pack, Partial<RequestRow>][] = [
+    [salonV1, {}],
+    [salonV1, { staff_confirmed: true }],
+    [salonV1, { starts_at: null, requested_window_text: "Thursday afternoon" }],
+    [salonV1, { starts_at: null }],
+    [salonV1, { next_action: "Call back", next_action_due_at: "2026-11-09T06:00:00.000Z" }],
+    [gymV1, { kind: "enquiry", status: "new", summary: "Trial", starts_at: null }],
+    [garageV1, { kind: "job", status: "active", starts_at: null }],
+  ];
+  for (const [pack, over] of cases) {
+    const r = row(over);
+    const c = ctx(pack);
+    const saved = factsOf(savedReply(r, c).body);
+    const detail = factsOf(summaryReply(r, c).body);
+    assertEquals(detail, saved, JSON.stringify(over));
+    assertEquals(factsOf(statusChangedReply(r, c).body), saved);
+    assertEquals(factsOf(confirmationReply(r, c).body), saved);
+    assertEquals(saved, factsOf(savedReply(r, c).body));
+    assertNotMatch(saved.join("\n"), /When:/, "a date explains itself");
+    assertEquals(saved[0], "Sarah");
+    assertEquals(saved[1], "Highlights" === r.summary ? "Highlights" : r.summary);
+    assert(saved.some((l) => l.startsWith("Status: ")), "the status keeps its label");
+  }
+  // The order: who, what, when, status, what is confirmed or missing, the next step.
+  const full = factsOf(summaryReply(row({ staff_confirmed: true, next_action: "Call back" }), ctx(salonV1)).body);
+  assertEquals(full, ["Sarah", "Highlights", "Thu 12 Nov 15:00", "Status: Requested", "Confirmed by the salon. Still needs confirmation from the client.", "Next step: Call back"]);
+  assertEquals(factsOf(summaryReply(row({ starts_at: null }), ctx(salonV1)).body)[2], "No time entered");
+});
+
+Deno.test("look 2b: every closing sentence ends with a full stop (or is a question)", () => {
+  const c = ctx(salonV1);
+  const r = row();
+  const closed = row({ status: "closed", outcome: "attended" });
+  const replies = [
+    savedReply(r, c), summaryReply(r, c), summaryReply(row({ kind: "enquiry", status: "new" }), ctx(gymV1)), summaryReply(closed, c),
+    statusChangedReply(r, c), statusChangedReply(r, c, ["reopened"]), confirmationReply(row({ staff_confirmed: true, customer_confirmed: true }), c),
+    convertedReply({ kind: "enquiry", number: 12 }, row(), c), undoneReply(r, c), openListReply([r], 0, c), openListReply([], 0, c),
+    foundReply([], 0, c), foundReply([r, row()], 0, c), askFirstReply(r, c, { to: "closed", outcome: "cancelled", flags: [] }),
+    ...KNOWN_REFUSALS.map((reason) => refusalReply({ reason })),
+  ];
+  for (const x of replies) {
+    const end = x.body.split("\n").filter(Boolean).at(-1)!;
+    // A title alone (a reply of one block) is not a closing sentence.
+    if (x.body.split("\n").filter(Boolean).length === 1) continue;
+    assertMatch(end, /[.?]$|\(\d+\)$|^\d+ open$/, `closing line: ${end}`);
+  }
 });
