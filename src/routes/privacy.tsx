@@ -118,6 +118,12 @@ function Page() {
             questions. Earlier versions of a fact are kept as a history.
           </li>
           <li>
+            Two optional answers from setup: how you keep track of client requests today (with the
+            name of your booking app, if you give it) and whether you want to try new WhatsApp tools
+            first, each with the date you first answered. You can skip them, and change or clear
+            them in About your business. Kabsi sends nothing because of an answer.
+          </li>
+          <li>
             Your Google reviews (reviewer's public name, rating, text and dates), the replies we
             draft and the replies you post; posts, photos and special hours you prepare; your Google
             profile's name, phone, address, hours, website and category, to detect changes.

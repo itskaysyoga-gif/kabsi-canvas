@@ -16,6 +16,7 @@ import {
   type Who,
 } from "@/components/onboarding/stages";
 import { ErrorNote } from "@/components/onboarding/onboarding-shell";
+import { RequestQuestionsStage } from "@/components/onboarding/request-answers";
 import { ErrorState } from "@/components/kabsi/ui";
 import { readStartSearch } from "@/lib/search-params";
 import { STAGE_OF, screenOf, type Screen } from "@/lib/onboarding-flow";
@@ -54,6 +55,7 @@ const HELP_STEP: Record<Screen, HelpStep> = {
   find: "find",
   check: "snapshot",
   confirm: "find",
+  questions: "find",
   whatsapp: "find",
   manager: "access",
   checked: "waiting",
@@ -216,7 +218,11 @@ function StartPage() {
       }
     : { step: "find" };
   const showResume =
-    !!s?.resume_code && (screen === "confirm" || screen === "whatsapp" || screen === "manager");
+    !!s?.resume_code &&
+    (screen === "confirm" ||
+      screen === "questions" ||
+      screen === "whatsapp" ||
+      screen === "manager");
 
   return (
     <OnboardingShell
@@ -247,6 +253,9 @@ function StartPage() {
           error={error}
           onConfirm={confirm}
         />
+      ) : null}
+      {screen === "questions" && location ? (
+        <RequestQuestionsStage locationId={location.id} onDone={refresh} />
       ) : null}
       {screen === "whatsapp" && s ? (
         <WhatsAppStage

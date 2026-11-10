@@ -77,12 +77,12 @@ Gate 1 opened on 9 Nov 2026 on RB-D's evaluation (R-140, master plan 30.44 item 
 | 6 | RB-E | WhatsApp connection: capture and find, test businesses | Opus | Gate 1 | Alone |
 | 7 | RB-F | Update, correct, confirm, convert, Undo, what's open | Opus | RB-E | Alone |
 |  | **Gate 2** |  |  |  |  |
-| 8 | RB-G | Suggest an existing customer, never merge | Opus | Gate 2 | With W-1 |
+|  | **Gate 3** (R-145: the early answers) |  |  |  |  |
+| 8 | RB-G | Suggest an existing customer, never merge | Opus | Gate 3 | With W-1 |
 | 9 | RB-H | Export, erasure, holds | Opus | RB-G | With W-1 |
 | 10 | RB-I | Retention rules and the real-data gate | Opus | RB-H | Alone |
 | 11 | RB-J | Privacy, terms, customer notice, facts | Sonnet | RB-I, the legal review's notes | With W-2 |
-|  | **Gate 3** |  |  |  |  |
-| 12 | RB-K | Pilot kit, the first session (R-140) and the salon worker ease test with RB-F's pass marks (R-141), one real salon switched on | Sonnet | Gate 3 | Alone |
+| 12 | RB-K | Pilot kit, the first session (R-140) and the salon worker ease test with RB-F's pass marks (R-141), one real salon switched on | Sonnet | RB-J, and the real salon checks under the gates table | Alone |
 |  | **Gate 4: the 30-day scorecard** |  |  |  |  |
 | 13 | W-1 | Website and app design | Opus | Gate 2 | With RB-G, RB-H |
 | 14 | W-2 | Copy and facts, held back | Sonnet | W-1 approved | With RB-J |
@@ -98,11 +98,13 @@ Later capabilities each wait for their own evidence, and are listed in the Sessi
 | Gate | Opens | Evidence required | If it fails |
 |---|---|---|---|
 | 1 | The real phone | RB-C1, RB-C2 and RB-D merged. Eval pass marks met. Rashid's own phone as the test owner (R-141). Rashid's go | Fix and rerun. No phone work |
-| 2 | Customer data work | Full script passes on the real phone. Yawmiyati unchanged. Meta's pricing data read. Five owner conversations from Instagram are done (R-141, master plan 30.45 item 3). A conversation counts only when the owner keeps requests by hand or in chats with no full booking platform and agrees to try Kabsi on their own phone for two weeks. At least 3 of 5 open the gate | After two rounds of fixes, redesign or stop. If fewer than 2 of 5 qualify and agree, the request book stops after the demo and Kabsi stays Google care |
-| 3 | One real business | RB-G to RB-J merged. Legal review. Kapso Pro with a 30-day window. Supabase Pro. Kapso's written answer on the provider terms. Rashid's go for one location | No real data |
+| 2 | The phone demo is done | Full script passes on the real phone. Yawmiyati unchanged. Meta's pricing data read. Only the phone demo is needed: the five owner conversations are no longer required (R-145, master plan 30.48 item 3, which replaces R-140 item 3 and R-141 items 2 and 3) | After two rounds of fixes, redesign or stop |
+| 3 | Customer data work (RB-G to RB-K) | Of the first 10 businesses that answer the two optional onboarding questions (R-145, master plan 30.48 item 4), at least 3 keep requests in chats, a notebook or memory and say yes to early access, the first being the pilot. Read in Staff, Businesses, Early answers (counts only) | Fewer than 2 of the first 10: the request book stays off and Kabsi stays Google care. Exactly 2: lane R decides. Fewer than 10 answers: keep collecting |
 | 4 | More building | Pilot scorecard read after 30 days, with a usage check on day 14 | Continue, change focus to trades, or stop. If owners will not enter requests on most working days, the request book stops and Kabsi stays Google care |
 | 5 | The public website | Live for real owners. Facts updated. Claims checked. Rashid's go | The site keeps saying only what it says now |
 | 6 | A second business and scale | Limits and usage meter. Kapso's answer. A price decision | One business only |
+
+Before RB-K switches one real salon on, what the earlier Gate 3 asked still applies (master plan 30.48 item 4): RB-G to RB-J merged, the legal review, Kapso Pro with a 30-day window, Supabase Pro, Kapso's written answer on the provider terms, and Rashid's go for one location. Without them there is no real data.
 
 ### Google product launch, running beside this
 
@@ -142,7 +144,7 @@ Today four separate locks refuse it. RB-I replaces them with one rule, and sets 
 | Lock today | After RB-I |
 |---|---|
 | `real_data_allowed` has a check forcing false | True only when the location is `live` and an approved retention rule exists for its country |
-| `location_packs.state` allows only off and test | Adds `live`, set by hand for one location at Gate 3 |
+| `location_packs.state` allows only off and test | Adds `live`, set by hand for one location when RB-K switches one real salon on |
 | `customer_identifiers_guard` takes only fictional values | Takes real values only when `real_data_allowed` is true |
 | `rb_gate` needs `test`, `rb_external_ok` needs `fictional-` | Accept `live` only with an approved rule. Test locations keep today's limits |
 
@@ -224,7 +226,7 @@ The existing design system stays: Design 9, the light-led tokens, one yellow but
 | Pricing | Unchanged | Only what P-1 decides |
 | `/for` pages | Unchanged | Hair, barber, beauty and spa pages carry the salon examples. Salon focus never reaches Home |
 | FAQ, About | Unchanged | New answers: what it records, what it does not, and that Kabsi never messages customers |
-| Security, Privacy, Terms | Change at Gate 3 through RB-J, because real data needs them | Reviewed wording stays |
+| Security, Privacy, Terms | Change through RB-J, before one real salon is switched on, because real data needs them | Reviewed wording stays |
 | Founding, Partners | Unchanged | Reworded only if the offer changes |
 | Free check, guides, free tools | Unchanged | Unchanged |
 | Nora, `llms` files, facts | Unchanged | Updated in the same switch as the site |
@@ -271,12 +273,13 @@ Only the items below need Rashid. Everything else runs inside the sessions.
 |---|---|---|
 | Now | Run RB-0 | Open a claude.ai/code session on `kabsi-canvas`, choose Sonnet, paste the RB-0 prompt |
 | Now | Say go for F-1, RB-C1, RB-C2 and RB-D | Write GO on the first line of each prompt |
-| Now | Start the five owner conversations (R-141) | From Instagram, by hand, as research, and never from any WhatsApp number. Ask how they track requests today and whether they would try Kabsi on their own phone for two weeks |
+| Now | Nothing for the owner conversations | No longer required (R-145). Every new business is asked the two optional questions in onboarding; read the answers in Staff, Businesses, Early answers |
 | By 17 Nov | Set the monthly AI budget | Anthropic console. RB-D's hand run under 5 USD should finish before the credit ends |
 | Before Gate 1 | Rashid's own phone, the owner of Yawmiyati, joined to the three test businesses through his existing verified user (R-141) | Bind it through the test businesses in RB-E. No number in code. Never paste the number into a report |
 | At Gate 2 | Run the phone script | Script comes from RB-F's report. The ease test with a salon worker moves to RB-K's first session (R-141) |
-| Before Gate 3 | Legal review, Kapso Pro with a 30-day window, Supabase Pro | The review's notes go into the RB-J prompt |
-| Gate 3 | One real salon, from a Founding 25 application or an introduction | Rashid's go for one location |
+| At Gate 3 | Read the early answers | Staff, Businesses, Early answers: 3 or more of the first 10 opens it; fewer than 2 keeps the request book off |
+| Before RB-K | Legal review, Kapso Pro with a 30-day window, Supabase Pro | The review's notes go into the RB-J prompt |
+| RB-K | One real salon, from the businesses that answered yes, a Founding 25 application or an introduction | Rashid's go for one location |
 | Day 14 and day 30 of the pilot | Read the scorecard with lane R | Lane R decides continue, change focus or stop |
 
 Paste each session report back into the lane R chat. Lane R checks it, and any change to the next prompt comes from there.
@@ -287,7 +290,7 @@ These stay out until real use earns them: vehicles, quotes, forwards, screenshot
 
 | Risk | What could happen | Control |
 |---|---|---|
-| Owners will not type | The slice works and nobody uses it | Five conversations now. Day 14 check. Gate 4 stop rule |
+| Owners will not type | The slice works and nobody uses it | The early answers at Gate 3 (R-145). Day 14 check. Gate 4 stop rule |
 | Live agent regression | A Google flow breaks | One switch, the snapshot test, the full WhatsApp suite, the Yawmiyati check |
 | No staging system | Dark code runs in production | Fictional businesses, a separate phone, real data refused by the database |
 | A service caller names the wrong person | The database cannot prove who is behind a call | RB-E takes actor and location from the verified sender, as an acceptance test |

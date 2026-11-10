@@ -37,6 +37,11 @@ export type OnboardingStatus = {
   first_task_done: boolean;
   /** Only for owners: the code of the resume link. */
   resume_code: string | null;
+  /**
+   * Onboarding 1 (R-145): the owner continued or skipped the two optional questions. A status without the field
+   * (older code) counts as done: the questions screen shows only for `false`.
+   */
+  questions_done?: boolean;
 };
 
 /** The screens of /start, in order. */
@@ -44,6 +49,7 @@ export type Screen =
   | "find" // no business yet: find it on Google Maps (stage 2)
   | "check" // the claimed free check, before anything is asked (stage 1)
   | "confirm" // is this your business, who looks after its Google profile (stage 2)
+  | "questions" // two optional questions, right after the business is chosen (Onboarding 1, R-145; stage 2)
   | "whatsapp" // send Kabsi one message (stage 3)
   | "manager" // add Kabsi as a Manager: invite pending or accepted (stage 4)
   | "checked" // access works, the trial dates (end of stage 4)
@@ -55,6 +61,7 @@ export const STAGE_OF: Record<Screen, number> = {
   check: 0,
   find: 1,
   confirm: 1,
+  questions: 1,
   whatsapp: 2,
   manager: 3,
   checked: 4,
@@ -82,6 +89,8 @@ export function trialStartedToday(endsAt: string | null, now = Date.now()): bool
 export function screenOf({ status, whatsappOn, seen, now = Date.now() }: ScreenInput): Screen {
   if (!status) return "find";
   if (!status.confirmed) return status.check && !seen.check ? "check" : "confirm";
+  // Onboarding 1 (R-145): once, for a real business that is not yet through the four stages. Continue or Skip both end it.
+  if (status.questions_done === false && !status.is_demo && !status.checked) return "questions";
   if (!status.whatsapp && !seen.whatsapp && whatsappOn) return "whatsapp";
   // While Kabsi has no WhatsApp number, stage 3 shows what Settings shows ("coming soon") until the owner moves on;
   // after the authorisation on stage 4 it is behind them.
