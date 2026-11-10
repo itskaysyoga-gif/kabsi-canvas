@@ -108,7 +108,7 @@ Deno.test("extractFields: a value the reader finds where the model quoted nothin
   assert(none.nothingToRead);
   assertEquals(none.fields["when"]!.kind, "absent");
   assertEquals(none.fields["phone"]!.kind, "absent");
-  assertEquals(none.reply.body, "I could not read a request in that. Nothing was saved.");
+  assertEquals(none.reply.body, "No request found in that\n\nNothing was saved.");
   // Digits against letters are never a phone, whoever quotes them.
   const quoted = ok(extractFields("3ali 7assan 3ala haircut", answer({ customer_name: "3ali", phone: "3ali 7assan 3", service: "haircut", when: null, stylist: null }), ctx("salon", "LB", "Asia/Beirut")));
   assertEquals(quoted.fields["phone"]!.kind, "absent");
@@ -253,7 +253,7 @@ Deno.test("extract: a failed model call reads nothing and says so, and an empty 
   assertEquals(calls, 1);
   assert(failed.nothingToRead);
   assert(failed.issues.includes("no_model_answer"));
-  assertEquals(failed.reply.body, "I could not read that just now. Nothing was saved. Please send it again.");
+  assertEquals(failed.reply.body, "Could not read that\nNothing was saved.\n\nPlease send it again.");
   const never = () => {
     calls++;
     return Promise.resolve("{}");

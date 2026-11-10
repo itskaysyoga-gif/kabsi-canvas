@@ -210,7 +210,8 @@ function say1(t: Turn, body: string, buttons?: Button[]) {
  * buttons are passed on exactly as given.
  */
 const answered = (t: Turn, body: string, result: string, buttons?: Button[], list?: ListMsg) => {
-  if (!t.style && !IN_SCOPE.test(result)) return say1(t, body, buttons).then(() => result);
+  // A phone with no Kabsi role (a prospect talking to Nora) keeps its look; look 2 is for owners, their team, staff and partners.
+  if (!t.style && (!IN_SCOPE.test(result) || !domains(t.who).length)) return say1(t, body, buttons).then(() => result);
   const m = lookMsg(t, body, result, buttons, list);
   return sendReply(t.d.out, t.s, t.phone, m.body, buttons, { locationId: t.business?.location_id ?? null }, { footer: m.footer, list: m.list }).then(() => result);
 };

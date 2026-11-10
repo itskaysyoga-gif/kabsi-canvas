@@ -40,7 +40,7 @@ Deno.test("photo post: words with AI drafting on, the draft passes every check a
   const deps = w.deps();
   const r = await send(w, deps, PHONES.owner, { media: img("pp1"), text: CAPTION });
   assert.equal(r.result, "photo_post_shown");
-  assert.equal(r.last!.body, `Harbour Lane Coffee (owner)\n\nHarbour Lane Coffee: Kabsi will post this on your Google profile with the photo you just sent, after your yes.\n\n"${DRAFT}"`);
+  assert.equal(r.last!.body, `*🖼️ Post with your photo*\n\n> ${DRAFT}\n\nKabsi posts it with the photo you just sent, after your yes.`);
   assert.deepEqual(r.last!.buttons, ["Approve", "Edit on kabsi.co", "Skip"]);
   assert.deepEqual(w.photoDraftCalls, [`${BIZ.harbour}:${CAPTION}`]);
   const post = onlyPost(w);
@@ -55,7 +55,7 @@ Deno.test("photo post: AI drafting off, the owner's words are the post", async (
   const deps = w.deps();
   const r = await send(w, deps, PHONES.owner, { media: img("pp2"), text: CAPTION });
   assert.equal(r.result, "photo_post_shown");
-  assert.match(r.last!.body, new RegExp(`"${CAPTION}"$`));
+  assert.match(r.last!.body, new RegExp(`^\\*🖼️ Post with your photo\\* · Harbour Lane Coffee\n\n> ${CAPTION}\n\nKabsi posts it with the photo you just sent, after your yes\\.$`));
   assert.equal(onlyPost(w).text, CAPTION);
   assert.equal(w.photoDraftCalls.length, 0, "no model call");
 });
@@ -77,7 +77,7 @@ Deno.test("photo post: words that fail the post checks get the postProblem line,
   const deps = w.deps();
   const r = await send(w, deps, PHONES.owner, { media: img("pp4"), text: "The best coffee in town, call 212 555 0188" });
   assert.equal(r.result, "photo_post_problem");
-  assert.match(r.last!.body, /^Harbour Lane Coffee \(owner\)\n\nHarbour Lane Coffee: Kabsi cannot post that as it is, because it .+\. Please send it again without that\. Or add the photo to your Google profile on its own, or skip it\.$/);
+  assert.match(r.last!.body, /^\*🖼️ Kabsi cannot post that\*\n\nIt .+\.\n\nPlease send it again without that\. Or add the photo to your Google profile on its own, or skip it\.$/);
   assert.deepEqual(r.last!.buttons, ["Add as a photo", "Skip"]);
   assert.equal(w.posts.size, 0, "no post draft");
   const [photoId, photo] = [...w.waPhotos.entries()][0];
@@ -93,7 +93,7 @@ Deno.test("photo post: a superlative alone fails the checks too", async () => {
   const deps = w.deps();
   const r = await send(w, deps, PHONES.owner, { media: img("pp4b"), text: "The best flat white in New York this week" });
   assert.equal(r.result, "photo_post_problem");
-  assert.match(r.last!.body, /because it says it is the best, which Google does not allow\./);
+  assert.match(r.last!.body, /\n\nIt says it is the best, which Google does not allow\.\n\n/);
 });
 
 Deno.test("photo post: a photo with no words is unchanged, a plain photo", async () => {
@@ -102,7 +102,7 @@ Deno.test("photo post: a photo with no words is unchanged, a plain photo", async
   const deps = w.deps();
   const r = await send(w, deps, PHONES.owner, { media: img("pp5") });
   assert.equal(r.result, "photo");
-  assert.match(r.last!.body, /getting your photo ready/);
+  assert.match(r.last!.body, /^\*🖼️ Photo received\*\n\nKabsi is getting it ready and will ask you here in a minute: Yes, Edit or Skip\./);
   assert.equal(w.posts.size, 0);
   assert.equal([...w.waPhotos.values()][0].hold, false);
   assert.equal(w.photoDraftCalls.length, 0);
@@ -113,12 +113,12 @@ Deno.test("photo post: staff send it, the owner and manager are asked, staff nev
   const deps = w.deps();
   const r = await send(w, deps, PHONES.staff, { media: img("pp6"), text: CAPTION });
   assert.equal(r.result, "photo_post_staff");
-  assert.match(r.last!.body, /the owner is asked to approve it\. Nothing goes on Google until they say yes\.$/);
+  assert.match(r.last!.body, /the owner is asked to approve it\.\n\nNothing goes on Google until they say yes\.$/);
   assert.ok(w.sent.filter((m) => m.to === PHONES.staff).every((m) => !m.buttons.includes("Approve")), "no Approve for staff");
   for (const phone of [PHONES.owner, PHONES.manager]) {
     const row = w.outbox.find((x) => x.phone === phone && x.kind === "post_ready");
     assert.ok(row, `${phone} is asked`);
-    assert.match(row!.body, /your team sent a photo with a note/);
+    assert.match(row!.body, /^\*🖼️ Post with your team's photo\* · Harbour Lane Coffee\n\nYour team sent a photo with a note\.\n> Late appointments every Thursday this month\n\nKabsi posts it with that photo after your yes\.$/);
     assert.deepEqual(row!.buttons.map((b) => b.title), ["Approve", "Edit on kabsi.co", "Skip"]);
   }
   assert.ok(!w.outbox.some((x) => x.phone === PHONES.staff && x.kind === "post_ready"));
@@ -126,7 +126,7 @@ Deno.test("photo post: staff send it, the owner and manager are asked, staff nev
   w.waPhotos.get(onlyPost(w).photo)!.state = "draft";
   const a = await send(w, deps, PHONES.owner, { button: lastButtonId(w, PHONES.owner, "Approve") });
   assert.equal(a.result, "approved");
-  assert.equal(a.last!.body, "Harbour Lane Coffee (owner)\n\nApproved for Harbour Lane Coffee. It goes to Google in 10 seconds. Press Undo to stop it.");
+  assert.equal(a.last!.body, "*✅ Approved* · Harbour Lane Coffee\n\nIt goes to Google in 10 seconds.\n\nPress Undo to stop it.");
   assert.equal(onlyPost(w).state, "publishing");
   // The manager's button is now stale.
   const m = await send(w, deps, PHONES.manager, { button: lastButtonId(w, PHONES.manager, "Approve") });
@@ -139,12 +139,12 @@ Deno.test("photo post: Essentials with no posts left this month says so and offe
   const deps = w.deps();
   const r = await send(w, deps, PHONES.plain, { media: img("pp7"), text: "Fresh bagels from 7am every weekday" });
   assert.equal(r.result, "photo_post_used_up");
-  assert.match(r.last!.body, /Corner Deli: your plan has no posts left this month, so Kabsi cannot make this a post\. You can add the photo to your Google profile on its own, or skip it\.$/);
+  assert.match(r.last!.body, /^\*🖼️ No posts left this month\*\n\nYour plan has no posts left this month, so Kabsi cannot make this a post\.\n\nYou can add the photo to your Google profile on its own, or skip it\.$/);
   assert.deepEqual(r.last!.buttons, ["Add as a photo", "Skip"]);
   const [photoId] = [...w.waPhotos.keys()];
   const s = await send(w, deps, PHONES.plain, { button: lastButtonId(w, PHONES.plain, "Skip") });
   assert.equal(s.result, "held_photo_skipped");
-  assert.match(s.last!.body, /Okay, skipped\. Nothing was put on Google\./);
+  assert.match(s.last!.body, /^\*🖼️ Okay, skipped\*\n\nNothing was put on Google\.$/);
   assert.equal(w.waPhotos.get(photoId)!.state, "skipped");
 });
 
@@ -156,7 +156,7 @@ Deno.test("photo post: an owner of two businesses picks one first, then the phot
   assert.equal(w.photos.length, 0, "nothing is uploaded before the business is known");
   const p = await send(w, deps, PHONES.multi, { button: `b:${BIZ.smile}` });
   assert.equal(p.result, "photo_post_shown");
-  assert.match(p.last!.body, /^Smile Dental \(owner\)\n\nSmile Dental: Kabsi will post this/);
+  assert.match(p.last!.body, /^\*🖼️ Post with your photo\* · Smile Dental\n\n> New whitening appointments on Saturdays\n\n/);
   assert.equal(onlyPost(w).location, BIZ.smile);
   assert.equal(w.waPhotos.get(onlyPost(w).photo)!.user, USERS.multi);
 });
@@ -168,14 +168,14 @@ Deno.test("photo post: Approve before the photo is checked asks to press again; 
   const approve = lastButtonId(w, PHONES.owner, "Approve");
   const early = await send(w, deps, PHONES.owner, { button: approve });
   assert.equal(early.result, "refused:post_photo_missing");
-  assert.match(early.last!.body, /Kabsi is still checking the photo\. Press Approve again in a minute\./);
+  assert.match(early.last!.body, /^\*❓ Still checking the photo\*\n\nPress Approve again in a minute\.$/);
   w.waPhotos.get(onlyPost(w).photo)!.state = "draft";
   const a = await send(w, deps, PHONES.owner, { button: approve });
   assert.equal(a.result, "approved");
   assert.deepEqual(a.last!.buttons, ["Undo"]);
   const u = await send(w, deps, PHONES.owner, { button: lastButtonId(w, PHONES.owner, "Undo") });
   assert.equal(u.result, "undone");
-  assert.match(u.last!.body, /Undone\. Nothing was sent\./);
+  assert.match(u.last!.body, /^\*↩️ Undone\*\n\nNothing was sent\./);
 });
 
 Deno.test("photo post: Skip skips the post and its photo; a second Skip changes nothing", async () => {
@@ -258,7 +258,7 @@ Deno.test("photo post binding: unchanged text and photo, Approve works; pressing
   assert.equal(post.state, "publishing");
   const again = await send(w, deps, PHONES.owner, { button: approve });
   assert.equal(again.result, "repeat");
-  assert.match(again.last!.body, /This one is already handled\. Nothing changed\./);
+  assert.match(again.last!.body, /^\*✅ This one is already handled\*\n\nNothing changed\.$/);
 });
 
 Deno.test("photo post binding: the text changed after it was shown, the old Approve is refused", async () => {
@@ -266,7 +266,7 @@ Deno.test("photo post binding: the text changed after it was shown, the old Appr
   post.text = `${post.text} Now with oat milk.`;
   const a = await send(w, deps, PHONES.owner, { button: approve });
   assert.equal(a.result, "refused:changed");
-  assert.match(a.last!.body, /This one is already handled\. Nothing changed\./);
+  assert.match(a.last!.body, /^\*❓ This one is already handled\*\n\nNothing changed\.$/);
   assert.equal(post.state, "draft", "nothing approved");
 });
 

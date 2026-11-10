@@ -69,5 +69,5 @@ Deno.test("18.3: an unreadable file is refused with Please send it as a photo", 
   const { messages } = parseWebhook("whatsapp.message.received", webhook({ type: "document", document: { id: "m-bad", mime_type: "image/jpeg", filename: "photo.jpg" } }));
   assertEquals(parse(messages[0]).k, "photo");
   assertEquals(photoRefusal(bytes), "not_photo");
-  assertEquals(SAY.photoUnreadable, "Please send it as a photo.");
+  assertEquals(SAY.photoUnreadable, "Send it as a photo\n\nPlease send it as a photo.");
 });

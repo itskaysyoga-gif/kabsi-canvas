@@ -70,10 +70,10 @@ Deno.test("reads the forwarded marker from the message context", () => {
 Deno.test("a review alert: business, stars, first name only, at most 300 characters of the review, the draft", () => {
   const long = "Great coffee. ".repeat(40);
   const body = reviewAlertBody({ business: "Harbour Lane Coffee", stars: 5, reviewer: "Maya Haddad", text: long, draft: "Thank you, Maya." });
-  assert.match(body, /^Harbour Lane Coffee: new 5-star review from Maya\./);
+  assert.match(body, /^\*⭐ New 5-star review\* · Harbour Lane Coffee\n\nFrom Maya\n/);
   assert.doesNotMatch(body, /Haddad/);
   assert.equal(excerpt(long)!.length, 300);
-  assert.match(body, /Kabsi's reply: Thank you, Maya\./);
+  assert.match(body, /\nKabsi's reply:\n> Thank you, Maya\.$/);
   assert.equal(firstName("  "), null);
   assert.doesNotMatch(body, /[—–!]/);
   assert.deepEqual(alertButtons("tok", false).map((b) => b.title), ["Edit on kabsi.co"]);

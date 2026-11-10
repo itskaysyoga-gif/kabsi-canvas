@@ -136,7 +136,7 @@ export function receipt(o: {
 export type Receipt = ReturnType<typeof receipt>;
 
 /**
- * The WhatsApp version, in look 2 (30.50 item 2): a receipt marker and "Your weekly receipt" with the business, then the
+ * The WhatsApp version, in look 2 (30.50 item 2): a receipt marker and "Your weekly report" (K-02) with the business, then the
  * week, the work and the numbers one per line (a list), then the one next step. The work first.
  */
 export function receiptText(o: {
@@ -156,5 +156,5 @@ export function receiptText(o: {
   if (o.accuracy) facts.push(`${o.accuracy.line} ${o.accuracy.action} ${o.accuracy.label}`);
   const wait = o.waiting ? `Waiting for your yes: ${o.waiting}.` : "Nothing is waiting for your yes.";
   const end = o.next ? `${wait} Next step: ${o.next}.`.replace(/\.\.$/, ".") : wait;
-  return render({ mark: MARK.receipt, title: "Your weekly receipt", business: o.business, facts, end });
+  return render({ mark: MARK.receipt, title: "Your weekly report", business: o.business, facts, end });
 }

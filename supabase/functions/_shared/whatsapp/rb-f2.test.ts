@@ -53,12 +53,15 @@ async function toSalon(w: World) {
 Deno.test("a: switch, then My business, shows the numbered list of the four businesses; the number picks one", async () => {
   const w = phoneWorld();
   assert.equal(await send(w, { text: "switch" }), "which_role");
-  assert.equal(last(w).body, "*❓ Your business or Kabsi staff tools?*");
+  assert.equal(last(w).body, "*❓ Business or staff tools?*");
   assert.deepEqual(last(w).buttons, ["My business", "Staff tools"]);
   assert.equal(await send(w, { button: "r:business" }), "which_business");
-  assert.equal(last(w).body, "*❓ Which business?*\nReply with the number.\n1. Kabsi Test Garage\n2. Kabsi Test Gym\n3. Kabsi Test Salon\n4. Yawmiyati");
+  assert.equal(last(w).body, "*❓ Which business?*\n\nTap Choose and pick one, or reply with its number.");
+  assert.equal(last(w).kind, "list");
+  assert.deepEqual(last(w).rows, ["Kabsi Test Garage", "Kabsi Test Gym", "Kabsi Test Salon", "Yawmiyati"]);
+  assert.deepEqual(last(w).rowIds!.slice(0, 3), [`b:${GARAGE}`, `b:${GYM}`, `b:${SALON}`]);
   assert.equal(await send(w, { text: "3" }), "business_set");
-  assert.match(last(w).body, /^\*✅ Done\*\nYou are now working on Kabsi Test Salon\./);
+  assert.match(last(w).body, /^\*✅ Switched\*\n\nYou are now working on Kabsi Test Salon\./);
   assert.equal(w.conversation(ME).active_location_id, SALON);
   // The second switch, after a business is active, lists them again rather than saying "your business".
   assert.equal(await send(w, { text: "switch" }), "which_role");
@@ -74,7 +77,7 @@ Deno.test("a: a phone with staff tools and one business: My business after switc
   const w = new World();
   assert.equal(await send(w, { text: "switch" }), "which_role");
   assert.equal(await send(w, { button: "r:business" }), "role_set");
-  assert.match(last(w).body, /^\*✅ Done\*\nYou are now working on your business\./);
+  assert.match(last(w).body, /^\*✅ Switched\*\n\nYou are now working on your business\./);
 });
 
 // ─── b. A business-or-staff question, or "Which business?", never captures a later message.
@@ -205,14 +208,15 @@ Deno.test("e: sarah is shown and saved as Sarah; thursday afternoon as Thursday 
   assert.equal(await send(w, { text: BOOK }), "request_proposed");
   const p = last(w).body;
   assert.match(p, /Name: Sarah\n/);
-  assert.match(p, /When: Thursday afternoon, no time set\n/);
+  assert.match(p, /When: Thursday afternoon, no time set$/);
+  assert.equal(last(w).footer, "Nothing is saved until you tap Save.");
   assert.doesNotMatch(p, /sarah|thursday/);
   assert.equal(await send(w, { button: `rs:${lastIntake(w).id}` }), "request_saved");
   assert.equal(w.requests[0].customer_name, "Sarah");
   // Saved with its date, so a list next week still names the right day (review finding 1).
   assert.equal(w.requests[0].requested_window_text, "Thu 29 Oct afternoon");
   assert.equal(w.requests[0].starts_at, null);
-  assert.match(last(w).body, /#1 Sarah · Highlights · Thu 29 Oct afternoon, no time set · Requested/);
+  assert.match(last(w).body, /Appointment 1 saved\* · Kabsi Test Salon\n\nSarah\nHighlights\nThu 29 Oct afternoon, no time set\nStatus: Requested\n/);
   for (const s of w.repliesTo(ME)) assert.doesNotMatch(s.body, HOUSE);
 });
 
@@ -277,7 +281,7 @@ Deno.test("review: a pick more than 10 minutes late says the question closed, ne
   assert.equal(await send(w, { text: BOOK }), "which_business");
   w.now += 11 * 60_000;
   assert.equal(await send(w, { text: "3" }), "pick_closed");
-  assert.match(last(w).body, /more than 10 minutes ago, so I did not use it\*\nPlease send your message again\./);
+  assert.match(last(w).body, /^\*❓ Question closed\*\n\nIt was asked more than 10 minutes ago, so I did not use your answer\.\n\nPlease send your message again\./u);
   assert.equal(q(w), null);
   // A late tap on a role question asked by switch says the same.
   assert.equal(await send(w, { text: "switch" }), "which_role");

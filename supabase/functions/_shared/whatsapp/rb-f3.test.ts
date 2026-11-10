@@ -56,7 +56,8 @@ Deno.test("typos: the retest message reads Highlights and Thursday afternoon, in
   says(w, text, salon("sarah", "highlightss", "thrsday afternoon"));
   assert.equal(await send(w, { text }), "request_proposed");
   const p = last(w).body;
-  assert.match(p, /Name: Sarah\nService: Highlights\nWhen: Thursday afternoon, no time set\n/);
+  assert.match(p, /Name: Sarah\nService: Highlights\nWhen: Thursday afternoon, no time set$/);
+  assert.equal(last(w).footer, "Nothing is saved until you tap Save.");
   assert.doesNotMatch(p, /not clear|highlightss/);
   assert.deepEqual(last(w).buttons, ["Save", "Change"]);
   assert.equal(await send(w, { button: `rs:${lastIntake(w).id}` }), "request_saved");
@@ -152,7 +153,8 @@ Deno.test("revise: Change, then Highlights thursday afternoon, reads the new tim
   assert.equal(await send(w, { button: `rc:${lastIntake(w).id}` }), "request_change");
   says(w, "Highlights thursday afternoon", salon(null, "Highlights", "thursday afternoon"));
   assert.equal(await send(w, { text: "Highlights thursday afternoon" }), "request_revised");
-  assert.match(last(w).body, /Name: Sarah\nService: Highlights\nWhen: Thursday afternoon, no time set\n/);
+  assert.match(last(w).body, /Name: Sarah\nService: Highlights\nWhen: Thursday afternoon, no time set$/);
+  assert.equal(last(w).footer, "Nothing is saved until you tap Save.");
   assert.equal(w.intakes.size, 1);
   assert.equal(lastIntake(w).raw, "Book sarah for highlightss thrsday afternoon\nHighlights thursday afternoon");
 });
@@ -168,7 +170,8 @@ Deno.test("revise: Manicure friday agternoon, then friday 5pm, then Lina keeps t
   assert.match(last(w).body, /When: Fri 30 Oct 17:00/);
   says(w, "Lina", salon("Lina", null, null));
   assert.equal(await send(w, { text: "Lina" }), "request_revised");
-  assert.match(last(w).body, /Name: Lina\nService: Manicure\nWhen: Fri 30 Oct 17:00\n/);
+  assert.match(last(w).body, /Name: Lina\nService: Manicure\nWhen: Fri 30 Oct 17:00$/);
+  assert.equal(last(w).footer, "Nothing is saved until you tap Save.");
   assert.equal(await send(w, { text: "Save" }), "request_saved");
   assert.equal(w.requests[0].starts_at, "2026-10-30T13:00:00.000Z");
 });
@@ -187,7 +190,7 @@ Deno.test("duplicates: the same name, kind and service open within 7 days asks U
   await sarahSaved(w);
   says(w, "sarah highlights friday afternoon", salon("sarah", "highlights", "friday afternoon"));
   assert.equal(await send(w, { text: "sarah highlights friday afternoon" }), "request_duplicate");
-  assert.equal(last(w).body, "*Sarah already has \u{1F4C5} #1, Highlights, Thu 29 Oct afternoon* · Kabsi Test Salon\nUpdate #1 or add a new one?");
+  assert.equal(last(w).body, "*❓ Sarah already has #1* · Kabsi Test Salon\n\nHighlights\nThu 29 Oct afternoon\n\nUpdate #1 or add a new one?");
   assert.deepEqual(last(w).buttons, ["Update #1", "Add new"]);
   assert.equal(w.requests.length, 1);
   // Update #1: the new time goes on #1, the draft is dropped, Undo is offered; no second Sarah.
@@ -197,7 +200,7 @@ Deno.test("duplicates: the same name, kind and service open within 7 days asks U
   assert.equal(await send(w, { button: update }), "request_updated");
   assert.equal(w.requests.length, 1);
   assert.equal(w.requests[0].requested_window_text, "Fri 30 Oct afternoon");
-  assert.match(last(w).body, /^\*✅ Appointment 1 corrected\* · Kabsi Test Salon\nwhen changed from Thu 29 Oct afternoon to Fri 30 Oct afternoon\./u);
+  assert.match(last(w).body, /^\*✅ Appointment 1 corrected\* · Kabsi Test Salon\n\nWhen: was Thu 29 Oct afternoon, now Fri 30 Oct afternoon$/u);
   assert.deepEqual(last(w).buttons, ["Undo"]);
   assert.equal(intake.state, "discarded");
   assert.equal(w.conversation(ME).open_question, null);
@@ -244,9 +247,10 @@ Deno.test("style: a bold first line with one marker; the business only when the 
   await toSalon(w);
   says(w, "Book Sarah for highlights thursday afternoon", salon("Sarah", "highlights", "thursday afternoon"));
   await send(w, { text: "Book Sarah for highlights thursday afternoon" });
-  assert.equal(last(w).body, "*\u{1F4C5} New appointment* · Kabsi Test Salon\nName: Sarah\nService: Highlights\nWhen: Thursday afternoon, no time set\nNothing is saved until you tap Save.");
+  assert.equal(last(w).body, "*\u{1F4C5} New appointment* · Kabsi Test Salon\n\nName: Sarah\nService: Highlights\nWhen: Thursday afternoon, no time set");
+  assert.equal(last(w).footer, "Nothing is saved until you tap Save.");
   await send(w, { text: "Save" });
-  assert.match(last(w).body, /^\*✅ Appointment 1 saved\* · Kabsi Test Salon\n#1 Sarah · Highlights · Thu 29 Oct afternoon, no time set · Requested/u);
+  assert.match(last(w).body, /^\*✅ Appointment 1 saved\* · Kabsi Test Salon\n\nSarah\nHighlights\nThu 29 Oct afternoon, no time set\nStatus: Requested\n/u);
   await send(w, { button: lastIds(w)[0]! });
   assert.match(last(w).body, /^\*↩️ Undone\* · Kabsi Test Salon\n/u);
   for (const s of w.repliesTo(ME)) {
@@ -254,7 +258,7 @@ Deno.test("style: a bold first line with one marker; the business only when the 
     assert.doesNotMatch(s.body, HOUSE);
   }
   // A phone with one business: no business name in the first line.
-  assert.equal(styleReply("Appointment 2 saved.\n#2 Sarah", markOf("request_saved", "appointment"), null), "*✅ Appointment 2 saved*\n#2 Sarah");
+  assert.equal(styleReply("Appointment 2 saved.\n#2 Sarah", markOf("request_saved", "appointment"), null), "*✅ Appointment 2 saved*\n\n#2 Sarah");
   assert.equal(markOf("request_proposed", "job"), MARK.job);
   assert.equal(markOf("request_proposed", "enquiry"), MARK.enquiry);
   assert.equal(markOf("request_confirm_guess", "appointment"), MARK.confirm);
@@ -265,13 +269,16 @@ Deno.test("style: a bold first line with one marker; the business only when the 
 Deno.test("style: switch and help in the new look", async () => {
   const w = phoneWorld();
   assert.equal(await send(w, { text: "switch" }), "which_role");
-  assert.equal(last(w).body, "*❓ Your business or Kabsi staff tools?*");
+  assert.equal(last(w).body, "*❓ Business or staff tools?*");
   await send(w, { button: "r:business" });
-  assert.match(last(w).body, /^\*❓ Which business\?\*\nReply with the number\.\n1\. Kabsi Test Garage/u);
+  assert.equal(last(w).body, "*❓ Which business?*\n\nTap Choose and pick one, or reply with its number.");
+  assert.equal(last(w).kind, "list");
+  assert.equal(last(w).rows![0], "Kabsi Test Garage");
+  assert.equal(last(w).rowIds![0], `b:${GARAGE}`);
   await send(w, { text: "3" });
-  assert.equal(last(w).body, "*✅ Done*\nYou are now working on Kabsi Test Salon. Send \"switch\" to change it.");
+  assert.equal(last(w).body, "*✅ Switched*\n\nYou are now working on Kabsi Test Salon.\n\nSend \"switch\" to change it.");
   assert.equal(await send(w, { text: "help" }), "help");
-  assert.match(last(w).body, /^\*\u{1F4CB} You can send\* · Kabsi Test Salon\n"stats"/u);
+  assert.match(last(w).body, /^\*\u{1F4CB} You can send\* · Kabsi Test Salon\n\n"stats"/u);
 });
 
 // ─── 4. reset test (R-148 item 4).
@@ -286,12 +293,13 @@ Deno.test("reset test: staff only, asks with Confirm, then voids only this phone
   w.requests.push({ id: id(903), location: id(5), number: 1, kind: "appointment", status: "requested", summary: "Facial", customer_name: "Dina", phones: [],
     requested_window_text: null, starts_at: null, intake_id: null, by: USERS.rashid, created_at: iso });
   assert.equal(await send(w, { text: "reset test" }), "reset_ask");
-  assert.match(last(w).body, /^\*❓ Reset test\?\*\nThis removes the 1 open request you made at 1 test business\. Nothing else changes\. Tap Confirm to go ahead\./u);
+  assert.equal(last(w).body, "*❓ Reset test?*\n\nThis removes the 1 open request you made at 1 test business. Nothing else changes.");
+  assert.equal(last(w).footer, "Tap Confirm to go ahead.");
   assert.equal(last(w).buttons[0], "Confirm");
   assert.equal(w.requests[0].status, "requested", "nothing changes before the tap");
   const button = lastIds(w)[0]!;
   assert.equal(await send(w, { button }), "reset_done");
-  assert.match(last(w).body, /^\*✅ Test reset\*\n1 request was removed at the test businesses\./u);
+  assert.match(last(w).body, /^\*✅ Test reset\*\n\n1 request was removed at the test businesses\./u);
   assert.equal(w.requests[0].outcome, "voided");
   assert.equal(w.requests[1].status, "requested");
   assert.equal(w.requests[2].status, "requested");
@@ -302,7 +310,7 @@ Deno.test("reset test: staff only, asks with Confirm, then voids only this phone
 Deno.test("reset test: refused to a phone that is not Kabsi staff; an old Confirm after 10 minutes does nothing", async () => {
   const w = phoneWorld();
   assert.equal(await receive(w.deps(), msg(w, PHONES.owner, { text: "reset test" })), "reset_refused");
-  assert.match(w.repliesTo(PHONES.owner).at(-1)!.body, /Reset test is for Kabsi staff only\*\nNothing was changed\./);
+  assert.match(w.repliesTo(PHONES.owner).at(-1)!.body, /^\*❓ One question\*\n\nReset test is for Kabsi staff only\.\n\nNothing was changed\.$/u);
   assert.ok(!w.calls.some((c) => c.startsWith("reset_test")));
   await sarahSaved(w);
   assert.equal(await send(w, { text: "reset test" }), "reset_ask");
@@ -320,7 +328,7 @@ Deno.test("off topic: a general assistant ask gets the fixed line and no model c
   assert.equal(await receive(w.deps(), msg(w, PHONES.owner, { text: "write me a poem about the sea" })), "off_topic");
   assert.equal(w.aiCalls, before, "no model call");
   const body = w.repliesTo(PHONES.owner).at(-1)!.body;
-  assert.match(body, /Kabsi looks after your business on Google: review replies, your listing, photos and posts\. Send "help" to see what you can send\./);
+  assert.match(body, /Kabsi looks after your business on Google: review replies, your listing, photos and posts\.\n\nSend "help" to see what you can send\./);
   assert.equal(await receive(w.deps(), msg(w, PHONES.owner, { text: "the thing from before" })), "off_topic");
   assert.doesNotMatch(w.repliesTo(PHONES.owner).at(-1)!.body, /Do you mean/);
   assert.equal(isOffTopic("what's the weather tomorrow"), true);
