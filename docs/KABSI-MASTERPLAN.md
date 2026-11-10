@@ -8,7 +8,7 @@ Addendum 2 (23 Oct 2026, 11:30 Beirut) is sections 18 and 19 below, recorded as 
 
 What stays fixed: Google's API and review rules (no review gating, incentives or fake reviews; owner approval before anything is published), Meta's WhatsApp rules, payment processor rules and consumer law. Breaking them gets Kabsi's Google access, WhatsApp number or payments shut off, which ends the business; everything else is open.
 
-GitHub: the only account is itskaysyoga-gif (itskaysyoga@gmail.com, Rashid's).
+GitHub: the only account is itskaysyoga-gif (Rashid's own).
 
 Session 0 (24 Oct 2026) added sections 20 to 29 at the end of this file and the "Changed by" lines below; Ops 1 part B added section 30 the same day. Later sections win over earlier ones where they differ: 30 over 29 over 28 over 27 over everything older. Each older section that a later one replaces or changes starts with one italic line that says so and points to the new text; read the new text as current. The decisions are recorded in plan section 4 (R-68 to R-90); the session order is plan section 7.
 
@@ -17,7 +17,7 @@ Session 0 (24 Oct 2026) added sections 20 to 29 at the end of this file and the 
 - Moved from session 18 to session 19: the post Undo test on the prepared Update (tap the Update's own Approve, not "Approve the month") and P0.7-03 Pub/Sub.
 - Kapso number: done (23 Oct 2026, section 9.8).
 - Waiting on people: Creem test keys and the webhook secret in Supabase (session 10).
-- R-55: one Kapso account under rashid.abouhamzy@yawmiyati.com for Kabsi and Alo King, hello@kabsi.co an owner of the Kabsi.co project; a deliberate exception to R-32 so one paid plan covers both businesses.
+- R-55: one Kapso account under Rashid's Yawmiyati work address for Kabsi and Alo King, hello@kabsi.co an owner of the Kabsi.co project; a deliberate exception to R-32 so one paid plan covers both businesses.
 
 ## 1. Position: Kabsi runs on WhatsApp (R-60)
 *Replaced by 27.2 (position, hero, pillars). The two-touch rule and the WhatsApp-first idea stand; the hero lines, pillars and "never a review reply generator" below are not current.*
