@@ -248,6 +248,9 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     const fresh = !!pq.at && now - Date.parse(pq.at) < PICK_OPEN_MS;
     if (!answers || !fresh) {
       await d.db.setConv(phone, { open_question: null });
+      // A late answer to a question that held something (a message, a photo, a switch): say so, never drop it in silence.
+      const held = pq.type === "role" ? !!pq.pending || !!pq.switch : !!pq.pending || !!pq.media;
+      if (answers && held) return answered(t, SAY.pickClosed, "pick_closed");
       return run({ ...t, who: { ...who, conversation: { ...conv!, open_question: null } } }, cmd);
     }
   }
@@ -256,9 +259,11 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   if (cmd.k === "role_pick") {
     if (!domains(who).includes(cmd.to)) return answered(t, SAY.unclear, "role_refused");
     // RB-F2: only the role question itself is closed by the pick; an old "My business" tap leaves any other question open.
+    // A pick of staff or partner tools closes every question, as before: a request draft question left open there could not
+    // be answered and would let a typed yes reach an approval elsewhere.
     const q = conv?.open_question?.type === "role" ? conv.open_question : null;
-    const left = q ? null : conv?.open_question ?? null;
-    await d.db.setConv(phone, q ? { active_role: cmd.to, open_question: null } : { active_role: cmd.to });
+    const left = q || cmd.to !== "business" ? null : conv?.open_question ?? null;
+    await d.db.setConv(phone, left ? { active_role: cmd.to } : { active_role: cmd.to, open_question: null });
     const next: Who = { ...who, conversation: conv ? { ...conv, active_role: cmd.to, open_question: left } : conv };
     if (q?.type === "role" && q.pending) {
       const m: Inbound = { ...t.m, text: q.pending, buttonId: null, media: null, forwarded: !!q.forwarded };
@@ -1199,19 +1204,19 @@ async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
   const oq = t.who.conversation?.open_question;
   // RB-F2: while a proposal waits, a typed Save (also as a reply that quotes it) is the same as tapping Save, and a typed
   // Change the same as tapping Change. Anywhere else the words keep their meaning.
-  if (cmd.k === "free" && oq?.type === "rb_proposal") {
-    const typed = PROPOSAL_WORDS[text.toLowerCase().replace(/[.!,]+$/, "").replace(/\s+/g, " ").trim()];
-    if (typed) return await bookButton(t, { k: "request", action: typed, intakeId: oq.intake_id });
-  }
+  // It goes through the same checks as a typed yes: the draft must be open for the business the owner is working on.
+  const typed = cmd.k === "free" && oq?.type === "rb_proposal" ? PROPOSAL_WORDS[text.toLowerCase().replace(/[.!,]+$/, "").replace(/\s+/g, " ").trim()] ?? null : null;
+  const yesNo: "yes" | "no" | null = cmd.k === "yes" || typed === "save" ? "yes" : cmd.k === "no" ? "no" : null;
   // RB-F: a typed yes or no to a question asked before a change, or to the one reading of a time.
   if ((cmd.k === "yes" || cmd.k === "no") && (oq?.type === "rb_ask" || oq?.type === "rb_time")) return await bookAnswer(t, cmd.k === "yes", oq);
-  const answer = (cmd.k === "yes" || cmd.k === "no") && oq?.type === "rb_proposal";
+  const answer = yesNo !== null && oq?.type === "rb_proposal";
   if (!ref && cmd.k !== "free" && !answer) return null;
   const bt = await bookCheck(t);
   if (!bt) return null;
   const db = t.d.book.db;
   const b = bt.b;
-  if (cmd.k === "yes" || cmd.k === "no") {
+  if (typed === "change" && b && bt.open) return await bookButton(t, { k: "request", action: "change", intakeId: bt.open.intake_id });
+  if (yesNo && answer) {
     // Yes saves only when a proposal is waiting here; otherwise it keeps its meaning (approve the last task). While a draft
     // is still open, a yes is never passed on to an approval waiting elsewhere (a Google reply or post).
     if (!b || !bt.open) {
@@ -1219,7 +1224,7 @@ async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
       const q = t.who.conversation?.open_question as RbQuestion;
       const qb = businesses(t.who).find((x) => x.location_id === q.location_id);
       const g = qb ? await db.intake(qb.location_id, qb.user_id, q.intake_id).catch(() => null) : null;
-      if (cmd.k === "yes" && g?.ok === true && g.state === "pending") return answered(withB(t, qb!), BOOK_SAY.tapSave, "request_yes_tap_save");
+      if (yesNo === "yes" && g?.ok === true && g.state === "pending") return answered(withB(t, qb!), BOOK_SAY.tapSave, "request_yes_tap_save");
       await t.d.db.setConv(t.phone, { open_question: null });
       return null;
     }
@@ -1230,7 +1235,7 @@ async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
       await t.d.db.setConv(t.phone, { open_question: null });
       return null;
     }
-    if (cmd.k === "yes") return await bookSave(tb, b, bt.on.get(b.location_id)!, bt.open.intake_id, undefined, g);
+    if (yesNo === "yes") return await bookSave(tb, b, bt.on.get(b.location_id)!, bt.open.intake_id, undefined, g);
     await db.discard(b.location_id, b.user_id, `discard:${t.m.messageId}`, bt.open.intake_id).catch(() => null);
     await t.d.db.setConv(t.phone, { open_question: null });
     return answered(tb, BOOK_SAY.dropped, "request_dropped");

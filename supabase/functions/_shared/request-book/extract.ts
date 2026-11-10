@@ -15,7 +15,7 @@ import { MODELS } from "../models.ts";
 import type { Pack, FieldTarget } from "./packs/schema.ts";
 import { latinDigit } from "./normalize/digits.ts";
 import { normalizeMessage, type NormalizedMessage, type WhenResult } from "./normalize/index.ts";
-import { asWritten, clip, formatDay, formatWhen, kindWord, type ReplyContext, windowLabel } from "./replies/words.ts";
+import { clip, formatDay, formatWhen, kindWord, type ReplyContext, windowLabel } from "./replies/words.ts";
 import { finish } from "./replies/index.ts";
 import { MAX_RAW_TEXT } from "./intake/adapter.ts";
 import type { Reply } from "./types.ts";
@@ -264,12 +264,12 @@ const base = (f: { key: string; label: string; target: FieldTarget }): Extracted
 type Spec = Pack["fields"][number];
 
 /**
- * RB-F2: each word of a name written all in lower case gets a capital first letter, also after a hyphen or an apostrophe
- * ("sarah" to "Sarah", "al-hassan" to "Al-Hassan"). A word with any capital already ("McKay", "DeShawn") is left as typed,
+ * RB-F2: each word of a name written all in lower case gets a capital first letter, also after a hyphen, and after an
+ * apostrophe followed by a name ("sarah" to "Sarah", "al-hassan" to "Al-Hassan", "o'neil" to "O'Neil", "sarah's" to "Sarah's"). A word with any capital already ("McKay", "DeShawn") is left as typed,
  * and a script with no capitals is unchanged.
  */
 export function nameCase(name: string): string {
-  return name.split(" ").map((w) => (w === w.toLowerCase() && w !== w.toUpperCase() ? w.replace(/(^|[-'\u2019])(\p{Ll})/gu, (_m, a: string, b: string) => a + b.toUpperCase()) : w)).join(" ");
+  return name.split(" ").map((w) => (w === w.toLowerCase() && w !== w.toUpperCase() ? w.replace(/(^|-)(\p{Ll})|(['\u2019])(\p{Ll})(?=\p{Ll}{2})/gu, (m: string, a?: string, b?: string, c?: string, e?: string) => (b ? (a ?? "") + b.toUpperCase() : c && e ? c + e.toUpperCase() : m)) : w)).join(" ");
 }
 
 function verbatimField(spec: Spec, loc: Located | null, why: string, maxWords: number | null): ExtractedField {
@@ -381,6 +381,9 @@ function likelyPm(cands: WhenCand[], pack: Pack): { keep: WhenCand[]; applied: b
   return { keep, applied: keep.length < cands.length };
 }
 
+/** RB-F2: the saved form of a day and a part of the day: the date itself, so a later list stays true. */
+const savedWindow = (date: string | null, dayPart: string | null) => [date ? formatDay(date) : "", dayPart ?? ""].filter(Boolean).join(" ").replace(/^./, (c) => c.toUpperCase());
+
 /** RB-F2: words about when that the date reader did not understand are never shown back as if they were read. */
 export const NOT_CLEAR_PREFIX = "not clear, you wrote ";
 const notClear = (words: string) => `${NOT_CLEAR_PREFIX}"${clip(words, 60)}"`;
@@ -425,7 +428,8 @@ function whenField(spec: Spec, w: WhenResult, ctx: ExtractContext, loc: Located 
     else if (window) display = `${window}, no time set`;
     else if (w.time) display = w.time;
     return {
-      ...f, ...ev, kind: "stated", normalized: { date: w.date, time: w.time, starts_at: w.startsAt, day_part: w.dayPart, ...(window ? { text: window } : {}) }, normalizer: norm,
+      // What is saved names the date ("Thu 29 Oct afternoon"), never only a relative word that changes meaning the next day.
+      ...f, ...ev, kind: "stated", normalized: { date: w.date, time: w.time, starts_at: w.startsAt, day_part: w.dayPart, ...(window ? { text: savedWindow(w.date, w.dayPart) } : {}) }, normalizer: norm,
       validation: { passed: true, reason: null }, show: "plain", display,
     };
   }

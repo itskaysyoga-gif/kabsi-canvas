@@ -93,6 +93,8 @@ export const SAY = {
   whichBusiness: "Which business?",
   whichBusinessList: (names: string[]) =>
     `Which business? Reply with the number.\n\n${names.map((n, i) => `${i + 1}. ${n}`).join("\n")}`,
+  // RB-F2: an answer to "Which business?" or "Your business or Kabsi staff tools?" more than 10 minutes after it was asked.
+  pickClosed: "That question was asked more than 10 minutes ago, so I did not use it. Please send your message again.",
   switched: (to: string) => `Done. You are now working on ${to}. Send "switch" to change it.`,
   partnerOnly: "Partner tools are for Kabsi Partners. Send \"partner\" to hear about the program.",
   businessOnly: "Business tools are for businesses on Kabsi. Your partner tools: \"my link\", \"how am I doing\", \"kit\", \"payout\".",

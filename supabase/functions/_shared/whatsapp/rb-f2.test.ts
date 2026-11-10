@@ -210,9 +210,10 @@ Deno.test("e: sarah is shown and saved as Sarah; thursday afternoon as Thursday 
   assert.doesNotMatch(p, /sarah|thursday/);
   assert.equal(await send(w, { button: `rs:${lastIntake(w).id}` }), "request_saved");
   assert.equal(w.requests[0].customer_name, "Sarah");
-  assert.equal(w.requests[0].requested_window_text, "Thursday afternoon");
+  // Saved with its date, so a list next week still names the right day (review finding 1).
+  assert.equal(w.requests[0].requested_window_text, "Thu 29 Oct afternoon");
   assert.equal(w.requests[0].starts_at, null);
-  assert.match(last(w).body, /#1 Sarah · Highlights · Thursday afternoon, no time set · Requested/);
+  assert.match(last(w).body, /#1 Sarah · Highlights · Thu 29 Oct afternoon, no time set · Requested/);
   for (const s of w.repliesTo(ME)) assert.doesNotMatch(s.body, HOUSE);
 });
 
@@ -234,6 +235,8 @@ Deno.test("e: nameCase capitalises lower-case words only", () => {
   assert.equal(nameCase("sarah"), "Sarah");
   assert.equal(nameCase("sarah al-hassan"), "Sarah Al-Hassan");
   assert.equal(nameCase("o'neil"), "O'Neil");
+  assert.equal(nameCase("sarah's"), "Sarah's");
+  assert.equal(nameCase("james\u2019s mum"), "James\u2019s Mum");
   assert.equal(nameCase("McKay"), "McKay");
   assert.equal(nameCase("DJ"), "DJ");
   assert.equal(nameCase("ليلى"), "ليلى");
@@ -241,4 +244,44 @@ Deno.test("e: nameCase capitalises lower-case words only", () => {
   const built = createInput(salonV1, { customer_name: { kind: "stated", normalized: "sarah" }, service: { kind: "stated", normalized: { text: "highlights", services: ["highlights"] } } }, id(500));
   assert.ok(built.ok);
   assert.equal(built.ok && built.input.customer_name, "Sarah");
+});
+
+// ─── The independent review's confirmed findings.
+
+Deno.test("review: an old Staff tools tap closes a waiting proposal, so a typed yes or Save never saves it from staff tools", async () => {
+  const w = phoneWorld();
+  await toSalon(w);
+  assert.equal(await send(w, { text: BOOK }), "request_proposed");
+  assert.equal(await send(w, { button: "r:staff" }), "role_set");
+  assert.equal(q(w), null);
+  assert.notEqual(await send(w, { text: "Save" }), "request_saved");
+  assert.notEqual(await send(w, { text: "yes" }), "request_saved");
+  assert.equal(w.requests.length, 0);
+});
+
+Deno.test("review: a typed Save while another business is active does not save the draft there; it asks for the tap", async () => {
+  const w = phoneWorld();
+  await toSalon(w);
+  assert.equal(await send(w, { text: BOOK }), "request_proposed");
+  // An old business button for the Gym: the Salon's draft stays open, the Gym is active.
+  assert.equal(await send(w, { button: `b:${GYM}` }), "business_set");
+  assert.equal(await send(w, { text: "Save" }), "request_yes_tap_save");
+  assert.equal(w.requests.length, 0);
+  // Its own Save button still works.
+  assert.equal(await send(w, { button: `rs:${lastIntake(w).id}` }), "request_saved");
+});
+
+Deno.test("review: a pick more than 10 minutes late says the question closed, never drops the held message in silence", async () => {
+  const w = phoneWorld();
+  assert.equal(await send(w, { text: "switch" }), "which_role");
+  assert.equal(await send(w, { button: "r:business" }), "which_business");
+  assert.equal(await send(w, { text: BOOK }), "which_business");
+  w.now += 11 * 60_000;
+  assert.equal(await send(w, { text: "3" }), "pick_closed");
+  assert.match(last(w).body, /more than 10 minutes ago, so I did not use it\. Please send your message again\./);
+  assert.equal(q(w), null);
+  // A late tap on a role question asked by switch says the same.
+  assert.equal(await send(w, { text: "switch" }), "which_role");
+  w.now += 11 * 60_000;
+  assert.equal(await send(w, { button: "r:business" }), "pick_closed");
 });
