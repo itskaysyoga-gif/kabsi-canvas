@@ -222,7 +222,8 @@ const plain = (t: Turn): Turn => ({ ...t, head: null, style: { pack: null } });
 function lookMsg(t: Turn, body: string, result: string, buttons?: Button[], list?: ListMsg): Msg {
   const pack = t.style?.pack ?? null;
   const many = businesses(t.who).length > 1;
-  const biz = t.business && (many || NAMES_BUSINESS.test(result)) ? t.business.business : null;
+  // A switch says the business in its words, so it is not named again after the title.
+  const biz = t.business && (many || NAMES_BUSINESS.test(result)) && !/^(business_set|switched|role_set)$/.test(result) ? t.business.business : null;
   return toMsg(fromText(body, markFor(result, kindIn(body, pack)), biz), { buttons: buttons?.length ?? 0, asList: LIST_RESULT.test(result), list });
 }
 
@@ -266,7 +267,8 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     return answered(t, SAY.forwardedYes, "forwarded_yes");
   }
   // F-1: a forwarded yes, no or number never answers Kabsi's own questions (the search, hours, the monthly question).
-  const fwdAnswer = cmd.k === "free" && !!cmd.forwardedAnswer;
+  // Look 2: a tapped request list row ("#12") is not an answer either: it opens that request.
+  const fwdAnswer = cmd.k === "free" && (!!cmd.forwardedAnswer || !!t.m.listRow);
 
   // RB-F2: the role and business questions hold a message for after the pick. Any message that is not their answer closes
   // them, and they close by themselves after 10 minutes, so an old question never captures a later message.
@@ -334,7 +336,7 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     if (cmd.k === "number") return photoCategoryPicked(t, oq, String(cmd.n));
     // Anything that is not a kind of photo is a new message, not an answer: the menu is closed and the message handled as usual.
     // F-1: forwarded words never answer the menu.
-    if (cmd.k === "free" && !t.m.forwarded && pickCategory(cmd.text)) return photoCategoryPicked(t, oq, cmd.text);
+    if (cmd.k === "free" && !t.m.forwarded && !t.m.listRow && pickCategory(cmd.text)) return photoCategoryPicked(t, oq, cmd.text);
     await d.db.setConv(phone, { open_question: null });
   }
   // V4: the onboarding buttons, the setup question typed as words, and the owner's yes to the monthly answer's facts.
@@ -342,7 +344,7 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   if (cmd.k === "facts") return factsButton(t, cmd.action, cmd.locationId, cmd.month);
   if (oq?.type === "setup") {
     // F-1: forwarded words never answer the setup question (setupReply reads more yes words than the router's list).
-    const typed = cmd.k === "yes" ? "yes" : cmd.k === "tool" && cmd.tool === "help" ? "help" : cmd.k === "free" && !t.m.forwarded ? setupReply(cmd.text) : null;
+    const typed = cmd.k === "yes" ? "yes" : cmd.k === "tool" && cmd.tool === "help" ? "help" : cmd.k === "free" && !t.m.forwarded && !t.m.listRow ? setupReply(cmd.text) : null;
     if (typed) return onboardingButton(t, typed === "yes" ? "yes" : typed, oq.location_id);
   }
   if (oq?.type === "update" && now - Date.parse(oq.at) < ANSWER_WINDOW_MS) {
@@ -410,7 +412,10 @@ async function withBusiness(t: Turn, toolName: string, pending: string | null, f
     // Look 2: up to 10 businesses are a list message whose rows are the same business buttons (b:<id>); typing the number still works.
     if (options.length <= 10) {
       return answered(plain(t), SAY.whichBusinessTap, "which_business", undefined,
-        { button: "Choose", sections: [{ rows: options.map((o) => ({ id: `b:${o.id}`, title: o.name.length <= 24 ? o.name : `${o.name.slice(0, 21).trimEnd()}...` })) }] });
+        { button: "Choose", sections: [{ rows: options.map((o, i) => {
+          const t = `${i + 1}. ${o.name}`;
+          return { id: `b:${o.id}`, title: t.length <= 24 ? t : `${t.slice(0, 21).trimEnd()}...` };
+        }) }] });
     }
     return answered(plain(t), SAY.whichBusinessList(options.map((o) => o.name)), "which_business");
   }

@@ -58,7 +58,7 @@ Deno.test("a: switch, then My business, shows the numbered list of the four busi
   assert.equal(await send(w, { button: "r:business" }), "which_business");
   assert.equal(last(w).body, "*❓ Which business?*\n\nTap Choose and pick one, or reply with its number.");
   assert.equal(last(w).kind, "list");
-  assert.deepEqual(last(w).rows, ["Kabsi Test Garage", "Kabsi Test Gym", "Kabsi Test Salon", "Yawmiyati"]);
+  assert.deepEqual(last(w).rows, ["1. Kabsi Test Garage", "2. Kabsi Test Gym", "3. Kabsi Test Salon", "4. Yawmiyati"]);
   assert.deepEqual(last(w).rowIds!.slice(0, 3), [`b:${GARAGE}`, `b:${GYM}`, `b:${SALON}`]);
   assert.equal(await send(w, { text: "3" }), "business_set");
   assert.match(last(w).body, /^\*✅ Switched\*\n\nYou are now working on Kabsi Test Salon\./);

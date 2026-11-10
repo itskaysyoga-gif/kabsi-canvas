@@ -2144,9 +2144,9 @@ The look:
 - A review and Kabsi's draft are WhatsApp quote lines ("> "). So is a post shown for a yes.
 - A standing note goes in the footer of a message with buttons or a list: "Nothing is saved until you tap Save.", "Nothing is saved until you tap.", "Nothing is changed until you tap.", "Tap Confirm to go ahead.", "This covers only what was entered in Kabsi." A plain text message keeps the note as its status line.
 - A list of requests ("what's open", "what's unconfirmed", "who asked about", several found) is a WhatsApp list message: button "Open a request", one row per request (title "#12 Sarah", the rest as the row's description), sections by status, the note in the footer, the status line "Tap one to open it." More than 10 shows 10 and "and N more". A row tap opens the request, as typing "#12" does.
-- "Which business?" with 4 to 10 businesses is a list message: button "Choose", one row per business; typing the number still works. The status line: "Tap Choose and pick one, or reply with its number."
+- "Which business?" with 4 to 10 businesses is a list message: button "Choose", one row per business numbered "1. Kabsi Test Garage"; typing the number still works. The status line: "Tap Choose and pick one, or reply with its number."
 - One marker per message: 📅 appointment, 💬 enquiry, 🔧 job, ✅ saved or done, ⏳ needs confirmation, ↩️ undone, ❓ a question or a refusal, 📋 a list, ⭐ a review and its draft, 🕒 hours, 🖼️ a photo or a post, 🧾 the weekly report. DESIGN.md's no-emoji rule still holds for the site and app.
-- At most 3 buttons, the yes first. Button titles and ids are unchanged.
+- At most 3 buttons, the yes first. Button titles and ids are unchanged. A message with buttons or a list is never cut short, so a post or a reply shown for a yes is always whole.
 
 New and changed lines (title, then facts, then status or question):
 - Switch: "Business or staff tools?" (was "Your business or Kabsi staff tools?"), "Business or partner tools?". After a pick: "Switched" / "You are now working on [business]." / "Send "switch" to change it." (was "Done. You are now working on ...").

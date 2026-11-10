@@ -45,6 +45,8 @@ export type Inbound = {
   // F-1: Meta's message context marks a message the person forwarded (context.forwarded, or context.frequently_forwarded
   // past 5 forwards). A forwarded message is never the person's own yes, no, number answer or code (router.ts).
   forwarded: boolean;
+  /** Look 2: the words came from a tap on a request list row ("#12"). They open that request and never answer a question. */
+  listRow?: boolean;
 };
 export type StatusEvent = { messageId: string; status: "sent" | "delivered" | "read" | "failed"; error: string | null;
   /** RB-F: Meta's price facts for the message (statuses[].pricing), when the receipt carries them. No person, no text. */
@@ -88,6 +90,7 @@ export function parseWebhook(event: string | null, body: unknown): { messages: I
         contacts: contactsOf(m),
         referral: referralOf(m),
         forwarded: forwardedOf(m),
+        ...(listRowText(interactive) && !str(obj(m.text).body) ? { listRow: true } : {}),
       });
     } else if (["sent", "delivered", "read", "failed"].includes(String(k.status))) {
       const errs = (Array.isArray(k.statuses) ? (k.statuses as unknown[]) : []).flatMap((s) => (Array.isArray(obj(s).errors) ? (obj(s).errors as unknown[]) : []));

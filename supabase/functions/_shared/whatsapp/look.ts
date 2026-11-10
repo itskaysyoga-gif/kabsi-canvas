@@ -88,8 +88,9 @@ const FALLBACK: Record<string, string> = {
 export function render(l: Look): string {
   const title = unstar(l.title).replace(/[.:]$/, "").trim();
   const facts = (l.facts ?? []).map((f) => f.trimEnd()).filter((f) => f.trim());
-  // The business is named once: not after the title when the title or a fact already names it.
-  const biz = l.business && !title.includes(l.business) && !facts.some((f) => f.includes(l.business!)) ? ` · ${unstar(l.business)}` : "";
+  // The business is named after the title unless the title itself names it. A fact or a quote that happens to hold the
+  // name never stands in for it (a review of "Bloom" may mention "Bloomfield").
+  const biz = l.business && !title.includes(l.business) ? ` · ${unstar(l.business)}` : "";
   return [`*${l.mark} ${title}*${biz}`, facts.join("\n"), (l.end ?? "").trim()].filter(Boolean).join("\n\n");
 }
 
@@ -195,8 +196,11 @@ export function toList(l: Look, extraMore = 0): { look: Look; list: ListMsg } | 
     // A row's description keeps what is still missing in full ("To confirm: the salon, the client"); the earlier parts shrink.
     const [name, ...parts] = m[2]!.split(" · ").map((p) => p.replace(/^Needs confirmation from (.+?) and from (.+)$/, "To confirm: $1, $2").replace(/^Needs confirmation from (.+)$/, "To confirm: $1"));
     const tail = parts.length > 1 && /^To confirm:/.test(parts.at(-1)!) ? parts.pop()! : null;
-    const room = ROW_DESC_MAX - (tail ? tail.length + 3 : 0);
-    const rest = parts.length ? [clip(parts.join(" · "), Math.max(room, 12)), ...(tail ? [tail] : [])] : tail ? [tail] : [];
+    // The summary (the first part) shrinks first, so the time and the status stay whole.
+    const after = parts.slice(1).join(" · ");
+    const room = ROW_DESC_MAX - (tail ? tail.length + 3 : 0) - (after ? after.length + 3 : 0);
+    const head = parts.length ? clip(parts[0]!, Math.max(room, 12)) : null;
+    const rest = [...(head ? [head] : []), ...(after ? [after] : []), ...(tail ? [tail] : [])];
     sections.at(-1)!.rows.push({ id: `#${m[1]}`, title: clip(`#${m[1]} ${name}`, ROW_TITLE_MAX), ...(rest.length ? { description: clip(rest.join(" · "), ROW_DESC_MAX) } : {}) });
     shown++;
   }
@@ -220,10 +224,12 @@ export function toMsg(l: Look, o: { buttons?: number; asList?: boolean; list?: L
     if (made) ({ look, list } = made);
   }
   look = withFooter(look, !!list || (o.buttons ?? 0) > 0);
-  const max = list || (o.buttons ?? 0) > 0 ? BUTTON_BODY_MAX : TEXT_BODY_MAX;
+  // A message with buttons or a list is never cut: what an owner approves must be shown whole. A body over WhatsApp's limit
+  // is refused by the sender, as before look 2, and no Approve is shown. Plain text is cut at 4,096 as before.
+  const interactive = !!list || (o.buttons ?? 0) > 0;
   const body = render(look);
   return {
-    body: body.length <= max ? body : `${body.slice(0, max - 4).trimEnd()} ...`,
+    body: interactive || body.length <= TEXT_BODY_MAX ? body : `${body.slice(0, TEXT_BODY_MAX - 4).trimEnd()} ...`,
     ...(look.footer ? { footer: clip(look.footer, FOOTER_MAX) } : {}),
     ...(list ? { list } : {}),
   };
@@ -261,7 +267,7 @@ export function markFor(result: string, kind: KindName | null): string {
   const byKind = kind ? MARK[kind] : MARK.list;
   if (/^hours_/.test(r)) return MARK.hours;
   if (/^(post_|photo|held_photo|video$|post_skip)/.test(r)) return MARK.picture;
-  if (/^(shown_for_yes|no_review$|exact_|edit_|show_refused|review_alert|new_draft)/.test(r)) return MARK.review;
+  if (/^(shown_for_yes|no_review$|exact_|edit_(started|refused|draft)|show_refused|review_alert|new_draft)/.test(r)) return MARK.review;
   if (/^receipt/.test(r)) return MARK.receipt;
   if (/undone|undo_refused|request_undo|^undo$|^too_late$/.test(r)) return MARK.undone;
   if (/^request_(confirm|convert)_(guess|choose)$/.test(r)) return MARK.confirm;

@@ -44,8 +44,8 @@ const senderFor = (o: Out, s: SendState) => (s.live_ok && o.live.live ? o.live :
 const doneState = (sender: Sender) => (sender.live ? "sent" : "mock_sent");
 
 /** Look 2: the rows of a list as text, for a sender that cannot send a list message. */
-export const listAsText = (body: string, l: ListMsg) =>
-  `${body}\n\n${l.sections.flatMap((s) => [...(s.title ? [s.title] : []), ...s.rows.map((r) => [r.title, r.description].filter(Boolean).join(" · "))]).join("\n")}`;
+export const listAsText = (body: string, l: ListMsg, footer?: string) =>
+  `${body}\n\n${l.sections.flatMap((s) => [...(s.title ? [s.title] : []), ...s.rows.map((r) => [r.title, r.description].filter(Boolean).join(" · "))]).join("\n")}${footer ? `\n\n${footer}` : ""}`;
 
 /** An answer inside the window the person just opened. Recorded after it went, so the person never waits on the log.
  *  Look 2: `extra` carries the footer of a message with buttons or a list, and the list itself. The record keeps the body
@@ -58,14 +58,16 @@ export async function reply(o: Out, s: SendState, phone: string, body: string, b
   let error: string | null = null;
   try {
     const r = extra.list && !buttons?.length
-      ? (sender.list ? await sender.list(phone, body, extra.list, extra.footer) : await sender.text(phone, listAsText(body, extra.list)))
+      ? (sender.list ? await sender.list(phone, body, extra.list, extra.footer) : await sender.text(phone, listAsText(body, extra.list, extra.footer)))
       : buttons?.length ? await sender.buttons(phone, body, buttons.slice(0, 3), extra.footer) : await sender.text(phone, body);
     providerId = r.id;
   } catch (e) {
     state = "failed";
     error = String((e as Error)?.message ?? e).slice(0, 300);
   }
-  const id = await o.db.add({ phone, userId: meta.userId ?? null, locationId: meta.locationId ?? null, kind: "reply", body, buttons });
+  // The record keeps what the person saw: the body, then a list's rows and the footer (look 2), and the buttons as before.
+  const seen = extra.list ? listAsText(body, extra.list, extra.footer) : extra.footer ? `${body}\n\n${extra.footer}` : body;
+  const id = await o.db.add({ phone, userId: meta.userId ?? null, locationId: meta.locationId ?? null, kind: "reply", body: seen, buttons });
   if (id) await o.db.mark([id], state, { providerId, error });
   return state;
 }

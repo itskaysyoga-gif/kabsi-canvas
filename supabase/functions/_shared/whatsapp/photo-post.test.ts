@@ -40,7 +40,7 @@ Deno.test("photo post: words with AI drafting on, the draft passes every check a
   const deps = w.deps();
   const r = await send(w, deps, PHONES.owner, { media: img("pp1"), text: CAPTION });
   assert.equal(r.result, "photo_post_shown");
-  assert.equal(r.last!.body, `*🖼️ Post with your photo*\n\n> ${DRAFT}\n\nKabsi posts it with the photo you just sent, after your yes.`);
+  assert.equal(r.last!.body, `*🖼️ Post with your photo* · Harbour Lane Coffee\n\n> ${DRAFT}\n\nKabsi posts it with the photo you just sent, after your yes.`);
   assert.deepEqual(r.last!.buttons, ["Approve", "Edit on kabsi.co", "Skip"]);
   assert.deepEqual(w.photoDraftCalls, [`${BIZ.harbour}:${CAPTION}`]);
   const post = onlyPost(w);

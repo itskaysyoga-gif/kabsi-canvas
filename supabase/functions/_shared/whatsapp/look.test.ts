@@ -20,8 +20,9 @@ Deno.test("render: three blocks at most, a bold title with one marker, the busin
   assert.deepEqual(lookProblems({ body }), []);
   // No facts: two blocks. No end: two blocks. The business named in a fact is not repeated after the title.
   assert.equal(render({ mark: MARK.ask, title: "Which business?" }), "*❓ Which business?*");
+  // The business follows the title even when a fact names it (the agent leaves it out of a switch, which says it in words).
   assert.equal(render({ mark: MARK.done, title: "Switched", business: "Kabsi Test Salon", facts: ["You are now working on Kabsi Test Salon."] }),
-    "*✅ Switched*\n\nYou are now working on Kabsi Test Salon.");
+    "*✅ Switched* · Kabsi Test Salon\n\nYou are now working on Kabsi Test Salon.");
   // A star or an underscore in a title or business never breaks the bold.
   assert.equal(render({ mark: MARK.done, title: "Sa*rah_ saved", business: "A*B" }), "*✅ Sarah saved* · AB");
 });
@@ -212,4 +213,60 @@ Deno.test("conversation: a proposal, Save, what's open as a list, and the row ta
     assert.doesNotMatch(s.body + (s.footer ?? ""), HOUSE);
     assert.ok(s.buttons.length <= 3);
   }
+});
+
+// ─── The independent review's findings (section 5 of the archive file), each with its case.
+
+Deno.test("review 1: a message with buttons is never cut, so Approve never sits under a cut post or reply", () => {
+  const long = "Our autumn menu starts on Monday. ".repeat(44).trim();
+  const m = toMsg(fromText(SAY.postShown(long), markFor("post_shown", null), "Harbour Lane Coffee"), { buttons: 2 });
+  assert.ok(m.body.includes(long), "the whole post is in the body (the sender refuses a body over WhatsApp's limit, as before)");
+  // Plain text is still cut at WhatsApp's 4,096, as before look 2.
+  assert.ok(toMsg(fromText(`Title\n${"x".repeat(5000)}`, MARK.list)).body.length <= 4096);
+});
+
+Deno.test("review 2: a change to Google names the business even when the quoted text holds the name", () => {
+  assert.match(render({ mark: MARK.review, title: "New draft", business: "Bloom", facts: quote("Thanks for visiting Bloomsbury Cafe") }), /^\*⭐ New draft\* · Bloom\n/);
+  assert.match(reviewAlertBody({ business: "Bloom", stars: 5, reviewer: "Ana", text: "Better than Bloomfield salon", draft: "Thank you." }, "Post this reply on Google?"),
+    /^\*⭐ New 5-star review\* · Bloom\n/);
+  assert.match(postAlertBody("Bloom", "Come to Bloom Kids"), /^\*\u{1F5BC}️ Post ready for Google\* · Bloom\n/u);
+});
+
+Deno.test("review 3: a tapped list row opens the request and never answers an open question", async () => {
+  const w = salonWorld();
+  const send = (o: Parameters<typeof msg>[2], listRow = false) => receive(w.deps(), { ...msg(w, PHONES.rashid, o), ...(listRow ? { listRow: true } : {}) });
+  await send({ text: "switch" });
+  await send({ button: "r:business" });
+  await send({ button: `b:${SALON}` });
+  // The map's search question is open for the salon: a typed answer would set the search.
+  w.conversation(PHONES.rashid).open_question = { type: "keyword", location_id: SALON, suggested: null } as never;
+  const r = await send({ button: "#1", text: "#1" }, true);
+  assert.ok(!w.calls.some((c) => c.startsWith("keyword:")), "the search is never set from a row tap");
+  assert.match(r, /^request_/);
+  // The webhook marks the tap; a typed "#1" carries no mark.
+  const tap = parseWebhook("whatsapp.message.received", {
+    message: { id: "wamid.z", from: "12125550148", timestamp: "1", type: "interactive", interactive: { type: "list_reply", list_reply: { id: "#1", title: "#1 Sarah" } }, kapso: { direction: "inbound" } },
+    conversation: { phone_number: "+12125550148", phone_number_id: "PNID" }, phone_number_id: "PNID",
+  }).messages[0]!;
+  assert.equal(tap.listRow, true);
+});
+
+Deno.test("review 4: a list row keeps its time and what is missing; the summary shrinks first", () => {
+  const l = fromText("1 open\n#12 Sarah · Full head highlights and a cut with toner and a blow dry · Thu 12 Nov 15:00 · Needs confirmation from the salon and from the client\n\nThis covers only what was entered in Kabsi.", MARK.list);
+  const row = toMsg(l, { asList: true }).list!.sections[0]!.rows[0]!;
+  assert.ok(row.description!.length <= 72, row.description);
+  assert.match(row.description!, /Thu 12 Nov 15:00 · To confirm: the salon, the client$/);
+});
+
+Deno.test("review 5: the business list numbers its rows, so replying with the number still matches what is shown", async () => {
+  const w = salonWorld();
+  for (const [n, name] of [[21, "Kabsi Test Gym"], [22, "Kabsi Test Garage"]] as const) {
+    w.biz.push({ id: id(n), name, tz: "Asia/Dubai", country: "AE", pro: false, members: { [USERS.rashid]: "owner" }, demo: true });
+  }
+  await receive(w.deps(), msg(w, PHONES.rashid, { text: "switch" }));
+  await receive(w.deps(), msg(w, PHONES.rashid, { button: "r:business" }));
+  const s = w.repliesTo(PHONES.rashid).at(-1)!;
+  assert.equal(s.kind, "list");
+  assert.ok(s.rows!.every((r, i) => r.startsWith(`${i + 1}. `)), s.rows!.join("|"));
+  assert.ok(s.rowIds!.every((x) => /^b:/.test(x)));
 });

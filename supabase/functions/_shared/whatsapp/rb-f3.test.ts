@@ -273,7 +273,7 @@ Deno.test("style: switch and help in the new look", async () => {
   await send(w, { button: "r:business" });
   assert.equal(last(w).body, "*❓ Which business?*\n\nTap Choose and pick one, or reply with its number.");
   assert.equal(last(w).kind, "list");
-  assert.equal(last(w).rows![0], "Kabsi Test Garage");
+  assert.equal(last(w).rows![0], "1. Kabsi Test Garage");
   assert.equal(last(w).rowIds![0], `b:${GARAGE}`);
   await send(w, { text: "3" });
   assert.equal(last(w).body, "*✅ Switched*\n\nYou are now working on Kabsi Test Salon.\n\nSend \"switch\" to change it.");
