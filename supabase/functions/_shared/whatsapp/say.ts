@@ -77,7 +77,7 @@ export const SAY = {
   // 13b part 2 (judged 25 Oct): only what the facts say is open today; WhatsApp for owners and Partners are not open yet.
   trial: `Start free here, no card, about 10 minutes: ${START_URL}\n\nThe free trial starts once Kabsi can reach your Google profile.`,
   partnerProgram:
-    "Kabsi Partners is not open yet. When it opens, a partner earns 25 percent of every payment for as long as the business pays. Read more: kabsi.co/partners",
+    "Anyone can join Kabsi Partners at kabsi.co/partners/join, and the link is ready at once. A partner earns 25 percent of every payment for as long as the business pays, from the day card payments open.",
   needsAccount: `That needs a Kabsi account for your business. Start free, no card: ${START_URL}`,
 
   // Binding (9.2).
