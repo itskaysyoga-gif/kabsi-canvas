@@ -160,13 +160,13 @@ describe("Payout method (29.1, 30.51 item 6)", () => {
       field: "method",
     });
   });
-  it("confirms on WhatsApp only with a confirmed number and an open window, else by email code", () => {
+  it("confirms on WhatsApp with a confirmed number, by email code only without WhatsApp", () => {
     expect(payoutChannel({ phone: "+447700900123", windowOpen: true, stopped: false })).toBe(
       "whatsapp",
     );
     expect(payoutChannel({ phone: null, windowOpen: true, stopped: false })).toBe("email");
     expect(payoutChannel({ phone: "+447700900123", windowOpen: false, stopped: false })).toBe(
-      "email",
+      "open_window",
     );
   });
   it("makes 6 digits and keeps the code out of the subject", () => {

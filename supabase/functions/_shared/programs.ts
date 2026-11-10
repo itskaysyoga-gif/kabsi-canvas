@@ -198,9 +198,11 @@ export function foundingLine(day: FoundingDay, business: string, endsAt: string 
 
 /**
  * 30.51 item 6: how a payout change is confirmed. The partner's own WhatsApp ("Yes, it's me") when the account has a
- * confirmed number and Kabsi may write to it now (the 24-hour window: a free-form message with a button); else a code by
- * email. Kabsi never sends the change through anything the browser chose.
+ * confirmed number. Kabsi may write a free-form message with a button only inside the 24-hour window, so with the window
+ * closed the partner is asked to send Kabsi any message first ("open_window"). A code by email only without WhatsApp (no
+ * confirmed number, or the number stopped Kabsi's messages). Kabsi never uses a channel the browser chose.
  */
-export function payoutChannel(o: { phone: string | null; windowOpen: boolean; stopped: boolean }): "whatsapp" | "email" {
-  return o.phone && o.windowOpen && !o.stopped ? "whatsapp" : "email";
+export function payoutChannel(o: { phone: string | null; windowOpen: boolean; stopped: boolean }): "whatsapp" | "email" | "open_window" {
+  if (!o.phone || o.stopped) return "email";
+  return o.windowOpen ? "whatsapp" : "open_window";
 }

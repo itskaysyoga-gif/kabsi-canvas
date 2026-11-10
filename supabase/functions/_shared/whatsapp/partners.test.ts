@@ -52,11 +52,11 @@ Deno.test("partners2: the payout ask is look 2: one marker, a bold title, the me
   assert.doesNotMatch(Object.values(PARTNERS_SAY).map((v) => (typeof v === "string" ? v : "")).join(" "), /[—–!]/);
 });
 
-Deno.test("partners2: WhatsApp when the account has a confirmed number and the window is open; else the email code", () => {
+Deno.test("partners2: WhatsApp when the account has a confirmed number; the email code only without WhatsApp", () => {
   assert.equal(payoutChannel({ phone: "+971500000301", windowOpen: true, stopped: false }), "whatsapp");
   assert.equal(payoutChannel({ phone: null, windowOpen: true, stopped: false }), "email", "no WhatsApp on the account");
-  assert.equal(payoutChannel({ phone: "+971500000301", windowOpen: false, stopped: false }), "email", "window closed");
-  assert.equal(payoutChannel({ phone: "+971500000301", windowOpen: true, stopped: true }), "email", "stopped");
+  assert.equal(payoutChannel({ phone: "+971500000301", windowOpen: false, stopped: false }), "open_window", "window closed: message Kabsi first, never email");
+  assert.equal(payoutChannel({ phone: "+971500000301", windowOpen: true, stopped: true }), "email", "stopped: no WhatsApp");
 });
 
 Deno.test("partners2: \"payouts\" from the staff phone lists first payouts; one tap approves", async () => {

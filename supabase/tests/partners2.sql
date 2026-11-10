@@ -262,5 +262,36 @@ select is((select count(*)::int from public.owner_referral_rewards where organiz
 select pg_temp.biz('00000000-0000-4000-8000-0000000030ca', '00000000-0000-4000-8000-0000000030a1', 'Partner Owned Spa', 'p2-place-a');
 select is(public.owner_referral_link('00000000-0000-4000-8000-0000000030ca', '+971500000301') ->> 'result', 'partner', 'a partner who owns a business shares the partner link');
 
+-- Review findings (independent review, 10 Nov 2026).
+-- A first payout with no payout method on file is not approved by the tap.
+insert into public.partner_payouts (partner_id, run_on, amount_cents, lines, statement)
+select id, current_date, 3000, 1, '{}' from public.partner_accounts where code = 'P-PHONE2';
+select is(public.partner_first_payout_review((select o.id from public.partner_payouts o join public.partner_accounts p on p.id = o.partner_id where p.code = 'P-PHONE2'), '+971500000399') ->> 'result',
+  'no_method', 'no tap approves a payout with nowhere to go');
+select ok((public.partner_home('00000000-0000-4000-8000-0000000030a2') ->> 'payout_ask')::boolean, 'a payout on the way asks for the method');
+-- Re-approving a joined partner on the staff page is not their review (the review is the WhatsApp tap).
+insert into auth.users (instance_id, id, aud, role, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+values ('00000000-0000-0000-0000-000000000000', '00000000-0000-4000-8000-0000000030ab', 'authenticated', 'authenticated', 'pc@example.test', now(), '{}', '{}', now(), now());
+select pg_temp.join('00000000-0000-4000-8000-0000000030ab', 'pc@example.test', 'creator', 'US');
+select tests.act_as('00000000-0000-4000-8000-0000000000a3');
+select public.staff_partner_decide(pg_temp.pid('00000000-0000-4000-8000-0000000030ab'), 'approved');
+reset role;
+select is((select reviewed_at from public.partner_accounts where user_id = '00000000-0000-4000-8000-0000000030ab'), null, 'staff re-approval does not review a joined partner');
+-- The last link before sign-up wins between an owner's link and a partner's WhatsApp code, too.
+insert into auth.users (instance_id, id, aud, role, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+values ('00000000-0000-0000-0000-000000000000', '00000000-0000-4000-8000-0000000030ac', 'authenticated', 'authenticated', 'r4@example.test', now(), '{}', '{}', now(), now());
+insert into public.whatsapp_optins (user_id, phone, state, consent_text, verified_at)
+values ('00000000-0000-4000-8000-0000000030ac', '+971500000312', 'active', 'test consent', now());
+select pg_temp.biz('00000000-0000-4000-8000-0000000030cc', '00000000-0000-4000-8000-0000000030ac', 'Later Code Nails', 'p2-place-c');
+insert into public.whatsapp_conversations (phone, partner_code, partner_code_at)
+values ('+971500000312', pg_temp.code('00000000-0000-4000-8000-0000000030a2'), now() - interval '1 day');
+insert into public.signup_attribution (user_id, via_code, via_at) values ('00000000-0000-4000-8000-0000000030ac', (select r ->> 'code' from olink), now() - interval '5 days');
+update public.locations set via_code = (select r ->> 'code' from olink) where id = '00000000-0000-4000-8000-0000000030cc';
+select is((select partner_id from public.partner_referrals where organization_id = pg_temp.org('00000000-0000-4000-8000-0000000030cc')),
+  pg_temp.pid('00000000-0000-4000-8000-0000000030a2'), 'a partner code after an owner''s link wins');
+select is((select count(*)::int from public.owner_referrals where organization_id = pg_temp.org('00000000-0000-4000-8000-0000000030cc')), 0, 'and no owner referral is saved');
+-- A test payment never uses up the owner's one free month.
+select is((select count(*)::int from public.owner_referral_rewards where mode <> 'live'), 0, 'owner rewards are live payments only');
+
 select * from finish();
 rollback;

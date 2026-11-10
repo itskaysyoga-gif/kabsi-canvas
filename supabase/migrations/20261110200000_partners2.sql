@@ -227,7 +227,9 @@ begin
                       where k.partner_id = x.id and k.mode is distinct from 'live' and k.state <> 'void'),
       'next_payout_on', v_next),
     -- 29.1: the payout method is asked only once 50 US dollars has cleared (or once one is on file).
-    'payout_ask', x.payout_method is not null or v_cleared + v_paid >= 5000,
+    -- A payout already made (25 US dollars and up) needs somewhere to go, so the method is asked then too.
+    'payout_ask', x.payout_method is not null or v_cleared + v_paid >= 5000
+                  or exists (select 1 from public.partner_payouts o where o.partner_id = x.id and o.state in ('proposed', 'approved')),
     'businesses', coalesce((select jsonb_agg(jsonb_build_object('trade', l.category_label, 'area', l.area,
         'state', case when exists (select 1 from public.subscriptions s where s.organization_id = r.organization_id and s.provider = 'creem'
                                      and s.state in ('active', 'past_due')) then 'paying'
@@ -376,7 +378,13 @@ begin
   select * into o from public.partner_payouts where id = p_payout for update;
   if not found or o.state <> 'proposed' then return jsonb_build_object('result', 'unknown'); end if;
   select * into x from public.partner_accounts where id = o.partner_id for update;
-  if x.reviewed_at is not null then return jsonb_build_object('result', 'unknown'); end if;
+  if x.reviewed_at is not null or x.status <> 'approved' then return jsonb_build_object('result', 'unknown'); end if;
+  -- Never a partner's own phone, and never a payout with nowhere to go.
+  if x.phone is not distinct from p_phone
+     or exists (select 1 from public.whatsapp_optins w where w.user_id = x.user_id and w.phone = p_phone) then
+    return jsonb_build_object('result', 'forbidden');
+  end if;
+  if x.payout_method is null then return jsonb_build_object('result', 'no_method', 'code', x.code); end if;
   v_founding := x.founding_partner or (select count(*) from public.partner_accounts where founding_partner) < 20;
   update public.partner_accounts set reviewed_at = now(), reviewed_by = 'whatsapp:' || p_phone, founding_partner = v_founding, updated_at = now()
    where id = x.id;
@@ -402,8 +410,8 @@ begin
   return v_n;
 end $$;
 
--- staff_partner_decide as it stands live (20261026165709), with one change: an approval by staff on the staff page is a
--- review too (reviewed_at), so the founding count and the first payout follow it.
+-- staff_partner_decide as it stands live (20261026165709), with one change: approving an old application (status
+-- 'applied') on the staff page is its review too. A joined partner is reviewed only by the first payout's WhatsApp tap.
 create or replace function public.staff_partner_decide(p_id uuid, p_status text, p_handle text default null, p_note text default null) returns jsonb
 language plpgsql security definer set search_path = '' as $$
 declare x public.partner_accounts; v_handle text; v_founding boolean;
@@ -420,7 +428,8 @@ begin
     if exists (select 1 from public.partner_accounts where handle = v_handle) then raise exception 'handle_taken'; end if;
     update public.partner_accounts set handle = v_handle, code = coalesce(code, 'P-' || upper(v_handle)) where id = p_id;
   end if;
-  if p_status = 'approved' and x.reviewed_at is null then
+  -- Only an old application approved on the staff page is a review; a joined partner is reviewed at the first payout tap.
+  if p_status = 'approved' and x.status = 'applied' and x.reviewed_at is null then
     v_founding := x.founding_partner or (select count(*) from public.partner_accounts where founding_partner) < 20;
     update public.partner_accounts set reviewed_at = now(), reviewed_by = 'staff:' || coalesce(auth.uid()::text, 'unknown'),
       founding_partner = v_founding where id = p_id;
@@ -523,12 +532,28 @@ begin
      or exists (select 1 from public.owner_referrals r where r.organization_id = l.organization_id) then
     return null;
   end if;
+  -- One referral source per business: the location trigger and the daily sweep never both write one.
+  perform pg_advisory_xact_lock(hashtext('referral:' || l.organization_id::text));
+  if exists (select 1 from public.partner_referrals r where r.organization_id = l.organization_id)
+     or exists (select 1 from public.owner_referrals r where r.organization_id = l.organization_id) then
+    return null;
+  end if;
   select o.created_at into v_created from public.organizations o where o.id = l.organization_id;
   v_via := nullif(upper(btrim(coalesce(l.via_code, ''))), '');
   v_via_at := coalesce((select a.via_at from public.signup_attribution a where a.user_id = l.created_by), l.created_at);
+  -- The partner code a phone of the owner sent on WhatsApp in the 60 days before sign-up (the other kind of touch).
+  select c.partner_code, c.partner_code_at into v_wa, v_wa_at
+    from public.whatsapp_conversations c
+   where c.partner_code is not null
+     and c.partner_code_at between v_created - interval '60 days' and v_created + interval '1 day'
+     and c.phone in (select o.phone from public.whatsapp_optins o join public.organization_members m on m.user_id = o.user_id
+                      where m.organization_id = l.organization_id and m.role = 'owner')
+     and exists (select 1 from public.partner_accounts p where p.code = c.partner_code and p.status in ('approved', 'paused'))
+   order by c.partner_code_at desc limit 1;
   if v_via like 'R-%' then
     select c.organization_id into v_ref_org from public.owner_referral_codes c where c.code = v_via;
-    if v_ref_org is null then
+    -- The last link before sign-up wins: an owner's link that came before a partner's WhatsApp code loses to it.
+    if v_ref_org is null or (v_wa is not null and v_wa_at > v_via_at) then
       v_via := null;
     else
       -- An owner who is a partner earns as a partner (30.50 item 5).
@@ -549,14 +574,6 @@ begin
       v_via := null;
     end if;
   end if;
-  select c.partner_code, c.partner_code_at into v_wa, v_wa_at
-    from public.whatsapp_conversations c
-   where c.partner_code is not null
-     and c.partner_code_at between v_created - interval '60 days' and v_created + interval '1 day'
-     and c.phone in (select o.phone from public.whatsapp_optins o join public.organization_members m on m.user_id = o.user_id
-                      where m.organization_id = l.organization_id and m.role = 'owner')
-     and exists (select 1 from public.partner_accounts p where p.code = c.partner_code and p.status in ('approved', 'paused'))
-   order by c.partner_code_at desc limit 1;
   if v_via is not null and (v_wa is null or v_via_at >= v_wa_at) then
     v_code := v_via; v_touch := v_via_at; v_src := 'via';
   elsif v_wa is not null then
@@ -588,6 +605,8 @@ begin
   if e.event_type = 'subscription.paid' then
     if r.status <> 'active' or r.self_referral or private.owner_self_referral(r.referrer_org, r.organization_id) then return 'no_reward'; end if;
     if not private.card_payments_open(e.organization_id, v_mode) then return 'payments_closed'; end if;
+    -- A free month is earned by a real payment only: a test payment never uses up the one reward.
+    if v_mode <> 'live' then return 'test_mode'; end if;
     insert into public.owner_referral_rewards (referral_id, referrer_org, organization_id, billing_event_id, payment_id, mode, earned_at)
     values (r.id, r.referrer_org, r.organization_id, e.id, e.payment_id, v_mode, coalesce(e.event_created_at, e.received_at))
     on conflict (referral_id) do nothing;
@@ -596,7 +615,7 @@ begin
   if e.event_type in ('refund.created', 'dispute.created') then
     v_pay := coalesce(e.detail #>> '{object,transaction,id}', e.payment_id);
     select * into w from public.owner_referral_rewards where referral_id = r.id for update;
-    if found and w.state = 'earned' and (w.payment_id = v_pay or v_pay is null) then
+    if found and w.state = 'earned' and v_pay is not null and w.payment_id = v_pay then
       update public.owner_referral_rewards set state = 'void', void_reason = e.event_type where id = w.id;
       return 'owner_reward_void';
     end if;

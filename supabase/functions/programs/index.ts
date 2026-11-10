@@ -166,6 +166,9 @@ async function payoutRequest(req: Request): Promise<Response> {
   const deps = await agentDeps();
   const state = contact.phone ? await deps.out.db.state(contact.phone) : null;
   const channel = payoutChannel({ phone: contact.phone, windowOpen: !!state && ctx.on && inWindow(state, new Date()), stopped: !!state?.stopped });
+  if (channel === "open_window") {
+    return fail("open_whatsapp", "Send any message to Kabsi on WhatsApp first, then try again. Kabsi asks you to confirm there.", 409);
+  }
   const code = channel === "email" ? emailCode((n) => crypto.getRandomValues(new Uint8Array(n))) : null;
   const { data, error } = await db.rpc("partner_payout_request", {
     p_user: user.id, p_method: c.value.method, p_detail: c.value.detail, p_channel: channel, p_code_hash: code ? await codeHash(user.id, code) : null,
@@ -182,23 +185,15 @@ async function payoutRequest(req: Request): Promise<Response> {
     const sent = await notify(deps.out, { phone: r.phone!, userId: user.id, locationId: null, kind: "partner_payout_confirm", urgent: true,
       body: PARTNERS_SAY.payoutAsk(r.method!, r.last4!), buttons: [{ id: `pc:${r.id}`, title: PARTNERS_SAY.payoutYes }], dedupe: `payout:${r.id}` });
     if (sent === "sent" || sent === "mock_sent" || sent === "duplicate") return json({ ok: true, id: r.id, channel }, 200, NO_CACHE);
-    // The message did not go: the same request is confirmed by email instead (a new one, so the code is fresh).
-    return await payoutRequestByEmail(user.id, c.value.method, c.value.detail);
+    return fail("open_whatsapp", "Kabsi could not reach your WhatsApp just now. Send any message to Kabsi on WhatsApp, then try again.", 409);
   }
-  await sendCode(user.id, r.email!, r.id, code!, r.method!, r.last4!);
+  await sendCode(user.id, codeTo(user.email, r.email!), r.id, code!, r.method!, r.last4!);
   return json({ ok: true, id: r.id, channel }, 200, NO_CACHE);
 }
 
-async function payoutRequestByEmail(userId: string, method: string, detail: string): Promise<Response> {
-  const code = emailCode((n) => crypto.getRandomValues(new Uint8Array(n)));
-  const { data, error } = await admin().rpc("partner_payout_request", {
-    p_user: userId, p_method: method, p_detail: detail, p_channel: "email", p_code_hash: await codeHash(userId, code),
-  });
-  const r = one<{ result: string; id?: string; email?: string; method?: string; last4?: string }>(data);
-  if (error || r.result !== "asked" || !r.id) return fail("try_again", "Something went wrong. Please try again in a minute.", 500);
-  await sendCode(userId, r.email!, r.id, code, r.method!, r.last4!);
-  return json({ ok: true, id: r.id, channel: "email" }, 200, NO_CACHE);
-}
+/** The code goes to the account's own sign-in email (verified by signing in); the join form's email only when the account
+ *  has none (an account made with WhatsApp, which never reaches this path while its number works). */
+const codeTo = (account: string | null, typed: string) => (account && !/@wa\.kabsi\.co$/i.test(account) ? account : typed);
 
 async function sendCode(userId: string, email: string, id: string, code: string, method: string, last4: string) {
   const r = await notifyEmail({ category: "direct", kind: "partner_payout_code", key: `payout:${id}`, to: [{ email, userId }],
