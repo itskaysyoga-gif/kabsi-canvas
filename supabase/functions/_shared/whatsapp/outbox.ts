@@ -15,10 +15,6 @@ export type OutRow = {
   buttons: Button[]; template: TemplateRef | null; urgent: boolean; state: string; due_at: string; attempts: number;
   /** 13b part 2: an image that goes with the message, by reference (the map of one finished grid). */
   media?: OutMedia | null;
-  /** Ops 1: when the row was queued, so a held message can be closed after its 30 days. */
-  created_at?: string;
-  /** The claim returns the row as "sending", so a held row is told by the error the hold wrote. */
-  error?: string | null;
 };
 export type OutMedia = { map_scan: string };
 export type NewRow = {
@@ -42,8 +38,7 @@ export type Out = {
 };
 
 // A held message waits for the person to write (release() makes it due); it is dropped with the outbox after 30 days.
-const HELD_DAYS = 30;
-const HELD_UNTIL = (now: Date) => new Date(now.getTime() + HELD_DAYS * 86_400_000);
+const HELD_UNTIL = (now: Date) => new Date(now.getTime() + 30 * 86_400_000);
 const senderFor = (o: Out, s: SendState) => (s.live_ok && o.live.live ? o.live : o.mock);
 const doneState = (sender: Sender) => (sender.live ? "sent" : "mock_sent");
 
@@ -103,11 +98,6 @@ async function sendRow(o: Out, s: SendState, row: OutRow): Promise<string> {
       const r = await sendBody(o, sender, row);
       await o.db.mark([row.id], doneState(sender), { providerId: r.id });
       return doneState(sender);
-    }
-    // Ops 1: a held message waits 30 days for the person to write; after that it is closed, not held for 30 more.
-    if ((row.state === "held" || row.error === "outside_window") && row.created_at && now.getTime() - Date.parse(row.created_at) >= HELD_DAYS * 86_400_000) {
-      await o.db.mark([row.id], "dropped", { error: "held_expired" });
-      return "dropped";
     }
     if (row.template?.name) {
       const r = await sender.template(row.phone, row.template.name, row.template.params);

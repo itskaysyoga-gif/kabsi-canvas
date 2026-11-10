@@ -55,5 +55,5 @@ Deno.test("Ops 1: the digest says what to do about each stuck publication", () =
   assert.match(morningDigest({ ...stuck, publications_stuck: 2 }).body, /2 publications stuck,/);
   assert.equal(stuckText({ ...S, publications_stuck: 0 }), "No publications stuck");
   assert.doesNotMatch(morningDigest({ ...stuck, publications_stuck: 0 }).body, /stuck/);
-  assert.doesNotMatch(stuckText({ ...S, publications_stuck: 5, publications_retrying: 3, publications_waiting_google: 2 }), /[—–!]/);
+  assert.doesNotMatch(stuckText({ ...S, publications_stuck: 5, publications_retrying: 3, publications_waiting_google: 2 }), /[\u2014\u2013!]/);
 });

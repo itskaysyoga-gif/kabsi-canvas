@@ -1161,7 +1161,7 @@ async function staff(t: Turn, name: string, arg: string | undefined): Promise<st
       const stuck = stuckText({ publications_stuck: Number(n.publications_stuck ?? 0), publications_retrying: Number(n.publications_retrying ?? 0),
         publications_waiting_google: Number(n.publications_waiting_google ?? 0), publications_need_look: Number(n.publications_need_look ?? 0) });
       const todo = Number(n.publications_need_look ?? 0) ? " Open System health on the staff page for the ones that need a look." : "";
-      const held = Number(n.outbox_held ?? 0) ? ` ${n.outbox_held} WhatsApp ${Number(n.outbox_held) === 1 ? "message is" : "messages are"} held. Each goes out when that person next writes to Kabsi, and closes after 30 days.` : " No WhatsApp messages are held.";
+      const held = Number(n.outbox_held ?? 0) ? ` ${n.outbox_held} WhatsApp ${Number(n.outbox_held) === 1 ? "message is" : "messages are"} held. Each goes out when that person next writes to Kabsi, and is deleted after 30 days.` : " No WhatsApp messages are held.";
       const body = name === "staff_status"
         ? `Jobs failed in the last hour: ${n.jobs_failed_1h}. Jobs late: ${n.jobs_waiting}. Number quality: ${n.number_quality ?? "not read yet"}. ${stuck}.${todo}`
         : `Hand-offs in the last 2 days: ${n.handoffs}. ${stuck}.${todo}${held}`;
