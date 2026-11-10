@@ -39,9 +39,23 @@ export function requestLine(row: RequestRow, ctx: ReplyContext, opts: { summaryM
   return parts.join(" \u00b7 ");
 }
 
+/**
+ * Look 2 (30.50 item 2): one request as facts, one per line: who, what, when, and its status. A label only where the
+ * value does not explain itself. What an appointment still needs is the status line after them (confirmationShort).
+ */
+export function requestFacts(row: RequestRow, ctx: ReplyContext, summaryMax = 160): string[] {
+  const when = whenText(row, ctx);
+  return [who(row), clip(row.summary, summaryMax), ...(when ? [when] : []), `Status: ${statusWord(ctx.pack, row)}`];
+}
+/** The status line after a request's facts: what an appointment still needs, when it needs anything. */
+const needs = (row: RequestRow, ctx: ReplyContext) => {
+  const c = confirmationShort(row, ctx.pack);
+  return c ? `\n\n${c}.` : "";
+};
+
 /** The whole state of one request, in one reply. */
 export function summaryReply(row: RequestRow, ctx: ReplyContext): Reply {
-  const lines = [`${label(row, ctx.pack)} for ${who(row)}`, `${clip(row.summary, 300)}`];
+  const lines = [label(row, ctx.pack), who(row), `${clip(row.summary, 300)}`];
   const when = whenText(row, ctx);
   lines.push(when ? `When: ${when}` : "When: no time entered");
   lines.push(`Status: ${statusWord(ctx.pack, row)}`);
@@ -51,8 +65,8 @@ export function summaryReply(row: RequestRow, ctx: ReplyContext): Reply {
     const due = row.next_action_due_at ? ` by ${formatWhen(row.next_action_due_at, ctx.timeZone, ctx.now)}` : "";
     lines.push(`Next step: ${clip(row.next_action, 120)}${due}`);
   }
-  lines.push(row.kind === "appointment" ? "This is a note in Kabsi. It is not entered in any other diary." : "This is what was entered in Kabsi.");
-  return finish(lines.join("\n"));
+  const note = row.kind === "appointment" ? "This is a note in Kabsi. It is not entered in any other diary." : "This is what was entered in Kabsi.";
+  return finish(`${lines.join("\n")}\n\n${note}`);
 }
 
 /**
@@ -91,23 +105,23 @@ export function openListReply(rows: RequestRow[], more: number, ctx: ReplyContex
   const total = rows.length + more;
   const plural = kindWord(ctx.pack, filter.kind ?? "appointment", true).toLowerCase();
   if (total === 0) {
-    const none = filter.unconfirmed ? `No ${plural} are waiting for a confirmation.` : "Nothing is open.";
-    return finish(`${none}\n${COVERS_NOTE}`);
+    const none = filter.unconfirmed ? `No ${plural} waiting` : "Nothing is open";
+    return finish(`${none}\n\n${COVERS_NOTE}`);
   }
   // The headline is only as strong as the rows: if any listed row holds both confirmations it is not claimed to be missing one.
   const allMissing = rows.every((r) => r.kind === "appointment" && !(r.staff_confirmed && r.customer_confirmed));
   const head = filter.unconfirmed && allMissing
-    ? `${total} ${total === 1 ? kindWord(ctx.pack, "appointment").toLowerCase() : plural} still ${total === 1 ? "needs" : "need"} a confirmation.`
-    : `${total} open.`;
+    ? `${total} ${total === 1 ? kindWord(ctx.pack, "appointment").toLowerCase() : plural} to confirm`
+    : `${total} open`;
   return listReply(head, rows, more, ctx, [COVERS_NOTE]);
 }
 
 /** The answer to "find": none, one in full, or several to choose from. */
 export function foundReply(rows: RequestRow[], more: number, ctx: ReplyContext): Reply {
   const total = rows.length + more;
-  if (total === 0) return finish(`Nothing found in Kabsi for that.\n${COVERS_NOTE}`);
+  if (total === 0) return finish(`Nothing found\nNothing in Kabsi matches that.\n\n${COVERS_NOTE}`);
   if (total === 1 && rows[0]) return summaryReply(rows[0], ctx);
-  return listReply(`${total} found. Which one? Send its number.`, rows, more, ctx, [COVERS_NOTE]);
+  return listReply(`${total} found`, rows, more, ctx, ["", "Which one? Tap it, or send its number."]);
 }
 
 export type ProposalView = {
@@ -164,7 +178,7 @@ export function proposalReply(p: ProposalView, ctx: ReplyContext): Reply {
 
 /** After Save. Undo stays offered for 10 minutes. */
 export function savedReply(row: RequestRow, ctx: ReplyContext): Reply {
-  return finish(`${label(row, ctx.pack)} saved.\n${requestLine(row, ctx, { summaryMax: 160 })}`, ["Undo"]);
+  return finish(`${label(row, ctx.pack)} saved\n${requestFacts(row, ctx).join("\n")}${needs(row, ctx)}`, ["Undo"]);
 }
 
 const FLAG_NOTE: Record<string, string> = {
@@ -178,7 +192,9 @@ const FLAG_NOTE: Record<string, string> = {
 /** After a status change that applied at once. */
 export function statusChangedReply(row: RequestRow, ctx: ReplyContext, flags: string[] = []): Reply {
   const notes = flags.map((f) => FLAG_NOTE[f]).filter(Boolean);
-  const body = [`${label(row, ctx.pack)} is now ${statusWord(ctx.pack, row)}.`, requestLine(row, ctx, { summaryMax: 160 }), ...notes].join("\n");
+  const now = `${label(row, ctx.pack)} is now ${statusWord(ctx.pack, row)}`;
+  const title = now.split(/\s+/).length <= 5 ? now : `${label(row, ctx.pack)} updated`;
+  const body = `${title}\n${requestFacts(row, ctx).join("\n")}${notes.length ? `\n\n${notes.join(" ")}` : needs(row, ctx)}`;
   return finish(body, ["Undo"]);
 }
 
@@ -191,23 +207,26 @@ export function askFirstReply(
   const name = label(row, pack);
   const target = statusKeyWord(pack, row.kind, change.outcome ?? change.to);
   const now = statusWord(pack, row);
-  const lines: string[] = [];
-  if (change.reopen) lines.push(`${name} is closed as ${now}.`, "Reopen it?");
+  // Look 2: the question is the title; what it is about, one fact per line; why it asks, as the status.
+  const facts = [who(row), clip(row.summary, 120)];
+  let title: string;
+  let why: string;
+  if (change.reopen) [title, why] = [`Reopen ${name}?`, `It is closed as ${now}.`];
   else if (change.flags.includes("arrival_not_recorded")) {
-    lines.push(`${name} is still ${now}, and the step before ${target} was never recorded.`,
-      change.to === "closed" ? `Close it as ${target} anyway?` : `Mark it ${target} anyway?`);
+    [title, why] = [change.to === "closed" ? `Close ${name} anyway?` : `Mark ${name} anyway?`,
+      `It is still ${now}, and the step before ${target} was never recorded. It would be ${target}.`];
   } else if (change.flags.includes("attended_without_time") || change.flags.includes("attended_before_time")) {
-    lines.push(`${name} has ${change.flags.includes("attended_without_time") ? "no time entered" : "a time that has not come yet"}.`, `Close it as ${target} anyway?`);
+    [title, why] = [`Close ${name} anyway?`, `It has ${change.flags.includes("attended_without_time") ? "no time entered" : "a time that has not come yet"}. It would close as ${target}.`];
   } else if (change.flags.includes("no_show_before_time")) {
-    lines.push(`${name} has ${row.starts_at ? "a time that has not come yet" : "no time entered"}.`, `Close it as ${target} anyway?`);
-  } else lines.push(`This closes ${name} as ${target}.`, "Go ahead?");
-  return finish(lines.join("\n"), ["Yes", "No"]);
+    [title, why] = [`Close ${name} anyway?`, `It has ${row.starts_at ? "a time that has not come yet" : "no time entered"}. It would close as ${target}.`];
+  } else [title, why] = [`Close ${name}?`, `It closes as ${target}.`];
+  return finish(`${title}\n${facts.join("\n")}\n\n${why}`, ["Yes", "No"]);
 }
 
 /** After a confirmation was recorded or cleared. The words are written from the record the database now holds. */
 export function confirmationReply(row: RequestRow, ctx: ReplyContext): Reply {
   const c = confirmationText(row, ctx.pack) ?? "";
-  return finish(`${label(row, ctx.pack)} updated.\n${requestLine(row, ctx, { summaryMax: 120 })}\n${c}`.trimEnd(), ["Undo"]);
+  return finish(`${label(row, ctx.pack)} updated\n${requestFacts(row, ctx, 120).join("\n")}${c ? `\n\n${c}` : ""}`, ["Undo"]);
 }
 
 export type FieldChange = { field: string; before: unknown; after: unknown };
@@ -220,9 +239,10 @@ const shown = (field: string, v: unknown, ctx: ReplyContext): string => {
 
 /** After a correction: each field with what it was and what it is now, and a note when the time change cleared the confirmations. */
 export function correctedReply(row: RequestRow, changes: FieldChange[], ctx: ReplyContext, flags: string[] = []): Reply {
-  const lines = changes.map((c) => `${fieldLabel(ctx.pack, c.field)} changed from ${shown(c.field, c.before, ctx)} to ${shown(c.field, c.after, ctx)}.`);
+  const cap = (w: string) => w.charAt(0).toUpperCase() + w.slice(1);
+  const lines = changes.map((c) => `${cap(fieldLabel(ctx.pack, c.field))}: was ${shown(c.field, c.before, ctx)}, now ${shown(c.field, c.after, ctx)}`);
   // The note about the confirmations is part of the answer, so it is kept and the changes shrink to make room.
-  const note = flags.includes("confirmations_cleared") ? ["The time changed, so both confirmations were cleared."] : [];
+  const note = flags.includes("confirmations_cleared") ? ["", "The time changed, so both confirmations were cleared."] : [];
   const body = fit([`${label(row, ctx.pack)} corrected`], lines, note, BUTTON_BODY_MAX, 0, (n) => `and ${n} more ${n === 1 ? "change" : "changes"}`);
   return finish(body, ["Undo"]);
 }
@@ -230,17 +250,17 @@ export function correctedReply(row: RequestRow, changes: FieldChange[], ctx: Rep
 /** After an enquiry became an appointment or a job: the enquiry stays on record and the new one holds no confirmation. */
 export function convertedReply(enquiry: Pick<RequestRow, "kind" | "number">, created: RequestRow, ctx: ReplyContext): Reply {
   const body = [
-    `${label(enquiry, ctx.pack)} became ${label(created, ctx.pack)} for ${who(created)}.`,
-    "The enquiry stays on record.",
-    requestLine(created, ctx, { summaryMax: 120 }),
-    created.kind === "appointment" ? "No confirmation has been recorded yet." : "",
-  ].filter(Boolean).join("\n");
+    `${label(enquiry, ctx.pack)} is now ${label(created, ctx.pack)}`,
+    ...requestFacts(created, ctx, 120),
+    "",
+    `The enquiry stays on record.${created.kind === "appointment" ? " No confirmation has been recorded yet." : ""}`,
+  ].join("\n");
   return finish(body, ["Undo"]);
 }
 
 /** After Undo. */
 export function undoneReply(row: RequestRow, ctx: ReplyContext): Reply {
-  return finish(`Undone. ${label(row, ctx.pack)} is back to ${statusWord(ctx.pack, row)}.`);
+  return finish(`Undone\n${label(row, ctx.pack)} is back to ${statusWord(ctx.pack, row)}.`);
 }
 
 const REFUSALS: Record<string, string> = {
@@ -277,9 +297,25 @@ const REFUSALS: Record<string, string> = {
   customer_changed: "That customer's details changed. Send it again.",
 };
 
+/** Look 2: the short title of a refusal (five words at most); the refusal's own words follow it. */
+const REFUSAL_TITLE: Record<string, string> = {
+  disabled: "Request book is off", not_member: "Phone not linked", forbidden: "Owner or manager only", not_found: "Request not found",
+  version_conflict: "It changed meanwhile", window_passed: "Too late to undo", not_latest: "Undo the latest first", already_undone: "Already undone",
+  not_undoable: "Cannot undo an Undo", no_change: "Nothing to change", closed: "That request is closed", not_reopenable: "Cannot reopen it",
+  not_allowed: "Cannot make that change", not_appointment: "Not an appointment", not_enquiry: "Not an enquiry", time_required: "Enter a time first",
+  customer_erased: "Details were erased", real_data_refused: "Made up details only", invalid_input: "Could not read that",
+  invalid_field: "A detail is not valid", unknown_field: "Cannot change that detail", use_convert: "Say what it became",
+  outcome_required: "Say how it ended", intake_unavailable: "Draft no longer open", duplicate_message: "Draft already made",
+  values_cleared: "Cannot undo that", undo_conflict: "Cannot undo that", key_reused: "Tap already used", invalid_key: "Could not read that",
+  customer_not_found: "Customer not found", customer_changed: "Customer details changed",
+};
+
+/** A refusal's words alone, for a line that carries it inside a longer reply. */
+export const refusalText = (reason: string) => REFUSALS[reason] ?? "That did not go through. Nothing was changed.";
+
 /** Any refusal from the database or from policy, in words, with what to do next. Never shows a code, a name or a value. */
 export function refusalReply(r: Pick<Refusal, "reason">): Reply {
-  return finish(REFUSALS[r.reason] ?? "That did not go through. Nothing was changed.");
+  return finish(`${REFUSAL_TITLE[r.reason] ?? "Not done"}\n\n${REFUSALS[r.reason] ?? "That did not go through. Nothing was changed."}`);
 }
 
 export const KNOWN_REFUSALS = Object.keys(REFUSALS);

@@ -7,6 +7,8 @@
 
 
 import { PAY_TODAY_LINE } from "../billing-words.ts";
+import { PHOTO_CATEGORIES } from "../review-growth/photo.ts";
+import { MARK, quote, render } from "./look.ts";
 
 export type Lang = "en" | "es" | "ar";
 
@@ -29,7 +31,7 @@ export function handoffTime(r: { role: string; pro?: boolean } | null | undefine
 /** The hand-off reply in English by role; Spanish and Arabic keep their own line (say("handoff", lang)). */
 export function handoffReply(r: { role: string; pro?: boolean } | null | undefined, lang: Lang | string | null | undefined): string {
   if (lang === "es" || lang === "ar") return say("handoff", lang);
-  return `Thanks. A person from Kabsi will answer you here ${handoffTime(r)}. ${HANDOFF_HOURS}`;
+  return `A person will answer you\nHere on WhatsApp, ${handoffTime(r)}.\n${HANDOFF_HOURS}`;
 }
 
 /** Photo Post 1: a post check that failed (posts/checks.ts code), as the end of "because it ..." in SAY.postProblem. */
@@ -88,23 +90,24 @@ export const SAY = {
   started: "Welcome back. Your Kabsi messages are on again. Send \"help\" to see what you can do here.",
 
   // Roles (29.7).
-  whichRole: "Your business or your partner tools?",
-  whichRoleStaff: "Your business or Kabsi staff tools?",
+  whichRole: "Business or partner tools?",
+  whichRoleStaff: "Business or staff tools?",
   whichBusiness: "Which business?",
   whichBusinessList: (names: string[]) =>
-    `Which business? Reply with the number.\n\n${names.map((n, i) => `${i + 1}. ${n}`).join("\n")}`,
+    `Which business?\n${names.map((n, i) => `${i + 1}. ${n}`).join("\n")}\n\nReply with the number.`,
+  // Look 2: up to 10 businesses are a list message; its rows are the business buttons (b:<id>) they always were.
+  whichBusinessTap: "Which business?\n\nTap Choose and pick one, or reply with its number.",
   // RB-F2: an answer to "Which business?" or "Your business or Kabsi staff tools?" more than 10 minutes after it was asked.
-  pickClosed: "That question was asked more than 10 minutes ago, so I did not use it. Please send your message again.",
-  switched: (to: string) => `Done. You are now working on ${to}. Send "switch" to change it.`,
+  pickClosed: "Question closed\nIt was asked more than 10 minutes ago, so I did not use your answer.\n\nPlease send your message again.",
+  switched: (to: string) => `Switched\nYou are now working on ${to}.\n\nSend "switch" to change it.`,
   partnerOnly: "Partner tools are for Kabsi Partners. Send \"partner\" to hear about the program.",
   businessOnly: "Business tools are for businesses on Kabsi. Your partner tools: \"my link\", \"how am I doing\", \"kit\", \"payout\".",
   roleNotAllowed: (role: string) => `As ${role} you can send photos and news here. The owner approves everything that goes to Google.`,
-  billingOwnerOnly: "Only the owner can change the plan and billing.",
-
+  billingOwnerOnly: "Owner only\nOnly the owner can change the plan and billing.",
   // Owner tools (9.3).
   ownerHelp:
-    "You can send:\n\"stats\" or \"this month\"\n\"review link\" or \"QR\"\n\"ask a customer\" for a ready review message\na photo for your Google profile\na voice note or a message about what is new\n\"reply:\" and your exact reply to the last review\na change to the last draft, for example \"make it shorter\"\n\"switch\" to change business\n\"talk to a person\"",
-  staffHelp: "You can send photos here for the owner to approve, \"ask a customer\" for the review message, or \"talk to a person\".",
+    "You can send\n\"stats\" or \"this month\"\n\"review link\" or \"QR\"\n\"ask a customer\" for a ready review message\na photo for your Google profile\na voice note or a message about what is new\n\"reply:\" and your exact reply to the last review\na change to the last draft, for example \"make it shorter\"\n\"switch\" to change business\n\"talk to a person\"",
+  staffHelp: "You can send\nphotos here for the owner to approve\n\"ask a customer\" for the review message\n\"talk to a person\"",
   stats: (business: string, days: number, s: { new_reviews: number; answered: number; waiting: number; average: number | null }) =>
     `${business}, the last ${days} days: ${s.new_reviews} new ${s.new_reviews === 1 ? "review" : "reviews"}${s.average ? `, average ${s.average} stars` : ""}, ${s.answered} answered through Kabsi. ${s.waiting} waiting for you.`,
   reviewLink: (business: string, url: string) =>
@@ -112,59 +115,61 @@ export const SAY = {
   noReviewLink: (business: string) => `${business} has no review link yet. Make one in Kabsi under Get Reviews.`,
   qr: (business: string, url: string) =>
     `${business}: your printable QR card is in Kabsi under Get Reviews. It opens this link: ${url}`,
-  billingSoon: "Billing is coming soon, reply 'talk to a person' for help",
+  billingSoon: "Billing is coming soon\n\nReply \"talk to a person\" for help.",
   // Session 10 (10.2.10): the owner's billing actions. Prices come from the Creem catalogue; dates are long dates.
   // Sync 2a (R-142 item 3, WA-07): card payments are closed, so no push to choose a plan: PAY_TODAY_LINE, then the Plan page.
-  billingNoPlan: (business: string, url: string) => `${business} has no paid plan right now. ${PAY_TODAY_LINE} Your plan page: ${url}`,
-  billingStatus: (business: string, plan: string, end: string | null, ends: boolean) =>
-    `${business} is on ${plan}. ${end ? (ends ? `It ends on ${end}.` : `It renews on ${end}.`) : ""} Reply "card", "invoice", "upgrade", "add a location" or "cancel".`.replace(/\s+/g, " "),
-  billingPortal: (business: string, url: string) => `${business}: your card, invoices and receipts are here: ${url}`,
-  billingCancelAsk: (end: string | null) => `Cancel your plan? It ends on ${end ?? "the last day you paid for"}, and everything keeps working until then.`,
-  billingCancelled: (end: string | null) => `Done. Your plan ends on ${end ?? "the last day you paid for"}. Changed your mind? Tap Keep my plan.`,
-  billingAlreadyEnds: (end: string | null) => `Your plan already ends on ${end ?? "the last day you paid for"}. Tap Keep my plan to carry on.`,
+  billingNoPlan: (business: string, url: string) => `No paid plan\n${business} has no paid plan right now. ${PAY_TODAY_LINE}\n\nYour plan page: ${url}`,
+  billingStatus: (_business: string, plan: string, end: string | null, ends: boolean) =>
+    `${plan}${end ? `\n${ends ? "Ends" : "Renews"} on ${end}` : ""}\n\nReply "card", "invoice", "upgrade", "add a location" or "cancel".`,
+  billingPortal: (_business: string, url: string) => `Your card and invoices\nYour card, invoices and receipts are here: ${url}`,
+  billingCancelAsk: (end: string | null) => `Cancel your plan?\nIt ends on ${end ?? "the last day you paid for"}.\nEverything keeps working until then.`,
+  billingCancelled: (end: string | null) => `Plan cancelled\nYour plan ends on ${end ?? "the last day you paid for"}.\n\nChanged your mind? Tap Keep my plan.`,
+  billingAlreadyEnds: (end: string | null) => `Your plan already ends\nIt ends on ${end ?? "the last day you paid for"}.\n\nTap Keep my plan to carry on.`,
   billingKept: "Done. Your plan carries on.",
-  billingUpgradeAsk: (price: string) => `Switch to Pro for ${price}? Creem charges the difference for the rest of this period today.`,
+  billingUpgradeAsk: (price: string) => `Switch to Pro?\nPrice: ${price}\nCreem charges the difference for the rest of this period today.`,
   billingUpgraded: "Done. You are on Pro now.",
-  billingDowngradeAsk: (price: string, end: string | null) => `Switch to Essentials for ${price} from your next renewal${end ? `, ${end}` : ""}? You keep Pro until then.`,
+  billingDowngradeAsk: (price: string, end: string | null) => `Switch to Essentials?\nPrice: ${price}\nFrom your next renewal${end ? `, ${end}` : ""}\nYou keep Pro until then.`,
   billingDowngraded: (end: string | null) => `Done. Essentials starts${end ? ` on ${end}` : " at your next renewal"}.`,
   billingSamePlan: (plan: string) => `You are already on ${plan}.`,
   // Billing 2 (10.2.3): an extra location is its own Creem payment on the owner's customer, renewed from the day it is paid.
-  billingAddAsk: (price: string) => `Add a location for ${price}? You pay for it on Creem's page, and it renews from today.`,
-  billingAddLink: (url: string) => `Pay for the extra location here: ${url}\nKabsi adds it to your plan when the payment goes through.`,
-  billingTryLater: "The payment service did not answer. Please try again in a minute, or reply \"talk to a person\".",
-  handoff: `Thanks. A person from Kabsi will answer you here ${HANDOFF_TIMES.other}. ${HANDOFF_HOURS}`,
+  billingAddAsk: (price: string) => `Add a location?\nPrice: ${price}\nYou pay for it on Creem's page, and it renews from today.`,
+  billingAddLink: (url: string) => `Pay for the location\n${url}\n\nKabsi adds it to your plan when the payment goes through.`,
+  billingTryLater: "Payment service did not answer\n\nPlease try again in a minute, or reply \"talk to a person\".",
+  handoff: `A person will answer you\nHere on WhatsApp, ${HANDOFF_TIMES.other}.\n${HANDOFF_HOURS}`,
   // 13b part 2 (30.10 point 7): hours and typed posts approved on WhatsApp, shown back exactly first (25.5).
-  hoursShown: (business: string, line: string) => `${business}: Kabsi will set these hours on Google after your yes.\n\n${line}`,
-  hoursAsk: "Which day, and what hours? For example: \"closed tomorrow\", \"open 10am to 2pm on Friday\" or \"closed 24 to 26 December\".",
-  hoursNeedTimes: "What time do you open and close that day? For example: \"open 9am to 5pm\".",
-  hoursBadTime: "Those times do not work: the closing time must come after the opening time. For example: \"open 9am to 5pm on Friday\".",
-  hoursPast: "That day has already passed. Which day do you mean?",
-  hoursTooFar: "Kabsi can set hours up to a year ahead. Which day do you mean?",
-  hoursWeekly: (business: string, url: string) =>
-    `${business}: a lasting change to your weekly hours is confirmed on kabsi.co, so you see exactly what Google will show. Open Hours: ${url}`,
-  postAsk: (business: string) =>
-    `${business}: send the words of the post starting with "post:", for example "post: Our autumn menu starts on Monday." Or send a photo with a short note.`,
-  postShown: (business: string, text: string) => `${business}: Kabsi will post this on your Google profile after your yes.\n\n"${text}"`,
-  postProblem: (business: string, problems: string[]) =>
-    `${business}: Kabsi cannot post that as it is, because it ${problems.join(" and ")}. Please send it again without that.`,
+  hoursShown: (line: string) => `New hours for Google\n${line}\n\nKabsi sets them on Google after your yes.`,
+  hoursAsk: "Which day, and what hours?\nFor example:\n\"closed tomorrow\"\n\"open 10am to 2pm on Friday\"\n\"closed 24 to 26 December\"",
+  hoursNeedTimes: "What are the times?\nFor example: \"open 9am to 5pm\".\n\nWhen do you open and close that day?",
+  hoursBadTime: "Those times do not work\nThe closing time must come after the opening time.\nFor example: \"open 9am to 5pm on Friday\".",
+  hoursPast: "That day has passed\n\nWhich day do you mean?",
+  hoursTooFar: "Too far ahead\nKabsi can set hours up to a year ahead.\n\nWhich day do you mean?",
+  hoursWeekly: (url: string) =>
+    `Weekly hours are on kabsi.co\nA lasting change to your weekly hours is confirmed on kabsi.co, so you see exactly what Google will show.\n\nOpen Hours: ${url}`,
+  postAsk: () =>
+    `Send the words of the post\nStart with "post:", for example "post: Our autumn menu starts on Monday."\nOr send a photo with a short note.`,
+  postShown: (text: string) => `Post for your Google profile\n${quote(text)}\n\nKabsi posts it after your yes.`,
+  postProblem: (_business: string, problems: string[]) =>
+    `Kabsi cannot post that\nIt ${problems.join(" and ")}.\n\nPlease send it again without that.`,
   // Photo Post 1 (docs/COPY.md 42): a photo with words becomes a post with that photo, for the owner's yes.
-  photoPostShown: (business: string, text: string) =>
-    `${business}: Kabsi will post this on your Google profile with the photo you just sent, after your yes.\n\n"${text}"`,
+  photoPostShown: (text: string) =>
+    `Post with your photo\n${quote(text)}\n\nKabsi posts it with the photo you just sent, after your yes.`,
+  // Look 2: sent to the owner (notify), rendered here because it does not pass the agent's reply step.
   photoPostForOwner: (business: string, text: string) =>
-    `${business}: your team sent a photo with a note. Kabsi will post this on your Google profile with that photo, after your yes.\n\n"${text}"`,
+    render({ mark: MARK.picture, title: "Post with your team's photo", business, facts: ["Your team sent a photo with a note.", ...quote(text)],
+      end: "Kabsi posts it with that photo after your yes." }),
   photoPostTakenStaff: "Thank you. Kabsi made a post with your photo and words, and the owner is asked to approve it. Nothing goes on Google until they say yes.",
-  photoPostUsedUp: (business: string) =>
-    `${business}: your plan has no posts left this month, so Kabsi cannot make this a post. You can add the photo to your Google profile on its own, or skip it.`,
+  photoPostUsedUp: (_business: string) =>
+    `No posts left this month\nYour plan has no posts left this month, so Kabsi cannot make this a post.\n\nYou can add the photo to your Google profile on its own, or skip it.`,
   photoPostProblemTail: "Or add the photo to your Google profile on its own, or skip it.",
   photoPostProblemTailStaff: "Or send the photo again without words to add it on its own, or skip it.",
-  photoPostUsedUpStaff: (business: string) =>
-    `${business}: the plan has no posts left this month, so Kabsi cannot make this a post. Send the photo again without words to add it on its own, or skip it.`,
+  photoPostUsedUpStaff: (_business: string) =>
+    `No posts left this month\nThe plan has no posts left this month, so Kabsi cannot make this a post.\n\nSend the photo again without words to add it on its own, or skip it.`,
   photoPostOnSite: "Thank you. Kabsi made a post with your photo and words. It waits for the owner's yes on kabsi.co. Nothing goes on Google until they say yes.",
-  photoPostChecking: "Kabsi is still checking the photo. Press Approve again in a minute.",
+  photoPostChecking: "Still checking the photo\n\nPress Approve again in a minute.",
   photoPostSkipped: "Okay, skipped. Nothing was put on Google.",
   heldAsPhoto: "Okay. Kabsi is getting the photo ready on its own and will ask you here: Yes, Edit or Skip. Nothing goes on Google until you say yes.",
-  approverOnly: (business: string) => `Your role at ${business} cannot approve this. The owner can, on WhatsApp or on kabsi.co.`,
-  notConnectedYet: (business: string, url: string) => `Kabsi cannot change ${business} on Google yet. Open your Kabsi account to finish setting up: ${url}`,
+  approverOnly: (business: string) => `Only the owner can approve\nYour role at ${business} cannot approve this.\n\nThe owner can, on WhatsApp or on kabsi.co.`,
+  notConnectedYet: (business: string, url: string) => `Not connected yet\nKabsi cannot change ${business} on Google yet.\n\nOpen your Kabsi account to finish setting up: ${url}`,
   // The map on WhatsApp (28.5, docs/COPY.md 0.1 and 20): places around you, never spots.
   keywordAsk: (business: string, keyword: string) =>
     `${business}: your first map is next. Kabsi will search '${keyword}' on Google Maps from places around you, like a customer standing there. Is that what your customers search for?`,
@@ -179,42 +184,43 @@ export const SAY = {
   keywordPaused: "Maps are paused for a moment. Kabsi will send yours as soon as they run again.",
   mapLater: "Okay. Your map stays in your Kabsi account on kabsi.co.",
   mapGone: "That map is no longer here. Your latest map is in your Kabsi account on kabsi.co.",
-  editStarted: "On it. A new draft is coming.",
-  noRecentReview: "Which review do you mean? Open the latest review alert and tap Edit on kabsi.co, or send \"help\".",
-  exactShown: (business: string, text: string) =>
-    `${business}: Kabsi will post this reply on Google after your yes.\n\n"${text}"`,
-  newDraft: (business: string, text: string) => `${business}: here is the new draft.\n\n"${text}"`,
-  approved: (business: string) => `Approved for ${business}. It goes to Google in 10 seconds. Press Undo to stop it.`,
+  editStarted: "New draft coming\n\nKabsi is writing it now.",
+  noRecentReview: "Which review do you mean?\n\nOpen the latest review alert and tap Edit on kabsi.co, or send \"help\".",
+  exactShown: (text: string) =>
+    `Your reply for Google\n${quote(text)}\n\nKabsi posts it on Google after your yes.`,
+  newDraft: (_business: string, text: string) => `New draft\n${quote(text)}\n\nPost this reply on Google?`,
+  approved: (_business: string) => `Approved\nIt goes to Google in 10 seconds.\n\nPress Undo to stop it.`,
   undone: "Undone. Nothing was sent. The draft is waiting for you in Kabsi.",
-  tooLate: "It has already gone to Google, so it cannot be undone here. Open Kabsi to see it.",
+  tooLate: "Already on Google\nIt cannot be undone here.\n\nOpen Kabsi to see it.",
   alreadyHandled: "This one is already handled. Nothing changed.",
-  notYours: "This is no longer yours to approve. Nothing changed.",
+  notYours: "No longer yours to approve\n\nNothing changed.",
   whichOne: "Which one?",
-  nothingWaiting: "Nothing is waiting for your yes right now.",
+  nothingWaiting: "Nothing is waiting\n\nNothing needs your yes right now.",
   // F-1: a forwarded "Yes" never approves anything.
-  forwardedYes: "That looks forwarded, so I did not count it as your yes. Tap Yes, or type it yourself.",
+  forwardedYes: "Not counted as your yes\nThat looks forwarded.\n\nTap Yes, or type it yourself.",
   noted: "Okay, nothing was changed.",
   onIt: "On it.",
   unclear: "I did not catch that. You can send \"help\" to see what you can do here, or \"talk to a person\".",
   // RB-F3 (R-148 item 4): the staff-only "reset test" for the demo businesses.
-  resetAsk: (n: number, b: number) => `Reset test?\nThis removes the ${n} open ${n === 1 ? "request" : "requests"} you made at ${b === 1 ? "1 test business" : `${b} test businesses`}. Nothing else changes. Tap Confirm to go ahead.`,
+  resetAsk: (n: number, b: number) => `Reset test?\nThis removes the ${n} open ${n === 1 ? "request" : "requests"} you made at ${b === 1 ? "1 test business" : `${b} test businesses`}. Nothing else changes.\n\nTap Confirm to go ahead.`,
   resetDone: (n: number) => `Test reset\n${n} ${n === 1 ? "request was" : "requests were"} removed at the test businesses.`,
   resetNone: "Nothing to reset\nYou have no open requests at the test businesses.",
   resetStaffOnly: "Reset test is for Kabsi staff only\nNothing was changed.",
   resetFailed: "Kabsi could not reset the test just now\nNothing was changed. Please send it again in a minute.",
   // RB-F3 (R-148 item 5, WhatsApp's 2026 terms bar general-purpose assistants): a message that is not one of Kabsi's jobs.
   // RB-F4 (R-149 item 4): the off-topic line in the RB-F3 look; its first line is the bold one with ❓.
-  offTopic: "Kabsi cannot help with that\nKabsi looks after your business on Google: review replies, your listing, photos and posts. Send \"help\" to see what you can send.",
-  offTopicBook: "Kabsi cannot help with that\nKabsi looks after your business on Google and keeps your request book: review replies, your listing, photos, posts and your customers' requests. Send \"help\" to see what you can send.",
+  offTopic: "Kabsi cannot help with that\nKabsi looks after your business on Google: review replies, your listing, photos and posts.\n\nSend \"help\" to see what you can send.",
+  offTopicBook: "Kabsi cannot help with that\nKabsi looks after your business on Google and keeps your request book: review replies, your listing, photos, posts and your customers' requests.\n\nSend \"help\" to see what you can send.",
   abuseNotice: "Kabsi will not reply to messages like this. If you need help, send \"talk to a person\".",
 
   // Media (18.3, 28.3).
-  photoTaken: "Got it. Kabsi is getting your photo ready and will ask you here in a minute: Yes, Edit or Skip. Nothing goes on Google until you say yes.",
-  photoTakenStaff: "Thank you. Kabsi is getting the photo ready, and the owner is asked to approve it. Nothing goes on Google until they say yes.",
-  photoUnreadable: "Please send it as a photo.",
-  photoCategoryAsk: (menu: string) => menu,
-  photoCategorySet: (label: string) => `Done. It will go on your Google profile as ${label}. Put it on your Google profile?`,
-  photoCategoryBad: "Please reply with a number from 1 to 8.",
+  photoTaken: "Photo received\nKabsi is getting it ready and will ask you here in a minute: Yes, Edit or Skip.\n\nNothing goes on Google until you say yes.",
+  photoTakenStaff: "Photo received\nKabsi is getting it ready, and the owner is asked to approve it.\n\nNothing goes on Google until they say yes.",
+  photoUnreadable: "Send it as a photo\n\nPlease send it as a photo.",
+  // Look 2: the menu's question as the title, the eight kinds, then how to answer.
+  photoCategoryAsk: () => `What is the photo of?\n${PHOTO_CATEGORIES.map((c) => `${c.n}. ${c.label[0].toUpperCase()}${c.label.slice(1)}`).join("\n")}\n\nReply with the number.`,
+  photoCategorySet: (label: string) => `Category set\nIt will go on your Google profile as ${label}.\n\nPut it on your Google profile?`,
+  photoCategoryBad: "Reply with a number\n\nPlease reply with a number from 1 to 8.",
   photoSkipped: "Okay, skipped. Nothing was put on Google.",
   photoGone: "That photo is already handled. Nothing changed.",
   videoKept: "Thanks. Kabsi keeps videos, but Google posts from WhatsApp take photos only for now.",

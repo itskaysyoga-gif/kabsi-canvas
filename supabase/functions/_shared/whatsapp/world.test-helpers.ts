@@ -46,7 +46,8 @@ type User = { id: string; phone: string | null; optin: "active" | "stopped" | "n
 // Fix 2: a post's Approve is bound to what was shown: its text, its photo and that photo's file (private.whatsapp_item).
 type Seen = { text: string; photo: string; file: string };
 type Action = { token: string; user: string; location: string; type: string; target: string; used: boolean; stale: boolean; risk?: string; seen?: Seen };
-export type SentMsg = { to: string; kind: string; body: string; buttons: string[]; live: boolean; template?: string };
+/** Look 2: footer is the footer of a message with buttons or a list; rows are a list message's rows ("title · description"). */
+export type SentMsg = { to: string; kind: string; body: string; buttons: string[]; live: boolean; template?: string; footer?: string; rows?: string[]; rowIds?: string[] };
 
 const uuid = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 export const BIZ = { harbour: uuid(1), deli: uuid(2), smile: uuid(3), bright: uuid(4), yawmiyati: uuid(5), alnoor: uuid(6), foreign: uuid(9) };
@@ -571,7 +572,10 @@ export class World {
     return {
       live,
       text: async (to, body) => push({ to, kind: "text", body, buttons: [] }),
-      buttons: async (to, body, b: Button[]) => push({ to, kind: "buttons", body, buttons: b.map((x) => x.title) }),
+      buttons: async (to, body, b: Button[], footer?: string) => push({ to, kind: "buttons", body, buttons: b.map((x) => x.title), ...(footer ? { footer } : {}) }),
+      list: async (to, body, l, footer) => push({ to, kind: "list", body, buttons: [], ...(footer ? { footer } : {}),
+        rows: l.sections.flatMap((x) => x.rows.map((r) => [r.title, r.description].filter(Boolean).join(" · "))),
+        rowIds: l.sections.flatMap((x) => x.rows.map((r) => r.id)) }),
       template: async (to, name) => push({ to, kind: "template", body: "", buttons: [], template: name }),
       media: async (id) => w.mediaBytes.get(id) ?? new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 16, 74, 70, 73, 70]),
       image: async (to, png, body, b: Button[]) => push({ to, kind: "image", body, buttons: b.map((x) => x.title) }),

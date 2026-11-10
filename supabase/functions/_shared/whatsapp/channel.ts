@@ -80,7 +80,8 @@ export function parseWebhook(event: string | null, body: unknown): { messages: I
         messageId: id,
         timestamp: Number(m.timestamp ?? 0),
         type: str(m.type) ?? "unknown",
-        text: str(obj(m.text).body) ?? str(obj(m.button).text) ?? caption(m),
+        // Look 2: a row of a request list ("#12") reads as the owner typing "#12", so it opens the request by the same path.
+        text: str(obj(m.text).body) ?? str(obj(m.button).text) ?? caption(m) ?? listRowText(interactive),
         buttonId: button,
         mediaId: str(obj(m.image).id),
         media: mediaOf(m, k),
@@ -96,6 +97,12 @@ export function parseWebhook(event: string | null, body: unknown): { messages: I
     }
   }
   return { messages, statuses };
+}
+
+/** Look 2: the id of a request list row ("#12"), and nothing else, read as the words the owner would type. */
+function listRowText(interactive: Obj): string | null {
+  const id = str(obj(interactive.list_reply).id);
+  return id && /^#\d{1,9}$/.test(id) ? id : null;
 }
 
 /** RB-F: the last pricing object Meta put on the message's receipts: billable, category and the pricing model, nothing else. */

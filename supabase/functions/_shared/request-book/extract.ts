@@ -616,8 +616,8 @@ export function extractFields(text: string, modelText: string | null, ctx: Extra
 /** The message the owner reads. Built from the record of what was read, by code, and never claiming a fact the owner has not recorded. */
 export function replyFor(ex: Omit<Extraction, "reply"> | Extraction, ctx: ReplyContext): Reply {
   const pack = ctx.pack;
-  if (ex.issues.includes("no_model_answer")) return finish("I could not read that just now. Nothing was saved. Please send it again.");
-  if (ex.nothingToRead) return finish("I could not read a request in that. Nothing was saved.");
+  if (ex.issues.includes("no_model_answer")) return finish("Could not read that\nNothing was saved.\n\nPlease send it again.");
+  if (ex.nothingToRead) return finish("No request found in that\n\nNothing was saved.");
   const lines: string[] = [];
   for (const spec of pack.fields) {
     const f = ex.fields[spec.key]!;
@@ -627,25 +627,26 @@ export function replyFor(ex: Omit<Extraction, "reply"> | Extraction, ctx: ReplyC
   if (ex.said.agreed) lines.push(`You said the ${customer} agreed. Kabsi records an agreement only when you tell it to.`);
   if (ex.said.already_arranged) lines.push("You said it is already arranged. Kabsi cannot check that, so this is only a request here.");
   // RB-F3: the first line names what this is ("New appointment"); the agent makes it the bold first line with its marker.
-  const head = lines.length ? `New ${kindWord(pack, pack.defaultKind).toLowerCase()}` : `New ${kindWord(pack, pack.defaultKind).toLowerCase()}: nothing readable yet`;
+  // Look 2: the facts one per line under it, then the one question or status after a blank line.
+  const head = lines.length ? `New ${kindWord(pack, pack.defaultKind).toLowerCase()}` : `New ${kindWord(pack, pack.defaultKind).toLowerCase()}\nNothing readable yet`;
   const body = [head, ...lines].filter(Boolean).join("\n");
 
   const ask = ex.askField ? ex.fields[ex.askField]! : null;
   if (ask) {
     if (ask.show === "buttons") {
       const what = ask.target === "phone" ? "number" : ask.target === "summary" ? ask.label.toLowerCase() : "time";
-      return finish(`${body}\nWhich ${what} did you mean? Nothing is saved until you tap.`, ask.candidates.map((c) => c.label));
+      return finish(`${body}\n\nWhich ${what} did you mean? Nothing is saved until you tap.`, ask.candidates.map((c) => c.label));
     }
-    if (ask.target === "summary") return finish(`${body}\nThat ${ask.label.toLowerCase()} could mean several things. Send it again. Nothing is saved yet.`, ["Change"]);
+    if (ask.target === "summary") return finish(`${body}\n\nThat ${ask.label.toLowerCase()} could mean several things. Send it again. Nothing is saved yet.`, ["Change"]);
     const eg = ask.target === "phone" ? "Send the one to use" : "Say the day and the hour again";
-    return finish(`${body}\n${ask.target === "phone" ? "There is more than one number." : "That time could mean several things."} ${eg}. Nothing is saved yet.`, ["Change"]);
+    return finish(`${body}\n\n${ask.target === "phone" ? "There is more than one number." : "That time could mean several things."} ${eg}. Nothing is saved yet.`, ["Change"]);
   }
-  if (ex.missingRequired.length) return finish(`${body}\nStill needed: ${ex.missingRequired.join(", ")}. Nothing is saved yet.`, ["Change"]);
+  if (ex.missingRequired.length) return finish(`${body}\n\nStill needed: ${ex.missingRequired.join(", ")}. Nothing is saved yet.`, ["Change"]);
   const guess = Object.values(ex.fields).some((f) => f.show === "guess");
   // RB-F2: a time the date reader did not understand is asked about, never shown back as if it were read.
   const unclear = Object.values(ex.fields).some((f) => f.target === "when" && f.show === "plain" && f.display?.startsWith(NOT_CLEAR_PREFIX));
   const tail = [unclear ? WHEN_NOT_CLEAR_ASK : null, guess ? "A question mark is a guess." : null, "Nothing is saved until you tap Save."].filter(Boolean).join(" ");
-  return finish(`${body}\n${tail}`, ["Save", "Change"]);
+  return finish(`${body}\n\n${tail}`, ["Save", "Change"]);
 }
 
 /** Read one message: ask the model for quotes, then let code check and fill. A failed or unreadable answer reads nothing. */

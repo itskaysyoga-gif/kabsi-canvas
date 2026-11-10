@@ -3,6 +3,7 @@
 // Yes is the one publication pipeline (channel whatsapp, 10 second undo); Edit changes the category; Skip drops it. A member of
 // staff can send a photo but never approves one: the owner is asked. Pure text and parsing here, no database.
 import type { Button } from "../whatsapp/channel.ts";
+import { MARK, render } from "../whatsapp/look.ts";
 
 /** What the owner picks on Edit: the plain word, Google's category, and the words after "as". Numbers are the menu order. */
 export const PHOTO_CATEGORIES = [
@@ -30,21 +31,21 @@ export const CATEGORY_MENU = `What is it a photo of? Reply with the number.\n\n$
 
 export type ReadyPhoto = { business: string; category: string | null; note: string | null; suitable: boolean | null; forOwner: boolean };
 
-/** The "photo is ready" message. Says what Kabsi did, shows the category it would go under, and asks one thing. */
+/** The "photo is ready" message in look 2 (30.50 item 2): a picture and the title with the business, what Kabsi did and
+ *  the category, one per line, then the one question. */
 export function photoReadyBody(p: ReadyPhoto): string {
-  const lines = [
-    p.forOwner
-      ? `${p.business}: a photo from your team is ready.`
-      : `${p.business}: your photo is ready. Kabsi checked the size and light and saved a clean copy with no location details.`,
-    `It would go on your Google profile as ${categoryLabel(p.category)}.`,
+  const facts = [
+    `Goes on Google as ${categoryLabel(p.category)}`,
+    ...(p.forOwner ? ["Sent by your team"] : ["Size and light checked", "Saved with no location details"]),
+    ...(p.note ? [`Kabsi noticed: ${p.note.replace(/[–—!]/g, "")}`] : []),
   ];
-  if (p.note) lines.push(`Kabsi noticed: ${p.note.replace(/[–—!]/g, "")}`);
-  lines.push("Put it on your Google profile?");
-  return lines.join("\n\n").slice(0, 1024);
+  return render({ mark: MARK.picture, title: p.forOwner ? "A photo from your team" : "Your photo is ready", business: p.business, facts,
+    end: "Put it on your Google profile?" }).slice(0, 1024);
 }
 
 export function photoRefusedBody(business: string, note: string | null): string {
-  return `${business}: Kabsi could not use that photo${note ? `. ${note.replace(/[–—!]/g, "").replace(/\.$/, "")}` : ""}. Please send another one.`;
+  return render({ mark: MARK.picture, title: "Could not use that photo", business,
+    facts: note ? [note.replace(/[–—!]/g, "").replace(/\.$/, "") + "."] : [], end: "Please send another one." });
 }
 
 /** Yes goes to the one pipeline (the approval token); Edit asks for the category; Skip drops the photo. */

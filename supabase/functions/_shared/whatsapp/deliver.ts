@@ -11,6 +11,7 @@
 // follows its rules (6 a day, quiet hours, batching, digests, the window). Answers to inbound messages are the agent's.
 import { alertButtons, type Button, postAlertBody, type ReviewAlert, reviewAlertBody } from "./channel.ts";
 import { notify, type Out } from "./outbox.ts";
+import type { ListMsg } from "./look.ts";
 import { assertSendable, ref, type TemplateRef } from "./templates.ts";
 import { errorText } from "../log-scrub.ts";
 
@@ -18,7 +19,10 @@ export type Sent = { id: string };
 export interface Sender {
   readonly live: boolean;
   text(to: string, body: string): Promise<Sent>;
-  buttons(to: string, body: string, buttons: Button[]): Promise<Sent>;
+  /** Look 2: an optional footer under the buttons (a standing note, WhatsApp's footer of 60 characters). */
+  buttons(to: string, body: string, buttons: Button[], footer?: string): Promise<Sent>;
+  /** Look 2: a WhatsApp list message (up to 10 rows). A sender without it sends the rows as text (outbox.ts). */
+  list?(to: string, body: string, list: ListMsg, footer?: string): Promise<Sent>;
   template(to: string, name: string, params: Record<string, string> | string[]): Promise<Sent>;
   media(mediaId: string): Promise<Uint8Array>;
   /** 13b part 2: an image (the map PNG) with its line and up to 3 buttons under it, in one message. */
@@ -90,7 +94,9 @@ export async function sendReviewAlert(ctx: Ctx, userIds: string[], r: ReviewForA
   for (const userId of userIds) {
     const canApprove = r.risk !== "high" && r.safeDraft && !!r.draft;
     const action = canApprove ? await ctx.db.actionCreate(userId, "review_reply", r.reviewId) : { ok: false };
-    const body = `${reviewAlertBody({ ...r, draft: canApprove ? r.draft : null })}\n\nOpen in Kabsi: ${ctx.appUrl}/app/reviews?f=needs`;
+    // Look 2: with Approve, the question; without it, where to open the review (the same link as before).
+    const link = `Open in Kabsi: ${ctx.appUrl}/app/reviews?f=needs`;
+    const body = reviewAlertBody({ ...r, draft: canApprove ? r.draft : null }, action.ok && action.token ? "Post this reply on Google?" : link);
     out[userId] = await deliver(ctx, {
       userId, locationId: r.locationId, kind: "review_alert", dedupe: `review_alert:${r.reviewId}:${userId}`, body, alert: "review",
       buttons: action.ok && action.token ? alertButtons(action.token, true) : undefined,
@@ -108,7 +114,7 @@ export async function sendPostAlert(ctx: Ctx, userIds: string[], p: { postId: st
     const action = await ctx.db.actionCreate(userId, "local_post", p.postId);
     out[userId] = await deliver(ctx, {
       userId, locationId: p.locationId, kind: "post_alert", dedupe: `post_alert:${p.postId}:${userId}`, alert: "review",
-      body: `${postAlertBody(p.business, p.summary)}\n\nOpen in Kabsi: ${ctx.appUrl}/app/posts`,
+      body: postAlertBody(p.business, p.summary, action.ok && action.token ? "Post it on your Google profile?" : `Open in Kabsi: ${ctx.appUrl}/app/posts`),
       buttons: action.ok && action.token ? alertButtons(action.token, true) : undefined,
       template: ref("post_ready", { business: p.business }),
     });
@@ -137,13 +143,14 @@ export async function sendProtectionAlert(ctx: Ctx, userIds: string[], c: { chan
 }
 
 /** A mock sender: records nothing outside Kabsi and calls nobody. Used until the live switch is on. */
-export function mockSender(log: { to: string; kind: string; body: string }[] = []): Sender {
+export function mockSender(log: { to: string; kind: string; body: string; footer?: string }[] = []): Sender {
   let n = 0;
   const id = () => `mock-${Date.now()}-${++n}`;
   return {
     live: false,
     text: async (to, body) => (log.push({ to, kind: "text", body }), { id: id() }),
-    buttons: async (to, body, b) => (log.push({ to, kind: `buttons:${b.map((x) => x.title).join("|")}`, body }), { id: id() }),
+    buttons: async (to, body, b, footer) => (log.push({ to, kind: `buttons:${b.map((x) => x.title).join("|")}`, body, ...(footer ? { footer } : {}) }), { id: id() }),
+    list: async (to, body, l, footer) => (log.push({ to, kind: `list:${l.sections.flatMap((x) => x.rows.map((r) => r.title)).join("|")}`, body, ...(footer ? { footer } : {}) }), { id: id() }),
     template: async (to, name) => (assertSendable(name), log.push({ to, kind: `template:${name}`, body: "" }), { id: id() }),
     media: async () => new Uint8Array(),
     image: async (to, png, body, b) => (log.push({ to, kind: `image:${png.length}:${b.map((x) => x.title).join("|")}`, body }), { id: id() }),

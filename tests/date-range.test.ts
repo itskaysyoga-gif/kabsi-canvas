@@ -36,9 +36,10 @@ describe("Your weekly report date ranges (Eval 1)", () => {
         dates: "19 to 25 October",
         did: [{ key: "replies", label: "Replies sent to Google", count: 3 }],
       }),
-    ).toMatch(/^Rose Lane Salon, 19 to 25 October\. Kabsi did: replies sent to Google 3\./);
+    ).toMatch(/^\*\u{1F9FE} Your weekly receipt\* · Rose Lane Salon\n\n19 to 25 October\nReplies sent to Google: 3\n/u);
+    // Look 2 (30.50 item 2): the week is the first fact; a quiet week says so on the next line.
     expect(receiptText({ ...base, dates: "28 October to 3 November", did: [] })).toMatch(
-      /^Rose Lane Salon, 28 October to 3 November: a quiet week\./,
+      /\n\n28 October to 3 November\nA quiet week\./,
     );
   });
 });

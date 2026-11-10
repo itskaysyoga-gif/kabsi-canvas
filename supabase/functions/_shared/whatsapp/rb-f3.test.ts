@@ -4,7 +4,9 @@
 // fakes. Customers are fictional. World time: Monday 26 Oct 2026, 19:00 in Dubai.
 import assert from "node:assert/strict";
 import { receive } from "./agent.ts";
-import { editDistance, getPack, markOf, MARK, near, normalizeVocabulary, normalizeWhen, styleReply } from "./book.ts";
+import { editDistance, getPack, markOf, MARK, near, normalizeVocabulary, normalizeWhen } from "./book.ts";
+import { fromText, render } from "./look.ts";
+const styleReply = (body: string, mark: string, business: string | null) => render(fromText(body, mark, business));
 import { isOffTopic } from "./router.ts";
 import { msg, PHONES, USERS, World } from "./world.test-helpers.ts";
 
