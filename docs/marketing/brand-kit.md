@@ -26,7 +26,7 @@ Set up once on higgsfield.ai before the first video (VIDEO Part 4 "Brand kit"). 
 
 - Titles: Lalezar (regular). Big hook text and the end card main line only.
 - Everything else: Readex Pro. Captions in Readex Pro SemiBold.
-- Both are open-licence (SIL OFL). Download from Google Fonts (fonts.google.com, "Lalezar" and "Readex Pro") and upload to the Higgsfield brand kit. The repo carries only the web subsets, without SemiBold.
+- Both are open-licence (SIL OFL). Download from Google Fonts (fonts.google.com, "Lalezar" and "Readex Pro") and upload to the Higgsfield brand kit. The repo no longer carries these font files (removed in Clean 4); download them from Google Fonts.
 - If the Higgsfield plan does not accept custom fonts: save the caption style as a preset with the closest clean built-in sans-serif and use it in every video. Never mix fonts between videos.
 
 ## Caption style (save as preset "Kabsi captions")
