@@ -112,6 +112,12 @@ export async function sendTick(deps: SendDeps): Promise<SendResult> {
     if (m.kind === "follow_up" && /kabsi\.co\/founding\//i.test(body)) {
       const f = await deps.founding().catch(() => null);
       body = withoutStaleInvite(body, f ? foundingInviteUrl(f.slug, f.left) : null);
+      // Never send what is left if it is no longer a whole email: a person looks at it instead.
+      if (body.length < 20 || !body.includes("Rashid Abou Hamzy")) {
+        await deps.markFailed(m.id, "invite_line_left_too_little");
+        r.failed++;
+        continue;
+      }
     }
     if (!houseStyleOk(body) || !houseStyleOk(m.subject) || !linksOk(body, m.kind)) {
       await deps.markFailed(m.id, "house_style_or_links");

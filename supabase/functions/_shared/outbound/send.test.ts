@@ -234,5 +234,10 @@ Deno.test("Outbound 2: a follow-up sends its invite line only while the link is 
     assert.equal((await sendTick(t.d)).state, "sent", JSON.stringify(founding));
     assert.equal(sent.includes("founding places open"), keeps, JSON.stringify(founding));
     assert.ok(sent.includes("Rashid Abou Hamzy, founder of Kabsi"));
+    assert.ok(sent.includes("Hi again. Happy to run that free check."), "the first line always goes");
   }
+  const bare = msg({ id: "f2", kind: "follow_up", parent_id: "m0", parent: first, body: `Details: kabsi.co/founding/${slug}\n\nkabsi.co` });
+  const t = deps({ founding: async () => null }, OPEN, [bare]);
+  await sendTick(t.d);
+  assert.ok(t.log.includes("failed:f2:invite_line_left_too_little"), "too little left: a person looks at it, nothing is sent");
 });

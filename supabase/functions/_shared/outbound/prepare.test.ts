@@ -411,4 +411,15 @@ Deno.test("at send time a stale invite line is left out and the rest of the appr
   assert.equal(withoutStaleInvite(body, "kabsi.co/founding/Other000000000000000Slug"), plain, "slug rotated");
   assert.equal(withoutStaleInvite(body, url.toLowerCase()), plain, "a slug differing only in case is not the same");
   assert.equal(withoutStaleInvite(plain, null), plain);
+  const tight = `Hi again. Happy to run that free check.\n${inviteLine(url)}\n\nRashid Abou Hamzy, founder of Kabsi`;
+  assert.equal(withoutStaleInvite(tight, null), "Hi again. Happy to run that free check.\n\nRashid Abou Hamzy, founder of Kabsi", "only the invite line goes, never its neighbours");
+  const crlf = `Hi again. Happy to run that free check.\r\n${inviteLine(url)}\r\n\r\nRashid Abou Hamzy`;
+  assert.ok(withoutStaleInvite(crlf, null).startsWith("Hi again. Happy to run that free check."), "CRLF keeps the first line");
+});
+
+Deno.test("an industry name that every object has is still refused", () => {
+  const ok = { company_id: "1", business_name: "Rose Lane Salon", industry: "hair salon", country: "GB", city: "Exampleton",
+    website: "https://rose.example.com", email: "hello@rose.example.com", email_page_url: "https://rose.example.com/contact",
+    company_type: "registered company", company_number: "01234567", company_status: "Active", company_status_date: "2026-11-01" };
+  for (const k of ["constructor", "toString", "hasOwnProperty", "__proto__"]) assert.equal(rowRefusal({ ...ok, industry: k }, ["GB"], "2026-11-06"), "industry", k);
 });

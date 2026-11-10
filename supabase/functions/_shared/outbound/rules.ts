@@ -308,14 +308,22 @@ export function followUp(p: { business: string; invite?: string | null }): Draft
 }
 
 /** At send time: a follow-up whose invite link is no longer the current one (places gone, slug rotated or removed)
- *  loses that one line; the rest of the approved text goes unchanged. */
+ *  loses only the line that carries it; every other line of the approved text goes unchanged, and the blank lines left
+ *  behind close up to one. */
 export function withoutStaleInvite(body: string, current: string | null): string {
-  return String(body ?? "").split("\n\n").filter((para) => {
-    const links = linksIn(para).filter((l) => FOUNDING_LINK.test(l));
+  const text = String(body ?? "");
+  const lines = text.split("\n");
+  const kept = lines.filter((line) => {
+    const links = linksIn(line).filter((l) => FOUNDING_LINK.test(l));
     if (!links.length) return true;
-    return !!current && links.every((l) => l === current.toLowerCase()) && para.includes(current);
-  }).join("\n\n");
+    return !!current && links.every((l) => l === current.toLowerCase()) && line.includes(current);
+  });
+  if (kept.length === lines.length) return text;
+  return kept.join("\n").replace(/(?:\r?\n[ \t]*){3,}/g, "\n\n").trim();
 }
+
+/** Is this one of the eight first tier industries? Own keys only, so "constructor" or "toString" never pass. */
+export const knownIndustry = (industry: string) => Object.hasOwn(KIND_WORDS, String(industry ?? ""));
 
 /** A business name Outbound may write: letters it can print, no house style break, no link. */
 export function nameOk(name: string): boolean {

@@ -2,7 +2,7 @@
 // master plan 30.39). Pure: the caller fetches the file and the pages. Companies House comes from the register itself
 // (30.39 item 12): Harvey reads Companies House's free monthly Basic Company Data file (Open Government Licence) and
 // writes company_status and company_status_date (the file's date); there is no Companies House API key.
-import { industryGroup, INDUSTRY_ORDER, KIND_WORDS, nameOk, OPEN_COUNTRIES, ownDomain } from "./rules.ts";
+import { industryGroup, INDUSTRY_ORDER, knownIndustry, nameOk, OPEN_COUNTRIES, ownDomain } from "./rules.ts";
 
 /** RFC 4180 CSV: quoted fields, doubled quotes, newlines inside quotes. */
 export function parseCsv(text: string): Record<string, string>[] {
@@ -69,7 +69,7 @@ export function companyRefusal(r: Record<string, string>, today: string): string
 export function rowRefusal(r: Record<string, string>, openCountries: readonly string[], today: string): string | null {
   // Only the UK can ever open (30.45 item 5): a country outside OPEN_COUNTRIES is closed whatever the settings hold.
   if (!(OPEN_COUNTRIES as readonly string[]).includes(r.country) || !openCountries.includes(r.country)) return "country_closed";
-  if (!KIND_WORDS[r.industry]) return "industry";
+  if (!knownIndustry(r.industry)) return "industry";
   if (!nameOk(r.business_name)) return "name";
   if (!r.city || r.city.length > 60) return "city";
   if (!/^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/.test(r.email)) return "email";
