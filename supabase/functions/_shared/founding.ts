@@ -47,13 +47,18 @@ export async function foundingMessage(applicationId: string, day: number): Promi
   return "sent";
 }
 
-/** The month's payout list is ready for staff approval (the 5th). */
+/** The month's payout list is ready for staff approval (the 5th). Partners 2 (30.50 item 4): a partner's first payout waits
+ *  for one staff tap on WhatsApp ("payouts"); the rest are approved on the staff page. */
 export async function partnerPayoutsReady(runOn: string): Promise<string> {
-  const { data, error } = await admin().from("partner_payouts").select("amount_cents").eq("run_on", runOn).eq("state", "proposed");
+  const { data, error } = await admin().from("partner_payouts").select("amount_cents, partner_accounts(reviewed_at)").eq("run_on", runOn).eq("state", "proposed");
   if (error) throw error;
-  const rows = (data ?? []) as { amount_cents: number }[];
+  type Row = { amount_cents: number; partner_accounts: { reviewed_at: string | null } | { reviewed_at: string | null }[] | null };
+  const rows = (data ?? []) as Row[];
   if (!rows.length) return "none";
+  const reviewed = (r: Row) => !!(Array.isArray(r.partner_accounts) ? r.partner_accounts[0] : r.partner_accounts)?.reviewed_at;
+  const first = rows.filter((r) => !reviewed(r)).length;
   const total = rows.reduce((s, r) => s + r.amount_cents, 0) / 100;
-  await staffAlert(`Partner payouts for ${runOn}: ${rows.length} ${rows.length === 1 ? "partner" : "partners"}, $${total.toFixed(2)} in all. Approve them on the staff page`, `payouts:${runOn}`);
+  const firstLine = first ? `. ${first} ${first === 1 ? "is a first payout" : "are first payouts"}: reply "payouts" here to review with one tap` : "";
+  await staffAlert(`Partner payouts for ${runOn}: ${rows.length} ${rows.length === 1 ? "partner" : "partners"}, $${total.toFixed(2)} in all. Approve them on the staff page${firstLine}`, `payouts:${runOn}`);
   return "alerted";
 }

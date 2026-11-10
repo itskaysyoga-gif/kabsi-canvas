@@ -230,7 +230,9 @@ export function rowDescription(parts: string[]): string {
   const service = others[0] ?? null;
   const when = others.slice(1).find((x) => WHEN.test(x)) ?? null;
   const status = others.slice(1).filter((x) => x !== when);
-  return fitParts([service ?? "", when ? when.replace(/, no time set$/, "") : "", confirm ?? "", ...status], ROW_DESC_MAX);
+  const day = when ? when.replace(/, no time set$/, "") : "";
+  // R-155: a long service name loses its last words, so the day and time always stay.
+  return fitParts([day && service ? wholeWords(service, ROW_DESC_MAX - day.length - 3) || service : service ?? "", day, confirm ?? "", ...status], ROW_DESC_MAX);
 }
 
 const ROW = /^#(\d{1,9})\s+(.+)$/;
@@ -341,6 +343,10 @@ export function markFor(result: string, kind: KindName | null): string {
   if (/^(post_|photo|held_photo|video$|post_skip)/.test(r)) return MARK.picture;
   if (/^(shown_for_yes|no_review$|exact_|edit_(started|refused|draft)|show_refused|review_alert|new_draft)/.test(r)) return MARK.review;
   if (/^receipt/.test(r)) return MARK.receipt;
+  // Partners 2: the owner's link, and the staff list of first payouts.
+  if (/^referral_/.test(r)) return MARK.list;
+  if (r === "payouts_list") return MARK.receipt;
+  if (/^payouts_(approved|none)$/.test(r)) return MARK.done;
   if (/undone|undo_refused|request_undo|^undo$|^too_late$/.test(r)) return MARK.undone;
   if (/^request_(confirm|convert)_(guess|choose)$/.test(r)) return MARK.confirm;
   if (/_(which|ask|choose|tap)$|which_|_tap_|still_waiting|request_change$|request_duplicate$|request_yes_tap_save|question_elsewhere|forwarded_yes|reset_ask|pick_closed|^off_topic$|^unclear|^refused$|^not_yours$|^stale_button$|_refused$|_owner_only$|^billing_(error|unclear|stub)$|^billing_[a-z_]+$/.test(r) && !/^billing_(cancelled|kept|upgraded|downgraded|location_link|status|no_plan|portal|same_plan|already_ends)$/.test(r)) return MARK.ask;
@@ -352,7 +358,7 @@ export function markFor(result: string, kind: KindName | null): string {
 /** The replies in scope of look 2 (30.50 item 2): the request book, help, switch, off topic, and the Google care replies
  *  inside the window (a review and its draft, hours, photos and posts, billing and the hand-off). Others keep their look
  *  until a later session moves them (docs/LATER.md). */
-export const IN_SCOPE = /^(nora$|request_|reset_|forwarded_yes|help$|which_role|which_business|business_set|role_set|role_refused|switched|pick_closed|off_topic|hours_|post_|photo|held_photo|video$|file_refused|shown_for_yes|no_review$|exact_|edit_|show_refused|approved$|undone$|undo:|too_late$|repeat$|stale_button$|refused:|which_one$|yes_nothing$|not_yours$|billing_|handoff$)/;
+export const IN_SCOPE = /^(nora$|request_|reset_|forwarded_yes|help$|which_role|which_business|business_set|role_set|role_refused|switched|pick_closed|off_topic|hours_|post_|photo|held_photo|video$|file_refused|shown_for_yes|no_review$|exact_|edit_|show_refused|approved$|undone$|undo:|too_late$|repeat$|stale_button$|refused:|which_one$|yes_nothing$|not_yours$|billing_|handoff$|referral_|payouts_)/;
 /** Replies about a change to Google: the business is always named after the title (say.ts: the business named first on
  *  anything that can change Google). */
 export const NAMES_BUSINESS = /^(hours_shown|post_shown|photo_post_shown|photo_category_set|shown_for_yes|approved)$/;

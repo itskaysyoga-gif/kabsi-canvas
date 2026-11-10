@@ -26,6 +26,7 @@ import { sensitivity } from "../review-growth/sensitive.ts";
 import { sendSensitiveAlert } from "../review-growth/alerts.ts";
 import type { BookDb, BookDeps } from "./book.ts";
 import { signinDb } from "../wa-signin-db.ts";
+import type { FirstPayout, PartnersWaDb } from "./partners.ts";
 
 async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await admin().rpc(fn, args);
@@ -327,8 +328,17 @@ export async function agentDeps(): Promise<AgentDeps> {
     book: bookFor(key),
     // Signup 1: Continue with WhatsApp and the new sign-in notice (the seam in agent.ts).
     signin: signinDb(),
+    // Partners 2: the payout confirm, the staff tap at the money and the owner's link (20261110200000_partners2.sql).
+    partners: partnersDb,
   };
 }
+
+const partnersDb: PartnersWaDb = {
+  confirmPayout: (id, phone) => rpc("partner_payout_confirm_whatsapp", { p_id: id, p_phone: phone }),
+  firstPayouts: (phone) => rpc<FirstPayout[] | null>("partner_first_payouts", { p_phone: phone }),
+  reviewPayout: (id, phone) => rpc("partner_first_payout_review", { p_payout: id, p_phone: phone }),
+  referralLink: (locationId, phone) => rpc("owner_referral_link", { p_location: locationId, p_phone: phone }),
+};
 
 // Session 10: the owner's billing actions on the real Creem code. The agent already checked the phone is the owner's
 // (the role list); each call finds the business's organisation here.

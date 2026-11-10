@@ -158,6 +158,9 @@ export function parseButton(id: string): Command {
   if (bill) return { k: "tool", tool: "billing", arg: `confirm:${bill[1]}` };
   // 13b part 2: the map's "Show me" and "Later" (m:s:<scan>, m:l), the owner's keyword confirm (v:y:<business>, v:c:<business>).
   // The morning digest's one-tap buttons (staff_admin only; the router checks the role).
+  // Partners 2: the staff tap at the money (pr:<payout>), staff_admin only (the router checks the role).
+  const pr = /^pr:([0-9a-f-]{36})$/.exec(id);
+  if (pr) return { k: "tool", tool: "staff_payouts", arg: `approve:${pr[1]}` };
   const zr = /^zr:([a-z0-9]{8})$/.exec(id);
   if (zr) return { k: "tool", tool: "staff_reset_test", arg: `confirm:${zr[1]}` };
   const st = /^s:(status|waiting|today)$/.exec(id);

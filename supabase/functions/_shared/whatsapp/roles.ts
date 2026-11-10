@@ -66,9 +66,9 @@ export type Domain = "business" | "partner" | "staff";
 export const TOOLS = {
   unknown: ["help", "question", "scan", "prices", "trial", "partner_program", "person"],
   prospect: ["help", "question", "scan", "send_map", "prices", "trial", "partner_program", "person"],
-  owner: ["help", "question", "switch", "stats", "review_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
+  owner: ["help", "question", "switch", "stats", "review_link", "referral_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
     "hours", "post", "billing", "voice", "ask_customer", "person"],
-  manager: ["help", "question", "switch", "stats", "review_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
+  manager: ["help", "question", "switch", "stats", "review_link", "referral_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
     "hours", "post", "voice", "ask_customer", "person"],
   staff: ["help", "question", "switch", "photo", "voice", "ask_customer", "person"],
   partner: ["help", "question", "switch", "partner_tool", "person"],
