@@ -53,19 +53,25 @@ export function ownDomain(email: string, website: string): boolean {
 }
 
 // ─── industries, countries, time zones
-/** Harvey's industry codes as an owner would say them, plural, for "looking at <kind> in <city>". The six salon
- *  industries come first, each with its own words (lane R, R-142 decision 4c, 30.45 item 5). */
+/** The eight first tier industries (lane R, R-151 item 5, master plan 30.51), Harvey's codes as an owner would say them,
+ *  plural, for "looking at <kind> in <city>". Every other industry is refused (register.ts rowRefusal "industry"). */
 export const KIND_WORDS: Record<string, string> = {
   "hair salon": "hair salons", "barbershop": "barbers", "beauty salon": "beauty salons", "nail salon": "nail salons",
   "lash and brow studio": "lash and brow studios", "spa and massage": "spas and massage studios",
-  "restaurant": "restaurants", "cafe": "cafes", "clinic": "clinics", "car repair garage": "car repair garages",
-  "dentist": "dentists", "gym": "gyms", "vet": "vets", "physiotherapist": "physiotherapists",
+  "restaurant": "restaurants", "cafe": "cafes",
 };
-/** The six salon industries first, in lane R's order, then the other trades. */
+/** The six salon industries, in lane R's order (R-142 decision 4c): the beauty group. */
 export const SALON_INDUSTRIES = ["hair salon", "barbershop", "beauty salon", "nail salon", "lash and brow studio", "spa and massage"] as const;
-export const INDUSTRY_ORDER = [
-  ...SALON_INDUSTRIES, "clinic", "dentist", "physiotherapist", "cafe", "restaurant", "car repair garage", "gym", "vet",
-];
+/** The food group (30.50 item 13: food joins the first tier), in the order the queue used before. */
+export const FOOD_INDUSTRIES = ["cafe", "restaurant"] as const;
+/** The order inside each group. The queue alternates the groups, one beauty then one food (register.ts ordered). */
+export const INDUSTRY_ORDER: string[] = [...SALON_INDUSTRIES, ...FOOD_INDUSTRIES];
+export type IndustryGroup = "beauty" | "food";
+export function industryGroup(industry: string): IndustryGroup | null {
+  if ((SALON_INDUSTRIES as readonly string[]).includes(industry)) return "beauty";
+  if ((FOOD_INDUSTRIES as readonly string[]).includes(industry)) return "food";
+  return null;
+}
 
 /** The only country Outbound may ever write to: UK registered companies active on Companies House (30.45 item 5). The
  *  UAE and every other country stay off; the database's check on outbound_settings.open_countries says the same. */
@@ -85,13 +91,17 @@ export function linksIn(text: string): string[] {
   return out;
 }
 
-/** Email 1 and the follow-up carry only kabsi.co and kabsi.co/privacy; a reply may also carry a kabsi.co page and the
- *  Facebook and Instagram addresses from SOCIAL_LINKS. The same rule as private.outbound_links_ok. */
+/** The Founding 25 invite link as linksIn sees it (lower-cased): kabsi.co/founding/ and 24 letters and digits. */
+const FOUNDING_LINK = /^kabsi\.co\/founding\/[a-z0-9]{24}$/;
+
+/** Email 1 carries only kabsi.co and kabsi.co/privacy; the follow-up may also carry the private Founding 25 invite link
+ *  (Outbound 2, R-151); a reply may also carry a kabsi.co page and the Facebook and Instagram addresses from
+ *  SOCIAL_LINKS. The same rule as private.outbound_links_ok. */
 export function linksOk(body: string, kind: "first" | "follow_up" | "reply"): boolean {
   return linksIn(body).every((l) =>
     kind === "reply"
       ? l === "kabsi.co" || l.startsWith("kabsi.co/") || l.startsWith("www.facebook.com/profile.php?id=") || l.startsWith("www.instagram.com/kabsi.co")
-      : l === "kabsi.co" || l === "kabsi.co/privacy"
+      : l === "kabsi.co" || l === "kabsi.co/privacy" || (kind === "follow_up" && FOUNDING_LINK.test(l))
   );
 }
 
@@ -111,6 +121,7 @@ const BOOKING_SYSTEMS: [string[], string][] = [
   [["glossgenius.com"], "GlossGenius"], [["mindbodyonline.com", "mindbody.io"], "Mindbody"], [["zenoti.com"], "Zenoti"],
   [["salonized.com"], "Salonized"], [["styleseat.com"], "StyleSeat"], [["boulevard.io", "joinblvd.com"], "Boulevard"],
   [["opentable.com", "opentable.co.uk"], "OpenTable"], [["resdiary.com"], "ResDiary"], [["sevenrooms.com"], "SevenRooms"],
+  [["designmynight.com"], "DesignMyNight"], [["tablein.com"], "Tablein"], [["quandoo."], "Quandoo"], [["thefork."], "TheFork"],
   [["dentally.co", "dentally.com"], "Dentally"], [["cliniko.com"], "Cliniko"], [["jane.app"], "Jane"],
 ];
 
@@ -219,16 +230,20 @@ export function updatedRecently(html: string, today: Date): boolean {
   return years.some((x) => x === y || x === y - 1);
 }
 
-export function pickDetail(html: string, today: Date): Detail | null {
+/** The detail sentences of docs/COPY.md 65. A restaurant or cafe takes table bookings and its Instagram shows its food
+ *  (Outbound 2); the other sentences read right for both groups. */
+export function pickDetail(html: string, today: Date, group: IndustryGroup = "beauty"): Detail | null {
   const system = bookingSystem(html);
   if (system && houseStyleOk(system)) {
-    return { kind: "booking", sentence: `I saw you take bookings through ${system}, so customers find you online already.` };
+    const what = group === "food" ? "table bookings" : "bookings";
+    return { kind: "booking", sentence: `I saw you take ${what} through ${system}, so customers find you online already.` };
   }
   if (hasHours(html)) {
     return { kind: "hours", sentence: "Your site lists your opening hours, and keeping Google's hours the same saves wasted trips." };
   }
   if (instagramLinked(html)) {
-    return { kind: "instagram", sentence: "Your Instagram shows the work, and the same photos could do well on your Google profile." };
+    const shows = group === "food" ? "your food" : "the work";
+    return { kind: "instagram", sentence: `Your Instagram shows ${shows}, and the same photos could do well on your Google profile.` };
   }
   if (updatedRecently(html, today)) {
     return { kind: "updated", sentence: "Your site looks recently updated, so your Google profile is the next place customers check." };
@@ -267,16 +282,48 @@ export function emailOne(p: { business: string; kind: string; city: string; deta
   };
 }
 
-export function followUp(p: { business: string }): Draft {
+/** The private Founding 25 invite link (R-151, master plan 30.51), built server side from app_settings
+ *  founding_invite_slug, only while places remain (founding_places().left, the count the private page uses). A missing
+ *  or malformed slug, or no places left, gives null and the follow-up leaves the line out. Never log the result. */
+export function foundingInviteUrl(slug: unknown, left: unknown): string | null {
+  if (typeof slug !== "string" || !/^[A-Za-z0-9]{24}$/.test(slug)) return null;
+  if (typeof left !== "number" || !Number.isFinite(left) || left <= 0) return null;
+  return `kabsi.co/founding/${slug}`;
+}
+
+/** The one short invite line of the follow-up (Outbound 2). No price, no count. */
+export const inviteLine = (url: string) =>
+  `I also have founding places open: three months of Kabsi Pro free, and you tell me what to make better. Details: ${url}`;
+
+export function followUp(p: { business: string; invite?: string | null }): Draft {
   return {
     subject: `Re: ${possessive(p.business)} Google profile`,
     body: [
       `Hi again. Happy to run that free check of ${possessive(p.business)} Google profile if useful. A yes is enough, and if not, no worries.`,
+      ...(p.invite ? [inviteLine(p.invite)] : []),
       SIGNATURE,
       FOOTER,
     ].join("\n\n"),
   };
 }
+
+/** At send time: a follow-up whose invite link is no longer the current one (places gone, slug rotated or removed)
+ *  loses only the line that carries it; every other line of the approved text goes unchanged, and the blank lines left
+ *  behind close up to one. */
+export function withoutStaleInvite(body: string, current: string | null): string {
+  const text = String(body ?? "");
+  const lines = text.split("\n");
+  const kept = lines.filter((line) => {
+    const links = linksIn(line).filter((l) => FOUNDING_LINK.test(l));
+    if (!links.length) return true;
+    return !!current && links.every((l) => l === current.toLowerCase()) && line.includes(current);
+  });
+  if (kept.length === lines.length) return text;
+  return kept.join("\n").replace(/(?:\r?\n[ \t]*){3,}/g, "\n\n").trim();
+}
+
+/** Is this one of the eight first tier industries? Own keys only, so "constructor" or "toString" never pass. */
+export const knownIndustry = (industry: string) => Object.hasOwn(KIND_WORDS, String(industry ?? ""));
 
 /** A business name Outbound may write: letters it can print, no house style break, no link. */
 export function nameOk(name: string): boolean {
@@ -285,7 +332,12 @@ export function nameOk(name: string): boolean {
 }
 
 // ─── the ramp and the window
-/** 3 a day in week 1, 5 in week 2, then 10 (30.39 item 7). Before started_on (test mode): week 1. */
+/** The ramp of R-151 item 5 (master plan 30.51): 5 a day in week 1 (days 1 to 7), then 10 a day from day 8, staying 10
+ *  through December; at most 300 a month. 20 a day waits for 400 strong matches and clean delivery (lane R decides).
+ *  outbound_settings holds the live values; these are its defaults. */
+export const RAMP = { ramp_week1: 5, ramp_week2: 10, ramp_after: 10, monthly_cap: 300 } as const;
+
+/** The day's cap: week 1 from started_on (day 1), week 2, then after. Before started_on (test mode): week 1. */
 export function dailyCap(s: { ramp_week1: number; ramp_week2: number; ramp_after: number; started_on: string | null }, day: string): number {
   if (!s.started_on) return s.ramp_week1;
   const d = Math.floor((Date.parse(`${day}T00:00:00Z`) - Date.parse(`${s.started_on}T00:00:00Z`)) / 86_400_000);

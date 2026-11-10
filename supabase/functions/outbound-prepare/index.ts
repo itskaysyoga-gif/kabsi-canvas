@@ -16,7 +16,7 @@ serve(async (req) => {
     const r = await prepare({
       settings: db.settings, refreshSuppression: db.refreshSuppression, register: db.harveyRegister,
       page: (u) => readPage(u), eligible: db.eligible, queuedFor: db.queuedFor, sentThisMonth: () => db.sentThisMonth(),
-      insert: db.insertDraft, testRecipients: db.testRecipients(), now: new Date(),
+      insert: db.insertDraft, founding: db.foundingInvite, testRecipients: db.testRecipients(), now: new Date(),
     }, { today: body.day === "today" });
     log(fn, { action: "prepare", ...r });
     return json(r);
