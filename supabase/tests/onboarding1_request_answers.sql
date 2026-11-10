@@ -8,9 +8,8 @@ select * from no_plan();
 
 \ir _fixtures.psql
 
--- The victim owner A owns LA ..c1. Another owner B (..b2) owns LB. A manager M of LA is added; the stranger S is ..b1.
-insert into public.locations (id, name, place_id) values ('00000000-0000-4000-8000-0000000000c2', 'Other Bakery', 'other-place');
-insert into public.location_members (location_id, user_id, role) values ('00000000-0000-4000-8000-0000000000c2', '00000000-0000-4000-8000-0000000000b2', 'owner');
+-- The victim owner A owns LA ..c1. Another owner B (..b2) owns LB ..c2 (both from the fixtures). A manager M (..b3) of LA is added;
+-- the stranger S is ..b1.
 insert into public.location_members (location_id, user_id, role) values ('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000b3', 'manager');
 
 create temp table before_counts as select
