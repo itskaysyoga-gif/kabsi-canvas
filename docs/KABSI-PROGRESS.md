@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 10 Nov 2026 (Plan 1). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 10 Nov 2026 (Look 2). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -57,10 +57,10 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 10 Nov 2026, Look 2 (R-150 item 2): one render step (`whatsapp/look.ts`) for WhatsApp replies: three blocks (marker and bold title, facts one per line, one status or question), quote lines for reviews and drafts, standing notes in the footer, request lists as WhatsApp list messages (10 rows, then "and N more"); request book, help, switch, off topic and the Google care replies in the window; no button, route, approval path, template or model call changed. Phone check for Rashid in `2026-11-10-look2.md`.
 - 10 Nov 2026, Plan 1 (R-150, docs only): master plan 30.50, the launch plan: Google care on WhatsApp only, Reply look 2, three sign-in ways with a new sign-in notice, partners join with no application, one partner program, cards counted as taps, the calendar (freeze 6 Dec, payments and Harvey 10 Dec, ads 12 Dec), the AI budget and the session order; five LATER rows. No code, facts or public wording changed. `2026-11-10-plan1.md`.
 - 10 Nov 2026, RB-F4 (R-149): at a business with the request book on, a message about a person goes to the book before the off-topic line and the router (a gym's trial is the gym's), "X booked Y" with no enquiry proposes a new visit or job, typo weekdays give one button per day, the off-topic line in the new look, help lists the book; no model call added. `2026-11-10-rb-f4.md`.
-- 10 Nov 2026, Ops 1: the "8 and 5 publications stuck" were demo rows scheduled for later (counting bug, fixed; the digest now says what to do about each); held WhatsApp messages were never released because Meta delivery statuses turned them into sent (fixed); migration 20261110090923. `2026-11-10-ops1.md`.
-- Older entries (Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
+- Older entries (Ops 1 is in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
 
 ## How a session updates this page
 
