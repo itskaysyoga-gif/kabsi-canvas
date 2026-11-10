@@ -52,7 +52,7 @@ Every page below is read at 390 px and 1440 px in the truth pass. The copy of ev
 | About `/about` | Who runs Kabsi (Rashid's own words), the honest facts | `d8-about.tsx` | C | Rashid |
 | Partners `/partners`, `/partners/terms` | Kabsi Partners terms, payout minimum 25 | `d2-partners.tsx`, `partners_.terms.tsx` | C | Rashid |
 | Security `/security` | What Kabsi stores and does not | `d8-security.tsx` | C, F | Rashid |
-| Privacy `/privacy`, Terms `/terms` | The law's words, retention, the contact list notice | `src/components/marketing/legal.tsx`, `src/lib/retention.ts`, `src/lib/consent.ts`; `src/routes/privacy.tsx`, `terms.tsx` | C (legal wording changes only with lane R) | Rashid |
+| Privacy `/privacy`, Terms `/terms` | The law's words, what Kabsi keeps about a business (including the two optional onboarding answers, R-145), retention, the contact list notice | `src/components/marketing/legal.tsx`, `src/lib/retention.ts`, `src/lib/consent.ts`; `src/routes/privacy.tsx`, `terms.tsx` | C (legal wording changes only with lane R) | Rashid |
 | FAQ `/faq` and the FAQ on Pricing, Founding, Partners and the industry pages | Answers from the facts | `src/lib/faq.ts` (the JSON-LD builder), `src/components/kabsi/faq-data.ts`, `d8-faq.tsx` | F then C | Rashid |
 | Setup call `/setup-call`, `/manager-steps` | How to add Kabsi as a manager; the booking is an email while `BOOKING_READY` is false | `setup-call.tsx`, `d2-flow.tsx`, `src/lib/manager-guide.ts` | C, S | Rashid |
 | Log in `/login` and signed-out screens | Sign-in wording, the code email first in in-app browsers | `sign-in-panel.tsx`, `src/lib/sign-in-errors.ts`, `signed-out.ts` | C | Rashid |
@@ -106,10 +106,10 @@ Every page below is read at 390 px and 1440 px in the truth pass. The copy of ev
 | Surface | What it states | Where it lives | Updated by | Owner |
 |---|---|---|---|---|
 | Owner dashboard screens (Home, Reviews, Google Profile, Content, Insights, Plan, Settings, Team, Photos, Hours) | Plain words, names from K-02, plan limits | `src/routes/_authenticated/app/`, `src/components/app/`, `src/components/home/`, `src/lib/entitlements.ts`, `src/lib/plans.ts` | C (sections 19, 36, 46, 51, 57, 60) | Rashid |
-| Onboarding | Four stages, no passwords | `src/components/onboarding/`, `src/lib/onboarding*.ts` | C (section 18, 25) | Rashid |
+| Onboarding | Four stages, no passwords; two optional questions right after the business is chosen, shown only here and in About your business, never naming the request book, nothing sent because of an answer (Onboarding 1, R-145) | `src/components/onboarding/`, `src/lib/onboarding*.ts`, `src/components/onboarding/request-answers.tsx`, `src/lib/request-answers.ts`; the answers are columns of `locations` | C (section 18, 25, 73) | Rashid |
 | Weekly report | Work done, what waits for a yes | `supabase/functions/_shared/care-report/compose.ts`, `report.ts`, `results-report/`, `insights/example.ts` | C | Rashid |
 | Plan limits in the database | What each plan allows | `plan_limits()` (migration) and `supabase/functions/_shared/plans.ts`, `src/lib/plans.ts` | By migration | Build |
-| Staff area | Staff only; never reaches owners | `src/routes/_authenticated/staff/`, `src/components/staff/` | C (section 57) | Rashid |
+| Staff area | Staff only; never reaches owners. Businesses also shows Early answers: counts of the two onboarding answers and the first businesses to answer yes in chats, a notebook or memory, which is Gate 3's evidence (R-145) | `src/routes/_authenticated/staff/`, `src/components/staff/` (`request-answers-panel.tsx`; data from `public.staff_request_answers()`) | C (section 57, 73) | Rashid |
 | Demo data | The two fictional demo businesses | `supabase/seed/demo.sql`, `supabase/functions/_shared/demo.ts` | By hand, with lane R | Build |
 | Creem product names, descriptions and amounts | The ten products (founding and list families, extra location), the product description | `CATALOGUE` and `PRODUCT_DESCRIPTION` in `supabase/functions/_shared/creem.ts`; made in Creem by the setup action (`billing-creem/setup`) | S, then the setup action in test and live mode | Hussein (the Creem account), Build |
 | Creem checkout page | How Creem shows the product to the buyer | Creem's dashboard (`docs/COPY.md` section 23) | H | Hussein |
@@ -150,6 +150,7 @@ The shared lists (never-say names and claims, the dash and exclamation mark rule
 | `npm run check:tokens` | Design tokens (K-108) |
 | `node scripts/build-kb.mjs --check` and `tests/knowledge-build.test.ts` | The three built facts files match `knowledge/facts/` |
 | `tests/sitemap.test.ts` | The sitemap equals the routes and the industry content |
+| `tests/onboarding1-request-answers.test.ts` and `supabase/tests/onboarding1_request_answers.sql` | The two onboarding questions: their words, that they stay out of every public page, email and WhatsApp builder, skip and save, the staff counts and Gate 3's rule, and (database) that another business cannot read or write the answers |
 | `tests/industry1-dup.test.ts` and `scripts/industry-dup.mjs` | The 21 industry pages: each at least 70 percent its own text, no pair above 35 percent identical sentences (R-144; the same measure runs on the served pages in `tests/e2e/public.spec.ts`) |
 
 ## 12. How to walk this map in a pull request

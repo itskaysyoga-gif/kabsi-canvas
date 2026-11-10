@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { KnowledgeStep } from "@/components/onboarding/steps";
+import { RequestAnswersCard } from "@/components/onboarding/request-answers";
 import { AccountTop } from "@/components/kabsi/d3-account";
 import { EmptyState, ErrorState, Skeleton, buttonClass } from "@/components/kabsi/ui";
 import { myLatestLocation } from "@/lib/onboarding";
@@ -44,12 +45,15 @@ function KnowledgePage() {
         </ErrorState>
       ) : null}
       {location.data ? (
-        <KnowledgeStep
-          key={location.data.id}
-          location={location.data}
-          onChanged={() => location.refetch()}
-          mode="settings"
-        />
+        <>
+          <KnowledgeStep
+            key={location.data.id}
+            location={location.data}
+            onChanged={() => location.refetch()}
+            mode="settings"
+          />
+          <RequestAnswersCard key={`answers-${location.data.id}`} locationId={location.data.id} />
+        </>
       ) : null}
     </>
   );

@@ -23,4 +23,7 @@ Files named in this list are in `docs/progress/archive/`.
 
 - 9 Nov 2026, Tidy 1 part 0 (R-143, docs): master plan 30.47 and the R-143 row. `2026-11-09-tidy1.md`. (Moved from PROGRESS by Industry 1.)
 - 9 Nov 2026, SEO 1 (indexing health): old addresses one 301, footer link to /setup-call, robots fix; IndexNow already live (200); industry pairs report for lane R. `2026-11-09-seo1.md`. (Moved from PROGRESS by Nora 2.)
-- 9 Nov 2026, Tidy 1 part 1 (R-143 items 1, 2, 4, 5, 7): Creem lines in the future tense, "Asked ChatGPT on [date]", map location, renewals in facts 06 and 13. `2026-11-09-tidy1.md`. (Moved from PROGRESS by RB-F2.)
+- 9 Nov 2026, Tidy 1 part 2 (R-143 item 3): card checkout only once Google access works (guard and test), the terms line dropped. `2026-11-09-tidy1.md`. (Moved from PROGRESS by Onboarding 1.)
+- 9 Nov 2026, Tidy 1 part 1 (R-143 items 1, 2, 4, 5, 7): Creem lines in the future tense, "Asked ChatGPT on [date]", map location, renewals in facts 06 and 13. `2026-11-09-tidy1.md`. (Moved from PROGRESS by Onboarding 1.)
+- 9 Nov 2026, Tidy 1 part 3 (R-143 item 6): the number's own findings of the daily Kapso check are also emailed to hello@kabsi.co once a day; template findings stay on WhatsApp. `2026-11-09-tidy1.md`. (Moved from PROGRESS by Onboarding 1.)
+- 9 Nov 2026, Tidy 1 part 4 (R-143 item 8): this page back under 10 KB; nine older lines moved word for word. `2026-11-09-tidy1.md`. (Moved from PROGRESS by Onboarding 1.)

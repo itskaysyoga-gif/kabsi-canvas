@@ -55,6 +55,7 @@ select throws_ok($$ select public.confirm_business('00000000-0000-4000-8000-0000
 select throws_ok($$ select public.claim_free_check('00000000-0000-4000-8000-0000000000c1', 'ABCD2345') $$, '42501', null, 'claim_free_check refuses a non-member');
 select throws_ok($$ select public.save_ai_prompt('00000000-0000-4000-8000-0000000000c1', 'best hair salon near the marina') $$, '42501', null, 'save_ai_prompt refuses a non-member');
 select throws_ok($$ select public.remove_ai_prompt('00000000-0000-4000-8000-0000000000f9') $$, '42501', null, 'remove_ai_prompt refuses a non-member');
+select throws_ok($$ select public.save_request_answers('00000000-0000-4000-8000-0000000000c1', 'chats', null, true) $$, '42501', null, 'save_request_answers refuses a non-member');
 -- Kabsi staff read every business for support and installers activate cards (is_staff() in these functions), so
 -- these refuse every non-member except Kabsi staff. sec1_tenant_matrix.sql sets kabsi_staff for its staff personas.
 \if :{?kabsi_staff}

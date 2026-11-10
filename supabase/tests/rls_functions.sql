@@ -159,6 +159,7 @@ select throws_ok($$ select public.staff_evidence_add('00000000-0000-4000-8000-00
 select throws_ok($$ select public.staff_evidence_delete(gen_random_uuid()) $$, '42501', null, 'staff_evidence_delete refuses a non-staff user');
 select throws_ok($$ select public.staff_activation() $$, '42501', null, 'staff_activation refuses a non-staff user');
 select throws_ok($$ select public.staff_validation() $$, '42501', null, 'staff_validation refuses a non-staff user');
+select throws_ok($$ select public.staff_request_answers() $$, '42501', null, 'staff_request_answers refuses a non-staff user (Onboarding 1)');
 select throws_ok($$ select public.staff_today() $$, '42501', null, 'staff_today refuses a non-staff user (App 5)');
 select throws_ok($$ select public.staff_outbound_approve('00000000-0000-4000-8000-0000000000d8') $$, '42501', null, 'staff_outbound_approve refuses a non-staff user (Harvey 4A)');
 select throws_ok($$ select public.staff_outbound_approve_all(array['00000000-0000-4000-8000-0000000000d8']::uuid[]) $$, '42501', null, 'staff_outbound_approve_all refuses a non-staff user');
