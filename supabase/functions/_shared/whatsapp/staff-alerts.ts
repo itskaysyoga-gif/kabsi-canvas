@@ -75,6 +75,8 @@ export type Summary = {
   publications_retrying?: number; publications_waiting_google?: number; publications_need_look?: number; jobs_failed: number; errors_by_job: { job: string; n: number }[];
   ai_cost_micros: number; places_today: number; places_cap: number; dataforseo_micros: number; dataforseo_cap_usd: number;
   number_quality: string | null; number_messaging: string | null; alerts_24h: number;
+  /** Growth 1: of the businesses whose Manager access began 1 to 30 days ago, how many had a first approved Google action within 24 hours of it. */
+  first_action_cohort?: number; first_action_24h?: number;
 };
 
 const usd = (micros: number) => `$${(Number(micros) / 1e6).toFixed(2)}`;
@@ -110,6 +112,14 @@ export function morningDigest(s: Summary): { body: string; buttons: Button[] } {
   return { body: `${head}\n\n${numbersText(s)}`, buttons: [{ id: "s:waiting", title: "Waiting" }, { id: "s:status", title: "Status" }, { id: "s:today", title: "Today" }] };
 }
 
+/** Growth 1: one honest sentence for the share of new businesses acting within a day of giving access. No percent of nothing. */
+export function firstActionText(s: Pick<Summary, "first_action_cohort" | "first_action_24h">): string {
+  const cohort = n(s.first_action_cohort);
+  if (!cohort) return "First approved action within 24 hours of Manager access: no business to measure yet (access began 1 to 30 days ago).";
+  const done = Math.min(n(s.first_action_24h), cohort);
+  return `First approved action within 24 hours of Manager access: ${done} of ${cohort} (${Math.round((done / cohort) * 100)} percent), access began 1 to 30 days ago.`;
+}
+
 /** The last 24 hours (9.9) and the budgets (26.9): also the answer to "today". */
 export function numbersText(s: Summary): string {
   const errors = (s.errors_by_job ?? []).map((e) => `${e.job} ${e.n} (${(n(e.n) / 24).toFixed(1)} an hour)`).join(", ");
@@ -120,6 +130,7 @@ export function numbersText(s: Summary): string {
     `Jobs failed: ${n(s.jobs_failed)}${errors ? `, most from ${errors}` : ""}.`,
     `AI cost since yesterday: ${usd(n(s.ai_cost_micros))}. Places today: ${n(s.places_today)} of ${n(s.places_cap)}. DataForSEO: ${dfs}.`,
     `Staff alerts in 24 hours: ${n(s.alerts_24h)}.`,
+    firstActionText(s),
   ].join("\n");
 }
 

@@ -1,7 +1,7 @@
 // Staff alerts on WhatsApp (13b part 2, master plan 9.9, 26.9, 30.9 item 5): which events go at once, the plain text, the
 // morning digest and its hour.
 import assert from "node:assert/strict";
-import { alertText, digestDue, morningDigest, numbersText, plain, routeOf, stuckText, type Summary } from "./staff-alerts.ts";
+import { alertText, digestDue, firstActionText, morningDigest, numbersText, plain, routeOf, stuckText, type Summary } from "./staff-alerts.ts";
 
 const S: Summary = {
   signups: 1, trials_started: 1, paid_new: 0, paid_total: 0, cancellations: 0, reviews_answered: 3, replies_waiting: 2, handoffs_waiting: 1,
@@ -56,4 +56,16 @@ Deno.test("Ops 1: the digest says what to do about each stuck publication", () =
   assert.equal(stuckText({ ...S, publications_stuck: 0 }), "No publications stuck");
   assert.doesNotMatch(morningDigest({ ...stuck, publications_stuck: 0 }).body, /stuck/);
   assert.doesNotMatch(stuckText({ ...S, publications_stuck: 5, publications_retrying: 3, publications_waiting_google: 2 }), /[\u2014\u2013!]/);
+});
+
+Deno.test("Growth 1: the digest carries the share of new businesses with a first approved action within 24 hours of access", () => {
+  assert.equal(firstActionText({ first_action_cohort: 4, first_action_24h: 3 }),
+    "First approved action within 24 hours of Manager access: 3 of 4 (75 percent), access began 1 to 30 days ago.");
+  assert.match(firstActionText({ first_action_cohort: 3, first_action_24h: 1 }), /1 of 3 \(33 percent\)/);
+  // No business to measure: a plain line, never "0 percent" or a division by nothing. An older summary without the keys reads the same.
+  assert.match(firstActionText({ first_action_cohort: 0, first_action_24h: 0 }), /no business to measure yet/);
+  assert.match(firstActionText({}), /no business to measure yet/);
+  assert.match(morningDigest({ ...S, first_action_cohort: 2, first_action_24h: 2 }).body, /2 of 2 \(100 percent\)/);
+  assert.match(numbersText(S), /no business to measure yet/);
+  for (const t of [firstActionText({ first_action_cohort: 4, first_action_24h: 3 }), firstActionText({})]) assert.doesNotMatch(t, /[\u2014\u2013!%]/);
 });

@@ -1,13 +1,12 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 11 Nov 2026 (Cards 2, Partners 3). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 11 Nov 2026 (Growth 1, Cards 2, Partners 3). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
 Files named in this list are in `docs/progress/archive/`.
 
 - Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati (first real reply and post removal verified, 23 Oct). kabsi.co on Vercel; Creem the only payment route (test mode). Evidence: `evidence.md`.
-- Older status lines (26 Oct to 6 Nov 2026) are word for word in `2026-11-09-progress-moved.md`.
 - No customer is live yet. Before the first Meta ad (30.35 item 5): the DataForSEO top-up, Vercel Pro and the open lines of `docs/launch1/readiness.md`. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -26,19 +25,20 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Open for Rashid (as last recorded; the full table is `docs/progress/archive/steps-only-rashid-can-do.md`)
 
-- The lane R checklist of 7 Nov is Rashid's project doc `claude/kabsi-whats-left-2026-11-07.md` (not in this repository). In short: card payments wait for Creem's live setup; the first Meta ad for the DataForSEO top-up, Vercel Pro and `docs/launch1/readiness.md`; the first paying business for Kapso Pro and 30.19 section 6; dates: AI credit ends 17 Nov, Sentry budget before 30 Nov.
-- Phone test (13b part 1): passed 25 Oct (ladder above). 13b part 2: send START from the staff phone (it is stopped); delete the Supabase secrets SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET and the Supabase SENTRY_AUTH_TOKEN; run `supabase/manual/20261025_drop_slack_leftovers.sql` (expect `0 | 0 | 0 | 0`); remove the Kabsi app from Slack when you like.
+- The lane R checklist of 7 Nov is Rashid's project doc `claude/kabsi-whats-left-2026-11-07.md` (not in this repository). In short: card payments wait for Creem's live setup; first Meta ad: the DataForSEO top-up, Vercel Pro, `docs/launch1/readiness.md`; first paying business: Kapso Pro and 30.19 section 6; AI credit ends 17 Nov, Sentry budget before 30 Nov.
+- 13b part 2: send START from the staff phone (it is stopped); delete the Supabase secrets SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET and the Supabase SENTRY_AUTH_TOKEN; run `supabase/manual/20261025_drop_slack_leftovers.sql` (expect `0 | 0 | 0 | 0`); remove the Kabsi app from Slack when you like.
 - Clean 4: run the branch delete script in `docs/progress/archive/2026-11-10-clean4-branches.md` with your own GitHub login (463 branches; expect 12 left).
 - Safe 1: make `HARVEY_READ_TOKEN` (`docs/OPS-SETUP.md` step 9); tick the checklist at the end of `docs/runbooks/github-gone.md`; kabsi-harvey still has a daily schedule and the register in its tree.
 - Sec 2: the backup secret, unused secrets, two-step logins (`docs/security/secrets-and-accounts.md`); the retention switch (`supabase/data/20261027_sec2_retention_on.sql`).
 - Supabase Auth: leaked-password protection; paste the four `emails/auth/*.html` templates again, rebuilt on 5 Nov with the WhatsApp line (steps in emails/auth/README.md).
 - Email 1: news.kabsi.co in Resend and Cloudflare before lifecycle emails go on (LATER row).
+- Master plan 19.6: two-step verification everywhere, recovery codes offline, second Kabsi Google account.
 - Google Cloud: Places quotas and budget alerts; contacts and owners on kabsi.co addresses only.
 - Hosting (30.25 item 1): Supabase stays on Free until 10 paying businesses or 60 percent of any Free limit, then Pro. Vercel Pro (its free trial first) before paid ads or payments open.
 - Price 1: before plans open, the test-mode checkout on both price families (LATER row: `founding_places_test` 0 for the list price, then back to 30). The live list products are made by the setup action at going live.
 - Creem (session 10): send one test event from Creem's dashboard to the webhook (expect 200 and one `billing_events` row), add the product bundle, mark Yawmiyati's organisation `billing_test` if you want to try the paid buttons. Hussein only at going live (verification, payout). Exact steps: `docs/progress/archive/2026-10-25-session-10-creem.md`.
-- Master plan 19.6: two-step verification everywhere, recovery codes offline, the second Kabsi Google account.
-- Growth 1: the Meta and Speed Insights steps in docs/EVENTS.md (last section).
+- Growth 1 (25 Oct): the Meta and Speed Insights steps in docs/EVENTS.md (last section).
+- Growth 1 (11 Nov): read each listing site's own page, then submit by hand in the order of `docs/marketing/listings.md`; write back the date and live address.
 - Check 2: on a phone, pick 3 businesses at kabsi.co/scan, then read today's `places_usage` (autocomplete above 0, details 3 or more); add a Google Cloud quota alert for Places Autocomplete.
 - UX 1: after the deploy, `POST /visibility/terms` once (two DataForSEO calls, about 0.15 USD) and the read-back in the UX 1 archive file.
 - V1: a free Geoapify key, saved as the Supabase secret GEOAPIFY_API_KEY (clicks in `docs/progress/archive/2026-10-25-v1-visibility-map.md`); until then maps draw on a plain ground. DataForSEO top-up (50 US dollars) before the first Meta ad (30.28; the balance read 0.31 after Scan 2 on 5 Nov); Gemini stays off.
@@ -63,8 +63,8 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 ## Recent entries (newest first)
 
 - 11 Nov 2026, Cards 2 (R-150 item 9): owner side PR 572, partner card links PR 574. `2026-11-11-cards2.md`.
-- 11 Nov 2026, Partners 3 (30.50 items 5 to 7): final /partners, the kit in /partner (18 posts, A6 insert, never say list), 4 partner emails. No migration. `2026-11-11-partners3.md`.
-- Older entries (Partners 2 `2026-11-10-partners2.md`; Outbound 2 `2026-11-10-outbound2.md`; Site 3a `2026-11-10-site3a.md`; Clean 4 `2026-11-10-clean4.md`; Look 2b `2026-11-10-look2b.md`; Founding 1 `2026-11-10-founding1.md`; RB-T `2026-11-10-rb-t.md`; Safe 1 `2026-11-10-safe1.md`; Signup 1 `2026-11-10-signup1.md`; Look 2 `2026-11-10-look2.md`; Plan 1 `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
+- 11 Nov 2026, Growth 1 (30.50 item 12): profile and 7 listings in `docs/marketing/` (nothing submitted); funnel check; a digest line for first actions within 24 hours of access; PR 571. `2026-11-11-growth1.md`.
+- Older entries (Partners 3 `2026-11-11-partners3.md`; Partners 2 `2026-11-10-partners2.md`; Outbound 2 `2026-11-10-outbound2.md`; Site 3a `2026-11-10-site3a.md`; Clean 4 `2026-11-10-clean4.md`; Look 2b `2026-11-10-look2b.md`; Founding 1 `2026-11-10-founding1.md`; RB-T `2026-11-10-rb-t.md`; Safe 1 `2026-11-10-safe1.md`; Signup 1 `2026-11-10-signup1.md`; Look 2 `2026-11-10-look2.md`; Plan 1 `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
 
 ## How a session updates this page
 
