@@ -402,8 +402,7 @@ function Page() {
                 team reads and answers your WhatsApp messages (section 14).
               </li>
               <li>
-                When switched on, a speech to text provider (ElevenLabs or OpenAI; this page names
-                the one in use) that turns a WhatsApp voice note into text (section 14).
+                A speech to text provider that turns a WhatsApp voice note into text (section 14).
               </li>
               <li>
                 Meta: runs WhatsApp, which carries the messages between you and the Kabsi WhatsApp
@@ -577,9 +576,10 @@ function Page() {
             Kabsi, and deleted with the business.
           </li>
           <li>
-            WhatsApp voice notes (when switched on): the audio is deleted as soon as it has been
-            turned into text. We keep only the text, like any other message. Notes over 10 MB or 3
-            minutes are refused and never stored.
+            WhatsApp voice notes: Kabsi does not keep the audio. It is held in memory only while it
+            is turned into text, and we keep only the text, like any other message. Notes over 10
+            MB or 3 minutes are refused and never stored. We also keep a daily count of the
+            seconds transcribed, with no words and no phone number.
           </li>
           <li>
             Backups: encrypted copies of the database, the photos and our code are kept for 21 days
@@ -714,12 +714,14 @@ function Page() {
               too (section 5).
             </p>
             <p>
-              <b>Voice notes.</b> When voice notes are switched on, you can send Kabsi a voice note
-              instead of typing. The audio goes to a speech to text provider (section 6) only to be
-              turned into text. We delete the audio as soon as the text is ready and keep only the
-              text, which Kabsi then treats like any message you typed. Please keep a voice note
-              under 3 minutes and 10 MB; longer ones are refused. Kabsi never uses a voice note to
-              train AI models or to copy your voice.
+              <b>Voice notes.</b> You can send Kabsi a voice note instead of typing, in any
+              language. The audio goes to a speech to text provider (section 6) only to be turned
+              into text. Kabsi does not keep the audio and keeps only the text, which Kabsi then
+              treats like any message you typed. Kabsi answers a voice note with a line that says
+              what it heard, and a voice note is never your yes: nothing goes on your Google
+              profile until you tap Yes or type it yourself. Please keep a voice note under 3
+              minutes and 10 MB; longer ones are refused. Kabsi never uses a voice note to train AI
+              models or to copy your voice.
             </p>
             <p>
               <b>Who handles it.</b> Kapso provides the messaging service and the inbox where our

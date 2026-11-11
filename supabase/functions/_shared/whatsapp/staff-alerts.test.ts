@@ -1,7 +1,7 @@
 // Staff alerts on WhatsApp (13b part 2, master plan 9.9, 26.9, 30.9 item 5): which events go at once, the plain text, the
 // morning digest and its hour.
 import assert from "node:assert/strict";
-import { alertText, digestDue, firstActionText, morningDigest, numbersText, plain, routeOf, stuckText, type Summary } from "./staff-alerts.ts";
+import { alertText, digestDue, firstActionText, morningDigest, numbersText, plain, routeOf, stuckText, type Summary, voiceText } from "./staff-alerts.ts";
 
 const S: Summary = {
   signups: 1, trials_started: 1, paid_new: 0, paid_total: 0, cancellations: 0, reviews_answered: 3, replies_waiting: 2, handoffs_waiting: 1,
@@ -68,4 +68,24 @@ Deno.test("Growth 1: the digest carries the share of new businesses with a first
   assert.match(morningDigest({ ...S, first_action_cohort: 2, first_action_24h: 2 }).body, /2 of 2 \(100 percent\)/);
   assert.match(numbersText(S), /no business to measure yet/);
   for (const t of [firstActionText({ first_action_cohort: 4, first_action_24h: 3 }), firstActionText({})]) assert.doesNotMatch(t, /[\u2014\u2013!%]/);
+});
+
+// Voice 2 (R-158 item 3): the digest shows yesterday's voice minutes; the two voice alerts go to the staff phone at once.
+Deno.test("Voice 2: the voice alerts (3 failures in a row, a day over 60 minutes) are urgent", () => {
+  assert.equal(routeOf({ kind: "voice_failed" }), "urgent");
+  assert.equal(routeOf({ kind: "voice_minutes_high" }), "urgent");
+  const a = alertText({ id: 1, kind: "voice_failed", channel: "alerts", title: "Voice notes are failing", body: "3 voice notes in a row could not be transcribed.", created_at: "" });
+  assert.equal(a.summary, "Voice notes are failing");
+  assert.doesNotMatch(a.body, /[\u2014\u2013!]/);
+});
+Deno.test("Voice 2: the staff digest and today show yesterday's voice minutes", () => {
+  assert.equal(voiceText({ voice_seconds_yesterday: 750, voice_notes_yesterday: 31 }), "Voice notes yesterday: 13 minutes in 31 notes.");
+  assert.equal(voiceText({ voice_seconds_yesterday: 60, voice_notes_yesterday: 1 }), "Voice notes yesterday: 1 minute in 1 note.");
+  assert.equal(voiceText({ voice_seconds_yesterday: 40, voice_notes_yesterday: 2 }), "Voice notes yesterday: under 1 minute in 2 notes.");
+  assert.equal(voiceText({}), "Voice notes yesterday: 0 minutes in 0 notes.");
+  assert.equal(voiceText({ voice_seconds_yesterday: 300, voice_notes_yesterday: 4, voice_failures_yesterday: 2 }), "Voice notes yesterday: 5 minutes in 4 notes, 2 requests failed.");
+  const withVoice = { ...S, voice_seconds_yesterday: 750, voice_notes_yesterday: 31 };
+  assert.match(morningDigest(withVoice).body, /Voice notes yesterday: 13 minutes in 31 notes\./);
+  assert.match(numbersText(withVoice), /AI cost since yesterday: \$0\.45\.[^\n]*\nVoice notes yesterday: 13 minutes in 31 notes\.\nStaff alerts in 24 hours: 4\./);
+  for (const t of [voiceText(withVoice), numbersText(withVoice)]) assert.doesNotMatch(t, /[\u2014\u2013!]/);
 });

@@ -129,6 +129,27 @@ Deno.test("the router: forwarded text is never yes, no, a number or a code; STOP
   assert.deepEqual(parse(inbound({ text: "KABSI 123456" })), { k: "bind", code: "123456" });
 });
 
+// Voice 2 (R-158 item 3): the words of a voice note are heard by a machine. Never yes, no, a number, a code or an opt-in, and never a staff
+// command; STOP still wins. Everything else keeps its usual meaning.
+Deno.test("the router: a voice note's words are never yes, no, a number, a code, START or a staff command; STOP still wins", () => {
+  const v = (text: string) => parse(inbound({ text, fromVoice: true }));
+  assert.deepEqual(v("Yes"), { k: "free", text: "Yes", forwardedAnswer: true, forwardedYes: true });
+  for (const w of ["ok", "approve", "confirm", "sure", "نعم"]) assert.equal((v(w) as { forwardedYes?: boolean }).forwardedYes, true, w);
+  assert.deepEqual(v("No"), { k: "free", text: "No", forwardedAnswer: true });
+  assert.deepEqual(v("2"), { k: "free", text: "2", forwardedAnswer: true });
+  assert.equal(v("KABSI 123456").k, "free");
+  assert.equal(v("123456").k, "free");
+  assert.equal(v("STAFF ABCD2345").k, "free");
+  assert.equal(v("start").k, "free", "a spoken START never opts anyone back in");
+  for (const t of ["status", "waiting", "today", "pause Harbour Cafe", "resume Harbour Cafe", "payout list", "approve payouts", "reset test"]) assert.equal(v(t).k, "free", t);
+  for (const t of ["STOP", "baja"]) assert.equal(v(t).k, "stop", t);
+  assert.equal(v("stats").k, "tool", "other words keep their usual meaning");
+  assert.equal(v("closed tomorrow").k, "tool");
+  // Typed by the person, the same words are as before.
+  assert.equal(parse(inbound({ text: "status" })).k, "tool");
+  assert.deepEqual(parse(inbound({ text: "Yes" })), { k: "yes" });
+});
+
 // A fake Kapso: records the calls and the bodies it was sent.
 function fakeKapso(state: { webhooks: { id: string; url: string; active?: boolean }[]; templates: string[]; flows?: unknown[]; refuse?: string; failWebhook?: Response }) {
   const calls: string[] = [];

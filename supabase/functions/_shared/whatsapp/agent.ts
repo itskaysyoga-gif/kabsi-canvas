@@ -18,7 +18,7 @@ import {
   bookHelp, bookIntent, enquiryKind, kabsiJob, kabsiQuestion, type Kind, KIND_KEY, namesKabsi, newKind, packAs, packWordWins, proposalKind,
 } from "./book.ts";
 import { photoRefusal, voiceCheck } from "./media.ts";
-import { fromText, IN_SCOPE, LIST_RESULT, type ListMsg, markFor, type Msg, NAMES_BUSINESS, noraLook, ROW_TITLE_MAX, toMsg, wholeWords } from "./look.ts";
+import { BUTTON_BODY_MAX, fromText, IN_SCOPE, LIST_RESULT, type ListMsg, markFor, type Msg, NAMES_BUSINESS, noraLook, ROW_TITLE_MAX, TEXT_BODY_MAX, toMsg, wholeWords } from "./look.ts";
 import { type SigninDb, signinSeam } from "./signin.ts";
 import { linkOf, PARTNERS_SAY, type PartnersWaDb, payoutSeam } from "./partners.ts";
 import {
@@ -48,6 +48,7 @@ import { type GrowthStats, growthLine } from "../review-growth/stats.ts";
 import { ANSWER_WINDOW_MS, readUpdate } from "../review-growth/monthly.ts";
 import { categoryLabel, type PhotoCategory, pickCategory } from "../review-growth/photo.ts";
 import type { Transcript } from "../voice/transcribe.ts";
+import { heardLine } from "../voice/guard.ts";
 import { CATALOGUE, extraKey, type Period, type Plan, planKey, type PriceFamily } from "../creem.ts";
 import type { FirstBack, OnboardingHooks } from "../onboarding/hooks.ts";
 import { monthlyFacts, SAY_ONBOARDING, setupReply } from "../onboarding/stages.ts";
@@ -142,8 +143,9 @@ export type AgentDeps = {
   confirmKeyword?(locationId: string, keyword: string): Promise<{ ok: boolean; reason?: string }>;
   /** 28.1: the full map image for a scan code, once V1's job has it. A stub (null) until V1 merges. */
   mapImage(scanCode: string): Promise<Uint8Array | null>;
-  /** V3 (28.3): a voice note to text. The audio stays in memory and is never stored; without it voice notes say they are off. */
-  transcribe?(audio: Uint8Array, mime: string | null, phone: string): Promise<Transcript>;
+  /** V3 (28.3), Voice 2: a voice note to text. The audio stays in memory and is never stored; without it voice notes say they are off.
+   *  `who` is what the daily limits count against (voice/guard.ts): the business, or a phone Kabsi does not know. */
+  transcribe?(audio: Uint8Array, mime: string | null, who: { phone: string; known: boolean; locationId: string | null }): Promise<Transcript>;
   /** Photo Post 1: Kabsi's own draft of a post from the owner's words and verified facts (writePost, its spend cap). Absent when
    *  Kabsi's AI drafting is off; null when the draft failed. Either way the owner's words are the post. */
   draftPhotoPost?(locationId: string, caption: string): Promise<string | null>;
@@ -210,10 +212,30 @@ type Turn = {
   style?: { pack: Pack | null };
   /** The person's first message to Kabsi: the only one that gets the welcome (QA 1, 25 Oct). */
   first?: boolean;
+  /** Voice 2: the quote line "> I heard: ..." that opens the first reply to a voice note. Shared by every copy of the turn, so only
+   *  one reply carries it. */
+  heard?: { line: string; used: boolean };
 };
 
-function say1(t: Turn, body: string, buttons?: Button[]) {
-  return sendReply(t.d.out, t.s, t.phone, headed(t.head ?? null, body), buttons, { locationId: t.business?.location_id ?? null });
+/** Voice 2: the reply with the quote line of a voice note in front, once. Plain and button messages alike: a message with buttons is
+ *  never cut (look.ts), so the transcript is shortened to what the body can still hold; with no room for a useful part of it, the
+ *  quote goes first as a message of its own. */
+function withHeard(t: Turn, body: string, interactive: boolean): { body: string; before?: string } {
+  const h = t.heard;
+  if (!h || h.used) return { body };
+  h.used = true;
+  const limit = interactive ? BUTTON_BODY_MAX : TEXT_BODY_MAX;
+  const room = limit - body.length - 2;
+  if (h.line.length <= room) return { body: `${h.line}\n\n${body}` };
+  const prefix = "> I heard: ";
+  const fit = room - prefix.length >= 40 ? heardLine(h.line.slice(prefix.length), room - prefix.length) : "";
+  return fit ? { body: `${fit}\n\n${body}` } : { body, before: h.line };
+}
+
+async function say1(t: Turn, body: string, buttons?: Button[]) {
+  const h = withHeard(t, headed(t.head ?? null, body), !!buttons?.length);
+  if (h.before) await sendReply(t.d.out, t.s, t.phone, h.before, undefined, { locationId: t.business?.location_id ?? null });
+  return sendReply(t.d.out, t.s, t.phone, h.body, buttons, { locationId: t.business?.location_id ?? null });
 }
 /**
  * Every reply to what the person wrote. Look 2 (30.50 item 2): a reply in scope (look.ts IN_SCOPE, or any request book
@@ -225,7 +247,12 @@ const answered = (t: Turn, body: string, result: string, buttons?: Button[], lis
   // A phone with no Kabsi role (a prospect talking to Nora) keeps its look; look 2 is for owners, their team, staff and partners.
   if (!t.style && (!IN_SCOPE.test(result) || !domains(t.who).length)) return say1(t, body, buttons).then(() => result);
   const m = lookMsg(t, body, result, buttons, list);
-  return sendReply(t.d.out, t.s, t.phone, m.body, buttons, { locationId: t.business?.location_id ?? null }, { footer: m.footer, list: m.list }).then(() => result);
+  const h = withHeard(t, m.body, !!buttons?.length || !!m.list);
+  return (async () => {
+    if (h.before) await sendReply(t.d.out, t.s, t.phone, h.before, undefined, { locationId: t.business?.location_id ?? null });
+    await sendReply(t.d.out, t.s, t.phone, h.body, buttons, { locationId: t.business?.location_id ?? null }, { footer: m.footer, list: m.list });
+    return result;
+  })();
 };
 /** RB-F3: a switch or help reply in the new look (no role head, the bold first line). */
 const plain = (t: Turn): Turn => ({ ...t, head: null, style: { pack: null } });
@@ -287,7 +314,7 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   // F-1: a forwarded "Yes" is not the owner's own yes. With something waiting for a yes, nothing is approved and the owner is
   // asked to tap Yes or type it; with nothing waiting it is free text like any other forwarded message.
   if (cmd.k === "free" && cmd.forwardedYes && businesses(who).length && (RB_QUESTIONS.includes(conv?.open_question?.type ?? "") || (await d.db.openItems(phone)).length)) {
-    return answered(t, SAY.forwardedYes, "forwarded_yes");
+    return answered(t, t.m.fromVoice ? SAY.voiceYes : SAY.forwardedYes, "forwarded_yes");
   }
   // F-1: a forwarded yes, no or number never answers Kabsi's own questions (the search, hours, the monthly question).
   // Look 2: a tapped request list row ("#12") is not an answer either: it opens that request.
@@ -1085,10 +1112,12 @@ async function monthlyAnswer(t: Turn, locationId: string, text: string): Promise
   return result;
 }
 
-/** A voice note (28.3): refused over 10 MB or 3 minutes with the kind line; otherwise transcribed in memory, the audio dropped,
- *  and the words handled like a typed message. Only the text is used. */
+/** A voice note (28.3, Voice 2). Over 10 MB or 3 minutes: the kind line, nothing sent anywhere. Over a daily limit: a kind line that asks
+ *  for typing. Otherwise the audio is transcribed in memory and dropped, and every reply to it opens with the quote line
+ *  "I heard: ..." (the transcript, cut at a word to 300 characters), then the normal reply. An empty, failed or unclear transcript
+ *  gets "I could not hear that clearly" and nothing else happens. The words are handled like a typed message, except that they are
+ *  never a yes, a no, a number or a code (router.ts), so nothing reaches Google without the owner's own yes. Only the text is used. */
 async function voice(t: Turn, media: { id: string; size: number | null; mime: string | null }): Promise<string> {
-  if (!domains(t.who).length) return answered(t, say("unclear", t.lang), "voice_stranger");
   const pre = voiceCheck(media.size);
   if (!pre.ok) return answered(t, SAY.voiceTooLong, `voice_${pre.why}`);
   if (!t.d.transcribe) return answered(t, SAY.voiceOff, "voice_off");
@@ -1096,21 +1125,31 @@ async function voice(t: Turn, media: { id: string; size: number | null; mime: st
   try {
     bytes = await t.d.media(media.id);
   } catch {
-    return answered(t, SAY.voiceFailed, "voice_unreadable");
+    return answered(t, SAY.voiceUnclear, "voice_unreadable");
   }
   const post = voiceCheck(media.size, bytes);
   if (!post.ok) return answered(t, SAY.voiceTooLong, `voice_${post.why}`);
+  const known = domains(t.who).length > 0;
   let r: Transcript;
   try {
-    r = await t.d.transcribe(bytes, media.mime, t.phone);
+    r = await t.d.transcribe(bytes, media.mime, { phone: t.phone, known, locationId: businesses(t.who)[0]?.location_id ?? null });
   } catch {
     r = { ok: false, reason: "failed" };
   }
   // The audio was only ever in memory here: nothing wrote it anywhere, and nothing below uses it.
-  if (!r.ok) return answered(t, r.reason === "not_configured" ? SAY.voiceOff : SAY.voiceFailed, `voice_${r.reason}`);
-  await say1(t, SAY.voiceHeard(r.text));
-  const m: Inbound = { ...t.m, text: r.text, media: null, mediaId: null, type: "text" };
-  return run({ ...t, m }, parse(m));
+  if (!r.ok) {
+    if (r.reason === "not_configured") return answered(t, SAY.voiceOff, "voice_not_configured");
+    if (r.reason === "limit") return answered(t, SAY.voiceLimit, "voice_limit");
+    if (r.reason === "too_big") return answered(t, SAY.voiceTooLong, "voice_too_big");
+    return answered(t, SAY.voiceUnclear, `voice_${r.reason}`);
+  }
+  const line = heardLine(r.text);
+  if (!line) return answered(t, SAY.voiceUnclear, "voice_empty");
+  const m: Inbound = { ...t.m, text: r.text, media: null, mediaId: null, type: "text", fromVoice: true };
+  // The language of the words (a note has no text before this), so the reply comes back in it as for a typed message.
+  const lang = guessLang(r.text) ?? t.lang;
+  if (lang !== t.lang) await t.d.db.setConv(t.phone, { language: lang });
+  return run({ ...t, m, lang, heard: { line, used: false } }, parse(m));
 }
 
 // ─── Buttons and Yes (9.3, 25.5).
