@@ -27,15 +27,18 @@ const processors = between(privacy, "<h2>6. Who helps us (processors)</h2>", "<h
 const factsBlock = between(facts, "### 9.5b WhatsApp: privacy", "### 9.6 Cookies");
 
 describe("WhatsApp processors and privacy text (P0.6-12)", () => {
-  it("/privacy names Kapso and Meta in the processors list and has a WhatsApp section", () => {
-    expect(processors).toMatch(/Kapso/);
+  // Fix 5 (R-158 item 2): the provider is named by its category, never by name, on every public surface.
+  it("/privacy names the WhatsApp messaging provider and Meta in the processors list and has a WhatsApp section", () => {
+    expect(processors).toMatch(/WhatsApp messaging provider/);
     expect(processors).toMatch(/Meta/);
-    expect(privacySection).toMatch(/Kapso/);
+    expect(privacySection).toMatch(/WhatsApp messaging provider/);
     expect(privacySection).toMatch(/Meta/);
+    expect(privacy).not.toMatch(/kapso/i);
   });
 
-  it("/terms names Kapso and Meta and points to the privacy section", () => {
-    expect(termsSection).toMatch(/Kapso/);
+  it("/terms names the WhatsApp messaging provider and Meta and points to the privacy section", () => {
+    expect(termsSection).toMatch(/WhatsApp messaging provider/);
+    expect(terms).not.toMatch(/kapso/i);
     expect(termsSection).toMatch(/Meta/);
     expect(termsSection).toMatch(/section 14/);
   });
@@ -124,7 +127,7 @@ describe("Nora's source answers WhatsApp questions without calling an AI model",
       "Can I approve a reply or a post on WhatsApp?",
       [/Yes, once you connect WhatsApp/, /kabsi\.co/],
     ],
-    ["Who are the processors of my WhatsApp messages, Kapso and Meta?", [/Kapso/, /Meta/]],
+    ["Who are the processors of my WhatsApp messages?", [/WhatsApp messaging provider/, /Meta/]],
     ["How long do you keep my WhatsApp chat?", [/no automatic deletion date/i]],
     [
       "Will Kabsi send me alerts on WhatsApp? How do I stop them, STOP?",

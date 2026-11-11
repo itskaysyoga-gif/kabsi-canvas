@@ -415,8 +415,9 @@ function Page() {
             <li>
               Our WhatsApp messaging provider, which carries messages over Meta&apos;s WhatsApp
               Business Platform, provides the messaging service, and Meta runs WhatsApp, which
-              carries the messages. WhatsApp&apos;s own terms apply to your use of WhatsApp. What we collect and
-              how long we keep it is in section 14 of our <Link to="/privacy">privacy policy</Link>.
+              carries the messages. WhatsApp&apos;s own terms apply to your use of WhatsApp. What we
+              collect and how long we keep it is in section 14 of our{" "}
+              <Link to="/privacy">privacy policy</Link>.
             </li>
             <li>
               Kabsi writes first only to a number that opted in, and outside 24 hours from your last

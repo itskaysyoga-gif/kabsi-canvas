@@ -206,11 +206,7 @@ export function WhatsAppStep({
               ? "The sign-in did not finish. Start again."
               : "This sign-in has ended. Start again."}
           </p>
-          <button
-            type="button"
-            className={buttonClass("primary", "lg", true)}
-            onClick={pre.again}
-          >
+          <button type="button" className={buttonClass("primary", "lg", true)} onClick={pre.again}>
             Start again
           </button>
         </div>

@@ -52,7 +52,9 @@ describe("Partners 2 web", () => {
     expect(sources.indexOf("/partner")).toBeLessThan(sources.indexOf("/partner/:path+"));
     const noindex = v.headers.find((h) => h.source === "/partners/:page(join|home)");
     expect(noindex?.headers).toContainEqual({ key: "X-Robots-Tag", value: "noindex" });
-    const pages = JSON.parse(readFileSync("src/content/sitemap-pages.json", "utf8")) as { path: string }[];
+    const pages = JSON.parse(readFileSync("src/content/sitemap-pages.json", "utf8")) as {
+      path: string;
+    }[];
     expect(pages.map((p) => p.path)).not.toContain("/partners/join");
     expect(pages.map((p) => p.path)).not.toContain("/partners/home");
     expect(readFileSync("src/routes/partners_.home.tsx", "utf8")).toMatch(/content: "noindex"/);

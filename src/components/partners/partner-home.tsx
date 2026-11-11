@@ -65,7 +65,11 @@ export default function PartnerPage() {
           ) : !user ? (
             <Card>
               <p className="mb-4 text-small font-bold text-text-1">{C.signInFirst}</p>
-              <SignInPanel next="/partners/home" onDone={() => void router.invalidate()} inApp={inApp} />
+              <SignInPanel
+                next="/partners/home"
+                onDone={() => void router.invalidate()}
+                inApp={inApp}
+              />
             </Card>
           ) : failed ? (
             <Banner

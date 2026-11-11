@@ -2,7 +2,7 @@
 // its SHA-256 hash, Supabase the nonce itself), the redirect flow as the fallback when Google's script does not load, and
 // the WhatsApp sign-in that starts in the background with a passed check only.
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const read = (f: string) => readFileSync(f, "utf8");
@@ -28,7 +28,11 @@ function fakeDoc(outcome: "load" | "error" | "never", onLoad?: () => void) {
       return s;
     },
     head: {
-      appendChild: (s: { src: string; onload: null | (() => void); onerror: null | (() => void) }) => {
+      appendChild: (s: {
+        src: string;
+        onload: null | (() => void);
+        onerror: null | (() => void);
+      }) => {
         added.push(s);
         if (outcome === "load")
           setTimeout(() => {
@@ -51,7 +55,11 @@ describe("Google Identity Services", () => {
     expect(a.hashed).toBe(createHash("sha256").update(a.raw).digest("hex"));
     expect(a.hashed).toMatch(/^[0-9a-f]{64}$/);
 
-    let init: { nonce: string; client_id: string; callback: (r: { credential?: string }) => void } | null = null;
+    let init: {
+      nonce: string;
+      client_id: string;
+      callback: (r: { credential?: string }) => void;
+    } | null = null;
     const gis = {
       initialize: (o: typeof init) => void (init = o),
       renderButton: vi.fn(),
@@ -79,7 +87,10 @@ describe("Google Identity Services", () => {
     const onSigned = vi.fn();
     const onError = vi.fn();
     await drawGoogleButton(
-      { initialize: (o: { callback: typeof cb }) => void (cb = o.callback), renderButton: () => {} } as never,
+      {
+        initialize: (o: { callback: typeof cb }) => void (cb = o.callback),
+        renderButton: () => {},
+      } as never,
       {} as HTMLElement,
       { width: 300, onSigned, onError, clientId: "x" },
       { signIn: async () => ({ error: new Error("nonce mismatch") }) },
@@ -109,14 +120,21 @@ describe("Google Identity Services", () => {
   });
 
   it("loads Google's script only from the sign-in panel, keeps the redirect button as the fallback and hides it while the provider is off", () => {
-    const users = ["src"].flatMap(function walk(d: string): string[] {
-      return require("node:fs")
-        .readdirSync(d, { withFileTypes: true })
-        .flatMap((e: { name: string; isDirectory: () => boolean }) =>
-          e.isDirectory() ? walk(`${d}/${e.name}`) : /\.tsx?$/.test(e.name) ? [`${d}/${e.name}`] : [],
+    const users = ["src"]
+      .flatMap(function walk(d: string): string[] {
+        return readdirSync(d, { withFileTypes: true }).flatMap((e) =>
+          e.isDirectory()
+            ? walk(`${d}/${e.name}`)
+            : /\.tsx?$/.test(e.name)
+              ? [`${d}/${e.name}`]
+              : [],
         );
-    }).filter((f) => /loadGis\(|gsi\/client/.test(read(f)));
-    expect(users.sort()).toEqual(["src/components/auth/sign-in-panel.tsx", "src/lib/google-gis.ts"]);
+      })
+      .filter((f) => /loadGis\(|gsi\/client/.test(read(f)));
+    expect(users.sort()).toEqual([
+      "src/components/auth/sign-in-panel.tsx",
+      "src/lib/google-gis.ts",
+    ]);
     const panel = read("src/components/auth/sign-in-panel.tsx");
     expect(panel).toMatch(/googleOk \? \(\s*<GisGoogle/);
     expect(panel).toMatch(/fallback=\{\s*<GoogleChoice/);
@@ -137,13 +155,20 @@ describe("WhatsApp sign-in starts when the panel opens", () => {
   it("shows at most three numbered steps and no consent paragraph over two lines", async () => {
     const step = read("src/components/auth/whatsapp-signin.tsx");
     expect(step.match(/<Step n=\{\d\}>/g)).toHaveLength(3);
-    const { WA_CONSENT_SHORT, WA_CONSENT_LINES, WHATSAPP_SIGNIN_CONSENT } = await import(
-      "../supabase/functions/_shared/wa-signin"
-    );
+    const { WA_CONSENT_SHORT, WA_CONSENT_LINES, WHATSAPP_SIGNIN_CONSENT } =
+      await import("../supabase/functions/_shared/wa-signin");
     // About 45 characters a line at 390 px in the small size: two lines.
-    for (const l of [WA_CONSENT_SHORT, ...WA_CONSENT_LINES]) expect(l.length).toBeLessThanOrEqual(92);
+    for (const l of [WA_CONSENT_SHORT, ...WA_CONSENT_LINES])
+      expect(l.length).toBeLessThanOrEqual(92);
     // The list says what the stored consent says.
-    for (const fact of ["sign-in", "300 characters", "draft reply", "first name", "STOP", "Meta's WhatsApp Business Platform"])
+    for (const fact of [
+      "sign-in",
+      "300 characters",
+      "draft reply",
+      "first name",
+      "STOP",
+      "Meta's WhatsApp Business Platform",
+    ])
       expect([WA_CONSENT_SHORT, ...WA_CONSENT_LINES].join(" ")).toContain(fact);
     expect(WHATSAPP_SIGNIN_CONSENT).toContain("Meta's WhatsApp Business Platform");
     expect(WHATSAPP_SIGNIN_CONSENT.toLowerCase()).not.toContain("kapso");

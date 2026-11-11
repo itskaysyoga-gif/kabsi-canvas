@@ -35,7 +35,13 @@ const SURFACES = [
 
 describe("the WhatsApp provider's name is on no public surface", () => {
   it("covers the surfaces", () => {
-    for (const f of ["src/routes/privacy.tsx", "src/routes/terms.tsx", "src/components/kabsi/d8-about.tsx", "public/llms-full.txt", "knowledge/facts/11-privacy-security-and-data.md"])
+    for (const f of [
+      "src/routes/privacy.tsx",
+      "src/routes/terms.tsx",
+      "src/components/kabsi/d8-about.tsx",
+      "public/llms-full.txt",
+      "knowledge/facts/11-privacy-security-and-data.md",
+    ])
       expect(SURFACES).toContain(f);
   });
   it.each(SURFACES)("%s", (f) => {
@@ -44,7 +50,9 @@ describe("the WhatsApp provider's name is on no public surface", () => {
   it("privacy and terms name the category instead", () => {
     for (const f of ["src/routes/privacy.tsx", "src/routes/terms.tsx"]) {
       const t = readFileSync(f, "utf8").replace(/\s+/g, " ");
-      expect(t).toContain("Our WhatsApp messaging provider, which carries messages over Meta&apos;s WhatsApp Business Platform");
+      expect(t).toContain(
+        "Our WhatsApp messaging provider, which carries messages over Meta&apos;s WhatsApp Business Platform",
+      );
     }
   });
 });

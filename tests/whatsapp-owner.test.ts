@@ -8,18 +8,21 @@ import { WHATSAPP_CONSENT_TEXT, connectHref } from "../src/lib/whatsapp-owner";
 // P0.8-03 (K-129, K-113 as amended): the opt-in wording and the Connect link. The approvals, undo, STOP and access
 // rules are tested in supabase/tests/whatsapp_channel.sql and supabase/functions/_shared/whatsapp/whatsapp.test.ts.
 describe("WhatsApp owner channel in the app (P0.8-03)", () => {
-  it("the consent text names what is sent, Meta and Kapso, the limits and STOP", () => {
+  it("the consent text names what is sent, Meta and the WhatsApp messaging provider (Fix 5: by category), the limits and STOP", () => {
     for (const p of [
       /first name/,
       /up to 300 characters/,
       /draft reply/,
       /Meta/,
-      /Kapso/,
+      /Our WhatsApp messaging provider carries these messages over Meta's WhatsApp Business Platform/,
       /STOP/,
       /low and medium risk/,
       /name, address, categories, map location, phone or opening status/,
     ]) {
       expect(WHATSAPP_CONSENT_TEXT).toMatch(p);
+    }
+    {
+      expect(WHATSAPP_CONSENT_TEXT).not.toMatch(/kapso/i);
     }
     expect(WHATSAPP_CONSENT_TEXT).not.toMatch(/[—–!]/);
     expect(WHATSAPP_CONSENT_TEXT.length).toBeGreaterThan(40);
