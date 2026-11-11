@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { buildMessage, dataBlock, type Line, quotedPrintable, serverSays, smtpProbe, smtpSend } from "./smtp.ts";
 import { type DueMessage, modeRefusal, sendTick, type SendDeps, type SendSettings, testFast } from "./send.ts";
-import { localParts } from "./rules.ts";
+import { localParts, RAMP } from "./rules.ts";
 
 function fakeServer(replies: string[]) {
   const written: string[] = [];
@@ -51,7 +51,7 @@ Deno.test("the message: plain text, UTF-8, a real Message-ID, threading, a mailt
   assert.ok(quotedPrintable("x".repeat(200)).split("\r\n").every((l) => l.length <= 76));
 });
 
-const OPEN: SendSettings = { sending_open: true, test_mode: true, ramp_week1: 3, ramp_week2: 5, ramp_after: 10, monthly_cap: 300, started_on: "2026-11-02", stopped_reason: null, next_send_at: null };
+const OPEN: SendSettings = { sending_open: true, test_mode: true, ...RAMP, started_on: "2026-11-02", stopped_reason: null, next_send_at: null };
 const TEST: SendSettings = { ...OPEN, sending_open: false, started_on: null };
 const MON_10 = new Date("2026-11-09T10:00:00Z");
 
@@ -74,7 +74,7 @@ function deps(over: Partial<SendDeps> = {}, settings = OPEN, due: DueMessage[] =
     deliver: async (to, _m, accepted) => { log.push(`deliver:${to}`); await accepted(); },
     markSent: async (m, _id, _at, f) => void log.push(`sent:${m.id}:${f ? localParts(f, "Europe/London").date : "none"}`),
     markCancelled: async (ids, why) => void log.push(`cancel:${ids.join(",")}:${why}`),
-    markFailed: async (id, why) => void log.push(`failed:${id}:${why}`),
+    markFailed: async (id, why) => void log.push(`failed:${id}:${why}`), founding: async () => null,
     testRecipients: ["inbox@test.example.com"], sender: { name: "Rashid Abou Hamzy", address: "rashid@getkabsi.com" },
     now: MON_10, random: () => 0, ...over,
   };
@@ -118,8 +118,8 @@ Deno.test("the window and the caps", async () => {
   assert.equal((await sendTick(sat.d)).sent, 0, "Saturday");
   const late = deps({ now: new Date("2026-11-09T17:30:00Z") });
   assert.equal((await sendTick(late.d)).sent, 0, "after 17:00");
-  assert.equal((await sendTick(deps({ sentOn: async () => 3 }, { ...OPEN, started_on: "2026-11-08" }).d)).state, "day_full", "week 1: 3 a day");
-  assert.equal((await sendTick(deps({ sentOn: async () => 4 }, { ...OPEN, started_on: "2026-11-01" }).d)).state, "sent", "week 2: 5 a day");
+  assert.equal((await sendTick(deps({ sentOn: async () => 5 }, { ...OPEN, started_on: "2026-11-08" }).d)).state, "day_full", "week 1: 5 a day");
+  assert.equal((await sendTick(deps({ sentOn: async () => 9 }, { ...OPEN, started_on: "2026-11-01" }).d)).state, "sent", "day 9: 10 a day");
   assert.equal((await sendTick(deps({ sentThisMonth: async () => 300 }).d)).state, "month_full");
 });
 
@@ -131,7 +131,7 @@ Deno.test("the test run's setting (30.39 item 12): window and spacing shortened 
   const fast = deps({ now: FRI_20 }, live, [testMsg]);
   assert.equal((await sendTick(fast.d)).state, "sent", "outside 9:00 to 17:00 while live");
   assert.ok(fast.log.includes("next:1"), "1 minute apart while live");
-  assert.equal((await sendTick(deps({ now: FRI_20, sentOn: async () => 3 }, live, [testMsg]).d)).state, "day_full", "the day's cap still holds");
+  assert.equal((await sendTick(deps({ now: FRI_20, sentOn: async () => 5 }, live, [testMsg]).d)).state, "day_full", "the day's cap still holds");
   const ended = deps({ now: new Date("2026-11-06T22:00:01Z") }, live, [testMsg]);
   assert.equal((await sendTick(ended.d)).sent, 0, "ended: the window holds again");
   for (const s of [{ ...live, sending_open: true }, { ...live, test_mode: false }, { ...TEST, test_fast_until: null }]) {
@@ -221,4 +221,23 @@ Deno.test("SMTP probe: logs in and quits, never MAIL, RCPT or DATA, so nothing i
 Deno.test("serverSays: printable, short, and every secret and its base64 form cut out", () => {
   assert.equal(serverSays("NO bad c2VjcmV0LXZhbHVl and secret-value\r\n\u0007", ["secret-value"]), "NO bad [redacted] and [redacted]");
   assert.equal(serverSays("x".repeat(500)).length, 160);
+});
+
+Deno.test("Outbound 2: a follow-up sends its invite line only while the link is current and places remain", async () => {
+  const slug = "FakeSlug0000000000Test12"; // invented
+  const first = { status: "sent", message_id: "<ob.0@getkabsi.com>", sent_at: "2026-11-04T10:00:00Z" };
+  const body = `Hi again. Happy to run that free check.\n\nI also have founding places open: three months of Kabsi Pro free, and you tell me what to make better. Details: kabsi.co/founding/${slug}\n\nRashid Abou Hamzy, founder of Kabsi\nkabsi.co\n\nkabsi.co/privacy`;
+  const follow = msg({ id: "f1", kind: "follow_up", parent_id: "m0", parent: first, body });
+  for (const [founding, keeps] of [[{ slug, left: 4 }, true], [{ slug, left: 0 }, false], [null, false], [{ slug: "Other000000000000000Slug", left: 4 }, false]] as const) {
+    let sent = "";
+    const t = deps({ founding: async () => founding, deliver: async (_to, m, ok) => { sent = m; await ok(); } }, OPEN, [follow]);
+    assert.equal((await sendTick(t.d)).state, "sent", JSON.stringify(founding));
+    assert.equal(sent.includes("founding places open"), keeps, JSON.stringify(founding));
+    assert.ok(sent.includes("Rashid Abou Hamzy, founder of Kabsi"));
+    assert.ok(sent.includes("Hi again. Happy to run that free check."), "the first line always goes");
+  }
+  const bare = msg({ id: "f2", kind: "follow_up", parent_id: "m0", parent: first, body: `Details: kabsi.co/founding/${slug}\n\nkabsi.co` });
+  const t = deps({ founding: async () => null }, OPEN, [bare]);
+  await sendTick(t.d);
+  assert.ok(t.log.includes("failed:f2:invite_line_left_too_little"), "too little left: a person looks at it, nothing is sent");
 });

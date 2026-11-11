@@ -19,6 +19,7 @@ export function ScanBox({
   industry,
   note,
   trialSeparate,
+  stacked,
   onStart,
 }: {
   /** Kept for older callers: the line under the box is always the free check line. */
@@ -34,6 +35,8 @@ export function ScanBox({
   note?: string | undefined;
   /** R-126 (COPY-02): adds "The 14-day free trial is separate. ..." under the free check line. On Home, /scan and the /for pages. */
   trialSeparate?: boolean | undefined;
+  /** Site 3a: the field and the button stay one above the other at every width (a narrow side column). */
+  stacked?: boolean | undefined;
   /** Guides 3: called once when the visitor starts the check from this box (the guide's own click event). */
   onStart?: (() => void) | undefined;
 }) {
@@ -41,6 +44,7 @@ export function ScanBox({
     <div data-main-cta className={cn("w-full", className)}>
       <ScanForm
         id={id}
+        stacked={stacked}
         defaultValue={defaultValue}
         keyword={keyword}
         industry={industry}
@@ -54,12 +58,14 @@ export function ScanBox({
 
 function ScanForm({
   id,
+  stacked,
   defaultValue,
   keyword,
   industry,
   onStart,
 }: {
   id?: string | undefined;
+  stacked?: boolean | undefined;
   defaultValue: string;
   keyword?: string | undefined;
   industry?: string | undefined;
@@ -97,7 +103,11 @@ function ScanForm({
     });
   };
   return (
-    <form onSubmit={submit} noValidate className="flex flex-col gap-3 sm:flex-row sm:items-start">
+    <form
+      onSubmit={submit}
+      noValidate
+      className={cn("flex flex-col gap-3", !stacked && "sm:flex-row sm:items-start")}
+    >
       <BusinessCombobox
         id={id}
         className="min-w-0 flex-1"
@@ -117,7 +127,7 @@ function ScanForm({
         }
         leading={<Search className="size-5 shrink-0 text-text-3" aria-hidden />}
       />
-      <Button type="submit" className="sm:mt-[1.875rem]">
+      <Button type="submit" className={cn(!stacked && "sm:mt-[1.875rem]")}>
         {MAIN_CTA}
       </Button>
     </form>

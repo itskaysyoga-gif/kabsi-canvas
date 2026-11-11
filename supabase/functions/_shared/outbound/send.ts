@@ -4,7 +4,9 @@
 // from the ramp and started_on, the monthly cap. Suppression is checked again right before sending. The follow-up goes in
 // the same thread on day 4 or 5 and is cancelled by any reply, bounce or suppression at that business.
 import { buildMessage, newMessageId } from "./smtp.ts";
-import { dailyCap, followUpDate, houseStyleOk, inWindow, linksOk, localParts, nextGap } from "./rules.ts";
+import {
+  dailyCap, followUpDate, foundingInviteUrl, houseStyleOk, inWindow, linksOk, localParts, nextGap, withoutStaleInvite,
+} from "./rules.ts";
 
 export type SendSettings = {
   sending_open: boolean; test_mode: boolean; ramp_week1: number; ramp_week2: number; ramp_after: number; monthly_cap: number;
@@ -47,6 +49,8 @@ export type SendDeps = {
   markSent(m: DueMessage, messageId: string, at: Date, followUpAt: Date | null): Promise<void>;
   markCancelled(ids: string[], why: string): Promise<void>;
   markFailed(id: string, why: string): Promise<void>;
+  /** The private Founding 25 invite (R-151), as in prepare: the slug and founding_places().left, or null. Never logged. */
+  founding(): Promise<{ slug: string | null; left: number } | null>;
   testRecipients: string[];
   sender: { name: string; address: string };
   now: Date;
@@ -102,7 +106,20 @@ export async function sendTick(deps: SendDeps): Promise<SendResult> {
         continue;
       }
     }
-    if (!houseStyleOk(m.body) || !houseStyleOk(m.subject) || !linksOk(m.body, m.kind)) {
+    // Outbound 2: a follow-up's invite line goes only while it is still the current link and places remain; otherwise
+    // that one line is left out and the rest of the approved text goes unchanged.
+    let body = m.body;
+    if (m.kind === "follow_up" && /kabsi\.co\/founding\//i.test(body)) {
+      const f = await deps.founding().catch(() => null);
+      body = withoutStaleInvite(body, f ? foundingInviteUrl(f.slug, f.left) : null);
+      // Never send what is left if it is no longer a whole email: a person looks at it instead.
+      if (body.length < 20 || !body.includes("Rashid Abou Hamzy")) {
+        await deps.markFailed(m.id, "invite_line_left_too_little");
+        r.failed++;
+        continue;
+      }
+    }
+    if (!houseStyleOk(body) || !houseStyleOk(m.subject) || !linksOk(body, m.kind)) {
       await deps.markFailed(m.id, "house_style_or_links");
       r.failed++;
       continue;
@@ -121,7 +138,7 @@ export async function sendTick(deps: SendDeps): Promise<SendResult> {
     let message: string;
     try {
       message = buildMessage({
-        from: deps.sender, to: m.to_address, subject: m.subject, body: m.body, messageId, date: deps.now,
+        from: deps.sender, to: m.to_address, subject: m.subject, body, messageId, date: deps.now,
         inReplyTo: thread, references: refs,
       });
     } catch {

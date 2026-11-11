@@ -1,27 +1,28 @@
-// Home on Design 9 (Web 5 part B, master plan 30.24), below the first screen (Polish 4 part D: the hero and the steps
-// line are in d9-home.tsx, which loads this file after the page paints): the profile watch; a
-// photo to a Google post; reviews, holiday hours and the weekly report as one compact row; Where you show up (the
-// nearby map and one AI answer); you stay in control; pick your business; the pricing
-// preview; the founder; four questions; the closing free check. Every business is an Example. CSS
-// only: nothing moves on load.
+// Home on Design 9 (Web 5 part B, master plan 30.24), below the first screen (Polish 4 part D: the hero is in
+// d9-home.tsx, which loads this file after the page paints). Site 3a (master plan 30.50 item 10, R-150) put it in this
+// order: the familiar problem (the profile watch), three steps, one WhatsApp demonstration in the Look 2 style, what
+// Kabsi handles in four groups, you stay in control with a sample weekly report, the plans, four questions and the
+// closing free check. Every business is an Example. CSS only: nothing moves on load. PhotoToPost, NearbyMap and
+// AiAnswer stay here for the industry pages.
 import {
-  CalendarDays,
   Check,
   CircleCheck,
+  Clock,
+  Images,
   KeyRound,
   MessageSquareText,
+  Star,
   Store,
   ThumbsUp,
   type LucideIcon,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { CONTACT_EMAIL, TRIAL_LINE } from "@/lib/site";
-import { ExampleBadge, Faq, KabsiMark } from "./ui";
-import { FOUNDER, Img, PHOTOS, type Photo } from "./photos";
-import { MORE_PHOTOS } from "./photos-more";
+import { TRIAL_LINE } from "@/lib/site";
+import { ExampleBadge, Faq, KabsiMark, WithWhatsAppMark } from "./ui";
+import { Img, PHOTOS, type Photo } from "./photos";
 import { Closing } from "./closing";
-import { Highlight } from "./highlight";
+import { Highlight, YellowNumber } from "./highlight";
 import { SiteLink } from "./site-link";
 import { PLANS } from "./plans";
 import { useFoundingLeft } from "./founding-price";
@@ -30,22 +31,14 @@ import { BAND_LABEL, type RankBand } from "./map-data";
 import { FAQ, HOME_FAQ } from "./faq-data";
 import { CONTROL_SHORT } from "./d8-data";
 import { D9Arrow, NumberedPoints, PictureButtons, YellowLabel, d9LinkCls } from "./d9-hero";
-import {
-  D9_BUSINESS,
-  D9_MAP_POINTS,
-  D9_PHOTO,
-  D9_REPORT,
-  D9_SHOW_UP,
-  D9_SUPPORT,
-  D9_SUPPORT_TITLE,
-  D9_WATCH,
-} from "./d9-data";
+import { D9_DEMO, D9_HANDLES, D9_THREE_STEPS, type Look2Message } from "./site3-data";
+import { D9_BUSINESS, D9_MAP_POINTS, D9_PHOTO, D9_REPORT, D9_SHOW_UP, D9_WATCH } from "./d9-data";
 import { Marked } from "@/components/kabsi/highlight";
 
 /** Design 9's section rhythm on Home: py-10 on phones (keeps Home under 9,200 px at 390), 18 from 640 px, 28 from 1024 px. */
 const sectionY = "py-10 sm:py-18 lg:py-28";
 
-/* ---------- Profile watch ---------- */
+/* ---------- Profile watch: the one familiar problem ---------- */
 
 function ProfileWatch() {
   const w = D9_WATCH;
@@ -91,21 +84,7 @@ function WatchVisual() {
             <p className="font-display text-h3 font-bold">{w.owner.value}</p>
           </div>
         </div>
-        <div className="mt-3 rounded-inner wa-ground p-3">
-          <div className="flex items-start gap-2">
-            <KabsiMark ring={false} className="mt-0.5 size-7" />
-            <div className="min-w-0 flex-1">
-              <div className="rounded-bubble rounded-ss-none bg-wa-in px-2.5 py-1.5 text-chat text-wa-ink shadow-bubble">
-                {w.message}
-                <span className="mt-0.5 block text-end text-chat-meta text-wa-time-out">08:02</span>
-              </div>
-              <div className="-ms-1.5">
-                <PictureButtons labels={w.buttons} />
-              </div>
-            </div>
-          </div>
-        </div>
-        <ul className="mt-4 hidden flex-wrap gap-1.5 sm:flex" aria-label="What Kabsi checks">
+        <ul className="mt-4 flex flex-wrap gap-1.5" aria-label="What Kabsi checks">
           {w.watched.map((d) => (
             <li
               key={d}
@@ -241,84 +220,10 @@ function PhotoVisual({
   );
 }
 
-/* ---------- The supporting row: reviews, holiday hours, the weekly report ---------- */
-
-const SUPPORT_ICONS: Record<string, LucideIcon> = {
-  reviews: MessageSquareText,
-  holiday: CalendarDays,
-};
-
-function SupportRow() {
-  const r = D9_REPORT;
-  return (
-    <section aria-labelledby="support-h" className="border-b border-line bg-surface-1">
-      <div className="container-kb py-10 sm:py-16 lg:py-20">
-        <h2 id="support-h" className="text-h2">
-          <Marked text={D9_SUPPORT_TITLE} mark="a weekly report." />
-        </h2>
-        <div className="mt-6 grid gap-6 sm:mt-8 md:grid-cols-[1fr_1fr_1.2fr] md:gap-8">
-          {D9_SUPPORT.map((s) => {
-            const Icon = SUPPORT_ICONS[s.id] ?? Check;
-            return (
-              <div key={s.id} className="flex gap-3 md:block">
-                <Icon className="mt-0.5 size-6 shrink-0" aria-hidden />
-                <div className="md:mt-4">
-                  <h3 className="text-title">{s.title}</h3>
-                  <p className="mt-1 text-small text-text-2 sm:text-body">{s.text}</p>
-                </div>
-              </div>
-            );
-          })}
-          <figure className="rounded-panel border border-line bg-surface-0 p-4 sm:p-5">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-label font-semibold text-text-2">{r.when}</p>
-                <h3 className="text-title">{r.title}</h3>
-              </div>
-              <ExampleBadge />
-            </div>
-            <ul className="mt-3 grid grid-cols-1 gap-1 text-small font-semibold min-[400px]:grid-cols-3 md:grid-cols-1">
-              {r.done.map((d) => (
-                <li key={d} className="flex items-center gap-1.5">
-                  <Check className="size-4 shrink-0 text-ok" aria-hidden />
-                  {d}
-                </li>
-              ))}
-            </ul>
-            <p className="mt-3 border-t border-line pt-3 text-small">
-              <span className="font-bold">One next step:</span> {r.next}
-            </p>
-          </figure>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ---------- Where you show up (one section) ---------- */
 
 const BANDS: RankBand[] = ["top", "mid", "low", "none"];
 const BAND_SAMPLE: Record<RankBand, number> = { top: 1, mid: 4, low: 14, none: 25 };
-
-function WhereYouShowUp() {
-  const s = D9_SHOW_UP;
-  return (
-    <section aria-labelledby="show-h">
-      <div className={cn("container-kb", sectionY)}>
-        <div className="max-w-[40rem]">
-          <h2 id="show-h" className="text-h2">
-            <Marked text={s.title} mark="show up" />
-          </h2>
-          <p className="mt-3 text-body text-text-2">{s.line}</p>
-        </div>
-        <div className="mt-8 grid gap-4 lg:grid-cols-2 lg:gap-6">
-          <NearbyMap />
-          <AiAnswer />
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /** Industries 2: an industry page's own nearby line (Example). */
 export type NearbyExample = { kind: string; term: string };
@@ -479,33 +384,70 @@ export function AiAnswer({
   );
 }
 
-/* ---------- You stay in control (the approved lines, d8-data CONTROL) ---------- */
+/* ---------- Three steps (Site 3a) ---------- */
 
-const CONTROL_ICONS: LucideIcon[] = [KeyRound, ThumbsUp, Store];
-
-function D9Control() {
+function ThreeSteps() {
   return (
-    <section aria-labelledby="control-h" className="border-t border-line bg-surface-1">
-      <div className={cn("container-kb grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16", sectionY)}>
-        <div>
-          <h2 id="control-h" className="text-h2">
-            <Marked text="You stay in control." mark="in control." />
-          </h2>
-          <SiteLink to="/security" className={cn(d9LinkCls, "mt-3 text-body")}>
-            See how to remove Kabsi on Security
-            <D9Arrow />
-          </SiteLink>
-        </div>
-        <ul className="grid gap-x-8 gap-y-3 sm:grid-cols-3 sm:gap-y-4">
-          {CONTROL_SHORT.map((c, i) => {
-            const Icon = CONTROL_ICONS[i] ?? Check;
+    <section aria-labelledby="three-h" className="border-y border-line bg-surface-1">
+      <div className={cn("container-kb", sectionY)}>
+        <h2 id="three-h" className="text-h2">
+          <Marked text="Kabsi works in three steps." mark="three steps." />
+        </h2>
+        <ol className="mt-6 grid gap-6 sm:mt-10 md:grid-cols-3 md:gap-8">
+          {D9_THREE_STEPS.map((st, i) => (
+            <li key={st.title} className="flex gap-4 md:block">
+              <YellowNumber n={i + 1} className="size-9 shrink-0 text-small" />
+              <div className="md:mt-4">
+                <h3 className="text-title">
+                  <WithWhatsAppMark text={st.title} />
+                </h3>
+                <p className="mt-1 text-body text-text-2">{st.text}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- What Kabsi handles, in four groups (Site 3a; How it works shows it too) ---------- */
+
+const HANDLE_ICONS: Record<(typeof D9_HANDLES)[number]["id"], LucideIcon> = {
+  reviews: MessageSquareText,
+  details: Store,
+  posts: Images,
+  report: Clock,
+};
+
+export function HandlesGroups({
+  id = "handles-h",
+  title = "What Kabsi handles",
+  mark = "handles",
+  className,
+}: {
+  id?: string;
+  title?: string;
+  mark?: string;
+  className?: string;
+}) {
+  return (
+    <section aria-labelledby={id} className={cn("border-t border-line", className)}>
+      <div className="container-kb py-10 sm:py-18 lg:py-24">
+        <h2 id={id} className="text-h2">
+          <Marked text={title} mark={mark} />
+        </h2>
+        <ul className="mt-6 grid gap-x-8 gap-y-6 sm:mt-10 sm:grid-cols-2 lg:grid-cols-4">
+          {D9_HANDLES.map((h) => {
+            const Icon = HANDLE_ICONS[h.id];
             return (
-              <li key={c.title} className="flex gap-3">
-                <Icon className="mt-0.5 size-5 shrink-0 text-ok" aria-hidden />
-                <div>
-                  <h3 className="text-body font-bold">{c.title}</h3>
-                  <p className="hidden text-small text-text-2 sm:block">{c.text}</p>
-                </div>
+              <li key={h.id} className="border-t-2 border-text-1 pt-4">
+                <p className="flex items-center gap-2 text-small font-semibold text-text-2">
+                  <Icon className="size-4 shrink-0 text-text-1" aria-hidden />
+                  {h.group}
+                </p>
+                <h3 className="mt-2 text-title">{h.title}</h3>
+                <p className="mt-1 text-body text-text-2">{h.text}</p>
               </li>
             );
           })}
@@ -515,69 +457,163 @@ function D9Control() {
   );
 }
 
-/* ---------- Pick your business (the four finished trades, photo cards; shorter on a phone) ---------- */
+/* ---------- The one WhatsApp demonstration, in the Look 2 style (Site 3a) ---------- */
 
-const TRADES: { to: string; label: string; photo: Photo; focus: string }[] = [
-  { to: "/for/hair-salon", label: "Hair salons", photo: PHOTOS.salonStudio, focus: "50% 30%" },
-  // Industries 2 (B-006): 4:5 crops, so a portrait card is never an upscaled landscape file.
-  {
-    to: "/for/barbershop",
-    label: "Barbershops",
-    photo: MORE_PHOTOS.barberCutPortrait,
-    focus: "50% 35%",
-  },
-  {
-    to: "/for/nail-salon",
-    label: "Nail salons",
-    photo: MORE_PHOTOS.nailTechnicianPortrait,
-    focus: "50% 50%",
-  },
-  {
-    to: "/for/restaurant",
-    label: "Restaurants",
-    photo: MORE_PHOTOS.restaurantDiningPortrait,
-    focus: "50% 55%",
-  },
-];
+const MARKERS: Record<Look2Message["marker"], LucideIcon> = { review: Star, done: CircleCheck };
 
-function D9PickBusiness() {
+/** One WhatsApp message in three blocks: marker and bold title, the facts (quote lines for the review and the draft),
+ * then the status or question; the buttons under it, the yes first. A picture: its buttons are not controls. */
+function Look2Bubble({ m }: { m: Look2Message }) {
+  const Icon = MARKERS[m.marker];
   return (
-    <section aria-labelledby="pick-h" className="border-t border-line">
-      <div className={cn("container-kb", sectionY)}>
-        <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
-          <h2 id="pick-h" className="text-h2">
-            <Marked text="Pick your business" mark="your business" />
+    <li>
+      <div className="relative ms-1.5 max-w-[95%] rounded-bubble rounded-ss-none bg-wa-in px-2.5 pt-1.5 pb-1 text-chat text-wa-ink shadow-bubble">
+        <span
+          aria-hidden
+          className="absolute -start-2 top-0 size-2.5 bg-wa-in [clip-path:polygon(0_0,100%_0,100%_100%)]"
+        />
+        <p className="flex items-center gap-1.5">
+          <Icon
+            className={cn(
+              "size-4 shrink-0",
+              m.marker === "review" ? "fill-current text-warn" : "text-kb-green-ink",
+            )}
+            aria-hidden
+          />
+          <span>
+            <span className="font-bold">{m.title}</span> · {m.business}
+          </span>
+        </p>
+        <div className="mt-2 space-y-0.5">
+          {m.facts.map((f) =>
+            f.quote ? (
+              <p key={f.text} className="border-s-[3px] border-wa-divider ps-2 text-wa-time-out">
+                {f.text}
+              </p>
+            ) : (
+              <p key={f.text}>{f.text}</p>
+            ),
+          )}
+        </div>
+        <p className="mt-2">{m.status}</p>
+        <p className="mt-0.5 text-end text-chat-meta text-wa-time-out">{m.time}</p>
+      </div>
+      {m.buttons && <PictureButtons labels={m.buttons} />}
+    </li>
+  );
+}
+
+function Look2Demo() {
+  const d = D9_DEMO;
+  return (
+    <section aria-labelledby="demo-h" data-wake className="theme-dark bg-band">
+      <div
+        className={cn(
+          "container-kb grid gap-8 lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-16",
+          sectionY,
+        )}
+      >
+        <div>
+          <YellowLabel>On WhatsApp</YellowLabel>
+          <h2 id="demo-h" className="mt-4 text-h2">
+            One message. <span className="text-phrase">Your yes. Done.</span>
           </h2>
-          <SiteLink to="/for" className={cn(d9LinkCls, "text-body")}>
-            Every kind of business
+          <p className="mt-4 max-w-[34rem] text-body text-text-2 sm:text-lead">{d.line}</p>
+          <ol className="mt-6 space-y-2 text-small font-semibold" aria-label="Where the reply is">
+            {d.states.map((st) => (
+              <li key={st} className="flex items-center gap-2">
+                <CircleCheck className="size-4 shrink-0 text-ok" aria-hidden />
+                {st}
+              </li>
+            ))}
+          </ol>
+        </div>
+        <figure className="relative mx-auto w-[18.5rem] sm:w-[20rem] lg:me-0">
+          <div className="rounded-[2.4rem] bg-kb-black p-[0.55rem] shadow-float ring-1 ring-line">
+            <div className="overflow-hidden rounded-[1.9rem] bg-wa-chat">
+              <div className="flex items-center gap-2 border-b border-wa-divider bg-wa-header px-3 pt-4 pb-2 text-wa-ink">
+                <KabsiMark ring={false} className="size-8" />
+                <p className="min-w-0 flex-1 truncate text-chat font-bold">Kabsi</p>
+                <ExampleBadge className="shrink-0 text-wa-ink" />
+              </div>
+              <ol
+                className="space-y-2.5 px-2.5 pt-3 pb-4"
+                aria-label="Messages from Kabsi, Example"
+              >
+                <Look2Bubble m={d.alert} />
+                <li className="ms-auto w-fit rounded-bubble rounded-se-none bg-wa-out px-3 py-1.5 text-chat text-wa-ink shadow-bubble">
+                  {d.tap}
+                </li>
+                <Look2Bubble m={d.done} />
+              </ol>
+            </div>
+          </div>
+          <figcaption className="sr-only">{d.caption}</figcaption>
+        </figure>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- You stay in control, with a sample weekly report (Site 3a) ---------- */
+
+const CONTROL_ICONS: LucideIcon[] = [KeyRound, ThumbsUp, Store];
+
+function ControlAndReport() {
+  const r = D9_REPORT;
+  return (
+    <section aria-labelledby="control-h" className="border-t border-line bg-surface-1">
+      <div
+        className={cn(
+          "container-kb grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-16",
+          sectionY,
+        )}
+      >
+        <div>
+          <h2 id="control-h" className="text-h2">
+            <Marked text="You stay in control." mark="in control." />
+          </h2>
+          <ul className="mt-6 space-y-4">
+            {CONTROL_SHORT.map((c, i) => {
+              const Icon = CONTROL_ICONS[i] ?? Check;
+              return (
+                <li key={c.title} className="flex gap-3">
+                  <Icon className="mt-0.5 size-5 shrink-0 text-ok" aria-hidden />
+                  <div>
+                    <h3 className="text-body font-bold">{c.title}</h3>
+                    <p className="text-small text-text-2">{c.text}</p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          <SiteLink to="/security" className={cn(d9LinkCls, "mt-4 text-body")}>
+            See how to remove Kabsi on Security
             <D9Arrow />
           </SiteLink>
         </div>
-        <ul className="mt-6 grid grid-cols-2 gap-3 sm:mt-10 lg:grid-cols-4 lg:gap-4">
-          {TRADES.map((t) => (
-            <li key={t.label}>
-              <SiteLink
-                to={t.to}
-                className="press group relative block aspect-[4/3] overflow-hidden rounded-card bg-surface-3 sm:aspect-[4/5]"
-              >
-                <Img
-                  photo={t.photo}
-                  sizes="(min-width: 1024px) 24vw, 50vw"
-                  decorative
-                  className="absolute inset-0 size-full object-cover"
-                  style={{ objectPosition: t.focus }}
-                />
-                <span
-                  aria-hidden
-                  className="absolute inset-0 bg-[linear-gradient(180deg,transparent_40%,rgb(0_0_0/0.78))]"
-                />
-                <span className="absolute inset-x-3 bottom-2.5 text-body font-bold text-kb-white sm:text-title">
-                  {t.label}
-                </span>
-              </SiteLink>
-            </li>
-          ))}
-        </ul>
+        <figure className="rounded-panel border border-line bg-surface-0 p-5 shadow-lift sm:p-7">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-label font-semibold text-text-2">{r.when}</p>
+              <h3 className="text-title">{r.title}</h3>
+            </div>
+            <ExampleBadge />
+          </div>
+          <p className="mt-1 text-small text-text-2">{D9_BUSINESS}</p>
+          <ul className="mt-4 space-y-1.5 text-small font-semibold">
+            {r.done.map((d) => (
+              <li key={d} className="flex items-center gap-2">
+                <Check className="size-4 shrink-0 text-ok" aria-hidden />
+                {d}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 border-t border-line pt-4 text-small">
+            <span className="font-bold">One next step:</span> {r.next}
+          </p>
+          <figcaption className="mt-3 text-label text-text-2">{r.line}</figcaption>
+        </figure>
       </div>
     </section>
   );
@@ -641,45 +677,6 @@ export function PricingPreview({ marked = true }: { marked?: boolean } = {}) {
   );
 }
 
-/* ---------- The founder (no invite-only offer on Home, Founding 1, R-151) ---------- */
-
-function FounderBand() {
-  return (
-    <section aria-labelledby="founder-h" className="theme-dark bg-band">
-      <div className={cn("container-kb", sectionY)}>
-        <figure className="flex gap-5 sm:gap-6">
-          <img
-            src={FOUNDER.large}
-            width={FOUNDER.w}
-            height={FOUNDER.h}
-            alt={FOUNDER.alt}
-            loading="lazy"
-            decoding="async"
-            className="size-20 shrink-0 rounded-full object-cover sm:size-32"
-          />
-          <div>
-            <h2 id="founder-h" className="text-h3 sm:text-h2">
-              From the founder
-            </h2>
-            <blockquote className="mt-3 max-w-[36rem] text-body text-text-2 sm:text-lead">
-              <p>A Google profile needs work every week. I built Kabsi to do that work for you.</p>
-            </blockquote>
-            <figcaption className="mt-3 text-small">
-              <span className="font-bold">Rashid Abou Hamzy</span>, founder of Kabsi.{" "}
-              <a
-                href={`mailto:${CONTACT_EMAIL}`}
-                className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4"
-              >
-                {CONTACT_EMAIL}
-              </a>
-            </figcaption>
-          </div>
-        </figure>
-      </div>
-    </section>
-  );
-}
-
 /* ---------- Four questions (the shared FAQ's Home four, their current wording) ---------- */
 
 function D9Questions() {
@@ -695,19 +692,20 @@ function D9Questions() {
   );
 }
 
-/** Everything below Home's first screen (Polish 4 part D): its own chunk, loaded after the page paints (d9-home.tsx). */
+/**
+ * Everything below Home's first screen (Polish 4 part D): its own chunk, loaded after the page paints (d9-home.tsx).
+ * Site 3a (master plan 30.50 item 10): one familiar problem, three steps, one WhatsApp demonstration (Example, Look 2),
+ * what Kabsi handles in four groups, control with a sample weekly report (Example), the plans, questions, the free check.
+ */
 export function D9HomeLowerSections() {
   return (
     <>
       <ProfileWatch />
-      <PhotoToPost />
-      {/* Fix 2 (master plan 30.27 item 2): Where you show up straight after photo to post, before the supporting row. */}
-      <WhereYouShowUp />
-      <SupportRow />
-      <D9Control />
-      <D9PickBusiness />
+      <ThreeSteps />
+      <Look2Demo />
+      <HandlesGroups />
+      <ControlAndReport />
       <PricingPreview />
-      <FounderBand />
       <D9Questions />
       <Closing />
     </>

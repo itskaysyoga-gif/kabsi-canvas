@@ -289,6 +289,14 @@ test.describe("Scan 3: the free check result", () => {
       );
       expect(tiny).toEqual([]);
       expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
+      // Site 3a (30.50 item 10): "Missing" (Google shows nothing) is never merged with "Could not check" (public data
+      // cannot show it); the closed line counts both.
+      const google = page.locator('details[data-detail="google"] > summary');
+      await expect(google).toContainText("1 Kabsi could not check");
+      await google.click();
+      await expect(page.getByRole("heading", { name: "What Kabsi could not check" })).toBeVisible();
+      await expect(page.getByText("Could not check", { exact: true })).toHaveCount(1);
+      if (k === "missing") await expect(page.getByText("Missing", { exact: true })).toHaveCount(5);
       await axe(page);
       if (k === "restaurant" || k === "missing")
         await page.screenshot({
@@ -370,9 +378,16 @@ test.describe("Scan 3: the free check result", () => {
     await page.goto("/scan/TESTSCN3");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Harbour Burgers");
     await expect(page.getByRole("heading", { name: "The main thing we found" })).toBeVisible();
+    // Site 3a: the finding in words first, then the position; and what a saved report does not keep.
+    await expect(
+      page.getByText(
+        "When someone nearby searches for 'fast food restaurant', you come up near the top of Google Maps.",
+      ),
+    ).toBeVisible();
     await expect(
       page.getByText(/you appear 2nd in this Google Maps check\./).first(),
     ).toBeVisible();
+    await expect(page.getByText(/What Google shows on your profile is not kept/)).toBeVisible();
     await expect(page.getByRole("heading", { name: "What Kabsi would do" })).toBeVisible();
     await expect(page.locator("details[data-detail]")).toHaveCount(2);
     await expect(page.getByRole("combobox")).toBeVisible();

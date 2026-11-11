@@ -37,15 +37,26 @@ A surface that states one of these reads it or repeats it. When it changes here,
 | Never-say names and claims | The lists in `tests/helpers/house-rules.ts` | Every surface in sections 3 to 8 |
 | The operator, merchant and non-affiliation lines | `OPERATOR_LINE`, `MERCHANT_LINE`, `NOT_AFFILIATED`, `GOOGLE_NOTICE` in `src/lib/site.ts` | Footer, terms, privacy, emails |
 
+## 2a. Offers (Site 3a, 10 Nov 2026)
+
+Every offer Kabsi makes, who gets it, when it starts and ends, and the file that controls it. Site 3a wrote this table and changed no offer. A pull request that changes an offer changes its row here.
+
+| Offer | Who gets it | Starts | Ends | Controlled by |
+|---|---|---|---|---|
+| The 14 day trial (Pro, no card) | Every new business, public | The day Kabsi's Manager access to the Google profile works (day 1), never at sign-up | Day 14: the owner chooses a plan or stops; nothing is charged by itself. For 7 more days Kabsi keeps watching and drafting and publishes nothing | `trialDays` in `supabase/functions/_shared/plans.ts` and its SQL twin `trial_days_for` (migration `20260930090000_plans_v2_trial.sql`); the words are `TRIAL_LINE` in `src/lib/site.ts`, facts 05 and 06 |
+| The launch price (Essentials 19 a month or 190 a year, Pro 39 or 390; called the founding price inside the code and the database) | The first 30 businesses that pay, public ("launch price", never "founding price", 30.51 item 3) | When card payments open (planned 10 Dec 2026, 30.50 item 15) | When the 30 places are taken; each of the 30 keeps the price while it stays subscribed | `FOUNDING_PRICES`, `FOUNDING_TOTAL`, `foundingLine`, `foundingPlacesLine` in `src/lib/site.ts`; the real count from `founding_places_left()` through `billing-creem/founding` (`supabase/functions/billing-creem/index.ts`); the Creem products in `CATALOGUE` of `supabase/functions/_shared/creem.ts`; facts 06 |
+| The partner 30 day trial (Pro) | A business that comes through a Kabsi Partners link or card, public on the partners page and partner terms | When partner links switch on, which is when card payments open (30.50 item 7); for the business, the day its access works, as the 14 day trial | Day 30, then as the 14 day trial | Not built yet: `trialDays` in `supabase/functions/_shared/plans.ts` returns 14 for every signup until Kabsi Partners builds the partner trial (Partners 2, K-127). The words are in `d2-partners.tsx`, `src/routes/partners_.terms.tsx` and facts 08 |
+| Founding 25 (three months of Pro free, by application) | Private, invite only (30.51 item 3): a business Rashid invites by message or email. Never named on a public surface | When the invited business's application is accepted and its access works | After 90 days the business chooses a plan at the launch price or stops; applications close when the 25 places are taken or Rashid closes them | The page `/founding/<slug>` (`src/routes/founding.$slug.tsx`, `d5-founding.tsx`, `founding-private.ts`); the secret `app_settings.founding_invite_slug` (rotated by staff through `public.staff_founding_invite`); the applications and places in `supabase/functions/programs/index.ts` and `supabase/functions/_shared/founding.ts`; the private note `knowledge/internal/2026-11-10-founding-25-private.md` |
+
 ## 3. The website (in this repository)
 
 Every page below is read at 390 px and 1440 px in the truth pass. The copy of every page is in `docs/COPY.md` (section 24 to 68, later sections win).
 
 | Surface | What it states | Where it lives | Updated by | Owner |
 |---|---|---|---|---|
-| Home `/` | Brand line, the four jobs, prices from, trial, launch price line (no Founding 25 since Founding 1), nearby check | `src/routes/index.tsx`, `d9-home.tsx`, `d9-home-lower.tsx`, `d9-hero.tsx`, `hero-lines.ts`, `home-examples.ts` | C, S | Rashid |
+| Home `/` | Brand line, the four jobs (four groups since Site 3a, COPY.md 81), prices from, trial, launch price line (no Founding 25 since Founding 1), the one WhatsApp demonstration | `src/routes/index.tsx`, `d9-home.tsx`, `d9-home-lower.tsx`, `d9-hero.tsx`, `d9-data.ts`, `site3-data.ts`, `hero-lines.ts`, `home-examples.ts` | C, S | Rashid |
 | Pricing `/pricing` | Both plans, list and launch prices with the real count of launch places, extra location, help lines, refund line | `d8-pricing.tsx`, `plans.ts`, `faq-data.ts`; numbers from `site.ts` | S, C | Rashid |
-| How it works `/how-it-works` | The loop, the three states (Approved, Sent to Google, Live on Google) | `how-page.tsx`, `d9-how.tsx` | C | Rashid |
+| How it works `/how-it-works` | The loop, the three states (Approved, Sent to Google, Live on Google), what Kabsi does in four groups | `how-page.tsx`, `d9-how.tsx`, `d9-home-lower.tsx` (`HandlesGroups`) | C | Rashid |
 | Free check `/scan`, `/scan/CODE`, `/google-profile-check` | What the check does and says, the trial as a separate thing | `d4-free-check.tsx`, `scan-live.tsx`, `scan-box.tsx`, `result-preview.tsx` | C | Rashid |
 | Free tool `/google-review-link` | Link, QR, printable card | `d2-tools.tsx` | C | Rashid |
 | Founding `/founding/<slug>` (private; `/founding` alone is the 404) | Founding 25, three months of Pro, the application; noindex, nofollow, no canonical, never cached, in no sitemap, llms file or IndexNow list; the count and the application need the slug | `src/routes/founding.$slug.tsx`, `d5-founding.tsx`, `founding-private.ts`, `src/lib/founding-invite.ts`, `founding-invite-server.ts`, `founding-count.ts`, `api.founding-count.ts`, `supabase/functions/programs/index.ts`, `vercel.json` headers; the slug is scrubbed from Sentry and PostHog and the Pixel skips the page (`scrub.ts`, `meta-pixel.ts`) | C (section 80), the staff Invite link panel | Rashid |

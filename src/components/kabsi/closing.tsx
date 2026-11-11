@@ -10,7 +10,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SCAN_LINE, TRIAL_LINE } from "@/lib/site";
+import { TRIAL_LINE } from "@/lib/site";
 import { ScanBox } from "./scan-box";
 import { Highlight } from "./highlight";
 import { SiteLink } from "./site-link";
@@ -52,9 +52,8 @@ export function Closing({
             className="mt-6"
             keyword={keyword}
             industry={industry}
-            note={SCAN_LINE}
+            note={TRIAL_LINE}
           />
-          <p className="mt-2 text-small text-text-2">{TRIAL_LINE}</p>
         </div>
       </div>
     </section>

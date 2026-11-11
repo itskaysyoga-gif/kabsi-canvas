@@ -108,7 +108,7 @@ export function DemoThreeCases() {
       <div className="container-kb section-y">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 id="demo-h" className="text-h2">
-            <Marked text="What happens after your yes." mark="your yes." />
+            <Marked text="What you approve." mark="you approve." />
           </h2>
           <ExampleBadge />
         </div>
@@ -252,7 +252,7 @@ function DemoPhone({
   return (
     <div className="mx-auto w-[18.5rem] sm:w-[20rem] lg:mx-0">
       <div className="rounded-[2.4rem] bg-kb-black p-[0.55rem] shadow-float">
-        <div className="flex h-[34rem] flex-col overflow-hidden rounded-[1.9rem] bg-wa-chat">
+        <div className="flex min-h-[15rem] flex-col overflow-hidden rounded-[1.9rem] bg-wa-chat">
           <div className="flex items-center gap-2 border-b border-wa-divider bg-wa-header px-3 pt-4 pb-2 text-wa-ink">
             <KabsiMark ring={false} className="size-8" />
             <div className="min-w-0 flex-1 leading-tight">

@@ -86,6 +86,19 @@ export async function insertDraft(d: NewDraft) {
   }
 }
 
+/** The private Founding 25 invite (Outbound 2, R-151): app_settings.founding_invite_slug and founding_places().left,
+ *  the count the private page uses. Service role only. Null when either cannot be read; an error never carries the
+ *  slug. The caller builds the link with foundingInviteUrl and never logs it. */
+export async function foundingInvite(): Promise<{ slug: string | null; left: number } | null> {
+  const db = admin();
+  const s = await db.from("app_settings").select("value").eq("key", "founding_invite_slug").maybeSingle();
+  if (s.error) return null;
+  const p = await db.rpc("founding_places");
+  if (p.error || !p.data) return null;
+  const left = Number((p.data as { left?: unknown }).left);
+  return { slug: typeof s.data?.value === "string" ? s.data.value : null, left: Number.isFinite(left) ? left : 0 };
+}
+
 // ─── outbound-send (part D)
 
 /** Approved messages that are due, replies first, oldest first, with their business and their Email 1. */
