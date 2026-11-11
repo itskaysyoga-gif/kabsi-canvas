@@ -123,8 +123,9 @@ Deno.test("cards2: another business's card is unknown and never named; staff and
   assert.match(last(w, PHONES.plain).body, /Card ABC234 · Till/);
   assert.equal(await receive(deps, msg(w, PHONES.owner, { text: "Link card ABC234", forwarded: true })) === "card_ask", false);
   assert.equal(await receive(deps, msg(w, PHONES.owner, { button: `lc:ABC234:${BIZ.harbour}`, forwarded: true })), "card_forwarded");
-  // A staff member of a business is not its owner or manager: sign in as the owner instead.
-  assert.equal(await receive(deps, msg(w, PHONES.staff, { text: "Link card NEW234" })), "card_signup");
+  // A staff member of a business is not its owner or manager: the owner or a manager links it.
+  assert.equal(await receive(deps, msg(w, PHONES.staff, { text: "Link card NEW234" })), "card_owner_only");
+  assert.match(last(w, PHONES.staff).body, /Only the owner or a manager can link card NEW234/);
 });
 
 Deno.test("cards2: \"cards\" lists each card with taps this week and last week; a row opens the card", async () => {
@@ -173,4 +174,30 @@ Deno.test("cards2: words: taps never reviews, no dash or exclamation mark, a pla
   assert.equal(typedPlace("x"), null);
   assert.equal(typedPlace("a".repeat(31)), null);
   assert.ok(CARDS_SAY.yesButton.length <= 20);
+});
+
+Deno.test("cards2 review fixes: a thank-you is never a place, a person is refused, another question is never closed", async () => {
+  const w = new World();
+  const db = fake(w, { ABC234: { location: null, label: null, status: "unassigned" }, DEF567: { location: null, label: null, status: "unassigned" } });
+  const deps = { ...w.deps(), cards: db };
+  await receive(deps, msg(w, PHONES.owner, { text: "Link card ABC234" }));
+  await receive(deps, msg(w, PHONES.owner, { button: `lc:ABC234:${BIZ.harbour}` }));
+  assert.notEqual(await receive(deps, msg(w, PHONES.owner, { text: "thanks" })), "card_labelled");
+  assert.equal(db.cards.ABC234!.label, null, "thanks is not a place");
+  assert.equal(await receive(deps, msg(w, PHONES.owner, { text: "Sam's till" })), "card_bad_label", "a person is refused");
+  assert.equal(await receive(deps, msg(w, PHONES.owner, { text: "Waiter" })), "card_bad_label");
+  assert.equal(db.cards.ABC234!.label, null);
+  assert.match(last(w, PHONES.owner).body, /Never a person's name\./);
+  // An open question from elsewhere stays open: the card's place buttons still work, a typed word is not taken.
+  w.conversation(PHONES.owner).open_question = { type: "hours", pending: "close at 5", location_id: BIZ.harbour };
+  await receive(deps, msg(w, PHONES.owner, { text: "Link card DEF567" }));
+  await receive(deps, msg(w, PHONES.owner, { button: `lc:DEF567:${BIZ.harbour}` }));
+  assert.equal(w.conversation(PHONES.owner).open_question?.type, "hours");
+  assert.equal(await receive(deps, msg(w, PHONES.owner, { button: "cl:DEF567:b" })), "card_labelled");
+  assert.equal(db.cards.DEF567!.label, "Table");
+});
+
+Deno.test("cards2 review fixes: typed places", () => {
+  for (const ok of ["Bar", "Front desk", "Window seat", "Till 2"]) assert.equal(typedPlace(ok), ok);
+  for (const no of ["thanks", "Thank you", "ok", "got it", "Sam's till", "Stylist", "barber chair", "is it on?", "one two three four"]) assert.equal(typedPlace(no), null, no);
 });

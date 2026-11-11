@@ -55,10 +55,12 @@ export const CARDS_SAY = {
     `Card already linked\nCard ${code} · ${label ?? "No place yet"}\n\nTap a place to change it, or type one, like Bar.`,
   labelled: (code: string, label: string) =>
     `Card ready\nCard ${code} · ${label}\nEach tap opens your Google review form.\n\nWrite "cards" to see its taps each week.`,
-  badLabel: "Name the place\nUse 2 to 30 letters, like Front desk or Window.\n\nType the place again, or tap one.",
+  badLabel: "Name the place\nUse 2 to 30 letters for where the card is, like Front desk or Window. Never a person's name.\n\nType the place again, or tap one.",
   unknown: (code: string) => `Card not found\nKabsi could not find card ${code}. Check the code printed on the card.\n\nWrite "talk to a person" for help.`,
   disabled: (code: string) => `This card is off\nCard ${code} is switched off.\n\nWrite "talk to a person" to turn it back on.`,
   limited: "Too many tries\nKabsi stopped card codes from this number for an hour.\n\nPlease try again later.",
+  ownerOnly: (code: string) => `Ask the owner\nOnly the owner or a manager can link card ${code}.\n\nAsk them to send "Link card ${code}" to Kabsi.`,
+  otherBusiness: (code: string) => `Set for another business\nCard ${code} is set up for a different business on Google.\n\nAsk the person who gave you the card, or write "talk to a person".`,
   noPlace: "Your Google profile first\nKabsi links a card once your business is on Google in Kabsi.\n\nFinish setup on kabsi.co, then send the code again.",
   // An unknown phone: sign in first, the code is kept in the link.
   signup: (code: string, link: string) =>
@@ -83,10 +85,16 @@ export function cardsList(cards: CardWeek[]): { body: string; list: ListMsg } {
   return { body: CARDS_SAY.listBody(cards.length), list: { button: CARDS_SAY.listButton, sections: [{ rows }] } };
 }
 
-/** A typed place: one line of 2 to 30 characters that is not a command the router reads. */
+/** Short replies that are never a place ("thanks" after "Card linked" must not become the card's name). */
+const NOT_A_PLACE = /^(thanks?( you)?|thank u|thx|ty|ok(ay)?|great|good|cool|nice|perfect|done|got it|no worries|later|cheers|brilliant|lovely|awesome|sure|yes please|no thanks)$/i;
+/** Words that name a person or a job, never a place: a card's label is where it is, never who stands there (no ranking of
+ *  people, Google's review rules). A possessive ("Sam's till") names a person too. */
+export const PERSON_WORD = /\b(staff|employee|waiter|waitress|server|barista|stylist|barber|cashier|manager|owner|therapist|technician|driver|mr|mrs|ms|miss)\b|['\u2019]s\b/i;
+/** A typed place: one line of 2 to 30 characters, three words at most, not a question, not a thank-you, not a person. */
 export function typedPlace(text: string | null | undefined): string | null {
   const t = (text ?? "").replace(/\s+/g, " ").trim().replace(/[.]$/, "");
-  return t.length >= 2 && t.length <= 30 && !/[<>{}\\\n]/.test(t) ? t : null;
+  if (t.length < 2 || t.length > 30 || /[<>{}\\?\n]/.test(t) || t.split(" ").length > 3) return null;
+  return NOT_A_PLACE.test(t) || PERSON_WORD.test(t) ? null : t;
 }
 
 /** The sign-in link that keeps the card code (the activate page's own path). */

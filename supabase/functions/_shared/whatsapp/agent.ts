@@ -22,7 +22,7 @@ import { fromText, IN_SCOPE, LIST_RESULT, type ListMsg, markFor, type Msg, NAMES
 import { type SigninDb, signinSeam } from "./signin.ts";
 import { linkOf, PARTNERS_SAY, type PartnersWaDb, payoutSeam } from "./partners.ts";
 import {
-  CARD_LABEL_BTN, CARD_LINK_BTN, CARD_ROW_BTN, type CardCheck, CARDS_SAY, type CardsDb, cardsList, LABEL_OPEN_MS, LINK_CARD_RE, PLACES,
+  CARD_LABEL_BTN, CARD_LINK_BTN, CARD_ROW_BTN, type CardCheck, CARDS_SAY, type CardsDb, cardsList, LABEL_OPEN_MS, LINK_CARD_RE, PERSON_WORD, PLACES,
   type PlaceKey, placeButtons, startLink, typedPlace,
 } from "./cards.ts";
 import { MAX_BYTES } from "../photos/sniff.ts";
@@ -486,9 +486,13 @@ async function cardRoute(t: Turn, cmd: Command): Promise<string | null> {
   const row = btn ? CARD_ROW_BTN.exec(btn) : null;
   const oq = t.who.conversation?.open_question;
   const open = oq?.type === "card_label" && !!oq.at && (t.d.now ?? Date.now)() - Date.parse(oq.at) < LABEL_OPEN_MS ? oq : null;
-  // A typed place: plain words, three at most and no question, only while the place question is open (10 minutes).
-  const typed = open && !btn && !m.media && !m.forwarded && !m.listRow && cmd.k === "free" && !/[?]/.test(cmd.text) && cmd.text.trim().split(/\s+/).length <= 3
-    ? typedPlace(cmd.text) : null;
+  // A typed place, only while the place question is open (10 minutes): plain words, three at most, no question, no
+  // thank-you, never a person (cards.ts typedPlace). A person's name or job is refused with the place question again.
+  const plainText = !!open && !btn && !m.media && !m.forwarded && !m.listRow && cmd.k === "free";
+  const typed = plainText ? typedPlace(cmd.text) : null;
+  if (plainText && !typed && PERSON_WORD.test(cmd.k === "free" ? cmd.text : "")) {
+    return answered(t, CARDS_SAY.badLabel, "card_bad_label", placeButtons(open!.code));
+  }
   if (!link && !pick && !place && !row && !typed) return null;
   // F-1: a forwarded tap is never the owner's own.
   if (m.forwarded) return "card_forwarded";
@@ -504,7 +508,7 @@ async function cardRoute(t: Turn, cmd: Command): Promise<string | null> {
     const tb = { ...t, business: b, head: head(t.who, "business", b) };
     const r = await db.link(code, b.location_id, t.phone);
     if (r.result !== "linked") return cardRefused(tb, code, r.result);
-    await t.d.db.setConv(t.phone, { open_question: { type: "card_label", code, at: nowIso(t) } satisfies OpenQuestion });
+    await askPlace(t, code);
     return answered(tb, CARDS_SAY.linked(code, b.business), "card_linked", placeButtons(code));
   }
   const code = place ? place[1]! : open!.code;
@@ -514,6 +518,14 @@ async function cardRoute(t: Turn, cmd: Command): Promise<string | null> {
   if (r.result !== "labelled") return answered(t, CARDS_SAY.unknown(code), "card_unknown");
   if (open) await t.d.db.setConv(t.phone, { open_question: null });
   return answered(t, CARDS_SAY.labelled(code, r.label ?? label), "card_labelled");
+}
+
+/** The place question is kept open for a typed place only when no other question is open: a card never closes the hours,
+ *  setup or request book question an owner is in the middle of (the place buttons still work). */
+async function askPlace(t: Turn, code: string) {
+  const q = t.who.conversation?.open_question;
+  if (q && q.type !== "card_label") return;
+  await t.d.db.setConv(t.phone, { open_question: { type: "card_label", code, at: nowIso(t) } satisfies OpenQuestion });
 }
 
 /** The businesses a phone may link a card for: those where it is the owner or a manager. */
@@ -531,10 +543,14 @@ async function cardAnswer(t: Turn, code: string, c: CardCheck): Promise<string> 
   if (c.result === "already") {
     const b = own.find((x) => x.location_id === c.location_id);
     const tb = b ? { ...t, business: b, head: head(t.who, "business", b) } : t;
-    await t.d.db.setConv(t.phone, { open_question: { type: "card_label", code, at: nowIso(t) } satisfies OpenQuestion });
+    await askPlace(t, code);
     return answered(tb, CARDS_SAY.already(code, c.label), "card_already", placeButtons(code));
   }
   // An unknown phone, or a phone with no business it may link a card for: sign in first, the code kept in the link.
+  // Staff of a business: the owner or a manager links cards.
+  if ((c.result === "signup" || c.result === "ask") && !own.length && businesses(t.who).length) {
+    return answered(t, CARDS_SAY.ownerOnly(code), "card_owner_only");
+  }
   if (c.result === "signup" || (c.result === "ask" && !own.length)) {
     return answered(t, CARDS_SAY.signup(code, startLink(t.d.appUrl, code)), "card_signup");
   }
@@ -546,11 +562,13 @@ async function cardAnswer(t: Turn, code: string, c: CardCheck): Promise<string> 
   }
   // Several businesses: the pick is the yes. Up to 3 as buttons, up to 10 as a list.
   const options = own.slice(0, 10).map((b) => ({ id: `lc:${code}:${b.location_id}`, name: b.business }));
-  if (options.length <= 3) {
-    return answered(plain(t), CARDS_SAY.which(code), "card_which", options.map((o) => ({ id: o.id, title: wholeWords(o.name, 20) || o.name.slice(0, 20) })));
+  const titles = options.map((o) => wholeWords(o.name, 20) || o.name.slice(0, 20));
+  // Two names that shorten to the same button go in a numbered list, so each business can be told apart.
+  if (options.length <= 3 && new Set(titles).size === titles.length) {
+    return answered(plain(t), CARDS_SAY.which(code), "card_which", options.map((o, i) => ({ id: o.id, title: titles[i]! })));
   }
   return answered(plain(t), CARDS_SAY.which(code), "card_which", undefined,
-    { button: CARDS_SAY.whichList, sections: [{ rows: options.map((o) => ({ id: o.id, title: wholeWords(o.name, ROW_TITLE_MAX) || o.name.slice(0, ROW_TITLE_MAX) })) }] });
+    { button: CARDS_SAY.whichList, sections: [{ rows: options.map((o, i) => ({ id: o.id, title: wholeWords(`${i + 1}. ${o.name}`, ROW_TITLE_MAX) || `${i + 1}. ${o.name}`.slice(0, ROW_TITLE_MAX) })) }] });
 }
 
 // ─── Tools by name, each checked against the role's list (29.7).
