@@ -121,8 +121,18 @@ export const SIGNIN_SAY = {
 export const WHATSAPP_SIGNIN_CONSENT =
   "When you continue with WhatsApp, Kabsi uses your WhatsApp number to sign you in and sends WhatsApp messages to it: " +
   "sign-in confirmations and new sign-in notices, and for your business an alert for each new review with the business " +
-  "name, the star rating, the reviewer's first name, the review text up to 300 characters and the draft reply. Meta " +
-  "(WhatsApp) and Kapso carry these messages. Reply STOP at any time to stop.";
+  "name, the star rating, the reviewer's first name, the review text up to 300 characters and the draft reply. Our " +
+  "WhatsApp messaging provider carries these messages over Meta's WhatsApp Business Platform. Reply STOP at any time to stop.";
+
+/** Fix 5: the same consent on screen, as one short line and a list under "What Kabsi sends" (no line over two lines). */
+export const WA_CONSENT_SHORT = "Kabsi uses this WhatsApp number to sign you in and to send you messages. Reply STOP to stop.";
+export const WA_CONSENT_LINES = [
+  "Sign-in confirmations and new sign-in notices.",
+  "An alert for each new review: the business name, the stars and the reviewer's first name.",
+  "The review text, up to 300 characters, and the draft reply.",
+  "Our WhatsApp messaging provider carries them over Meta's WhatsApp Business Platform.",
+  "Reply STOP at any time to stop.",
+] as const;
 
 // ─── The browser's two calls.
 
