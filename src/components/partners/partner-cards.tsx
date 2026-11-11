@@ -120,11 +120,11 @@ export default function PartnerCards() {
           </button>
           <ul className="mt-3 divide-y divide-line">
             {data.cards.map((c) => (
-              <li key={c.code} className="flex flex-wrap items-center gap-3 py-3">
+              <li key={c.code} className="flex items-start gap-3 py-3">
                 {c.state === "new" || c.state === "set" ? (
                   <input
                     type="checkbox"
-                    className="size-5 shrink-0 accent-kb-green"
+                    className="mt-1 size-5 shrink-0 accent-kb-green"
                     aria-label={C.select(c.code)}
                     checked={chosen.includes(c.code)}
                     onChange={() => toggle(c.code)}
@@ -132,23 +132,27 @@ export default function PartnerCards() {
                 ) : (
                   <span className="size-5 shrink-0" aria-hidden />
                 )}
-                <span className="min-w-0 flex-1 break-all font-mono text-small text-text-1">
-                  {cardLinkUrl(c.code)}
-                </span>
-                <span className="text-small text-text-2">
-                  {C.state[c.state]}
-                  {c.state !== "claimed" ? ` · ${C.taps(c.taps)}` : ""}
-                </span>
-                {c.destination ? (
-                  <a
-                    href={c.destination}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-small font-bold text-text-1 underline underline-offset-4"
-                  >
-                    {C.test}
-                  </a>
-                ) : null}
+                <div className="min-w-0 flex-1">
+                  <p className="font-mono text-small text-text-1">
+                    {cardLinkUrl(c.code).replace(/^https:\/\//, "")}
+                  </p>
+                  <p className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-small text-text-2">
+                    <span>
+                      {C.state[c.state]}
+                      {c.state !== "claimed" ? ` · ${C.taps(c.taps)}` : ""}
+                    </span>
+                    {c.destination ? (
+                      <a
+                        href={c.destination}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-bold text-text-1 underline underline-offset-4"
+                      >
+                        {C.test}
+                      </a>
+                    ) : null}
+                  </p>
+                </div>
               </li>
             ))}
           </ul>
