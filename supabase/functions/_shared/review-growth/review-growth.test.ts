@@ -384,8 +384,9 @@ Deno.test("Scribe: one request with the key in a header, the model, no speaker l
     return new Response(JSON.stringify({ language_code: "ar", language_probability: 0.9, text: " We are closed  Friday ", words: [{ text: "x" }] }), { status: 200 });
   }) as unknown as typeof fetch;
   const r = await scribe("secret", { fetcher }).transcribe(new Uint8Array([1, 2, 3]), "audio/ogg; codecs=opus");
-  assertEquals(r, { ok: true, text: "We are closed Friday", language: "ar" });
-  assertEquals(seen, { url: "https://api.elevenlabs.io/v1/speech-to-text", key: "secret", model: "scribe_v2", diarize: "false", type: "audio/ogg; codecs=opus" });
+  // Voice 2: the current model is scribe_v3, and the duration the provider reports is read back (none here).
+  assertEquals(r, { ok: true, text: "We are closed Friday", language: "ar", seconds: null });
+  assertEquals(seen, { url: "https://api.elevenlabs.io/v1/speech-to-text", key: "secret", model: "scribe_v3", diarize: "false", type: "audio/ogg; codecs=opus" });
 });
 Deno.test("Scribe: refuses over 10 MB before sending, and a provider error or empty text is a plain failure", async () => {
   let calls = 0;
@@ -396,11 +397,12 @@ Deno.test("Scribe: refuses over 10 MB before sending, and a provider error or em
   assertEquals(await scribe("k", { fetcher: f(200, { text: "  " }) }).transcribe(new Uint8Array(10), null), { ok: false, reason: "empty" });
   assertEquals(await scribe("k", { fetcher: (async () => { throw new Error("net"); }) as unknown as typeof fetch }).transcribe(new Uint8Array(10), null), { ok: false, reason: "failed" });
 });
-Deno.test("the voice echo is short and has no dash or exclamation mark", async () => {
-  const { SAY } = await import("../whatsapp/say.ts");
-  const e = SAY.voiceHeard("We open at ten \u2014 come in! ".repeat(20));
+Deno.test("the voice echo is a quote line, cut at a word to 300 characters, and has no dash or exclamation mark", async () => {
+  const { heardLine } = await import("../voice/guard.ts");
+  const e = heardLine("We open at ten \u2014 come in! ".repeat(20));
   assertNotMatch(e, BANNED);
-  assert(e.length < 180);
+  assert(e.startsWith("> I heard: We open at ten come in"));
+  assert(e.length <= "> I heard: ".length + 300);
 });
 Deno.test("the word error rate ignores case, punctuation and Arabic marks", () => {
   assertEquals(wer("We are closed on Friday.", "we are closed on friday"), 0);

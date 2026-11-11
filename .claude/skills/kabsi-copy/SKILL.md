@@ -10,7 +10,7 @@ Kabsi's readers are busy local business owners. Write the way a calm, capable pe
 ## Plain English for owners
 - Short sentences. Everyday words. Say what Kabsi does and what happens next.
 - One idea per sentence, one ask per message. Name the button the reader will tap.
-- Say "your reviews", "your Google profile", "your hours". Never "listing", "visibility", "spot", "grid", "pin" or "app" to an owner. Never say API, sync, pipeline, SEO score, listing integrity or webhook to an owner.
+- Say "your reviews", "your Google profile", "your hours". Never "listing", "visibility", "spot", "grid", "pin" or "app" to an owner. One exception (R-158, Home 2): Home may say "your Google listing", the owner's own word, and "AI agent" in its hero line and its control line only; never "agentic". Never say API, sync, pipeline, SEO score, listing integrity or webhook to an owner.
 - Numbers as digits. Ranges with "to" (2 to 4), never a dash.
 - Tell the truth about limits. If Kabsi cannot do something, say so and say what the owner can do.
 - Nothing goes live without the owner's yes. Say so wherever a change is described.
@@ -19,7 +19,7 @@ Kabsi's readers are busy local business owners. Write the way a calm, capable pe
 - Brand line, footer and emails: "Your business on Google. Taken care of." The older lines "Your reviews and listing. Taken care of." and "Your Google Business Profile, taken care of." are retired.
 - Home H1 is the brand line itself. Supporting line: "Reviews to reply to. Details to keep right. Posts to prepare. Kabsi does the work and asks for your yes on WhatsApp." While Kabsi's WhatsApp number is not set, every "on WhatsApp" line is followed by "WhatsApp opens at launch. Until then you approve on kabsi.co." (the one switch, `WHATSAPP_ON`).
 - Main button everywhere: "Check my business free" (the free check). Second: "See how it works". The trial line, apart from the free check: "Free for 14 days once Kabsi is connected. No card."
-- The four jobs (Home): "Reply to every review", "Keep your details right", "Post when something changes", "See the work, every Monday". Never "More reviews", "attract new customers", "Higher visibility", "show up in more searches", "Answer questions", "monitors messages" or "24/7".
+- The four jobs (Home and How it works, Home 2, lane R R-158, 11 Nov 2026): "Reviews answered", "Listing kept right", "Posts from your photos", "Found in AI answers". The older four ("Reply to every review", "Keep your details right", "Post when something changes", "See the work, every Monday") stay approved lines elsewhere. Never "More reviews", "attract new customers", "Higher visibility", "show up in more searches", "Answer questions", "monitors messages" or "24/7".
 - The three states of anything Kabsi sends, never merged: "Approved", "Sent to Google", "Live on Google". "Live on Google" is the one word for the state Kabsi has seen on Google, everywhere: website, account, emails and WhatsApp copy kabsi-canvas owns ("Your reply is live on Google."). The approved Meta Utility templates are not resubmitted for it.
 - Founding 25 is private (30.51): its line appears only on the invited page, never on a public surface: "Kabsi does the Google work; you tell Rashid what to make better." Never "we manage" or "we do the Google work": Kabsi is subscription software the owner controls, not an agency.
 - Other approved lines: "Set up in a few steps, no passwords", "Nothing goes live without your yes", "You can remove Kabsi any time", "Cancel any time. Your plan runs to the end of the period you paid for."

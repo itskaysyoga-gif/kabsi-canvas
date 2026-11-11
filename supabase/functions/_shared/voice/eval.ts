@@ -5,7 +5,8 @@
 // the same word error rate. It stops before the character or seconds ceiling, so one run stays well inside 1 US dollar.
 //
 // The pass mark (decided in V4, V3 left none on record): every language's mean word error rate at most 20 percent and no single
-// note above 50 percent. Voice notes are switched on for business phones only when every language passes.
+// note above 50 percent. Voice 2 (R-158 item 3): voice notes are on for everyone whatever the scores, so the test now only measures
+// (the scores are the table that the owner's "I heard" line makes bearable); it no longer switches anything.
 import { scribe, wer } from "./transcribe.ts";
 
 export type Note = { id: string; lang: string; text: string };

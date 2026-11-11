@@ -311,7 +311,8 @@ export function toMsg(l: Look, o: { buttons?: number; asList?: boolean; list?: L
 /** The checks the tests run on every reply in scope: blocks, the title, the body lines, one marker, the footer. */
 export function lookProblems(m: Msg, o: { list?: boolean } = {}): string[] {
   const out: string[] = [];
-  const blocks = m.body.split("\n\n");
+  // Voice 2: the quote line of a voice note ("> I heard: ...") opens the reply and is not one of its blocks.
+  const blocks = m.body.replace(/^> I heard: [^\n]*\n\n/, "").split("\n\n");
   if (blocks.length > 3) out.push(`${blocks.length} blocks`);
   const head = /^\*(\S+) (.+?)\*(?: · .+)?$/u.exec(blocks[0] ?? "");
   if (!head) out.push("no bold title");

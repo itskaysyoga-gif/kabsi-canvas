@@ -50,8 +50,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - Launch 1: Founding 25 is private: open its invite link (staff, Programs, Founding 25, Show the link) and send one application named "QA Launch 1 test" (a session removes the row).
 - Outbound: before you say start on 10 Dec, the placement test of 30.39 item 13, steps in `2026-11-10-outbound2.md`. Ramp 5 a day, then 10 from day 8; 20 a day waits for 400 strong matches and clean delivery (lane R).
 - Partners 3: print the A6 insert from kabsi.co/partner (Your kit) at 100 percent and scan it. Send the NFC card photo on 17 Nov.
-- Signup 1 (PR 554, merged): turn on the Google provider in Supabase Auth with `https://kabsi.co/**` in the redirect URLs; then the 7 step phone check in `2026-11-10-signup1.md`.
+- Signup 1, Fix 5: Google web client (origin https://kabsi.co); its ID first in Supabase Auth, Google, "Client IDs" (and secret, nonce check on) and in Vercel `VITE_GOOGLE_WEB_CLIENT_ID`; provider on, `https://kabsi.co/**` redirect; phone check in `2026-11-11-fix5.md`.
 - RB-T: on 16 Nov, the 20-message phone script in `docs/kabsi-3/phone-script-2026-11-16.md` from your phone (pass: 18 of 20, no wrong save); start with "reset test".
+- Voice 2: check `ELEVENLABS_API_KEY` is set for the whatsapp function and run the 20-note eval once (about 0.2 USD), then the 4 note phone check; exact steps and read-backs in `2026-11-11-voice2.md`. `voice_notes` is switched on only after the key is confirmed.
 - Close 1: merge PR 499 (reply.v4) with the admin merge; the rule on main refuses it while the Prompt gate is red, by design (R-130); then check the deployed function names reply.v4. After the DataForSEO top-up, one full free check to see why the one of 6 Nov failed (30.42).
 
 ## Open After merge checks and findings
@@ -62,9 +63,10 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 11 Nov 2026, Fix 5 (R-158 item 2): programs_daily fixed and run, partner emails on their own step (PR 577); sign-in, Kapso and partner pages in part 2. `2026-11-11-fix5.md`.
-- 11 Nov 2026, Cards 2: PRs 572 and 574. `2026-11-11-cards2.md`.
-- Older entries (Growth 1 `2026-11-11-growth1.md`; Partners 3 `2026-11-11-partners3.md`; Partners 2 `2026-11-10-partners2.md`; Outbound 2 `2026-11-10-outbound2.md`; Site 3a `2026-11-10-site3a.md`; Clean 4 `2026-11-10-clean4.md`; Look 2b `2026-11-10-look2b.md`; Founding 1 `2026-11-10-founding1.md`; RB-T `2026-11-10-rb-t.md`; Safe 1 `2026-11-10-safe1.md`; Signup 1 `2026-11-10-signup1.md`; Look 2 `2026-11-10-look2.md`; Plan 1 `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
+- 11 Nov 2026, Voice 2 (R-158 item 3): voice notes on for everyone; PR 578; the eval, the key check and the phone check are Rashid's (see Open). `2026-11-11-voice2.md`.
+- 11 Nov 2026, Home 2 (R-158 item 4): new Home, PR 580. `2026-11-11-home2.md`.
+- 11 Nov 2026, Fix 5 (R-158 item 2): PRs 577 and 579. `2026-11-11-fix5.md`.
+- Older entries (Cards 2, Growth 1 and Partners 3 `2026-11-11-<name>.md`; Partners 2, Outbound 2, Site 3a, Clean 4, Look 2 and 2b, Founding 1, RB-T, Safe 1, Signup 1, Plan 1, RB-F4, Ops 1 `2026-11-10-<name>.md`; Partners 1, RB-F3 and Tidy 2 in `2026-11-10-tidy2.md`; earlier ones in `2026-11-09-progress-moved.md`).
 
 ## How a session updates this page
 

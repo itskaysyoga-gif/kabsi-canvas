@@ -24,6 +24,8 @@ import {
   pageHead,
 } from "../src/lib/site";
 import { PLANS } from "../src/components/kabsi/plans";
+import { HOME_LINE } from "../src/components/kabsi/hero-lines";
+import { HOME2_H1 } from "../src/components/kabsi/home2-hero-data";
 import { readText } from "./helpers/facts";
 import { NEVER_CLAIMS, NEVER_NAMES } from "./helpers/house-rules";
 
@@ -105,9 +107,15 @@ describe("the copy rules on every public line (kabsi-copy, K-112, K-144, 30.15)"
     }
   });
   it("speaks to owners in their words: no listing, visibility, spot, grid, pin or app", () => {
+    // Home 2 (lane R R-158 item 4, 11 Nov 2026): owners say "my Google listing", so Home's own lines may say "listing".
+    // Only Home 2's two data files and Home's route head; every other public line keeps the rule, and no file may say
+    // visibility, grid point or the app.
+    const HOME2 = /kabsi\/home2-(hero-)?data\.ts$|routes\/index\.tsx$/;
     for (const [f, s] of all.filter(([f]) => !LEGAL.test(f))) {
       expect(s, `${f}: ${s.slice(0, 60)}`).not.toMatch(
-        /\b(listing|visibility|grid point|the app)\b/i,
+        HOME2.test(f)
+          ? /\b(visibility|grid point|the app)\b/i
+          : /\b(listing|visibility|grid point|the app)\b/i,
       );
     }
   });
@@ -127,14 +135,17 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     expect(MAIN_CTA).toBe("Check my business free");
     expect(SCAN_LINE).toBe("Free check. No account and no Google access needed.");
     expect(TRIAL_LINE).toBe("Free for 14 days once Kabsi is connected. No card.");
-    // Design 9 (Web 5 part B): the H1 is the brand line itself, "Taken care of." on the yellow bar; the meta description
-    // stays Polish 2's line (HOME_LINE), the visible hero line is Design 9's.
-    const home = read("src/components/kabsi/d9-hero.tsx");
-    expect(home).toContain('<D9Title text="Your business on Google. Taken care of." />');
+    // Home 2 (lane R R-158 item 4): the H1 is the brand line with "through WhatsApp", its last sentence on the yellow
+    // bar; the meta description is HOME_LINE, Home 2's (docs/site4/home.md).
+    const home = read("src/components/kabsi/home2-hero.tsx");
+    expect(home).toContain("<D9Title text={HOME2_H1} />");
+    expect(HOME2_H1).toBe("Your business on Google. Taken care of through WhatsApp.");
+    expect(HOME2_H1.startsWith(BRAND_LINE.replace(/\.$/, ""))).toBe(true);
     expect(read("src/routes/index.tsx")).toContain("description: HOME_LINE");
-    expect(read("src/components/kabsi/hero-lines.ts")).toContain(
-      "Your details kept right, a reply ready for every review and your profile kept fresh, without doing it yourself. Kabsi prepares the work, and nothing goes live without your yes.",
+    expect(HOME_LINE).toBe(
+      "Kabsi answers your reviews, keeps your hours, photos and posts fresh, and checks what ChatGPT says about you. Nothing goes live until you tap yes on WhatsApp.",
     );
+    expect(HOME_LINE.length).toBeLessThanOrEqual(160);
     // Go live 1 (30.28): the WhatsApp launch line is gone from the hero.
     expect(home).not.toMatch(/WHATSAPP_LAUNCH_LINE|opens at launch/);
   });
@@ -345,25 +356,27 @@ describe("Home on Design 9 (Web 5 part B, master plan 30.24)", () => {
     expect(example).not.toMatch(/without a reply|no reply|Last post|holiday hours/i);
     expect(data).not.toContain("Your hours, replies, posts, photos and links");
   });
-  // Site 3a (30.50 item 10): the trade photo cards left Home (the industries are one click away in the header); Home is
-  // in the order lane R set, with one WhatsApp demonstration and no Founding 25.
-  it("puts Home in the Site 3a order, with one WhatsApp demonstration", () => {
+  // Home 2 (lane R R-158 item 4): the hero with its one WhatsApp day, the four jobs, then the order of
+  // docs/site4/home.md. Site 3a's profile watch, three steps and separate demonstration left Home on purpose.
+  it("puts Home in the Home 2 order", () => {
+    expect(read("src/components/kabsi/d9-home.tsx")).toMatch(/<D9Hero \/>\s*<HomeLower \/>/);
     const order = home.slice(home.indexOf("export function D9HomeLowerSections"));
     const names = [
-      "<ProfileWatch />",
-      "<ThreeSteps />",
-      "<Look2Demo />",
-      "<HandlesGroups />",
+      "<JobsStrip />",
+      "<Problem />",
+      "<WhatKabsiDoes />",
       "<ControlAndReport />",
+      "<HowItStarts />",
+      "<ForYourBusiness />",
       "<PricingPreview />",
-      "<D9Questions />",
+      "<Home2Questions />",
       "<Closing />",
     ];
     const at = names.map((n) => order.indexOf(n));
     expect(at.every((i) => i > 0)).toBe(true);
     expect([...at].sort((a, b) => a - b)).toEqual(at);
     expect(order).not.toMatch(
-      /<(PhotoToPost|WhereYouShowUp|D9PickBusiness|FounderBand|StepsLine)\b/,
+      /<(PhotoToPost|WhereYouShowUp|D9PickBusiness|FounderBand|StepsLine|ProfileWatch|ThreeSteps|Look2Demo)\b/,
     );
     expect(home).not.toContain("const TRADES");
     expect(read("src/components/kabsi/d9-hero.tsx")).not.toContain(

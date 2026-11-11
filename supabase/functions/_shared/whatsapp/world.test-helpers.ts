@@ -123,8 +123,10 @@ export class World {
   /** V3: processed photos waiting for a yes, by id. */
   photoDrafts = new Map<string, { location: string; state: string; category: string }>();
   /** V3: what the transcriber answers for a voice note (tests set it); null means "not configured". */
-  transcript: { ok: true; text: string; language: string | null } | { ok: false; reason: "not_configured" | "empty" | "too_big" | "failed" } | null = null;
+  transcript: { ok: true; text: string; language: string | null } | { ok: false; reason: "not_configured" | "empty" | "too_big" | "failed" | "limit" } | null = null;
   transcribed: number[] = [];
+  /** Voice 2: who each transcription was for (known phone or not, and its business), as the day limits see it. */
+  voiceWho: { known: boolean; locationId: string | null }[] = [];
   firstMaps: string[] = [];
   /** What the first map step answers after a code binds an owner (28.5). */
   firstMapAnswer: { state: "started" | "waiting" | "ask" | "none"; keyword?: string | null } = { state: "none" };
@@ -135,6 +137,8 @@ export class World {
   aiSlow = false;
   onItFast = false;
   mediaBytes = new Map<string, Uint8Array>();
+  /** Media ids whose download fails (a file Kapso cannot hand over). */
+  mediaFails = new Set<string>();
   /** Photo Post 1: WhatsApp photos by id (held when they came with words), photo posts by id, posts left per business. */
   waPhotos = new Map<string, { location: string; user: string; state: string; hold: boolean; asked: boolean; file?: string }>();
   posts = new Map<string, { location: string; text: string; caption: string; photo: string; state: string }>();
@@ -577,7 +581,10 @@ export class World {
         rows: l.sections.flatMap((x) => x.rows.map((r) => [r.title, r.description].filter(Boolean).join(" · "))),
         rowIds: l.sections.flatMap((x) => x.rows.map((r) => r.id)) }),
       template: async (to, name) => push({ to, kind: "template", body: "", buttons: [], template: name }),
-      media: async (id) => w.mediaBytes.get(id) ?? new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 16, 74, 70, 73, 70]),
+      media: async (id) => {
+        if (w.mediaFails.has(id)) throw new Error("media gone");
+        return w.mediaBytes.get(id) ?? new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 16, 74, 70, 73, 70]);
+      },
       image: async (to, png, body, b: Button[]) => push({ to, kind: "image", body, buttons: b.map((x) => x.title) }),
     };
   }
@@ -974,8 +981,9 @@ export class World {
       firstMap: async (loc) => (w.firstMaps.push(loc), w.firstMapAnswer),
       confirmKeyword: async (loc, k) => (w.calls.push(`keyword:${loc}:${k}`), w.keywordAnswer),
       mapImage: async () => null,
-      transcribe: async (audio) => {
+      transcribe: async (audio, _mime, who) => {
         w.transcribed.push(audio.length);
+        w.voiceWho.push({ known: who.known, locationId: who.locationId });
         return w.transcript ?? { ok: false, reason: "not_configured" };
       },
       flush: async () => {},

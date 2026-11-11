@@ -226,9 +226,12 @@ export const SAY = {
   videoKept: "Thanks. Kabsi keeps videos, but Google posts from WhatsApp take photos only for now.",
   voiceTooLong: "Please keep voice notes under 3 minutes",
   voiceOff: "Voice notes are not switched on yet. Please type your message and I will take it from there.",
-  voiceFailed: "I could not hear that note clearly. Please try again, or type your message.",
-  // The echo is trimmed and cleaned of dashes and exclamation marks (the house style), and kept short: it is a check, not a record.
-  voiceHeard: (text: string) => `I heard: "${text.replace(/[\u2013\u2014!]/g, " ").replace(/\s+/g, " ").trim().slice(0, 160)}"`,
+  // Voice 2 (R-158 item 3): a note with nothing readable, a failed one and an unreadable file all get the one line.
+  voiceUnclear: "I could not hear that clearly. Please send it again or type it.",
+  // Over a day limit (30 notes a business, 5 a phone Kabsi does not know): a kind line that asks for typing.
+  voiceLimit: "That is a lot of voice notes for one day. Please type this one and I will take it from there.",
+  // A voice note is never the owner's yes (the usual yes is the button or typing it).
+  voiceYes: "Not counted as your yes\nA voice note cannot say yes.\n\nTap Yes, or type it yourself.",
   updateWhat: "What is new? Tell me in your own words, for example a new service, a price or new opening times. Or reply No if nothing changed.",
   // "Ask a customer" (30.15 section 3.5): a ready message, forwarded from the owner's own phone. Kabsi never gets a number.
   askNoLink: (business: string) => `${business} has no review link yet. Make one in Kabsi under Get Reviews, then ask me again.`,

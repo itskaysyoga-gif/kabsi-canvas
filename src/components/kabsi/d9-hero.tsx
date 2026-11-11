@@ -1,12 +1,11 @@
 // Design 9 hero and the steps line (Web 5, master plan 30.24: treatment B). The hero sits at z-10, so the free check's
 // suggestion list stays above the steps line that follows (check2-find-business.spec.ts). The H1 is one element of real, selectable
-// text, painted at once: no entrance, no letter animation, no layout shift. "Taken care of." sits on the Kabsi-yellow
-// bar (the d9-mark utility), once per page, in charcoal; yellow is never text on ivory or white.
+// text, painted at once: no entrance, no letter animation, no layout shift. Its last sentence ("Taken care of through
+// WhatsApp." since Home 2) sits on the Kabsi-yellow bar (the d9-mark utility), once per page, in charcoal; yellow is never text on ivory or white.
 import { ArrowRight } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { TRIAL_LINE } from "@/lib/site";
-import { ResultPreview } from "./result-preview";
 import { ExampleBadge, KabsiMark, WithWhatsAppMark } from "./ui";
 import { Img, PHOTOS, type Photo } from "./photos";
 import { ScanBox } from "./scan-box";
@@ -15,66 +14,13 @@ import { D9Title } from "./d9-title";
 import { YellowLabel, YellowNumber } from "./highlight";
 
 export { YellowLabel, YellowNumber };
-import { D9_BUSINESS, D9_HERO_LINE, D9_STEPS, type D9Message, type StepId } from "./d9-data";
+import { D9_BUSINESS, D9_STEPS, type D9Message, type StepId } from "./d9-data";
 
 export const d9LinkCls =
   "press inline-flex min-h-11 items-center gap-1.5 font-semibold text-text-1 underline decoration-text-3 decoration-1 underline-offset-4 hover:decoration-text-1";
 
 export function D9Arrow() {
   return <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />;
-}
-
-/* ---------- Home hero ---------- */
-
-/**
- * Site 3a (master plan 30.50 item 10, R-150): the hero is the free check. One action (the business search), one
- * reassurance beside it (TRIAL_LINE), and "See how it works". From 1024 px the Example free check result stands on the
- * salon photo, so the page shows what the check gives back. The WhatsApp demonstration is further down, once.
- */
-export function D9Hero() {
-  return (
-    <section aria-labelledby="hero-title" data-hero className="relative isolate z-10">
-      <div className="container-kb grid gap-6 pt-6 pb-10 sm:gap-8 md:pt-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:gap-12 lg:pt-14 lg:pb-20">
-        <div className="max-w-[40rem]">
-          <h1 id="hero-title" className="text-display text-balance">
-            <D9Title text="Your business on Google. Taken care of." />
-          </h1>
-          <p className="mt-4 max-w-[36rem] text-lead text-text-2 sm:mt-6">
-            <WithWhatsAppMark text={D9_HERO_LINE} />
-          </p>
-          {/* relative z-10: the suggestion list opens above what follows (Web 4 review). */}
-          <div className="relative z-10 mt-5 max-w-[36rem] sm:mt-7">
-            <ScanBox id="hero-scan" note={TRIAL_LINE} />
-            <SiteLink to="/how-it-works" className={cn(d9LinkCls, "mt-1 text-body sm:mt-2")}>
-              See how it works
-              <D9Arrow />
-            </SiteLink>
-          </div>
-        </div>
-        <HeroResult />
-      </div>
-    </section>
-  );
-}
-
-/** The Example free check result over the salon photo, from 1024 px only (the phone's first screen stays short). */
-function HeroResult() {
-  return (
-    <div className="relative mx-auto hidden w-full max-w-[30rem] py-8 lg:me-0 lg:block">
-      <div
-        aria-hidden
-        className="absolute inset-y-0 start-[30%] end-0 -z-10 overflow-hidden rounded-panel"
-      >
-        <Img
-          photo={PHOTOS.salonTablet}
-          sizes="28vw"
-          decorative
-          className="absolute inset-0 size-full object-cover object-[60%_50%]"
-        />
-      </div>
-      <ResultPreview className="me-[18%]" />
-    </div>
-  );
 }
 
 /* ---------- The Example phone (WhatsApp style, a picture: its buttons are not controls) ---------- */

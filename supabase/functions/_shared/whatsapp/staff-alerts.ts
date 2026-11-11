@@ -38,6 +38,8 @@ const URGENT = new Set([
   "whatsapp_check",
   // Signup 1 (30.50 item 3d): the daily check found Google sign-in switched off in Supabase Auth
   "signin_provider_off",
+  // Voice 2 (R-158 item 3): voice notes failing 3 times in a row, and a day passing 60 minutes of transcription
+  "voice_failed", "voice_minutes_high",
 ]);
 /** About the number itself: email only (9.9). */
 const NUMBER_ONLY = /^whatsapp_number/;
@@ -77,6 +79,8 @@ export type Summary = {
   number_quality: string | null; number_messaging: string | null; alerts_24h: number;
   /** Growth 1: of the businesses whose Manager access began 1 to 30 days ago, how many had a first approved Google action within 24 hours of it. */
   first_action_cohort?: number; first_action_24h?: number;
+  /** Voice 2: yesterday's voice notes (the Beirut day before the digest): seconds transcribed, notes, failed requests. */
+  voice_seconds_yesterday?: number; voice_notes_yesterday?: number; voice_failures_yesterday?: number;
 };
 
 const usd = (micros: number) => `$${(Number(micros) / 1e6).toFixed(2)}`;
@@ -120,6 +124,13 @@ export function firstActionText(s: Pick<Summary, "first_action_cohort" | "first_
   return `First approved action within 24 hours of Manager access: ${done} of ${cohort} (${Math.round((done / cohort) * 100)} percent), access began 1 to 30 days ago.`;
 }
 
+/** Voice 2: "Voice notes yesterday: 12 minutes in 31 notes." The staff alert at 60 minutes a day is in voice_record (migration). */
+export function voiceText(s: Pick<Summary, "voice_seconds_yesterday" | "voice_notes_yesterday" | "voice_failures_yesterday">): string {
+  const secs = n(s.voice_seconds_yesterday), notes = n(s.voice_notes_yesterday), failed = n(s.voice_failures_yesterday);
+  const mins = secs > 0 && secs < 60 ? "under 1 minute" : plural(Math.round(secs / 60), "minute", "minutes");
+  return `Voice notes yesterday: ${mins} in ${plural(notes, "note", "notes")}${failed ? `, ${plural(failed, "request", "requests")} failed` : ""}.`;
+}
+
 /** The last 24 hours (9.9) and the budgets (26.9): also the answer to "today". */
 export function numbersText(s: Summary): string {
   const errors = (s.errors_by_job ?? []).map((e) => `${e.job} ${e.n} (${(n(e.n) / 24).toFixed(1)} an hour)`).join(", ");
@@ -129,6 +140,7 @@ export function numbersText(s: Summary): string {
     `Reviews answered on Google: ${n(s.reviews_answered)}. Replies waiting: ${n(s.replies_waiting)}.`,
     `Jobs failed: ${n(s.jobs_failed)}${errors ? `, most from ${errors}` : ""}.`,
     `AI cost since yesterday: ${usd(n(s.ai_cost_micros))}. Places today: ${n(s.places_today)} of ${n(s.places_cap)}. DataForSEO: ${dfs}.`,
+    voiceText(s),
     `Staff alerts in 24 hours: ${n(s.alerts_24h)}.`,
     firstActionText(s),
   ].join("\n");

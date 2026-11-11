@@ -1,5 +1,5 @@
-// Home on Design 9 (Web 5 part B, master plan 30.24): the hero here, everything below the first screen in
-// d9-home-lower.tsx (Site 3a, 30.50 item 10: the three steps follow the familiar problem there).
+// Home on Design 9 (Web 5 part B, master plan 30.24): the hero here (home2-hero.tsx), everything below it in
+// d9-home-lower.tsx (Home 2, lane R R-158 item 4: the order is in docs/site4/home.md).
 //
 // Polish 4 part D (the script budget): the lower sections are their own chunk. The server renders them in full, so the
 // page arrives whole, with one H1 painted at once and nothing moving. In the browser their server HTML is kept as it is
@@ -7,18 +7,11 @@
 // their code loads and they are drawn again from it, the same size in the same place. A first visit's measurement
 // (Lighthouse) ends before any of that, so it reads only the first screen's code.
 import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { D9Hero } from "./d9-hero";
+import { D9Hero } from "./home2-hero";
 
-type Lower = typeof import("./d9-home-lower");
-let lower: Lower | null = null;
-let loading: Promise<Lower> | null = null;
+import { loadHomeLower, lowerNow } from "./home-lower-loader";
 
-/** Load the lower sections' code once. The route's loader awaits it on the server, so the server render has it. */
-export function loadHomeLower(): Promise<Lower> {
-  if (lower) return Promise.resolve(lower);
-  loading ??= import("./d9-home-lower").then((m) => (lower = m));
-  return loading;
-}
+export { loadHomeLower };
 
 const WAKE = ["scroll", "pointerdown", "touchstart", "keydown", "wheel"] as const;
 
@@ -45,7 +38,7 @@ function giveFocusBack(root: HTMLElement | null, place: number | null) {
 const HomeLower = memo(function HomeLower() {
   const ref = useRef<HTMLDivElement>(null);
   // On the server (and on a later visit to Home inside the site) the code is already loaded: draw it at once.
-  const [ready, setReady] = useState(() => lower !== null);
+  const [ready, setReady] = useState(() => lowerNow() !== null);
   const place = useRef<number | null>(null);
   useLayoutEffect(() => {
     if (!ready || place.current === null) return;
@@ -81,6 +74,7 @@ const HomeLower = memo(function HomeLower() {
     return stop;
   }, [ready]);
 
+  const lower = lowerNow();
   if (ready && lower) {
     const { D9HomeLowerSections } = lower;
     return (
