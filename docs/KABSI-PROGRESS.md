@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 10 Nov 2026 (Partners 2, Look 2b, Founding 1, RB-T, Safe 1, Clean 4). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 10 Nov 2026 (Partners 2, Site 3a, Outbound 2, Look 2b, Founding 1, RB-T, Safe 1, Clean 4). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -26,7 +26,6 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Open for Rashid (as last recorded; the full table is `docs/progress/archive/steps-only-rashid-can-do.md`)
 
-- Partners 2: the migration `supabase/migrations/20261110200000_partners2.sql` waits for the lane R chat to apply it (apply_migration timed out on a question); expect `partner_accounts.user_id` to exist and `public.partner_join(uuid,jsonb)` to be a function; then merge PR 564, then part B (`claude/partners-2b`).
 - The lane R checklist of 7 Nov is Rashid's project doc `claude/kabsi-whats-left-2026-11-07.md` (not in this repository). In short: card payments wait for Creem's live setup; the first Meta ad for the DataForSEO top-up, Vercel Pro and `docs/launch1/readiness.md`; the first paying business for Kapso Pro and 30.19 section 6; dates: AI credit ends 17 Nov, Sentry budget before 30 Nov.
 - Phone test (13b part 1): passed 25 Oct (ladder above). 13b part 2: send START from the staff phone (it is stopped); delete the Supabase secrets SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET and the Supabase SENTRY_AUTH_TOKEN; run `supabase/manual/20261025_drop_slack_leftovers.sql` (expect `0 | 0 | 0 | 0`); remove the Kabsi app from Slack when you like.
 - Clean 4: run the branch delete script in `docs/progress/archive/2026-11-10-clean4-branches.md` with your own GitHub login (463 branches; expect 12 left).
@@ -49,7 +48,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - Ready 2: main's protection on (`docs/OPS-SETUP.md` step 7, 2 minutes); run `supabase/manual/20261107_ready2_qa_test_data_delete.sql` (expect 0s, demo_kept 2, demo_viewer_kept 1); did the staff phone get the alerts of 09:50 and 09:51 UTC?
 - App 5: may qa-staff@test.local be staff, for live staff runs? (LATER row)
 - Launch 1: Founding 25 is private: open its invite link (staff, Programs, Founding 25, Show the link) and send one application named "QA Launch 1 test" (a session removes the row).
-- Outbound: before you say start, the placement test of 30.39 item 13 (LATER row).
+- Outbound: before you say start on 10 Dec, the placement test of 30.39 item 13, steps in `2026-11-10-outbound2.md`. Ramp 5 a day, then 10 from day 8; 20 a day waits for 400 strong matches and clean delivery (lane R).
 - Signup 1 (PR 554, merged): turn on the Google provider in Supabase Auth with `https://kabsi.co/**` in the redirect URLs; then the 7 step phone check in `2026-11-10-signup1.md`.
 - RB-T: on 16 Nov, the 20-message phone script in `docs/kabsi-3/phone-script-2026-11-16.md` from your phone (pass: 18 of 20, no wrong save); start with "reset test".
 - Close 1: merge PR 499 (reply.v4) with the admin merge; the rule on main refuses it while the Prompt gate is red, by design (R-130); then check the deployed function names reply.v4. After the DataForSEO top-up, one full free check to see why the one of 6 Nov failed (30.42).
@@ -62,8 +61,10 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 10 Nov 2026, Partners 2 (R-150, R-151 item 6): join with no application, the partner home, payout changes behind a fresh confirm, first payout behind a staff tap, owners' "my link", R-155; Creem test products renamed. Migration not applied, PRs not merged. `2026-11-10-partners2.md`.
-- Older entries (Look 2b is in `2026-11-10-look2b.md`; Clean 4 is in `2026-11-10-clean4.md`; Founding 1 is in `2026-11-10-founding1.md`; RB-T is in `2026-11-10-rb-t.md`; Safe 1 is in `2026-11-10-safe1.md`; Signup 1 is in `2026-11-10-signup1.md`; Look 2 is in `2026-11-10-look2.md`; Plan 1 is in `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
+- 10 Nov 2026, Partners 2 (R-150, R-151 item 6): join with no application, the partner home, payout changes behind a fresh confirm, first payout behind a staff tap, owners' "my link", R-155; Creem test products renamed. Migration 20261111045557 applied 11 Nov and read back; PRs 564 and 566. `2026-11-10-partners2.md`.
+- 10 Nov 2026, Site 3a (R-150 item 10, R-151): audit at 8 widths (`docs/site3/audit.md`); offers table in SYNC.md 2a; Home, Pricing, How it works and the free check result fixed. `2026-11-10-site3a.md`.
+- 10 Nov 2026, Outbound 2 (R-151 item 5): ramp 5 then 10 a day (migration 20261111035954 applied 11 Nov; read back 5, 10, 10, 300, locked, test mode); the eight first tier industries pass; beauty and food alternate; food wording; the follow-up carries the private Founding 25 link while places remain. Nothing sent. `2026-11-10-outbound2.md`.
+- Older entries (Clean 4 is in `2026-11-10-clean4.md`; Look 2b is in `2026-11-10-look2b.md`; Founding 1 is in `2026-11-10-founding1.md`; RB-T is in `2026-11-10-rb-t.md`; Safe 1 is in `2026-11-10-safe1.md`; Signup 1 is in `2026-11-10-signup1.md`; Look 2 is in `2026-11-10-look2.md`; Plan 1 is in `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
 
 ## How a session updates this page
 

@@ -13,7 +13,7 @@ import {
 } from "../src/lib/partner";
 
 // Partners 2 (master plan 30.50 items 4 to 6): the join form and the partner home say what the server checks, in the
-// words of docs/COPY.md section 81, with the house rules (no dashes, no exclamation marks, no Arabic).
+// words of docs/COPY.md section 82, with the house rules (no dashes, no exclamation marks, no Arabic).
 describe("Partners 2 web", () => {
   it("lists the six kinds in the server's order and words", () => {
     expect(PARTNER_KIND_OPTIONS.map(([k]) => k)).toEqual([...PARTNER_KINDS]);

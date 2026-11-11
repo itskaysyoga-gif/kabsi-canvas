@@ -37,7 +37,6 @@ export type D9Message = {
   photo?: boolean;
   time: string;
 };
-
 /** Buttons as the product sends them (30.24 item 2): Yes, Edit, Skip for replies; Approve, Edit, Skip for posts. */
 export const D9_HERO_STREAM: D9Message[] = [
   {

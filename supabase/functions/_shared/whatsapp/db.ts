@@ -328,7 +328,7 @@ export async function agentDeps(): Promise<AgentDeps> {
     book: bookFor(key),
     // Signup 1: Continue with WhatsApp and the new sign-in notice (the seam in agent.ts).
     signin: signinDb(),
-    // Partners 2: the payout confirm, the staff tap at the money and the owner's link (20261110200000_partners2.sql).
+    // Partners 2: the payout confirm, the staff tap at the money and the owner's link (20261111045557_partners2.sql).
     partners: partnersDb,
   };
 }

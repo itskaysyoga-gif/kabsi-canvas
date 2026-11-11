@@ -345,8 +345,29 @@ describe("Home on Design 9 (Web 5 part B, master plan 30.24)", () => {
     expect(example).not.toMatch(/without a reply|no reply|Last post|holiday hours/i);
     expect(data).not.toContain("Your hours, replies, posts, photos and links");
   });
-  it("cards only for finished trades, each with a photo", () => {
-    const cards = home.slice(home.indexOf("const TRADES"), home.indexOf("function D9PickBusiness"));
-    expect(cards.match(/photo: (MORE_)?PHOTOS\./g)).toHaveLength(4);
+  // Site 3a (30.50 item 10): the trade photo cards left Home (the industries are one click away in the header); Home is
+  // in the order lane R set, with one WhatsApp demonstration and no Founding 25.
+  it("puts Home in the Site 3a order, with one WhatsApp demonstration", () => {
+    const order = home.slice(home.indexOf("export function D9HomeLowerSections"));
+    const names = [
+      "<ProfileWatch />",
+      "<ThreeSteps />",
+      "<Look2Demo />",
+      "<HandlesGroups />",
+      "<ControlAndReport />",
+      "<PricingPreview />",
+      "<D9Questions />",
+      "<Closing />",
+    ];
+    const at = names.map((n) => order.indexOf(n));
+    expect(at.every((i) => i > 0)).toBe(true);
+    expect([...at].sort((a, b) => a - b)).toEqual(at);
+    expect(order).not.toMatch(
+      /<(PhotoToPost|WhereYouShowUp|D9PickBusiness|FounderBand|StepsLine)\b/,
+    );
+    expect(home).not.toContain("const TRADES");
+    expect(read("src/components/kabsi/d9-hero.tsx")).not.toContain(
+      "<D9Phone\n        items={D9_HERO_STREAM}",
+    );
   });
 });
