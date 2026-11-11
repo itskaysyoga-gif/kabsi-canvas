@@ -45,10 +45,13 @@ values (pg_temp.org('00000000-0000-4000-8000-0000000050c2'), pg_temp.org('000000
         '00000000-0000-4000-8000-0000000050c3', 'R-F5F5F5', now());
 
 -- A new business whose partner link arrives after the sign-up step: the daily step attributes it.
-select pg_temp.biz('00000000-0000-4000-8000-0000000050c4', '00000000-0000-4000-8000-0000000050a4', 'Fix Five Gym', 'f5-place-4');
-delete from public.partner_referrals where organization_id = pg_temp.org('00000000-0000-4000-8000-0000000050c4');
+-- The browser saved the partner code before the business was made, so the location carries it (locations_via_code);
+-- the referral row the sign-up step wrote is removed, so only the daily step can write it again.
 insert into public.signup_attribution (user_id, via_code, via_at) values ('00000000-0000-4000-8000-0000000050a4', pg_temp.code(), now() - interval '1 hour')
 on conflict (user_id) do update set via_code = excluded.via_code, via_at = excluded.via_at;
+select pg_temp.biz('00000000-0000-4000-8000-0000000050c4', '00000000-0000-4000-8000-0000000050a4', 'Fix Five Gym', 'f5-place-4');
+update public.locations set via_code = pg_temp.code() where id = '00000000-0000-4000-8000-0000000050c4' and via_code is null;
+delete from public.partner_referrals where organization_id = pg_temp.org('00000000-0000-4000-8000-0000000050c4');
 
 -- An expired payout method request: the second loop (the one whose variable was renamed) ends it.
 insert into public.partner_payout_changes (partner_id, method, last4, channel, phone, expires_at)
