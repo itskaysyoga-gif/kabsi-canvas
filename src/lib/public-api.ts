@@ -134,18 +134,6 @@ export type FoundingApplication = {
 export const applyFounding = (a: FoundingApplication) =>
   call<{ ok: true }>("programs/founding", { method: "POST", body: JSON.stringify(a) });
 
-export type PartnerKind =
-  "creator" | "agency" | "accountant" | "reseller" | "business_group" | "other";
-export type PartnerApplication = {
-  name: string;
-  email: string;
-  kind: PartnerKind;
-  terms: true;
-  turnstile: string;
-};
-export const applyPartner = (a: PartnerApplication) =>
-  call<{ ok: true }>("programs/partners", { method: "POST", body: JSON.stringify(a) });
-
 /* ---------- The free check (V4, POST and GET /visibility/check) ---------- */
 
 export type NearbyCard = {

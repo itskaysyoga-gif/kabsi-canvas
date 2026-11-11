@@ -100,6 +100,9 @@ export function captureTouch(
   if (via && /^[A-Za-z0-9_-]{2,40}$/.test(via)) {
     const secure = window.location.protocol === "https:" ? "; Secure" : "";
     document.cookie = `${VIA_COOKIE}=${encodeURIComponent(via.toUpperCase())}; Max-Age=${VIA_DAYS * 86400}; Path=/; SameSite=Lax${secure}`;
+    // Partners 2: a visit through a partner link is counted once per visit (partner-visit.ts, loaded only then).
+    if (/^P-/i.test(via))
+      void import("@/lib/partner-visit").then((m) => m.countPartnerVisit(via.toUpperCase()));
   }
 
   if (!watching) {

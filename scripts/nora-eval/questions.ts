@@ -190,7 +190,7 @@ export const QUESTIONS: Question[] = [
     must: [MAIL],
     coming: true,
     reference:
-      "Kabsi Partners, the affiliate program, is not open yet, and I can't give a date. Anyone can apply now on the partners page or at hello@kabsi.co, and partner links open when card payments open.",
+      "Kabsi Partners, the affiliate program, is not open for payments yet, and I can't give a date. Anyone can join now at kabsi.co/partners/join and gets a link at once, and questions go to hello@kabsi.co. Partner links pay from the day card payments open.",
   },
   {
     id: "en13",
