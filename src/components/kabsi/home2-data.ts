@@ -23,7 +23,7 @@ export const HOME2_THREAD: readonly (Look2Message | OwnerLine)[] = [
       { text: "From Chloe B." },
       { text: "Amber did a lovely colour. Booked again.", quote: true },
       { text: "Kabsi's reply:" },
-      { text: "Thank you, Chloe. We will tell Amber. See you in six weeks.", quote: true },
+      { text: "Thank you, Chloe. We will tell Amber. See you at your next visit.", quote: true },
     ],
     status: "Post this reply on Google?",
     buttons: ["Approve", "Edit on kabsi.co"],
@@ -43,7 +43,7 @@ export const HOME2_THREAD: readonly (Look2Message | OwnerLine)[] = [
   {
     id: "photo",
     owner: true,
-    text: "New balayage colours this month.",
+    text: "New balayage colours this month. Open Saturdays.",
     photo: true,
     time: "15:05",
   },
@@ -52,7 +52,12 @@ export const HOME2_THREAD: readonly (Look2Message | OwnerLine)[] = [
     marker: "post",
     title: "Post ready for Google",
     business: "Hollis Hair",
-    facts: [{ text: "New balayage colours this month. Saturdays are open.", quote: true }],
+    facts: [
+      {
+        text: "New balayage colours this month at Hollis Hair, and we are open on Saturdays. Come and see them.",
+        quote: true,
+      },
+    ],
     status: "Post it on your Google profile?",
     buttons: ["Approve", "Edit on kabsi.co"],
     time: "15:06",
@@ -77,7 +82,7 @@ export type JobId = (typeof HOME2_JOBS)[number]["id"];
 export const HOME2_PROBLEM = {
   title: "Customers decide in seconds.",
   mark: "in seconds.",
-  line: "They pick a business on Google Maps and, more and more, by asking an AI assistant. They go by what they see. Most owners have no time to keep up.",
+  line: "They pick a business on Google Maps, and some ask an AI assistant. They go by what they see, and keeping it all right takes time you rarely have.",
   label: "What they see",
   seen: [
     { id: "stars", title: "Stars and replies", text: "Is every review answered?" },
@@ -102,13 +107,13 @@ export type Home2Job = {
 
 const LINES: Record<JobId, Omit<Home2Job, "id" | "title">> = {
   reviews: {
-    kabsi: "Kabsi drafts a reply to every new review, in your tone and in the review's language.",
+    kabsi: "Kabsi drafts replies to your new reviews, in your tone and in the review's language.",
     you: "Read it and tap Approve.",
     note: "Kabsi never offers anything for a review and never hides one.",
   },
   listing: {
     kabsi:
-      "Kabsi checks your hours, holiday hours, photos and details every day. When Google shows something different from what you told Kabsi, it asks you.",
+      "Kabsi checks your hours and details on Google every day, and asks about holiday hours before each bank holiday. When Google shows something different from what you told Kabsi, it asks you.",
     you: "Tap Keep my information or Google is right.",
   },
   posts: {
@@ -118,8 +123,8 @@ const LINES: Record<JobId, Omit<Home2Job, "id" | "title">> = {
   },
   ai: {
     kabsi:
-      "Kabsi asks ChatGPT and Perplexity the questions your customers ask. It shows whether you are named, what is said, and what to fix on your listing.",
-    you: "Approve the fix it suggests.",
+      "Kabsi asks ChatGPT and Perplexity questions like the ones your customers ask. It shows whether you are named, what is said, and what to fix on your listing.",
+    you: "Approve the fix on Google, or check what it points to.",
     plan: "3 questions a month on Essentials, 10 every 2 weeks on Pro.",
     note: "No one can promise an AI assistant will recommend you.",
   },
@@ -142,8 +147,8 @@ export const HOME2_EXAMPLES = {
     owner: { label: "What you told Kabsi", day: "Monday", value: "10:00 to 16:00" },
   },
   post: {
-    owner: "New balayage colours this month.",
-    post: "New balayage colours this month. Saturdays are open.",
+    owner: "New balayage colours this month. Open Saturdays.",
+    post: "New balayage colours this month at Hollis Hair, and we are open on Saturdays. Come and see them.",
   },
 } as const;
 
@@ -161,7 +166,7 @@ export const HOME2_CONTROL = {
     },
     {
       title: "Remove Kabsi any time",
-      text: "On Google, in People and access. Kabsi stops at once.",
+      text: "On Google in People and access, or in Kabsi's Settings.",
     },
   ],
 } as const;
@@ -176,7 +181,7 @@ export const HOME2_START = {
     { title: "Add Kabsi as a Manager on Google", text: "About 2 minutes, with each step shown." },
     {
       title: "Say yes on WhatsApp",
-      text: "Kabsi starts the work and asks before anything goes live.",
+      text: "Once your access is checked, Kabsi starts and asks before anything goes live.",
     },
   ],
 } as const;
@@ -187,7 +192,7 @@ export const HOME2_TRADES = {
   title: "For your kind of business.",
   mark: "your kind",
   /** Voice notes join this line once they are switched on (facts 01: not on yet; docs/site4/home.md section 7). */
-  line: "Kabsi works wherever your customers use Google. You can write to Kabsi on WhatsApp in your own language. The website is in English.",
+  line: "Kabsi works for a verified Google listing in any country. On WhatsApp, Kabsi's assistant answers in the language you write in. The website is in English.",
   /** Each slug is an indexed industry page (tests/home2.test.ts). */
   chips: [
     { slug: "barbershop", label: "Barbershop" },
@@ -217,7 +222,7 @@ export const HOME2_FAQ = [
   },
   {
     q: "What is a Manager on Google, and can I remove Kabsi?",
-    a: "A Manager is Google's own way to let a service help with your listing. You add Kabsi as a Manager and never share your password. You stay the owner, and you can remove Kabsi on Google any time. Kabsi stops at once.",
+    a: "A Manager is Google's own way to let a service help with your listing. You add Kabsi as a Manager and never share your password. You stay the owner, and you can remove Kabsi on Google or in Kabsi's Settings any time.",
   },
   {
     q: "Does it work in my country?",

@@ -18,11 +18,11 @@ Owner words, as the brief says: "your Google listing", "Google Maps", "reviews".
 - The one primary action: the free check's business search (02:8), with the note "Free for 14 days once Kabsi is connected. No card." (`TRIAL_LINE`, 02:14).
 - Second link: "See how it works" (02:8).
 - Visual: one WhatsApp thread labelled Example, in the Look 2 style (COPY.md 77, the real reply words of `supabase/functions/_shared/whatsapp/say.ts`, `agent.ts` and `deliver.ts`), one day at the Example salon:
-  1. 08:12, star marker: "New 5-star review · Hollis Hair" / "From Chloe B." / quote "Amber did a lovely colour. Booked again." / "Kabsi's reply:" / quote "Thank you, Chloe. We will tell Amber. See you in six weeks." / "Post this reply on Google?" Buttons: Approve, Edit on kabsi.co.
+  1. 08:12, star marker: "New 5-star review · Hollis Hair" / "From Chloe B." / quote "Amber did a lovely colour. Booked again." / "Kabsi's reply:" / quote "Thank you, Chloe. We will tell Amber. See you at your next visit." / "Post this reply on Google?" Buttons: Approve, Edit on kabsi.co.
   2. 11:40, the owner: "Closed Monday"
   3. 11:40, clock marker: "New hours for Google · Hollis Hair" / "Monday 23 November: closed all day." / "Kabsi sets them on Google after your yes." Buttons: Approve, Edit on kabsi.co. (A typed hours change becomes dated hours for a yes: `agent.ts` hoursShown; 01:73 "We are closed Friday becomes an hours change to approve".)
-  4. 15:05, the owner: a photo with "New balayage colours this month."
-  5. 15:06, picture marker: "Post ready for Google · Hollis Hair" / quote "New balayage colours this month. Saturdays are open." / "Post it on your Google profile?" Buttons: Approve, Edit on kabsi.co. (A photo with words becomes a post with that photo for the owner's yes, 04:7.)
+  4. 15:05, the owner: a photo with "New balayage colours this month. Open Saturdays."
+  5. 15:06, picture marker: "Post ready for Google · Hollis Hair" / quote "New balayage colours this month at Hollis Hair, and we are open on Saturdays. Come and see them." / "Post it on your Google profile?" Buttons: Approve, Edit on kabsi.co. (A photo with words becomes a post with that photo for the owner's yes, 04:7.)
   - Screen reader caption: "Example: one day of Kabsi messages to an invented salon on WhatsApp: a new 5-star review with a reply to approve, the owner's "Closed Monday" turned into hours for Google, and a photo turned into a Google post. Each waits for the owner's Approve."
 
 ## 2. The four jobs (a strip under the hero)
@@ -38,7 +38,7 @@ Screen reader heading: "What Kabsi does for you".
 ## 3. The problem, in owner words
 
 - Headline: "Customers decide in seconds." (bar on "in seconds.")
-- Line: "They pick a business on Google Maps and, more and more, by asking an AI assistant. They go by what they see. Most owners have no time to keep up."
+- Line: "They pick a business on Google Maps, and some ask an AI assistant. They go by what they see, and keeping it all right takes time you rarely have."
   - No number, no statistic (plan 2.11). The four things are what Kabsi works on: reviews and replies (04:32), hours (04:35), photos (02:10), and the AI answer (01:67).
 - Four small cards, "What they see":
   - "Stars and replies" / "Is every review answered?"
@@ -51,12 +51,12 @@ Screen reader heading: "What Kabsi does for you".
 Headline: "What Kabsi does, and what you do." (bar on "what you do."). Each block: the job as its title, "Kabsi" and what it does, "You" and the one tap, and a small Example.
 
 1. Reviews answered
-   - Kabsi: "Kabsi drafts a reply to every new review, in your tone and in the review's language." (04:32; tone and the last five approved replies, 13:115; the reviewer's language, 13:135)
+   - Kabsi: "Kabsi drafts replies to your new reviews, in your tone and in the review's language." (04:32; tone and the last five approved replies, 13:115; the reviewer's language, 13:135)
    - You: "Read it and tap Approve." (04:5, Approve on WhatsApp, 02:25)
    - Rule line: "Kabsi never offers anything for a review and never hides one." (13:171 "never filters or rewards reviewers"; Google's review rules)
    - Example: a 4-star review "Good cut, a short wait." with the reply "Thank you, Sam. Sorry for the wait. See you next time."
 2. Listing kept right
-   - Kabsi: "Kabsi checks your hours, holiday hours, photos and details every day. When Google shows something different from what you told Kabsi, it asks you." (04:35 Google Protection; holiday hours five days before a bank holiday, 04:7; photos checked, 13:241)
+   - Kabsi: "Kabsi checks your hours and details on Google every day, and asks about holiday hours before each bank holiday. When Google shows something different from what you told Kabsi, it asks you." (04:35 Google Protection; holiday hours five days before a bank holiday, 04:7; photos checked, 13:241)
    - You: "Tap Keep my information or Google is right." (04:35)
    - Example: "What Google shows: Monday, Closed" beside "What you told Kabsi: Monday, 10:00 to 16:00".
    - Note for lane R: the brief's "changes others suggest on Google" is written as "when Google shows something different", because the facts say Kabsi compares the listing with what the owner confirmed (04:35); they do not say Kabsi reads Google's suggested edits.
@@ -64,10 +64,10 @@ Headline: "What Kabsi does, and what you do." (bar on "what you do."). Each bloc
    - Kabsi: "Send a photo with a few words on WhatsApp. Kabsi writes a Google post with that photo." (04:7)
    - You: "Read it and tap Approve." (04:7)
    - Plan line: "2 posts a month on Essentials, every week on Pro." (02:10)
-   - Example: the owner's photo with "New balayage colours this month." and the post ready.
+   - Example: the owner's photo with "New balayage colours this month. Open Saturdays." and the post ready.
 4. Found in AI answers
-   - Kabsi: "Kabsi asks ChatGPT and Perplexity the questions your customers ask. It shows whether you are named, what is said, and what to fix on your listing." (01:67; a fact stated differently opens a task to fix it on the listing, 13:158)
-   - You: "Approve the fix it suggests." (13:158: the fix on the Google profile goes through the owner's yes, 04:5)
+   - Kabsi: "Kabsi asks ChatGPT and Perplexity questions like the ones your customers ask. It shows whether you are named, what is said, and what to fix on your listing." (01:67; a fact stated differently opens a task to fix it on the listing, 13:158)
+   - You: "Approve the fix on Google, or check what it points to." (13:158: the fix on the Google profile goes through the owner's yes, 04:5)
    - Plan line: "3 questions a month on Essentials, 10 every 2 weeks on Pro." (01:67, 01:97, 02:10)
    - Honest line: "No one can promise an AI assistant will recommend you." (13:158)
    - Example: the question "Which hair salon near Gloucester Road in Bristol takes late appointments?", "Asked ChatGPT on 2 Nov 2026.", the Example answer, and "Answers we get from ChatGPT and Perplexity directly, which can differ from what their apps show." (the existing Example, 04:15, 13:158)
@@ -79,7 +79,7 @@ Headline: "What Kabsi does, and what you do." (bar on "what you do."). Each bloc
 - Three points:
   - "No password shared" / "Kabsi uses Google's own Manager access." (13:24, 13:171, 02:20)
   - "Nothing goes live without your yes" / "Every reply, post and change waits for your tap." (approved line; 04:5)
-  - "Remove Kabsi any time" / "On Google, in People and access. Kabsi stops at once." (13:197, 13:200)
+  - "Remove Kabsi any time" / "On Google in People and access, or in Kabsi's Settings." (13:197, 13:200)
 - Example weekly report (the existing sample): "Every Monday", "Your weekly report", "6 replies live on Google", "1 post", "Details checked every day", "One next step: Add 3 photos of the team at work.", "What Kabsi did, what waits for your yes, and one next step." (04:5)
 - Link: "See how to remove Kabsi on Security".
 
@@ -88,14 +88,14 @@ Headline: "What Kabsi does, and what you do." (bar on "what you do."). Each bloc
 - Headline: "How it starts." (bar on "starts.")
   1. "Run the free check" / "About 30 seconds. No access needed." (04: the free check; `CHECK_HERO` "About 30 seconds, and no access needed.")
   2. "Add Kabsi as a Manager on Google" / "About 2 minutes, with each step shown." (the free check result's "It takes about two minutes", COPY.md section on Start free; 05: the guided Manager step with the recording)
-  3. "Say yes on WhatsApp" / "Kabsi starts the work and asks before anything goes live." (02:25, 04:5; the trial starts when access works, 02:14)
+  3. "Say yes on WhatsApp" / "Once your access is checked, Kabsi starts and asks before anything goes live." (02:25, 04:5; the trial starts when access works, 02:14)
 
 ## 7. For your kind of business
 
 - Headline: "For your kind of business." (bar on "your kind")
-- Line: "Kabsi works wherever your customers use Google. You can write to Kabsi on WhatsApp in your own language. The website is in English."
+- Line: "Kabsi works for a verified Google listing in any country. On WhatsApp, Kabsi's assistant answers in the language you write in. The website is in English."
   - Any country (13:9, 13:27, 13:378). Own language on WhatsApp: Kabsi's assistant answers in the language the person writes in (`supabase/functions/_shared/nora-rules.ts` line 59) and a post is written in the language of the owner's note (`supabase/functions/_shared/posts.ts` line 72); added to facts 04 by this task. The website is in English (13:141).
-  - Voice notes: not in the line while voice notes are not switched on (01:73). When Voice 2 is merged and the facts say voice notes are on, the line becomes "You can write to Kabsi, or send a voice note, on WhatsApp in your own language." (a docs/LATER.md row if Voice 2 is not merged before this task).
+  - Voice notes: not in the line while voice notes are not switched on (01:73). When Voice 2 is merged and the facts say voice notes are on, the line can add "You can also send a voice note." (a docs/LATER.md row).
 - Chips to the industry pages: Barbershop, Hair salon, Nail salon, Restaurant, Cafe, Bakery, Gym, Clinic, Garage, Florist, and "Every kind of business" (to /for).
 
 ## 8. Plans preview
@@ -107,7 +107,7 @@ Headline: "What Kabsi does, and what you do." (bar on "what you do."). Each bloc
 
 - "Do I need to be good with technology?" / "No. If you can use WhatsApp, you can use Kabsi. Adding Kabsi on Google is one guided step, and after that you answer with a tap." (02:25, 05: the guided steps)
 - "Will Kabsi post anything without asking me?" / "No. Every reply, post and change waits for your yes. After you tap Approve you have 10 seconds to undo it." (04:5, 01:57; the 10 second undo, COPY.md 77)
-- "What is a Manager on Google, and can I remove Kabsi?" / "A Manager is Google's own way to let a service help with your listing. You add Kabsi as a Manager and never share your password. You stay the owner, and you can remove Kabsi on Google any time. Kabsi stops at once." (13:24, 13:194, 13:197, 13:200)
+- "What is a Manager on Google, and can I remove Kabsi?" / "A Manager is Google's own way to let a service help with your listing. You add Kabsi as a Manager and never share your password. You stay the owner, and you can remove Kabsi on Google or in Kabsi's Settings any time." (13:24, 13:194, 13:197, 13:200)
 - "Does it work in my country?" / "Yes. Kabsi works for a verified Google listing in any country, at the same prices. Replies follow each reviewer's language. The website is in English." (13:9, 13:378, 13:135, 13:141)
 - "Will Kabsi make ChatGPT recommend me?" / "No one can promise that. Kabsi checks what ChatGPT and Perplexity say about you, and helps you fix your listing where an answer gets a fact wrong." (13:158)
 
@@ -123,3 +123,19 @@ The shared closing check (`closing.tsx`), unchanged: "Check my business free" wi
 ## How it works, aligned
 
 The four groups at the top of How it works (`HandlesGroups`, "What Kabsi does") take the same four jobs and the same first lines as section 4: Reviews answered, Listing kept right, Posts from your photos, Found in AI answers.
+
+## Independent review before the merge (11 Nov 2026)
+
+A fresh agent read every line against the facts, Google's review rules and the copy rules. Its findings and what changed:
+1. "photos and holiday hours checked every day" said more than the facts (photos are checked when sent; holiday hours are asked before each bank holiday): rewritten.
+2. How it starts: the trial and the work start once access is checked (02:14), so step 3 says "Once your access is checked". Setup itself connects WhatsApp before the Manager step (05:19); lane R's three steps are kept as the owner's view of it.
+3. "a reply to every new review": a review that needs care gets no draft (01:72), so "replies to your new reviews".
+4. "Found in AI answers" can read as a result: kept as lane R's word, with the honest line in its block; for lane R to confirm.
+5. "the questions your customers ask": Kabsi writes questions in customers' words (01:67), so "questions like the ones".
+6. "Approve the fix it suggests": a fix off Google is the owner's to check (13:158), so "Approve the fix on Google, or check what it points to."
+7. "more and more" and "Most owners": unsourced, removed.
+8. The Example post added "Saturdays are open", which the owner had not said (posts are grounded in the owner's words, `posts.ts`): the owner's line now says "Open Saturdays."
+9. The Example reply's "See you in six weeks" added a fact: now "See you at your next visit."
+10. "Kabsi works wherever your customers use Google" and "write in your own language": Kabsi needs a verified listing (13:9), and typed hours changes are read in English (`hours-parse.ts`): the line now says what is true.
+11. "Kabsi stops at once" is said of Disconnect in Kabsi (13:200), not of removal on Google: removed from the control point and the FAQ answer.
+

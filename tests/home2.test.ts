@@ -72,7 +72,7 @@ describe("Home 2: the hero", () => {
     const owner = HOME2_THREAD.filter((m) => "owner" in m);
     expect(owner.map((m) => ("owner" in m ? m.text : ""))).toEqual([
       "Closed Monday",
-      "New balayage colours this month.",
+      "New balayage colours this month. Open Saturdays.",
     ]);
     // The picture is drawn by the lower sections' code (kept from the server HTML on a first visit) inside the hero.
     expect(read("src/components/kabsi/d9-home-lower.tsx")).toMatch(
