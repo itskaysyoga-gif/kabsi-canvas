@@ -278,17 +278,3 @@ export async function loadFoundingPriceLeft(): Promise<number | null> {
     return null;
   }
 }
-
-/** Partners 2: one visit through a partner link (?via=P-CODE), counted once per visit; the answer is never shown. */
-export async function countPartnerVisit(code: string): Promise<void> {
-  try {
-    await fetch(`${supabaseUrl}/functions/v1/programs/partner/visit`, {
-      method: "POST",
-      headers: { "content-type": "application/json", ...anonHeaders },
-      body: JSON.stringify({ code }),
-      keepalive: true,
-    });
-  } catch {
-    /* a visit that is not counted changes nothing for the visitor */
-  }
-}
