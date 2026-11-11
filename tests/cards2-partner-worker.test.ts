@@ -140,7 +140,7 @@ describe("the partner's card links words", () => {
 describe("the kv-sync trigger follows a change of partner", () => {
   it("fires on partner_id, on top of the live conditions", async () => {
     const { readFileSync } = await import("node:fs");
-    const sql = readFileSync("supabase/migrations/20261111130000_cards2_partner.sql", "utf8");
+    const sql = readFileSync("supabase/migrations/20261111070159_cards2_partner.sql", "utf8");
     const fn = sql.slice(sql.indexOf("create or replace function public.cards_kv_sync()"));
     for (const col of ["status", "destination", "location_id", "page_mode", "partner_id"])
       expect(fn).toContain(`old.${col} is distinct from new.${col}`);
