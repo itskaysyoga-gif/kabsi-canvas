@@ -87,7 +87,8 @@ describe("Sync 2a part 2", () => {
       /create (or replace )?function private\.produce_jobs\(\)/i.test(sql(f)),
     );
     const newest = defining[defining.length - 1]!;
-    expect(newest).toMatch(/sync2a_retire_renewals/);
+    // Fix 5 replaced it once more (one offer added, partner_notices); the renewal line is still gone.
+    expect(newest).toMatch(/sync2a_retire_renewals|fix5_partner_notices_step/);
     expect(sql(newest).replace(/^--.*$/gm, "")).not.toMatch(/renewal_reminders/);
     expect(read("supabase/functions/api/jobs.ts")).not.toMatch(/renewal_reminders|renewalsJob/);
     const cron = read("supabase/functions/api/cron.ts");
