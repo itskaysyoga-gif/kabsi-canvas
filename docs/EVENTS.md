@@ -113,7 +113,7 @@ The staff WhatsApp morning digest (08:00 Beirut, and the answer to "today") ends
 - Who is counted: every real business (not a demo business, not a kabsi.co test account) whose first `google_access_granted` audit record is at least 24 hours and at most 30 days old.
 - What counts as the first approved Google action: an `approval` audit record by a person (a review reply, a post, a photo or a profile change; each one is a write to Google, in any channel) made within 24 hours after that access record.
 - With no business in that window the line says "no business to measure yet" and never "0 percent".
-- Where: `private.first_action_share()` (migration `20261111061200_growth1_first_action_share.sql`), read through `public.whatsapp_staff_summary()`; the words are `firstActionText` in `supabase/functions/_shared/whatsapp/staff-alerts.ts`. Counts only; no business, person or customer detail.
+- Where: `private.first_action_share()` (migration `20261111063702_growth1_first_action_share.sql`), read through `public.whatsapp_staff_summary()`; the words are `firstActionText` in `supabase/functions/_shared/whatsapp/staff-alerts.ts`. Counts only; no business, person or customer detail.
 - On 11 Nov 2026 the real answer was 0 of 1 (one real business has had access; its first approval came later).
 
 ## Attribution (20.3)
