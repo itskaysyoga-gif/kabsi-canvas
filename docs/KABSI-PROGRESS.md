@@ -63,8 +63,8 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 ## Recent entries (newest first)
 
 - 11 Nov 2026, Home 2 (R-158 item 4): a new Home with AI answers back on it; copy with sources in `docs/site4/home.md`; PR 580. `2026-11-11-home2.md`.
-- 11 Nov 2026, Cards 2: PRs 572 and 574. `2026-11-11-cards2.md`.
-- Older entries (Growth 1 `2026-11-11-growth1.md`; Partners 3 `2026-11-11-partners3.md`; Partners 2 `2026-11-10-partners2.md`; Outbound 2 `2026-11-10-outbound2.md`; Site 3a `2026-11-10-site3a.md`; Clean 4 `2026-11-10-clean4.md`; Look 2b `2026-11-10-look2b.md`; Founding 1 `2026-11-10-founding1.md`; RB-T `2026-11-10-rb-t.md`; Safe 1 `2026-11-10-safe1.md`; Signup 1 `2026-11-10-signup1.md`; Look 2 `2026-11-10-look2.md`; Plan 1 `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
+- 11 Nov 2026, Fix 5 (R-158 item 2): programs_daily fixed and run, partner emails on their own step (PR 577); sign-in, Kapso and partner pages in part 2. `2026-11-11-fix5.md`.
+- Older entries (Cards 2 `2026-11-11-cards2.md`; Growth 1 `2026-11-11-growth1.md`; Partners 3 `2026-11-11-partners3.md`; Partners 2 `2026-11-10-partners2.md`; Outbound 2 `2026-11-10-outbound2.md`; Site 3a `2026-11-10-site3a.md`; Clean 4 `2026-11-10-clean4.md`; Look 2b `2026-11-10-look2b.md`; Founding 1 `2026-11-10-founding1.md`; RB-T `2026-11-10-rb-t.md`; Safe 1 `2026-11-10-safe1.md`; Signup 1 `2026-11-10-signup1.md`; Look 2 `2026-11-10-look2.md`; Plan 1 `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
 
 ## How a session updates this page
 
