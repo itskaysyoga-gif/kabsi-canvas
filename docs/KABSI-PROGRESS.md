@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 11 Nov 2026 (Growth 1, Cards 2, Partners 3). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 11 Nov 2026. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
