@@ -172,10 +172,12 @@ describe("Home 2: the copy rules", () => {
     );
     expect(readdirSync("public").join(" ")).not.toMatch(/chatgpt|perplexity/i);
   });
-  it("leaves voice notes out until they are switched on (facts 01)", () => {
+  // Voice 2 (11 Nov 2026, R-158 item 3): voice notes are on from today, so facts 01 no longer says "not on". Home 2 still leaves them
+  // out of its own line; adding them is a Home decision (docs/LATER.md, the Home 2 row).
+  it("keeps voice notes out of the trades line, and facts 01 says they are on (Voice 2)", () => {
     expect(HOME2_TRADES.line).not.toMatch(/voice/i);
     expect(read("knowledge/facts/01-decisions-coming-and-changing.md")).toMatch(
-      /Ask Kabsi with voice notes \(built 26 Oct 2026, V3; not on/,
+      /Ask Kabsi with voice notes \(on for every business from 11 Nov 2026/,
     );
   });
 });

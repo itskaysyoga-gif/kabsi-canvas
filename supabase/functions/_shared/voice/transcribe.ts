@@ -8,7 +8,10 @@
 // logged and never sent to Sentry, PostHog or any tool; it goes to the WhatsApp agent and nowhere else.
 import { VOICE_MAX_BYTES } from "../whatsapp/media.ts";
 
-export type Transcript = { ok: true; text: string; language: string | null } | { ok: false; reason: "not_configured" | "empty" | "too_big" | "failed" };
+/** `seconds` is what the provider says it transcribed (audio_duration_secs), when it says; `limit` is a daily limit (guard.ts). */
+export type Transcript =
+  | { ok: true; text: string; language: string | null; seconds?: number | null }
+  | { ok: false; reason: "not_configured" | "empty" | "too_big" | "failed" | "limit" };
 
 export interface Transcriber {
   readonly name: "elevenlabs" | "mock";
@@ -16,10 +19,13 @@ export interface Transcriber {
 }
 
 const SCRIBE_URL = "https://api.elevenlabs.io/v1/speech-to-text";
-export const DEFAULT_SCRIBE_MODEL = "scribe_v2";
+// Voice 2: ElevenLabs' current model for recorded audio is scribe_v3 (docs, models page, 11 Nov 2026: "successor to scribe_v2", the same
+// endpoint and parameters; scribe_v2 stays available). VOICE_SCRIBE_MODEL in Supabase secrets can name another without a deploy.
+export const DEFAULT_SCRIBE_MODEL = "scribe_v3";
 
-/** ElevenLabs Scribe. One request per note: the file and the model, language detected by the model, no speaker labels and no
- *  sound tags (so the text is just what was said). `fetcher` is a dep, so tests never reach the network. */
+/** ElevenLabs Scribe. One request per note: the file and the model, the language left out so the model detects it (also within one
+ *  note, for Arabic mixed with English), no speaker labels and no sound tags (so the text is just what was said). `fetcher` is a
+ *  dep, so tests never reach the network. */
 export function scribe(apiKey: string, o: { model?: string; fetcher?: typeof fetch } = {}): Transcriber {
   const f = o.fetcher ?? fetch;
   return {
@@ -41,10 +47,13 @@ export function scribe(apiKey: string, o: { model?: string; fetcher?: typeof fet
         await res.body?.cancel();
         return { ok: false, reason: "failed" };
       }
-      const body = (await res.json().catch(() => null)) as { text?: unknown; language_code?: unknown } | null;
+      const body = (await res.json().catch(() => null)) as { text?: unknown; language_code?: unknown; audio_duration_secs?: unknown } | null;
       const text = typeof body?.text === "string" ? body.text.replace(/\s+/g, " ").trim() : "";
+      // A 200 with no body is the provider failing, not a silent note.
+      if (!body) return { ok: false, reason: "failed" };
+      const seconds = typeof body.audio_duration_secs === "number" && Number.isFinite(body.audio_duration_secs) ? body.audio_duration_secs : null;
       if (!text) return { ok: false, reason: "empty" };
-      return { ok: true, text: text.slice(0, 4000), language: typeof body?.language_code === "string" ? body.language_code.slice(0, 8) : null };
+      return { ok: true, text: text.slice(0, 4000), language: typeof body.language_code === "string" ? body.language_code.slice(0, 8) : null, seconds };
     },
   };
 }

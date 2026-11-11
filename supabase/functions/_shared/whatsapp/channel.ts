@@ -47,6 +47,8 @@ export type Inbound = {
   forwarded: boolean;
   /** Look 2: the words came from a tap on a request list row ("#12"). They open that request and never answer a question. */
   listRow?: boolean;
+  /** Voice 2: the words are the transcript of a voice note. Never the person's yes, no, number or code (router.ts). */
+  fromVoice?: boolean;
 };
 export type StatusEvent = { messageId: string; status: "sent" | "delivered" | "read" | "failed"; error: string | null;
   /** RB-F: Meta's price facts for the message (statuses[].pricing), when the receipt carries them. No person, no text. */

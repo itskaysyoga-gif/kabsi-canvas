@@ -68,6 +68,15 @@ Deno.test("signup1 agent: STOP still comes first; the sign-in comes before every
   assert.equal(w2.aiCalls, 0);
 });
 
+// Voice 2: the words of a voice note are never the person's own sign-in code either.
+Deno.test("signup1 agent: a spoken sign-in is ignored", async () => {
+  const w = new World();
+  const log: string[] = [];
+  const r = await receive({ ...w.deps(), signin: fakeSignin(log) }, { ...msg(w, PHONES.unknown, { text: "Kabsi sign in AB23CD" }), fromVoice: true });
+  assert.equal(r, "signin_forwarded");
+  assert.deepEqual(log, [], "nothing claimed");
+});
+
 Deno.test("signup1 agent: a forwarded sign-in is ignored; other words go on as before", async () => {
   const w = new World();
   const log: string[] = [];

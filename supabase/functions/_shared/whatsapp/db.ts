@@ -20,6 +20,7 @@ import { flush, type Out, type OutDb, type OutRow } from "./outbox.ts";
 import type { SendState } from "./policy.ts";
 import type { Who } from "./roles.ts";
 import { suggestKeyword } from "./map.ts";
+import { transcribeNote } from "../voice/service.ts";
 import { pickTranscriber } from "../voice/transcribe.ts";
 import { onboardingHooks } from "../onboarding/db.ts";
 import { sensitivity } from "../review-growth/sensitive.ts";
@@ -308,16 +309,23 @@ export async function agentDeps(): Promise<AgentDeps> {
         return { ok: false, reason: String((e as Error)?.message ?? e).slice(0, 80) };
       }
     },
-    // V3 (28.3): ElevenLabs Scribe when ELEVENLABS_API_KEY is set, else the mock, which reads only fixtures and tells owners that
-    // voice notes are not switched on. A ceiling per phone a day and for the whole number keeps the cost small.
-    // V4: the key alone does not switch them on. app_settings voice_notes is 'on' only after the 20-note test passed in every
-    // language (POST /whatsapp/staff/voice-eval); until then owners are told voice notes are not switched on yet.
-    transcribe: async (audio, mime, phone) => {
-      const { data: on } = await admin().from("app_settings").select("value").eq("key", "voice_notes").maybeSingle();
-      if (on?.value !== "on") return { ok: false, reason: "not_configured" };
-      if (!(await rateLimit(`wa_voice:${(await sha256Hex(`wa_voice:${phone}`)).slice(0, 24)}`, 20, 86400)) || !(await rateLimit("wa_voice_all", 400, 86400))) return { ok: false, reason: "failed" };
-      const t = pickTranscriber({ key: Deno.env.get("ELEVENLABS_API_KEY") });
-      return await t.transcribe(audio, mime);
+    // V3 (28.3), Voice 2 (R-158 item 3): ElevenLabs Scribe (voice/transcribe.ts) when ELEVENLABS_API_KEY is set, else the mock, which
+    // reads only fixtures and tells owners that voice notes are not switched on. Voice notes are on for every business and every phone
+    // once app_settings voice_notes is 'on' (set after the Voice 2 code is deployed); until then owners are told they are not
+    // switched on yet. The day limits (30 notes a business, 5 a phone Kabsi does not know), the seconds of the day, and the failures
+    // in a row are in voice/service.ts and public.voice_record.
+    transcribe: async (audio, mime, who) => {
+      const phoneKey = (await sha256Hex(`wa_voice:${who.phone}`)).slice(0, 24);
+      return await transcribeNote(audio, mime, { known: who.known, locationId: who.locationId, phoneKey }, {
+        enabled: async () => (await admin().from("app_settings").select("value").eq("key", "voice_notes").maybeSingle()).data?.value === "on",
+        hit: (key, max, windowSeconds) => rateLimit(key, max, windowSeconds),
+        provider: () => pickTranscriber({ key: Deno.env.get("ELEVENLABS_API_KEY"), model: Deno.env.get("VOICE_SCRIBE_MODEL") }),
+        record: async (seconds, outcome) => {
+          const { error } = await admin().rpc("voice_record", { p_seconds: seconds, p_outcome: outcome });
+          // Counts only. If the record breaks there are no usage rows, no 60 minute alert and no failure streak, so say so in the log.
+          if (error) log("voice_record", { ok: false, err: error.message });
+        },
+      });
     },
     firstMap,
     confirmKeyword,

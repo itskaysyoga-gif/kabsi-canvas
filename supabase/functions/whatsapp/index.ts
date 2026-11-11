@@ -431,18 +431,16 @@ async function staffAction(action: string) {
 }
 
 /** The 20-note voice test (V4 item 0). Runs once a day at most (it spends a few cents), in the background, and writes the
- *  result to app_settings voice_eval_last (scores only, never the audio or the transcripts). With {"apply": true} it also sets
- *  voice_notes to 'on' when every language passed, and to 'off' when any failed. */
+ *  result to app_settings voice_eval_last (scores only, never the audio or the transcripts). Voice 2 (R-158 item 3): voice notes
+ *  are on whatever the scores, so this op only measures; it no longer switches voice_notes (the old {"apply": true} is ignored). */
 async function voiceEval(req: Request): Promise<Response> {
   const key = Deno.env.get("ELEVENLABS_API_KEY");
   if (!key) return json({ ok: false, error: "no_key" }, 409);
-  const body = (await req.json().catch(() => ({}))) as { apply?: boolean };
   if (!(await rateLimit("voice_eval", 1, 86400, { failClosed: true }))) return json({ ok: false, error: "ran_today" }, 429);
   const work = (async () => {
     const r = await runVoiceEval(key, VOICE_NOTES);
     const out = { at: new Date().toISOString(), pass: r.pass, table: voiceTable(r), langs: r.langs, rows: r.rows, chars: r.chars, seconds: r.seconds, stopped: r.stopped };
     await admin().from("app_settings").upsert({ key: "voice_eval_last", value: JSON.stringify(out) });
-    if (body.apply) await admin().from("app_settings").upsert({ key: "voice_notes", value: r.pass ? "on" : "off" });
   })().catch((e) => captureError("whatsapp", e, { step: "voice_eval" }));
   if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) EdgeRuntime.waitUntil(work); else await work;
   return json({ ok: true, started: true, notes: VOICE_NOTES.length });

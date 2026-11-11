@@ -114,17 +114,21 @@ export function parse(m: Inbound): Command {
   // a question with a number; it goes the free-text path instead. RB-E (lane R on F-1's LATER row): a forwarded START is not
   // the person's own opt-in either, so it never turns messages back on after STOP. Scan and partner codes stay as they are.
   const fwd = m.forwarded === true;
-  if (!fwd && START.has(t)) return { k: "start" };
-  const staff = fwd ? null : STAFF_CODE.exec(raw);
+  // Voice 2 (R-158 item 3): the words of a voice note are heard by a machine, so they are never the person's yes, no, number, code or
+  // opt-in either. Nothing is approved, bound or switched back on by a voice note; the person taps the button or types it.
+  // (STOP still wins: a misheard stop is easy to undo, a misheard yes is not.)
+  const vox = m.fromVoice === true;
+  if (!fwd && !vox && START.has(t)) return { k: "start" };
+  const staff = fwd || vox ? null : STAFF_CODE.exec(raw);
   if (staff) return { k: "bind", code: `STAFF ${staff[1].toUpperCase()}` };
-  const owner = fwd ? null : OWNER_CODE.exec(raw);
+  const owner = fwd || vox ? null : OWNER_CODE.exec(raw);
   if (owner) return { k: "bind", code: owner[1] };
-  const scan = SCAN_CODE.exec(raw);
+  const scan = vox ? null : SCAN_CODE.exec(raw);
   if (scan) return { k: "scan_code", code: `KAB-${scan[1].toUpperCase()}`, rest: raw.replace(scan[0], "").trim() };
-  const partner = PARTNER_CODE.exec(raw);
+  const partner = vox ? null : PARTNER_CODE.exec(raw);
   if (partner) return { k: "partner_code", code: partner[1].toUpperCase() };
-  if (fwd && YES.has(t)) return { k: "free", text: raw.slice(0, 2000), forwardedAnswer: true, forwardedYes: true };
-  if (fwd && (NO.has(t) || /^\d{1,2}$/.test(t))) return { k: "free", text: raw.slice(0, 2000), forwardedAnswer: true };
+  if ((fwd || vox) && YES.has(t)) return { k: "free", text: raw.slice(0, 2000), forwardedAnswer: true, forwardedYes: true };
+  if ((fwd || vox) && (NO.has(t) || /^\d{1,2}$/.test(t))) return { k: "free", text: raw.slice(0, 2000), forwardedAnswer: true };
   if (YES.has(t)) return { k: "yes" };
   if (NO.has(t)) return { k: "no" };
   if (/^\d{1,2}$/.test(t)) return { k: "number", n: Number(t) };
@@ -132,6 +136,8 @@ export function parse(m: Inbound): Command {
   const exact = /^(?:reply|respuesta|رد)\s*:\s*([\s\S]{2,4000})$/i.exec(raw);
   if (exact) return { k: "tool", tool: "exact_reply", arg: exact[1].trim() };
   for (const [re, tool, arg] of WORDS) {
+    // Voice 2: Kabsi's staff commands (pause, resume, payouts, reset) are typed, never spoken: a misheard word must not run one.
+    if (vox && tool.startsWith("staff_")) continue;
     const hit = re.exec(t);
     if (hit) return { k: "tool", tool, arg: arg ?? (tool === "billing" ? t : hit[1] && tool.startsWith("staff_") ? raw.trim().split(/\s+/).slice(1).join(" ") : undefined) };
   }
