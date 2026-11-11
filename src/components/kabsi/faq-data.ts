@@ -271,7 +271,7 @@ export const PARTNER_FAQ = [
   // Partners 1 (R-148, docs/COPY.md section 74).
   {
     q: "When do partner links switch on?",
-    a: "When card payments open. You can join now at kabsi.co/partners/join, and the first 20 partners Kabsi reviews are Founding Partners.",
+    a: "On launch day, when card payments open. You can join now at kabsi.co/partners/join, and the first 20 partners Kabsi reviews are Founding Partners.",
   },
   {
     q: "Does Kabsi work with any review card?",

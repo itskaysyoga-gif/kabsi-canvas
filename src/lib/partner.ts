@@ -240,5 +240,5 @@ export const PARTNER_COPY = {
   review: "Kabsi reviews each partner before the first payout.",
   founding: "Founding Partner",
   notPartner: "You are not a Kabsi partner yet.",
-  joinLink: "Join Kabsi Partners",
+  joinLink: "Join in two minutes",
 } as const;

@@ -1,15 +1,6 @@
 // Partners: the programme page, its terms, a partner's own page and the report a partner shares.
-import {
-  ArrowRight,
-  Check,
-  Gift,
-  Globe,
-  MessageCircle,
-  Nfc,
-  QrCode as QrIcon,
-  Video,
-} from "lucide-react";
-import { WHATSAPP_ON } from "@/lib/site";
+import { ArrowRight, Briefcase, Check, Globe, Nfc, Store, Users, Video } from "lucide-react";
+import { PLAN_PRICES, WHATSAPP_ON } from "@/lib/site";
 import { usePartnerPlaces } from "@/lib/public-api";
 import { cn } from "@/lib/utils";
 import { QrCode } from "./d2-parts";
@@ -17,57 +8,73 @@ import { SiteLink } from "./site-link";
 import { PageHero, popCls, stagger } from "./page-hero";
 import { PARTNERS_HERO } from "./hero-lines";
 import { PARTNER_FAQ } from "./faq-data";
-import { ButtonLink, Card, ExampleBadge, Faq, SectionHead } from "./ui";
+import { ButtonLink, Card, ExampleBadge, Faq } from "./ui";
 import { Marked, YellowLabel } from "@/components/kabsi/highlight";
 import { PHOTOS } from "./photos";
 import { SectionPhoto } from "./section-photo";
 
 /* ---------- /partners ---------- */
 
-// Partners 1 (lane R R-148, docs/COPY.md section 74): the page speaks first to sellers of NFC and QR Google review cards,
-// then to local web and social media freelancers. No change to the 25 percent, the trial lengths or when links switch on.
+// Partners 1 (lane R R-148, docs/COPY.md section 74) and Partners 3 (30.50 items 5 to 7, COPY.md section 83): the page
+// speaks first to sellers of NFC and QR Google review cards. Order: the hero, how it works in three steps, the six kinds
+// of partner, the money with an Example on the list price, the five rules, questions, the real count of Founding Partner
+// places, one button. No change to the 25 percent, the trial lengths or when partner links pay.
+
+/** True when card payments are open and partner links pay. Flip it, and the one launch-day line goes, with the Launch gate. */
+const CARDS_OPEN = false;
+/** The one line until card payments open. */
+export const PAYING_LINE = "Partner links start paying on launch day.";
 
 const STEPS = [
   {
-    title: "Join in a few minutes",
+    title: "Join in two minutes",
     text: "Sign in and answer five short questions. Your link and QR code are ready at once.",
   },
   {
-    title: "Add your link to every card you sell",
-    text: "Each business gets a 30 day Kabsi trial instead of 14 days, with no card.",
+    title: "Share your link or put it on your cards",
+    text: "Each business gets a 30 day Kabsi trial instead of 14 days, with no card. Your kit has ready posts and a printable insert.",
   },
   {
-    title: "Get paid on the 5th of each month",
-    text: "25 percent of every payment, for as long as the business stays.",
+    title: "Get paid every month",
+    text: "25 percent of every payment, for as long as the business stays. Paid on the 5th.",
   },
 ];
 
-const GETS: [typeof QrIcon, string][] = [
-  [QrIcon, "Your own link and QR code"],
-  [Gift, "Free checks to send to businesses you know"],
-  [Video, "A kit of ready posts and a short video"],
-  [MessageCircle, "A WhatsApp summary every Monday"],
-];
-
-/** Who it is for: the first segment (R-148 item 1), then the rest of the earlier list. */
-const FIRST: [typeof QrIcon, string, string][] = [
+/** The six kinds of partner (the six of the join form), one short card each: what is special for them. */
+const KINDS: [typeof Nfc, string, string][] = [
   [
     Nfc,
-    "Sellers of NFC and QR review cards",
-    "Your customers already want reviews. Kabsi answers each one.",
+    "Review card sellers",
+    "Every card you sell comes with a 30 day trial. Kabsi answers the reviews whatever card they came from, and your kit has an A6 insert for the box.",
   ],
-  [Globe, "Web and social media freelancers", "You already look after how they look online."],
+  [
+    Globe,
+    "Freelancers and small agencies",
+    "Kabsi does the weekly Google routine for your clients, and each client approves every change. You earn while they stay.",
+  ],
+  [
+    Video,
+    "Creators",
+    "Ready posts with the paid partnership label, and a link for your bio. Your audience starts with 30 days free.",
+  ],
+  [
+    Briefcase,
+    "Consultants and accountants",
+    "Something useful to give a client: their Google profile taken care of, with their yes on every change.",
+  ],
+  [
+    Store,
+    "POS and booking resellers",
+    "Offer it beside your system. Your customers start with 30 days of Pro free, through your link.",
+  ],
+  [
+    Users,
+    "Kabsi customers",
+    "Already using Kabsi? Join to earn 25 percent instead of a free month for each business that pays.",
+  ],
 ];
 
-const ALSO = [
-  "Business setup consultants",
-  "Accountants and bookkeepers",
-  "POS and booking resellers",
-  "Business groups and coworking spaces",
-  "Creators who speak to small business owners",
-];
-
-/** The money (facts 08): the rate, the hold, the payout and what earns nothing. No amounts per partner. */
+/** The money (facts 08): the rate, the hold, the payout and what earns nothing. */
 const MONEY = [
   "Each commission waits 30 days, then clears.",
   "Paid on the 5th of each month, once 25 US dollars has cleared.",
@@ -75,13 +82,21 @@ const MONEY = [
   "Trials and your own business earn nothing.",
 ];
 
+/** The example, on the list price (PLAN_PRICES), before tax. Labelled Example on the page; never a promise (facts 08). */
+const RATE = 0.25;
+const share = (monthly: number) => (monthly * RATE).toFixed(2);
+const EXAMPLE_ROWS = [
+  ["Essentials", PLAN_PRICES.essentialsMonthly],
+  ["Pro", PLAN_PRICES.proMonthly],
+] as const;
+
+/** The five rules (master plan 29.5, in plain words). The partner terms are the full text. */
 export const PARTNER_RULES = [
   "Say it is a paid partnership, every time.",
-  "Never say Kabsi works with Google.",
-  "Never promise rankings, reviews or customers.",
+  "Never say Kabsi works with Google. Never promise rankings, reviews, calls, customers or that a review will be removed.",
   "Follow Google's review rules: never ask only happy customers, never reward a review, never fake one.",
-  "No bulk or unsolicited messages.",
-  "Breaking a rule ends the partnership and its payments.",
+  "No bulk or unsolicited messages, no ads on the Kabsi name, no coupon or cashback sites.",
+  "Use only the claims in your kit. No fake accounts, and no earnings from your own business.",
 ];
 
 /** Partners' hero visual (Partners 1): an Example review card and the Kabsi line that follows a new review. */
@@ -133,7 +148,7 @@ export function PartnersPage() {
           ...PARTNERS_HERO,
           line: `${PARTNERS_HERO.line}${WHATSAPP_ON ? " Everything runs on WhatsApp." : ""}`,
         }}
-        under="You earn 25 percent of every payment, for as long as the business stays. Join now: your link is ready at once."
+        under={CARDS_OPEN ? null : PAYING_LINE}
         action={<JoinButton />}
         visual={<ReviewCardVisual />}
       />
@@ -152,21 +167,27 @@ export function PartnersPage() {
               </li>
             ))}
           </ol>
-          <p className="mt-8 max-w-[40rem] text-body text-text-2">
-            Partner links switch on when card payments open. The first 20 partners Kabsi reviews are
-            Founding Partners.
-          </p>
-          <h3 className="mt-12 text-h3">What partners get</h3>
-          <ul className="mt-5 grid gap-3 sm:grid-cols-2">
-            {GETS.map(([Icon, t]) => (
-              <li
-                key={t}
-                className="flex items-center gap-4 rounded-card border border-line bg-surface-0 p-4"
-              >
-                <span className="grid size-11 shrink-0 place-items-center rounded-full bg-surface-2">
-                  <Icon className="size-5" aria-hidden />
-                </span>
-                <span className="text-body font-semibold">{t}</span>
+        </div>
+      </section>
+
+      <section aria-labelledby="p-suits" className="border-t border-line">
+        <div className="container-kb pt-18 lg:pt-30">
+          <SectionPhoto photo={PHOTOS.salonTablet} />
+        </div>
+        <div className="container-kb pt-10 pb-18 lg:pb-30">
+          <h2 id="p-suits" className="text-h2">
+            <Marked text="Six kinds of partner" mark="partner" />
+          </h2>
+          <ul className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {KINDS.map(([Icon, t, line]) => (
+              <li key={t} className="rounded-card border border-line bg-surface-1 p-5 sm:p-6">
+                <div className="flex items-center gap-3">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-full bg-surface-2">
+                    <Icon className="size-5" aria-hidden />
+                  </span>
+                  <h3 className="text-title">{t}</h3>
+                </div>
+                <p className="mt-3 text-body text-text-2">{line}</p>
               </li>
             ))}
           </ul>
@@ -184,59 +205,48 @@ export function PartnersPage() {
               Of every payment a business you referred makes, for as long as it stays. Extra
               locations count too.
             </p>
+            <ul className="mt-6 space-y-3">
+              {MONEY.map((m) => (
+                <li key={m} className="flex gap-3 rounded-card border border-line p-4 text-body">
+                  <Check className="mt-1 size-5 shrink-0 text-ok" strokeWidth={2.5} aria-hidden />
+                  {m}
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="space-y-3 self-end">
-            {MONEY.map((m) => (
-              <li key={m} className="flex gap-3 rounded-card border border-line p-4 text-body">
-                <Check className="mt-1 size-5 shrink-0 text-ok" strokeWidth={2.5} aria-hidden />
-                {m}
-              </li>
-            ))}
-          </ul>
+          <div className="self-start rounded-panel border border-line p-6">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-h3">On the list price</h3>
+              <ExampleBadge />
+            </div>
+            <dl className="mt-5 divide-y divide-line border-y border-line">
+              {EXAMPLE_ROWS.map(([plan, price]) => (
+                <div key={plan} className="py-4">
+                  <dt className="text-body text-text-2">
+                    A business on {plan} at ${price} a month
+                  </dt>
+                  <dd className="mt-1 font-display text-title font-bold">
+                    You earn ${share(price)} a month
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-4 text-small text-text-2">
+              An example on the list price, before tax, after the 30 day hold and for as long as the
+              business pays. It is not a promise of what you will earn.
+            </p>
+          </div>
         </div>
       </section>
 
-      <section aria-labelledby="p-suits" className="border-t border-line">
-        <div className="container-kb pt-18 lg:pt-30">
-          <SectionPhoto photo={PHOTOS.salonTablet} />
-        </div>
-        <div className="container-kb pt-10 pb-18 lg:pb-30">
-          <h2 id="p-suits" className="text-h2">
-            <Marked text="Who it is for" mark="is for" />
-          </h2>
-          <ul className="mt-8 grid gap-4 md:grid-cols-2">
-            {FIRST.map(([Icon, t, line]) => (
-              <li key={t} className="rounded-card border border-line bg-surface-1 p-6">
-                <span className="grid size-11 place-items-center rounded-full bg-surface-2">
-                  <Icon className="size-5" aria-hidden />
-                </span>
-                <h3 className="mt-4 text-title">{t}</h3>
-                <p className="mt-1 text-body text-text-2">{line}</p>
-              </li>
-            ))}
-          </ul>
-          <h3 className="mt-10 text-title">Also a good fit</h3>
-          <ul className="mt-3 divide-y divide-line border-y border-line">
-            {ALSO.map((s) => (
-              <li key={s} className="flex min-h-13 items-center gap-3 text-body">
-                <Check className="size-5 shrink-0 text-ok" strokeWidth={2.5} aria-hidden />
-                {s}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <section aria-labelledby="p-rules" className="theme-dark bg-band">
+      <section aria-labelledby="p-rules" className="border-t border-line">
         <div className="container-kb section-y grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <div>
             <h2 id="p-rules" className="text-h2">
-              The rules
+              <Marked text="The five rules" mark="rules" />
             </h2>
             <p className="mt-4 text-body text-text-2">
-              The first 20 partners Kabsi reviews are Founding Partners: Kabsi Pro free for their
-              own business and a monthly call with Rashid.
-              <span data-qa-mask>{places ? ` ${places.founding_left} places left.` : ""}</span>
+              Breaking a rule ends the partnership and its payments.
             </p>
             <p className="mt-4 text-small">
               <SiteLink
@@ -277,17 +287,19 @@ export function PartnersPage() {
       </section>
 
       <section
-        id="apply"
-        aria-labelledby="p-apply"
+        id="join"
+        aria-labelledby="p-join"
         className="scroll-mt-20 border-t border-line bg-surface-1"
       >
         <div className="container-kb section-y grid gap-10 lg:grid-cols-2 lg:gap-16">
           <div>
-            <h2 id="p-apply" className="max-w-[40rem] text-h2">
+            <h2 id="p-join" className="max-w-[40rem] text-h2">
               <Marked text="Earn 25% of every payment." mark="25% of every payment." />
             </h2>
-            <p className="mt-4 text-body text-text-2">
-              Kabsi Partners opens when card payments open.
+            <p className="mt-4 max-w-[36rem] text-body text-text-2">
+              The first 20 partners Kabsi reviews are Founding Partners: Kabsi Pro free for their
+              own business and a monthly call with Rashid.
+              <span data-qa-mask>{places ? ` ${places.founding_left} places left.` : ""}</span>
             </p>
             <SiteLink
               to="/scan"
@@ -323,7 +335,7 @@ export function PartnersPage() {
 function JoinButton({ className }: { className?: string }) {
   return (
     <div className={`flex flex-col gap-3 sm:flex-row ${className ?? ""}`} data-main-cta>
-      <ButtonLink to="/partners/join">Join Kabsi Partners</ButtonLink>
+      <ButtonLink to="/partners/join">Join in two minutes</ButtonLink>
     </div>
   );
 }

@@ -16,6 +16,7 @@ import { renderReport } from "./report-body.ts";
 import { receipt } from "../results-report/receipt.ts";
 import * as account from "./account-copy.ts";
 import { lifecycleEmail } from "./lifecycle-copy.ts";
+import { partnerFirstPaymentEmail, partnerJoinedEmail, partnerPayoutEmail, partnerTrialEmail } from "./partner-copy.ts";
 import { STEPS, type Snapshot as LifeSnapshot, type StepId } from "../lifecycle.ts";
 import type { EmailContent } from "./template.ts";
 
@@ -117,6 +118,18 @@ export function catalog(): CatalogEntry[] {
     e("billing_ended", "billing", false, billingLineAt("ended", { business: BIZ }, APP).email!),
     e("billing_payment_reminder", "billing", false, billingLineAt("payment_reminder", { business: BIZ, graceEnds: new Date("2026-12-12T09:00:00Z"), portal: `${APP}/app/plan` }, APP).email!),
     ...([60, 85, 90] as const).map((d) => e(`founding_day${d}`, "billing", false, foundingLine(d, BIZ, "2026-12-05T09:00:00Z", APP).email)),
+    // Partners 3 (30.50 items 5 to 7): the four Kabsi Partners emails, from invented data (a partner, never a real one).
+    e("partner_joined", "direct", false, partnerJoinedEmail({ name: "Sara Khan", code: "P-AB23CD" }, APP)),
+    e("partner_referral_started", "direct", false, partnerTrialEmail({ trade: "Hair salon", area: "Dubai Marina" }, APP)),
+    e("partner_first_payment", "direct", false, partnerFirstPaymentEmail({ cents: 975 }, APP)),
+    e("partner_payout_sent", "direct", false, partnerPayoutEmail({
+      cents: 2925, method: "paypal", last4: "1234", month: "2026-12", sentAt: "2026-12-05T10:00:00Z",
+      lines: [
+        { earned_at: "2026-11-02T09:00:00Z", trade: "Hair salon", area: "Dubai Marina", commission_cents: 975 },
+        { earned_at: "2026-11-09T09:00:00Z", trade: "Barbershop", area: "Bristol", commission_cents: 975 },
+        { earned_at: "2026-11-16T09:00:00Z", trade: "Cafe", area: "Leeds", commission_cents: 975 },
+      ],
+    }, APP)),
     e("manager_steps", "direct", true, copy.managerSteps(BIZ, APP, 3)),
     e("deletion_scheduled", "account", true, copy.deletionScheduled(BIZ, "28 October 2026", APP)),
     e("deletion_done", "account", true, copy.deletionDone(BIZ, APP)),
