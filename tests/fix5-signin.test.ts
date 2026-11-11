@@ -1,0 +1,151 @@
+// Fix 5 (R-158 item 2, items 2 and 3): Continue with Google through Google Identity Services with a nonce (Google gets
+// its SHA-256 hash, Supabase the nonce itself), the redirect flow as the fallback when Google's script does not load, and
+// the WhatsApp sign-in that starts in the background with a passed check only.
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+const read = (f: string) => readFileSync(f, "utf8");
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+});
+
+/** A document whose script element fires load or error as told. */
+function fakeDoc(outcome: "load" | "error" | "never", onLoad?: () => void) {
+  const added: { src: string }[] = [];
+  const doc = {
+    createElement: () => {
+      const s = {
+        src: "",
+        async: false,
+        defer: false,
+        onload: null as null | (() => void),
+        onerror: null as null | (() => void),
+        remove: () => {},
+      };
+      return s;
+    },
+    head: {
+      appendChild: (s: { src: string; onload: null | (() => void); onerror: null | (() => void) }) => {
+        added.push(s);
+        if (outcome === "load")
+          setTimeout(() => {
+            onLoad?.();
+            s.onload?.();
+          }, 0);
+        if (outcome === "error") setTimeout(() => s.onerror?.(), 0);
+      },
+    },
+  };
+  return { doc: doc as unknown as Document, added };
+}
+
+describe("Google Identity Services", () => {
+  it("makes a fresh nonce each time; Google gets its SHA-256 hex, Supabase the nonce itself", async () => {
+    const { makeNonce, drawGoogleButton } = await import("../src/lib/google-gis");
+    const a = await makeNonce();
+    const b = await makeNonce();
+    expect(a.raw).not.toBe(b.raw);
+    expect(a.hashed).toBe(createHash("sha256").update(a.raw).digest("hex"));
+    expect(a.hashed).toMatch(/^[0-9a-f]{64}$/);
+
+    let init: { nonce: string; client_id: string; callback: (r: { credential?: string }) => void } | null = null;
+    const gis = {
+      initialize: (o: typeof init) => void (init = o),
+      renderButton: vi.fn(),
+    };
+    const signIn = vi.fn(async () => ({ error: null }));
+    const onSigned = vi.fn();
+    await drawGoogleButton(
+      gis as never,
+      {} as HTMLElement,
+      { width: 360, onSigned, onError: vi.fn(), clientId: "web-client.apps.googleusercontent.com" },
+      { signIn },
+    );
+    expect(init!.client_id).toBe("web-client.apps.googleusercontent.com");
+    init!.callback({ credential: "id-token" });
+    await vi.waitFor(() => expect(onSigned).toHaveBeenCalled());
+    const sent = (signIn.mock.calls[0] as unknown as [{ token: string; nonce: string }])[0];
+    expect(sent.token).toBe("id-token");
+    expect(createHash("sha256").update(sent.nonce).digest("hex")).toBe(init!.nonce);
+    expect(gis.renderButton).toHaveBeenCalledOnce();
+  });
+
+  it("a refused token is an error, never a sign-in", async () => {
+    const { drawGoogleButton } = await import("../src/lib/google-gis");
+    let cb: (r: { credential?: string }) => void = () => {};
+    const onSigned = vi.fn();
+    const onError = vi.fn();
+    await drawGoogleButton(
+      { initialize: (o: { callback: typeof cb }) => void (cb = o.callback), renderButton: () => {} } as never,
+      {} as HTMLElement,
+      { width: 300, onSigned, onError, clientId: "x" },
+      { signIn: async () => ({ error: new Error("nonce mismatch") }) },
+    );
+    cb({ credential: "t" });
+    await vi.waitFor(() => expect(onError).toHaveBeenCalled());
+    cb({});
+    expect(onError).toHaveBeenCalledTimes(2);
+    expect(onSigned).not.toHaveBeenCalled();
+  });
+
+  it("falls back to the redirect flow: no client ID, a script error, or no answer in 4 seconds", async () => {
+    vi.stubGlobal("window", globalThis);
+    vi.resetModules();
+    const { loadGis } = await import("../src/lib/google-gis");
+    expect(await loadGis(fakeDoc("load").doc, "")).toBeNull();
+    expect(await loadGis(fakeDoc("error").doc, "id")).toBeNull();
+    vi.useFakeTimers();
+    const slow = loadGis(fakeDoc("never").doc, "id", 4000);
+    vi.advanceTimersByTime(4001);
+    expect(await slow).toBeNull();
+    vi.useRealTimers();
+    const id = { initialize: () => {}, renderButton: () => {} };
+    const f = fakeDoc("load", () => vi.stubGlobal("google", { accounts: { id } }));
+    expect(await loadGis(f.doc, "id")).toBe(id);
+    expect(f.added[0]!.src).toBe("https://accounts.google.com/gsi/client");
+  });
+
+  it("loads Google's script only from the sign-in panel, keeps the redirect button as the fallback and hides it while the provider is off", () => {
+    const users = ["src"].flatMap(function walk(d: string): string[] {
+      return require("node:fs")
+        .readdirSync(d, { withFileTypes: true })
+        .flatMap((e: { name: string; isDirectory: () => boolean }) =>
+          e.isDirectory() ? walk(`${d}/${e.name}`) : /\.tsx?$/.test(e.name) ? [`${d}/${e.name}`] : [],
+        );
+    }).filter((f) => /loadGis\(|gsi\/client/.test(read(f)));
+    expect(users.sort()).toEqual(["src/components/auth/sign-in-panel.tsx", "src/lib/google-gis.ts"]);
+    const panel = read("src/components/auth/sign-in-panel.tsx");
+    expect(panel).toMatch(/googleOk \? \(\s*<GisGoogle/);
+    expect(panel).toMatch(/fallback=\{\s*<GoogleChoice/);
+    expect(read("vercel.json")).toContain("https://accounts.google.com/gsi/client");
+  });
+});
+
+describe("WhatsApp sign-in starts when the panel opens", () => {
+  it("the panel keeps one bot check mounted and asks for a code only with a passed check", () => {
+    const panel = read("src/components/auth/sign-in-panel.tsx");
+    expect(panel).toMatch(/const wa = useWaPrestart\(waOn\)/);
+    expect(panel).toMatch(/\{wa\.widget\(step === "whatsapp"\)\}/);
+    const step = read("src/components/auth/whatsapp-signin.tsx");
+    expect(step).toMatch(/if \(!token \|\| busy\.current\) return;/);
+    expect(step).toContain("Open WhatsApp on this computer");
+    expect(step).toMatch(/data-wa-qr/);
+  });
+  it("shows at most three numbered steps and no consent paragraph over two lines", async () => {
+    const step = read("src/components/auth/whatsapp-signin.tsx");
+    expect(step.match(/<Step n=\{\d\}>/g)).toHaveLength(3);
+    const { WA_CONSENT_SHORT, WA_CONSENT_LINES, WHATSAPP_SIGNIN_CONSENT } = await import(
+      "../supabase/functions/_shared/wa-signin"
+    );
+    // About 45 characters a line at 390 px in the small size: two lines.
+    for (const l of [WA_CONSENT_SHORT, ...WA_CONSENT_LINES]) expect(l.length).toBeLessThanOrEqual(92);
+    // The list says what the stored consent says.
+    for (const fact of ["sign-in", "300 characters", "draft reply", "first name", "STOP", "Meta's WhatsApp Business Platform"])
+      expect([WA_CONSENT_SHORT, ...WA_CONSENT_LINES].join(" ")).toContain(fact);
+    expect(WHATSAPP_SIGNIN_CONSENT).toContain("Meta's WhatsApp Business Platform");
+    expect(WHATSAPP_SIGNIN_CONSENT.toLowerCase()).not.toContain("kapso");
+  });
+});
