@@ -442,15 +442,10 @@ const HANDLERS: Record<string, JobHandler> = {
   ratings_snapshot: step("ratings", ratingsJob),
   weekly_reports: step("weekly", weeklyJob),
   deletions: step("deletions", deletionsJob),
-  // Partners 3: the partner emails that follow an event ride the same 5 minute step. A failure there is captured and never
-  // fails the trial reminders (its own job log line carries the counts).
-  trial_reminders: step("trials", async () => ({
-    ...(await trialsJob()),
-    ...(await partnerNotices().catch(async (e) => {
-      await captureError("dispatch", e, { job: "partner_notices" });
-      return {};
-    })),
-  })),
+  trial_reminders: step("trials", trialsJob),
+  // Partners 3, Fix 5: the partner emails that follow an event (first trial, first payment, payout sent) have their own
+  // 5 minute step, offered by produce_jobs. Dedupe keys keep each email single.
+  partner_notices: step("partner_notices", () => partnerNotices()),
   photo_files: step("photo_files", () => removeDuePhotoFiles(photoFileStore(admin()))),
   // P0.5-02: the posts care routine for one business, this month and the next (_shared/posts/plan.ts). It prepares
   // only from something true and asks one question otherwise; it never publishes.
