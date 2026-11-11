@@ -5,6 +5,7 @@
 // No IP address is ever received or stored.
 import { serve } from "../_shared/kabsi.ts";
 import { admin, captureError, json, log, timingSafeEqual } from "../_shared/kabsi.ts";
+import { served } from "../_shared/card-served.ts";
 
 const CODE_RE = /^[2-9A-HJKMNP-Z]{6}$/;
 
@@ -18,8 +19,10 @@ serve(async (req) => {
     if (req.method === "GET") {
       const code = (req.headers.get("x-kabsi-code") ?? new URL(req.url).searchParams.get("code") ?? "").toUpperCase();
       if (!CODE_RE.test(code)) return json({ status: "unknown" }, 404);
-      const { data } = await db.from("cards").select("status, destination, location_id, page_mode").eq("code", code).maybeSingle();
-      if (!data) return json({ status: "unknown" }, 404);
+      const { data: row } = await db.from("cards").select("status, destination, location_id, page_mode, partner_id").eq("code", code).maybeSingle();
+      if (!row) return json({ status: "unknown" }, 404);
+      // Cards 2: an unclaimed partner card with its business set is served as an active direct link (card-served.ts).
+      const data = served(row);
       return json({
         status: data.status,
         destination: data.destination,

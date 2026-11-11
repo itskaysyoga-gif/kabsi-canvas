@@ -5,6 +5,7 @@
 //   POST { backfill: true }  writes every card once (Cloudflare bulk endpoint, 1,000 keys per call)
 import { serve } from "../_shared/kabsi.ts";
 import { admin, captureError, isInternal, json, log } from "../_shared/kabsi.ts";
+import { served } from "../_shared/card-served.ts";
 
 const NAMESPACE = Deno.env.get("CF_KV_NAMESPACE_ID") ?? "d897cbaa4ff34c8bab5e6923b3c41542"; // STICKERS
 const CODE_RE = /^[2-9A-HJKMNP-Z]{6}$/;
@@ -16,11 +17,14 @@ type CardRow = {
   destination: string | null;
   location_id: string | null;
   page_mode: string | null;
+  partner_id: string | null;
 };
 
 // Same shape the Worker reads: {d: destination, b: location_id, a: active, m: "direct" | "page"} (m: P0.8-05, K-132;
 // a copy without it is a direct link).
-function cardValue(c: Pick<CardRow, "status" | "destination" | "location_id" | "page_mode">) {
+// Cards 2: an unclaimed partner card with its business set is served as an active direct link (_shared/card-served.ts).
+function cardValue(row: Pick<CardRow, "status" | "destination" | "location_id" | "page_mode" | "partner_id">) {
+  const c = served(row);
   return JSON.stringify({
     d: c.destination ?? null,
     b: c.location_id ?? null,
@@ -47,7 +51,7 @@ serve(async (req) => {
     if (body.backfill === true) {
       let written = 0;
       for (let from = 0; ; from += BULK_SIZE) {
-        const { data, error } = await db.from("cards").select("code, status, destination, location_id, page_mode")
+        const { data, error } = await db.from("cards").select("code, status, destination, location_id, page_mode, partner_id")
           .order("code").range(from, from + BULK_SIZE - 1);
         if (error) throw error;
         const rows = (data ?? []) as CardRow[];
@@ -67,7 +71,7 @@ serve(async (req) => {
 
     const code = body.code;
     if (!code || !CODE_RE.test(code)) return json({ error: "bad_code" }, 400);
-    const { data: card, error } = await db.from("cards").select("code, status, destination, location_id, page_mode")
+    const { data: card, error } = await db.from("cards").select("code, status, destination, location_id, page_mode, partner_id")
       .eq("code", code).maybeSingle();
     if (error) throw error;
 

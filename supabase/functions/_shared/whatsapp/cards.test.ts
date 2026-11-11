@@ -201,3 +201,33 @@ Deno.test("cards2 review fixes: typed places", () => {
   for (const ok of ["Bar", "Front desk", "Window seat", "Till 2"]) assert.equal(typedPlace(ok), ok);
   for (const no of ["thanks", "Thank you", "ok", "got it", "Sam's till", "Stylist", "barber chair", "is it on?", "one two three four"]) assert.equal(typedPlace(no), null, no);
 });
+
+// ─── Cards 2, partner side (30.50 item 9, items 6 and 7 of the task) ───────────────────────────────────────────────────
+Deno.test("cards2 partner: an unknown phone with a partner card signs up through the partner's link, 30 days", async () => {
+  const w = new World();
+  const db = fake(w, {});
+  const deps = { ...w.deps(), cards: { ...db, check: async (): Promise<CardCheck> => ({ result: "signup", partner_code: "P-AB23CD" }) } };
+  assert.equal(await receive(deps, msg(w, PHONES.unknown, { text: "Link card PRT234" })), "card_signup");
+  const body = last(w, PHONES.unknown).body;
+  assert.match(body, /\/start\?code=PRT234&via=P-AB23CD/);
+  assert.match(body, /free for 30 days once it is connected/);
+  // A plain card has no partner and no 30 days.
+  const plain = { ...w.deps(), cards: { ...db, check: async (): Promise<CardCheck> => ({ result: "signup", partner_code: null }) } };
+  await receive(plain, msg(w, PHONES.unknown2, { text: "Link card ABC234" }));
+  assert.doesNotMatch(last(w, PHONES.unknown2).body, /via=|30 days/);
+});
+
+Deno.test("cards2 partner: a partner card set for one place links only to the phone's business at that place", async () => {
+  const w = new World();
+  const db = fake(w, { PRT234: { location: null, label: null, status: "unassigned" } });
+  const only = (ids: string[]) => ({ ...w.deps(), cards: { ...db, check: async (): Promise<CardCheck> => ({ result: "ask", only: ids }) } });
+  // Two businesses, one at the card's place: asked about that one only.
+  assert.equal(await receive(only([BIZ.bright]), msg(w, PHONES.multi, { text: "Link card PRT234" })), "card_ask");
+  assert.match(last(w, PHONES.multi).body, /Link card PRT234 to Bright Smile Kids\?$/);
+  assert.deepEqual(last(w, PHONES.multi).buttons, ["Yes, link it"]);
+  // None of the phone's businesses: set for another business.
+  assert.equal(await receive(only([BIZ.foreign]), msg(w, PHONES.owner, { text: "Link card PRT234" })), "card_other_business");
+  assert.match(last(w, PHONES.owner).body, /set up for a different business on Google/);
+  const refused = { ...w.deps(), cards: { ...db, link: async () => ({ result: "other_business" as const }) } };
+  assert.equal(await receive(refused, msg(w, PHONES.owner, { button: `lc:PRT234:${BIZ.harbour}` })), "card_other_business");
+});

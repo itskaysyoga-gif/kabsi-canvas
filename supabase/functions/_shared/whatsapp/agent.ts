@@ -535,11 +535,14 @@ function cardRefused(t: Turn, code: string, why: string): Promise<string> {
   if (why === "disabled") return answered(t, CARDS_SAY.disabled(code), "card_disabled");
   if (why === "limited") return answered(t, CARDS_SAY.limited, "card_limited");
   if (why === "no_place") return answered(t, CARDS_SAY.noPlace, "card_no_place");
+  if (why === "other_business") return answered(t, CARDS_SAY.otherBusiness(code), "card_other_business");
   return answered(t, CARDS_SAY.unknown(code), "card_unknown");
 }
 
 async function cardAnswer(t: Turn, code: string, c: CardCheck): Promise<string> {
-  const own = cardBusinesses(t);
+  // A partner card whose business is set: only the phone's businesses at that Google place may take it.
+  const only = c.result === "ask" && c.only ? new Set(c.only) : null;
+  const own = cardBusinesses(t).filter((b) => !only || only.has(b.location_id));
   if (c.result === "already") {
     const b = own.find((x) => x.location_id === c.location_id);
     const tb = b ? { ...t, business: b, head: head(t.who, "business", b) } : t;
@@ -548,11 +551,13 @@ async function cardAnswer(t: Turn, code: string, c: CardCheck): Promise<string> 
   }
   // An unknown phone, or a phone with no business it may link a card for: sign in first, the code kept in the link.
   // Staff of a business: the owner or a manager links cards.
+  if (only && !own.length && cardBusinesses(t).length) return cardRefused(t, code, "other_business");
   if ((c.result === "signup" || c.result === "ask") && !own.length && businesses(t.who).length) {
     return answered(t, CARDS_SAY.ownerOnly(code), "card_owner_only");
   }
   if (c.result === "signup" || (c.result === "ask" && !own.length)) {
-    return answered(t, CARDS_SAY.signup(code, startLink(t.d.appUrl, code)), "card_signup");
+    const partner = c.result === "signup" ? c.partner_code ?? null : null;
+    return answered(t, CARDS_SAY.signup(code, startLink(t.d.appUrl, code, partner), !!partner), "card_signup");
   }
   if (c.result !== "ask") return cardRefused(t, code, c.result);
   if (own.length === 1) {
