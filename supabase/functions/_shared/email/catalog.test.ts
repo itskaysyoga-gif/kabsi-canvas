@@ -162,7 +162,10 @@ Deno.test("retired emails stay gone (P0.8-01, K-123 to K-127): no partner, payme
   for (const c of catalog()) {
     const { html, text } = render(c);
     const all = `${c.content.subject}\n${text}\n${visible(html)}`;
-    assert.doesNotMatch(all, /usdt|binance|whish|\bomt\b|nowpayments|lebanon|lebanese|\+961|resale|partner/i, c.kind);
+    // Partners 3 (30.50 items 5 to 7) added the four Kabsi Partners emails (partner_joined, partner_referral_started,
+    // partner_first_payment, partner_payout_sent), so the bare word "partner" is allowed. The retired partner mail (invites,
+    // invoices, the portal, workspaces, wholesale and reselling) and every other check on this line stay.
+    assert.doesNotMatch(all, /usdt|binance|whish|\bomt\b|nowpayments|lebanon|lebanese|\+961|resale|partner (invite|invoice|portal|workspace|wholesale)|partner-set-up/i, c.kind);
     assert.doesNotMatch(all, /\bcash\b|NFC card(s)? (order|price)|order (a|your) card/i, c.kind);
   }
 });
