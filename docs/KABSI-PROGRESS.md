@@ -62,10 +62,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 11 Nov 2026, Cards 2: PRs 572 and 574. `2026-11-11-cards2.md`.
 - 11 Nov 2026, Growth 1 (30.50 item 12): profile and 7 listings in `docs/marketing/` (nothing submitted); funnel check; a digest line for first actions within 24 hours of access; PR 571. `2026-11-11-growth1.md`.
-- 11 Nov 2026, Cards 2 (R-150 item 9): link cards on WhatsApp, "cards", report block; PR 572. `2026-11-11-cards2.md`.
-- 11 Nov 2026, Partners 3 (30.50 items 5 to 7): final /partners, the kit in /partner (18 posts, A6 insert, never say list), 4 partner emails. No migration. `2026-11-11-partners3.md`.
-- Older entries (Partners 2 `2026-11-10-partners2.md`; Outbound 2 `2026-11-10-outbound2.md`; Site 3a `2026-11-10-site3a.md`; Clean 4 `2026-11-10-clean4.md`; Look 2b `2026-11-10-look2b.md`; Founding 1 `2026-11-10-founding1.md`; RB-T `2026-11-10-rb-t.md`; Safe 1 `2026-11-10-safe1.md`; Signup 1 `2026-11-10-signup1.md`; Look 2 `2026-11-10-look2.md`; Plan 1 `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
+- Older entries (Partners 3 `2026-11-11-partners3.md`; Partners 2 `2026-11-10-partners2.md`; Outbound 2 `2026-11-10-outbound2.md`; Site 3a `2026-11-10-site3a.md`; Clean 4 `2026-11-10-clean4.md`; Look 2b `2026-11-10-look2b.md`; Founding 1 `2026-11-10-founding1.md`; RB-T `2026-11-10-rb-t.md`; Safe 1 `2026-11-10-safe1.md`; Signup 1 `2026-11-10-signup1.md`; Look 2 `2026-11-10-look2.md`; Plan 1 `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
 
 ## How a session updates this page
 

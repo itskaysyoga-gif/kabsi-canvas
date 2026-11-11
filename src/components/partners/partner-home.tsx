@@ -1,5 +1,5 @@
 import { Link, useRouter } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { SignInPanel } from "@/components/auth/sign-in-panel";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -22,6 +22,9 @@ import {
   payoutLabel,
   usd,
 } from "@/lib/partner";
+
+// Cards 2: the card links section loads on its own, after the rest of the home (the review link search comes with it).
+const PartnerCards = lazy(() => import("./partner-cards"));
 
 // Partners 2 (master plan 30.50 item 6): kabsi.co/partner, the partner home. Signed in: the link and its QR code, the kit
 // (Partners 3: ready posts, the A6 insert, the say and never say lists), the
@@ -176,6 +179,10 @@ function Home({ home, reload }: { home: PartnerHome; reload: () => void }) {
           <p className="mt-4 text-body text-text-2">{C.noBusinesses}</p>
         )}
       </Card>
+
+      <Suspense fallback={null}>
+        <PartnerCards />
+      </Suspense>
 
       <Payout home={home} reload={reload} />
 

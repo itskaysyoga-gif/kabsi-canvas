@@ -59,7 +59,7 @@ export const payoutLabel = (m: string | null | undefined) =>
   PAYOUT_OPTIONS.find(([k]) => k === m)?.[1] ?? m ?? "";
 
 /** Keep equal to PARTNER_TERMS_VERSION in supabase/functions/_shared/programs.ts (tests/partners2-web.test.ts). */
-export const PARTNER_TERMS_VERSION = "2026-11-10.2";
+export const PARTNER_TERMS_VERSION = "2026-11-11.1";
 
 export const PARTNER_SITE = "https://kabsi.co";
 export const partnerLink = (code: string) => `${PARTNER_SITE}/?via=${code}`;

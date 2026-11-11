@@ -547,13 +547,20 @@ Kabsi sells no NFC cards, anywhere. The review link and QR code work with your o
 
 **A Kabsi card you already have**
 
-Kabsi cards that were sold before 21 Oct 2026 keep working. Kabsi issues no new ones.
+Kabsi cards that were sold before 21 Oct 2026 keep working. Kabsi itself issues no new ones. Since Cards 2 (11 Nov 2026), Kabsi Partners make Kabsi card links on their partner home and write them on the review cards they sell (section 5.3).
 
 - Tap a card that isn't linked ("This Kabsi card isn't set up yet"), sign in and link it; or in Get reviews, **Add a Kabsi card**, type the 6-character code under the QR, tap **Add**.
 - Name cards ("Counter", "Table 4") with **Save name**. **Switch off** stops a card within about a minute; it then shows "This review link isn't active. Please ask the staff for help."
 - **On WhatsApp (Cards 2, 11 Nov 2026):** the page of a card that isn't linked has **Set up on WhatsApp**, which opens a chat with "Link card ABC234" written in. Kabsi answers "Link card ABC234 to [business]?" with one button, **Yes, link it**; an owner or manager with several businesses picks the business instead. Then Kabsi asks where the card is: **Front desk**, **Till** or **Table**, or type a place, like Bar. A name is a place, never a person: a person's name or job ("Sam's till", "Waiter") is refused, and a thank-you is never taken as a place. A number Kabsi doesn't know gets a sign-in link that keeps the code, and the card links as soon as the business is added. A card linked to another business reads as not found, and its business is never named. Staff of a business can't link cards; Kabsi asks them to ask the owner or a manager. 10 wrong codes in an hour stop card codes from that number for an hour.
 - **"cards" on WhatsApp** lists each card with its place and its taps this week (from Monday) and last week. Tap a card to change its place. A tap is not a review: Kabsi counts taps, never reviews from a card, and never ranks people or sets anyone a target.
 - **The weekly report** (page and email) has a block "From your Kabsi cards" when the business has a card: each card's place and its taps that week, with "A tap is not a review." Taps from bots are left out.
+
+### 5.3 Kabsi card links from Kabsi Partners (Cards 2, 11 Nov 2026)
+
+- Kabsi sells no cards. A partner who sells review cards makes Kabsi card links on kabsi.co/partner, in batches of 10, 25 or 50 (200 to start, until Kabsi raises the number), and writes one link (go.kabsi.co/ABC234) on each card.
+- The partner sets each card's business with the same business search as the free review link tool. Kabsi keeps only the business's Google Place ID. A partner can set 50 businesses a day.
+- Until the owner claims it, a tap on the card goes straight to that business's Google review form: no page in between, no rating question, no filter. Kabsi counts the tap (no IP address is stored), and the partner sees taps until the claim.
+- The owner claims the card by sending "Link card" and its code to Kabsi on WhatsApp (or on the card's setup page, which links it without the partner). A card set for one business links only to that business on Google. On WhatsApp, a number Kabsi doesn't know gets a sign-in link through the partner: the business gets the 30 day Pro trial and the partner earns under the partner terms (the last link before sign-up counts; a partner's own business earns nothing). After the claim, the card's taps are the business's, in "cards" and the weekly report.
 
 ### 5.4 How to write your review link onto an NFC tag
 
@@ -627,6 +634,7 @@ The partners page showed the rate and no dollar earnings: "25 percent of what ea
 
 - Kabsi Partners speaks first to sellers of NFC and QR Google review cards, then to local web and social media freelancers. The line: "The card gets the reviews. Kabsi answers them." With a partner link, every card a partner sells comes with a 30-day Kabsi trial (the same 30-day Pro trial as above), and the partner earns 25 percent of every payment for as long as the business stays. Anyone can join now at kabsi.co/partners/join; partner links pay from the day card payments open. The first 20 partners Kabsi reviews are Founding Partners.
 - Kabsi works with any review card: it reads every new Google review, however it came in, and prepares a reply for the owner's yes.
+- **Card links (Cards 2, 11 Nov 2026):** the partner home has "Card links": a partner makes Kabsi card links in batches (200 to start, until Kabsi raises the number), sets each card's business with the review link search (50 a day), and writes the links on the cards they sell. Kabsi sells no cards. Until the owner claims a card, a tap goes straight to the business's Google review form; the owner claims it by sending "Link card" and the code on WhatsApp, and a new business signs up with the 30 day Pro trial through the partner. The partner terms (version 2026-11-11.1) add the card rule: every customer goes straight to the review form, no page, rating question or filter in front of it, each card set only for the business it is sold to, taps never reviews, never a ranking of staff.
 - A partner follows Google's review rules: no review gating or filtering (asking only happy customers), no rewards for reviews, no fake reviews. Breaking this rule ends the partnership and its payments. It is in the partner terms (section 5, updated 10 Nov 2026).
 
 ### Partners 3: the final partners page, the kit and the partner emails (11 Nov 2026, R-150, master plan 30.50 items 5 to 7)

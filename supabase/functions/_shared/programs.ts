@@ -17,7 +17,7 @@ export const PARTNER_KIND_LABEL: Record<PartnerKind, string> = {
   customer: "Kabsi customer",
 };
 /** The version of /partners/terms a partner agrees to. Change it when the terms change in a way that matters. */
-export const PARTNER_TERMS_VERSION = "2026-11-10.2"; // Partners 2 (R-150 item 4): join at once, review at the first payout
+export const PARTNER_TERMS_VERSION = "2026-11-11.1"; // Partners 2 (R-150 item 4); Cards 2 (30.50 item 9): Kabsi card links
 /**
  * The words the founding applicant agrees to, stored with the application (30.17 section 1). UX 1: the form asks "Named or
  * anonymous case study" (anonymous unless the owner picks named), and the stored words say which one they agreed to.

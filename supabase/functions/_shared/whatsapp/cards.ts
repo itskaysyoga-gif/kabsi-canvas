@@ -27,14 +27,18 @@ export type PlaceKey = keyof typeof PLACES;
 export const LABEL_OPEN_MS = 10 * 60_000;
 
 export type CardCheck =
-  | { result: "ask" | "signup" | "unknown" | "disabled" | "limited" }
+  | { result: "unknown" | "disabled" | "limited" | "other_business" }
+  // Cards 2 partner side: a partner card whose business is set may be linked only to the phone's businesses with that place.
+  | { result: "ask"; only?: string[] | null }
+  // A partner card: the partner's code goes in the sign-up link (Partners 2's attribution, 30 days of Pro).
+  | { result: "signup"; partner_code?: string | null }
   | { result: "already"; location_id: string; label: string | null };
 export type CardWeek = { code: string; label: string | null; this_week: number; last_week: number };
 export interface CardsDb {
   /** What "Link card CODE" means for this phone. Refused codes count against the phone (10 an hour). */
   check(code: string, phone: string): Promise<CardCheck>;
   /** The tap: links the card to this business, when the business is the phone's own. */
-  link(code: string, locationId: string, phone: string): Promise<{ result: "linked" | "unknown" | "disabled" | "limited" | "no_place"; label?: string | null }>;
+  link(code: string, locationId: string, phone: string): Promise<{ result: "linked" | "unknown" | "disabled" | "limited" | "no_place" | "other_business"; label?: string | null }>;
   /** The place label, for a card of one of the phone's own businesses. */
   label(code: string, label: string, phone: string): Promise<{ result: "labelled" | "unknown" | "bad_label"; label?: string }>;
   /** "cards": taps per card this week (from Monday) and last week, for one of the phone's own businesses. */
@@ -63,8 +67,8 @@ export const CARDS_SAY = {
   otherBusiness: (code: string) => `Set for another business\nCard ${code} is set up for a different business on Google.\n\nAsk the person who gave you the card, or write "talk to a person".`,
   noPlace: "Your Google profile first\nKabsi links a card once your business is on Google in Kabsi.\n\nFinish setup on kabsi.co, then send the code again.",
   // An unknown phone: sign in first, the code is kept in the link.
-  signup: (code: string, link: string) =>
-    `Set up Kabsi first\nCard ${code} links to your business once Kabsi is set up. Open this link to sign in. The card links as soon as your business is added:\n${link}\n\nNothing goes live without your yes.`,
+  signup: (code: string, link: string, partner = false) =>
+    `Set up Kabsi first\nCard ${code} links to your business once Kabsi is set up. Open this link to sign in. The card links as soon as your business is added:\n${link}${partner ? "\nWith this card, Kabsi is free for 30 days once it is connected. No payment card needed." : ""}\n\nNothing goes live without your yes.`,
   // "cards"
   listBody: (n: number) => `Your cards\nTaps this week and last week, by place.\n${TAP_NOTE}${n > 10 ? `\nand ${n - 10} more` : ""}\n\nTap one to change its place.`,
   listButton: "Open a card",
@@ -97,5 +101,7 @@ export function typedPlace(text: string | null | undefined): string | null {
   return NOT_A_PLACE.test(t) || PERSON_WORD.test(t) ? null : t;
 }
 
-/** The sign-in link that keeps the card code (the activate page's own path). */
-export const startLink = (appUrl: string, code: string) => `${appUrl.replace(/\/+$/, "")}/start?code=${code}`;
+/** The sign-in link that keeps the card code (the activate page's own path), and for a partner card the partner's code
+ *  (?via=P-..., the link touch Partners 2's attribution reads; the last link before sign-up wins). */
+export const startLink = (appUrl: string, code: string, partner?: string | null) =>
+  `${appUrl.replace(/\/+$/, "")}/start?code=${code}${partner && /^P-[2-9A-HJKMNP-Z]{6}$/.test(partner) ? `&via=${partner}` : ""}`;

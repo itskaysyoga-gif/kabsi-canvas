@@ -21,8 +21,9 @@ export const Route = createFileRoute("/partners_/terms")({
   component: Page,
 });
 
-// Partners 2 (R-150 item 4): join at once, review at the first payout. Version 2026-11-10.2 (PARTNER_TERMS_VERSION).
-const UPDATED = "10 November 2026 (version 2026-11-10.2)";
+// Partners 2 (R-150 item 4): join at once, review at the first payout. Cards 2 (30.50 item 9): Kabsi card links.
+// Version 2026-11-11.1 (PARTNER_TERMS_VERSION).
+const UPDATED = "11 November 2026 (version 2026-11-11.1)";
 
 function Page() {
   return (
@@ -149,6 +150,10 @@ function Page() {
             link. Kabsi's own records decide which partner was last.
           </li>
           <li>
+            A Kabsi card link you made counts the same way: when the owner sends &quot;Link
+            card&quot; and the card&apos;s code to Kabsi on WhatsApp before the business signs up.
+          </li>
+          <li>
             Businesses that come through a partner get a 30 day Pro trial instead of 14 days. There
             are no discount codes and no cash to customers. There is one trial for each Google
             business.
@@ -181,6 +186,13 @@ function Page() {
             customers), no rewards for reviews and no fake reviews. This covers every card, stand,
             link and message you sell or send. Breaking this rule ends the partnership and its
             payments: commission not yet paid is withheld.
+          </li>
+          <li>
+            Kabsi card links: Kabsi sells no cards. You may write the card links you make on your
+            partner home onto cards you sell (200 to start; Kabsi may raise or lower the number). A
+            card sends every customer straight to the business&apos;s Google review form: never put
+            a page, a rating question or a filter in front of it, and set each card only for the
+            business you sell it to. A card counts taps, never reviews, and never ranks staff.
           </li>
           <li>
             No bulk or unsolicited WhatsApp, SMS or email. Send Kabsi to people yourself, one to
