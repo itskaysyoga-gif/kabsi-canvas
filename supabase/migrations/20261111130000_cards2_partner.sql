@@ -20,7 +20,7 @@
 
 -- ─── 1. columns ──────────────────────────────────────────────────────────────────────────────────────────────────
 alter table public.cards add column if not exists partner_id uuid references public.partner_accounts(id) on delete set null;
-alter table public.cards add column if not exists place_id text check (place_id is null or place_id ~ '^[A-Za-z0-9_-]{10,300}$');
+alter table public.cards add column if not exists place_id text check (place_id is null or place_id ~ '^[A-Za-z0-9_-]{10,255}$');
 alter table public.cards add column if not exists minted_at timestamptz;
 -- When an owner first claimed a partner card. Never cleared (owner deletion puts a card back to unassigned and clears its
 -- business, activated_at included), so the partner never sees the business's taps or re-sets a card a business had.
@@ -90,7 +90,7 @@ begin
   select * into x from public.partner_accounts where user_id = p_user;
   if not found then return jsonb_build_object('result', 'not_partner'); end if;
   if x.status not in ('approved', 'paused') then return jsonb_build_object('result', 'not_active'); end if;
-  if coalesce(p_place, '') !~ '^[A-Za-z0-9_-]{10,300}$' or cardinality(coalesce(p_codes, '{}')) not between 1 and 50 then
+  if coalesce(p_place, '') !~ '^[A-Za-z0-9_-]{10,255}$' or cardinality(coalesce(p_codes, '{}')) not between 1 and 50 then
     return jsonb_build_object('result', 'bad_request');
   end if;
   if not exists (select 1 from public.cards c where c.partner_id = x.id and c.code = any (p_codes) and c.location_id is null

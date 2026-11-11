@@ -261,7 +261,7 @@ async function partnerCardsPlace(req: Request): Promise<Response> {
   const body = await req.json().catch(() => ({})) as Record<string, unknown>;
   const codes = Array.isArray(body.codes) ? body.codes.filter((c): c is string => typeof c === "string" && /^[2-9A-HJKMNP-Z]{6}$/.test(c)) : [];
   const place = typeof body.place_id === "string" ? body.place_id : "";
-  if (!codes.length || codes.length > 50 || !/^[A-Za-z0-9_-]{10,300}$/.test(place)) return fail("bad_request", "Choose the business again.", 400);
+  if (!codes.length || codes.length > 50 || !/^[A-Za-z0-9_-]{10,255}$/.test(place)) return fail("bad_request", "Choose the business again.", 400);
   const { data, error } = await admin().rpc("partner_cards_place", { p_user: user.id, p_codes: codes, p_place: place });
   if (error) throw error;
   const r = one<{ result: string; count?: number }>(data);

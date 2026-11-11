@@ -15,7 +15,7 @@ export type CardRow = {
 };
 export type Served = { status: string; destination: string | null; location_id: string | null; page_mode: "direct" | "page" };
 
-const GOOGLE = /^https:\/\/search\.google\.com\/local\/writereview\?placeid=[A-Za-z0-9_-]{10,300}$/;
+const GOOGLE = /^https:\/\/search\.google\.com\/local\/writereview\?placeid=[A-Za-z0-9_-]{10,255}$/;
 
 export function served(c: CardRow): Served {
   const partnerReady = c.status === "unassigned" && !!c.partner_id && !c.location_id && !!c.destination && GOOGLE.test(c.destination);
