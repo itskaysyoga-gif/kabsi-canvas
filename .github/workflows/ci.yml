@@ -217,7 +217,9 @@ jobs:
       # R-106 (4 Nov 2026, master plan 30.26): lowered to 205 to keep Polish 4's gain (the pull request build read 199 KB).
       # Copy 3 (master plan 30.29 item 2): Pricing 215 and /scan 235 KB in CI, so neither grows (the live budgets, 225 and
       # 245 KB, are in lighthouse-live.yml).
-      LH_PAGES: "/=205,/pricing=215,/scan=235"
+      # Partners 2 (11 Nov 2026, Rashid's yes in the session): Pricing 216, for the two partner routes every page's route
+      # list now carries (main read 215.4 KB and the branch 215.75 KB in the same local measure).
+      LH_PAGES: "/=205,/pricing=216,/scan=235"
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
