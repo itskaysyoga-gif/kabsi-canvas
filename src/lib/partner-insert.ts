@@ -30,7 +30,9 @@ export const INSERT = {
 /** The disclosure line: the partner's name when it can be printed, otherwise "a Kabsi Partner" alone. */
 export function disclosure(name: string): string {
   const n = printable(name).slice(0, 24).trim();
-  return n ? `Paid partnership. ${n} is a Kabsi Partner.` : "Paid partnership. Shared by a Kabsi Partner.";
+  return n
+    ? `Paid partnership. ${n} is a Kabsi Partner.`
+    : "Paid partnership. Shared by a Kabsi Partner.";
 }
 
 /** The link as people read it: no scheme. */
@@ -73,7 +75,9 @@ export function insertShapes(
     });
 
   INSERT.head.forEach((t, i) => line(t, 46 + i * 22, 17, true, INK));
-  wrap(INSERT.body, 11.5, W - 56, measure).forEach((t, i) => line(t, 96 + i * 15, 11.5, false, MUTED));
+  wrap(INSERT.body, 11.5, W - 56, measure).forEach((t, i) =>
+    line(t, 96 + i * 15, 11.5, false, MUTED),
+  );
 
   // The yellow panel with the offer.
   out.push({ kind: "rect", x: 24, y: 146, w: W - 48, h: 68, r: 14, fill: YELLOW });
@@ -86,7 +90,15 @@ export function insertShapes(
   const fy = 228;
   out.push({ kind: "rect", x: fx, y: fy, w: S, h: S, r: 16, fill: YELLOW });
   const inset = 8;
-  out.push({ kind: "rect", x: fx + inset, y: fy + inset, w: S - inset * 2, h: S - inset * 2, r: 8, fill: WHITE });
+  out.push({
+    kind: "rect",
+    x: fx + inset,
+    y: fy + inset,
+    w: S - inset * 2,
+    h: S - inset * 2,
+    r: 8,
+    fill: WHITE,
+  });
   out.push(...qrShapes(link, fx + inset, fy + inset, S - inset * 2));
 
   line(`${INSERT.scan}: ${shortLink(link)}`, fy + S + 18, 10, false, INK);

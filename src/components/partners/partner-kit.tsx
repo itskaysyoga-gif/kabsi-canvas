@@ -15,7 +15,15 @@ import {
 // partner's own kind first), the A6 insert for card packaging with the partner's QR code, and the say and never say lists.
 // The words are src/lib/partner-kit.ts and docs/COPY.md section 83. The insert's drawing code loads only when the kit shows.
 
-export function PartnerKit({ kind, name, link }: { kind: PartnerKind; name: string; link: string }) {
+export function PartnerKit({
+  kind,
+  name,
+  link,
+}: {
+  kind: PartnerKind;
+  name: string;
+  link: string;
+}) {
   const [shown, setShown] = useState<PartnerKind>(kind);
   const [copied, setCopied] = useState<number | null>(null);
   const [svg, setSvg] = useState("");
@@ -45,7 +53,10 @@ export function PartnerKit({ kind, name, link }: { kind: PartnerKind; name: stri
   const download = async () => {
     setFailed(false);
     try {
-      const [ins, card] = await Promise.all([import("@/lib/partner-insert"), import("@/lib/qr-card")]);
+      const [ins, card] = await Promise.all([
+        import("@/lib/partner-insert"),
+        import("@/lib/qr-card"),
+      ]);
       const shapes = ins.insertShapes(name, link, card.canvasMeasure());
       const blob = new Blob([ins.insertPdf(shapes)], { type: "application/pdf" });
       card.saveBlob(blob, "kabsi-insert-a6.pdf");
@@ -84,7 +95,12 @@ export function PartnerKit({ kind, name, link }: { kind: PartnerKind; name: stri
         {KIT_POSTS[shown].map((body, i) => (
           <li key={`${shown}-${i}`} className="rounded-inner bg-surface-2 p-4">
             <p className="whitespace-pre-line text-small text-text-1">{postText(body, link)}</p>
-            <Button variant="secondary" size="md" className="mt-3" onClick={() => void copy(i, body)}>
+            <Button
+              variant="secondary"
+              size="md"
+              className="mt-3"
+              onClick={() => void copy(i, body)}
+            >
               {copied === i ? KIT.copied : KIT.copy}
             </Button>
           </li>
@@ -99,7 +115,7 @@ export function PartnerKit({ kind, name, link }: { kind: PartnerKind; name: stri
       <div className="mt-4 flex flex-col items-start gap-4 sm:flex-row sm:items-end">
         {/* The SVG is drawn by partner-insert.ts from shapes; the partner's name in it is escaped there. */}
         <div
-          className="w-44 shrink-0 overflow-hidden rounded-inner border border-line bg-surface-0"
+          className="w-56 shrink-0 overflow-hidden rounded-inner border border-line bg-surface-0"
           aria-label={KIT.insertPreview}
           role="img"
           dangerouslySetInnerHTML={{ __html: svg }}

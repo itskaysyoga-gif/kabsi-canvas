@@ -28,7 +28,8 @@ import { BANG, DASHES, NEVER_CLAIMS, NEVER_NAMES } from "./helpers/house-rules";
 const read = (f: string) => readFileSync(f, "utf8");
 const ARABIC = /[؀-ۿ]/;
 /** Claims no partner post may make (K-53, K-144): a rank, the 3-pack, a review count, a star figure, a Google partnership. */
-const RANKING = /\brank|top 3|3-pack|top results|\b\d[\d,]* (reviews|stars|calls|customers)\b|google partner|approved by google|partner of google/i;
+const RANKING =
+  /\brank|top 3|3-pack|top results|\b\d[\d,]* (reviews|stars|calls|customers)\b|google partner|approved by google|partner of google/i;
 const LINK = partnerLink("P-AB23CD");
 
 describe("the kit: ready posts", () => {
@@ -55,7 +56,10 @@ describe("the kit: ready posts", () => {
         expect(body, k).not.toMatch(ARABIC);
         expect(body, k).not.toMatch(/\bpercent\b|%/); // earnings are never quoted in a post
         // The only number a post states is the trial, 30 days.
-        expect([...body.matchAll(/\d+/g)].map((m) => m[0]).every((n) => n === "30"), body).toBe(true);
+        expect(
+          [...body.matchAll(/\d+/g)].map((m) => m[0]).every((n) => n === "30"),
+          body,
+        ).toBe(true);
         // Nothing promised for a review, and no reward.
         expect(body).not.toMatch(/\b(discount|cashback|reward|prize|gift)\b/i);
       }
@@ -77,7 +81,18 @@ describe("the kit: say and do not say", () => {
       expect(l).not.toMatch(BANG);
     }
     const all = DO_NOT_SAY.join(" ");
-    for (const must of [/works with Google/, /ranked higher/, /review count/, /removed/, /happy customers/, /by itself/, /suspension/, /logo/, /bulk or unsolicited/, /earns/])
+    for (const must of [
+      /works with Google/,
+      /ranked higher/,
+      /review count/,
+      /removed/,
+      /happy customers/,
+      /by itself/,
+      /suspension/,
+      /logo/,
+      /bulk or unsolicited/,
+      /earns/,
+    ])
       expect(all).toMatch(must);
   });
   it("lists only claims Kabsi allows (K-53) and none of the banned ones", () => {
@@ -120,7 +135,9 @@ describe("the kit: the A6 insert", () => {
     expect(shapes.filter((s) => s.kind === "circle").length).toBeGreaterThan(100); // the QR code
   });
   it("makes no claim and shows no Google logo; Google appears only as plain words", () => {
-    const all = texts(shapes).map((t) => t.text).join(" ");
+    const all = texts(shapes)
+      .map((t) => t.text)
+      .join(" ");
     expect(all).not.toMatch(RANKING);
     expect(all).not.toMatch(DASHES);
     expect(all).not.toMatch(BANG);
@@ -153,7 +170,21 @@ describe("the four partner emails", () => {
     started: partnerTrialEmail({ trade: "Hair salon", area: "Dubai Marina" }, APP),
     payment: partnerFirstPaymentEmail({ cents: 1475 }, APP),
     payout: partnerPayoutEmail(
-      { cents: 5400, method: "paypal", last4: "1234", month: "2026-12", sentAt: "2026-12-05T10:00:00Z", lines: [{ earned_at: "2026-11-02T09:00:00Z", trade: "Cafe", area: "Leeds", commission_cents: 5400 }] },
+      {
+        cents: 5400,
+        method: "paypal",
+        last4: "1234",
+        month: "2026-12",
+        sentAt: "2026-12-05T10:00:00Z",
+        lines: [
+          {
+            earned_at: "2026-11-02T09:00:00Z",
+            trade: "Cafe",
+            area: "Leeds",
+            commission_cents: 5400,
+          },
+        ],
+      },
       APP,
     ),
   };
@@ -192,7 +223,17 @@ describe("the four partner emails", () => {
     expect(mails.payout.text).toContain("Cafe, Leeds: $54.00");
   });
   it("shows a refund line as minus", () => {
-    const m = partnerPayoutEmail({ cents: 2500, method: "usdc", last4: "ab12", month: "2026-12", sentAt: "2026-12-05T10:00:00Z", lines: [{ trade: null, area: null, commission_cents: -975 }] }, APP);
+    const m = partnerPayoutEmail(
+      {
+        cents: 2500,
+        method: "usdc",
+        last4: "ab12",
+        month: "2026-12",
+        sentAt: "2026-12-05T10:00:00Z",
+        lines: [{ trade: null, area: null, commission_cents: -975 }],
+      },
+      APP,
+    );
     expect(m.text).toContain("A business: refund, minus $9.75");
     expect(m.text).toContain("USDC ending in ab12");
   });
@@ -202,27 +243,108 @@ describe("which emails the events call for", () => {
   const P = { email: "sara@example.test", user_id: "u1", status: "approved", payout_last4: "1234" };
   const none: Events = { trials: [], payments: [], payouts: [] };
   it("sends the first trial once per partner, however many started", () => {
-    const n = planNotices({ ...none, trials: [
-      { partner_id: "p1", partner: P, trade: "Cafe", area: "Leeds", started_at: "2026-12-02T10:00:00Z" },
-      { partner_id: "p1", partner: P, trade: "Hair salon", area: "Bristol", started_at: "2026-12-01T10:00:00Z" },
-      { partner_id: "p2", partner: { ...P, email: "b@example.test" }, trade: null, area: null, started_at: "2026-12-01T10:00:00Z" },
-    ] }, "https://kabsi.co");
-    expect(n.map((x) => x.key)).toEqual(["partner_referral_started:p1", "partner_referral_started:p2"]);
+    const n = planNotices(
+      {
+        ...none,
+        trials: [
+          {
+            partner_id: "p1",
+            partner: P,
+            trade: "Cafe",
+            area: "Leeds",
+            started_at: "2026-12-02T10:00:00Z",
+          },
+          {
+            partner_id: "p1",
+            partner: P,
+            trade: "Hair salon",
+            area: "Bristol",
+            started_at: "2026-12-01T10:00:00Z",
+          },
+          {
+            partner_id: "p2",
+            partner: { ...P, email: "b@example.test" },
+            trade: null,
+            area: null,
+            started_at: "2026-12-01T10:00:00Z",
+          },
+        ],
+      },
+      "https://kabsi.co",
+    );
+    expect(n.map((x) => x.key)).toEqual([
+      "partner_referral_started:p1",
+      "partner_referral_started:p2",
+    ]);
     expect(n[0]!.content.text).toContain("Hair salon, Bristol"); // the earliest
     expect(n[0]!.to).toEqual({ email: "sara@example.test", userId: "u1" });
   });
   it("sends the first payment only when the partner had no earlier commission, and not to a paused partner", () => {
-    const base = { partner_id: "p1", partner: P, cents: 1475, earned_at: "2026-11-02T09:00:00Z", hold_until: "2026-12-02T09:00:00Z", hadEarlier: false };
-    expect(planNotices({ ...none, payments: [base] }, "https://kabsi.co").map((x) => x.key)).toEqual(["partner_first_payment:p1"]);
-    expect(planNotices({ ...none, payments: [{ ...base, hadEarlier: true }] }, "https://kabsi.co")).toEqual([]);
-    expect(planNotices({ ...none, payments: [{ ...base, partner: { ...P, status: "paused" } }] }, "https://kabsi.co")).toEqual([]);
-    expect(planNotices({ ...none, trials: [{ partner_id: "p1", partner: { ...P, status: "left" }, trade: null, area: null, started_at: "2026-12-01T10:00:00Z" }] }, "https://kabsi.co")).toEqual([]);
+    const base = {
+      partner_id: "p1",
+      partner: P,
+      cents: 1475,
+      earned_at: "2026-11-02T09:00:00Z",
+      hold_until: "2026-12-02T09:00:00Z",
+      hadEarlier: false,
+    };
+    expect(
+      planNotices({ ...none, payments: [base] }, "https://kabsi.co").map((x) => x.key),
+    ).toEqual(["partner_first_payment:p1"]);
+    expect(
+      planNotices({ ...none, payments: [{ ...base, hadEarlier: true }] }, "https://kabsi.co"),
+    ).toEqual([]);
+    expect(
+      planNotices(
+        { ...none, payments: [{ ...base, partner: { ...P, status: "paused" } }] },
+        "https://kabsi.co",
+      ),
+    ).toEqual([]);
+    expect(
+      planNotices(
+        {
+          ...none,
+          trials: [
+            {
+              partner_id: "p1",
+              partner: { ...P, status: "left" },
+              trade: null,
+              area: null,
+              started_at: "2026-12-01T10:00:00Z",
+            },
+          ],
+        },
+        "https://kabsi.co",
+      ),
+    ).toEqual([]);
   });
   it("sends one email per payout sent, keyed by the payout", () => {
-    const n = planNotices({ ...none, payouts: [
-      { id: "o1", partner: P, cents: 5400, method: "paypal", month: "2026-12", sent_at: "2026-12-05T10:00:00Z", lines: [] },
-      { id: "o2", partner: P, cents: 3000, method: "paypal", month: "2027-01", sent_at: "2027-01-05T10:00:00Z", lines: [] },
-    ] }, "https://kabsi.co");
+    const n = planNotices(
+      {
+        ...none,
+        payouts: [
+          {
+            id: "o1",
+            partner: P,
+            cents: 5400,
+            method: "paypal",
+            month: "2026-12",
+            sent_at: "2026-12-05T10:00:00Z",
+            lines: [],
+          },
+          {
+            id: "o2",
+            partner: P,
+            cents: 3000,
+            method: "paypal",
+            month: "2027-01",
+            sent_at: "2027-01-05T10:00:00Z",
+            lines: [],
+          },
+        ],
+      },
+      "https://kabsi.co",
+    );
     expect(n.map((x) => x.key)).toEqual(["partner_payout_sent:o1", "partner_payout_sent:o2"]);
     expect(n[0]!.content.text).toContain("PayPal ending in 1234");
   });
@@ -231,11 +353,24 @@ describe("which emails the events call for", () => {
 describe("the partners page", () => {
   const page = read("src/components/kabsi/d2-partners.tsx");
   it("opens with the card line, then three steps, six kinds, the example, five rules, questions and the count", () => {
-    const order = ['id="p-steps"', 'id="p-suits"', 'id="p-money"', 'id="p-rules"', 'id="p-faq"', 'id="p-join"'].map((s) => page.indexOf(s));
+    const order = [
+      'id="p-steps"',
+      'id="p-suits"',
+      'id="p-money"',
+      'id="p-rules"',
+      'id="p-faq"',
+      'id="p-join"',
+    ].map((s) => page.indexOf(s));
     expect(order.every((i) => i > 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
-    expect(read("src/components/kabsi/hero-lines.ts")).toContain("The card gets the reviews. Kabsi answers them.");
-    expect(page.match(/title: "(Join in two minutes|Share your link or put it on your cards|Get paid every month)"/g)?.length).toBe(3);
+    expect(read("src/components/kabsi/hero-lines.ts")).toContain(
+      "The card gets the reviews. Kabsi answers them.",
+    );
+    expect(
+      page.match(
+        /title: "(Join in two minutes|Share your link or put it on your cards|Get paid every month)"/g,
+      )?.length,
+    ).toBe(3);
     expect(page).toContain("usePartnerPlaces()");
     expect(page).toContain("places left.");
     expect(page).toContain("SectionPhoto");
@@ -268,13 +403,22 @@ describe("the partners page", () => {
     expect(page).toContain("It is not a promise of what you will earn.");
   });
   it("says links start paying on launch day until card payments open", () => {
-    expect(page).toContain('export const PAYING_LINE = "Partner links start paying on launch day.";');
+    expect(page).toContain(
+      'export const PAYING_LINE = "Partner links start paying on launch day.";',
+    );
     expect(page).toContain("under={CARDS_OPEN ? null : PAYING_LINE}");
     expect(page).toContain("const CARDS_OPEN = false;");
   });
   it("is in docs/COPY.md, facts 08 and the partner home carries the kit", () => {
     const copy = read("docs/COPY.md");
-    for (const line of [PARTNER_PAYING_LINE.replace(", when card payments open", ""), KIT.title, KIT.insertDownload, "Join in two minutes", PAID_LABEL, INSERT.big])
+    for (const line of [
+      PARTNER_PAYING_LINE.replace(", when card payments open", ""),
+      KIT.title,
+      KIT.insertDownload,
+      "Join in two minutes",
+      PAID_LABEL,
+      INSERT.big,
+    ])
       expect(copy, line).toContain(line);
     expect(read("knowledge/facts/08-partners.md")).toContain("Partners 3");
     expect(read("src/components/partners/partner-home.tsx")).toContain("<PartnerKit");

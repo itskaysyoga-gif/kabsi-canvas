@@ -1,14 +1,5 @@
 // Partners: the programme page, its terms, a partner's own page and the report a partner shares.
-import {
-  ArrowRight,
-  Briefcase,
-  Check,
-  Globe,
-  Nfc,
-  Store,
-  Users,
-  Video,
-} from "lucide-react";
+import { ArrowRight, Briefcase, Check, Globe, Nfc, Store, Users, Video } from "lucide-react";
 import { PLAN_PRICES, WHATSAPP_ON } from "@/lib/site";
 import { usePartnerPlaces } from "@/lib/public-api";
 import { cn } from "@/lib/utils";
@@ -17,7 +8,7 @@ import { SiteLink } from "./site-link";
 import { PageHero, popCls, stagger } from "./page-hero";
 import { PARTNERS_HERO } from "./hero-lines";
 import { PARTNER_FAQ } from "./faq-data";
-import { ButtonLink, ExampleBadge, Faq } from "./ui";
+import { ButtonLink, Card, ExampleBadge, Faq } from "./ui";
 import { Marked, YellowLabel } from "@/components/kabsi/highlight";
 import { PHOTOS } from "./photos";
 import { SectionPhoto } from "./section-photo";
@@ -189,12 +180,14 @@ export function PartnersPage() {
           </h2>
           <ul className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {KINDS.map(([Icon, t, line]) => (
-              <li key={t} className="rounded-card border border-line bg-surface-1 p-6">
-                <span className="grid size-11 place-items-center rounded-full bg-surface-2">
-                  <Icon className="size-5" aria-hidden />
-                </span>
-                <h3 className="mt-4 text-title">{t}</h3>
-                <p className="mt-1 text-body text-text-2">{line}</p>
+              <li key={t} className="rounded-card border border-line bg-surface-1 p-5 sm:p-6">
+                <div className="flex items-center gap-3">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-full bg-surface-2">
+                    <Icon className="size-5" aria-hidden />
+                  </span>
+                  <h3 className="text-title">{t}</h3>
+                </div>
+                <p className="mt-3 text-body text-text-2">{line}</p>
               </li>
             ))}
           </ul>
@@ -228,11 +221,11 @@ export function PartnersPage() {
             </div>
             <dl className="mt-5 divide-y divide-line border-y border-line">
               {EXAMPLE_ROWS.map(([plan, price]) => (
-                <div key={plan} className="flex flex-wrap items-baseline justify-between gap-2 py-4">
+                <div key={plan} className="py-4">
                   <dt className="text-body text-text-2">
                     A business on {plan} at ${price} a month
                   </dt>
-                  <dd className="font-display text-title font-bold">
+                  <dd className="mt-1 font-display text-title font-bold">
                     You earn ${share(price)} a month
                   </dd>
                 </div>
@@ -275,7 +268,7 @@ export function PartnersPage() {
         </div>
       </section>
 
-      <section aria-labelledby="p-faq" className="border-t border-line bg-surface-1">
+      <section aria-labelledby="p-faq" className="border-t border-line">
         <div className="container-kb section-y grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <h2 id="p-faq" className="text-h2">
             <Marked text="Questions partners ask" mark="partners ask" />
@@ -296,7 +289,7 @@ export function PartnersPage() {
       <section
         id="join"
         aria-labelledby="p-join"
-        className="scroll-mt-20 theme-dark border-t border-line bg-band"
+        className="scroll-mt-20 border-t border-line bg-surface-1"
       >
         <div className="container-kb section-y grid gap-10 lg:grid-cols-2 lg:gap-16">
           <div>
@@ -316,8 +309,8 @@ export function PartnersPage() {
               <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />
             </SiteLink>
           </div>
-          <div className="rounded-card border border-line p-5 sm:p-6">
-            <p className="text-body">
+          <Card>
+            <p className="text-body text-text-1">
               Sign in, answer five short questions, and your link and QR code are ready at once.
               Kabsi reviews each partner before their first payout.
             </p>
@@ -331,7 +324,7 @@ export function PartnersPage() {
                 Open your partner home
               </SiteLink>
             </p>
-          </div>
+          </Card>
         </div>
       </section>
     </>
