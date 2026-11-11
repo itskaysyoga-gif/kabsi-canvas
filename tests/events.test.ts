@@ -1,6 +1,6 @@
 // P0.6-02 and Growth 1 (master plan 20.1, 20.3): one name per action, server events never from the browser, and where a
 // sign-up came from.
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/supabase", () => ({
@@ -237,4 +237,65 @@ describe("attribution", () => {
     expect(p["fbc"]).toBeNull();
     expect(p["first"]).toMatchObject({ utm_source: "meta" });
   });
+});
+
+// Growth 1 (30.50 item 12): the funnel of docs/EVENTS.md, from the free check started to a paid subscription, has a place in
+// the code that sends each of its events. A name that is listed and never sent would leave a hole in the dashboards.
+describe("the funnel events exist in code", () => {
+  const funnel =
+    (EVENTS_DOC.match(/## Funnel and dashboards[\s\S]*?\n\nFour dashboards/)?.[0] ?? "")
+      .match(/`[a-z_]+`/g)
+      ?.map((m) => m.slice(1, -1)) ?? [];
+  // The funnel of the document, plus the two steps the revenue dashboard uses between sign-up and paid.
+  const names = [...new Set([...funnel, "trial_started", "checkout_started"])];
+  const files = (dir: string, ext: RegExp): string[] =>
+    (readdirSync(dir, { recursive: true }) as string[])
+      .filter((f) => ext.test(f) && !/\.test\./.test(f))
+      .map((f) => `${dir}/${f}`);
+  const src = files("src", /\.tsx?$/)
+    .map((f) => readFileSync(f, "utf8"))
+    .join("\n");
+  const sql = files("supabase/migrations", /\.sql$/)
+    .map((f) => readFileSync(f, "utf8"))
+    .join("\n");
+  const billing = readFileSync("supabase/functions/_shared/billing.ts", "utf8");
+  const browser = union("BrowserEvent");
+
+  it("reads the names of the funnel from the document", () => {
+    expect(names).toEqual(
+      expect.arrayContaining([
+        "landing_viewed",
+        "free_scan_started",
+        "free_scan_completed",
+        "signup_completed",
+        "google_access_granted",
+        "whatsapp_connected",
+        "first_yes",
+        "paid",
+        "trial_started",
+        "checkout_started",
+      ]),
+    );
+  });
+
+  for (const name of [
+    "landing_viewed",
+    "free_scan_started",
+    "free_scan_completed",
+    "signup_completed",
+    "google_access_granted",
+    "whatsapp_connected",
+    "first_yes",
+    "paid",
+    "trial_started",
+    "checkout_started",
+  ]) {
+    it(`${name} is sent from code`, () => {
+      expect(names).toContain(name);
+      if (browser.includes(name)) expect(src).toContain(`track("${name}"`);
+      else if (name === "checkout_started")
+        expect(billing).toMatch(/record_product_event[\s\S]{0,120}checkout_started/);
+      else expect(sql).toContain(`product_event('${name}'`);
+    });
+  }
 });

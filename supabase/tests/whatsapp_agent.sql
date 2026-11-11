@@ -109,6 +109,21 @@ select lives_ok($$ select public.ops_emit('jobs_silent', 'alerts', 'No job finis
 select is((select count(*) from public.whatsapp_ops_claim(50) x where x ->> 'kind' = 'jobs_silent'), 1::bigint, 'the tick takes it');
 select is((select count(*) from public.whatsapp_ops_claim(50) x where x ->> 'kind' = 'jobs_silent'), 0::bigint, 'never twice');
 select ok(public.whatsapp_staff_summary() ? 'places_cap', 'the morning numbers');
+
+-- Growth 1: the share of new businesses whose first approved Google action came within 24 hours of Manager access.
+select ok(public.whatsapp_staff_summary() ? 'first_action_cohort' and public.whatsapp_staff_summary() ? 'first_action_24h', 'the morning numbers carry the first action share');
+select ok(not has_function_privilege('authenticated', 'private.first_action_share()', 'execute')
+          and not has_function_privilege('anon', 'private.first_action_share()', 'execute'), 'the share is closed to the browser roles');
+insert into public.audit_events (created_at, actor_type, action, location_id, object_type, object_id, channel, result)
+values (now() - interval '3 days', 'system', 'google_access_granted', '00000000-0000-4000-8000-0000000000c1', 'location', '00000000-0000-4000-8000-0000000000c1', 'system', 'granted');
+select is(private.first_action_share(), '{"first_action_cohort": 1, "first_action_24h": 0}'::jsonb,
+  'access 3 days ago and the only approval today: in the cohort, not within 24 hours');
+insert into public.audit_events (created_at, actor_type, actor_id, action, location_id, object_type, object_id, channel, result)
+values (now() - interval '3 days' + interval '2 hours', 'user', '00000000-0000-4000-8000-0000000000a1', 'approval', '00000000-0000-4000-8000-0000000000c1', 'review_reply', 'x', 'dashboard', 'approved');
+select is(private.first_action_share(), '{"first_action_cohort": 1, "first_action_24h": 1}'::jsonb, 'an approval 2 hours after access counts');
+update public.locations set is_demo = true where id = '00000000-0000-4000-8000-0000000000c1';
+select is(private.first_action_share() ->> 'first_action_cohort', '0', 'a demo business is never counted');
+update public.locations set is_demo = false where id = '00000000-0000-4000-8000-0000000000c1';
 select ok(not exists (select 1 from cron.job where jobname like 'kabsi_slack%'), 'no Slack cron job is left');
 
 -- The webhook secret goes to Vault --------------------------------------------------------------------------------------
