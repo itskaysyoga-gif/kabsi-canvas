@@ -20,6 +20,7 @@ import {
 import { photoRefusal, voiceCheck } from "./media.ts";
 import { fromText, IN_SCOPE, LIST_RESULT, type ListMsg, markFor, type Msg, NAMES_BUSINESS, noraLook, ROW_TITLE_MAX, toMsg, wholeWords } from "./look.ts";
 import { type SigninDb, signinSeam } from "./signin.ts";
+import { linkOf, PARTNERS_SAY, type PartnersWaDb, payoutSeam } from "./partners.ts";
 import { MAX_BYTES } from "../photos/sniff.ts";
 import { notify, type Out, reply as sendReply } from "./outbox.ts";
 import type { SendState } from "./policy.ts";
@@ -154,6 +155,8 @@ export type AgentDeps = {
   book?: BookDeps;
   /** Signup 1: Continue with WhatsApp and the new sign-in notice. Absent, and the three messages it reads go on as before. */
   signin?: SigninDb;
+  /** Partners 2: the payout confirm, the staff tap at the money and the owner's link. Absent, and those replies are as before. */
+  partners?: PartnersWaDb;
 };
 
 const ABUSE_QUIET_MS = 24 * 3600_000;
@@ -246,6 +249,9 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   // Signup 1 (30.50 item 3): "Kabsi sign in CODE" and its two buttons, one exact pattern, before every other route.
   const signin = await signinSeam(d, t.s, phone, t.m);
   if (signin) return signin;
+  // Partners 2 (30.51 item 6): "Yes, it's me" under a payout method change, one exact button, before every other route.
+  const payout = await payoutSeam(d, t.s, phone, t.m);
+  if (payout) return payout;
   if (cmd.k === "start") {
     // START is the person's own opt-in again (13b phone test, 25 Oct): every role comes back, not only the conversation.
     await d.db.start(phone);
@@ -463,6 +469,10 @@ async function tool(t: Turn, name: string, arg: string | undefined, text: string
   const { who } = t;
   // "my link" is the review link for a business and the partner link for a partner.
   if (name === "review_link" && /my link/i.test(text) && domains(who).includes("partner") && (who.conversation?.active_role === "partner" || !domains(who).includes("business"))) name = "partner_tool";
+  // Partners 2 (30.50 item 5): for an owner, "my link" is the referral link (one free month per referred business that pays).
+  else if (name === "review_link" && /^\s*my link\W*$/i.test(text) && t.d.partners) name = "referral_link";
+  // The staff help names "payouts": from the staff phone it is the staff list, not the partner tool.
+  if (name === "partner_tool" && /^\s*payouts?\W*$/i.test(text) && domains(who).includes("staff") && !domains(who).includes("partner")) name = "staff_payouts";
   const dom = domainOf(name);
   // "help" could mean either role: asked once, then remembered (29.7).
   const ask = name === "help" ? needsRoleChoice(who, null) : null;
@@ -653,6 +663,12 @@ async function businessTool(t: Turn, name: string, arg: string | undefined): Pro
       return answered(t, g ? `${line}\n\n${growthLine(g)}` : line, "stats");
     }
     case "ask_customer": return askCustomer(t);
+    case "referral_link": {
+      const r = await t.d.partners!.referralLink(b.location_id, t.phone);
+      if (r.result === "none" || !r.code) return answered(t, PARTNERS_SAY.noLink, "referral_none");
+      const link = linkOf(app, r.code);
+      return answered(t, r.result === "partner" ? PARTNERS_SAY.partnerLink(link) : PARTNERS_SAY.referral(link), `referral_${r.result}`);
+    }
     case "review_link":
     case "qr": {
       const code = await t.d.db.reviewLink(b.location_id);
@@ -1211,9 +1227,26 @@ async function staff(t: Turn, name: string, arg: string | undefined): Promise<st
     }
     case "staff_reset_test": return await resetTest(t, arg);
     case "staff_partners": return answered(t, SAY.staffPartnersSoon, "staff_partners_stub");
-    case "staff_payouts": return answered(t, SAY.staffPayoutsSoon, "staff_payouts_stub");
+    case "staff_payouts": return await firstPayouts(t, arg);
     default: return answered(t, SAY.staffHelpText, "staff_help");
   }
+}
+
+/** Partners 2 (30.50 item 4): the first payouts waiting for one staff tap; the tap reviews the partner and approves it. */
+async function firstPayouts(t: Turn, arg: string | undefined): Promise<string> {
+  const p = t.d.partners;
+  if (!p) return answered(t, SAY.staffPayoutsSoon, "staff_payouts_stub");
+  const tap = arg?.startsWith("approve:") ? arg.slice(8) : null;
+  if (tap) {
+    const r = await p.reviewPayout(tap, t.phone);
+    if (r.result !== "approved" || !r.code) return answered(t, SAY.alreadyHandled, "stale_button");
+    return answered(t, PARTNERS_SAY.approved(r.code, r.amount_cents ?? 0, !!r.founding_partner, r.founding_count ?? 0), "payouts_approved");
+  }
+  const rows = await p.firstPayouts(t.phone);
+  if (!rows) return answered(t, SAY.staffHelpText, "staff_help");
+  if (!rows.length) return answered(t, PARTNERS_SAY.noFirstPayouts, "payouts_none");
+  return answered(t, PARTNERS_SAY.firstPayouts(rows), "payouts_list",
+    rows.slice(0, 3).map((r) => ({ id: `pr:${r.id}`, title: PARTNERS_SAY.approveButton(r.code) })));
 }
 
 /** RB-F3 (R-148 item 4): "reset test", then Confirm. Only the sender's own open requests at the demo businesses. */

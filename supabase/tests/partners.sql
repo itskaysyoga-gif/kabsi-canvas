@@ -11,6 +11,9 @@ select * from no_plan();
 
 \ir _fixtures.psql
 
+-- Partners 2 (30.50 item 7): lines are made only when card payments are open.
+update public.app_settings set value = 'on' where key = 'billing_open';
+
 insert into auth.users (instance_id, id, aud, role, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
 select '00000000-0000-0000-0000-000000000000', u.id, 'authenticated', 'authenticated', u.email, now(), '{}', '{}', now(), now()
 from (values ('00000000-0000-4000-8000-0000000020a1'::uuid, 'founding-owner@example.test'),
@@ -115,7 +118,7 @@ reset role;
 
 -- ─── Kabsi Partners ──────────────────────────────────────────────────────────────────────────────────────────────
 select ok(public.partner_apply('{"name": "Sara K", "email": "sara@example.test", "kind": "creator", "terms_version": "2026-10-26"}') is not null, 'a partner applies');
-select ok(public.partner_apply('{"name": "Self Partner", "email": "self-partner@example.test", "kind": "other", "terms_version": "2026-10-26"}') is not null, 'a second partner applies');
+select ok(public.partner_apply('{"name": "Self Partner", "email": "self-partner@example.test", "kind": "agency", "terms_version": "2026-10-26"}') is not null, 'a second partner applies');
 select throws_ok($$ select public.partner_apply('{"name": "Sara K", "email": "SARA@example.test", "kind": "creator", "terms_version": "2026-10-26"}') $$,
   'P0001', 'already_applied', 'one open application per email');
 select tests.act_as('00000000-0000-4000-8000-0000000000a3');

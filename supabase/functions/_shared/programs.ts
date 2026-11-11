@@ -4,9 +4,20 @@ import { CARD_PAYMENTS_COMING } from "./email/lifecycle-copy.ts";
 
 export const FOUNDING_TRADES = ["beauty_hair", "food", "health", "other"] as const;
 export const FOUNDING_COUNTRIES = ["AE", "GB", "US"] as const;
-export const PARTNER_KINDS = ["creator", "agency", "accountant", "reseller", "business_group", "other"] as const;
-/** The version of /partners/terms an applicant agrees to. Change it when the terms change in a way that matters. */
-export const PARTNER_TERMS_VERSION = "2026-11-10"; // Partners 1 (R-148): the review rules line
+/** Partners 2 (30.50 item 5): the six kinds of partner, in the order the join form shows them. */
+export const PARTNER_KINDS = ["card_seller", "agency", "creator", "accountant", "reseller", "customer"] as const;
+export type PartnerKind = (typeof PARTNER_KINDS)[number];
+/** The words for each kind (docs/COPY.md, Partners 2). Kept equal to the join form by tests/programs.test.ts. */
+export const PARTNER_KIND_LABEL: Record<PartnerKind, string> = {
+  card_seller: "Review card seller",
+  agency: "Freelancer or small agency",
+  creator: "Creator",
+  accountant: "Consultant or accountant",
+  reseller: "POS or booking reseller",
+  customer: "Kabsi customer",
+};
+/** The version of /partners/terms a partner agrees to. Change it when the terms change in a way that matters. */
+export const PARTNER_TERMS_VERSION = "2026-11-10.2"; // Partners 2 (R-150 item 4): join at once, review at the first payout
 /**
  * The words the founding applicant agrees to, stored with the application (30.17 section 1). UX 1: the form asks "Named or
  * anonymous case study" (anonymous unless the owner picks named), and the stored words say which one they agreed to.
@@ -72,27 +83,70 @@ export function checkFounding(b: Body): Checked<FoundingApplication> {
   return { ok: true, value: { business_name, country, trade, business_kind, whatsapp, why_now, case_study, checkin_consent: true, consent_text: FOUNDING_CONSENT[case_study] } };
 }
 
-export type PartnerApplication = {
-  name: string; email: string; phone: string | null; country: string | null; city: string | null; kind: string;
-  reach: string | null; pitch: string | null; uae_permit: string | null; source: "web"; terms_version: string;
+/** Partners 2 (30.50 item 4): the one short form at kabsi.co/partners/join, after sign-in. */
+export type PartnerJoin = {
+  name: string; email: string; country: string; kind: PartnerKind; reach: string; uae_permit: string | null; terms_version: string;
 };
-export function checkPartner(b: Body): Checked<PartnerApplication> {
+/** The UAE line of 29.2: an advertiser permit number, or "I will only share privately" (stored as "private"). */
+export const UAE_PRIVATE = "private";
+export function checkJoin(b: Body): Checked<PartnerJoin> {
   const name = text(b.name, 80);
   if (name.length < 2) return { ok: false, field: "name", message: "Please write your name." };
   const email = text(b.email, 254).toLowerCase();
-  if (!EMAIL.test(email)) return { ok: false, field: "email", message: "Please write an email address we can reach you at." };
-  const phone = b.phone ? phoneOf(b.phone) : null;
-  if (b.phone && !phone) return { ok: false, field: "phone", message: "Please write your WhatsApp number with the country code." };
-  const country = text(b.country, 2).toUpperCase() || null;
-  if (country && !/^[A-Z]{2}$/.test(country)) return { ok: false, field: "country", message: "Please choose your country." };
-  const kind = text(b.kind, 20);
-  if (!(PARTNER_KINDS as readonly string[]).includes(kind)) return { ok: false, field: "kind", message: "Please choose what you do." };
+  if (!EMAIL.test(email) || /@wa\.kabsi\.co$/.test(email)) return { ok: false, field: "email", message: "Please write an email address we can reach you at." };
+  const kind = text(b.kind, 20) as PartnerKind;
+  if (!(PARTNER_KINDS as readonly string[]).includes(kind)) return { ok: false, field: "kind", message: "Please choose what kind of partner you are." };
+  const country = text(b.country, 2).toUpperCase();
+  if (!/^[A-Z]{2}$/.test(country)) return { ok: false, field: "country", message: "Please choose your country." };
+  const reach = text(b.reach, 300);
+  if (reach.length < 3) return { ok: false, field: "reach", message: "Please say in a few words how you will share Kabsi." };
+  let uae_permit: string | null = null;
+  if (country === "AE") {
+    uae_permit = b.uae_private === true ? UAE_PRIVATE : text(b.uae_permit, 60) || null;
+    if (!uae_permit) return { ok: false, field: "uae_permit", message: "In the UAE, write your advertiser permit number, or tick that you will only share privately." };
+  }
   if (b.terms !== true) return { ok: false, field: "terms", message: "Please read and agree to the partner terms." };
-  const uae_permit = text(b.uae_permit, 60) || null;
+  return { ok: true, value: { name, email, country, kind, reach, uae_permit, terms_version: PARTNER_TERMS_VERSION } };
+}
+
+// ─── the payout method (29.1, 30.51 item 6) ──────────────────────────────────────────────────────────────────────
+export const PAYOUT_METHODS = ["paypal", "usdt", "usdc"] as const;
+export type PayoutMethod = (typeof PAYOUT_METHODS)[number];
+export const PAYOUT_LABEL: Record<PayoutMethod, string> = { paypal: "PayPal", usdt: "USDT", usdc: "USDC" };
+/** 29.1: the payout method is asked only once this much has cleared (cents). */
+export const PAYOUT_ASK_CENTS = 5000;
+/** A PayPal email, or a USDT or USDC wallet address (26 to 64 letters and digits, as TRON and Ethereum addresses are). */
+export function checkPayout(b: Body): Checked<{ method: PayoutMethod; detail: string }> {
+  const method = text(b.method, 10) as PayoutMethod;
+  if (!(PAYOUT_METHODS as readonly string[]).includes(method)) return { ok: false, field: "method", message: "Please choose how you want to be paid." };
+  const detail = typeof b.detail === "string" ? b.detail.trim() : "";
+  if (method === "paypal") {
+    if (!EMAIL.test(detail) || detail.length > 200) return { ok: false, field: "detail", message: "Please write the email of your PayPal account." };
+  } else if (!/^[A-Za-z0-9]{26,64}$/.test(detail)) {
+    return { ok: false, field: "detail", message: "Please paste your wallet address. It is 26 to 64 letters and numbers." };
+  }
+  return { ok: true, value: { method, detail } };
+}
+/** "PayPal ending in 1234". */
+export const payoutName = (method: string, last4: string | null | undefined) =>
+  `${PAYOUT_LABEL[method as PayoutMethod] ?? method} ending in ${last4 ?? ""}`.trim();
+/** The 6 digits of an email confirm, from random bytes (rejection sampling keeps each digit equally likely). */
+export function emailCode(randomBytes: (n: number) => Uint8Array): string {
+  let out = "";
+  while (out.length < 6) for (const b of randomBytes(12)) if (b < 250 && out.length < 6) out += String(b % 10);
+  return out;
+}
+/** The email with the code (docs/COPY.md, Partners 2). The code is in the body only, never in the subject. */
+export function payoutCodeEmail(code: string, method: string, last4: string) {
+  const line = `Your code to change your Kabsi payout method to ${payoutName(method, last4)} is ${code}.`;
+  const help = "It works once, for 10 minutes. If you did not ask for this, ignore this email and nothing changes.";
+  const html = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   return {
-    ok: true,
-    value: { name, email, phone, country, city: text(b.city, 80) || null, kind, reach: text(b.reach, 300) || null, pitch: text(b.pitch, 500) || null,
-      uae_permit, source: "web", terms_version: PARTNER_TERMS_VERSION },
+    subject: "Your Kabsi payout code",
+    preheader: "Enter the code on kabsi.co/partner to confirm the change.",
+    title: "Confirm your payout method",
+    bodyHtml: `<p>${html(line)}</p><p>${html(help)}</p>`,
+    text: `${line}\n\n${help}`,
   };
 }
 
@@ -140,4 +194,15 @@ export function foundingLine(day: FoundingDay, business: string, endsAt: string 
       button: day === 60 ? undefined : { label: "Choose your plan", url: plan },
     },
   };
+}
+
+/**
+ * 30.51 item 6: how a payout change is confirmed. The partner's own WhatsApp ("Yes, it's me") when the account has a
+ * confirmed number. Kabsi may write a free-form message with a button only inside the 24-hour window, so with the window
+ * closed the partner is asked to send Kabsi any message first ("open_window"). A code by email only without WhatsApp (no
+ * confirmed number, or the number stopped Kabsi's messages). Kabsi never uses a channel the browser chose.
+ */
+export function payoutChannel(o: { phone: string | null; windowOpen: boolean; stopped: boolean }): "whatsapp" | "email" | "open_window" {
+  if (!o.phone || o.stopped) return "email";
+  return o.windowOpen ? "whatsapp" : "open_window";
 }

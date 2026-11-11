@@ -259,8 +259,9 @@ Deno.test("review 4: a list row keeps its time and what is missing; the summary 
   const l = fromText("1 open\n#12 Sarah · Full head highlights and a cut with toner and a blow dry · Thu 12 Nov 15:00 · Needs confirmation from the salon and from the client\n\nThis covers only what was entered in Kabsi.", MARK.list);
   const row = toMsg(l, { asList: true }).list!.sections[0]!.rows[0]!;
   assert.ok(row.description!.length <= 72, row.description);
-  // The parts in order: service, day and time, what is to confirm. The lowest parts go whole, so the service alone stays.
-  assert.equal(row.description, "Full head highlights and a cut with toner and a blow dry");
+  // The parts in order: service, day and time, what is to confirm. R-155: the day and time always stay; a long service
+  // name loses its last words to make room, and what is to confirm goes whole.
+  assert.equal(row.description, "Full head highlights and a cut with toner and a blow · Thu 12 Nov 15:00");
   const fits = toMsg(fromText("1 open\n#12 Sarah · Highlights · Thu 12 Nov 15:00 · Needs confirmation from the salon and from the client\n\nThis covers only what was entered in Kabsi.", MARK.list), { asList: true }).list!.sections[0]!.rows[0]!;
   assert.equal(fits.description, "Highlights · Thu 12 Nov 15:00 · To confirm: salon, client");
 });
@@ -301,6 +302,13 @@ Deno.test("look 2b: a row description is service, day and time, to confirm, in t
   assert.equal(rowOf(`#8 Sam · Haircut · Fri 13 Nov 10:00 · Requested · ${CONFIRM_LINE}`).description, "Haircut · Fri 13 Nov 10:00 · To confirm: salon, client · Requested");
   // The gym's side is "the gym": the same plain words.
   assert.equal(rowDescription(["Trial", "Mon 16 Nov 18:00", "Needs confirmation from the gym and from the member"]), "Trial · Mon 16 Nov 18:00 · To confirm: gym, member");
+  // R-155: a 60 character service name is shortened at a word boundary; the day and time stay.
+  const long = "Full colour with balayage highlights and a deep repair treat"; // 60 characters
+  assert.equal(long.length, 60);
+  const row = rowDescription([long, "Mon 16 Nov 18:00", "Needs confirmation from the salon"]);
+  assert.ok(row.endsWith(" · Mon 16 Nov 18:00"), row);
+  assert.ok(row.length <= 72, row);
+  assert.equal(row, "Full colour with balayage highlights and a deep · Mon 16 Nov 18:00");
 });
 
 Deno.test("look 2b: a description of 71, 72 and 73 characters: the lowest part goes whole at 73", () => {
@@ -326,12 +334,14 @@ Deno.test("look 2b: with a long service name no word is cut and nothing ends wit
   const d = rowOf(`#12 Sarah · ${long} · Thu 12 Nov 15:00 · ${CONFIRM_LINE}`).description!;
   assert.ok(d.length <= 72);
   assert.doesNotMatch(d, /\.\.\./);
-  assert.ok(long.startsWith(d), "only whole leading words of the service remain");
-  assert.ok(long.split(" ").join(" ").startsWith(d.split(" ").slice(0, -1).join(" ")));
+  // R-155: only whole leading words of the service remain, and the day and time stay.
+  assert.ok(d.endsWith(" · Thu 12 Nov 15:00"), d);
+  assert.ok(long.startsWith(d.split(" · ")[0]!) && long.charAt(d.split(" · ")[0]!.length) === " ", d);
   // A service of more than 72 characters loses its last words, never half of one.
   const huge = Array.from({ length: 14 }, (_, i) => `word${i}xx`).join(" ");
   const h = rowOf(`#2 Dina · ${huge} · Fri 13 Nov 10:00`).description!;
-  assert.ok(h.length <= 72 && huge.startsWith(h) && /word\d+xx$/.test(h), h);
+  const hs = h.split(" · ")[0]!;
+  assert.ok(h.length <= 72 && huge.startsWith(hs) && /word\d+xx$/.test(hs) && h.endsWith(" · Fri 13 Nov 10:00"), h);
   // The same holds for every length from 40 to 90 characters of service, with a time and a confirmation after it.
   for (let n = 40; n <= 90; n++) {
     let service = "abcd";
@@ -340,6 +350,7 @@ Deno.test("look 2b: with a long service name no word is cut and nothing ends wit
     assert.ok(x.length <= 72, `${n}: ${x.length}`);
     assert.doesNotMatch(x, /\.\.\.|[ ·]$/, String(n));
     for (const part of x.split(" · ")) assert.ok(/^(abcd( abcd)*|Thu 12 Nov 15:00|To confirm: salon, client)$/.test(part), `${n}: ${part}`);
+    assert.ok(x.includes("Thu 12 Nov 15:00"), `${n}: the day and time stay (R-155)`);
   }
 });
 
