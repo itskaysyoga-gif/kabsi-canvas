@@ -70,6 +70,18 @@ export function scanHandoffHref(code: string, digits: string = WHATSAPP_DIGITS):
 }
 
 /**
+ * Cards 2 (master plan 30.50 item 9): the activate page's "Set up on WhatsApp" fills in "Link card CODE"; Kabsi answers with
+ * one confirm and the place. Only the card's own six characters travel (no business name or private detail, K-58). Null
+ * for a malformed code or while Kabsi has no WhatsApp number.
+ */
+export function linkCardHref(code: string, digits: string = WHATSAPP_DIGITS): string | null {
+  const c = code.trim().toUpperCase();
+  return /^[2-9A-HJKMNP-Z]{6}$/.test(c) && digits
+    ? `https://wa.me/${digits}?text=${encodeURIComponent(`Link card ${c}`)}`
+    : null;
+}
+
+/**
  * The one booking link (P0.1-V3, R-31): a single Calendly event type, "Call with Kabsi", 20 minutes, with one required
  * question, "What's the call about?". Replace the placeholder with the event's public URL and nothing else changes.
  * Until it is replaced every booking link falls back to an email to the team, so no page points at a dead address.

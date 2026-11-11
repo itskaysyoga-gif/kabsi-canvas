@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { scanHandoffHref, scanHandoffText } from "../src/lib/site";
+import { linkCardHref, scanHandoffHref, scanHandoffText } from "../src/lib/site";
 import { parse } from "../supabase/functions/_shared/whatsapp/router";
 
 // Session 13b part 1 (master plan 24.8, 28.1): the site's prefilled message is exactly what the agent picks up.
@@ -28,5 +28,19 @@ describe("the scan hand-off to WhatsApp", () => {
       forwarded: false,
     });
     expect(cmd).toMatchObject({ k: "scan_code", code: "KAB-7Q4M2X9P" });
+  });
+});
+
+// Cards 2 (master plan 30.50 item 9): the activate page's "Set up on WhatsApp" fills in "Link card CODE" and nothing else.
+describe("linkCardHref", () => {
+  it("fills in Link card and the code, upper case", () => {
+    expect(linkCardHref("abc234", "12057456874")).toBe(
+      "https://wa.me/12057456874?text=Link%20card%20ABC234",
+    );
+  });
+  it("refuses a malformed code and a missing number", () => {
+    expect(linkCardHref("ABC1O4", "12057456874")).toBeNull();
+    expect(linkCardHref("ABC23", "12057456874")).toBeNull();
+    expect(linkCardHref("ABC234", "")).toBeNull();
   });
 });

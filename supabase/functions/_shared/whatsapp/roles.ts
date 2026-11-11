@@ -54,7 +54,9 @@ export type OpenQuestion =
   | { type: "rb_time"; location_id: string; request_id: string; version: number; action: "confirm" | "convert"; readings: string[]; services: string[];
       at: string; nonce: string }
   // RB-F3: the confirm question of the staff-only "reset test" (its nonce is in the Confirm button; open 10 minutes).
-  | { type: "reset_test"; at: string; nonce: string };
+  | { type: "reset_test"; at: string; nonce: string }
+  // Cards 2: the place of a card just linked or opened, typed back within 10 minutes (the card code only, never a business).
+  | { type: "card_label"; code: string; at: string };
 
 export type Who = { phone: string; roles: Role[]; conversation: Conversation | null };
 
@@ -66,9 +68,9 @@ export type Domain = "business" | "partner" | "staff";
 export const TOOLS = {
   unknown: ["help", "question", "scan", "prices", "trial", "partner_program", "person"],
   prospect: ["help", "question", "scan", "send_map", "prices", "trial", "partner_program", "person"],
-  owner: ["help", "question", "switch", "stats", "review_link", "referral_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
+  owner: ["help", "question", "switch", "stats", "cards", "review_link", "referral_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
     "hours", "post", "billing", "voice", "ask_customer", "person"],
-  manager: ["help", "question", "switch", "stats", "review_link", "referral_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
+  manager: ["help", "question", "switch", "stats", "cards", "review_link", "referral_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
     "hours", "post", "voice", "ask_customer", "person"],
   staff: ["help", "question", "switch", "photo", "voice", "ask_customer", "person"],
   partner: ["help", "question", "switch", "partner_tool", "person"],
