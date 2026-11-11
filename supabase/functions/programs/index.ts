@@ -12,6 +12,9 @@
 //   POST /programs/partner/payout    { method, detail } -> a fresh confirm on the partner's WhatsApp, or an email code
 //   POST /programs/partner/payout/confirm { id, code }  the email code
 //   POST /programs/partner/visit     { code } a visit through a partner link (public, limited per visitor)
+//   GET  /programs/partner/cards     Cards 2: the partner's card links, their state and taps before an owner claimed them
+//   POST /programs/partner/cards/mint  { count } 1 to 50 new card links, within the partner's limit (200 to start)
+//   POST /programs/partner/cards/place { codes, place_id } the business of unclaimed card links (50 a day per partner)
 // Staff alerts on WhatsApp (R-64) tell Rashid a new application is waiting or a partner joined.
 import { serve } from "../_shared/kabsi.ts";
 import { clientIp } from "../_shared/client-ip.ts";
@@ -220,6 +223,47 @@ async function payoutConfirm(req: Request): Promise<Response> {
   return json({ ok: true, method: r.method, last4: r.last4 }, 200, NO_CACHE);
 }
 
+// ─── Cards 2 (master plan 30.50 item 9): the partner's card links. Each is a go.kabsi.co code carrying the partner's
+// account (cards.partner_id); 200 to start, until staff raise it. The business of a card is the Google Place ID picked in
+// the review link search (its suggestions and their shared limits), plus a per-partner limit of 50 businesses set a day.
+async function partnerCards(req: Request): Promise<Response> {
+  const user = await signedIn(req);
+  if (!user) return signIn();
+  const { data, error } = await admin().rpc("partner_cards", { p_user: user.id });
+  if (error) throw error;
+  return json(data, 200, NO_CACHE);
+}
+async function partnerCardsMint(req: Request): Promise<Response> {
+  const user = await signedIn(req);
+  if (!user) return signIn();
+  if (!(await rateLimit(`programs:cards_mint:${user.id}`, 20, 3600, { failClosed: true }))) return fail("slow_down", "Please wait a little and try again.", 429);
+  const body = await req.json().catch(() => ({})) as Record<string, unknown>;
+  const count = typeof body.count === "number" && Number.isInteger(body.count) ? body.count : 0;
+  if (count < 1 || count > 50) return fail("bad_count", "Choose 1 to 50 card links at a time.", 400);
+  const { data, error } = await admin().rpc("partner_cards_mint", { p_user: user.id, p_count: count });
+  if (error) throw error;
+  const r = one<{ result: string; codes?: string[]; left?: number }>(data);
+  if (r.result === "over_limit") return json({ error: "over_limit", left: r.left ?? 0, message: `You can make ${r.left ?? 0} more card links. Write to hello@kabsi.co to ask for more.` }, 409, NO_CACHE);
+  if (r.result === "not_active") return fail("not_active", "Card links open once your partner account is active.", 403);
+  if (r.result !== "minted") return fail("not_partner", "You are not a Kabsi partner yet.", 403);
+  log("programs", { ok: true, op: "partner_cards_mint", count });
+  return json({ ok: true, codes: r.codes ?? [] }, 200, NO_CACHE);
+}
+async function partnerCardsPlace(req: Request): Promise<Response> {
+  const user = await signedIn(req);
+  if (!user) return signIn();
+  const body = await req.json().catch(() => ({})) as Record<string, unknown>;
+  const codes = Array.isArray(body.codes) ? body.codes.filter((c): c is string => typeof c === "string" && /^[2-9A-HJKMNP-Z]{6}$/.test(c)) : [];
+  const place = typeof body.place_id === "string" ? body.place_id : "";
+  if (!codes.length || codes.length > 50 || !/^[A-Za-z0-9_-]{10,300}$/.test(place)) return fail("bad_request", "Choose the business again.", 400);
+  const { data, error } = await admin().rpc("partner_cards_place", { p_user: user.id, p_codes: codes, p_place: place });
+  if (error) throw error;
+  const r = one<{ result: string; count?: number }>(data);
+  if (r.result === "limited") return fail("limited", "You have set 50 businesses today. Try again tomorrow.", 429);
+  if (r.result !== "set") return fail(r.result, "You are not a Kabsi partner yet.", 403);
+  return json({ ok: true, count: r.count ?? 0 }, 200, NO_CACHE);
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   // Sec 2: the body is capped before anything reads it (413 past BODY_LIMITS.form).
@@ -233,6 +277,9 @@ serve(async (req) => {
     if (req.method === "POST" && path.endsWith("/partner/payout")) return await payoutRequest(req);
     if (req.method === "POST" && path.endsWith("/partner/visit")) return await partnerVisit(req);
     if (req.method === "GET" && path.endsWith("/partner")) return await partnerHome(req);
+    if (req.method === "GET" && path.endsWith("/partner/cards")) return await partnerCards(req);
+    if (req.method === "POST" && path.endsWith("/partner/cards/mint")) return await partnerCardsMint(req);
+    if (req.method === "POST" && path.endsWith("/partner/cards/place")) return await partnerCardsPlace(req);
   } catch (e) {
     await captureError("programs", e, { step: "partners2" });
     return fail("try_again", "Something went wrong. Please try again in a minute.", 500);
