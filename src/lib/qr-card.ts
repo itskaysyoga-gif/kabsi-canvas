@@ -11,10 +11,10 @@ export const CARD_FOOT = "kabsi.co";
 /** A6 in PDF points. */
 export const A6 = { w: 297.64, h: 419.53 } as const;
 
-const INK = "#111111";
-const MUTED = "#4a4740";
-const YELLOW = "#ffd60a";
-const WHITE = "#ffffff";
+export const INK = "#111111";
+export const MUTED = "#4a4740";
+export const YELLOW = "#ffd60a";
+export const WHITE = "#ffffff";
 
 export type Shape =
   | { kind: "rect"; x: number; y: number; w: number; h: number; r: number; fill: string }
@@ -80,6 +80,58 @@ function nameLines(
 const inFinder = (r: number, c: number, n: number) =>
   (r < 7 && c < 7) || (r < 7 && c >= n - 7) || (r >= n - 7 && c < 7);
 
+/**
+ * The code itself, in the white panel whose box is (x, y, size): charcoal dots with a quiet zone of 4 modules, the three
+ * finder squares drawn as rounded squares. Shared by the review card and the partner insert (Partners 3), so a code
+ * scans the same on both.
+ */
+export function qrShapes(link: string, x: number, y: number, size: number): Shape[] {
+  const out: Shape[] = [];
+  const m = qrMatrix(link) as boolean[][];
+  const n = m.length;
+  const mod = size / (n + 8);
+  const ox = x + 4 * mod;
+  const oy = y + 4 * mod;
+  for (let r = 0; r < n; r++)
+    for (let c = 0; c < n; c++)
+      if (m[r]![c] && !inFinder(r, c, n))
+        out.push({
+          kind: "circle",
+          cx: ox + (c + 0.5) * mod,
+          cy: oy + (r + 0.5) * mod,
+          r: mod * 0.46,
+          fill: INK,
+        });
+  for (const [r0, c0] of [
+    [0, 0],
+    [0, n - 7],
+    [n - 7, 0],
+  ] as const) {
+    const bx = ox + c0 * mod;
+    const yy = oy + r0 * mod;
+    out.push({ kind: "rect", x: bx, y: yy, w: 7 * mod, h: 7 * mod, r: 1.8 * mod, fill: INK });
+    out.push({
+      kind: "rect",
+      x: bx + mod,
+      y: yy + mod,
+      w: 5 * mod,
+      h: 5 * mod,
+      r: 1.2 * mod,
+      fill: WHITE,
+    });
+    out.push({
+      kind: "rect",
+      x: bx + 2 * mod,
+      y: yy + 2 * mod,
+      w: 3 * mod,
+      h: 3 * mod,
+      r: 0.9 * mod,
+      fill: INK,
+    });
+  }
+  return out;
+}
+
 /** The card as shapes, in points from the top left. */
 export function cardShapes(business: string, link: string, measure: Measure = estimate): Shape[] {
   const { w: W, h: H } = A6;
@@ -120,48 +172,7 @@ export function cardShapes(business: string, link: string, measure: Measure = es
   const inset = 14;
   const inner = S - inset * 2;
   out.push({ kind: "rect", x: fx + inset, y: fy + inset, w: inner, h: inner, r: 10, fill: WHITE });
-  const m = qrMatrix(link) as boolean[][];
-  const n = m.length;
-  const mod = inner / (n + 8);
-  const ox = fx + inset + 4 * mod;
-  const oy = fy + inset + 4 * mod;
-  for (let r = 0; r < n; r++)
-    for (let c = 0; c < n; c++)
-      if (m[r]![c] && !inFinder(r, c, n))
-        out.push({
-          kind: "circle",
-          cx: ox + (c + 0.5) * mod,
-          cy: oy + (r + 0.5) * mod,
-          r: mod * 0.46,
-          fill: INK,
-        });
-  for (const [r0, c0] of [
-    [0, 0],
-    [0, n - 7],
-    [n - 7, 0],
-  ] as const) {
-    const x = ox + c0 * mod;
-    const yy = oy + r0 * mod;
-    out.push({ kind: "rect", x, y: yy, w: 7 * mod, h: 7 * mod, r: 1.8 * mod, fill: INK });
-    out.push({
-      kind: "rect",
-      x: x + mod,
-      y: yy + mod,
-      w: 5 * mod,
-      h: 5 * mod,
-      r: 1.2 * mod,
-      fill: WHITE,
-    });
-    out.push({
-      kind: "rect",
-      x: x + 2 * mod,
-      y: yy + 2 * mod,
-      w: 3 * mod,
-      h: 3 * mod,
-      r: 0.9 * mod,
-      fill: INK,
-    });
-  }
+  out.push(...qrShapes(link, fx + inset, fy + inset, inner));
   out.push({
     kind: "text",
     x: W / 2,

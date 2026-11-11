@@ -18,7 +18,7 @@
 // Staff alerts on WhatsApp (R-64) tell Rashid a new application is waiting or a partner joined.
 import { serve } from "../_shared/kabsi.ts";
 import { clientIp } from "../_shared/client-ip.ts";
-import { admin, captureError, CORS, fail, json, log, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
+import { admin, APP_URL, captureError, CORS, fail, json, log, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { staffAlert } from "../_shared/billing.ts";
 import {
   checkFounding, checkJoin, checkPayout, emailCode, inviteMatches, PARTNER_KIND_LABEL, type PartnerKind, payoutChannel, payoutCodeEmail,
@@ -29,6 +29,7 @@ import { notify } from "../_shared/whatsapp/outbox.ts";
 import { inWindow } from "../_shared/whatsapp/policy.ts";
 import { PARTNERS_SAY } from "../_shared/whatsapp/partners.ts";
 import { notify as notifyEmail } from "../_shared/notify.ts";
+import { partnerJoinedEmail } from "../_shared/email/partner-copy.ts";
 import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
 
 const CACHE = { "cache-control": "public, max-age=300" };
@@ -122,6 +123,10 @@ async function joinPartner(req: Request): Promise<Response> {
     // 30.50 item 4: a staff notice says a partner joined; review waits for the first payout.
     await staffAlert(`New Kabsi partner: ${c.value.name} (${PARTNER_KIND_LABEL[c.value.kind as PartnerKind]}, ${c.value.country}), code ${r.code}. Review comes at the first payout`, `partner_join:${r.id}`)
       .catch((e) => captureError("programs", e, { step: "partner_join_alert" }));
+    // Partners 3 (30.50 item 5): the email with the link and the kit. Never fails the join; sent once per partner code.
+    await notifyEmail({ category: "direct", kind: "partner_joined", key: `partner_joined:${r.id}`, to: [{ email: c.value.email, userId: user.id }],
+      content: partnerJoinedEmail({ name: c.value.name, code: r.code }, APP_URL) })
+      .catch((e) => captureError("programs", e, { step: "partner_join_email" }));
   }
   return json({ ok: true, code: r.code, joined: r.result === "joined" }, 200, NO_CACHE);
 }
