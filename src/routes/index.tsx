@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { oneOf } from "@/lib/search-params";
 import { SiteShell } from "@/components/kabsi/site-chrome";
-import { PHOTOS } from "@/components/kabsi/photos";
 import { HOME_LINE } from "@/components/kabsi/hero-lines";
 import { D9Home, loadHomeLower } from "@/components/kabsi/d9-home";
 import { ORG_LD, WEBSITE_LD, pageHead } from "@/lib/site";
@@ -23,28 +22,16 @@ export const Route = createFileRoute("/")({
   },
   head: () => {
     const h = pageHead({
-      title: "Kabsi: Your business on Google. Taken care of.",
+      // Home 2 (lane R R-158 item 4): the owner's words, "Google listing" (docs/site4/home.md, Meta).
+      title: "Kabsi: your Google listing, taken care of on WhatsApp",
       description: HOME_LINE,
       path: "/",
       image: "home",
       // docs/SEO-PLAN.md (Design 8, lane R decision 8): Organization and WebSite only; no Product or Offer markup.
       jsonLd: [ORG_LD, WEBSITE_LD],
     });
-    return {
-      ...h,
-      links: [
-        ...h.links,
-        // The salon photo behind the hero's Example result shows from 1024 px only (Site 3a), so only those screens preload it.
-        {
-          rel: "preload",
-          as: "image",
-          href: PHOTOS.salonTablet.large,
-          imageSrcSet: `${PHOTOS.salonTablet.small} 800w, ${PHOTOS.salonTablet.large} 1600w`,
-          imageSizes: "28vw",
-          media: "(min-width: 1024px)",
-        },
-      ],
-    };
+    // Home 2: the hero's picture is the WhatsApp thread (its one small photo loads lazily), so no photo is preloaded.
+    return h;
   },
   component: Home,
 });
