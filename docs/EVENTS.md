@@ -81,6 +81,41 @@ Promise check (26.5): `first_alert_sent.minutes_since_whatsapp_connected`, media
 
 The Monday staff WhatsApp summary with the week's funnel numbers is built by session 13b part 2 (staff alerts), from the same events.
 
+## Funnel check (Growth 1, 11 Nov 2026)
+
+Checked against `main` at 79ce60b, from the free check started to a paid subscription. The test `the funnel events exist in code` in `tests/events.test.ts` repeats the code part of this check on every run: the funnel names are read from this file, and each must have a `track("name"` call in `src/` or a `product_event('name'` call in a migration (`checkout_started` in `supabase/functions/_shared/billing.ts`). The database part was read on 11 Nov 2026 with a select on `public.product_events` and `pg_trigger` only (counts by name, no row content).
+
+| Stage | Event | Where it is sent | Trigger enabled in production | Rows in `product_events` |
+|---|---|---|---|---|
+| Visit | `landing_viewed` | `trackLanding` from `src/routes/__root.tsx:90`; `src/lib/telemetry.ts:396` | Browser: not a database event | Browser events go to PostHog and were not read |
+| Free check started | `free_scan_started` | `src/components/kabsi/scan-live.tsx:379` | Browser | Not read (PostHog) |
+| Free check finished | `free_scan_completed` | `src/components/kabsi/scan-live.tsx:424` | Browser | Not read (PostHog) |
+| Sign-up | `signup_completed` | `private.user_product_event`, trigger `users_product_event` on `auth.users` (migration 20261025210000) | Yes | 1 (8 Nov). 8 older rows carry the old name `registration_completed` |
+| Google access | `google_access_granted` | `private.audit_product_event`, trigger `audit_events_product`, from the audit record `google_access_granted` | Yes | 2 |
+| WhatsApp connected | `whatsapp_connected` | `private.phone_role_growth_event`, trigger `phone_roles_growth` | Yes | 0: the 3 owner or manager phones bound since 25 Oct are on demo businesses, which send nothing |
+| First alert | `first_alert_sent` | `private.outbox_growth_event`, trigger `whatsapp_outbox_growth`, kinds `review_alert`, `post_alert`, `protection_alert` | Yes | 0: no such alert has been sent to a real business |
+| First yes | `first_yes` | `private.audit_growth_event`, trigger `audit_events_growth`, from the audit record `approval` | Yes | 1 |
+| Trial | `trial_started` | The same trigger, from the audit record `trial_started` that `start_trial` writes | Yes | 0: no trial has started since 25 Oct |
+| Checkout | `checkout_started` | `supabase/functions/_shared/billing.ts:454`, through `public.record_product_event` | Not a trigger | 0: plans are not open |
+| Paid | `paid` | `private.subscription_product_event` (update) and `private.subscription_insert_event` (insert), triggers `subscriptions_product_event` and `subscriptions_insert_event` | Yes | 0: no active subscription exists |
+
+Result: every funnel event has a sender in code and, for the seven that come from database triggers, an enabled trigger in production (seven triggers, all enabled). Nothing in the funnel is missing. A zero above is not a fault: the database sends nothing for the demo business or for kabsi.co test accounts (the rule at the top of this file), and no customer is live yet.
+
+Events that do not fire, or do not say what this file says (none is in the funnel):
+
+- `setup_call_booked` has no sender. The setup call has no booking calendar since Fix 2 (4 Nov 2026), so nothing can send it. It stays in the type list.
+- `free_scan_started` and `free_scan_completed` always send `source: "tool"`. This file says the source is home, tool or onboarding; the code does not tell them apart (the one scan box is used in all three places). The funnel is unaffected. A LATER row records it.
+
+## The one number added to the staff digest (Growth 1, 11 Nov 2026)
+
+The staff WhatsApp morning digest (08:00 Beirut, and the answer to "today") ends with one line: "First approved action within 24 hours of Manager access: 3 of 4 (75 percent), access began 1 to 30 days ago."
+
+- Who is counted: every real business (not a demo business, not a kabsi.co test account) whose first `google_access_granted` audit record is at least 24 hours and at most 30 days old.
+- What counts as the first approved Google action: an `approval` audit record by a person (a review reply, a post, a photo or a profile change; each one is a write to Google, in any channel) made within 24 hours after that access record.
+- With no business in that window the line says "no business to measure yet" and never "0 percent".
+- Where: `private.first_action_share()` (migration `20261111063702_growth1_first_action_share.sql`), read through `public.whatsapp_staff_summary()`; the words are `firstActionText` in `supabase/functions/_shared/whatsapp/staff-alerts.ts`. Counts only; no business, person or customer detail.
+- On 11 Nov 2026 the real answer was 0 of 1 (one real business has had access; its first approval came later).
+
 ## Attribution (20.3)
 
 - The browser keeps, for the visit only (sessionStorage, no cookie): first and last touch with utm_source, utm_medium, utm_campaign, utm_content, utm_term, the landing page and the referring site; gclid and fbclid (and fbc, fbp) only where the privacy choice allows advertising.
