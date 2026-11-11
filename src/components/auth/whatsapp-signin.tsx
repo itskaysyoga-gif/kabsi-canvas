@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { MessageCircle } from "lucide-react";
 import { buttonClass } from "@/components/kabsi/ui";
+import { cn } from "@/lib/utils";
 import { Turnstile } from "@/components/turnstile";
 import { qrSvg } from "@/lib/qr";
 import {
@@ -182,7 +183,10 @@ export function WhatsAppStep({
         href={start.href}
         target="_blank"
         rel="noopener noreferrer"
-        className={buttonClass("primary", "lg", true)}
+        className={cn(
+          buttonClass("primary", "lg", true),
+          "h-auto min-h-13 whitespace-normal py-2 text-center",
+        )}
         data-main-cta
         data-wa-open
       >
@@ -215,14 +219,14 @@ export function WhatsAppStep({
           {phone ? (
             openButton("Open WhatsApp")
           ) : (
-            <div className="grid grid-cols-[1fr_auto] items-center gap-4">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
               {openButton("Open WhatsApp on this computer")}
               <div
-                className="size-32 rounded-inner border border-line bg-kb-white p-1.5"
+                className="size-28 rounded-inner border border-line bg-kb-white p-1"
                 role="img"
                 aria-label="QR code that opens WhatsApp on your phone with the sign-in message"
                 data-wa-qr
-                dangerouslySetInnerHTML={{ __html: qrSvg(start.href, 116) }}
+                dangerouslySetInnerHTML={{ __html: qrSvg(start.href, 104) }}
               />
             </div>
           )}
