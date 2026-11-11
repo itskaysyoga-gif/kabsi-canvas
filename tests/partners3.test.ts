@@ -191,7 +191,7 @@ describe("the four partner emails", () => {
   it("each has one button, a preview line and a plain-text part", () => {
     for (const [k, m] of Object.entries(mails)) {
       expect(m.button?.label, k).toBeTruthy();
-      expect(m.button?.url.startsWith(`${APP}/partner`), k).toBe(true);
+      expect(m.button?.url.startsWith(`${APP}/partners/home`), k).toBe(true);
       expect(m.preheader.length, k).toBeGreaterThan(0);
       expect(m.text.length, k).toBeGreaterThan(40);
       expect(m.text, k).not.toMatch(/<[a-z][^>]*>/i);
@@ -210,7 +210,7 @@ describe("the four partner emails", () => {
   });
   it("says what each one is for", () => {
     expect(mails.joined.text).toContain(partnerLink("P-AB23CD"));
-    expect(mails.joined.button?.url).toBe(`${APP}/partner#kit`);
+    expect(mails.joined.button?.url).toBe(`${APP}/partners/home#kit`);
     expect(mails.joined.text).toContain("A6 insert");
     expect(mails.joined.text).toContain(PARTNER_PAYING_LINE);
     expect(mails.started.text).toContain("Hair salon, Dubai Marina");

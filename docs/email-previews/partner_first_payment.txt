@@ -6,7 +6,7 @@ Payouts are on the 5th of each month, for every partner with 25 US dollars or mo
 
 Each payout comes with a statement.
 
-See your numbers: https://kabsi.co/partner
+See your numbers: https://kabsi.co/partners/home
 
 --
 Why you got this: You are a Kabsi partner.

@@ -143,7 +143,7 @@ export function payoutCodeEmail(code: string, method: string, last4: string) {
   const html = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   return {
     subject: "Your Kabsi payout code",
-    preheader: "Enter the code on kabsi.co/partner to confirm the change.",
+    preheader: "Enter the code on kabsi.co/partners/home to confirm the change.",
     title: "Confirm your payout method",
     bodyHtml: `<p>${html(line)}</p><p>${html(help)}</p>`,
     text: `${line}\n\n${help}`,

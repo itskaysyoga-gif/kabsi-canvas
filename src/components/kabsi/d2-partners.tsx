@@ -318,7 +318,7 @@ export function PartnersPage() {
             <p className="mt-4 text-small text-text-2">
               Already a partner?{" "}
               <SiteLink
-                to="/partner"
+                to="/partners/home"
                 className="font-bold text-text-1 underline underline-offset-4"
               >
                 Open your partner home

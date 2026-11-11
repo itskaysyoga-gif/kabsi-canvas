@@ -60,8 +60,9 @@ describe("old addresses answer one 301 to a live page", () => {
   it("answers /lebanon, /partner/ and the renamed tools with a trailing slash in one hop", () => {
     expect(answer("/lebanon/")?.destination).toBe("/pricing");
     expect(answer("/product/")?.destination).toBe("/pricing");
-    // Partners 2 (11 Nov 2026): /partner is the partner home now, so /partner/ answers it.
-    expect(answer("/partner/")?.destination).toBe("/partner");
+    // Fix 5 (R-158 item 2): the partner home is /partners/home; /partner and /partner/ answer it in one hop.
+    expect(answer("/partner/")?.destination).toBe("/partners/home");
+    expect(answer("/partner")?.destination).toBe("/partners/home");
     expect(answer("/google-profile-check/")?.destination).toBe("/scan");
     expect(answer("/get-started/")?.destination).toBe("/scan");
   });

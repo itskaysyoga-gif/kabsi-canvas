@@ -24,6 +24,8 @@ describe("edge cache for public pages", () => {
       "/start",
       "/staff",
       "/partner",
+      "/partners/home",
+      "/partners/join",
       "/a/abc",
       "/scan/KAB-12345678",
       "/guides",

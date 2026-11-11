@@ -134,8 +134,13 @@
       "statusCode": 301
     },
     {
+      "source": "/partner",
+      "destination": "/partners/home",
+      "statusCode": 301
+    },
+    {
       "source": "/partner/",
-      "destination": "/partner",
+      "destination": "/partners/home",
       "statusCode": 301
     },
     {
@@ -274,6 +279,15 @@
     },
     {
       "source": "/app/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/partners/:page(join|home)",
       "headers": [
         {
           "key": "X-Robots-Tag",

@@ -26,7 +26,7 @@ import {
 // Cards 2: the card links section loads on its own, after the rest of the home (the review link search comes with it).
 const PartnerCards = lazy(() => import("./partner-cards"));
 
-// Partners 2 (master plan 30.50 item 6): kabsi.co/partner, the partner home. Signed in: the link and its QR code, the kit
+// Partners 2 (master plan 30.50 item 6): kabsi.co/partners/home, the partner home. Signed in: the link and its QR code, the kit
 // (Partners 3: ready posts, the A6 insert, the say and never say lists), the
 // numbers from the one ledger, the payout method (asked once 50 US dollars has cleared, shown as the last 4 characters,
 // changed only after a fresh confirm on WhatsApp or an email code), and the rules. A referred business shows as its
@@ -65,7 +65,7 @@ export default function PartnerPage() {
           ) : !user ? (
             <Card>
               <p className="mb-4 text-small font-bold text-text-1">{C.signInFirst}</p>
-              <SignInPanel next="/partner" onDone={() => void router.invalidate()} inApp={inApp} />
+              <SignInPanel next="/partners/home" onDone={() => void router.invalidate()} inApp={inApp} />
             </Card>
           ) : failed ? (
             <Banner

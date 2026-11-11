@@ -106,7 +106,7 @@ export const SAY = {
   billingOwnerOnly: "Owner only\nOnly the owner can change the plan and billing.",
   // Owner tools (9.3).
   ownerHelp:
-    "You can send\n\"stats\" or \"this month\"\n\"review link\" or \"QR\"\n\"ask a customer\" for a ready review message\na photo for your Google profile\na voice note or a message about what is new\n\"reply:\" and your exact reply to the last review\na change to the last draft, for example \"make it shorter\"\n\"switch\" to change business\n\"talk to a person\"",
+    "You can send\n\"stats\" or \"this month\"\n\"review link\" or \"QR\"\n\"cards\" for the taps on your Kabsi cards\n\"my link\" to share Kabsi with another business\n\"ask a customer\" for a ready review message\na photo for your Google profile\na voice note or a message about what is new\n\"reply:\" and your exact reply to the last review\na change to the last draft, for example \"make it shorter\"\n\"switch\" to change business\n\"talk to a person\"",
   staffHelp: "You can send\nphotos here for the owner to approve\n\"ask a customer\" for the review message\n\"talk to a person\"",
   stats: (business: string, days: number, s: { new_reviews: number; answered: number; waiting: number; average: number | null }) =>
     `${business}, the last ${days} days: ${s.new_reviews} new ${s.new_reviews === 1 ? "review" : "reviews"}${s.average ? `, average ${s.average} stars` : ""}, ${s.answered} answered through Kabsi. ${s.waiting} waiting for you.`,

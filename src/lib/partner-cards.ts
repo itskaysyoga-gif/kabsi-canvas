@@ -1,4 +1,4 @@
-// Cards 2 (master plan 30.50 item 9): the partner's card links on kabsi.co/partner. Read and written only through the
+// Cards 2 (master plan 30.50 item 9): the partner's card links on kabsi.co/partners/home. Read and written only through the
 // programs function (signed in): GET partner/cards, POST partner/cards/mint, POST partner/cards/place. Kabsi sells no
 // cards: a partner writes each link on a card they sell. A tap on an unclaimed card goes straight to the business's
 // Google review form; taps are shown only until the owner claims the card (then they are the business's).

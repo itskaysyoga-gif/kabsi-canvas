@@ -398,8 +398,9 @@ function Page() {
           {WHATSAPP_ON ? (
             <>
               <li>
-                Kapso: the messaging service that holds the chat for {WHATSAPP_NUMBER}, where our
-                team reads and answers your WhatsApp messages (section 14).
+                Our WhatsApp messaging provider, which carries messages over Meta&apos;s WhatsApp
+                Business Platform and holds the chat for {WHATSAPP_NUMBER}, where our team reads and
+                answers your WhatsApp messages (section 14).
               </li>
               <li>
                 When switched on, a speech to text provider (ElevenLabs or OpenAI; this page names
@@ -554,8 +555,8 @@ function Page() {
             <li>
               WhatsApp messages with the Kabsi number: Kabsi deletes its own record of each one 12
               months after it was sent. The text Kabsi queues to send to you is cleared a day after
-              it is sent, and its queue record is deleted after 30 days. The chat stays in the Kapso
-              inbox until you ask us to delete it (section 14).
+              it is sent, and its queue record is deleted after 30 days. The chat stays in our WhatsApp
+              messaging provider&apos;s inbox until you ask us to delete it (section 14).
             </li>
           ) : null}
           <li>
@@ -722,9 +723,11 @@ function Page() {
               train AI models or to copy your voice.
             </p>
             <p>
-              <b>Who handles it.</b> Kapso provides the messaging service and the inbox where our
-              team reads and replies. Meta runs WhatsApp and carries the messages. Both process the
-              messages to deliver them, and Kapso also holds the chat for us. Kabsi keeps a record
+              <b>Who handles it.</b> Our WhatsApp messaging provider, which carries messages over
+              Meta&apos;s WhatsApp Business Platform, provides the messaging service and the inbox
+              where our team reads and replies. Meta runs WhatsApp and carries the messages. Both
+              process the messages to deliver them, and our WhatsApp messaging provider also holds
+              the chat for us. Kabsi keeps a record
               of each message&apos;s type and delivery, not its words. We use the chat only for you,
               and we do not use it for advertising, sell it, or use it to train AI models. Your use
               of WhatsApp is also covered by WhatsApp&apos;s own terms and privacy policy.
@@ -732,11 +735,12 @@ function Page() {
             <p>
               <b>How long it is kept.</b> Kabsi deletes its own record of each WhatsApp message 12
               months after it was sent. The text Kabsi queues to send to you is cleared a day after
-              it is sent, and its queue record is deleted after 30 days. The chat stays in the Kapso
-              inbox until you ask us to delete it: email {CONTACT_EMAIL} from the address on your
+              it is sent, and its queue record is deleted after 30 days. The chat stays in our WhatsApp
+              messaging provider&apos;s inbox until you ask us to delete it: email {CONTACT_EMAIL} from the address on your
               account, or say so in the chat, and we delete the chat on our side and tell you when
               it is done. A chat with Kabsi&apos;s earlier number (before 22 October 2026) has no
-              automatic deletion date. Kapso and Meta may keep messages under their own terms, and
+              automatic deletion date. Our WhatsApp messaging provider and Meta may keep messages under
+              their own terms, and
               the chat stays on your own phone until you delete it there. Review text in an alert is
               not kept by Kabsi.
             </p>
