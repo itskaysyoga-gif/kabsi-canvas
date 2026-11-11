@@ -1,5 +1,5 @@
 // Copy 3 (master plan 30.30 item 5): the speed gate measures Home, Pricing and /scan, each with its own script budget, and the
-// workflows carry the budgets of 30.29 item 2: CI Home 205, Pricing 215, /scan 235 KB; live Home 215, Pricing 225, /scan 245 KB.
+// workflows carry the budgets of 30.29 item 2: CI Home 205, Pricing 216 (215 until Partners 2, Rashid's yes on 11 Nov 2026), /scan 235 KB; live Home 215, Pricing 225, /scan 245 KB.
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -36,7 +36,7 @@ function gate(kbs: Record<string, number>, env: Record<string, string> = {}) {
     },
   );
 }
-const CI = "/=205,/pricing=215,/scan=235";
+const CI = "/=205,/pricing=216,/scan=235";
 
 describe("the speed gate reads Home, Pricing and /scan with a budget each", () => {
   it("passes when every page is within its own budget", () => {
@@ -47,9 +47,9 @@ describe("the speed gate reads Home, Pricing and /scan with a budget each", () =
     expect(r.stdout).toContain("| Script (transfer) | 234 KB | 235 KB | pass |");
   });
   it("fails when Pricing or /scan is over its own budget, even if Home is not", () => {
-    const pricing = gate({ "/": 199, "/pricing": 216, "/scan": 200 }, { LH_PAGES: CI });
+    const pricing = gate({ "/": 199, "/pricing": 217, "/scan": 200 }, { LH_PAGES: CI });
     expect(pricing.status).toBe(1);
-    expect(pricing.stderr).toContain("/pricing: script 216 KB is over 215 KB");
+    expect(pricing.stderr).toContain("/pricing: script 217 KB is over 216 KB");
     const scan = gate({ "/": 199, "/pricing": 200, "/scan": 236 }, { LH_PAGES: CI });
     expect(scan.status).toBe(1);
     expect(scan.stderr).toContain("/scan: script 236 KB is over 235 KB");
@@ -71,7 +71,7 @@ describe("the speed gate reads Home, Pricing and /scan with a budget each", () =
   });
   it("the workflows carry the budgets and measure the three pages", () => {
     const ci = read(".github/workflows/ci.yml");
-    expect(ci).toContain('LH_PAGES: "/=205,/pricing=215,/scan=235"');
+    expect(ci).toContain('LH_PAGES: "/=205,/pricing=216,/scan=235"');
     expect(ci).toContain("node scripts/lighthouse-gate.mjs .lighthouseci\n");
     const live = read(".github/workflows/lighthouse-live.yml");
     expect(live).toContain('LH_PAGES: "/=215,/pricing=225,/scan=245"');
