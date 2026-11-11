@@ -15,6 +15,7 @@ import { parseButton } from "../whatsapp/router.ts";
 import { handle } from "../whatsapp/agent.ts";
 import { BIZ, msg, PHONES, USERS, World } from "../whatsapp/world.test-helpers.ts";
 import type { Counts } from "../care-report/compose.ts";
+import { renderReport } from "../email/report-body.ts";
 
 const base: Facts = {
   business: "Rose Lane Salon", check: null, confirmed: true, whatsapp: true, setup_ok: true, keyword: "hair salon", consent: true,
@@ -402,4 +403,21 @@ Deno.test("Scope 1: with no staff phone nothing is claimed, and a send that fail
     /slow_start/,
   );
   assert.deepEqual(released, [BIZ.harbour], "the claim goes back so the next tick tries again");
+});
+
+// Cards 2 (30.50 item 9): the weekly report gains a Cards block only when the business has a card. Taps, never reviews.
+Deno.test("cards2: the receipt lists taps per card by place; no card, no block; the WhatsApp line is unchanged", () => {
+  const without = R();
+  assert.equal(without.cards, null);
+  const r = R({ cards: [{ code: "ABC234", label: "Front desk", this_week: 12 }, { code: "DEF567", label: null, this_week: 1 }] });
+  assert.deepEqual(r.cards?.map((c) => c.line), ["Front desk: 12 taps", "Card DEF567: 1 tap"]);
+  assert.equal(r.whatsapp, without.whatsapp, "the WhatsApp receipt text does not change");
+  const mail = renderReport({ name: "Rose Lane Salon" }, { period: { from: "2026-11-02", to: "2026-11-08" }, rating: null, rating_count: null,
+    rating_change: null, rating_drop: false, new_reviews: 0, new_avg: null, replied: 0, waiting: 0, taps: { total: 0, nfc: 0, qr: 0 }, receipt: r });
+  assert.match(mail.html, /From your Kabsi cards/);
+  assert.match(mail.text, /From your Kabsi cards:\n- Front desk: 12 taps\n- Card DEF567: 1 tap\nA tap is not a review\./);
+  const none = renderReport({ name: "Rose Lane Salon" }, { period: { from: "2026-11-02", to: "2026-11-08" }, rating: null, rating_count: null,
+    rating_change: null, rating_drop: false, new_reviews: 0, new_avg: null, replied: 0, waiting: 0, taps: { total: 0, nfc: 0, qr: 0 }, receipt: without });
+  assert.doesNotMatch(none.html + none.text, /Kabsi cards/);
+  assert.doesNotMatch(mail.text, /[–—!]|reviews from|became a review/);
 });

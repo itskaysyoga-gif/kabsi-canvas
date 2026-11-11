@@ -27,6 +27,7 @@ import { sendSensitiveAlert } from "../review-growth/alerts.ts";
 import type { BookDb, BookDeps } from "./book.ts";
 import { signinDb } from "../wa-signin-db.ts";
 import type { FirstPayout, PartnersWaDb } from "./partners.ts";
+import type { CardCheck, CardsDb } from "./cards.ts";
 
 async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await admin().rpc(fn, args);
@@ -330,8 +331,17 @@ export async function agentDeps(): Promise<AgentDeps> {
     signin: signinDb(),
     // Partners 2: the payout confirm, the staff tap at the money and the owner's link (20261111045557_partners2.sql).
     partners: partnersDb,
+    // Cards 2: "Link card CODE", the place label and "cards" (20261111120000_cards2_owner.sql).
+    cards: cardsDb,
   };
 }
+
+const cardsDb: CardsDb = {
+  check: (code, phone) => rpc<CardCheck>("card_link_check", { p_phone: phone, p_code: code }),
+  link: (code, locationId, phone) => rpc("card_link_whatsapp", { p_phone: phone, p_code: code, p_location: locationId }),
+  label: (code, label, phone) => rpc("card_label_whatsapp", { p_phone: phone, p_code: code, p_label: label }),
+  list: (locationId, phone) => rpc("card_list_whatsapp", { p_phone: phone, p_location: locationId }),
+};
 
 const partnersDb: PartnersWaDb = {
   confirmPayout: (id, phone) => rpc("partner_payout_confirm_whatsapp", { p_id: id, p_phone: phone }),

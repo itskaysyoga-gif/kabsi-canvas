@@ -119,6 +119,8 @@ export async function buildReport(loc: Loc, now = new Date()) {
   const care = await careBlocks(loc, now);
   // The 7 days before the Monday it is sent: Monday to Sunday.
   const period = { from: isoDay(new Date(now.getTime() - 7 * DAY), loc.time_zone), to: isoDay(new Date(now.getTime() - DAY), loc.time_zone) };
+  // Cards 2: each active card's taps in that week (bots left out, this business's taps only). A business with no card has none.
+  const { data: cardWeeks } = await db.rpc("card_taps_weeks", { p_location: loc.id, p_week: period.from });
   const work = receipt({
     dates: dateRange(period),
     business: loc.name, counts: care.care.counts, needs: care.needs, needsTotal: care.needs_total, plan: care.plan,
@@ -126,6 +128,7 @@ export async function buildReport(loc: Loc, now = new Date()) {
     ai: await latestAiAnswer(loc.id, now).catch(() => null), aiThisWeek: monthlyWeek(today),
     accuracy: await latestFinding(loc.id, now).catch(() => null),
     rivals: await rivalChanges(loc.id, now).catch(() => []),
+    cards: (cardWeeks as { code: string; label: string | null; this_week: number }[] | null) ?? null,
   });
 
   return {

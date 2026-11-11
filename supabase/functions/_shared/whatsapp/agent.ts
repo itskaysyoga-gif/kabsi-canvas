@@ -21,6 +21,10 @@ import { photoRefusal, voiceCheck } from "./media.ts";
 import { fromText, IN_SCOPE, LIST_RESULT, type ListMsg, markFor, type Msg, NAMES_BUSINESS, noraLook, ROW_TITLE_MAX, toMsg, wholeWords } from "./look.ts";
 import { type SigninDb, signinSeam } from "./signin.ts";
 import { linkOf, PARTNERS_SAY, type PartnersWaDb, payoutSeam } from "./partners.ts";
+import {
+  CARD_LABEL_BTN, CARD_LINK_BTN, CARD_ROW_BTN, type CardCheck, CARDS_SAY, type CardsDb, cardsList, LABEL_OPEN_MS, LINK_CARD_RE, PLACES,
+  type PlaceKey, placeButtons, startLink, typedPlace,
+} from "./cards.ts";
 import { MAX_BYTES } from "../photos/sniff.ts";
 import { notify, type Out, reply as sendReply } from "./outbox.ts";
 import type { SendState } from "./policy.ts";
@@ -157,6 +161,8 @@ export type AgentDeps = {
   signin?: SigninDb;
   /** Partners 2: the payout confirm, the staff tap at the money and the owner's link. Absent, and those replies are as before. */
   partners?: PartnersWaDb;
+  /** Cards 2: "Link card CODE", the place label and "cards". Absent, and those messages go on as before. */
+  cards?: CardsDb;
 };
 
 const ABUSE_QUIET_MS = 24 * 3600_000;
@@ -267,6 +273,9 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     await d.db.setConv(phone, { abuse_notice: true });
     return answered(t, SAY.abuseNotice, "abuse_notice");
   }
+  // Cards 2 (30.50 item 9): "Link card CODE", its buttons and a typed place, each one exact pattern.
+  const card = await cardRoute(t, cmd);
+  if (card) return card;
   if (cmd.k === "scan_code") {
     await d.db.attachCode(phone, cmd.code, null);
     return answered(t, SAY.scanPicked(cmd.code), "scan_code");
@@ -461,6 +470,87 @@ async function pickedBusiness(t: Turn, locationId: string): Promise<string> {
       { k: "photo", media: { kind: "image", id: m.id, mime: m.mime ?? "image/jpeg", filename: null, size: m.size, voice: false } });
   }
   return answered(plain({ ...next, business: b }), SAY.switched(b.business), "business_set");
+}
+
+// ─── Cards 2 (master plan 30.50 item 9): link a card on WhatsApp, its place, its row in "cards".
+// The business is always one of the phone's own (owner or manager), and the database checks it again on every write.
+
+async function cardRoute(t: Turn, cmd: Command): Promise<string | null> {
+  const db = t.d.cards;
+  if (!db) return null;
+  const m = t.m;
+  const btn = m.buttonId ?? "";
+  const link = !btn && !m.forwarded ? LINK_CARD_RE.exec(m.text ?? "") : null;
+  const pick = btn ? CARD_LINK_BTN.exec(btn) : null;
+  const place = btn ? CARD_LABEL_BTN.exec(btn) : null;
+  const row = btn ? CARD_ROW_BTN.exec(btn) : null;
+  const oq = t.who.conversation?.open_question;
+  const open = oq?.type === "card_label" && !!oq.at && (t.d.now ?? Date.now)() - Date.parse(oq.at) < LABEL_OPEN_MS ? oq : null;
+  // A typed place: plain words, three at most and no question, only while the place question is open (10 minutes).
+  const typed = open && !btn && !m.media && !m.forwarded && !m.listRow && cmd.k === "free" && !/[?]/.test(cmd.text) && cmd.text.trim().split(/\s+/).length <= 3
+    ? typedPlace(cmd.text) : null;
+  if (!link && !pick && !place && !row && !typed) return null;
+  // F-1: a forwarded tap is never the owner's own.
+  if (m.forwarded) return "card_forwarded";
+
+  if (link || row) {
+    const code = (link ?? row)![1]!.toUpperCase();
+    return cardAnswer(t, code, await db.check(code, t.phone));
+  }
+  if (pick) {
+    const code = pick[1]!;
+    const b = cardBusinesses(t).find((x) => x.location_id === pick[2]);
+    if (!b) return answered(t, CARDS_SAY.unknown(code), "card_unknown");
+    const tb = { ...t, business: b, head: head(t.who, "business", b) };
+    const r = await db.link(code, b.location_id, t.phone);
+    if (r.result !== "linked") return cardRefused(tb, code, r.result);
+    await t.d.db.setConv(t.phone, { open_question: { type: "card_label", code, at: nowIso(t) } satisfies OpenQuestion });
+    return answered(tb, CARDS_SAY.linked(code, b.business), "card_linked", placeButtons(code));
+  }
+  const code = place ? place[1]! : open!.code;
+  const label = place ? PLACES[place[2] as PlaceKey] : typed!;
+  const r = await db.label(code, label, t.phone);
+  if (r.result === "bad_label") return answered(t, CARDS_SAY.badLabel, "card_bad_label", placeButtons(code));
+  if (r.result !== "labelled") return answered(t, CARDS_SAY.unknown(code), "card_unknown");
+  if (open) await t.d.db.setConv(t.phone, { open_question: null });
+  return answered(t, CARDS_SAY.labelled(code, r.label ?? label), "card_labelled");
+}
+
+/** The businesses a phone may link a card for: those where it is the owner or a manager. */
+const cardBusinesses = (t: Turn) => businesses(t.who).filter((b) => b.role === "owner" || b.role === "manager");
+
+function cardRefused(t: Turn, code: string, why: string): Promise<string> {
+  if (why === "disabled") return answered(t, CARDS_SAY.disabled(code), "card_disabled");
+  if (why === "limited") return answered(t, CARDS_SAY.limited, "card_limited");
+  if (why === "no_place") return answered(t, CARDS_SAY.noPlace, "card_no_place");
+  return answered(t, CARDS_SAY.unknown(code), "card_unknown");
+}
+
+async function cardAnswer(t: Turn, code: string, c: CardCheck): Promise<string> {
+  const own = cardBusinesses(t);
+  if (c.result === "already") {
+    const b = own.find((x) => x.location_id === c.location_id);
+    const tb = b ? { ...t, business: b, head: head(t.who, "business", b) } : t;
+    await t.d.db.setConv(t.phone, { open_question: { type: "card_label", code, at: nowIso(t) } satisfies OpenQuestion });
+    return answered(tb, CARDS_SAY.already(code, c.label), "card_already", placeButtons(code));
+  }
+  // An unknown phone, or a phone with no business it may link a card for: sign in first, the code kept in the link.
+  if (c.result === "signup" || (c.result === "ask" && !own.length)) {
+    return answered(t, CARDS_SAY.signup(code, startLink(t.d.appUrl, code)), "card_signup");
+  }
+  if (c.result !== "ask") return cardRefused(t, code, c.result);
+  if (own.length === 1) {
+    const b = own[0]!;
+    return answered({ ...t, business: b, head: head(t.who, "business", b) }, CARDS_SAY.ask(code, b.business), "card_ask",
+      [{ id: `lc:${code}:${b.location_id}`, title: CARDS_SAY.yesButton }]);
+  }
+  // Several businesses: the pick is the yes. Up to 3 as buttons, up to 10 as a list.
+  const options = own.slice(0, 10).map((b) => ({ id: `lc:${code}:${b.location_id}`, name: b.business }));
+  if (options.length <= 3) {
+    return answered(plain(t), CARDS_SAY.which(code), "card_which", options.map((o) => ({ id: o.id, title: wholeWords(o.name, 20) || o.name.slice(0, 20) })));
+  }
+  return answered(plain(t), CARDS_SAY.which(code), "card_which", undefined,
+    { button: CARDS_SAY.whichList, sections: [{ rows: options.map((o) => ({ id: o.id, title: wholeWords(o.name, ROW_TITLE_MAX) || o.name.slice(0, ROW_TITLE_MAX) })) }] });
 }
 
 // ─── Tools by name, each checked against the role's list (29.7).
@@ -663,6 +753,13 @@ async function businessTool(t: Turn, name: string, arg: string | undefined): Pro
       return answered(t, g ? `${line}\n\n${growthLine(g)}` : line, "stats");
     }
     case "ask_customer": return askCustomer(t);
+    // Cards 2: each card with its place and its taps this week and last week, as a list (a row opens the card).
+    case "cards": {
+      const r = await t.d.cards?.list(b.location_id, t.phone);
+      if (!r || r.result !== "ok" || !r.cards?.length) return answered(t, CARDS_SAY.none, "card_none");
+      const { body, list } = cardsList(r.cards);
+      return answered(t, body, "card_list", undefined, list);
+    }
     case "referral_link": {
       const r = await t.d.partners!.referralLink(b.location_id, t.phone);
       if (r.result === "none" || !r.code) return answered(t, PARTNERS_SAY.noLink, "referral_none");

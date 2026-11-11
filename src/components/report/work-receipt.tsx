@@ -38,6 +38,8 @@ export type ReceiptData = {
     label: string;
   } | null;
   competitor: string | null;
+  /** Cards 2: each card's place and its taps in the week (older reports and businesses with no card have none). */
+  cards?: { place: string; taps: number; line: string }[] | null;
   /** AI Answers 1: an AI answer that gave a fact differently from what Kabsi has (older reports have none). */
   accuracy?: {
     heading: string;
@@ -50,6 +52,7 @@ export type ReceiptData = {
 
 const QUIET = "A quiet week. Kabsi kept watching your Google profile.";
 const OPEN_NOTE = "An open is not a review.";
+const TAP_NOTE = "A tap is not a review.";
 
 const safePath = (p: string | undefined) => (p && p.startsWith("/") ? p : "/app");
 
@@ -195,6 +198,24 @@ export function WorkReceipt({
             Your review link was opened {r.growth.link_opens}{" "}
             {r.growth.link_opens === 1 ? "time" : "times"}. {OPEN_NOTE}
           </p>
+        </section>
+      ) : null}
+
+      {r.cards?.length ? (
+        <section className="border-t border-line p-4 sm:p-5">
+          <SourceLabel>From your Kabsi cards</SourceLabel>
+          <h3 className="sr-only">From your Kabsi cards</h3>
+          <ul className="mt-3 space-y-1 text-body">
+            {r.cards.map((c, i) => (
+              <li key={`${c.place}-${i}`} className="flex justify-between gap-3">
+                <span className="min-w-0 break-words">{c.place}</span>
+                <span className="shrink-0 font-bold tabular-nums">
+                  {c.taps} {c.taps === 1 ? "tap" : "taps"}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-small text-text-2">{TAP_NOTE}</p>
         </section>
       ) : null}
 

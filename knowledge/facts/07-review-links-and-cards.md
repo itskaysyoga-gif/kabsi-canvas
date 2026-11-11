@@ -33,6 +33,9 @@ Kabsi cards that were sold before 21 Oct 2026 keep working. Kabsi issues no new 
 
 - Tap a card that isn't linked ("This Kabsi card isn't set up yet"), sign in and link it; or in Get reviews, **Add a Kabsi card**, type the 6-character code under the QR, tap **Add**.
 - Name cards ("Counter", "Table 4") with **Save name**. **Switch off** stops a card within about a minute; it then shows "This review link isn't active. Please ask the staff for help."
+- **On WhatsApp (Cards 2, 11 Nov 2026):** the page of a card that isn't linked has **Set up on WhatsApp**, which opens a chat with "Link card ABC234" written in. Kabsi answers "Link card ABC234 to [business]?" with one button, **Yes, link it**; an owner or manager with several businesses picks the business instead. Then Kabsi asks where the card is: **Front desk**, **Till** or **Table**, or type a place, like Bar. A name is a place, never a person. A number Kabsi doesn't know gets a sign-in link that keeps the code, and the card links as soon as the business is added. A card linked to another business reads as not found, and its business is never named. Staff of a business can't link cards; the owner or a manager does. 10 wrong codes in an hour stop card codes from that number for an hour.
+- **"cards" on WhatsApp** lists each card with its place and its taps this week (from Monday) and last week. Tap a card to change its place. A tap is not a review: Kabsi counts taps, never reviews from a card, and never ranks people or sets anyone a target.
+- **The weekly report** (page and email) has a block "From your Kabsi cards" when the business has a card: each card's place and its taps that week, with "A tap is not a review." Taps from bots are left out.
 
 ### 5.4 How to write your review link onto an NFC tag
 
