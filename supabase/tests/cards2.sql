@@ -29,7 +29,7 @@ insert into public.phone_roles (phone, role, user_id, location_id, source) value
 on conflict do nothing;
 
 insert into public.cards (code, kind, status) values ('CAR2AA', 'card', 'unassigned'), ('CAR2BB', 'card', 'unassigned'),
-  ('CAR2DD', 'card', 'disabled'), ('CAR2LK', 'link', 'unassigned');
+  ('CAR2DD', 'card', 'disabled'), ('CAR2MK', 'link', 'unassigned');
 insert into public.cards (code, kind, status, location_id, destination, label, activated_at)
 values ('CAR2CC', 'card', 'active', '00000000-0000-4000-8000-0000000040b3', 'https://search.google.com/local/writereview?placeid=place-card-b', 'Till', now());
 
@@ -51,7 +51,7 @@ select is(public.card_link_check('+447700900401', 'CAR2CC') ->> 'result', 'unkno
 select ok(public.card_link_check('+447700900401', 'CAR2CC') ->> 'location_id' is null, 'and its business is never named');
 select is(public.card_link_check('+447700900402', 'CAR2CC') ->> 'result', 'already', 'its own owner sees it is already linked');
 select is(public.card_link_check('+447700900401', 'CAR2DD') ->> 'result', 'disabled', 'a card switched off says so');
-select is(public.card_link_check('+447700900401', 'CAR2LK') ->> 'result', 'unknown', 'a review link is not a card');
+select is(public.card_link_check('+447700900401', 'CAR2MK') ->> 'result', 'unknown', 'a review link is not a card');
 select is(public.card_link_check('+447700900401', 'ABC') ->> 'result', 'unknown', 'a malformed code is unknown');
 
 -- The tap: only to one of the phone's own businesses.
