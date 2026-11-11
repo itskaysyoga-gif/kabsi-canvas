@@ -31,9 +31,9 @@ export type Conversation = {
 export type OpenQuestion =
   // RB-F2: at is when the question was asked (it closes after 10 minutes; one with no at is closed); switch marks the role
   // question that "switch" asked, so "My business" goes on to the list of businesses.
-  | { type: "role"; pending: string | null; options: Domain[]; forwarded?: true; at?: string; switch?: true }
+  | { type: "role"; pending: string | null; options: Domain[]; forwarded?: true; voice?: true; at?: string; switch?: true }
   // Photo Post 1: a photo sent with words waits here (its WhatsApp media id and the words) while the person picks the business.
-  | { type: "business"; pending: string | null; options: { id: string; name: string }[]; media?: { id: string; size: number | null; mime: string | null; caption: string }; forwarded?: true; at?: string }
+  | { type: "business"; pending: string | null; options: { id: string; name: string }[]; media?: { id: string; size: number | null; mime: string | null; caption: string }; forwarded?: true; voice?: true; at?: string }
   | { type: "which"; options: { token: string; label: string }[] }
   | { type: "digest"; ids: number[] }
   | { type: "hours"; pending: string; location_id: string }

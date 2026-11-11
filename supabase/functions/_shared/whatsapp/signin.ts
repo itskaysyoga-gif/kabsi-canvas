@@ -31,7 +31,7 @@ export async function signinSeam(d: { signin?: SigninDb; out: Out }, s: SendStat
   const db = d.signin;
   if (!db) return null;
   // F-1: a forwarded "Kabsi sign in CODE" is someone else's. Nothing is claimed and nothing is said.
-  if (m.forwarded) return "signin_forwarded";
+  if (m.forwarded || m.fromVoice) return "signin_forwarded";
   const say = (body: string, buttons?: { id: string; title: string }[]) => reply(d.out, s, phone, body, buttons);
 
   if (code) {

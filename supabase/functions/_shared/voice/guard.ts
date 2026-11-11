@@ -24,14 +24,18 @@ export const HEARD_MAX = 300;
 /** What the transcript says, cleaned for one WhatsApp quote line: dashes and exclamation marks (the house style) and WhatsApp's
  *  own formatting characters out, whitespace on one line. */
 export function cleanHeard(text: string): string {
-  return text.replace(/[–—!*_~`]/g, " ").replace(/\s+/g, " ").trim();
+  // Dashes (U+2012 to U+2015 and the minus sign U+2212), exclamation marks (also fullwidth and the Spanish inverted one), formatting.
+  return text.replace(/[\u2012-\u2015\u2212!\u00a1\uff01*_~`]/g, " ").replace(/\s+/g, " ").trim();
 }
 
-/** The most whole words of a text that fit in max characters: a word is never cut. */
+/** The most whole words of a text that fit in max characters. A text with no spaces to cut at (Chinese, Japanese, Thai) is cut at
+ *  the character instead, never in the middle of a character. */
 function cutAtWord(text: string, max: number): string {
   const ws = text.split(" ").filter(Boolean);
   while (ws.length && ws.join(" ").length > max) ws.pop();
-  return ws.join(" ").replace(/[\s,;:·-]+$/, "");
+  const out = ws.join(" ").replace(/[\s,;:·-]+$/, "");
+  if (out || !text) return out;
+  return Array.from(text.split(" ")[0]!).slice(0, max).join("");
 }
 
 /** True when the transcript holds nothing a person can read: no letter or digit in any script (a sound tag, dots, a stray mark). */
@@ -70,4 +74,15 @@ export function limitsFor(w: Who): Limit[] {
 export async function withinLimits(w: Who, hit: (key: string, max: number, windowSeconds: number) => Promise<boolean>): Promise<boolean> {
   for (const l of limitsFor(w)) if (!(await hit(l.key, l.max, DAY_SECONDS))) return false;
   return true;
+}
+
+/** Puts the quote line in front of a reply once, without ever pushing the reply over WhatsApp's body limit (`limit`: 1024 for a message
+ *  with buttons or a list, which is never cut, 4096 for plain text). The transcript is shortened to what the body can still hold; with
+ *  no useful room for it (under 40 characters), the quote goes first as a message of its own. */
+export function placeHeard(line: string, body: string, limit: number): { body: string; before?: string } {
+  const room = limit - body.length - 2;
+  if (line.length <= room) return { body: `${line}\n\n${body}` };
+  const prefix = "> I heard: ";
+  const fit = room - prefix.length >= 40 ? heardLine(line.slice(prefix.length), room - prefix.length) : "";
+  return fit ? { body: `${fit}\n\n${body}` } : { body, before: line };
 }

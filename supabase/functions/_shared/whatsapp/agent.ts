@@ -48,7 +48,7 @@ import { type GrowthStats, growthLine } from "../review-growth/stats.ts";
 import { ANSWER_WINDOW_MS, readUpdate } from "../review-growth/monthly.ts";
 import { categoryLabel, type PhotoCategory, pickCategory } from "../review-growth/photo.ts";
 import type { Transcript } from "../voice/transcribe.ts";
-import { heardLine } from "../voice/guard.ts";
+import { heardLine, placeHeard } from "../voice/guard.ts";
 import { CATALOGUE, extraKey, type Period, type Plan, planKey, type PriceFamily } from "../creem.ts";
 import type { FirstBack, OnboardingHooks } from "../onboarding/hooks.ts";
 import { monthlyFacts, SAY_ONBOARDING, setupReply } from "../onboarding/stages.ts";
@@ -224,12 +224,7 @@ function withHeard(t: Turn, body: string, interactive: boolean): { body: string;
   const h = t.heard;
   if (!h || h.used) return { body };
   h.used = true;
-  const limit = interactive ? BUTTON_BODY_MAX : TEXT_BODY_MAX;
-  const room = limit - body.length - 2;
-  if (h.line.length <= room) return { body: `${h.line}\n\n${body}` };
-  const prefix = "> I heard: ";
-  const fit = room - prefix.length >= 40 ? heardLine(h.line.slice(prefix.length), room - prefix.length) : "";
-  return fit ? { body: `${fit}\n\n${body}` } : { body, before: h.line };
+  return placeHeard(h.line, body, interactive ? BUTTON_BODY_MAX : TEXT_BODY_MAX);
 }
 
 async function say1(t: Turn, body: string, buttons?: Button[]) {
@@ -346,7 +341,7 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     await d.db.setConv(phone, left ? { active_role: cmd.to } : { active_role: cmd.to, open_question: null });
     const next: Who = { ...who, conversation: conv ? { ...conv, active_role: cmd.to, open_question: left } : conv };
     if (q?.type === "role" && q.pending) {
-      const m: Inbound = { ...t.m, text: q.pending, buttonId: null, media: null, forwarded: !!q.forwarded };
+      const m: Inbound = { ...t.m, text: q.pending, buttonId: null, media: null, forwarded: !!q.forwarded, fromVoice: !!q.voice };
       return run({ ...t, who: next, m }, parse(m));
     }
     // RB-F2: "switch", then "My business": with more than one business the numbered list comes at once.
@@ -385,8 +380,8 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   if (oq?.type === "photo_category") {
     if (cmd.k === "number") return photoCategoryPicked(t, oq, String(cmd.n));
     // Anything that is not a kind of photo is a new message, not an answer: the menu is closed and the message handled as usual.
-    // F-1: forwarded words never answer the menu.
-    if (cmd.k === "free" && !t.m.forwarded && !t.m.listRow && pickCategory(cmd.text)) return photoCategoryPicked(t, oq, cmd.text);
+    // F-1, Voice 2: forwarded words and the words of a voice note never answer the menu.
+    if (cmd.k === "free" && !t.m.forwarded && !t.m.fromVoice && !t.m.listRow && pickCategory(cmd.text)) return photoCategoryPicked(t, oq, cmd.text);
     await d.db.setConv(phone, { open_question: null });
   }
   // V4: the onboarding buttons, the setup question typed as words, and the owner's yes to the monthly answer's facts.
@@ -394,7 +389,7 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   if (cmd.k === "facts") return factsButton(t, cmd.action, cmd.locationId, cmd.month);
   if (oq?.type === "setup") {
     // F-1: forwarded words never answer the setup question (setupReply reads more yes words than the router's list).
-    const typed = cmd.k === "yes" ? "yes" : cmd.k === "tool" && cmd.tool === "help" ? "help" : cmd.k === "free" && !t.m.forwarded && !t.m.listRow ? setupReply(cmd.text) : null;
+    const typed = cmd.k === "yes" ? "yes" : cmd.k === "tool" && cmd.tool === "help" ? "help" : cmd.k === "free" && !t.m.forwarded && !t.m.fromVoice && !t.m.listRow ? setupReply(cmd.text) : null;
     if (typed) return onboardingButton(t, typed === "yes" ? "yes" : typed, oq.location_id);
   }
   if (oq?.type === "update" && now - Date.parse(oq.at) < ANSWER_WINDOW_MS) {
@@ -487,7 +482,7 @@ async function pickedBusiness(t: Turn, locationId: string): Promise<string> {
   const conv = t.who.conversation ? { ...t.who.conversation, active_location_id: b.location_id, active_role: "business" as Domain, open_question: left } : null;
   const next: Turn = { ...t, who: { ...t.who, conversation: conv } };
   if (q?.type === "business" && q.pending) {
-    const m: Inbound = { ...t.m, text: q.pending, buttonId: null, media: null, forwarded: !!q.forwarded };
+    const m: Inbound = { ...t.m, text: q.pending, buttonId: null, media: null, forwarded: !!q.forwarded, fromVoice: !!q.voice };
     return run({ ...next, m }, parse(m));
   }
   // Photo Post 1: the photo sent with words before the business was picked is handled now, for the business just picked.
@@ -507,7 +502,7 @@ async function cardRoute(t: Turn, cmd: Command): Promise<string | null> {
   if (!db) return null;
   const m = t.m;
   const btn = m.buttonId ?? "";
-  const link = !btn && !m.forwarded ? LINK_CARD_RE.exec(m.text ?? "") : null;
+  const link = !btn && !m.forwarded && !m.fromVoice ? LINK_CARD_RE.exec(m.text ?? "") : null;
   const pick = btn ? CARD_LINK_BTN.exec(btn) : null;
   const place = btn ? CARD_LABEL_BTN.exec(btn) : null;
   const row = btn ? CARD_ROW_BTN.exec(btn) : null;
@@ -657,7 +652,7 @@ async function tool(t: Turn, name: string, arg: string | undefined, text: string
 
 // F-1: words held while the person picks a role or a business keep their forwarded mark, so a forwarded "Yes" read again
 // after the pick is still not a yes.
-const fwdMark = (t: Turn): { forwarded?: true } => (t.m.forwarded ? { forwarded: true } : {});
+const fwdMark = (t: Turn): { forwarded?: true; voice?: true } => ({ ...(t.m.forwarded ? { forwarded: true as const } : {}), ...(t.m.fromVoice ? { voice: true as const } : {}) });
 
 async function askRole(t: Turn, options: Domain[], pending: string, o: { switch?: true } = {}): Promise<string> {
   await t.d.db.setConv(t.phone, { open_question: { type: "role", pending, options, ...fwdMark(t), at: nowIso(t), ...o } satisfies OpenQuestion });
@@ -1488,7 +1483,7 @@ const PROPOSAL_WORDS: Record<string, "save" | "change"> = { "save": "save", "sav
 async function bookSeam(t: Turn, cmd: Command): Promise<string | null> {
   if (!t.d.book) return null;
   // F-1: forwarded words never reach the request book, so a forwarded yes never saves; they go today's way.
-  if (t.m.forwarded) return null;
+  if (t.m.forwarded || t.m.fromVoice) return null;
   const text = (t.m.text ?? "").trim();
   const words = cmd.k === "free" || (cmd.k === "tool" && ["hours", "post", "billing"].includes(cmd.tool));
   // RB-F4 (R-149 item 1): Kabsi's own product words typed alone ("trial", "prices") are the business's own when its pack

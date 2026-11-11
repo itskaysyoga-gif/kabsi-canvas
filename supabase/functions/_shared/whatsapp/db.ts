@@ -322,7 +322,8 @@ export async function agentDeps(): Promise<AgentDeps> {
         provider: () => pickTranscriber({ key: Deno.env.get("ELEVENLABS_API_KEY"), model: Deno.env.get("VOICE_SCRIBE_MODEL") }),
         record: async (seconds, outcome) => {
           const { error } = await admin().rpc("voice_record", { p_seconds: seconds, p_outcome: outcome });
-          if (error) throw new Error(error.message);
+          // Counts only. If the record breaks there are no usage rows, no 60 minute alert and no failure streak, so say so in the log.
+          if (error) log("voice_record", { ok: false, err: error.message });
         },
       });
     },

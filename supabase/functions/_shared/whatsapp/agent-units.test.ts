@@ -140,6 +140,8 @@ Deno.test("the router: a voice note's words are never yes, no, a number, a code,
   assert.equal(v("KABSI 123456").k, "free");
   assert.equal(v("123456").k, "free");
   assert.equal(v("STAFF ABCD2345").k, "free");
+  assert.equal(v("my scan code is KAB-7Q4M2X9P").k, "free", "a spoken scan code is not read");
+  assert.equal(v("code P-sara").k, "free", "a spoken partner code is not read");
   assert.equal(v("start").k, "free", "a spoken START never opts anyone back in");
   for (const t of ["status", "waiting", "today", "pause Harbour Cafe", "resume Harbour Cafe", "payout list", "approve payouts", "reset test"]) assert.equal(v(t).k, "free", t);
   for (const t of ["STOP", "baja"]) assert.equal(v(t).k, "stop", t);

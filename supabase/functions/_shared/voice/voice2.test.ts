@@ -1,6 +1,6 @@
 // Voice 2 (R-158 item 3): every guard and limit of voice notes, on fakes. No key, no network, no database, no cost.
 import { assertEquals, assertMatch, assertNotMatch } from "jsr:@std/assert@1";
-import { BUSINESS_NOTES_PER_DAY, DAY_SECONDS, heardLine, isUnclear, limitsFor, secondsOf, UNKNOWN_NOTES_ALL_PER_DAY, UNKNOWN_NOTES_PER_DAY, withinLimits } from "./guard.ts";
+import { BUSINESS_NOTES_PER_DAY, DAY_SECONDS, heardLine, isUnclear, limitsFor, placeHeard, secondsOf, UNKNOWN_NOTES_ALL_PER_DAY, UNKNOWN_NOTES_PER_DAY, withinLimits } from "./guard.ts";
 import { type Outcome, transcribeNote, type VoiceDeps } from "./service.ts";
 import { DEFAULT_SCRIBE_MODEL, pickTranscriber, scribe, type Transcriber, type Transcript } from "./transcribe.ts";
 
@@ -21,8 +21,34 @@ Deno.test("the quote line cuts the words at a word, to 300 characters, and never
   const exact = "a".repeat(100) + " " + "b".repeat(100) + " " + "c".repeat(98);
   assertEquals(exact.length, 300);
   assertEquals(heardLine(exact), `> I heard: ${exact}`);
-  // one word longer than the room: nothing is cut mid word, so nothing is shown
-  assertEquals(heardLine("x".repeat(400)), "");
+  // a text with no spaces to cut at (Chinese, Japanese, Thai) is cut at the character, never dropped and never inside a character
+  assertEquals(heardLine("x".repeat(400)), `> I heard: ${"x".repeat(300)}`);
+  const cjk = "\u4eca\u5929\u6211\u4eec\u5173\u95e8".repeat(80);
+  assertEquals(heardLine(cjk), `> I heard: ${Array.from(cjk).slice(0, 300).join("")}`);
+  // a character outside the basic plane (two UTF-16 units) is never split
+  const astral = "\u{20BB7}".repeat(400);
+  assertEquals(Array.from(heardLine(astral).slice("> I heard: ".length)).length, 300);
+  assertEquals(isUnclear("\u{1F600}\u{1F600}"), true, "emoji alone are nothing readable");
+});
+Deno.test("the quote line never takes the reply over WhatsApp's limit: shortened to fit, or sent first on its own", () => {
+  const line = heardLine(Array.from({ length: 60 }, (_, i) => `word${i}`).join(" "));
+  // room to spare: in front, whole
+  assertEquals(placeHeard(line, "short", 1024), { body: `${line}\n\nshort` });
+  // a near full button body: the transcript is shortened to what is left, still whole words, and the total is within the limit
+  const body = "b".repeat(1024 - 150);
+  const fit = placeHeard(line, body, 1024);
+  assertEquals(fit.before, undefined);
+  assertEquals(fit.body.length <= 1024, true, `${fit.body.length}`);
+  assertEquals(fit.body.endsWith(`\n\n${body}`), true);
+  assertMatch(fit.body.split("\n\n")[0], /^> I heard: word0 word1 .*word\d+$/);
+  // no useful room: the quote goes first as its own message and the reply is untouched
+  const full = "c".repeat(1024 - 20);
+  assertEquals(placeHeard(line, full, 1024), { body: full, before: line });
+  // a body that is already at the limit is never made longer
+  const exact = "d".repeat(1024);
+  assertEquals(placeHeard(line, exact, 1024), { body: exact, before: line });
+  // plain text has the larger room
+  assertEquals(placeHeard(line, "e".repeat(1024 - 20), 4096).before, undefined);
 });
 Deno.test("the quote line carries no dash, exclamation mark or WhatsApp formatting, and no Arabic is changed", () => {
   const line = heardLine("Closed Friday — reopen Saturday! *Bold* _it_ ~no~ `x` – ok");

@@ -224,6 +224,15 @@ const CASES: Case[] = [
     // An approval arrives while the role question is open; the pick reads the held words again, still as forwarded.
     { from: PHONES.both, button: (w) => (w.alert(PHONES.both, BIZ.alnoor), "r:business"), expect: "forwarded_yes", reply: /That looks forwarded/ }],
     check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("approve")).length, 0) },
+  { name: "two roles: a spoken Yes held for the role question is still not a yes after the pick", tags: ["two_roles", "F-1", "Voice 2"],
+    setup: (w) => { w.mediaBytes.set("v1", ogg(5)); w.transcript = { ok: true, text: "Yes", language: "en" }; },
+    steps: [
+      { from: PHONES.both, media: voice("v1"), expect: "which_role", reply: /^> I heard: Yes\n\n/ },
+      { from: PHONES.both, button: (w) => (w.alert(PHONES.both, BIZ.alnoor), "r:business"), expect: "forwarded_yes", reply: /A voice note cannot say yes/ }],
+    check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("approve")).length, 0, "nothing approved by a held voice yes") },
+  { name: "owner: a spoken scan code is not taken as a scan code", tags: ["owner", "Voice 2", "F-1"],
+    setup: (w) => { w.mediaBytes.set("v1", ogg(5)); w.transcript = { ok: true, text: "my scan code is KAB-7Q4M2X9P", language: "en" }; },
+    steps: [{ from: PHONES.owner, media: voice("v1"), expect: /^(?!scan_code)/ }] },
   { name: "owner: no", tags: ["owner"], steps: [{ from: PHONES.owner, text: "no", expect: "no" }] },
   { name: "owner: exact reply is shown back for a Yes, nothing goes to Google before it", tags: ["owner", "9.3", "25.5"],
     setup: (w) => (w.conversation(PHONES.owner).last_task = { type: "review", review_id: "r-harbour-1", location_id: BIZ.harbour }),

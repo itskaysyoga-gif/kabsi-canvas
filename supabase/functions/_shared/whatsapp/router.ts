@@ -123,9 +123,9 @@ export function parse(m: Inbound): Command {
   if (staff) return { k: "bind", code: `STAFF ${staff[1].toUpperCase()}` };
   const owner = fwd || vox ? null : OWNER_CODE.exec(raw);
   if (owner) return { k: "bind", code: owner[1] };
-  const scan = SCAN_CODE.exec(raw);
+  const scan = vox ? null : SCAN_CODE.exec(raw);
   if (scan) return { k: "scan_code", code: `KAB-${scan[1].toUpperCase()}`, rest: raw.replace(scan[0], "").trim() };
-  const partner = PARTNER_CODE.exec(raw);
+  const partner = vox ? null : PARTNER_CODE.exec(raw);
   if (partner) return { k: "partner_code", code: partner[1].toUpperCase() };
   if ((fwd || vox) && YES.has(t)) return { k: "free", text: raw.slice(0, 2000), forwardedAnswer: true, forwardedYes: true };
   if ((fwd || vox) && (NO.has(t) || /^\d{1,2}$/.test(t))) return { k: "free", text: raw.slice(0, 2000), forwardedAnswer: true };
