@@ -19,9 +19,9 @@ create function pg_temp.join(p_user uuid, p_email text) returns jsonb language s
     'reach', 'The review cards I sell', 'terms_version', '2026-11-10.2')) $$;
 select pg_temp.join('00000000-0000-4000-8000-0000000050d1', 'seller-a@example.test');
 select pg_temp.join('00000000-0000-4000-8000-0000000050d2', 'seller-b@example.test');
-create function pg_temp.pid(p_user uuid) returns uuid language sql as $$ select id from public.partner_accounts where user_id = p_user $$;
+create function pg_temp.pid(p_user uuid) returns uuid language sql security definer as $$ select id from public.partner_accounts where user_id = p_user $$;
 create function pg_temp.pcode(p_user uuid) returns text language sql as $$ select code from public.partner_accounts where user_id = p_user $$;
-create function pg_temp.cards(p_user uuid) returns text[] language sql as $$
+create function pg_temp.cards(p_user uuid) returns text[] language sql security definer as $$
   select array_agg(code order by code) from public.cards where partner_id = pg_temp.pid(p_user) $$;
 
 -- The owner of a real business (place ChIJcardowner01) with WhatsApp.
@@ -76,7 +76,7 @@ select is(public.partner_cards_place('00000000-0000-4000-8000-0000000050d2', pg_
   'ChIJsomeoneelse') ->> 'result', 'limited', '50 businesses set a day per partner');
 
 -- ─── claiming ────────────────────────────────────────────────────────────────────────────────────────────────────
-create function pg_temp.c(n int) returns text language sql as $$ select (pg_temp.cards('00000000-0000-4000-8000-0000000050d1'))[n] $$;
+create function pg_temp.c(n int) returns text language sql security definer as $$ select (pg_temp.cards('00000000-0000-4000-8000-0000000050d1'))[n] $$;
 -- An unknown phone: the partner's code for its sign-up link, and the WhatsApp touch is noted.
 select is(public.card_link_check('+447700900599', pg_temp.c(1)),
   jsonb_build_object('result', 'signup', 'partner_code', pg_temp.pcode('00000000-0000-4000-8000-0000000050d1')), 'sign up through the partner');
