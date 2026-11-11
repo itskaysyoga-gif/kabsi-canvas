@@ -135,7 +135,7 @@
     },
     {
       "source": "/partner/",
-      "destination": "/partners",
+      "destination": "/partner",
       "statusCode": 301
     },
     {
@@ -179,12 +179,7 @@
       "statusCode": 301
     },
     {
-      "source": "/partner",
-      "destination": "/partners",
-      "statusCode": 301
-    },
-    {
-      "source": "/partner/:path*",
+      "source": "/partner/:path+",
       "destination": "/partners",
       "statusCode": 301
     },

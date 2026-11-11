@@ -34,6 +34,18 @@ describe("Partners 2 web", () => {
     expect(all).not.toMatch(/[؀-ۿ]/);
     expect(all).not.toMatch(/Apply|application step|approved by Google|Google partner/);
   });
+  it("serves kabsi.co/partner and /partners/join: no old redirect sends them away", () => {
+    const v = JSON.parse(readFileSync("vercel.json", "utf8")) as {
+      redirects: { source: string; destination: string }[];
+    };
+    const sources = v.redirects.map((r) => r.source);
+    for (const s of ["/partner", "/partner/:path*", "/partners/join", "/partners/:path*"])
+      expect(sources).not.toContain(s);
+    expect(sources).toContain("/partner/:path+"); // the old partner area's deeper links still go to /partners
+    expect(v.redirects.find((r) => r.source === "/partner/")).toMatchObject({
+      destination: "/partner",
+    });
+  });
   it("is in docs/COPY.md", () => {
     const copy = readFileSync("docs/COPY.md", "utf8");
     for (const line of [
