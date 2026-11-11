@@ -44,7 +44,7 @@ describe("the suggestion list opens above the hero visual (Web 4 review)", () =>
     expect(read("src/components/kabsi/page-hero.tsx")).toMatch(
       /className="relative z-10 mt-7 animate-enter"/,
     );
-    expect(read("src/components/kabsi/d9-hero.tsx")).toMatch(
+    expect(read("src/components/kabsi/home2-hero.tsx")).toMatch(
       /className="relative z-10 mt-5 max-w-\[36rem\]/,
     );
   });

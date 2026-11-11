@@ -71,10 +71,15 @@ describe("no app code in the first load of a public page", () => {
     // later, through a kept server HTML (no lazy boundary, no Suspense fallback, nothing blanked). The route's loader
     // awaits them, so the server render and an in-site visit to Home draw them at once.
     const d9 = read("src/components/kabsi/d9-home.tsx");
-    // Site 3a (30.50 item 10): Home's first screen is the hero alone; the three steps follow the familiar problem below.
-    expect(d9).toMatch(/import \{ D9Hero \} from "\.\/d9-hero"/);
+    // Site 3a (30.50 item 10): Home's first screen is the hero alone (Home 2, R-158 item 4: in home2-hero.tsx; the four
+    // jobs' strip is the first of the lower sections).
+    expect(d9).toMatch(/import \{ D9Hero \} from "\.\/home2-hero"/);
     expect(d9).not.toMatch(/\blazy\(|<Suspense|from "\.\/d9-home-lower"/);
-    expect(d9).toContain('import("./d9-home-lower")');
+    // Home 2 (R-158 item 4): the one dynamic import lives in home-lower-loader.ts, shared with the hero's picture.
+    expect(read("src/components/kabsi/home-lower-loader.ts")).toContain(
+      'import("./d9-home-lower")',
+    );
+    expect(d9).toContain('from "./home-lower-loader"');
     expect(d9).toContain("dangerouslySetInnerHTML");
     expect(top).toContain("await loadHomeLower()");
     expect(top).not.toMatch(/from "@\/components\/kabsi\/(d6-demo|whatsapp)"/);
