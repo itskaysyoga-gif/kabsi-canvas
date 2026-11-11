@@ -1,11 +1,11 @@
 // Kabsi Partners emails that follow an event (Partners 3, master plan 30.50 items 5 to 7): the first trial from a partner's
-// link, the first commission past its 30 day hold, and a payout sent. The dispatcher runs partnerNotices() with the
-// trial reminders step (every 5 minutes). It only reads the ledger and tells the partner: it changes no money, no access
+// link, the first commission past its 30 day hold, and a payout sent. The dispatcher runs partnerNotices() as its own
+// partner_notices step, offered every 5 minutes by private.produce_jobs() (Fix 5). It only reads the ledger and tells the partner: it changes no money, no access
 // and no link. Each email goes once: the dedupe key names the event, so a second run records nothing and sends nothing.
 // "You joined" is sent by the programs function at the join itself (programs/index.ts).
 import { admin, APP_URL, captureError } from "./kabsi.ts";
 import { notify } from "./notify.ts";
-import { type Events, type Partner, planNotices } from "./partner-plan.ts";
+import { type Events, type Notice, type Partner, planNotices } from "./partner-plan.ts";
 import type { PayoutLine } from "./email/partner-copy.ts";
 
 // ─── the database side ───────────────────────────────────────────────────────────────────────────────────────────────
@@ -69,19 +69,29 @@ async function readEvents(now: Date): Promise<Events> {
   return events;
 }
 
+export type NoticeDeps = {
+  read: (now: Date) => Promise<Events>;
+  send: (n: Notice) => Promise<{ sent: number; failed: number }>;
+  report?: (e: unknown, kind: string) => Promise<unknown>;
+};
+const LIVE: NoticeDeps = {
+  read: readEvents,
+  send: (n) => notify({ category: "direct", kind: n.kind, key: n.key, to: [n.to], content: n.content }),
+};
+
 /** The dispatcher step: read the events, send what has not been sent. Returns counts for the job log. */
-export async function partnerNotices(now = new Date()): Promise<Record<string, number>> {
-  const notices = planNotices(await readEvents(now), APP_URL);
+export async function partnerNotices(now = new Date(), deps: NoticeDeps = LIVE): Promise<Record<string, number>> {
+  const notices = planNotices(await deps.read(now), APP_URL);
   let sent = 0;
   let failed = 0;
   for (const n of notices) {
     try {
-      const r = await notify({ category: "direct", kind: n.kind, key: n.key, to: [n.to], content: n.content });
+      const r = await deps.send(n);
       sent += r.sent;
       failed += r.failed;
     } catch (e) {
       failed++;
-      await captureError("partner_notices", e, { kind: n.kind });
+      await (deps.report ? deps.report(e, n.kind) : captureError("partner_notices", e, { kind: n.kind }));
     }
   }
   return { partner_emails_sent: sent, partner_emails_failed: failed };
