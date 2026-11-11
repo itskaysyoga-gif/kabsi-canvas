@@ -54,7 +54,7 @@ Every page below is read at 390 px and 1440 px in the truth pass. The copy of ev
 
 | Surface | What it states | Where it lives | Updated by | Owner |
 |---|---|---|---|---|
-| Home `/` | Brand line, the four jobs (four groups since Site 3a, COPY.md 81), prices from, trial, launch price line (no Founding 25 since Founding 1), the one WhatsApp demonstration | `src/routes/index.tsx`, `d9-home.tsx`, `d9-home-lower.tsx`, `d9-hero.tsx`, `d9-data.ts`, `site3-data.ts`, `hero-lines.ts`, `home-examples.ts` | C, S | Rashid |
+| Home `/` | Brand line in the H1 (with "through WhatsApp" since Home 2), the four jobs (Home 2, COPY.md 86, also at the top of How it works), the AI answer plan amounts, trial, launch price line with the real count of places (no Founding 25 since Founding 1), the one WhatsApp day in the hero, the meta title and description | `src/routes/index.tsx`, `d9-home.tsx`, `home2-hero.tsx`, `home2-hero-data.ts`, `d9-home-lower.tsx`, `home2-data.ts`, `look2.tsx`, `d9-data.ts` (the weekly report sample), `hero-lines.ts`; the copy with sources in `docs/site4/home.md` | C, S | Rashid |
 | Pricing `/pricing` | Both plans, list and launch prices with the real count of launch places, extra location, help lines, refund line | `d8-pricing.tsx`, `plans.ts`, `faq-data.ts`; numbers from `site.ts` | S, C | Rashid |
 | How it works `/how-it-works` | The loop, the three states (Approved, Sent to Google, Live on Google), what Kabsi does in four groups | `how-page.tsx`, `d9-how.tsx`, `d9-home-lower.tsx` (`HandlesGroups`) | C | Rashid |
 | Free check `/scan`, `/scan/CODE`, `/google-profile-check` | What the check does and says, the trial as a separate thing | `d4-free-check.tsx`, `scan-live.tsx`, `scan-box.tsx`, `result-preview.tsx` | C | Rashid |

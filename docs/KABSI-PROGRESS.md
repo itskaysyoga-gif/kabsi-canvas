@@ -64,8 +64,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 ## Recent entries (newest first)
 
 - 11 Nov 2026, Voice 2 (R-158 item 3): voice notes on for everyone; PR 578; the eval, the key check and the phone check are Rashid's (see Open). `2026-11-11-voice2.md`.
-- 11 Nov 2026, Growth 1 (30.50 item 12): profile and 7 listings in `docs/marketing/` (nothing submitted); funnel check; a digest line for first actions within 24 hours of access; PR 571. `2026-11-11-growth1.md`.
-- Older entries (Cards 2 `2026-11-11-cards2.md`; Partners 3 `2026-11-11-partners3.md`; Partners 2, Outbound 2, Site 3a, Clean 4, Look 2 and 2b, Founding 1, RB-T, Safe 1, Signup 1, Plan 1, RB-F4, Ops 1: each `2026-11-10-<name>.md`; earlier ones in `2026-11-09-progress-moved.md`).
+- 11 Nov 2026, Home 2 (R-158 item 4): new Home, PR 580. `2026-11-11-home2.md`.
+- 11 Nov 2026, Fix 5 (R-158 item 2): programs_daily fixed and run, partner emails on their own step (PR 577); sign-in, Kapso and partner pages in part 2. `2026-11-11-fix5.md`.
+- Older entries (Cards 2, Growth 1 and Partners 3 `2026-11-11-<name>.md`; Partners 2, Outbound 2, Site 3a, Clean 4, Look 2 and 2b, Founding 1, RB-T, Safe 1, Signup 1, Plan 1, RB-F4, Ops 1 `2026-11-10-<name>.md`; Partners 1, RB-F3 and Tidy 2 in `2026-11-10-tidy2.md`; earlier ones in `2026-11-09-progress-moved.md`).
 
 ## How a session updates this page
 

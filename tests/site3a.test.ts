@@ -3,7 +3,6 @@
 // plans; words before numbers in the saved result; the offers table; no Founding 25 in DESIGN.md.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { D9_DEMO, D9_HANDLES, D9_THREE_STEPS } from "@/components/kabsi/site3-data";
 import { nearbyWords, SAVED_NOT_KEPT } from "@/lib/scan-words";
 
 const read = (f: string) => readFileSync(f, "utf8");
@@ -11,7 +10,8 @@ const DASH_OR_BANG = /[\u2013\u2014!]/;
 
 describe("Site 3a: one main action, one reassurance", () => {
   it("puts only TRIAL_LINE beside the free check on Home and in the closing check", () => {
-    const hero = read("src/components/kabsi/d9-hero.tsx");
+    // Home 2 moved Home's hero to its own file (home2-hero.tsx).
+    const hero = read("src/components/kabsi/home2-hero.tsx");
     expect(hero).toContain('<ScanBox id="hero-scan" note={TRIAL_LINE} />');
     expect(hero).not.toContain("HERO_PRICE_LINE");
     expect(hero).not.toContain("trialSeparate");
@@ -37,32 +37,7 @@ describe("Site 3a: one main action, one reassurance", () => {
   });
 });
 
-describe("Site 3a: Home's one WhatsApp demonstration (Look 2, 30.50 item 2)", () => {
-  for (const m of [D9_DEMO.alert, D9_DEMO.done]) {
-    it(`${m.id}: a title of five words or fewer, at most 3 buttons, the yes first`, () => {
-      expect(m.title.split(" ").length).toBeLessThanOrEqual(5);
-      expect((m.buttons ?? []).length).toBeLessThanOrEqual(3);
-      if (m.id === "review") expect(m.buttons?.[0]).toBe("Approve");
-      for (const l of [m.title, m.status, ...m.facts.map((f) => f.text)])
-        expect(l).not.toMatch(DASH_OR_BANG);
-    });
-  }
-  it("is labelled Example and keeps the three states apart", () => {
-    expect(read("src/components/kabsi/d9-home-lower.tsx")).toMatch(/<ExampleBadge[^>]*\/>/);
-    expect(D9_DEMO.states).toEqual(["Approved", "Sent to Google", "Live on Google"]);
-  });
-  it("names the four groups with the four approved jobs", () => {
-    expect(D9_HANDLES.map((h) => h.title)).toEqual([
-      "Reply to every review",
-      "Keep your details right",
-      "Post when something changes",
-      "See the work, every Monday",
-    ]);
-    expect(D9_THREE_STEPS).toHaveLength(3);
-    for (const s of [...D9_HANDLES, ...D9_THREE_STEPS])
-      expect(`${s.title} ${s.text}`).not.toMatch(DASH_OR_BANG);
-  });
-});
+// Home 2 (lane R R-158 item 4) replaced Home's separate demonstration and the four groups' lines: tests/home2.test.ts.
 
 describe("Site 3a: the free check result", () => {
   it("says the nearby finding in words, with no number, before the position", () => {
