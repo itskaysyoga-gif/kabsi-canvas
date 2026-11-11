@@ -34,17 +34,30 @@ describe("Partners 2 web", () => {
     expect(all).not.toMatch(/[؀-ۿ]/);
     expect(all).not.toMatch(/Apply|application step|approved by Google|Google partner/);
   });
-  it("serves kabsi.co/partner and /partners/join: no old redirect sends them away", () => {
+  it("serves /partners/join and /partners/home; /partner and /partner/ answer 301 to /partners/home (Fix 5)", () => {
     const v = JSON.parse(readFileSync("vercel.json", "utf8")) as {
-      redirects: { source: string; destination: string }[];
+      redirects: { source: string; destination: string; statusCode?: number }[];
+      headers: { source: string; headers: { key: string; value: string }[] }[];
     };
     const sources = v.redirects.map((r) => r.source);
-    for (const s of ["/partner", "/partner/:path*", "/partners/join", "/partners/:path*"])
+    for (const s of ["/partner/:path*", "/partners/join", "/partners/home", "/partners/:path*"])
       expect(sources).not.toContain(s);
     expect(sources).toContain("/partner/:path+"); // the old partner area's deeper links still go to /partners
-    expect(v.redirects.find((r) => r.source === "/partner/")).toMatchObject({
-      destination: "/partner",
-    });
+    for (const s of ["/partner", "/partner/"])
+      expect(v.redirects.find((r) => r.source === s)).toMatchObject({
+        destination: "/partners/home",
+        statusCode: 301,
+      });
+    // /partner comes before the deeper rule, so it answers in one hop.
+    expect(sources.indexOf("/partner")).toBeLessThan(sources.indexOf("/partner/:path+"));
+    const noindex = v.headers.find((h) => h.source === "/partners/:page(join|home)");
+    expect(noindex?.headers).toContainEqual({ key: "X-Robots-Tag", value: "noindex" });
+    const pages = JSON.parse(readFileSync("src/content/sitemap-pages.json", "utf8")) as {
+      path: string;
+    }[];
+    expect(pages.map((p) => p.path)).not.toContain("/partners/join");
+    expect(pages.map((p) => p.path)).not.toContain("/partners/home");
+    expect(readFileSync("src/routes/partners_.home.tsx", "utf8")).toMatch(/content: "noindex"/);
   });
   it("is in docs/COPY.md", () => {
     const copy = readFileSync("docs/COPY.md", "utf8");

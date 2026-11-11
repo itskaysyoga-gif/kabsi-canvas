@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { MessageCircle } from "lucide-react";
 import { buttonClass } from "@/components/kabsi/ui";
+import { cn } from "@/lib/utils";
 import { Turnstile } from "@/components/turnstile";
 import { qrSvg } from "@/lib/qr";
 import {
@@ -8,8 +9,9 @@ import {
   forgetStart,
   keptStart,
   startWhatsapp,
+  WA_CONSENT_LINES,
+  WA_CONSENT_SHORT,
   WaSigninError,
-  WHATSAPP_SIGNIN_CONSENT,
   type WaStart,
   type WaState,
 } from "@/lib/wa-signin";
@@ -39,46 +41,134 @@ export function WhatsAppChoice({
   );
 }
 
-const CHECK_MS = 2000;
+// A code with less than this left is replaced when the owner taps Continue with WhatsApp (time to send it). A code that
+// is already shown is never replaced in the background: the owner may be sending it (Fix 5 review finding 1).
+const FRESH_MS = 5 * 60_000;
+
+export type WaPrestart = {
+  start: WaStart | null;
+  error: string;
+  /** The invisible bot check. Kept mounted for the panel's life; shown only when Cloudflare asks for a click. */
+  widget: (visible: boolean) => ReactNode;
+  /** Forget the current code and make a new one (after it ended). */
+  again: () => void;
+  /** Called on the tap of Continue with WhatsApp: a code with under 5 minutes left is replaced then, never later. */
+  pick: () => void;
+};
 
 /**
- * The WhatsApp step (Signup 1, master plan 30.50 item 3a): Turnstile, then the ready link that opens WhatsApp with
- * "Kabsi sign in CODE" typed in (and on a desktop the same link as a QR code). This tab checks every 2 seconds; after the
- * owner taps "Yes, it's me" on WhatsApp, it signs in and goes on to its next page. Kabsi never sends a code.
+ * Fix 5 (R-158 item 2): the bot check and the sign-in code start in the background when the sign-in panel opens, so
+ * "Continue with WhatsApp" shows the ready link at once. A code is asked for only with a passed check (an empty token
+ * is a failed check and starts nothing); the server checks the token again before it makes a code. One code per page:
+ * it is kept across the panel's steps and never renewed by a timer (each start counts against the visitor's hourly
+ * limit), only at the tap when it has under 5 minutes left, or after it ended.
+ */
+export function useWaPrestart(on: boolean): WaPrestart {
+  const [start, setStart] = useState<WaStart | null>(() =>
+    typeof window === "undefined" ? null : keptStart(),
+  );
+  const [error, setError] = useState("");
+  const [round, setRound] = useState(0);
+  const busy = useRef(false);
+  const startRef = useRef(start);
+  startRef.current = start;
+
+  const onToken = useCallback((token: string) => {
+    if (!token || busy.current) return;
+    const s = startRef.current;
+    if (s && s.expiresAt - Date.now() > FRESH_MS) return;
+    busy.current = true;
+    setError("");
+    startWhatsapp(token)
+      .then((s2) => setStart(s2))
+      .catch((e) =>
+        setError(
+          e instanceof WaSigninError ? e.message : "Something went wrong. Please try again.",
+        ),
+      )
+      .finally(() => {
+        busy.current = false;
+      });
+  }, []);
+
+  const again = useCallback(() => {
+    forgetStart();
+    setStart(null);
+    setError("");
+    setRound((n) => n + 1);
+  }, []);
+
+  const pick = useCallback(() => {
+    const s = startRef.current;
+    if (s && s.expiresAt - Date.now() < FRESH_MS) again();
+  }, [again]);
+
+  const widget = (visible: boolean) =>
+    on && !start ? (
+      <div className={visible ? "" : "pointer-events-none absolute h-0 w-full overflow-hidden"}>
+        <Turnstile key={round} onToken={onToken} />
+      </div>
+    ) : null;
+  return { start, error, widget, again, pick };
+}
+
+const CHECK_MS = 2000;
+
+/** "It works for 9 more minutes." The code lives 10 minutes from when it was made. */
+export function minutesLeft(expiresAt: number, now: number): string {
+  const m = Math.max(1, Math.ceil((expiresAt - now) / 60_000));
+  return m >= 10
+    ? "It works for 10 minutes."
+    : `It works for ${m} more ${m === 1 ? "minute" : "minutes"}.`;
+}
+
+/** One numbered step, at most two lines. */
+function Step({ n, children }: { n: number; children: ReactNode }) {
+  return (
+    <li className="flex gap-3 text-small text-text-1">
+      <span
+        aria-hidden
+        className="grid size-6 shrink-0 place-items-center rounded-full bg-surface-2 text-small font-bold"
+      >
+        {n}
+      </span>
+      <span className="pt-0.5">{children}</span>
+    </li>
+  );
+}
+
+/**
+ * The WhatsApp step (Signup 1, master plan 30.50 item 3a; Fix 5): the ready link that opens WhatsApp with
+ * "Kabsi sign in CODE" typed in. On a computer the button "Open WhatsApp on this computer" and the QR code of the same
+ * link sit side by side; on a phone, one button. This tab checks every 2 seconds; after the owner taps "Yes, it's me"
+ * on WhatsApp, it signs in and goes on to its next page. Kabsi never sends a code.
  */
 export function WhatsAppStep({
   phone,
+  pre,
   onDone,
   onBack,
 }: {
   phone: boolean;
+  pre: WaPrestart;
   onDone: () => void;
   onBack: () => void;
 }) {
-  const [start, setStart] = useState<WaStart | null>(() =>
-    typeof window === "undefined" ? null : keptStart(),
-  );
+  const { start, error } = pre;
   const [state, setState] = useState<WaState>("waiting");
-  const [error, setError] = useState("");
   const [phoneEnd, setPhoneEnd] = useState<string | null>(null);
-  const [round, setRound] = useState(0);
-  const busy = useRef(false);
-
-  async function begin(token: string) {
-    if (busy.current || !token) return;
-    busy.current = true;
-    setError("");
-    try {
-      setStart(await startWhatsapp(token));
-      setState("waiting");
-    } catch (e) {
-      setError(e instanceof WaSigninError ? e.message : "Something went wrong. Please try again.");
-      setRound((n) => n + 1);
-    }
-    busy.current = false;
-  }
+  // The parent may pass a new onDone on each render; the checks keep running without a restart (review finding 4).
+  const done = useRef(onDone);
+  done.current = onDone;
+  // The minutes the code has left, read again every 30 seconds.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = window.setInterval(() => setNow(Date.now()), 30_000);
+    return () => window.clearInterval(t);
+  }, []);
 
   useEffect(() => {
+    setState("waiting");
     if (!start) return;
     let stop = false;
     const tick = async () => {
@@ -89,7 +179,7 @@ export function WhatsAppStep({
       setState(s);
       if (s === "signed_in") {
         stop = true;
-        onDone();
+        done.current();
       }
     };
     void tick();
@@ -101,27 +191,37 @@ export function WhatsAppStep({
       window.clearInterval(timer);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [start, onDone]);
+  }, [start]);
 
   const ended =
     state === "expired" || state === "used" || state === "unknown" || state === "failed";
-  function again() {
-    forgetStart();
-    setStart(null);
-    setState("waiting");
-    setRound((n) => n + 1);
-  }
+
+  const openButton = (label: string) =>
+    start ? (
+      <a
+        href={start.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={cn(
+          buttonClass("primary", "lg", true),
+          "h-auto min-h-13 whitespace-normal py-2 text-center",
+        )}
+        data-main-cta
+        data-wa-open
+      >
+        <MessageCircle aria-hidden className="size-5" />
+        {label}
+      </a>
+    ) : null;
 
   return (
     <div className="space-y-4">
       {!start ? (
-        <>
-          <p className="text-body text-text-1">
-            Kabsi opens WhatsApp with a short sign-in message. You send it, then tap Yes on
-            Kabsi&apos;s answer.
+        error ? null : (
+          <p className="text-small text-text-2" role="status" aria-live="polite">
+            Getting your sign-in ready.
           </p>
-          <Turnstile key={round} onToken={(t) => void begin(t)} />
-        </>
+        )
       ) : ended ? (
         <div className="space-y-3">
           <p className="text-body text-text-1" role="status">
@@ -129,61 +229,82 @@ export function WhatsAppStep({
               ? "The sign-in did not finish. Start again."
               : "This sign-in has ended. Start again."}
           </p>
-          <button type="button" className={buttonClass("primary", "lg", true)} onClick={again}>
+          <button type="button" className={buttonClass("primary", "lg", true)} onClick={pre.again}>
             Start again
           </button>
         </div>
       ) : (
         <div className="space-y-4">
-          <a
-            href={start.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={buttonClass("primary", "lg", true)}
-            data-main-cta
-          >
-            <MessageCircle aria-hidden className="size-5" />
-            Open WhatsApp
-          </a>
-          <p className="text-small text-text-2">{WHATSAPP_SIGNIN_CONSENT}</p>
-          {phone ? null : (
-            <div className="flex flex-col items-center gap-2 rounded-card border border-line bg-kb-white p-4">
+          {phone ? (
+            openButton("Open WhatsApp")
+          ) : (
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+              {openButton("Open WhatsApp on this computer")}
               <div
-                className="size-44"
+                className="size-28 rounded-inner border border-line bg-kb-white p-1"
                 role="img"
-                aria-label="QR code that opens WhatsApp with the sign-in message"
-                dangerouslySetInnerHTML={{ __html: qrSvg(start.href, 176) }}
+                aria-label="QR code that opens WhatsApp on your phone with the sign-in message"
+                data-wa-qr
+                dangerouslySetInnerHTML={{ __html: qrSvg(start.href, 104) }}
               />
-              <p className="text-small text-text-2">Or scan this with your phone&apos;s camera.</p>
             </div>
           )}
-          <p className="text-small text-text-2">
-            The message says{" "}
-            <span className="font-bold text-text-1">Kabsi sign in {start.code}</span>. It works for
-            10 minutes.
-          </p>
+          <ol className="space-y-2.5">
+            <Step n={1}>
+              {phone
+                ? "Tap Open WhatsApp."
+                : "Scan the code with your phone, or open WhatsApp on this computer."}
+            </Step>
+            <Step n={2}>
+              Send the message <span className="font-bold">Kabsi sign in {start.code}</span>.{" "}
+              {minutesLeft(start.expiresAt, now)}
+            </Step>
+            <Step n={3}>Tap Yes, it&apos;s me on Kabsi&apos;s answer.</Step>
+          </ol>
           <p className="text-small font-semibold text-text-1" role="status" aria-live="polite">
             {state === "asked"
               ? phoneEnd
-                ? `Kabsi answered the phone ending in ${phoneEnd} on WhatsApp. If that is your phone, tap Yes, it's me there. If not, close this page.`
+                ? `Kabsi answered the phone ending in ${phoneEnd}. Not your phone? Close this page.`
                 : "Kabsi answered on WhatsApp. Tap Yes, it's me there."
               : "Waiting for your message on WhatsApp."}
           </p>
+          <div className="text-small text-text-2">
+            <p>{WA_CONSENT_SHORT}</p>
+            <details className="mt-1">
+              <summary className="inline-flex min-h-11 cursor-pointer items-center font-bold text-text-1 underline underline-offset-4">
+                What Kabsi sends
+              </summary>
+              <ul className="list-disc space-y-1 pl-5">
+                {WA_CONSENT_LINES.map((l) => (
+                  <li key={l}>{l}</li>
+                ))}
+              </ul>
+            </details>
+          </div>
         </div>
       )}
       {error ? (
-        <p
-          role="alert"
-          className="rounded-inner bg-bad-soft px-4 py-3 text-small font-semibold text-bad"
-        >
-          {error}
-        </p>
+        <div className="space-y-3">
+          <p
+            role="alert"
+            className="rounded-inner bg-bad-soft px-4 py-3 text-small font-semibold text-bad"
+          >
+            {error}
+          </p>
+          <button
+            type="button"
+            className={buttonClass("secondary", "lg", true)}
+            onClick={pre.again}
+          >
+            Try again
+          </button>
+        </div>
       ) : null}
       <button
         type="button"
         className={buttonClass("tertiary")}
         onClick={() => {
-          forgetStart();
+          setState("waiting");
           onBack();
         }}
       >

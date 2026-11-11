@@ -65,6 +65,8 @@ describe("Sec 1: the service role stays on the server", () => {
       "VITE_SUPABASE_URL",
       "VITE_SUPABASE_PUBLISHABLE_KEY",
       "VITE_META_PIXEL_ID",
+      // Fix 5: the Google web client ID is public by design (Google Identity Services in the browser).
+      "VITE_GOOGLE_WEB_CLIENT_ID",
     ]);
     expect([...used].filter((n) => !allowed.has(n))).toEqual([]);
   });

@@ -9,8 +9,8 @@ import { WHATSAPP_DIGITS } from "@/lib/site";
 export const WHATSAPP_CONSENT_TEXT =
   "Kabsi will send WhatsApp messages to the phone you connect: an alert for each new review of your business with " +
   "the business name, the star rating, the reviewer's first name, the review text up to 300 characters and the " +
-  "draft reply, with a button to approve low and medium risk replies and posts. Meta (WhatsApp) and Kapso carry " +
-  "these messages. Changes to your business name, address, categories, map location, phone or opening status are never " +
+  "draft reply, with a button to approve low and medium risk replies and posts. Our WhatsApp messaging provider " +
+  "carries these messages over Meta's WhatsApp Business Platform. Changes to your business name, address, categories, map location, phone or opening status are never " +
   "approved on WhatsApp. Reply STOP at any time to stop.";
 
 export type WhatsappStatus = {

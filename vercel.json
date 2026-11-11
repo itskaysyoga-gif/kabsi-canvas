@@ -134,8 +134,13 @@
       "statusCode": 301
     },
     {
+      "source": "/partner",
+      "destination": "/partners/home",
+      "statusCode": 301
+    },
+    {
       "source": "/partner/",
-      "destination": "/partner",
+      "destination": "/partners/home",
       "statusCode": 301
     },
     {
@@ -253,7 +258,7 @@
         },
         {
           "key": "Content-Security-Policy-Report-Only",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://js-de.sentry-cdn.com https://browser.sentry-cdn.com https://challenges.cloudflare.com https://connect.facebook.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://ynjdqjlmdwjgbfezevxy.supabase.co https://*.googleusercontent.com https://www.facebook.com; font-src 'self' data:; connect-src 'self' https://ynjdqjlmdwjgbfezevxy.supabase.co wss://ynjdqjlmdwjgbfezevxy.supabase.co https://*.ingest.de.sentry.io https://challenges.cloudflare.com https://connect.facebook.net https://www.facebook.com; frame-src https://challenges.cloudflare.com; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; report-uri https://o4512003528720384.ingest.de.sentry.io/api/4512145411801168/security/?sentry_key=b09a18a8ac370accf6b8e423fff77a8d"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://js-de.sentry-cdn.com https://browser.sentry-cdn.com https://challenges.cloudflare.com https://connect.facebook.net https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://ynjdqjlmdwjgbfezevxy.supabase.co https://*.googleusercontent.com https://www.facebook.com; font-src 'self' data:; connect-src 'self' https://ynjdqjlmdwjgbfezevxy.supabase.co wss://ynjdqjlmdwjgbfezevxy.supabase.co https://*.ingest.de.sentry.io https://challenges.cloudflare.com https://connect.facebook.net https://www.facebook.com https://accounts.google.com/gsi/; frame-src https://challenges.cloudflare.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; report-uri https://o4512003528720384.ingest.de.sentry.io/api/4512145411801168/security/?sentry_key=b09a18a8ac370accf6b8e423fff77a8d"
         }
       ]
     },
@@ -274,6 +279,15 @@
     },
     {
       "source": "/app/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/partners/:page(join|home)",
       "headers": [
         {
           "key": "X-Robots-Tag",

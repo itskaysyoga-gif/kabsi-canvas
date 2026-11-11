@@ -4,9 +4,14 @@
 // The server parts are supabase/functions/_shared/wa-signin.ts and the auth-whatsapp function.
 import { anonHeaders, supabase, supabaseUrl } from "@/lib/supabase";
 import { WHATSAPP_DIGITS } from "@/lib/site";
-import { signinHref, WHATSAPP_SIGNIN_CONSENT } from "../../supabase/functions/_shared/wa-signin.ts";
+import {
+  signinHref,
+  WA_CONSENT_LINES,
+  WA_CONSENT_SHORT,
+  WHATSAPP_SIGNIN_CONSENT,
+} from "../../supabase/functions/_shared/wa-signin.ts";
 
-export { signinHref, WHATSAPP_SIGNIN_CONSENT };
+export { signinHref, WA_CONSENT_LINES, WA_CONSENT_SHORT, WHATSAPP_SIGNIN_CONSENT };
 
 // ─── Google: read Auth's public settings once per page load; the button shows only when the provider is on.
 let googleOn: Promise<boolean> | null = null;

@@ -10,7 +10,7 @@
 --    the search but use no such alias; read on 11 Nov 2026).
 -- 2. A pgTAP test runs programs_daily with a referral row present (supabase/tests/fix5_programs_daily.sql).
 -- Additive: one function replaced, nothing dropped, no data changed. The partner_notices job offer is its own file
--- (20261111090100_fix5_partner_notices_step.sql, renamed to its applied version), applied once the dispatcher that handles it is deployed.
+-- (20261111090151_fix5_partner_notices_step.sql), applied once the dispatcher that handles it is deployed.
 
 create or replace function private.programs_daily() returns jsonb
 language plpgsql security definer set search_path = '' as $$

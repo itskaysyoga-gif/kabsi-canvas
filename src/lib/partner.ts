@@ -1,5 +1,5 @@
 // Partners 2 (master plan 30.50 items 4 to 7, 30.51 item 6): the browser side of kabsi.co/partners/join and
-// kabsi.co/partner. Every call goes to the programs Edge Function with the signed-in session; the browser writes no table.
+// kabsi.co/partners/home. Every call goes to the programs Edge Function with the signed-in session; the browser writes no table.
 // The words are docs/COPY.md, Partners 2.
 import { supabase } from "@/lib/supabase";
 

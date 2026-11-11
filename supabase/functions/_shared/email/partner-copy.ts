@@ -36,7 +36,7 @@ export function partnerJoinedEmail(o: { name: string; code: string }, appUrl: st
     bodyHtml: para(`Hello ${esc(firstName(o.name))}, you joined Kabsi Partners. Your link:`) +
       para(`<strong>${esc(link)}</strong>`) + lines.map((t) => para(esc(t))).join(""),
     text: `Hello ${firstName(o.name)}, you joined Kabsi Partners. Your link:\n\n${link}\n\n${lines.join("\n\n")}`,
-    button: { label: "Open your kit", url: `${appUrl}/partner#kit` },
+    button: { label: "Open your kit", url: `${appUrl}/partners/home#kit` },
     links: [{ label: "Read the partner terms", url: `${appUrl}/partners/terms` }],
     why: "You joined Kabsi Partners.",
   };
@@ -57,7 +57,7 @@ export function partnerTrialEmail(o: { trade: string | null; area: string | null
     preheader: "A business started its Kabsi trial from your link.",
     bodyHtml: para(esc(first)) + lines.map((t) => para(esc(t))).join(""),
     text: `${first}\n\n${lines.join("\n\n")}`,
-    button: { label: "Open your partner home", url: `${appUrl}/partner` },
+    button: { label: "Open your partner home", url: `${appUrl}/partners/home` },
     why: WHY,
   };
 }
@@ -75,7 +75,7 @@ export function partnerFirstPaymentEmail(o: { cents: number }, appUrl: string): 
     preheader: `${usd(o.cents)} has cleared its 30 day hold.`,
     bodyHtml: para(esc(first)) + lines.map((t) => para(esc(t))).join(""),
     text: `${first}\n\n${lines.join("\n\n")}`,
-    button: { label: "See your numbers", url: `${appUrl}/partner` },
+    button: { label: "See your numbers", url: `${appUrl}/partners/home` },
     why: WHY,
   };
 }
@@ -103,7 +103,7 @@ export function partnerPayoutEmail(o: PayoutMail, appUrl: string): EmailContent 
     preheader: `${usd(o.cents)} for ${monthName(o.month)}, with your statement.`,
     bodyHtml: para(esc(first)) + (shown.length ? para("Your statement:") + ticks(shown) : "") + (more ? para(esc(more)) : "") + para(esc(closing)),
     text: `${first}\n\n${shown.length ? `Your statement:\n${shown.map((l) => `- ${l}`).join("\n")}\n\n` : ""}${more ? `${more}\n\n` : ""}${closing}`,
-    button: { label: "Open your partner home", url: `${appUrl}/partner` },
+    button: { label: "Open your partner home", url: `${appUrl}/partners/home` },
     why: WHY,
   };
 }

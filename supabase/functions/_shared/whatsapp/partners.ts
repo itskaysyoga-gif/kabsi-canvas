@@ -1,7 +1,7 @@
 // Partners 2 (master plan 30.50 items 4 to 6, 30.51 item 6): the WhatsApp side of Kabsi Partners that is not the partner
 // role (the partner role on WhatsApp is a later session).
 //   - The payout confirm: "Yes, it's me" (pc:<id>) under the message the programs function sends to the partner's own
-//     WhatsApp number when they change their payout method on kabsi.co/partner. A seam in agent.ts, like Signup 1's: it
+//     WhatsApp number when they change their payout method on kabsi.co/partners/home. A seam in agent.ts, like Signup 1's: it
 //     reads the one button and nothing else. The database checks the id, the 10 minutes, one use and that the tap comes
 //     from the number that was asked and is still the account's.
 //   - The staff tap at the money: "payouts" from the staff phone lists the first payouts waiting for review, each with
@@ -40,7 +40,7 @@ export const PARTNERS_SAY = {
   payoutYes: "Yes, it's me",
   payoutSaved: (method: string, last4: string) =>
     `✅ *Payout method saved*\n\n${payoutName(method, last4)}\n\nKabsi pays you this way from your next payout.`,
-  payoutEnded: "⏳ *This change has ended*\n\nStart again on kabsi.co/partner.",
+  payoutEnded: "⏳ *This change has ended*\n\nStart again on kabsi.co/partners/home.",
   // The owner's link (look 2 is applied by the agent: the first line is the title).
   referral: (link: string) => `*Your referral link*\n\n${link}\nOne free month for each business that pays\n\nShare it with an owner you know.`,
   partnerLink: (link: string) => `*Your partner link*\n\n${link}\n25 percent of each payment, while the business pays\n\nShare it with an owner you know.`,

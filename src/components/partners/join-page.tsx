@@ -19,7 +19,7 @@ import {
 } from "@/lib/partner";
 
 // Partners 2 (master plan 30.50 item 4): kabsi.co/partners/join. Sign in with the one panel (WhatsApp, Google or the
-// email code), then one short form; the account is made at once with its code, link and QR, and opens kabsi.co/partner.
+// email code), then one short form; the account is made at once with its code, link and QR, and opens kabsi.co/partners/home.
 // There is no application step. noindex: a page for people who already chose to join.
 
 const selectClass =
@@ -44,7 +44,7 @@ export default function JoinPage() {
     void partnerHome()
       .then((h) => {
         if (!live) return;
-        if (h.result === "ok") router.history.replace("/partner");
+        if (h.result === "ok") router.history.replace("/partners/home");
         else setChecked(true);
       })
       .catch(() => live && setChecked(true));
@@ -76,7 +76,7 @@ export default function JoinPage() {
             ) : (
               <JoinFormView
                 email={isPlaceholder(user.email) ? "" : (user.email ?? "")}
-                onJoined={() => router.history.replace("/partner")}
+                onJoined={() => router.history.replace("/partners/home")}
               />
             )}
           </div>

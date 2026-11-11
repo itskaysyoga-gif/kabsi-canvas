@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Banner, Button, Field, buttonClass } from "@/components/kabsi/ui";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Turnstile } from "@/components/turnstile";
@@ -7,8 +7,9 @@ import { continueWithGoogle, requestEmailCode, SignupError } from "@/lib/signup"
 import { emailTypoSuggestion } from "@/lib/email-typo";
 import { codeErrorWords, GOOGLE_UNAVAILABLE, IN_APP_LINE, OFFLINE } from "@/lib/sign-in-errors";
 import { WHATSAPP_ON } from "@/lib/site";
+import { drawGoogleButton, loadGis } from "@/lib/google-gis";
 import { googleSignInOn, isPhoneNow, waysOrder } from "@/lib/wa-signin";
-import { WhatsAppChoice, WhatsAppStep } from "@/components/auth/whatsapp-signin";
+import { useWaPrestart, WhatsAppChoice, WhatsAppStep } from "@/components/auth/whatsapp-signin";
 
 // The approved line for an email that is not a full address (COPY.md 24, Design 4).
 const EMAIL_ERROR = "Check the email. It needs a full address, like name@shop.com.";
@@ -21,6 +22,53 @@ function webmailLink(domain: string): { label: string; href: string } | null {
   if (domain === "outlook.com" || domain === "hotmail.com" || domain === "live.com")
     return { label: "Open Outlook", href: "https://outlook.live.com/mail/" };
   return null;
+}
+
+/** Fix 5: Google's own button through Google Identity Services, so the chooser names kabsi.co. It loads Google's
+ * script only here; until it is drawn (or when it fails to load, or no client ID is set) the redirect button stays. */
+function GisGoogle({
+  ready,
+  fallback,
+  onDone,
+  onError,
+}: {
+  ready: boolean;
+  fallback: ReactNode;
+  onDone: () => void;
+  onError: (message: string) => void;
+}) {
+  const box = useRef<HTMLDivElement>(null);
+  const [drawn, setDrawn] = useState(false);
+  const done = useRef(onDone);
+  done.current = onDone;
+  const fail = useRef(onError);
+  fail.current = onError;
+  useEffect(() => {
+    if (!ready) return;
+    let live = true;
+    void loadGis().then(async (gis) => {
+      if (!live || !gis || !box.current) return;
+      try {
+        await drawGoogleButton(gis, box.current, {
+          width: box.current.parentElement?.clientWidth ?? 360,
+          onSigned: () => done.current(),
+          onError: () => fail.current(GOOGLE_UNAVAILABLE),
+        });
+        if (live) setDrawn(true);
+      } catch {
+        /* the redirect button stays */
+      }
+    });
+    return () => {
+      live = false;
+    };
+  }, [ready]);
+  return (
+    <div>
+      <div ref={box} className={drawn ? "flex min-h-11 justify-center" : "hidden"} data-gis />
+      {drawn ? null : fallback}
+    </div>
+  );
 }
 
 /** "Continue with Google", or, inside an in-app browser, the line saying why it does not work there and a copy link. */
@@ -99,16 +147,24 @@ export function SignInPanel({
   );
   // Signup 1: Google only when Auth says the provider is on; the order by device, read after the first paint.
   const [googleOk, setGoogleOk] = useState(true);
+  // Fix 5 (review finding 6): Google's script loads only once Auth said the provider is on.
+  const [googleRead, setGoogleRead] = useState(false);
   const [phone, setPhone] = useState(false);
   useEffect(() => {
     setPhone(isPhoneNow());
     let live = true;
-    void googleSignInOn().then((on) => live && setGoogleOk(on));
+    void googleSignInOn().then((on) => {
+      if (!live) return;
+      setGoogleOk(on);
+      setGoogleRead(true);
+    });
     return () => {
       live = false;
     };
   }, []);
   const waOn = WHATSAPP_ON;
+  // Fix 5: the bot check and the WhatsApp sign-in code start in the background as soon as the panel opens.
+  const wa = useWaPrestart(waOn);
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [token, setToken] = useState("");
@@ -264,13 +320,23 @@ export function SignInPanel({
   );
 
   return (
-    <div ref={root}>
+    <div ref={root} className="relative">
+      {/* One stable place, so the check keeps going when the owner taps Continue with WhatsApp. */}
+      {wa.widget(step === "whatsapp")}
       {step === "choose" ? (
         <div className="space-y-3">
           {waysOrder(phone).map((way) =>
             way === "google" ? (
               googleOk ? (
-                <GoogleChoice key={way} inApp={false} busy={busy} onGoogle={() => void google()} />
+                <GisGoogle
+                  key={way}
+                  ready={googleRead}
+                  onDone={onDone}
+                  onError={(m) => setError(m)}
+                  fallback={
+                    <GoogleChoice inApp={false} busy={busy} onGoogle={() => void google()} />
+                  }
+                />
               ) : null
             ) : way === "whatsapp" ? (
               waOn ? (
@@ -278,6 +344,7 @@ export function SignInPanel({
                   key={way}
                   busy={busy}
                   onPick={() => {
+                    wa.pick();
                     setError("");
                     moved.current = true;
                     setStep("whatsapp");
@@ -310,6 +377,7 @@ export function SignInPanel({
       ) : step === "whatsapp" ? (
         <WhatsAppStep
           phone={phone}
+          pre={wa}
           onDone={onDone}
           onBack={() => {
             moved.current = true;
@@ -323,6 +391,7 @@ export function SignInPanel({
               <WhatsAppChoice
                 busy={busy}
                 onPick={() => {
+                  wa.pick();
                   setError("");
                   moved.current = true;
                   setStep("whatsapp");
