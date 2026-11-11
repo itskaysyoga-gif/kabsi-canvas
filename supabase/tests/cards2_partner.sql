@@ -37,6 +37,7 @@ from unnest(array['anon', 'authenticated']) r,
      unnest(array['public.partner_cards(uuid)', 'public.partner_cards_mint(uuid,integer)', 'public.partner_cards_place(uuid,text[],text)',
                   'public.card_link_check(text,text)', 'public.card_link_whatsapp(text,text,uuid)']) f;
 select ok(has_function_privilege('authenticated', 'public.activate_card(text,uuid,text)', 'execute'), 'the activate page still runs activate_card');
+select ok(not has_function_privilege('anon', 'public.cards_kv_sync()', 'execute'), 'the kv-sync trigger function is not the browser''s');
 select is((select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.pronamespace
             where n.nspname = 'public' and p.proname in ('partner_cards', 'partner_cards_mint', 'partner_cards_place', 'card_link_check',
               'card_link_whatsapp', 'activate_card')
@@ -107,7 +108,8 @@ reset role;
 -- ─── what the partner sees ───────────────────────────────────────────────────────────────────────────────────────
 insert into public.taps (code, location_id, source, is_bot) values
   (pg_temp.c(3), null, 'nfc', false), (pg_temp.c(3), null, 'qr', false), (pg_temp.c(3), null, 'nfc', true),
-  (pg_temp.c(1), null, 'nfc', false), (pg_temp.c(1), '00000000-0000-4000-8000-0000000050b1', 'nfc', false);
+  (pg_temp.c(1), '00000000-0000-4000-8000-0000000050b1', 'nfc', false);
+insert into public.taps (code, location_id, source, is_bot, created_at) values (pg_temp.c(1), null, 'nfc', false, now() - interval '1 hour');
 select is((select e ->> 'taps' from jsonb_array_elements(public.partner_cards('00000000-0000-4000-8000-0000000050d1') -> 'cards') e
             where e ->> 'code' = pg_temp.c(3)), '2', 'taps on an unclaimed card, bots left out');
 select is((select e ->> 'state' from jsonb_array_elements(public.partner_cards('00000000-0000-4000-8000-0000000050d1') -> 'cards') e
@@ -117,6 +119,16 @@ select is((select e ->> 'taps' from jsonb_array_elements(public.partner_cards('0
 select is((select e -> 'destination' from jsonb_array_elements(public.partner_cards('00000000-0000-4000-8000-0000000050d1') -> 'cards') e
             where e ->> 'code' = pg_temp.c(1)), 'null'::jsonb, 'nor its destination');
 select is(public.partner_cards('00000000-0000-4000-8000-0000000050d3') ->> 'result', 'not_partner', 'an owner is not a partner');
+-- The business leaves (owner deletion puts the card back to unassigned and clears its business): the card stays claimed
+-- for the partner, the business's taps never become the partner's, and the partner cannot set it again.
+update public.cards set status = 'unassigned', location_id = null, destination = null, label = null, activated_at = null where code = pg_temp.c(1);
+update public.taps set location_id = null where code = pg_temp.c(1);
+select is((select e ->> 'state' from jsonb_array_elements(public.partner_cards('00000000-0000-4000-8000-0000000050d1') -> 'cards') e
+            where e ->> 'code' = pg_temp.c(1)), 'claimed', 'a card a business had stays claimed');
+select is((select e ->> 'taps' from jsonb_array_elements(public.partner_cards('00000000-0000-4000-8000-0000000050d1') -> 'cards') e
+            where e ->> 'code' = pg_temp.c(1)), '1', 'and the business''s taps stay the business''s');
+select is(public.partner_cards_place('00000000-0000-4000-8000-0000000050d1', array[pg_temp.c(1)], 'ChIJcardowner01') ->> 'count', '0',
+  'the partner cannot set it again');
 
 select * from finish();
 rollback;

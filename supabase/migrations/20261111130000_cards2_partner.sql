@@ -8,8 +8,9 @@
 -- Kabsi) until an owner claims it; the tap function and kv-sync serve an unassigned partner card that has a business set
 -- as a direct link (supabase/functions/_shared/card-served.ts). Kabsi sells no cards: the partner sells their own card
 -- and writes the link on it.
---   1. cards.partner_id, cards.place_id (the Google Place ID only, Places policy, 30.10 item 3), cards.minted_at;
---      partner_accounts.card_limit (200).
+--   1. cards.partner_id, cards.place_id (the Google Place ID only, Places policy, 30.10 item 3), cards.minted_at,
+--      cards.claimed_at; partner_accounts.card_limit (200). The kv-sync trigger also fires when a card's partner changes
+--      (a deleted partner's cards stop being served at once).
 --   2. public.partner_cards, partner_cards_mint, partner_cards_place: the partner home's Card links (programs function,
 --      service role). Setting a business counts against a per-partner daily limit (50 a day) on top of the search's own.
 --   3. card_link_check and card_link_whatsapp (from 20261111061956) and activate_card (live body, 20261027192128) with
@@ -21,12 +22,15 @@
 alter table public.cards add column if not exists partner_id uuid references public.partner_accounts(id) on delete set null;
 alter table public.cards add column if not exists place_id text check (place_id is null or place_id ~ '^[A-Za-z0-9_-]{10,300}$');
 alter table public.cards add column if not exists minted_at timestamptz;
+-- When an owner first claimed a partner card. Never cleared (owner deletion puts a card back to unassigned and clears its
+-- business, activated_at included), so the partner never sees the business's taps or re-sets a card a business had.
+alter table public.cards add column if not exists claimed_at timestamptz;
 create index if not exists cards_partner_id_idx on public.cards (partner_id, minted_at desc) where partner_id is not null;
 alter table public.partner_accounts add column if not exists card_limit integer not null default 200 check (card_limit between 0 and 100000);
 
 -- ─── 2. the partner home's Card links ────────────────────────────────────────────────────────────────────────────
--- Taps shown to the partner are the taps before an owner claimed the card (taps.location_id is null): after the claim the
--- taps are the business's, never the partner's.
+-- Taps shown to the partner are the taps before an owner first claimed the card (cards.claimed_at): after the claim the
+-- taps are the business's, never the partner's, even if the business later leaves.
 create or replace function public.partner_cards(p_user uuid) returns jsonb
 language plpgsql stable security definer set search_path = '' as $$
 declare x public.partner_accounts;
@@ -37,10 +41,11 @@ begin
     'used', (select count(*) from public.cards c where c.partner_id = x.id),
     'cards', coalesce((select jsonb_agg(jsonb_build_object(
         'code', c.code,
-        'state', case when c.location_id is not null then 'claimed' when c.status = 'disabled' then 'off'
+        'state', case when c.claimed_at is not null or c.location_id is not null then 'claimed' when c.status = 'disabled' then 'off'
                       when c.destination is not null then 'set' else 'new' end,
-        'destination', case when c.location_id is null and c.status <> 'disabled' then c.destination end,
-        'taps', (select count(*) from public.taps t where t.code = c.code and t.location_id is null and not t.is_bot),
+        'destination', case when c.claimed_at is null and c.location_id is null and c.status <> 'disabled' then c.destination end,
+        'taps', (select count(*) from public.taps t where t.code = c.code and t.location_id is null and not t.is_bot
+                  and t.created_at < coalesce(c.claimed_at, 'infinity'::timestamptz)),
         'minted_at', c.minted_at) order by c.minted_at desc, c.code)
       from public.cards c where c.partner_id = x.id), '[]'::jsonb));
 end $$;
@@ -88,11 +93,15 @@ begin
   if coalesce(p_place, '') !~ '^[A-Za-z0-9_-]{10,300}$' or cardinality(coalesce(p_codes, '{}')) not between 1 and 50 then
     return jsonb_build_object('result', 'bad_request');
   end if;
+  if not exists (select 1 from public.cards c where c.partner_id = x.id and c.code = any (p_codes) and c.location_id is null
+                   and c.claimed_at is null and c.status = 'unassigned') then
+    return jsonb_build_object('result', 'set', 'count', 0);
+  end if;
   if not public.hit_rate_limit('partner_card_place:' || x.id::text, 50, 86400) then
     return jsonb_build_object('result', 'limited');
   end if;
   update public.cards c set place_id = p_place, destination = 'https://search.google.com/local/writereview?placeid=' || p_place
-   where c.partner_id = x.id and c.code = any (p_codes) and c.location_id is null and c.status = 'unassigned';
+   where c.partner_id = x.id and c.code = any (p_codes) and c.location_id is null and c.claimed_at is null and c.status = 'unassigned';
   get diagnostics v_n = row_count;
   return jsonb_build_object('result', 'set', 'count', v_n);
 end $$;
@@ -160,9 +169,13 @@ begin
   if c.status = 'disabled' then return jsonb_build_object('result', 'disabled'); end if;
   select place_id into v_place from public.locations where id = p_location;
   if v_place is null then return jsonb_build_object('result', 'no_place'); end if;
-  if c.place_id is not null and c.place_id <> v_place then return jsonb_build_object('result', 'other_business'); end if;
+  if c.place_id is not null and c.place_id <> v_place then
+    perform public.hit_rate_limit(v_key, 10, 3600);
+    return jsonb_build_object('result', 'other_business');
+  end if;
   v_dest := 'https://search.google.com/local/writereview?placeid=' || v_place;
-  update public.cards set location_id = p_location, destination = v_dest, status = 'active', activated_at = coalesce(activated_at, now())
+  update public.cards set location_id = p_location, destination = v_dest, status = 'active', activated_at = coalesce(activated_at, now()),
+    claimed_at = case when partner_id is not null then coalesce(claimed_at, now()) end
    where code = v_code;
   select r.user_id into v_user from public.phone_roles r
    where r.phone = p_phone and r.location_id = p_location and r.revoked_at is null and r.role in ('owner', 'manager')
@@ -198,12 +211,33 @@ begin
   end if;
   select place_id into v_place from public.locations where id = p_location;
   if v_place is null then raise exception 'location_has_no_place_id'; end if;
-  if c.place_id is not null and c.place_id <> v_place and not v_admin then return 'card_in_use'; end if;
+  if c.place_id is not null and c.place_id <> v_place and not v_admin then
+    perform public.hit_rate_limit(v_key, 10, 3600);
+    return 'card_in_use';
+  end if;
   v_dest := 'https://search.google.com/local/writereview?placeid=' || v_place;
   update public.cards set location_id = p_location, destination = v_dest, status = 'active',
-    activated_at = coalesce(activated_at, now()), label = coalesce(left(p_label, 60), label)
+    activated_at = coalesce(activated_at, now()), label = coalesce(left(p_label, 60), label),
+    claimed_at = case when partner_id is not null then coalesce(claimed_at, now()) end
   where code = v_code;
   return v_dest;
+end $$;
+
+-- ─── 4. the Worker's copy follows a change of partner too ────────────────────────────────────────────────────────
+-- public.cards_kv_sync as it stands live (read 11 Nov 2026), with partner_id added: an unclaimed partner card is served
+-- only while it has a partner (card-served.ts), so a partner removed by retention takes its cards off the edge at once.
+create or replace function public.cards_kv_sync() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  if tg_op <> 'UPDATE'
+     or old.status is distinct from new.status
+     or old.destination is distinct from new.destination
+     or old.location_id is distinct from new.location_id
+     or old.page_mode is distinct from new.page_mode
+     or old.partner_id is distinct from new.partner_id then
+    perform public.call_internal('kv-sync', jsonb_build_object('code', coalesce(new.code, old.code)));
+  end if;
+  return null;
 end $$;
 
 do $$

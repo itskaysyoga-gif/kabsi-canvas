@@ -245,6 +245,7 @@ async function partnerCardsMint(req: Request): Promise<Response> {
   const r = one<{ result: string; codes?: string[]; left?: number }>(data);
   if (r.result === "over_limit") return json({ error: "over_limit", left: r.left ?? 0, message: `You can make ${r.left ?? 0} more card links. Write to hello@kabsi.co to ask for more.` }, 409, NO_CACHE);
   if (r.result === "not_active") return fail("not_active", "Card links open once your partner account is active.", 403);
+  if (r.result === "bad_count") return fail("bad_count", "Choose 1 to 50 card links at a time.", 400);
   if (r.result !== "minted") return fail("not_partner", "You are not a Kabsi partner yet.", 403);
   log("programs", { ok: true, op: "partner_cards_mint", count });
   return json({ ok: true, codes: r.codes ?? [] }, 200, NO_CACHE);
@@ -260,7 +261,9 @@ async function partnerCardsPlace(req: Request): Promise<Response> {
   if (error) throw error;
   const r = one<{ result: string; count?: number }>(data);
   if (r.result === "limited") return fail("limited", "You have set 50 businesses today. Try again tomorrow.", 429);
-  if (r.result !== "set") return fail(r.result, "You are not a Kabsi partner yet.", 403);
+  if (r.result === "not_active") return fail("not_active", "Card links open once your partner account is active.", 403);
+  if (r.result === "bad_request") return fail("bad_request", "Choose the business again.", 400);
+  if (r.result !== "set") return fail("not_partner", "You are not a Kabsi partner yet.", 403);
   return json({ ok: true, count: r.count ?? 0 }, 200, NO_CACHE);
 }
 

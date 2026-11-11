@@ -68,7 +68,7 @@ export const CARDS_SAY = {
   noPlace: "Your Google profile first\nKabsi links a card once your business is on Google in Kabsi.\n\nFinish setup on kabsi.co, then send the code again.",
   // An unknown phone: sign in first, the code is kept in the link.
   signup: (code: string, link: string, partner = false) =>
-    `Set up Kabsi first\nCard ${code} links to your business once Kabsi is set up. Open this link to sign in. The card links as soon as your business is added:\n${link}${partner ? "\nWith this card, Kabsi is free for 30 days once it is connected. No card payment." : ""}\n\nNothing goes live without your yes.`,
+    `Set up Kabsi first\nCard ${code} links to your business once Kabsi is set up. Open this link to sign in. The card links as soon as your business is added:\n${link}${partner ? "\nWith this card, Kabsi is free for 30 days once it is connected. No payment card needed." : ""}\n\nNothing goes live without your yes.`,
   // "cards"
   listBody: (n: number) => `Your cards\nTaps this week and last week, by place.\n${TAP_NOTE}${n > 10 ? `\nand ${n - 10} more` : ""}\n\nTap one to change its place.`,
   listButton: "Open a card",

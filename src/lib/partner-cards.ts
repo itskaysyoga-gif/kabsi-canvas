@@ -82,7 +82,7 @@ export const CARD_COPY = {
       ? "1 card now opens this business's review form."
       : `${n} cards now open this business's review form.`,
   change: "Change business",
-  test: "Test the link",
+  test: "Open the review form",
   taps: (n: number) => (n === 1 ? "1 tap" : `${n} taps`),
   tapNote:
     "A tap is not a review. Taps show here until the owner claims the card; then they are the business's.",
@@ -94,5 +94,5 @@ export const CARD_COPY = {
   } as Record<CardLinkState, string>,
   claimLine:
     'When the owner sends "Link card" and the code to Kabsi on WhatsApp, the card joins their account with a 30 day free trial through your link.',
-  rule: "Give every customer the same card. Never ask for or reward reviews, and never filter who is asked.",
+  rule: "Give every customer the same card. Never pay for or reward reviews, and never ask only happy customers.",
 } as const;

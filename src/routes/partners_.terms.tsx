@@ -150,9 +150,8 @@ function Page() {
             link. Kabsi's own records decide which partner was last.
           </li>
           <li>
-            A Kabsi card link you made counts the same way: when the owner sends &quot;Link card&quot;
-            and the card&apos;s code to Kabsi on WhatsApp, or opens the card&apos;s setup link,
-            before the business signs up.
+            A Kabsi card link you made counts the same way: when the owner sends &quot;Link
+            card&quot; and the card&apos;s code to Kabsi on WhatsApp before the business signs up.
           </li>
           <li>
             Businesses that come through a partner get a 30 day Pro trial instead of 14 days. There
@@ -191,8 +190,8 @@ function Page() {
           <li>
             Kabsi card links: Kabsi sells no cards. You may write the card links you make on your
             partner home onto cards you sell (200 to start; Kabsi may raise or lower the number). A
-            card sends every customer straight to the business&apos;s Google review form: never put a
-            page, a rating question or a filter in front of it, and set each card only for the
+            card sends every customer straight to the business&apos;s Google review form: never put
+            a page, a rating question or a filter in front of it, and set each card only for the
             business you sell it to. A card counts taps, never reviews, and never ranks staff.
           </li>
           <li>
