@@ -62,7 +62,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 ## Recent entries (newest first)
 
 - 10 Nov 2026, Site 3a (R-150 item 10, R-151): audit at 8 widths (`docs/site3/audit.md`); offers table in SYNC.md 2a; Home, Pricing, How it works and the free check result fixed. `2026-11-10-site3a.md`.
-- 10 Nov 2026, Outbound 2 (R-151 item 5): ramp 5 then 10 a day in code (the migration waits for lane R: apply_migration asked and timed out; the database still reads 3, 5, 10, locked, test mode); the eight first tier industries pass; beauty and food alternate; food wording; the follow-up carries the private Founding 25 link while places remain. Nothing sent. `2026-11-10-outbound2.md`.
+- 10 Nov 2026, Outbound 2 (R-151 item 5): ramp 5 then 10 a day (migration 20261111035954 applied 11 Nov; read back 5, 10, 10, 300, locked, test mode); the eight first tier industries pass; beauty and food alternate; food wording; the follow-up carries the private Founding 25 link while places remain. Nothing sent. `2026-11-10-outbound2.md`.
 - Older entries (Clean 4 is in `2026-11-10-clean4.md`; Look 2b is in `2026-11-10-look2b.md`; Founding 1 is in `2026-11-10-founding1.md`; RB-T is in `2026-11-10-rb-t.md`; Safe 1 is in `2026-11-10-safe1.md`; Signup 1 is in `2026-11-10-signup1.md`; Look 2 is in `2026-11-10-look2.md`; Plan 1 is in `2026-11-10-plan1.md`, RB-F4 in `2026-11-10-rb-f4.md` and Ops 1 in `2026-11-10-ops1.md`; Partners 1, RB-F3, Tidy 2 parts 0, 1 and 3 are in `2026-11-10-tidy2.md` and `2026-11-09-progress-moved.md`; Tidy 2 part 2, Tidy 1 parts 0 to 4, RB-F, Sync 2a, Sync 2b parts A and B) are word for word in `2026-11-09-progress-moved.md`.
 
 ## How a session updates this page
