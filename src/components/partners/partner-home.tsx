@@ -7,6 +7,7 @@ import { Marked } from "@/components/kabsi/highlight";
 import { Badge, Banner, Button, ButtonLink, buttonClass, Card, Field } from "@/components/kabsi/ui";
 import { inAppBrowserNow } from "@/lib/in-app-browser";
 import { qrSvg } from "@/lib/qr";
+import { PartnerKit } from "./partner-kit";
 import {
   askPayoutChange,
   confirmPayoutCode,
@@ -22,7 +23,8 @@ import {
   usd,
 } from "@/lib/partner";
 
-// Partners 2 (master plan 30.50 item 6): kabsi.co/partner, the partner home. Signed in: the link and its QR code, the
+// Partners 2 (master plan 30.50 item 6): kabsi.co/partner, the partner home. Signed in: the link and its QR code, the kit
+// (Partners 3: ready posts, the A6 insert, the say and never say lists), the
 // numbers from the one ledger, the payout method (asked once 50 US dollars has cleared, shown as the last 4 characters,
 // changed only after a fresh confirm on WhatsApp or an email code), and the rules. A referred business shows as its
 // trade and area only (29.2). noindex.
@@ -135,6 +137,8 @@ function Home({ home, reload }: { home: PartnerHome; reload: () => void }) {
           <p className="text-small text-text-2">{C.qrLabel}. Print it or show it on your phone.</p>
         </div>
       </Card>
+
+      <PartnerKit kind={p.kind} name={p.name} link={link} />
 
       <Card>
         <h2 className="text-h3 font-bold text-text-1">{C.numbersTitle}</h2>

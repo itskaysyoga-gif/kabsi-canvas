@@ -343,6 +343,10 @@ export function markFor(result: string, kind: KindName | null): string {
   if (/^(post_|photo|held_photo|video$|post_skip)/.test(r)) return MARK.picture;
   if (/^(shown_for_yes|no_review$|exact_|edit_(started|refused|draft)|show_refused|review_alert|new_draft)/.test(r)) return MARK.review;
   if (/^receipt/.test(r)) return MARK.receipt;
+  // Cards 2: a card linked or given its place is done; "cards" is a list; anything else about a card asks or refuses.
+  if (/^card_(linked|labelled|already)$/.test(r)) return MARK.done;
+  if (/^card_(list|none)$/.test(r)) return MARK.list;
+  if (/^card_/.test(r)) return MARK.ask;
   // Partners 2: the owner's link, and the staff list of first payouts.
   if (/^referral_/.test(r)) return MARK.list;
   if (r === "payouts_list") return MARK.receipt;
@@ -358,7 +362,7 @@ export function markFor(result: string, kind: KindName | null): string {
 /** The replies in scope of look 2 (30.50 item 2): the request book, help, switch, off topic, and the Google care replies
  *  inside the window (a review and its draft, hours, photos and posts, billing and the hand-off). Others keep their look
  *  until a later session moves them (docs/LATER.md). */
-export const IN_SCOPE = /^(nora$|request_|reset_|forwarded_yes|help$|which_role|which_business|business_set|role_set|role_refused|switched|pick_closed|off_topic|hours_|post_|photo|held_photo|video$|file_refused|shown_for_yes|no_review$|exact_|edit_|show_refused|approved$|undone$|undo:|too_late$|repeat$|stale_button$|refused:|which_one$|yes_nothing$|not_yours$|billing_|handoff$|referral_|payouts_)/;
+export const IN_SCOPE = /^(nora$|request_|reset_|forwarded_yes|help$|which_role|which_business|business_set|role_set|role_refused|switched|pick_closed|off_topic|hours_|post_|photo|held_photo|video$|file_refused|shown_for_yes|no_review$|exact_|edit_|show_refused|approved$|undone$|undo:|too_late$|repeat$|stale_button$|refused:|which_one$|yes_nothing$|not_yours$|billing_|handoff$|referral_|payouts_|card_)/;
 /** Replies about a change to Google: the business is always named after the title (say.ts: the business named first on
  *  anything that can change Google). */
 export const NAMES_BUSINESS = /^(hours_shown|post_shown|photo_post_shown|photo_category_set|shown_for_yes|approved)$/;

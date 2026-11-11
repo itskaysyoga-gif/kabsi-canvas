@@ -96,6 +96,8 @@ export function receipt(o: {
   tz: string;
   /** The week in words ("19 to 25 October", email/report-body.ts dateRange), the start of the WhatsApp line. */
   dates?: string;
+  /** Cards 2: the business's active cards with their taps in the report's week (public.card_taps_weeks). */
+  cards?: { code: string; label: string | null; this_week: number }[] | null;
 }) {
   const did = didChips(o.counts);
   const waiting = { count: o.needsTotal, items: o.needs.slice(0, 3).map((n) => ({ title: n.title, path: n.path })) };
@@ -129,11 +131,19 @@ export function receipt(o: {
     v: 3 as const,
     did, did_total: did.reduce((s, c) => s + c.count, 0), updates: updatesCount(o.counts),
     waiting, next_step: next ? { title: next.title, path: next.path } : null,
-    google, growth, ai, accuracy, competitor: rival,
+    google, growth, ai, accuracy, competitor: rival, cards: cardLines(o.cards ?? null),
     whatsapp: receiptText({ business: o.business, dates: o.dates, did, waiting: waiting.count, next: next?.title ?? null, google, growth, ai, accuracy, rival }),
   };
 }
 export type Receipt = ReturnType<typeof receipt>;
+
+/** Cards 2 (30.50 item 9): one line per card, its place and its taps this week. Taps, never reviews; places, never people.
+ *  Null when the business has no card, so the block is left out. */
+export const CARD_TAP_NOTE = "A tap is not a review.";
+export function cardLines(cards: { code: string; label: string | null; this_week: number }[] | null) {
+  if (!cards?.length) return null;
+  return cards.map((c) => ({ place: c.label?.trim() || `Card ${c.code}`, taps: c.this_week, line: `${c.label?.trim() || `Card ${c.code}`}: ${c.this_week} ${c.this_week === 1 ? "tap" : "taps"}` }));
+}
 
 /**
  * The WhatsApp version, in look 2 (30.50 item 2): a receipt marker and "Your weekly report" (K-02) with the business, then the

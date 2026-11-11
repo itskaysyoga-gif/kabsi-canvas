@@ -57,7 +57,8 @@ describe("Go live 1: no At launch label and no launch line (master plan 30.28)",
     expect(scan).not.toContain("NEARBY_ON");
     expect(scan).not.toMatch(LAUNCH);
     const partners = readFileSync("src/components/kabsi/d2-partners.tsx", "utf8");
-    expect(partners).toContain("Kabsi Partners opens when card payments open.");
+    // Partners 3 (30.50 item 7): the page says it once, as the launch day line under the hero button.
+    expect(partners).toContain("Partner links start paying on launch day.");
     expect(partners).not.toMatch(LAUNCH);
   });
 });

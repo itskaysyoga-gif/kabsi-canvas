@@ -5,7 +5,7 @@
 // own profile, so a real owner's email never shows example figures; a block without real numbers is left out. The demo
 // business keeps its labelled examples. No review text and no quotes (K-113.3, R-19). Pure, so a test can read it.
 import { card, chips, esc, label, para, statCards } from "../email-layout.ts";
-import { didChips, type Chip, type Receipt } from "../results-report/receipt.ts";
+import { CARD_TAP_NOTE, didChips, type Chip, type Receipt } from "../results-report/receipt.ts";
 import type { Counts } from "../care-report/compose.ts";
 import { TOKENS } from "./tokens.ts";
 
@@ -152,6 +152,12 @@ export function renderReport(loc: { name: string }, r: ReportData): RenderedRepo
     parts.push(label("From your Kabsi review link"));
     parts.push(para(`Your review link was opened ${growth.link_opens} ${growth.link_opens === 1 ? "time" : "times"}. An open is not a review.`));
     text.push(`From your Kabsi review link: opened ${growth.link_opens} ${growth.link_opens === 1 ? "time" : "times"}. An open is not a review.`);
+  }
+  // Cards 2: taps per card, by place (never reviews, never people).
+  if (rc?.cards?.length) {
+    parts.push(label("From your Kabsi cards"));
+    parts.push(para(`${rc.cards.map((c) => esc(c.line)).join("<br>")}<br>${esc(CARD_TAP_NOTE)}`));
+    text.push(`From your Kabsi cards:\n${rc.cards.map((c) => `- ${c.line}`).join("\n")}\n${CARD_TAP_NOTE}`);
   }
   if (rc?.competitor) {
     parts.push(card({ label: "Competitor Watch", html: esc(rc.competitor) }));

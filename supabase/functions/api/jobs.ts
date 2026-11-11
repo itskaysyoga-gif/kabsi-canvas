@@ -19,6 +19,7 @@
 import { admin, APP_URL, captureError, internalSecret, isInternal, jobLog, json, sha256Hex } from "../_shared/kabsi.ts";
 import { notify, notifyDue } from "../_shared/notify.ts";
 import { lifecycleJob } from "../_shared/lifecycle-db.ts";
+import { partnerNotices } from "../_shared/partner-notices.ts";
 import * as copy from "../_shared/email/copy.ts";
 import { type Job, type JobHandler, type JobState, PermanentJobError, RetryLater, runJob } from "../_shared/jobs.ts";
 import { activeLocation, draftReview, isSyncable, notifyLocation, syncLocation } from "../_shared/reviews.ts";
@@ -441,7 +442,15 @@ const HANDLERS: Record<string, JobHandler> = {
   ratings_snapshot: step("ratings", ratingsJob),
   weekly_reports: step("weekly", weeklyJob),
   deletions: step("deletions", deletionsJob),
-  trial_reminders: step("trials", trialsJob),
+  // Partners 3: the partner emails that follow an event ride the same 5 minute step. A failure there is captured and never
+  // fails the trial reminders (its own job log line carries the counts).
+  trial_reminders: step("trials", async () => ({
+    ...(await trialsJob()),
+    ...(await partnerNotices().catch(async (e) => {
+      await captureError("dispatch", e, { job: "partner_notices" });
+      return {};
+    })),
+  })),
   photo_files: step("photo_files", () => removeDuePhotoFiles(photoFileStore(admin()))),
   // P0.5-02: the posts care routine for one business, this month and the next (_shared/posts/plan.ts). It prepares
   // only from something true and asks one question otherwise; it never publishes.

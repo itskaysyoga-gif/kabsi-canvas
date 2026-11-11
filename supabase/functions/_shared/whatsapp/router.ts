@@ -59,6 +59,8 @@ const WORDS: [RegExp, string, string?][] = [
   [/^(stats|statistics|numbers|how did we do( this week)?|estadísticas|estadisticas|إحصائيات|احصائيات)$/, "stats", "7"],
   [/^(this month|month|stats month|este mes|هذا الشهر)$/, "stats", "30"],
   [/^(review link|link|my link|enlace|رابط|رابط التقييم)$/, "review_link"],
+  // Cards 2: each card with its place and its taps this week and last week ("card" alone stays the billing word).
+  [/^(cards|my cards|card taps)$/, "cards"],
   [/^(qr|qr code|qr card|código qr)$/, "qr"],
   // V3 (30.15 section 3.5): a ready message with the review link, to forward after a real visit. Never a customer's number.
   [/^(ask a customer|ask customers?|ask for a review|ask for reviews|request a review|review request|send review link|send the review link|pedir una reseña)$/, "ask_customer"],
