@@ -81,25 +81,38 @@ describe("Google Identity Services", () => {
     expect(gis.renderButton).toHaveBeenCalledOnce();
   });
 
-  it("a refused token is an error, never a sign-in", async () => {
+  it("a refused token is an error, never a sign-in, and the next try gets a fresh nonce", async () => {
     const { drawGoogleButton } = await import("../src/lib/google-gis");
-    let cb: (r: { credential?: string }) => void = () => {};
+    const inits: { nonce: string; callback: (r: { credential?: string }) => void }[] = [];
     const onSigned = vi.fn();
     const onError = vi.fn();
+    const sent: string[] = [];
     await drawGoogleButton(
       {
-        initialize: (o: { callback: typeof cb }) => void (cb = o.callback),
+        initialize: (o: (typeof inits)[number]) => void inits.push(o),
         renderButton: () => {},
       } as never,
       {} as HTMLElement,
       { width: 300, onSigned, onError, clientId: "x" },
-      { signIn: async () => ({ error: new Error("nonce mismatch") }) },
+      {
+        signIn: async ({ nonce }) => {
+          sent.push(nonce);
+          return { error: new Error("nonce mismatch") };
+        },
+      },
     );
-    cb({ credential: "t" });
-    await vi.waitFor(() => expect(onError).toHaveBeenCalled());
-    cb({});
+    inits[0]!.callback({ credential: "t" });
+    await vi.waitFor(() => expect(inits).toHaveLength(2));
+    inits[1]!.callback({ credential: "t2" });
+    await vi.waitFor(() => expect(inits).toHaveLength(3));
     expect(onError).toHaveBeenCalledTimes(2);
     expect(onSigned).not.toHaveBeenCalled();
+    // Never the same nonce twice, to Google or to Supabase.
+    expect(new Set(inits.map((i) => i.nonce)).size).toBe(3);
+    expect(new Set(sent).size).toBe(2);
+    inits[2]!.callback({});
+    await vi.waitFor(() => expect(inits).toHaveLength(4));
+    expect(onError).toHaveBeenCalledTimes(3);
   });
 
   it("falls back to the redirect flow: no client ID, a script error, or no answer in 4 seconds", async () => {
@@ -143,6 +156,17 @@ describe("Google Identity Services", () => {
 });
 
 describe("WhatsApp sign-in starts when the panel opens", () => {
+  it("never renews a shown code in the background; a stale one is replaced only at the tap", async () => {
+    const step = read("src/components/auth/whatsapp-signin.tsx");
+    expect(step).not.toMatch(/setTimeout\(again/);
+    expect(step).toMatch(/const FRESH_MS = 5 \* 60_000/);
+    const panel = read("src/components/auth/sign-in-panel.tsx");
+    expect(panel.match(/wa\.pick\(\);/g)).toHaveLength(2);
+    const { minutesLeft } = await import("../src/components/auth/whatsapp-signin");
+    expect(minutesLeft(10 * 60_000, 0)).toBe("It works for 10 minutes.");
+    expect(minutesLeft(6 * 60_000 + 1, 0)).toBe("It works for 7 more minutes.");
+    expect(minutesLeft(30_000, 0)).toBe("It works for 1 more minute.");
+  });
   it("the panel keeps one bot check mounted and asks for a code only with a passed check", () => {
     const panel = read("src/components/auth/sign-in-panel.tsx");
     expect(panel).toMatch(/const wa = useWaPrestart\(waOn\)/);

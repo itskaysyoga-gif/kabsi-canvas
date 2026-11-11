@@ -27,10 +27,12 @@ function webmailLink(domain: string): { label: string; href: string } | null {
 /** Fix 5: Google's own button through Google Identity Services, so the chooser names kabsi.co. It loads Google's
  * script only here; until it is drawn (or when it fails to load, or no client ID is set) the redirect button stays. */
 function GisGoogle({
+  ready,
   fallback,
   onDone,
   onError,
 }: {
+  ready: boolean;
   fallback: ReactNode;
   onDone: () => void;
   onError: (message: string) => void;
@@ -42,6 +44,7 @@ function GisGoogle({
   const fail = useRef(onError);
   fail.current = onError;
   useEffect(() => {
+    if (!ready) return;
     let live = true;
     void loadGis().then(async (gis) => {
       if (!live || !gis || !box.current) return;
@@ -59,7 +62,7 @@ function GisGoogle({
     return () => {
       live = false;
     };
-  }, []);
+  }, [ready]);
   return (
     <div>
       <div ref={box} className={drawn ? "flex min-h-11 justify-center" : "hidden"} data-gis />
@@ -144,11 +147,17 @@ export function SignInPanel({
   );
   // Signup 1: Google only when Auth says the provider is on; the order by device, read after the first paint.
   const [googleOk, setGoogleOk] = useState(true);
+  // Fix 5 (review finding 6): Google's script loads only once Auth said the provider is on.
+  const [googleRead, setGoogleRead] = useState(false);
   const [phone, setPhone] = useState(false);
   useEffect(() => {
     setPhone(isPhoneNow());
     let live = true;
-    void googleSignInOn().then((on) => live && setGoogleOk(on));
+    void googleSignInOn().then((on) => {
+      if (!live) return;
+      setGoogleOk(on);
+      setGoogleRead(true);
+    });
     return () => {
       live = false;
     };
@@ -321,6 +330,7 @@ export function SignInPanel({
               googleOk ? (
                 <GisGoogle
                   key={way}
+                  ready={googleRead}
                   onDone={onDone}
                   onError={(m) => setError(m)}
                   fallback={
@@ -334,6 +344,7 @@ export function SignInPanel({
                   key={way}
                   busy={busy}
                   onPick={() => {
+                    wa.pick();
                     setError("");
                     moved.current = true;
                     setStep("whatsapp");
@@ -380,6 +391,7 @@ export function SignInPanel({
               <WhatsAppChoice
                 busy={busy}
                 onPick={() => {
+                  wa.pick();
                   setError("");
                   moved.current = true;
                   setStep("whatsapp");

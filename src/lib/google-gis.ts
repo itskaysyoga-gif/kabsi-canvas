@@ -89,7 +89,10 @@ export async function drawGoogleButton(
       supabase.auth.signInWithIdToken({ provider: "google", token, nonce }),
   },
 ): Promise<void> {
+  // Each draw has its own nonce; after any answer from Google the button is drawn again with a fresh one, so a nonce
+  // is never used twice (Fix 5 review finding 3).
   const nonce = await makeNonce();
+  const redraw = () => void drawGoogleButton(gis, el, opts, deps).catch(opts.onError);
   gis.initialize({
     client_id: opts.clientId ?? GOOGLE_WEB_CLIENT_ID,
     nonce: nonce.hashed,
@@ -99,11 +102,21 @@ export async function drawGoogleButton(
     use_fedcm_for_button: true,
     auto_select: false,
     callback: (r) => {
-      if (!r.credential) return opts.onError(new Error("no credential"));
+      if (!r.credential) {
+        opts.onError(new Error("no credential"));
+        return redraw();
+      }
       deps
         .signIn({ token: r.credential, nonce: nonce.raw })
-        .then(({ error }) => (error ? opts.onError(error) : opts.onSigned()))
-        .catch(opts.onError);
+        .then(({ error }) => {
+          if (!error) return opts.onSigned();
+          opts.onError(error);
+          redraw();
+        })
+        .catch((e) => {
+          opts.onError(e);
+          redraw();
+        });
     },
   });
   gis.renderButton(el, {

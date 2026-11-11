@@ -41,8 +41,9 @@ export function WhatsAppChoice({
   );
 }
 
-// A sign-in code with less than this left is replaced before it is shown (the owner needs time to send it).
-const FRESH_MS = 2 * 60_000;
+// A code with less than this left is replaced when the owner taps Continue with WhatsApp (time to send it). A code that
+// is already shown is never replaced in the background: the owner may be sending it (Fix 5 review finding 1).
+const FRESH_MS = 5 * 60_000;
 
 export type WaPrestart = {
   start: WaStart | null;
@@ -51,12 +52,16 @@ export type WaPrestart = {
   widget: (visible: boolean) => ReactNode;
   /** Forget the current code and make a new one (after it ended). */
   again: () => void;
+  /** Called on the tap of Continue with WhatsApp: a code with under 5 minutes left is replaced then, never later. */
+  pick: () => void;
 };
 
 /**
  * Fix 5 (R-158 item 2): the bot check and the sign-in code start in the background when the sign-in panel opens, so
  * "Continue with WhatsApp" shows the ready link at once. A code is asked for only with a passed check (an empty token
- * is a failed check and starts nothing); the server checks the token again before it makes a code.
+ * is a failed check and starts nothing); the server checks the token again before it makes a code. One code per page:
+ * it is kept across the panel's steps and never renewed by a timer (each start counts against the visitor's hourly
+ * limit), only at the tap when it has under 5 minutes left, or after it ended.
  */
 export function useWaPrestart(on: boolean): WaPrestart {
   const [start, setStart] = useState<WaStart | null>(() =>
@@ -93,13 +98,10 @@ export function useWaPrestart(on: boolean): WaPrestart {
     setRound((n) => n + 1);
   }, []);
 
-  // A code that is about to end while the panel stays open is replaced in the background.
-  useEffect(() => {
-    if (!start) return;
-    const wait = Math.max(0, start.expiresAt - Date.now() - FRESH_MS);
-    const t = window.setTimeout(again, wait);
-    return () => window.clearTimeout(t);
-  }, [start, again]);
+  const pick = useCallback(() => {
+    const s = startRef.current;
+    if (s && s.expiresAt - Date.now() < FRESH_MS) again();
+  }, [again]);
 
   const widget = (visible: boolean) =>
     on && !start ? (
@@ -107,10 +109,18 @@ export function useWaPrestart(on: boolean): WaPrestart {
         <Turnstile key={round} onToken={onToken} />
       </div>
     ) : null;
-  return { start, error, widget, again };
+  return { start, error, widget, again, pick };
 }
 
 const CHECK_MS = 2000;
+
+/** "It works for 9 more minutes." The code lives 10 minutes from when it was made. */
+export function minutesLeft(expiresAt: number, now: number): string {
+  const m = Math.max(1, Math.ceil((expiresAt - now) / 60_000));
+  return m >= 10
+    ? "It works for 10 minutes."
+    : `It works for ${m} more ${m === 1 ? "minute" : "minutes"}.`;
+}
 
 /** One numbered step, at most two lines. */
 function Step({ n, children }: { n: number; children: ReactNode }) {
@@ -147,6 +157,15 @@ export function WhatsAppStep({
   const { start, error } = pre;
   const [state, setState] = useState<WaState>("waiting");
   const [phoneEnd, setPhoneEnd] = useState<string | null>(null);
+  // The parent may pass a new onDone on each render; the checks keep running without a restart (review finding 4).
+  const done = useRef(onDone);
+  done.current = onDone;
+  // The minutes the code has left, read again every 30 seconds.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = window.setInterval(() => setNow(Date.now()), 30_000);
+    return () => window.clearInterval(t);
+  }, []);
 
   useEffect(() => {
     setState("waiting");
@@ -160,7 +179,7 @@ export function WhatsAppStep({
       setState(s);
       if (s === "signed_in") {
         stop = true;
-        onDone();
+        done.current();
       }
     };
     void tick();
@@ -172,7 +191,7 @@ export function WhatsAppStep({
       window.clearInterval(timer);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [start, onDone]);
+  }, [start]);
 
   const ended =
     state === "expired" || state === "used" || state === "unknown" || state === "failed";
@@ -237,8 +256,8 @@ export function WhatsAppStep({
                 : "Scan the code with your phone, or open WhatsApp on this computer."}
             </Step>
             <Step n={2}>
-              Send the message <span className="font-bold">Kabsi sign in {start.code}</span>. It
-              works for 10 minutes.
+              Send the message <span className="font-bold">Kabsi sign in {start.code}</span>.{" "}
+              {minutesLeft(start.expiresAt, now)}
             </Step>
             <Step n={3}>Tap Yes, it&apos;s me on Kabsi&apos;s answer.</Step>
           </ol>
