@@ -6,10 +6,11 @@ import type { ReactNode } from "react";
 import { Check, KeyRound, Lock, ShieldCheck, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import { CONTACT_EMAIL, KABSI_GROUP_ID, KABSI_GROUP_NAME } from "@/lib/site";
+import { CONTACT_EMAIL, KABSI_GROUP_ID, KABSI_GROUP_NAME, TRIAL_LINE } from "@/lib/site";
 import { RemoveKabsi } from "./d5-access";
 import { PageHero, popCls, stagger } from "./page-hero";
 import { Closing } from "./closing";
+import { ScanBox } from "./scan-box";
 import { SECURITY_HERO } from "./hero-lines";
 import { Marked } from "@/components/kabsi/highlight";
 import { Img, PHOTOS } from "./photos";
@@ -71,10 +72,12 @@ function CanCannotVisual() {
   );
 }
 
+// Site 3b: the four short answers come first (password, Manager access, approval, removal); the data lines follow.
 const SUMMARY = [
   "Kabsi never sees your Google password.",
-  "You can remove Kabsi as a Manager any time.",
+  "Kabsi works as a Manager you add on Google. You stay the owner.",
   "Nothing goes live without your yes.",
+  "You can remove Kabsi as a Manager any time.",
   "Kabsi's database is in Frankfurt. Data is encrypted in transit.",
   "Data from your Google profile is deleted 7 days after you leave.",
   "Report a problem: hello@kabsi.co.",
@@ -105,6 +108,8 @@ export function D8Security() {
       {/* Site 2 (master plan 30.34 item 4): a hero photo above what Kabsi can and never can do. */}
       <PageHero
         mark="stays yours."
+        action={<ScanBox id="hero-scan" note={TRIAL_LINE} />}
+        under={null}
         hero={SECURITY_HERO}
         visual={
           <div className="grid gap-4">
@@ -120,20 +125,12 @@ export function D8Security() {
       />
 
       <section aria-labelledby="sum-h" className="border-t border-line bg-surface-1">
-        <div className="container-kb section-y grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-          <div>
-            <h2 id="sum-h" className="text-h2">
-              <Marked text="In plain words" mark="plain words" />
-            </h2>
-            {/* Site 2: a phone approval beside the summary. */}
-            <Img
-              photo={PHOTOS.phoneReading}
-              sizes="(min-width: 1024px) 24rem, calc(100vw - 40px)"
-              className="mt-8 aspect-[3/2] w-full rounded-panel bg-surface-2 object-cover lg:aspect-[4/5] lg:max-w-[24rem]"
-              style={{ objectPosition: "50% 30%" }}
-            />
-          </div>
-          <ul className="divide-y divide-line border-y border-line">
+        <div className="container-kb section-y grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:grid-rows-[auto_1fr] lg:gap-x-16">
+          <h2 id="sum-h" className="text-h2 lg:col-start-1 lg:row-start-1">
+            <Marked text="In plain words" mark="plain words" />
+          </h2>
+          {/* The answers come before the picture on a phone; beside it from 1024 px. */}
+          <ul className="divide-y divide-line border-y border-line lg:col-start-2 lg:row-span-2 lg:row-start-1">
             {SUMMARY.map((s) => (
               <li key={s} className="flex gap-3 py-4 text-body">
                 <ShieldCheck className="mt-0.5 size-5 shrink-0 text-ok" aria-hidden />
@@ -141,6 +138,13 @@ export function D8Security() {
               </li>
             ))}
           </ul>
+          {/* Site 2: a phone approval beside the summary. */}
+          <Img
+            photo={PHOTOS.phoneReading}
+            sizes="(min-width: 1024px) 24rem, calc(100vw - 40px)"
+            className="aspect-[3/2] w-full rounded-panel bg-surface-2 object-cover lg:col-start-1 lg:row-start-2 lg:aspect-[4/5] lg:max-w-[24rem]"
+            style={{ objectPosition: "50% 30%" }}
+          />
         </div>
       </section>
 

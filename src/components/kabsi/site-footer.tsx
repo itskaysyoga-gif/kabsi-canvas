@@ -4,7 +4,9 @@ import { cn } from "@/lib/utils";
 import {
   BRAND_LINE,
   CONTACT_EMAIL,
+  MERCHANT_LINE,
   NOT_AFFILIATED,
+  OPERATOR_LINE,
   SOCIAL_LINKS,
   WHATSAPP_ON,
   WHATSAPP_URL,
@@ -16,8 +18,9 @@ import { openPrivacyChoices } from "@/lib/consent";
 /**
  * The short footer (Site 2, master plan 30.34 item 4): the logo, the brand line and the SOCIAL_LINKS icons; three short
  * groups (Product, Explore, Company) with no industry links; then the legal row (Privacy, Terms, Partner terms, Your
- * privacy choices) and one line: the independence line and the year. The operator, contact and Creem lines are at the
- * top of /terms and /privacy; Google's third-party guidance link is in the FAQ answer on adding Kabsi as a Manager.
+ * privacy choices) and the small print: the independence line and the year, then the operator and Creem lines (Site 3b,
+ * audit E1: DESIGN.md lists them for the footer; they are also at the top of /terms and /privacy). Google's third-party
+ * guidance link is in the FAQ answer on adding Kabsi as a Manager.
  * WhatsApp shows only while WHATSAPP_ON, with its glyph; hello@kabsi.co is always there.
  */
 type FootLink = { label: string; to: string; kind?: "mail" | "whatsapp" };
@@ -57,7 +60,7 @@ const GROUPS: { title: string; links: FootLink[] }[] = [
 const footLink =
   "inline-flex min-h-11 min-w-11 items-center gap-2 text-small text-text-2 underline-offset-4 transition-colors duration-150 hover:text-text-1 hover:underline";
 const quietLink =
-  "inline-flex min-h-11 min-w-11 items-center text-label text-text-2 underline underline-offset-4 hover:text-text-1";
+  "inline-flex min-h-11 items-center text-label text-text-2 underline underline-offset-4 hover:text-text-1";
 
 function SocialIcon({ name }: { name: string }) {
   const icon = name === "Facebook" ? siFacebook : siInstagram;
@@ -162,6 +165,9 @@ export function SiteFooter() {
             </li>
           </ul>
           <p className="max-w-[80ch]">{NOT_AFFILIATED} © 2026 Kabsi.</p>
+          <p className="max-w-[80ch]">
+            {OPERATOR_LINE} {MERCHANT_LINE}
+          </p>
         </div>
       </div>
     </footer>

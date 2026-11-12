@@ -12,11 +12,13 @@ import {
   OPERATOR_NAME,
   WHATSAPP_ON,
   WHATSAPP_URL,
+  TRIAL_LINE,
 } from "@/lib/site";
 import { FOUNDER, Img, PHOTOS } from "./photos";
 import { WhatsAppGlyph, buttonClass } from "./ui";
 import { PageHero } from "./page-hero";
 import { Closing } from "./closing";
+import { ScanBox } from "./scan-box";
 import { ABOUT_HERO } from "./hero-lines";
 import { Marked } from "@/components/kabsi/highlight";
 
@@ -100,6 +102,8 @@ export function D8About() {
     <>
       <PageHero
         mark="no time for Google."
+        action={<ScanBox id="hero-scan" note={TRIAL_LINE} />}
+        under={null}
         hero={ABOUT_HERO}
         visual={
           <Img

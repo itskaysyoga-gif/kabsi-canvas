@@ -6,6 +6,7 @@ import { FlowProgress, PageTop, useFlagState } from "./d2-parts";
 import { AccessSteps, type AccessState } from "./d5-access";
 import { Button, ButtonLink, ErrorState, StatusPill, buttonClass } from "./ui";
 import { Marked } from "@/components/kabsi/highlight";
+import { Closing } from "./closing";
 
 const FLOW = ["Find your business", "Your email", "Add Kabsi as a Manager"];
 
@@ -48,17 +49,14 @@ export function ManagerSteps() {
 
       <section className="container-kb mt-10">
         {s === "steps" && (
-          <div
-            className="max-w-2xl rounded-panel border border-line bg-surface-1 p-6 sm:p-8"
-            data-main-cta
-          >
+          <div className="max-w-2xl rounded-panel border border-line bg-surface-1 p-6 sm:p-8">
             <StatusPill tone="info">Not started</StatusPill>
             <p className="mt-4 text-h3">Five taps on Google, and Kabsi can start.</p>
             <p className="mt-2 text-body text-text-2">
               Kabsi checks for your invite by itself. Nothing goes live without your yes.
             </p>
             <div className="mt-6">
-              <a href="#how" className={buttonClass("primary")}>
+              <a href="#how" className={buttonClass("secondary")}>
                 Show me how
               </a>
             </div>
@@ -100,17 +98,16 @@ export function ManagerSteps() {
           </div>
         )}
         {s === "checked" && (
-          <div
-            className="max-w-2xl rounded-panel border border-line bg-surface-1 p-6 sm:p-8"
-            data-main-cta
-          >
+          <div className="max-w-2xl rounded-panel border border-line bg-surface-1 p-6 sm:p-8">
             <StatusPill tone="ok">Done</StatusPill>
             <p className="mt-4 text-h3">Access works.</p>
             <p className="mt-2 text-body text-text-2">
               Kabsi can now see your Google profile. Nothing has been published.
             </p>
             <div className="mt-6">
-              <ButtonLink to="/setup-call">Continue</ButtonLink>
+              <ButtonLink to="/setup-call" variant="secondary">
+                Continue
+              </ButtonLink>
             </div>
           </div>
         )}
@@ -133,6 +130,7 @@ export function ManagerSteps() {
           Google Business Profile is free from Google. Kabsi is an independent paid service.
         </p>
       </section>
+      <Closing />
     </>
   );
 }

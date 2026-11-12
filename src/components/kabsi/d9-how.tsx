@@ -8,6 +8,7 @@ import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 
 import { cn } from "@/lib/utils";
 import { ExampleBadge, KabsiMark, Switch } from "./ui";
 import { Img, PHOTOS } from "./photos";
+import { Look2Bubble } from "./look2";
 import { useSearchFlag } from "./page-signals";
 import {
   D9_BUSINESS,
@@ -277,25 +278,10 @@ function DemoPhone({
                 <span className="block px-1 pt-1">{c.ownerFirst}</span>
               </li>
             )}
-            <li className="me-auto max-w-[92%] rounded-bubble rounded-ss-none bg-wa-in px-2.5 py-1.5 text-chat text-wa-ink shadow-bubble">
-              <span className={cn(c.photo && "flex gap-2")}>
-                {c.photo && (
-                  <Img
-                    photo={PHOTOS.salonStudio}
-                    sizes="48px"
-                    decorative
-                    className="h-14 w-10 shrink-0 rounded-[0.375rem] object-cover"
-                  />
-                )}
-                <span>
-                  {c.ask}
-                  {c.quote && <span className="mt-0.5 block italic">'{c.quote}'</span>}
-                </span>
-              </span>
-            </li>
+            <Look2Bubble m={c.look} />
             {!after && !out.other && (
               <li
-                className="grid gap-1"
+                className="ms-1.5 grid max-w-[95%] gap-1"
                 style={{ gridTemplateColumns: `repeat(${1 + c.others.length}, minmax(0,1fr))` }}
               >
                 <button

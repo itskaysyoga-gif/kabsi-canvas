@@ -108,13 +108,14 @@ function Contents({ doc }: { doc: GuideDoc }) {
       <h2 id="contents" className="text-title font-bold text-text-1">
         In this guide
       </h2>
-      <ol className="mt-3 space-y-1">
+      <ol className="mt-2">
         {items.map((it, i) => (
           <li key={it.id} className="flex gap-3 text-small">
-            <span className="w-5 shrink-0 text-text-2">{i + 1}.</span>
+            <span className="w-5 shrink-0 py-1.5 text-text-2">{i + 1}.</span>
+            {/* Site 3b: each link is at least 24 px tall (WCAG 2.2 target size); it was 23. */}
             <a
               href={`#${it.id}`}
-              className="text-text-1 underline decoration-text-3 underline-offset-4 hover:decoration-text-1"
+              className="py-1.5 text-text-1 underline decoration-text-3 underline-offset-4 hover:decoration-text-1"
             >
               {it.label}
             </a>

@@ -4,6 +4,7 @@
 // controls. Home 2's hero thread uses it (Site 3a's one demonstration used it below the hero).
 import { cn } from "@/lib/utils";
 import { Img, type Photo } from "./photos";
+import { ExampleBadge, KabsiMark } from "./ui";
 
 export type Look2Line = { text: string; quote?: boolean };
 export type Look2Message = {
@@ -128,5 +129,29 @@ export function OwnerBubble({
       <p className="px-1 pt-1">{text}</p>
       <p className="px-1 text-end text-chat-meta text-wa-time-out">{time}</p>
     </li>
+  );
+}
+
+/** One Example message in a small phone (Site 3b: the sign-in page's side picture, in the words of Home's thread). */
+export function Look2Phone({ message, caption }: { message: Look2Message; caption: string }) {
+  return (
+    <figure className="relative w-full max-w-[20rem]">
+      <div className="rounded-[2.4rem] bg-kb-black p-[0.55rem] shadow-float">
+        <div className="overflow-hidden rounded-[1.9rem] bg-wa-chat">
+          <div className="flex items-center gap-2 border-b border-wa-divider bg-wa-header px-3 pt-3 pb-2 text-wa-ink">
+            <KabsiMark ring={false} className="size-8" />
+            <div className="min-w-0 flex-1 leading-tight">
+              <p className="truncate text-chat font-bold">Kabsi</p>
+              <p className="truncate text-chat-meta text-wa-time-out">Today</p>
+            </div>
+            <ExampleBadge className="shrink-0" />
+          </div>
+          <ol className="space-y-2 px-2.5 pt-3 pb-4" aria-label="A message from Kabsi, Example">
+            <Look2Bubble m={message} />
+          </ol>
+        </div>
+      </div>
+      <figcaption className="sr-only">{caption}</figcaption>
+    </figure>
   );
 }

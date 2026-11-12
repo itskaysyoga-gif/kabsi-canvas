@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { SignInPanel } from "@/components/auth/sign-in-panel";
 import { useAuth } from "@/components/auth/auth-provider";
-import { D9Phone } from "@/components/kabsi/d9-hero";
-import { D9_HERO_STREAM } from "@/components/kabsi/d9-data";
+import { Look2Phone } from "@/components/kabsi/look2";
+import { HOME2_THREAD } from "@/components/kabsi/home2-data";
+import type { Look2Message } from "@/components/kabsi/look2";
 import { SiteLink } from "@/components/kabsi/site-link";
 import { safeNext } from "@/lib/signup";
 import { text } from "@/lib/search-params";
@@ -170,10 +171,9 @@ function LoginPage() {
                 An approval on WhatsApp
                 <WhatsAppInline />
               </p>
-              <D9Phone
-                items={D9_HERO_STREAM.filter((m) => m.id === "review")}
-                caption="Example: a new review on WhatsApp with a reply ready, and Yes, Edit and Skip."
-                className="md:ms-0"
+              <Look2Phone
+                message={HOME2_THREAD[0] as Look2Message}
+                caption="Example: a new review on WhatsApp with a reply ready, and Approve and Edit on kabsi.co."
               />
             </div>
           </aside>

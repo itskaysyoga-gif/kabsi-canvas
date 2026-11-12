@@ -17,7 +17,6 @@
   { "path": "/google-profile-check", "page": "Free check at the old address", "wait": 800 },
   { "path": "/google-review-link", "page": "Review link and QR code", "wait": 800 },
   { "path": "/for", "page": "Every kind of business", "wait": 800 },
-  { "path": "/for/beauty-and-wellness", "page": "Hub: beauty and wellness", "wait": 800 },
   { "path": "/for/hair-salon", "page": "Industry: hair salon (finished)", "wait": 1500 },
   { "path": "/for/restaurant", "page": "Industry: restaurant (finished)", "wait": 1500 },
   { "path": "/for/dental-clinic", "page": "Industry: dental clinic (finished)", "wait": 1500 },

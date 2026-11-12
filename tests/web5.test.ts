@@ -95,9 +95,10 @@ describe("How it works: the demonstration in three cases (Web 5 part C)", () => 
   it("has the three cases in order, with the product's own buttons", () => {
     expect(D9_CASES.map((c) => c.tab)).toEqual(["Hours changed", "Photo to post", "New review"]);
     const by = Object.fromEntries(D9_CASES.map((c) => [c.id, [c.yes, ...c.others]]));
-    expect(by["hours"]).toEqual(["Use my hours", "Keep Google's"]);
-    expect(by["photo"]).toEqual(["Approve", "Edit", "Skip"]);
-    expect(by["review"]).toEqual(["Yes", "Edit", "Skip"]);
+    // Site 3b: the Look 2 words of Home's thread (yes first; "Edit on kabsi.co"; the hours case is the Keep my information choice).
+    expect(by["hours"]).toEqual(["Keep my information", "Google is right"]);
+    expect(by["photo"]).toEqual(["Approve", "Edit on kabsi.co"]);
+    expect(by["review"]).toEqual(["Approve", "Edit on kabsi.co"]);
   });
   it("goes Approved, Sent to Google, then Live on Google or Did not go through, never merged", () => {
     expect(D9_STATES.map((s) => s.label)).toEqual(["Approved", "Sent to Google", "Live on Google"]);
@@ -110,9 +111,18 @@ describe("How it works: the demonstration in three cases (Web 5 part C)", () => 
     expect(D9_UNDO_SECONDS).toBe(10);
   });
   it("answers the other buttons without sending anything", () => {
-    expect(d9OtherLine("Keep Google's")).toContain("nothing is sent");
+    expect(d9OtherLine("Google is right")).toContain("nothing is sent");
     expect(d9OtherLine("Skip")).toContain("Nothing is sent");
-    expect(d9OtherLine("Edit")).toContain("then you approve");
+    expect(d9OtherLine("Edit on kabsi.co")).toContain("then you approve");
+  });
+  it("draws each case in the Look 2 style: a marker and title, the facts, one question, no first person", () => {
+    for (const c of D9_CASES) {
+      expect(c.look.title.split(" ").length, c.id).toBeLessThanOrEqual(5);
+      expect(c.look.status, c.id).toMatch(/\?$/);
+      expect(JSON.stringify(c), c.id).not.toMatch(
+        /six weeks|Saturdays are open|\bI will\b|\bI \w+ed\b/,
+      );
+    }
   });
   it("calls no backend: the demonstration has no fetch, API or Supabase import", () => {
     const demo = read("src/components/kabsi/d9-how.tsx");

@@ -4,6 +4,7 @@
 // Lines that depend on Kabsi's WhatsApp number follow WHATSAPP_ON.
 
 import { WHATSAPP_ON } from "@/lib/site";
+import type { Look2Message } from "./look2";
 
 export const D9_BUSINESS = "Hollis Hair, Bristol";
 
@@ -203,9 +204,9 @@ export type DemoCase = {
   tab: string;
   /** What the owner sends first (the photo case), shown as the owner's own bubble. */
   ownerFirst?: string;
-  ask: string;
-  quote?: string;
-  photo?: boolean;
+  /** Kabsi's message in the Look 2 style (30.50 item 2): a marker and bold title, the facts, one question. */
+  look: Look2Message;
+  /** The button that says yes comes first; the others follow. */
   yes: string;
   others: readonly string[];
   approved: string;
@@ -216,32 +217,54 @@ export type DemoCase = {
 };
 
 const APPROVED = "Approved. You can undo it for 10 seconds.";
-const SENT = "Sent to Google. I will tell you when it is live.";
+const SENT = "Sent to Google. Kabsi tells you when it is live.";
 const FAILED = "Google did not accept it. Nothing was changed. Kabsi will tell you what to do.";
 
-/** Buttons as the product sends them (30.24 item 2). */
+/** Site 3b: the three cases in the Look 2 words of Home's thread (docs/site4/home.md), Hollis Hair an Example. */
 export const D9_CASES: DemoCase[] = [
   {
     id: "hours",
     tab: "Hours changed",
-    ask: "Google shows you closed on bank holiday Monday. You told me 10:00 to 16:00.",
-    yes: "Use my hours",
-    others: ["Keep Google's"],
+    look: {
+      id: "hours",
+      marker: "hours",
+      title: "Hours differ on Google",
+      business: "Hollis Hair",
+      facts: [
+        { text: "What Google shows: Monday, Closed." },
+        { text: "What you told Kabsi: Monday, 10:00 to 16:00." },
+      ],
+      status: "Which hours are right?",
+      time: "08:02",
+    },
+    yes: "Keep my information",
+    others: ["Google is right"],
     approved: APPROVED,
     sent: SENT,
-    live: "Live on Google: bank holiday Monday, 10:00 to 16:00.",
+    live: "Live on Google: Monday, 10:00 to 16:00.",
     failed: FAILED,
     summary: "Google showed different hours. The owner chose their own.",
   },
   {
     id: "photo",
     tab: "Photo to post",
-    ownerFirst: "New balayage colours this month. Saturdays are open.",
-    ask: "Post ready with your photo:",
-    quote: "New balayage colours this month. Saturdays are open.",
-    photo: true,
+    ownerFirst: "New balayage colours this month. Open Saturdays.",
+    look: {
+      id: "post",
+      marker: "post",
+      title: "Post ready for Google",
+      business: "Hollis Hair",
+      facts: [
+        {
+          text: "New balayage colours this month at Hollis Hair, and we are open on Saturdays. Come and see them.",
+          quote: true,
+        },
+      ],
+      status: "Post it on your Google profile?",
+      time: "15:06",
+    },
     yes: "Approve",
-    others: ["Edit", "Skip"],
+    others: ["Edit on kabsi.co"],
     approved: APPROVED,
     sent: SENT,
     live: "Live on Google: your post with your photo.",
@@ -251,10 +274,22 @@ export const D9_CASES: DemoCase[] = [
   {
     id: "review",
     tab: "New review",
-    ask: "New 5-star review from Chloe B. Reply ready:",
-    quote: "Thank you, Chloe. We will tell Amber. See you in six weeks.",
-    yes: "Yes",
-    others: ["Edit", "Skip"],
+    look: {
+      id: "review",
+      marker: "review",
+      title: "New 5-star review",
+      business: "Hollis Hair",
+      facts: [
+        { text: "From Chloe B." },
+        { text: "Amber did a lovely colour. Booked again.", quote: true },
+        { text: "Kabsi's reply:" },
+        { text: "Thank you, Chloe. We will tell Amber. See you at your next visit.", quote: true },
+      ],
+      status: "Post this reply on Google?",
+      time: "08:12",
+    },
+    yes: "Approve",
+    others: ["Edit on kabsi.co"],
     approved: APPROVED,
     sent: SENT,
     live: "Live on Google: your reply to Chloe B.",
@@ -277,9 +312,10 @@ export const D9_FAILED_TEXT = "Google said no. Kabsi tells you and nothing chang
 
 /** What the owner's other buttons answer in the demonstration. */
 export function d9OtherLine(label: string): string {
-  if (label === "Keep Google's") return "Kept. Google's hours stay, and nothing is sent.";
+  if (label === "Google is right" || label === "Keep Google's")
+    return "Noted. Google's hours stay, and nothing is sent.";
   if (label === "Skip") return "Skipped. Nothing is sent.";
-  return "Edit opens the words for you to change, then you approve.";
+  return "Edit opens the words on kabsi.co for you to change, then you approve.";
 }
 
 /** The demonstration's pure steps, so the order is tested without a browser (tests/web5.test.ts). */

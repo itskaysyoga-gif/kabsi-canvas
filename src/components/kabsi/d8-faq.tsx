@@ -2,10 +2,17 @@
 // groups (faq-data.ts FAQ_GROUPS, the same words as the FAQPage data in the route head), "Talk to a person" and the
 // closing free check.
 import { ArrowRight } from "lucide-react";
-import { CONTACT_EMAIL, GOOGLE_THIRD_PARTY_URL, WHATSAPP_ON, WHATSAPP_URL } from "@/lib/site";
+import {
+  CONTACT_EMAIL,
+  GOOGLE_THIRD_PARTY_URL,
+  WHATSAPP_ON,
+  WHATSAPP_URL,
+  TRIAL_LINE,
+} from "@/lib/site";
 import { Faq, WhatsAppGlyph, buttonClass } from "./ui";
 import { PageHero, popCls, stagger } from "./page-hero";
 import { Closing } from "./closing";
+import { ScanBox } from "./scan-box";
 import { FAQ_GROUPS } from "./faq-data";
 import { FAQ_HERO } from "./hero-lines";
 import { Marked } from "@/components/kabsi/highlight";
@@ -57,6 +64,8 @@ export function D8Faq() {
     <>
       <PageHero
         mark="owners ask"
+        action={<ScanBox id="hero-scan" note={TRIAL_LINE} />}
+        under={null}
         hero={FAQ_HERO}
         visual={
           <nav
@@ -92,7 +101,8 @@ export function D8Faq() {
                     href={`#${g.id}`}
                     className="press flex min-h-11 items-center rounded-inner px-3 text-small font-semibold text-text-2 hover:bg-surface-2 hover:text-text-1"
                   >
-                    <Marked text={g.title} mark={GROUP_MARKS[g.id]} />
+                    {/* Site 3b (audit E7): the yellow bar is for H1s and section headlines (30.32 item 3), not small links. */}
+                    {g.title}
                   </a>
                 </li>
               ))}

@@ -8,7 +8,8 @@ import { longDate } from "@/components/marketing/guide-article";
 import { Marked } from "@/components/kabsi/highlight";
 import type { GuideMeta } from "@/content/guides/types";
 import { GUIDE_GROUPS, guideLook, type GuideGroup } from "@/content/guides/look";
-import { SITE_URL, pageHead } from "@/lib/site";
+import { ButtonLink } from "@/components/kabsi/ui";
+import { MAIN_CTA, SITE_URL, TRIAL_LINE, pageHead } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 // Guides index (Guides 3, Style 1 part A): only the guides that are public on this request, decided on the server, newest
@@ -67,6 +68,11 @@ function Page() {
           Short answers, then the steps. Each one is checked against Google's own help pages, and
           dated.
         </p>
+        {/* Site 3b (audit E10): the free check is the one yellow action here too. */}
+        <div className="mt-6" data-main-cta>
+          <ButtonLink to="/scan">{MAIN_CTA}</ButtonLink>
+          <p className="mt-3 text-small text-text-2">{TRIAL_LINE}</p>
+        </div>
       </section>
       {first && !group ? (
         <section aria-label="Newest guide" className="container-kb mt-10">
