@@ -316,7 +316,7 @@ One line per decision. The full text, with what each one changes and why, is `do
 | R-158 | Cards 2, Partners 3 and Growth 1 accepted; Fix 5's scope; Kabsi never messages a number typed on the website; voice notes on from 11 Nov (changes 30.50 item 11); Home 2's brief; Google sign-in has its own Google Cloud project | Approved |
 | R-159 and R-160 | Backups: weekly encrypted R2 copy and Rashid's private GitLab copies; ElevenLabs paid plan with a commercial licence before 10 Dec; the sign-in Google Cloud project has a second owner; the old Lovable address leaves the redirect list | Approved |
 | R-161 | The WhatsApp sign-in code is made on intent; "AI answers checked"; the voice eval is skipped, the phone check decides | Merged (PR 584) |
-| R-162 | Site 3b accepted; /manager-steps keeps setup as its primary action; inline links of 22 to 23 px stay | Building (Fix 6) |
+| R-162 | Site 3b accepted; /manager-steps keeps setup as its primary action; inline links of 22 to 23 px stay | Merged (Fix 6, PR 587) |
 | Launch gate | Additions (30.52): the real Creem test checkout; the owner free month applied in Creem; a web claim of a partner card credits the partner like the WhatsApp path; CARDS_OPEN on and PARTNER_PAYING_LINE removed; ElevenLabs on a paid plan | Approved |
 
 ## 7. Order of work (R-84; master plan 27.11, 28.4, 29.8)
