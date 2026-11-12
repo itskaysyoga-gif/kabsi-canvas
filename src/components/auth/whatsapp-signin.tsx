@@ -30,12 +30,24 @@ export function WhatsAppChoice({
   onIntent: () => void;
   primary?: boolean;
 }) {
+  // A mouse passing over on its way to another button is not intent: it must stay on the button for a moment. The held
+  // check token makes the wait free (the code is ready well inside a second of the tap).
+  const dwell = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(dwell.current), []);
   return (
     <button
       type="button"
       onClick={onPick}
-      onPointerEnter={onIntent}
-      onFocus={onIntent}
+      onPointerEnter={(e) => {
+        if (e.pointerType === "touch") return onIntent();
+        window.clearTimeout(dwell.current);
+        dwell.current = window.setTimeout(onIntent, HOVER_DWELL_MS);
+      }}
+      onPointerLeave={() => window.clearTimeout(dwell.current)}
+      // Focus counts only in a window that has focus: the page moving focus in the background is not a person.
+      onFocus={() => {
+        if (document.hasFocus()) onIntent();
+      }}
       onTouchStart={onIntent}
       disabled={busy}
       className={
@@ -51,6 +63,7 @@ export function WhatsAppChoice({
 // A code with less than this left is replaced when the owner taps Continue with WhatsApp (time to send it). A code that
 // is already shown is never replaced in the background: the owner may be sending it (Fix 5 review finding 1).
 const FRESH_MS = 5 * 60_000;
+const HOVER_DWELL_MS = 200;
 
 export type WaPrestart = {
   start: WaStart | null;
@@ -111,19 +124,23 @@ export function useWaPrestart(on: boolean): WaPrestart {
     setError("");
     startWhatsapp(t)
       .then((s2) => setStart(s2))
-      .catch((e) =>
+      .catch((e) => {
+        // Intent is spent: a token the check refreshes by itself later starts nothing until the visitor asks again.
+        setWanted(false);
         setError(
           e instanceof WaSigninError ? e.message : "Something went wrong. Please try again.",
-        ),
-      )
+        );
+      })
       .finally(() => setBusy(false));
   }, [wanted, token, busy, start]);
 
+  // A new check and a new code, asked for by the visitor ("Try again", "Start again", or intent on a stale code).
   const again = useCallback(() => {
     forgetStart();
     setStart(null);
     setToken("");
     setError("");
+    setWanted(true);
     setRound((n) => n + 1);
   }, []);
 

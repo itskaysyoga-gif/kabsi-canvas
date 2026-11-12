@@ -91,9 +91,12 @@ export function warmGeoToken() {
   if (typeof window === "undefined") return;
   if (!warm || Date.now() - warm.at > 4 * 60_000) warm = { at: Date.now(), token: readGeoToken() };
 }
-function geoToken(): Promise<string | null> {
+async function geoToken(): Promise<string | null> {
   warmGeoToken();
-  return warm!.token;
+  const t = await warm!.token;
+  // A failed read is not kept: the next start reads it again.
+  if (!t) warm = null;
+  return t;
 }
 
 export async function startWhatsapp(turnstile: string): Promise<WaStart> {

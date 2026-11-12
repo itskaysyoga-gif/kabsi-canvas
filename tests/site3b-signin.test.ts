@@ -54,8 +54,9 @@ describe("the panel", () => {
     expect(panel).toMatch(/const wa = useWaPrestart\(waOn\)/);
   });
   it("counts pointing, focusing and touching the button as intent, in both places it appears", () => {
-    expect(step).toMatch(/onPointerEnter=\{onIntent\}/);
-    expect(step).toMatch(/onFocus=\{onIntent\}/);
+    expect(step).toMatch(/onPointerEnter=\{\(e\) => \{/);
+    expect(step).toMatch(/HOVER_DWELL_MS = 200/);
+    expect(step).toMatch(/if \(document\.hasFocus\(\)\) onIntent\(\);/);
     expect(step).toMatch(/onTouchStart=\{onIntent\}/);
     expect(panel.match(/onIntent=\{intent\}/g)).toHaveLength(2);
   });
@@ -63,6 +64,12 @@ describe("the panel", () => {
     expect(panel).toMatch(/const intent = \(\) => \{\s*if \(!quiet\.current\) wa\.want\(\);/);
     expect(panel).toMatch(
       /quiet\.current = true;\s*el\?\.focus\(\{ preventScroll: true \}\);\s*quiet\.current = false;/,
+    );
+  });
+  it("a failed start spends the intent, so a refreshed token alone starts nothing; Try again asks anew", () => {
+    expect(step).toMatch(/setWanted\(false\);\s*setError\(/);
+    expect(step).toMatch(
+      /const again = useCallback\(\(\) => \{[\s\S]*?setWanted\(true\);[\s\S]*?setRound/,
     );
   });
   it("moves focus only after the phone order is read, and never to the first button on a phone", () => {

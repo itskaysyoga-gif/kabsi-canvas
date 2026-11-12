@@ -52,6 +52,24 @@ test.describe("WhatsApp sign-in code on intent (R-161)", () => {
     expect(starts).toHaveLength(0);
   });
 
+  test("a mouse passing over the button makes no code; staying on it does", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "a pointer test");
+    const starts = await stub(page);
+    await page.goto("/login");
+    await page.waitForTimeout(2000);
+    const box = (await page.getByRole("button", { name: "Continue with WhatsApp" }).boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y - 40);
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height + 60);
+    await page.waitForTimeout(600);
+    expect(starts).toHaveLength(0);
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await expect.poll(() => starts.length, { timeout: 2000 }).toBe(1);
+  });
+
   test("the button shows within a second of the tap, and pointing makes one code only", async ({
     page,
     isMobile,
