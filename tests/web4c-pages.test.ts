@@ -20,9 +20,9 @@ describe("/faq on Design 8", () => {
       "WhatsApp",
       "Privacy and data",
     ]);
-    // Fix 2 (master plan 30.27 item 2) added two: the ChatGPT question and the nearby check against the AI answer.
-    expect(FAQ_ALL.length).toBe(28);
-    expect(new Set(FAQ_ALL.map((f) => f.q)).size).toBe(28);
+    // Fix 2 (master plan 30.27 item 2) added two: the ChatGPT question and the nearby check against the AI answer; Site 3b (R-161) added the voice note question.
+    expect(FAQ_ALL.length).toBe(29);
+    expect(new Set(FAQ_ALL.map((f) => f.q)).size).toBe(29);
   });
   it("gives the FAQPage data the visible answers word for word", () => {
     const ld = faqJsonLd(FAQ_ALL);

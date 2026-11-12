@@ -586,11 +586,14 @@ export function HandlesGroups({
   id = "handles-h",
   title = "What Kabsi does",
   mark = "does",
+  foot,
   className,
 }: {
   id?: string;
   title?: string;
   mark?: string;
+  /** A line under the four groups (How it works: the voice line). */
+  foot?: string;
   className?: string;
 }) {
   return (
@@ -614,6 +617,7 @@ export function HandlesGroups({
             );
           })}
         </ul>
+        {foot ? <p className="mt-8 max-w-[40rem] text-body text-text-2">{foot}</p> : null}
       </div>
     </section>
   );

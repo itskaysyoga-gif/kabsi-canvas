@@ -161,7 +161,8 @@ describe("WhatsApp sign-in starts when the panel opens", () => {
     expect(step).not.toMatch(/setTimeout\(again/);
     expect(step).toMatch(/const FRESH_MS = 5 \* 60_000/);
     const panel = read("src/components/auth/sign-in-panel.tsx");
-    expect(panel.match(/wa\.pick\(\);/g)).toHaveLength(2);
+    // R-161: the replacement happens at intent (`want`), which the tap also calls.
+    expect(panel.match(/wa\.want\(\);/g)).toHaveLength(3); // two taps and the intent helper
     const { minutesLeft } = await import("../src/components/auth/whatsapp-signin");
     expect(minutesLeft(10 * 60_000, 0)).toBe("It works for 10 minutes.");
     expect(minutesLeft(6 * 60_000 + 1, 0)).toBe("It works for 7 more minutes.");
@@ -172,7 +173,7 @@ describe("WhatsApp sign-in starts when the panel opens", () => {
     expect(panel).toMatch(/const wa = useWaPrestart\(waOn\)/);
     expect(panel).toMatch(/\{wa\.widget\(step === "whatsapp"\)\}/);
     const step = read("src/components/auth/whatsapp-signin.tsx");
-    expect(step).toMatch(/if \(!token \|\| busy\.current\) return;/);
+    expect(step).toMatch(/if \(!o\.wanted \|\| !o\.token \|\| o\.busy\) return false;/);
     expect(step).toContain("Open WhatsApp on this computer");
     expect(step).toMatch(/data-wa-qr/);
   });

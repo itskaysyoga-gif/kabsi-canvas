@@ -15,6 +15,7 @@ import { HOW_HERO } from "./hero-lines";
 import { D9Arrow, YellowNumber, d9LinkCls } from "./d9-hero";
 // Site 3a: the four groups live with Home's sections; How it works has no script budget, Home keeps them lazy.
 import { HandlesGroups } from "./d9-home-lower";
+import { VOICE_LINE } from "./voice-line";
 import { DemoThreeCases, HowVisual } from "./d9-how";
 import { D9_HOW_LINE } from "./d9-data";
 import { Marked } from "@/components/kabsi/highlight";
@@ -32,7 +33,13 @@ export function HowItWorksPage() {
       {/* The product video goes here once a real one exists (docs/VIDEO-PLAN.md, section 9). Hidden until then. */}
       <div data-slot="product-video" hidden />
       {/* Site 3a (30.50 item 10): what Kabsi does, what you approve, what happens next, then the Manager access detail. */}
-      <HandlesGroups id="does-h" title="What Kabsi does" mark="does" className="bg-surface-1" />
+      <HandlesGroups
+        id="does-h"
+        title="What Kabsi does"
+        mark="does"
+        foot={`On WhatsApp: ${VOICE_LINE}`}
+        className="bg-surface-1"
+      />
       <DemoThreeCases />
 
       <section aria-labelledby="next-h" className="border-t border-line">

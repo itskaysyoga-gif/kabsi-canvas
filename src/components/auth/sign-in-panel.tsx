@@ -150,8 +150,11 @@ export function SignInPanel({
   // Fix 5 (review finding 6): Google's script loads only once Auth said the provider is on.
   const [googleRead, setGoogleRead] = useState(false);
   const [phone, setPhone] = useState(false);
+  // The device is read after the first paint; focus moves only once the order of the ways is final.
+  const [deviceRead, setDeviceRead] = useState(false);
   useEffect(() => {
     setPhone(isPhoneNow());
+    setDeviceRead(true);
     let live = true;
     void googleSignInOn().then((on) => {
       if (!live) return;
@@ -163,7 +166,7 @@ export function SignInPanel({
     };
   }, []);
   const waOn = WHATSAPP_ON;
-  // Fix 5: the bot check and the WhatsApp sign-in code start in the background as soon as the panel opens.
+  // R-161: the bot check starts when the panel opens; the WhatsApp sign-in code is made only on intent on its button.
   const wa = useWaPrestart(waOn);
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -176,6 +179,11 @@ export function SignInPanel({
   const sentAt = useRef<number | null>(null);
   const root = useRef<HTMLDivElement>(null);
   const moved = useRef(false);
+  // The page moving focus to the first button is not the visitor's intent (R-161): only a person's focus counts.
+  const quiet = useRef(false);
+  const intent = () => {
+    if (!quiet.current) wa.want();
+  };
 
   useEffect(() => {
     if (inApp) setStep((s) => (s === "choose" ? "email" : s));
@@ -190,11 +198,17 @@ export function SignInPanel({
   // Focus: the first field when the log in page opens, then the field of each new step.
   useEffect(() => {
     if (!focusFirst && !moved.current) return;
+    if (!deviceRead) return;
+    // Site 3b: a phone has no keyboard to guide, so the first button gets no focus ring (it sat on Google, the second
+    // button, before the phone order was read). The fields of the email and code steps still take focus.
+    if (step === "choose" && phone && !moved.current) return;
     const el = root.current?.querySelector<HTMLElement>(
       step === "code" ? "input" : step === "email" ? "input[type=email]" : "button",
     );
+    quiet.current = true;
     el?.focus({ preventScroll: true });
-  }, [focusFirst, step]);
+    quiet.current = false;
+  }, [focusFirst, step, deviceRead, phone]);
 
   async function google() {
     setError("");
@@ -343,8 +357,9 @@ export function SignInPanel({
                 <WhatsAppChoice
                   key={way}
                   busy={busy}
+                  onIntent={intent}
                   onPick={() => {
-                    wa.pick();
+                    wa.want();
                     setError("");
                     moved.current = true;
                     setStep("whatsapp");
@@ -390,8 +405,9 @@ export function SignInPanel({
             <div className="mb-6 border-b border-line pb-5">
               <WhatsAppChoice
                 busy={busy}
+                onIntent={intent}
                 onPick={() => {
-                  wa.pick();
+                  wa.want();
                   setError("");
                   moved.current = true;
                   setStep("whatsapp");
