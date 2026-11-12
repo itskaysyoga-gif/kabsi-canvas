@@ -279,7 +279,10 @@ describe("the operator, the merchant of record and the social links", () => {
   it("names Rashid with no city, and Creem as the merchant of record", () => {
     expect(OPERATOR_LINE).toBe("Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co.");
     expect(MERCHANT_LINE).toBe("Card payments will be processed by Creem, our merchant of record.");
-    // Site 2 (30.34 item 4): both lines open /terms and /privacy instead of sitting in the footer.
+    // Site 2 (30.34 item 4): both lines open /terms and /privacy. Site 3b (audit E1) put them back in the footer's small print.
+    expect(read("src/components/kabsi/site-footer.tsx")).toContain(
+      "{OPERATOR_LINE} {MERCHANT_LINE}",
+    );
     for (const f of ["src/routes/terms.tsx", "src/routes/privacy.tsx"])
       expect(read(f), f).toContain("{OPERATOR_LINE} {MERCHANT_LINE}");
     expect(read("src/routes/terms.tsx")).toMatch(

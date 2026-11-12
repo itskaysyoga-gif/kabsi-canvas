@@ -212,7 +212,13 @@ function TradeHero({ industry: i }: { industry: Industry }) {
           </h1>
           <p className="mt-4 max-w-[34rem] text-lead text-text-2 sm:mt-5">{p.line}</p>
           <div className="relative z-10 mt-5 max-w-[34rem] sm:mt-7">
-            <ScanBox id="hero-scan" keyword={i.keyword} industry={i.slug} trialSeparate />
+            <ScanBox
+              id="hero-scan"
+              keyword={i.keyword}
+              keywordHint={false}
+              industry={i.slug}
+              note={TRIAL_LINE}
+            />
           </div>
         </div>
         <figure className="relative">
@@ -393,7 +399,7 @@ function Reading({ industry: i }: { industry: Industry }) {
             text={`Your Google profile, as ${a} owner`}
             mark="Your Google profile"
           />
-          <CardGrid items={i.profile} className="mt-8" />
+          <CardGrid items={i.profile} className="mt-8" level="h3" />
         </div>
         <div>
           {i.categories && (
@@ -474,7 +480,17 @@ function gridCols(n: number): string {
   return "sm:w-[calc((100%-1rem)/2)]";
 }
 
-function CardGrid({ items, className }: { items: Card[]; className?: string }) {
+function CardGrid({
+  items,
+  className,
+  level = "h4",
+}: {
+  items: Card[];
+  className?: string;
+  /** The heading level of each card: h3 straight under a section headline, h4 under a group heading. */
+  level?: "h3" | "h4";
+}) {
+  const Head = level;
   const w = gridCols(items.length);
   return (
     <ul className={cn("flex flex-wrap justify-center gap-4", className)} data-cards={items.length}>
@@ -486,7 +502,7 @@ function CardGrid({ items, className }: { items: Card[]; className?: string }) {
             w,
           )}
         >
-          <h4 className="text-title">{c.title}</h4>
+          <Head className="text-title">{c.title}</Head>
           <p className="mt-1 text-body text-text-2" data-line>
             {c.text}
           </p>
@@ -691,7 +707,7 @@ export function ForIndex() {
             </h1>
             <p className="mt-4 text-lead text-text-2 sm:mt-5">{FOR_HERO.line}</p>
             <div className="relative z-10 mt-5 sm:mt-7">
-              <ScanBox id="hero-scan" trialSeparate />
+              <ScanBox id="hero-scan" note={TRIAL_LINE} />
             </div>
           </div>
           <ForCollage all={all} />
@@ -776,7 +792,7 @@ export function ForIndex() {
             <p className="mt-3 text-lead text-text-2">
               Kabsi works for any local business with a Google profile.
             </p>
-            <ScanBox id="closing-scan" className="mt-6" trialSeparate />
+            <ScanBox id="closing-scan" className="mt-6" note={TRIAL_LINE} />
           </div>
         </div>
       </section>

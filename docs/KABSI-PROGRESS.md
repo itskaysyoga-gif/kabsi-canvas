@@ -63,7 +63,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 12 Nov 2026, Site 3b part 0 (R-161): the WhatsApp sign-in code on intent, "AI answers checked", the voice line. `2026-11-12-site3b.md`.
+- 12 Nov 2026, Site 3b (R-161): part 0 (PR 584) the sign-in code on intent, the voice line; part 1 the rest of the site (19 of 25 findings closed). `2026-11-12-site3b.md`.
 - 11 Nov 2026, Voice 2 (R-158 item 3): merged; `voice_notes` read `on` on 12 Nov. `2026-11-11-voice2.md`.
 - 11 Nov 2026, Home 2 (R-158 item 4): new Home, PR 580. `2026-11-11-home2.md`.
 - Older entries (Fix 5, Cards 2, Growth 1 and Partners 3 `2026-11-11-<name>.md`; Partners 2, Outbound 2, Site 3a, Clean 4, Look 2 and 2b, Founding 1, RB-T, Safe 1, Signup 1, Plan 1, RB-F4, Ops 1 `2026-11-10-<name>.md`; Partners 1, RB-F3 and Tidy 2 in `2026-11-10-tidy2.md`; earlier ones in `2026-11-09-progress-moved.md`).

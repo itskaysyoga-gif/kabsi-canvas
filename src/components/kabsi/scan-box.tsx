@@ -16,6 +16,7 @@ export function ScanBox({
   id,
   defaultValue = "",
   keyword,
+  keywordHint,
   industry,
   note,
   trialSeparate,
@@ -35,6 +36,9 @@ export function ScanBox({
   note?: string | undefined;
   /** R-126 (COPY-02): adds "The 14-day free trial is separate. ..." under the free check line. On Home, /scan and the /for pages. */
   trialSeparate?: boolean | undefined;
+  /** Site 3b (audit E8): an industry page keeps the trade's search term but drops the line that names it, so one line
+   * (the trial line) is the only reassurance under the box. Default true. */
+  keywordHint?: boolean | undefined;
   /** Site 3a: the field and the button stay one above the other at every width (a narrow side column). */
   stacked?: boolean | undefined;
   /** Guides 3: called once when the visitor starts the check from this box (the guide's own click event). */
@@ -47,6 +51,7 @@ export function ScanBox({
         stacked={stacked}
         defaultValue={defaultValue}
         keyword={keyword}
+        keywordHint={keywordHint}
         industry={industry}
         onStart={onStart}
       />
@@ -61,6 +66,7 @@ function ScanForm({
   stacked,
   defaultValue,
   keyword,
+  keywordHint = true,
   industry,
   onStart,
 }: {
@@ -68,6 +74,7 @@ function ScanForm({
   stacked?: boolean | undefined;
   defaultValue: string;
   keyword?: string | undefined;
+  keywordHint?: boolean | undefined;
   industry?: string | undefined;
   onStart?: (() => void) | undefined;
 }) {
@@ -121,7 +128,7 @@ function ScanForm({
         onPick={pick}
         error={error}
         hint={
-          keyword
+          keyword && keywordHint
             ? `Kabsi searches '${keyword}' on Google Maps around you, like a customer.`
             : undefined
         }

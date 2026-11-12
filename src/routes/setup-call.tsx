@@ -16,6 +16,7 @@ import {
 } from "@/lib/site";
 import { oneOf } from "@/lib/search-params";
 import { Marked } from "@/components/kabsi/highlight";
+import { Closing } from "@/components/kabsi/closing";
 
 const searchSchema = (
   s: Record<string, unknown>,
@@ -81,10 +82,11 @@ function SetupCallPage() {
                 </li>
               ))}
             </ol>
-            <div className="mt-6" data-main-cta>
+            {/* Site 3b (audit E3): the free check is the page's one yellow button, in the closing below. */}
+            <div className="mt-6">
               <a
                 href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}`}
-                className={buttonClass("primary", "lg")}
+                className={buttonClass("secondary", "lg")}
               >
                 Email {CONTACT_EMAIL}
               </a>
@@ -120,6 +122,7 @@ function SetupCallPage() {
           </aside>
         </div>
       </section>
+      <Closing />
     </PublicLayout>
   );
 }
