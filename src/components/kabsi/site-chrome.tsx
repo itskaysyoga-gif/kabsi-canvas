@@ -95,6 +95,7 @@ export function PhoneBar() {
   const show = usePhoneBarShown() && !noraOpen;
   return (
     <div
+      data-phone-bar
       aria-hidden={!show}
       inert={!show}
       className={cn(
@@ -127,10 +128,33 @@ export function PhoneBar() {
 const openNora = () => window.dispatchEvent(new CustomEvent("kabsi:open-nora"));
 
 /**
- * What Nora's lone button must never cover: the consent bar (it is lifted above it instead), a form's submit button
- * (the free check's Start free is one) and the footer's legal row.
+ * What Nora's lone button must never cover. From 640 px (the wide launcher): the consent bar (it is lifted above it
+ * instead), a form's submit button and the footer's legal row (Polish 4). On a phone (the round button, Fix 6, R-162):
+ * every button, field and tappable box, so nothing the visitor may want to press is ever under her; the last lines of
+ * a page are kept clear by the footer's bottom space (the legal row is `data-nora-avoid` and the footer ends with room
+ * for her and for the phone bar). A word inside a sentence is not a box: a link counts only when it is not inline.
  */
-const AVOID = "form button[type=submit], form input[type=submit], [data-nora-avoid]";
+const AVOID_WIDE = "form button[type=submit], form input[type=submit], [data-nora-avoid]";
+const AVOID_PHONE =
+  "button, input:not([type=hidden]), select, textarea, summary, a[href], [role=button], [role=combobox], [role=tab], [role=switch], [role=checkbox], [role=radio], [data-nora-avoid]";
+
+/**
+ * Her own two buttons and the whole phone bar never count: the bar has her button beside its one action by design, and
+ * while the bar shows her round button is not drawn at all (reading the bar would also leave her hidden for a moment
+ * after the bar steps aside, because its `inert` is not watched).
+ */
+function isHers(el: Element) {
+  return !!el.closest("[data-nora-launcher], [data-nora-bar], [data-phone-bar]");
+}
+
+/** On a phone, a link that is a box (a button, a card, a row) counts; a link inside a sentence does not. */
+function isBoxLink(el: Element) {
+  return (
+    !el.matches("a[href]") ||
+    el.matches("[data-nora-avoid]") ||
+    getComputedStyle(el).display !== "inline"
+  );
+}
 
 function overlaps(a: DOMRect, b: DOMRect, pad = 8) {
   return (
@@ -149,7 +173,9 @@ function shown(el: Element | null): el is HTMLElement {
  * Nora's button on every public page from the first paint (it is part of the server-drawn page, her code is not):
  * below 640 px a round 56 px button alone at the bottom right, inside the safe area, wherever the phone bar does not
  * show (where it shows, her button is in the bar); from 640 px the launcher as before. It steps aside while the menu or
- * Nora is open, or when it would cover one of AVOID, and sits above the consent bar while that waits for a choice.
+ * Nora is open, or when it would cover a button, a field or another tappable box (AVOID_PHONE; from 640 px AVOID_WIDE),
+ * and sits above the consent bar while that waits for a choice. While it waits, "Ask Nora" is in the menu and the phone
+ * bar's button takes over once the visitor is past the hero; it comes back as soon as nothing is under it.
  * Closing Nora gives focus back to whichever of her buttons shows.
  */
 export function NoraLauncher() {
@@ -170,14 +196,23 @@ export function NoraLauncher() {
       );
       const phone = window.innerWidth < 640;
       setLift(phone && shown(banner) ? Math.ceil(banner.getBoundingClientRect().height) : 0);
-      const avoid = [...document.querySelectorAll(AVOID)].filter(shown);
-      const hit = (btn: HTMLButtonElement | null) => {
+      const hit = (btn: HTMLButtonElement | null, list: Element[], box: boolean) => {
         if (!btn) return false;
         const z = btn.getBoundingClientRect();
         if (!z.width) return false;
-        return avoid.some((el) => overlaps(z, el.getBoundingClientRect()));
+        return list.some(
+          (el) => overlaps(z, el.getBoundingClientRect()) && (!box || isBoxLink(el)),
+        );
       };
-      setBlocked({ solo: hit(solo.current), wide: hit(wide.current) });
+      // The round button only shows below 640 px and the wide one from it, so each reads its own list.
+      const wideList = phone ? [] : [...document.querySelectorAll(AVOID_WIDE)].filter(shown);
+      const phoneList = phone
+        ? [...document.querySelectorAll(AVOID_PHONE)].filter((e) => shown(e) && !isHers(e))
+        : [];
+      setBlocked({
+        solo: hit(solo.current, phoneList, true),
+        wide: hit(wide.current, wideList, false),
+      });
     };
     const soon = () => {
       if (!raf) raf = window.requestAnimationFrame(check);
@@ -187,11 +222,18 @@ export function NoraLauncher() {
     window.addEventListener("resize", soon);
     const mo = new MutationObserver(soon);
     mo.observe(document.body, { childList: true, subtree: true });
+    // A page can move under her without a scroll or a change in the page (a picture or a font arriving): read again then.
+    const ro = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(soon);
+    ro?.observe(document.body);
+    window.addEventListener("load", soon);
+    void document.fonts?.ready.then(soon);
     return () => {
       if (raf) window.cancelAnimationFrame(raf);
       window.removeEventListener("scroll", soon);
       window.removeEventListener("resize", soon);
+      window.removeEventListener("load", soon);
       mo.disconnect();
+      ro?.disconnect();
     };
   }, [consentOpen, lift]);
 

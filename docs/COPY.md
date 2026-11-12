@@ -2367,3 +2367,11 @@ Replaces Home's lines of section 81 (Site 3a). The final copy, each line with th
 - How it works, the three demonstration cases, in the Look 2 words of Home's thread (Example, Hollis Hair): hours: "Hours differ on Google" / "What Google shows: Monday, Closed." / "What you told Kabsi: Monday, 10:00 to 16:00." / "Which hours are right?" with "Keep my information" and "Google is right" (all new, from facts 04's Keep my information and Google is right); the photo and the review cases use the messages of section 86 ("Post ready for Google", "New 5-star review"); buttons "Approve" and "Edit on kabsi.co". After a tap: "Approved. You can undo it for 10 seconds." / "Sent to Google. Kabsi tells you when it is live." (was "I will tell you") / "Live on Google: Monday, 10:00 to 16:00." / "Noted. Google's hours stay, and nothing is sent." / "Edit opens the words on kabsi.co for you to change, then you approve." The old "See you in six weeks" and "Saturdays are open" (facts the owner had not said) are gone.
 - The sign-in page's side picture is the first message of Home's thread, with its caption "Example: a new review on WhatsApp with a reply ready, and Approve and Edit on kabsi.co."
 
+
+## 89. Fix 6: /manager-steps and the industry pages' photo to post Example (12 Nov 2026, lane R R-162)
+
+No new line. The words below were already approved; Fix 6 moves where they sit.
+
+- /manager-steps: "Show me how" (at the start) and "Continue" (once access works) are the page's one yellow button. The page no longer ends with "Start with a free check." and the box; it ends with a quiet text link, "Check my business free", to /scan. /setup-call and the 404 are unchanged (the free check is their yellow button).
+- Industry pages, "Send a photo. Get a Google post.": the Example is now the Look 2 message of How it works' photo case (section 88): the owner's photo and own line, then "Post ready for Google" with the page's business (Example) and the page's own post as a quote line, "Post it on your Google profile?" and the buttons "Approve" and "Edit on kabsi.co". The old "Post ready with your photo:", the buttons "Edit" and "Skip" and the list "Approved, Sent to Google, Live on Google" are gone from that Example. Each trade keeps its own owner line and post (`page.post`).
+- Home, Nora and the footer: no wording change.

@@ -3,16 +3,35 @@
 // the free check's Start free, a form's submit button or the footer's legal row; her panel on a phone is a bottom sheet
 // of at most 75 percent of the screen, over the dimmed page, kept above the keyboard, closed by its button, Escape, a
 // tap on the dimmed page or a swipe down, with focus back on her button. Her code loads only when she is opened.
+// Fix 6 (12 Nov 2026, R-162): on a phone (320, 375 and 390 px wide, and 360) her round button never overlaps any button,
+// field or tappable box, nor the last lines of a page, wherever the visitor scrolls; the check is independent of the
+// code's own list (it reads every visible control, and a link only when it is a box, not a word in a sentence).
 // Runs in the m390 project only; each test sets its own phone size.
 import { expect, test, type Page } from "@playwright/test";
 import { axeClean, noBanner } from "./helpers/page";
 
-const PAGES = ["/", "/how-it-works", "/pricing", "/scan", "/for/hair-salon", "/faq"];
+const PAGES = [
+  "/",
+  "/how-it-works",
+  "/pricing",
+  "/scan",
+  "/for/hair-salon",
+  "/faq",
+  "/manager-steps",
+  "/partners",
+  "/security",
+];
 const SIZES = [
+  { width: 320, height: 568 },
   { width: 360, height: 640 },
+  { width: 375, height: 667 },
   { width: 390, height: 844 },
   { width: 768, height: 1024 },
 ];
+
+/** Every control a visitor may want to press, as the page shows it (a link counts only when it is a box). */
+const CONTROLS =
+  "button, input:not([type=hidden]), select, textarea, summary, a[href], [role=button], [role=combobox], [role=tab], [role=switch], [role=checkbox], [role=radio]";
 
 async function noraButton(page: Page) {
   return page.evaluate(() => {
@@ -39,44 +58,112 @@ async function noraButton(page: Page) {
 
 /** Overlap between Nora's showing button and the things she must never cover. */
 async function covers(page: Page) {
-  return page.evaluate(() => {
+  return page.evaluate((controls) => {
     const els = [...document.querySelectorAll<HTMLElement>("[data-nora-launcher]")].filter(
       (e) =>
         e.getClientRects().length > 0 &&
         !e.closest("[inert]") &&
         Number(getComputedStyle(e).opacity) > 0.5,
     );
+    const phone = window.innerWidth < 640;
     const avoid = [
       ...document.querySelectorAll<HTMLElement>(
-        "form button[type=submit], [data-nora-avoid], [data-testid=privacy-banner]",
+        phone
+          ? `${controls}, [data-nora-avoid], [data-testid=privacy-banner]`
+          : "form button[type=submit], [data-nora-avoid], [data-testid=privacy-banner]",
       ),
-    ].filter((e) => e.getClientRects().length > 0);
+    ].filter(
+      (e) =>
+        e.getClientRects().length > 0 &&
+        !e.closest("[inert], [data-nora-launcher], [data-nora-bar]") &&
+        getComputedStyle(e).visibility !== "hidden" &&
+        (!phone || !e.matches("a[href]") || getComputedStyle(e).display !== "inline"),
+    );
     const hits: string[] = [];
     for (const b of els) {
       const z = b.getBoundingClientRect();
       for (const a of avoid) {
         const r = a.getBoundingClientRect();
+        if (!r.width || !r.height) continue;
         if (z.left < r.right && z.right > r.left && z.top < r.bottom && z.bottom > r.top)
           hits.push(a.dataset["testid"] ?? a.textContent?.trim().slice(0, 30) ?? a.tagName);
       }
     }
     return hits;
+  }, CONTROLS);
+}
+
+/**
+ * At the end of the page: neither her round button nor the phone bar sits on the last line of text (the footer's small
+ * print). Returns the text of the line that is covered, or "".
+ */
+async function lastLineCovered(page: Page) {
+  return page.evaluate(() => {
+    const shownBox = (e: Element | null) =>
+      !!e &&
+      e.getClientRects().length > 0 &&
+      !e.closest("[inert]") &&
+      Number(getComputedStyle(e).opacity) > 0.5;
+    const nora = [...document.querySelectorAll("[data-nora-launcher=phone]")].find(shownBox);
+    const bar = document.querySelector("[data-nora-bar]")?.closest<HTMLElement>("div.fixed");
+    const boxes = [nora, bar && shownBox(bar) && !bar.hasAttribute("inert") ? bar : null]
+      .filter(Boolean)
+      .map((e) => e!.getBoundingClientRect());
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    let last: DOMRect | null = null;
+    let text = "";
+    while (walker.nextNode()) {
+      const n = walker.currentNode;
+      const p = n.parentElement;
+      if (!n.textContent?.trim() || !p) continue;
+      if (p.closest("[data-nora-launcher], [data-nora-bar], script, style, noscript, .sr-only"))
+        continue;
+      // Text of the fixed phone bar and consent bar is not page content.
+      if (
+        bar?.contains(p) ||
+        p.closest("[data-testid=privacy-banner], [data-testid=privacy-panel]")
+      )
+        continue;
+      const cs = getComputedStyle(p);
+      if (cs.display === "none" || cs.visibility === "hidden") continue;
+      const range = document.createRange();
+      range.selectNodeContents(n);
+      const rects = range.getClientRects();
+      const rr = rects[rects.length - 1];
+      if (!rr || rr.width < 1) continue;
+      if (!last || rr.bottom >= last.bottom) {
+        last = rr;
+        text = n.textContent.trim().slice(0, 40);
+      }
+    }
+    if (!last) return "";
+    const l = last;
+    return boxes.some(
+      (z) => z.left < l.right && z.right > l.left && z.top < l.bottom && z.bottom > l.top,
+    )
+      ? text
+      : "";
   });
 }
 
-/** Her lone button may step aside only where a submit button or the legal row sits under it. */
+/** Her lone button may step aside only where a control or the legal row sits under it (a submit button, from 640 px). */
 async function stepAsideReason(page: Page) {
-  return page.evaluate(() => {
+  return page.evaluate((controls) => {
+    const phone = window.innerWidth < 640;
     const b = document.querySelector<HTMLElement>(
-      window.innerWidth < 640 ? "[data-nora-launcher=phone]" : "[data-nora-launcher=wide]",
+      phone ? "[data-nora-launcher=phone]" : "[data-nora-launcher=wide]",
     );
     if (!b) return "";
     const z = b.getBoundingClientRect();
     const a = [
       ...document.querySelectorAll<HTMLElement>(
-        "form button[type=submit], form input[type=submit], [data-nora-avoid]",
+        phone
+          ? `${controls}, [data-nora-avoid]`
+          : "form button[type=submit], form input[type=submit], [data-nora-avoid]",
       ),
     ].find((e) => {
+      if (e.closest("[inert], [data-nora-launcher], [data-nora-bar]")) return false;
+      if (phone && e.matches("a[href]") && getComputedStyle(e).display === "inline") return false;
       const r = e.getBoundingClientRect();
       return (
         r.width > 0 &&
@@ -86,8 +173,8 @@ async function stepAsideReason(page: Page) {
         z.bottom > r.top - 8
       );
     });
-    return a ? (a.textContent?.trim().slice(0, 30) ?? "?") : "";
-  });
+    return a ? `${a.tagName}:${a.textContent?.trim().slice(0, 30) || a.id || "?"}` : "";
+  }, CONTROLS);
 }
 
 test.describe("Nora on phones @polish4", () => {
@@ -125,7 +212,7 @@ test.describe("Nora on phones @polish4", () => {
         const height = await page.evaluate(() => document.documentElement.scrollHeight);
         for (let y = 0; y <= height; y += Math.round(size.height * 0.6)) {
           await page.evaluate((v) => window.scrollTo(0, v), y);
-          await page.waitForTimeout(120);
+          await page.waitForTimeout(300);
           expect(await covers(page), `covers something at ${y}px`).toEqual([]);
           if (!(await noraButton(page)))
             expect(await stepAsideReason(page), `why no Nora button at ${y}px`).not.toBe("");
@@ -133,6 +220,7 @@ test.describe("Nora on phones @polish4", () => {
         await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
         await page.waitForTimeout(250);
         expect(await covers(page), "covers something at the bottom").toEqual([]);
+        expect(await lastLineCovered(page), "covers the last line of the page").toBe("");
         expect(noraCode, "Nora's code before she is opened").toEqual([]);
       });
     }

@@ -73,7 +73,7 @@ function SocialIcon({ name }: { name: string }) {
 
 export function SiteFooter() {
   return (
-    <footer className="bg-band pb-24 sm:pb-20">
+    <footer className="bg-band pb-[calc(6rem+env(safe-area-inset-bottom))] sm:pb-20">
       <div className="container-kb grid gap-8 pt-12 pb-8 lg:grid-cols-[1fr_2fr] lg:gap-10 lg:pt-20 lg:pb-12">
         <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4 lg:block">
           <div>
