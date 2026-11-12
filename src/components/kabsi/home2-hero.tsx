@@ -19,12 +19,13 @@ import { HOME2_H1, HOME2_HERO_LINE } from "./home2-hero-data";
 /**
  * Home 2: the H1, the line that says what Kabsi is, the free check as the one action with TRIAL_LINE beside it, "See how
  * it works", and one WhatsApp day (Example, Look 2 style) as the picture: beside the text from 1024 px, under it on a
- * phone. The four jobs follow in a strip (JobsStrip, d9-home-lower.tsx). Lines and sources: docs/site4/home.md.
+ * phone. From 1024 to 1279 px the picture's column is its own 21rem, so the search field keeps its width (Fix 6, audit A5:
+ * the field was 192 px at 1024). The four jobs follow in a strip (JobsStrip, d9-home-lower.tsx). Lines and sources: docs/site4/home.md.
  */
 export function D9Hero() {
   return (
     <section aria-labelledby="hero-title" data-hero className="relative isolate z-10">
-      <div className="container-kb grid gap-8 pt-6 pb-10 md:pt-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:gap-12 lg:pt-14 lg:pb-16">
+      <div className="container-kb grid gap-8 pt-6 pb-10 md:pt-12 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-center lg:gap-12 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:pt-14 lg:pb-16">
         <div className="max-w-[40rem]">
           <h1 id="hero-title" className="text-display text-balance">
             <D9Title text={HOME2_H1} />

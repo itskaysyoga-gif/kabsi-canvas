@@ -7,7 +7,7 @@ import { MERCHANT_LINE, OPERATOR_LINE, TRIAL_LINE } from "../src/lib/site";
 
 const read = (f: string) => readFileSync(f, "utf8");
 
-describe("Site 3b: one primary action per public page (audit E3, E4, E5, E10)", () => {
+describe("Site 3b: one primary action per public page (audit E3, E4, E5, E10; E4 changed by Fix 6)", () => {
   it("/setup-call: the email button is quiet and the page ends with the free check", () => {
     const s = read("src/routes/setup-call.tsx");
     expect(s).toMatch(/buttonClass\("secondary", "lg"\)/);
@@ -15,12 +15,17 @@ describe("Site 3b: one primary action per public page (audit E3, E4, E5, E10)", 
     expect(s).not.toContain("data-main-cta");
     expect(s).toContain("<Closing />");
   });
-  it("/manager-steps: Show me how and Continue are quiet and the page ends with the free check", () => {
+  it("/manager-steps: setup is the one yellow action and the free check is a quiet link (Fix 6, R-162)", () => {
     const s = read("src/components/kabsi/d2-flow.tsx");
-    expect(s).toMatch(/href="#how" className=\{buttonClass\("secondary"\)\}/);
-    expect(s).toMatch(/to="\/setup-call" variant="secondary"/);
-    expect(s).not.toContain("data-main-cta");
-    expect(s).toContain("<Closing />");
+    // "Show me how" and "Continue" are primary; nothing on the page is a secondary button standing in for them.
+    expect(s).toMatch(/href="#how" className=\{buttonClass\(\)\}/);
+    expect(s).toMatch(/<ButtonLink to="\/setup-call">Continue<\/ButtonLink>/);
+    expect(s).not.toMatch(/to="\/setup-call" variant="secondary"/);
+    // The free check is a text link to /scan, not the Closing band with its yellow search box.
+    expect(s).not.toContain("<Closing");
+    expect(s).not.toContain("<ScanBox");
+    expect(s).toMatch(/<SiteLink\s+to="\/scan"/);
+    expect(s).toContain("{MAIN_CTA}");
   });
   it("the 404: the free check is the yellow button, Go home a quiet link", () => {
     const s = read("src/components/kabsi/status-pages.tsx");

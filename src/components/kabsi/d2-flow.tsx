@@ -1,12 +1,12 @@
 // Add Kabsi as a Manager (/manager-steps). The step states have their own links in development only (d2-parts).
 import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
-import { KABSI_GROUP_ID } from "@/lib/site";
+import { KABSI_GROUP_ID, MAIN_CTA } from "@/lib/site";
 import { FlowProgress, PageTop, useFlagState } from "./d2-parts";
 import { AccessSteps, type AccessState } from "./d5-access";
 import { Button, ButtonLink, ErrorState, StatusPill, buttonClass } from "./ui";
 import { Marked } from "@/components/kabsi/highlight";
-import { Closing } from "./closing";
+import { SiteLink } from "./site-link";
 
 const FLOW = ["Find your business", "Your email", "Add Kabsi as a Manager"];
 
@@ -26,6 +26,11 @@ const MANAGER_STATES = [
 ] as const;
 type ManagerState = (typeof MANAGER_STATES)[number];
 
+/**
+ * Fix 6 (lane R R-162, 12 Nov 2026): a visitor here is in the middle of setting Kabsi up, so continuing the setup is the
+ * page's one yellow action ("Show me how" at the start, "Continue" once access works) and the free check is a quiet text
+ * link at the end. Site 3b had made the free check the yellow button here; /setup-call and the 404 keep it.
+ */
 export function ManagerSteps() {
   const [state, setState] = useFlagState<ManagerState>("start", MANAGER_STATES);
   const [resent, setResent] = useState(false);
@@ -39,7 +44,9 @@ export function ManagerSteps() {
           : "steps";
 
   return (
-    <>
+    // data-main-cta on the whole body: the setup action is this page's main action, so the header and the phone bar keep
+    // their own free check button quiet all the way down (page-signals.ts), and the page shows one yellow button.
+    <div data-main-cta>
       <PageTop
         title={<Marked text="Add Kabsi as a Manager on Google." mark="as a Manager" />}
         lead="You stay the owner. You can remove Kabsi any time."
@@ -56,7 +63,7 @@ export function ManagerSteps() {
               Kabsi checks for your invite by itself. Nothing goes live without your yes.
             </p>
             <div className="mt-6">
-              <a href="#how" className={buttonClass("secondary")}>
+              <a href="#how" className={buttonClass()}>
                 Show me how
               </a>
             </div>
@@ -105,9 +112,7 @@ export function ManagerSteps() {
               Kabsi can now see your Google profile. Nothing has been published.
             </p>
             <div className="mt-6">
-              <ButtonLink to="/setup-call" variant="secondary">
-                Continue
-              </ButtonLink>
+              <ButtonLink to="/setup-call">Continue</ButtonLink>
             </div>
           </div>
         )}
@@ -130,7 +135,16 @@ export function ManagerSteps() {
           Google Business Profile is free from Google. Kabsi is an independent paid service.
         </p>
       </section>
-      <Closing />
-    </>
+      <section className="border-t border-line bg-surface-1">
+        <div className="container-kb py-6">
+          <SiteLink
+            to="/scan"
+            className="press inline-flex min-h-11 items-center font-semibold text-text-1 underline decoration-text-3 decoration-1 underline-offset-4 hover:decoration-text-1"
+          >
+            {MAIN_CTA}
+          </SiteLink>
+        </div>
+      </section>
+    </div>
   );
 }

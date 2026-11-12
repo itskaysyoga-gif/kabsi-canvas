@@ -73,7 +73,12 @@ export function IndustryPage({
       <HowItWorks industry={i} />
       <Watch industry={i} />
       <PhotoToPost
-        example={{ photo: i.photos[1], owner: p.post.owner, quote: p.post.quote }}
+        example={{
+          photo: i.photos[1],
+          owner: p.post.owner,
+          quote: p.post.quote,
+          business: i.example.business,
+        }}
         intro={<PhotoCards industry={i} />}
       />
       <Jobs industry={i} />

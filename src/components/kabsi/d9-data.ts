@@ -109,6 +109,23 @@ export const D9_WATCH = {
 
 /* ---------- Photo to post ---------- */
 
+/**
+ * Fix 6 (R-162): the "Post ready for Google" message in the Look 2 style, one wording for How it works' photo case and
+ * the industry pages' photo to post Example (`buttons` are drawn only where the picture is not a demonstration).
+ */
+export const POST_LOOK_BUTTONS = ["Approve", "Edit on kabsi.co"] as const;
+export function postLook(business: string, text: string, time = "15:06"): Look2Message {
+  return {
+    id: "post",
+    marker: "post",
+    title: "Post ready for Google",
+    business,
+    facts: [{ text, quote: true }],
+    status: "Post it on your Google profile?",
+    time,
+  };
+}
+
 export const D9_PHOTO = {
   /** Polish 4 (30.25 item 3): a yellow label, the headline's second sentence in yellow on the charcoal band, one line, three points. */
   label: "On WhatsApp",
@@ -249,20 +266,10 @@ export const D9_CASES: DemoCase[] = [
     id: "photo",
     tab: "Photo to post",
     ownerFirst: "New balayage colours this month. Open Saturdays.",
-    look: {
-      id: "post",
-      marker: "post",
-      title: "Post ready for Google",
-      business: "Hollis Hair",
-      facts: [
-        {
-          text: "New balayage colours this month at Hollis Hair, and we are open on Saturdays. Come and see them.",
-          quote: true,
-        },
-      ],
-      status: "Post it on your Google profile?",
-      time: "15:06",
-    },
+    look: postLook(
+      "Hollis Hair",
+      "New balayage colours this month at Hollis Hair, and we are open on Saturdays. Come and see them.",
+    ),
     yes: "Approve",
     others: ["Edit on kabsi.co"],
     approved: APPROVED,

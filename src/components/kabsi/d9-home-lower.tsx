@@ -6,7 +6,6 @@
 // on load. PhotoToPost, NearbyMap and AiAnswer stay here for the industry pages; HandlesGroups for How it works.
 import {
   Check,
-  CircleCheck,
   Clock,
   Images,
   KeyRound,
@@ -30,7 +29,7 @@ import { PLANS } from "./plans";
 import { useFoundingLeft } from "./founding-price";
 import { RankDot } from "./map";
 import { BAND_LABEL, type RankBand } from "./map-data";
-import { D9Arrow, NumberedPoints, PictureButtons, YellowLabel, d9LinkCls } from "./d9-hero";
+import { D9Arrow, NumberedPoints, YellowLabel, d9LinkCls } from "./d9-hero";
 import {
   HOME2_CONTROL,
   HOME2_DOES,
@@ -46,7 +45,15 @@ import {
   HOME2_THREAD_CAPTION,
   HOME2_TRADES,
 } from "./home2-data";
-import { D9_BUSINESS, D9_MAP_POINTS, D9_PHOTO, D9_REPORT, D9_SHOW_UP } from "./d9-data";
+import {
+  D9_BUSINESS,
+  D9_MAP_POINTS,
+  D9_PHOTO,
+  D9_REPORT,
+  D9_SHOW_UP,
+  POST_LOOK_BUTTONS,
+  postLook,
+} from "./d9-data";
 import { Marked } from "@/components/kabsi/highlight";
 
 /** Design 9's section rhythm on Home: py-10 on phones (keeps Home under 9,200 px at 390), 18 from 640 px, 28 from 1024 px. */
@@ -55,7 +62,14 @@ const sectionY = "py-10 sm:py-18 lg:py-28";
 /* ---------- Photo to post (the dark band) ---------- */
 
 /** Industries 2: an industry page passes its tall photo and its own Example post. */
-export type PhotoPostExample = { photo: Photo; owner: string; quote: string; alt?: string };
+export type PhotoPostExample = {
+  photo: Photo;
+  owner: string;
+  quote: string;
+  /** The invented business named in the message (Fix 6). */
+  business?: string;
+  alt?: string;
+};
 
 /**
  * Industry 1 (R-144): an industry page passes its own left column (its photos and posts) in place of Home's three
@@ -84,30 +98,33 @@ export function PhotoToPost({
             <NumberedPoints points={p.points} className="mt-6" />
           </div>
         )}
-        <PhotoVisual example={example} states={!intro} />
+        <PhotoVisual example={example} />
       </div>
     </section>
   );
 }
 
-function PhotoVisual({
-  example,
-  states = true,
-}: {
-  example?: PhotoPostExample | undefined;
-  states?: boolean;
-}) {
+/**
+ * Fix 6 (lane R R-162): the Example is the Look 2 message, the same component as How it works (`Look2Bubble`): the owner's
+ * photo and line, then "Post ready for Google" with the post as a quote line and the yes first. A picture: its buttons
+ * are not controls.
+ */
+function PhotoVisual({ example }: { example?: PhotoPostExample | undefined }) {
   const p = D9_PHOTO;
   const photo = example?.photo ?? PHOTOS.salonStudio;
   const owner = example?.owner ?? p.ownerLine;
   const quote = example?.quote ?? p.quote;
+  const message = {
+    ...postLook(example?.business ?? D9_BUSINESS, quote),
+    buttons: POST_LOOK_BUTTONS,
+  };
   return (
     <figure
       className={cn(
         "relative mx-auto grid w-full max-w-[20rem] gap-4",
         // Industries 2: on an industry page the trade's tall photo stands beside the chat at full 2:3 height.
         example
-          ? "items-center sm:max-w-[38rem] sm:grid-cols-[1fr_1fr]"
+          ? "items-center sm:max-w-[38rem] sm:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]"
           : "items-end sm:max-w-[34rem] sm:grid-cols-[0.8fr_1fr]",
       )}
     >
@@ -129,38 +146,10 @@ function PhotoVisual({
           <p className="text-chat font-bold">Kabsi</p>
           <ExampleBadge className="text-wa-ink" />
         </div>
-        {/* The owner's own message: the photo and a line. */}
-        <div className="ms-auto w-[88%] rounded-bubble rounded-se-none bg-wa-out p-1.5 shadow-bubble">
-          <Img
-            photo={photo}
-            sizes="160px"
-            decorative
-            className="aspect-[4/3] w-full rounded-[0.375rem] object-cover object-[50%_30%]"
-          />
-          <p className="px-1 pt-1 text-chat">{owner}</p>
-          {states && <p className="px-1 text-end text-chat-meta text-wa-time-out">12:31</p>}
-        </div>
-        <div className="mt-2 w-[92%] rounded-bubble rounded-ss-none bg-wa-in px-2.5 py-1.5 text-chat shadow-bubble">
-          {p.ready}
-          <span className="mt-0.5 block italic">'{quote}'</span>
-          {states && <span className="block text-end text-chat-meta text-wa-time-out">12:32</span>}
-        </div>
-        <div className="-ms-1.5 w-[96%]">
-          <PictureButtons labels={p.buttons} />
-        </div>
-        {states && (
-          <ol
-            className="mt-2.5 space-y-1 rounded-bubble bg-wa-in p-2 text-chat-meta font-bold"
-            aria-label="Where the post is"
-          >
-            {p.states.map((s) => (
-              <li key={s} className="flex items-center gap-1.5">
-                <CircleCheck className="size-3.5 text-kb-green-ink" aria-hidden />
-                {s}
-              </li>
-            ))}
-          </ol>
-        )}
+        <ol className="space-y-2" aria-label="Messages, Example">
+          <OwnerBubble text={owner} time="15:05" photo={photo} />
+          <Look2Bubble m={message} />
+        </ol>
       </div>
       <figcaption className="sr-only">
         {example
