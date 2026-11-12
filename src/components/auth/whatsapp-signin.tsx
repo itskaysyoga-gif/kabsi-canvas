@@ -9,6 +9,7 @@ import {
   forgetStart,
   keptStart,
   startWhatsapp,
+  warmGeoToken,
   WA_CONSENT_LINES,
   WA_CONSENT_SHORT,
   WaSigninError,
@@ -16,20 +17,38 @@ import {
   type WaState,
 } from "@/lib/wa-signin";
 
-/** "Continue with WhatsApp", the button on the first step of the sign-in sheet (Signup 1). */
+/** "Continue with WhatsApp", the button on the first step of the sign-in sheet (Signup 1). R-161: pointing at it,
+ * focusing it or touching it is the visitor's intent, and only then is the sign-in code made (`onIntent`). */
 export function WhatsAppChoice({
   busy,
   onPick,
+  onIntent,
   primary = false,
 }: {
   busy: boolean;
   onPick: () => void;
+  onIntent: () => void;
   primary?: boolean;
 }) {
+  // A mouse passing over on its way to another button is not intent: it must stay on the button for a moment. The held
+  // check token makes the wait free (the code is ready well inside a second of the tap).
+  const dwell = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(dwell.current), []);
   return (
     <button
       type="button"
       onClick={onPick}
+      onPointerEnter={(e) => {
+        if (e.pointerType === "touch") return onIntent();
+        window.clearTimeout(dwell.current);
+        dwell.current = window.setTimeout(onIntent, HOVER_DWELL_MS);
+      }}
+      onPointerLeave={() => window.clearTimeout(dwell.current)}
+      // Focus counts only in a window that has focus: the page moving focus in the background is not a person.
+      onFocus={() => {
+        if (document.hasFocus()) onIntent();
+      }}
+      onTouchStart={onIntent}
       disabled={busy}
       className={
         buttonClass(primary ? "primary" : "secondary", "lg", true) + " disabled:opacity-60"
@@ -44,6 +63,7 @@ export function WhatsAppChoice({
 // A code with less than this left is replaced when the owner taps Continue with WhatsApp (time to send it). A code that
 // is already shown is never replaced in the background: the owner may be sending it (Fix 5 review finding 1).
 const FRESH_MS = 5 * 60_000;
+const HOVER_DWELL_MS = 200;
 
 export type WaPrestart = {
   start: WaStart | null;
@@ -52,16 +72,32 @@ export type WaPrestart = {
   widget: (visible: boolean) => ReactNode;
   /** Forget the current code and make a new one (after it ended). */
   again: () => void;
-  /** Called on the tap of Continue with WhatsApp: a code with under 5 minutes left is replaced then, never later. */
-  pick: () => void;
+  /** The visitor's intent: points at, focuses or touches "Continue with WhatsApp" (and the tap itself). The code is
+   * made now, with the passed bot check; a code with under 5 minutes left is replaced. Opening the panel never does. */
+  want: () => void;
 };
 
+/** True when a sign-in code may be made: the visitor showed intent, a passed bot check is in hand, no start is on its
+ * way, and there is no code yet (or the one there has under 5 minutes left). */
+export function shouldMakeCode(o: {
+  wanted: boolean;
+  token: string;
+  busy: boolean;
+  start: Pick<WaStart, "expiresAt"> | null;
+  now: number;
+}): boolean {
+  if (!o.wanted || !o.token || o.busy) return false;
+  return !o.start || o.start.expiresAt - o.now <= FRESH_MS;
+}
+
 /**
- * Fix 5 (R-158 item 2): the bot check and the sign-in code start in the background when the sign-in panel opens, so
- * "Continue with WhatsApp" shows the ready link at once. A code is asked for only with a passed check (an empty token
- * is a failed check and starts nothing); the server checks the token again before it makes a code. One code per page:
- * it is kept across the panel's steps and never renewed by a timer (each start counts against the visitor's hourly
- * limit), only at the tap when it has under 5 minutes left, or after it ended.
+ * Fix 5 (R-158 item 2) and Site 3b (R-161 item 1): the bot check starts when the sign-in panel opens, and its token is
+ * only held. The sign-in code (a stored row, and one of the visitor's 10 starts an hour) is made when the visitor
+ * shows intent on "Continue with WhatsApp", so choosing Google or email stores nothing and spends no start. The held
+ * token and the place token are ready by then, so the ready link shows within a second of the tap. A code is asked for
+ * only with a passed check (an empty token starts nothing); the server checks the token again. One code per page: it is
+ * kept across the panel's steps and never renewed by a timer, only at intent when it has under 5 minutes left, or after
+ * it ended.
  */
 export function useWaPrestart(on: boolean): WaPrestart {
   const [start, setStart] = useState<WaStart | null>(() =>
@@ -69,47 +105,59 @@ export function useWaPrestart(on: boolean): WaPrestart {
   );
   const [error, setError] = useState("");
   const [round, setRound] = useState(0);
-  const busy = useRef(false);
+  const [token, setToken] = useState("");
+  const [wanted, setWanted] = useState(false);
+  const [busy, setBusy] = useState(false);
   const startRef = useRef(start);
   startRef.current = start;
 
-  const onToken = useCallback((token: string) => {
-    if (!token || busy.current) return;
-    const s = startRef.current;
-    if (s && s.expiresAt - Date.now() > FRESH_MS) return;
-    busy.current = true;
+  // A read only, so the place token is ready when the code is made.
+  useEffect(() => {
+    if (on) warmGeoToken();
+  }, [on]);
+
+  useEffect(() => {
+    if (!shouldMakeCode({ wanted, token, busy, start, now: Date.now() })) return;
+    const t = token;
+    setToken("");
+    setBusy(true);
     setError("");
-    startWhatsapp(token)
+    startWhatsapp(t)
       .then((s2) => setStart(s2))
-      .catch((e) =>
+      .catch((e) => {
+        // Intent is spent: a token the check refreshes by itself later starts nothing until the visitor asks again.
+        setWanted(false);
         setError(
           e instanceof WaSigninError ? e.message : "Something went wrong. Please try again.",
-        ),
-      )
-      .finally(() => {
-        busy.current = false;
-      });
-  }, []);
+        );
+      })
+      .finally(() => setBusy(false));
+  }, [wanted, token, busy, start]);
 
+  // A new check and a new code, asked for by the visitor ("Try again", "Start again", or intent on a stale code).
   const again = useCallback(() => {
     forgetStart();
     setStart(null);
+    setToken("");
     setError("");
+    setWanted(true);
     setRound((n) => n + 1);
   }, []);
 
-  const pick = useCallback(() => {
+  const want = useCallback(() => {
     const s = startRef.current;
     if (s && s.expiresAt - Date.now() < FRESH_MS) again();
+    setWanted(true);
   }, [again]);
 
+  // One check per panel; a token is good for one code. The widget shows while there is no code yet.
   const widget = (visible: boolean) =>
     on && !start ? (
       <div className={visible ? "" : "pointer-events-none absolute h-0 w-full overflow-hidden"}>
-        <Turnstile key={round} onToken={onToken} />
+        <Turnstile key={round} onToken={setToken} />
       </div>
     ) : null;
-  return { start, error, widget, again, pick };
+  return { start, error, widget, again, want };
 }
 
 const CHECK_MS = 2000;

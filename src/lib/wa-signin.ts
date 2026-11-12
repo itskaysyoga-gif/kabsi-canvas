@@ -75,7 +75,10 @@ export function forgetStart() {
   kept = null;
 }
 
-async function geoToken(): Promise<string | null> {
+// R-161: the signed place token is read when the panel opens (a read, it stores nothing) so the code can be made the
+// moment the visitor shows intent; a token older than 4 minutes (it is good for 5) is read again at the start.
+let warm: { at: number; token: Promise<string | null> } | null = null;
+async function readGeoToken(): Promise<string | null> {
   try {
     const r = await fetch("/api/geo?sign=1", { signal: AbortSignal.timeout(2000) });
     const j = (await r.json()) as { token?: string };
@@ -83,6 +86,17 @@ async function geoToken(): Promise<string | null> {
   } catch {
     return null;
   }
+}
+export function warmGeoToken() {
+  if (typeof window === "undefined") return;
+  if (!warm || Date.now() - warm.at > 4 * 60_000) warm = { at: Date.now(), token: readGeoToken() };
+}
+async function geoToken(): Promise<string | null> {
+  warmGeoToken();
+  const t = await warm!.token;
+  // A failed read is not kept: the next start reads it again.
+  if (!t) warm = null;
+  return t;
 }
 
 export async function startWhatsapp(turnstile: string): Promise<WaStart> {

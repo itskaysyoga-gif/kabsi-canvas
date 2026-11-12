@@ -2,6 +2,7 @@
 // in their own module so the pages that share d9-data.ts (Pricing's steps line, the industry pages) do not carry them.
 // Every line and the fact it rests on: docs/site4/home.md. It replaces Site 3a's site3-data.ts.
 import type { Look2Message } from "./look2";
+import { VOICE_LINE } from "./voice-line";
 
 /* ---------- 1. The hero's picture: one day on WhatsApp (Example) ---------- */
 
@@ -73,7 +74,7 @@ export const HOME2_JOBS = [
   { id: "reviews", title: "Reviews answered" },
   { id: "listing", title: "Listing kept right" },
   { id: "posts", title: "Posts from your photos" },
-  { id: "ai", title: "Found in AI answers" },
+  { id: "ai", title: "AI answers checked" },
 ] as const;
 export type JobId = (typeof HOME2_JOBS)[number]["id"];
 
@@ -191,8 +192,8 @@ export const HOME2_START = {
 export const HOME2_TRADES = {
   title: "For your kind of business.",
   mark: "your kind",
-  /** Voice notes join this line once they are switched on (facts 01: not on yet; docs/site4/home.md section 7). */
-  line: "Kabsi works for a verified Google listing in any country. On WhatsApp, Kabsi's assistant answers in the language you write in. The website is in English.",
+  /** Voice notes are on (Voice 2); the approved voice line from facts 13 is the second sentence of the WhatsApp part. */
+  line: `Kabsi works for a verified Google listing in any country. On WhatsApp, Kabsi's assistant answers in the language you write in. ${VOICE_LINE} The website is in English.`,
   /** Each slug is an indexed industry page (tests/home2.test.ts). */
   chips: [
     { slug: "barbershop", label: "Barbershop" },

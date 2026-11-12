@@ -31,7 +31,7 @@ Icon and a few words each:
 - "Reviews answered" (04:32)
 - "Listing kept right" (04:35, Google Protection)
 - "Posts from your photos" (04:7)
-- "Found in AI answers" (01:67; the words are lane R's; section 4's block says what this means and that no one can promise it)
+- "AI answers checked" (01:67; the words are lane R's; section 4's block says what this means and that no one can promise it)
 
 Screen reader heading: "What Kabsi does for you".
 
@@ -65,7 +65,7 @@ Headline: "What Kabsi does, and what you do." (bar on "what you do."). Each bloc
    - You: "Read it and tap Approve." (04:7)
    - Plan line: "2 posts a month on Essentials, every week on Pro." (02:10)
    - Example: the owner's photo with "New balayage colours this month. Open Saturdays." and the post ready.
-4. Found in AI answers
+4. AI answers checked
    - Kabsi: "Kabsi asks ChatGPT and Perplexity questions like the ones your customers ask. It shows whether you are named, what is said, and what to fix on your listing." (01:67; a fact stated differently opens a task to fix it on the listing, 13:158)
    - You: "Approve the fix on Google, or check what it points to." (13:158: the fix on the Google profile goes through the owner's yes, 04:5)
    - Plan line: "3 questions a month on Essentials, 10 every 2 weeks on Pro." (01:67, 01:97, 02:10)
@@ -93,9 +93,9 @@ Headline: "What Kabsi does, and what you do." (bar on "what you do."). Each bloc
 ## 7. For your kind of business
 
 - Headline: "For your kind of business." (bar on "your kind")
-- Line: "Kabsi works for a verified Google listing in any country. On WhatsApp, Kabsi's assistant answers in the language you write in. The website is in English."
+- Line: "Kabsi works for a verified Google listing in any country. On WhatsApp, Kabsi's assistant answers in the language you write in. Type your message or send a voice note, in any language. The website is in English."
   - Any country (13:9, 13:27, 13:378). Own language on WhatsApp: Kabsi's assistant answers in the language the person writes in (`supabase/functions/_shared/nora-rules.ts` line 59) and a post is written in the language of the owner's note (`supabase/functions/_shared/posts.ts` line 72); added to facts 04 by this task. The website is in English (13:141).
-  - Voice notes: not in the line while voice notes are not switched on (01:73). When Voice 2 is merged and the facts say voice notes are on, the line can add "You can also send a voice note." (a docs/LATER.md row).
+  - Voice notes (Site 3b, 12 Nov 2026, R-161): on since Voice 2 (01:73), so the line adds facts 13's sentence, word for word: "Type your message or send a voice note, in any language." (13:225).
 - Chips to the industry pages: Barbershop, Hair salon, Nail salon, Restaurant, Cafe, Bakery, Gym, Clinic, Garage, Florist, and "Every kind of business" (to /for).
 
 ## 8. Plans preview
@@ -122,7 +122,7 @@ The shared closing check (`closing.tsx`), unchanged: "Check my business free" wi
 
 ## How it works, aligned
 
-The four groups at the top of How it works (`HandlesGroups`, "What Kabsi does") take the same four jobs and the same first lines as section 4: Reviews answered, Listing kept right, Posts from your photos, Found in AI answers.
+The four groups at the top of How it works (`HandlesGroups`, "What Kabsi does") take the same four jobs and the same first lines as section 4: Reviews answered, Listing kept right, Posts from your photos, AI answers checked.
 
 ## Independent review before the merge (11 Nov 2026)
 
@@ -130,7 +130,7 @@ A fresh agent read every line against the facts, Google's review rules and the c
 1. "photos and holiday hours checked every day" said more than the facts (photos are checked when sent; holiday hours are asked before each bank holiday): rewritten.
 2. How it starts: the trial and the work start once access is checked (02:14), so step 3 says "Once your access is checked". Setup itself connects WhatsApp before the Manager step (05:19); lane R's three steps are kept as the owner's view of it.
 3. "a reply to every new review": a review that needs care gets no draft (01:72), so "replies to your new reviews".
-4. "Found in AI answers" can read as a result: kept as lane R's word, with the honest line in its block; for lane R to confirm.
+4. "AI answers checked" can read as a result: kept as lane R's word, with the honest line in its block; for lane R to confirm.
 5. "the questions your customers ask": Kabsi writes questions in customers' words (01:67), so "questions like the ones".
 6. "Approve the fix it suggests": a fix off Google is the owner's to check (13:158), so "Approve the fix on Google, or check what it points to."
 7. "more and more" and "Most owners": unsourced, removed.

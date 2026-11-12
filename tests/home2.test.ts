@@ -20,6 +20,7 @@ import {
 import { HOME_LINE } from "@/components/kabsi/hero-lines";
 import { INDUSTRIES, industryIndexed } from "@/content/industries";
 import { TRIAL_LINE } from "@/lib/site";
+import { VOICE_FAQ, VOICE_LINE } from "@/components/kabsi/voice-line";
 
 const read = (f: string) => readFileSync(f, "utf8");
 const DASH_OR_BANG = /[–—!]/;
@@ -94,7 +95,7 @@ describe("Home 2: the hero", () => {
       "Reviews answered",
       "Listing kept right",
       "Posts from your photos",
-      "Found in AI answers",
+      "AI answers checked",
     ]);
     expect(HOME2_DOES.map((j) => j.title)).toEqual(HOME2_JOBS.map((j) => j.title));
     expect(read("src/components/kabsi/how-page.tsx")).toContain("<HandlesGroups");
@@ -172,10 +173,15 @@ describe("Home 2: the copy rules", () => {
     );
     expect(readdirSync("public").join(" ")).not.toMatch(/chatgpt|perplexity/i);
   });
-  // Voice 2 (11 Nov 2026, R-158 item 3): voice notes are on from today, so facts 01 no longer says "not on". Home 2 still leaves them
-  // out of its own line; adding them is a Home decision (docs/LATER.md, the Home 2 row).
-  it("keeps voice notes out of the trades line, and facts 01 says they are on (Voice 2)", () => {
-    expect(HOME2_TRADES.line).not.toMatch(/voice/i);
+  // Site 3b (R-161 item 3): voice notes are on (Voice 2, app_settings.voice_notes read back as on), so the approved voice line
+  // of facts 13 is on Home's trades line, on How it works and in the FAQ, word for word.
+  it("puts the approved voice line from facts 13 on Home, How it works and the FAQ (Site 3b)", () => {
+    expect(HOME2_TRADES.line).toContain(VOICE_LINE);
+    // Facts 13 continues the sentence with a colon; the line is its clause, word for word.
+    expect(read("knowledge/facts/13-faq.md")).toContain(VOICE_LINE.replace(/\.$/, ":"));
+    expect(read("knowledge/facts/13-faq.md")).toContain(VOICE_FAQ.a);
+    expect(read("src/components/kabsi/how-page.tsx")).toContain("VOICE_LINE");
+    expect(read("src/components/kabsi/faq-data.ts")).toContain("VOICE_FAQ");
     expect(read("knowledge/facts/01-decisions-coming-and-changing.md")).toMatch(
       /Ask Kabsi with voice notes \(on for every business from 11 Nov 2026/,
     );

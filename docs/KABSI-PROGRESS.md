@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 11 Nov 2026. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 12 Nov 2026. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -50,9 +50,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - Launch 1: Founding 25 is private: open its invite link (staff, Programs, Founding 25, Show the link) and send one application named "QA Launch 1 test" (a session removes the row).
 - Outbound: before you say start on 10 Dec, the placement test of 30.39 item 13, steps in `2026-11-10-outbound2.md`. Ramp 5 a day, then 10 from day 8; 20 a day waits for 400 strong matches and clean delivery (lane R).
 - Partners 3: print the A6 insert from kabsi.co/partner (Your kit) at 100 percent and scan it. Send the NFC card photo on 17 Nov.
-- Signup 1, Fix 5: Google web client (origin https://kabsi.co); its ID first in Supabase Auth, Google, "Client IDs" (and secret, nonce check on) and in Vercel `VITE_GOOGLE_WEB_CLIENT_ID`; provider on, `https://kabsi.co/**` redirect; phone check in `2026-11-11-fix5.md`.
+- Signup 1, Fix 5: the Google web client ID is in Vercel (`VITE_GOOGLE_WEB_CLIENT_ID`, set 12 Nov); confirm it is first in Supabase Auth, Google, "Client IDs" (secret, nonce check on) and the `https://kabsi.co/**` redirect; phone check in `2026-11-11-fix5.md` and `2026-11-12-site3b.md`.
 - RB-T: on 16 Nov, the 20-message phone script in `docs/kabsi-3/phone-script-2026-11-16.md` from your phone (pass: 18 of 20, no wrong save); start with "reset test".
-- Voice 2: check `ELEVENLABS_API_KEY` is set for the whatsapp function and run the 20-note eval once (about 0.2 USD), then the 4 note phone check; exact steps and read-backs in `2026-11-11-voice2.md`. `voice_notes` is switched on only after the key is confirmed.
+- Voice 2: `voice_notes` reads `on`. Check `ELEVENLABS_API_KEY` is set for the whatsapp function and run the 20-note eval once (about 0.2 USD), then the 4 note phone check; steps in `2026-11-11-voice2.md`.
 - Close 1: merge PR 499 (reply.v4) with the admin merge; the rule on main refuses it while the Prompt gate is red, by design (R-130); then check the deployed function names reply.v4. After the DataForSEO top-up, one full free check to see why the one of 6 Nov failed (30.42).
 
 ## Open After merge checks and findings
@@ -63,10 +63,10 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 11 Nov 2026, Voice 2 (R-158 item 3): merged and deployed (PR 578); `voice_notes` off until the key check (see Open). `2026-11-11-voice2.md`.
+- 12 Nov 2026, Site 3b part 0 (R-161): the WhatsApp sign-in code on intent, "AI answers checked", the voice line. `2026-11-12-site3b.md`.
+- 11 Nov 2026, Voice 2 (R-158 item 3): merged; `voice_notes` read `on` on 12 Nov. `2026-11-11-voice2.md`.
 - 11 Nov 2026, Home 2 (R-158 item 4): new Home, PR 580. `2026-11-11-home2.md`.
-- 11 Nov 2026, Fix 5 (R-158 item 2): PRs 577 and 579, merged and checked live. `2026-11-11-fix5.md`.
-- Older entries (Cards 2, Growth 1 and Partners 3 `2026-11-11-<name>.md`; Partners 2, Outbound 2, Site 3a, Clean 4, Look 2 and 2b, Founding 1, RB-T, Safe 1, Signup 1, Plan 1, RB-F4, Ops 1 `2026-11-10-<name>.md`; Partners 1, RB-F3 and Tidy 2 in `2026-11-10-tidy2.md`; earlier ones in `2026-11-09-progress-moved.md`).
+- Older entries (Fix 5, Cards 2, Growth 1 and Partners 3 `2026-11-11-<name>.md`; Partners 2, Outbound 2, Site 3a, Clean 4, Look 2 and 2b, Founding 1, RB-T, Safe 1, Signup 1, Plan 1, RB-F4, Ops 1 `2026-11-10-<name>.md`; Partners 1, RB-F3 and Tidy 2 in `2026-11-10-tidy2.md`; earlier ones in `2026-11-09-progress-moved.md`).
 
 ## How a session updates this page
 

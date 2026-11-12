@@ -7,6 +7,7 @@ import {
   WHATSAPP_NUMBER,
   WHATSAPP_ON,
 } from "@/lib/site";
+import { VOICE_FAQ } from "./voice-line";
 
 /** Polish 3 (COPY.md section 41); Go live 1 (30.28): the nearby check is open, so the answer ends at "what you can do next." */
 export const NEARBY_FAQ_A =
@@ -191,6 +192,7 @@ export const buildFaqGroups = (whatsappOn: boolean = WHATSAPP_ON): FaqGroup[] =>
               q: "Will Kabsi send me alerts on WhatsApp?",
               a: "Only after your yes, and you can reply STOP at any time.",
             },
+            VOICE_FAQ,
             {
               q: "Does Kabsi message my customers?",
               a: "No. Kabsi talks only to you. It gives you a review link and a QR card, and you send them.",
