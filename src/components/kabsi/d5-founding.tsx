@@ -19,7 +19,7 @@ import {
 import { getConsent, onConsentChange } from "@/lib/consent";
 import { useFlagState } from "./d2-parts";
 import { PageHero, popCls, stagger } from "./page-hero";
-import { FOUNDING25_UNDER, FOUNDING_FAQ, FOUNDING_HERO } from "./founding-private";
+import { FOUNDING25_UNDER, FOUNDING_FAQ, FOUNDING_HERO, FOUNDING_TRIAL } from "./founding-private";
 import { FOUNDER, PHOTOS } from "./photos";
 import { Banner, Button, ButtonLink, Faq, Field, Segmented, StatusPill, buttonClass } from "./ui";
 import { Marked } from "@/components/kabsi/highlight";
@@ -38,9 +38,9 @@ const WHO = [
 ];
 
 const GET = [
-  "Kabsi Pro free for 90 days, from the day Google access works. No card.",
+  "Kabsi at 19 US dollars a month for your first 12 months, then 29.",
+  "14 days free to start. A card is needed; cancel before day 14 and you pay nothing.",
   "Rashid, the founder, helps you start: old reviews with no reply, wrong details, missing links.",
-  "Then the launch price if you choose a plan: $19 or $39 a month, kept while your subscription stays paid.",
 ];
 
 const GIVE = [
@@ -100,7 +100,7 @@ export function FoundingPage({ slug }: { slug: string }) {
   return (
     <>
       <PageHero
-        mark="three months of Kabsi Pro, free."
+        mark={FOUNDING_HERO.mark}
         hero={FOUNDING_HERO}
         under={FOUNDING25_UNDER}
         action={
@@ -150,7 +150,7 @@ export function FoundingPage({ slug }: { slug: string }) {
       <section aria-labelledby="founding-faq" className="border-t border-line bg-surface-1">
         <div className="container-kb section-y grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <h2 id="founding-faq" className="text-h2">
-            <Marked text="Questions about Founding 25" mark="Founding 25" />
+            <Marked text="Questions about the founding offer" mark="founding offer" />
           </h2>
           <Faq items={FOUNDING_FAQ} />
         </div>
@@ -521,10 +521,9 @@ function Outcome({ state }: { state: Exclude<State, "open"> }) {
     );
   if (state === "accepted")
     return (
-      <Box pill={<StatusPill tone="ok">Accepted</StatusPill>} title="You have a Founding 25 place.">
-        <p>
-          Next, add Kabsi as a Manager on Google. Your 90 days of Pro start the day access works.
-        </p>
+      <Box pill={<StatusPill tone="ok">Accepted</StatusPill>} title="You have a founding place.">
+        <p>Next, add Kabsi as a Manager on Google. Your founding price starts with your plan.</p>
+        <p className="mt-2 text-small text-text-2">{FOUNDING_TRIAL}</p>
         <div className="mt-6" data-main-cta>
           <ButtonLink to="/manager-steps">Add Kabsi on Google</ButtonLink>
         </div>
@@ -543,8 +542,7 @@ function Outcome({ state }: { state: Exclude<State, "open"> }) {
   return (
     <div>
       <Banner tone="info" title="All 25 places are taken.">
-        You can still start: the free check needs nothing, and Kabsi is free for 14 days once it is
-        connected.
+        You can still start: the free check needs nothing, and Kabsi is free for 14 days.
       </Banner>
       <div className="mt-6" data-main-cta>
         <ButtonLink to="/scan">Check my business free</ButtonLink>

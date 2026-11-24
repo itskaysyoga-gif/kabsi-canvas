@@ -13,7 +13,7 @@ select is(
     where has_table_privilege(r, t, p)),
   '{}'::text[], 'nobody writes the AI Visibility tables from the API');
 select ok(not has_table_privilege('anon', 'public.ai_visibility_runs', 'select'), 'anon reads nothing');
-select is((select value from public.app_settings where key = 'ai_visibility_mode'), 'mock', 'mock mode by default');
+select is((select value from public.app_settings where key = 'ai_visibility_mode'), 'off', 'OFFER-2: off by setting (no provider call, the same as mock)');
 select is((select value from public.app_settings where key = 'ai_visibility_gemini'), 'off', 'Gemini is off by default');
 select ok((select value::numeric > 0 from public.app_settings where key = 'provider_cap_ai_visibility_usd'), 'a monthly cap exists');
 

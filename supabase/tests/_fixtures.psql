@@ -61,6 +61,8 @@ insert into public.rating_snapshots (location_id, taken_on) values ('00000000-00
 insert into public.special_hours (location_id, start_date, end_date, closed) values ('00000000-0000-4000-8000-0000000000c1', '2026-12-24', '2026-12-24', true);
 insert into public.google_events (message_id, type, google_location_id, location_id) values ('victim-message', 'NEW_REVIEW', 'locations/victim', '00000000-0000-4000-8000-0000000000c1');
 insert into public.weekly_reports (location_id, week_of, data) values ('00000000-0000-4000-8000-0000000000c1', '2026-09-28', '{}');
+insert into public.monthly_reports (location_id, month_of, data) values ('00000000-0000-4000-8000-0000000000c1', '2026-09-01', '{}');
+insert into public.link_watch_events (location_id, kind, event) values ('00000000-0000-4000-8000-0000000000c1', 'website', 'down');
 insert into public.visibility_keywords (id, location_id, keyword, radius_km, center_lat, center_lng, self_title)
 values ('00000000-0000-4000-8000-0000000000f8', '00000000-0000-4000-8000-0000000000c1', 'barber', 3, 25.08, 55.14, 'Victim Barber');
 insert into public.visibility_scans (id, location_id, keyword_id, keyword, radius_km, center_lat, center_lng, zoom, source)

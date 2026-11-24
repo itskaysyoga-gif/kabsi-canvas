@@ -227,14 +227,17 @@ describe("no public surface names Founding 25 or links /founding", () => {
       ...files("knowledge/facts", /\.md$/).map((p) => p.replaceAll("\\", "/")),
     ])
       expect(read(f), f).not.toMatch(FOUNDING_25);
-    // The launch price is the one public name of the 19 and 39 price.
-    expect(read("knowledge/kabsi-facts.md")).toMatch(/launch price/i);
-    // "There is no public founding offer." is the one public sentence about it (R-151); no price or place is called founding.
-    expect(read("knowledge/kabsi-facts.md")).not.toMatch(/founding (price|places?)\b/i);
-    expect(read("knowledge/kabsi-facts.md").match(/founding offer/gi) ?? []).toHaveLength(2);
-    expect(read("knowledge/kabsi-facts.md")).toContain(
-      "There is no public founding offer. A business that was invited should open the link in its invitation.",
-    );
+    // SITE-1 (blueprint 3.1, R-163): there is no public launch price any more, and the private founding offer is named
+    // nowhere public. The facts say only that there is no public offer, and send an invited business to its link.
+    const facts = read("knowledge/kabsi-facts.md");
+    expect(facts).not.toMatch(/founding/i);
+    // "launch price" stays only on lines that say it is retired.
+    for (const line of facts.split("\n").filter((l) => /launch price/i.test(l)))
+      expect(line, line.slice(0, 80)).toMatch(
+        /retired|RETIRED|replaces?d?|switched off|never quote|no longer/i,
+      );
+    expect(facts).toContain("There is no public offer or discount.");
+    expect(facts).toContain("A business that was invited should open the link in its invitation.");
   });
 
   it("no public page, component, library, email builder, share image or script names it", () => {

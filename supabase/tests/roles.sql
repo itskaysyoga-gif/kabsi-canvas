@@ -127,6 +127,7 @@ select throws_ok($$ select public.list_tasks('00000000-0000-4000-8000-0000000000
 select throws_ok($$ select * from public.activity_feed('00000000-0000-4000-8000-0000000000c1', 7) $$, '42501', null, 'staff: no activity feed');
 select throws_ok($$ select public.rename_card('VCTM22', 'Staff') $$, '42501', null, 'staff: cannot rename the review link');
 select throws_ok($$ select public.create_review_link('00000000-0000-4000-8000-0000000000c1', 'x') $$, '42501', null, 'staff: cannot make a review link');
+select throws_ok($$ select public.create_placement_link('00000000-0000-4000-8000-0000000000c1', 'receipt') $$, '42501', null, 'staff: cannot make a placement link');
 select throws_ok($$ select public.set_card_active('VCTM22', false) $$, '42501', null, 'staff: cannot switch the link off');
 select throws_ok($$ select public.set_review_link_mode('VCTM22', 'direct') $$, '42501', null, 'staff: cannot change what the link does');
 select throws_ok($$ select public.set_auto_posts('00000000-0000-4000-8000-0000000000c1', true) $$, '42501', null, 'staff: cannot set auto posts');

@@ -127,7 +127,7 @@ async function testRun(req: Request): Promise<Response> {
   try {
     switch (b.op) {
       case "checkout":
-        return json({ ok: true, url: await startCheckout(org, null, null, b.plan === "essentials" ? "essentials" : "pro", b.period === "year" ? "year" : "month") });
+        return json({ ok: true, url: await startCheckout(org, null, null, b.plan === "pro" ? "pro" : "essentials", b.period === "year" ? "year" : "month") });
       case "add_location":
         return json({ ok: true, url: await addLocation(org, null) });
       case "remove_location":

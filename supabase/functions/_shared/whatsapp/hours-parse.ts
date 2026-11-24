@@ -153,6 +153,22 @@ export function parseHours(text: string, now: Date, tz: string): HoursParse {
   return { ok: false, why: "no_day" };
 }
 
+/** OFFER-2: a range of times on its own ("10am to 4pm", "9 to 5", "from 9 till 13:30") for the weekly hours of one day, as
+ *  HH:MM (midnight is "00:00", the end of the day in the weekly model). "bad" for impossible times, null when there is none. */
+export function readRange(text: string): { open: string; close: string } | "bad" | null {
+  const t = text.toLowerCase().replace(/\s+/g, " ");
+  const range = new RegExp(`\\b(?:open\\s+)?(?:from\\s+)?${TIME}\\s*(?:to|till|until|-)\\s*${TIME}`).exec(t);
+  if (!range) return null;
+  const a = clock(range[1]), b = clock(range[2]);
+  if (!a || !b) return "bad";
+  const open = to24(a, "open");
+  let close = to24(b, "close");
+  if (open === null || close === null) return "bad";
+  if (close <= open && !b.mer && close + 720 > open && close + 720 <= 24 * 60) close += 720;
+  if (close <= open || open >= 24 * 60) return "bad";
+  return { open: hhmm(open), close: close >= 24 * 60 ? "00:00" : hhmm(close) };
+}
+
 const LONG = (d: string) => new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${d}T00:00:00Z`));
 const SHORT = (d: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${d}T00:00:00Z`));
 /** "9am", "5:30pm", "midnight". */

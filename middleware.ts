@@ -17,8 +17,6 @@ export const config = {
     "/about",
     "/security",
     "/faq",
-    "/partners",
-    "/partners/terms",
     "/setup-call",
     "/privacy",
     "/terms",

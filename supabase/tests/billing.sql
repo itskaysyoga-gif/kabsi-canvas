@@ -7,6 +7,8 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 select * from no_plan();
+-- OFFER-2: since 24 Nov 2026 the founding price is private (founding_public 'off'; price1.sql tests that). This file tests the counted places, kept for a switch back.
+update public.app_settings set value = 'on' where key = 'founding_public';
 
 \ir _fixtures.psql
 

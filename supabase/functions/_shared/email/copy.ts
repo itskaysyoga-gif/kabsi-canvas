@@ -86,6 +86,15 @@ export function weeklyReport(business: string, o: { dates: string; preheader: st
   };
 }
 
+/** The monthly report (PROOF-2): the body is the three bands of monthly-body.ts. */
+export function monthlyReport(_business: string, label: string, o: { preheader: string; subject: string }, html: string, text: string, appUrl: string): EmailContent {
+  const url = `${appUrl}/app/report`;
+  return {
+    subject: o.subject, preheader: o.preheader, title: `Your monthly report, ${label}`,
+    bodyHtml: html, button: { label: "Open your report", url }, text: `${text}\n\nOpen your report: ${url}`,
+  };
+}
+
 export function weeklyPost(business: string, postText: string, appUrl: string): EmailContent {
   const url = `${appUrl}/app/posts`;
   return {

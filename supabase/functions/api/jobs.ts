@@ -35,6 +35,8 @@ import {
   type CheckClaim, type Claim, type Item, NotSent, type Outcome, type PublishDeps, publishOne, reconcileOne, replySeen, type Seen, type Sent,
 } from "../_shared/publish.ts";
 import { accessJob, deletionsJob, ratingsJob, trialsJob, weeklyJob } from "./cron.ts";
+import { linkWatchJob } from "../_shared/link-watch/job.ts";
+import { monthlyReportJob } from "../_shared/monthly-report/build.ts";
 import { photoFileStore, removeDuePhotoFiles } from "../_shared/retention.ts";
 import { detectTasks } from "../_shared/tasks.ts";
 import { type Cadence, careMonth, type Planned } from "../_shared/posts/plan.ts";
@@ -441,6 +443,9 @@ const HANDLERS: Record<string, JobHandler> = {
   access_check: step("access", accessJob),
   ratings_snapshot: step("ratings", ratingsJob),
   weekly_reports: step("weekly", weeklyJob),
+  // PROOF-2: the daily link check for one business (retries of a failure are offered by the job itself), and its monthly report.
+  link_watch: async (job) => void await linkWatchJob(job),
+  monthly_report: async (job) => void await monthlyReportJob(job),
   deletions: step("deletions", deletionsJob),
   trial_reminders: step("trials", trialsJob),
   // Partners 3, Fix 5: the partner emails that follow an event (first trial, first payment, payout sent) have their own

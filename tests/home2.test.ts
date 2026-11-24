@@ -3,6 +3,7 @@
 // kind of business; the plans; five questions; the free check. Lines and sources: docs/site4/home.md.
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { TRIAL_LINE as OFFER_TRIAL_LINE } from "../src/lib/offer";
 import { describe, expect, it } from "vitest";
 import { HOME2_H1, HOME2_HERO_LINE } from "@/components/kabsi/home2-hero-data";
 import {
@@ -63,7 +64,7 @@ describe("Home 2: the hero", () => {
     const hero = read("src/components/kabsi/home2-hero.tsx");
     expect(hero).toContain('<ScanBox id="hero-scan" note={TRIAL_LINE} />');
     expect(hero.match(/<ScanBox /g)).toHaveLength(1);
-    expect(TRIAL_LINE).toBe("Free for 14 days once Kabsi is connected. No card.");
+    expect(TRIAL_LINE).toBe(OFFER_TRIAL_LINE); // SITE-1: blueprint 3.1, src/lib/offer.ts
     // The Example free check result left the hero: the thread is the one picture.
     expect(hero).not.toContain("ResultPreview");
   });
@@ -124,9 +125,9 @@ describe("Home 2: what Kabsi does, and what you do", () => {
     const facts = read("knowledge/facts/02-facts-that-change.md");
     const ai = HOME2_DOES.find((j) => j.id === "ai")!;
     expect(ai.plan).toBe("3 questions a month on Essentials, 10 every 2 weeks on Pro.");
-    expect(facts).toContain(
-      "3 questions every month on Essentials and 10 questions every 2 weeks on Pro",
-    );
+    // SITE-1 (blueprint 3.1, R-163): AI answer checks are switched off and there is one plan, so the facts no longer
+    // carry these amounts; the Home 2 data above is no longer on a route (Home is src/components/marketing/v31.tsx).
+    expect(facts).not.toMatch(/questions every month on Essentials|every 2 weeks on Pro/);
     expect(HOME2_DOES.find((j) => j.id === "posts")!.plan).toBe(
       "2 posts a month on Essentials, every week on Pro.",
     );

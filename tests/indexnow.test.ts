@@ -38,7 +38,8 @@ describe("IndexNow", () => {
     expect(changedUrls({ changedFiles: ["src/routes/pricing.tsx"], pages, guides, now })).toEqual([
       "https://kabsi.co/pricing",
     ]);
-    expect(changedUrls({ changedFiles: ["src/lib/plans.ts"], pages, guides, now })).toEqual([
+    // SITE-1: the pricing page is made of src/lib/offer.ts (the one price), not src/lib/plans.ts.
+    expect(changedUrls({ changedFiles: ["src/lib/offer.ts"], pages, guides, now })).toEqual([
       "https://kabsi.co/pricing",
     ]);
     expect(changedUrls({ changedFiles: ["src/routes/index.tsx"], pages, guides, now })).toEqual([

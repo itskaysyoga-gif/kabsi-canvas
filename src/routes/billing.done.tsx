@@ -17,7 +17,7 @@ function BillingDonePage() {
   return (
     <ConfirmLayout>
       <QuietMark icon={Check} tone="ok" />
-      <QuietTitle lead="Your plan starts the day Kabsi's access to your Google profile works.">
+      <QuietTitle lead="You can see your plan, and cancel any time, in Settings.">
         You are all set.
       </QuietTitle>
       <Link to="/app/plan" data-main-cta className={buttonClass("primary", "lg", true) + " mt-6"}>

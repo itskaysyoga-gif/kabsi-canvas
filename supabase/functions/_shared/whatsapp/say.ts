@@ -105,8 +105,9 @@ export const SAY = {
   roleNotAllowed: (role: string) => `As ${role} you can send photos and news here. The owner approves everything that goes to Google.`,
   billingOwnerOnly: "Owner only\nOnly the owner can change the plan and billing.",
   // Owner tools (9.3).
+  // OFFER-2 (blueprint 11): the Google-care tools only.
   ownerHelp:
-    "You can send\n\"stats\" or \"this month\"\n\"review link\" or \"QR\"\n\"cards\" for the taps on your Kabsi cards\n\"my link\" to share Kabsi with another business\n\"ask a customer\" for a ready review message\na photo for your Google profile\na voice note or a message about what is new\n\"reply:\" and your exact reply to the last review\na change to the last draft, for example \"make it shorter\"\n\"switch\" to change business\n\"talk to a person\"",
+    "You can send\n\"waiting\" for what needs your yes\n\"done\" for what Kabsi did this week\n\"stats\" or \"this month\"\n\"my hours\" for your hours on Google\na new usual time for one day, for example \"Saturdays 10am to 4pm\"\na new phone number or website\na photo, or a few words for a post\n\"review link\" or \"QR\"\n\"cards\" for the taps on your Kabsi cards\n\"reply:\" and your exact reply, or a change to a draft\n\"switch\" to change business\n\"talk to a person\"",
   staffHelp: "You can send\nphotos here for the owner to approve\n\"ask a customer\" for the review message\n\"talk to a person\"",
   stats: (business: string, days: number, s: { new_reviews: number; answered: number; waiting: number; average: number | null }) =>
     `${business}, the last ${days} days: ${s.new_reviews} new ${s.new_reviews === 1 ? "review" : "reviews"}${s.average ? `, average ${s.average} stars` : ""}, ${s.answered} answered through Kabsi. ${s.waiting} waiting for you.`,
@@ -120,7 +121,7 @@ export const SAY = {
   // Sync 2a (R-142 item 3, WA-07): card payments are closed, so no push to choose a plan: PAY_TODAY_LINE, then the Plan page.
   billingNoPlan: (business: string, url: string) => `No paid plan\n${business} has no paid plan right now. ${PAY_TODAY_LINE}\n\nYour plan page: ${url}`,
   billingStatus: (_business: string, plan: string, end: string | null, ends: boolean) =>
-    `${plan}${end ? `\n${ends ? "Ends" : "Renews"} on ${end}` : ""}\n\nReply "card", "invoice", "upgrade", "add a location" or "cancel".`,
+    `${plan}${end ? `\n${ends ? "Ends" : "Renews"} on ${end}` : ""}\n\nReply "card", "invoice", "add a location" or "cancel".`,
   billingPortal: (_business: string, url: string) => `Your card and invoices\nYour card, invoices and receipts are here: ${url}`,
   billingCancelAsk: (end: string | null) => `Cancel your plan?\nIt ends on ${end ?? "the last day you paid for"}.\nEverything keeps working until then.`,
   billingCancelled: (end: string | null) => `Plan cancelled\nYour plan ends on ${end ?? "the last day you paid for"}.\n\nChanged your mind? Tap Keep my plan.`,
@@ -128,8 +129,10 @@ export const SAY = {
   billingKept: "Done. Your plan carries on.",
   billingUpgradeAsk: (price: string) => `Switch to Pro?\nPrice: ${price}\nCreem charges the difference for the rest of this period today.`,
   billingUpgraded: "Done. You are on Pro now.",
-  billingDowngradeAsk: (price: string, end: string | null) => `Switch to Essentials?\nPrice: ${price}\nFrom your next renewal${end ? `, ${end}` : ""}\nYou keep Pro until then.`,
-  billingDowngraded: (end: string | null) => `Done. Essentials starts${end ? ` on ${end}` : " at your next renewal"}.`,
+  billingDowngradeAsk: (price: string, end: string | null) => `Move to Kabsi?\nPrice: ${price}\nFrom your next renewal${end ? `, ${end}` : ""}\nYou keep Pro until then.`,
+  billingDowngraded: (end: string | null) => `Done. Kabsi at 29 US dollars a month starts${end ? ` on ${end}` : " at your next renewal"}.`,
+  // OFFER-2: one plan, so there is nothing to upgrade to.
+  billingOnePlan: "One plan\nKabsi has one plan: 29 US dollars a month per location. There is nothing to upgrade to.",
   billingSamePlan: (plan: string) => `You are already on ${plan}.`,
   // Billing 2 (10.2.3): an extra location is its own Creem payment on the owner's customer, renewed from the day it is paid.
   billingAddAsk: (price: string) => `Add a location?\nPrice: ${price}\nYou pay for it on Creem's page, and it renews from today.`,
@@ -209,8 +212,37 @@ export const SAY = {
   resetFailed: "Kabsi could not reset the test just now\nNothing was changed. Please send it again in a minute.",
   // RB-F3 (R-148 item 5, WhatsApp's 2026 terms bar general-purpose assistants): a message that is not one of Kabsi's jobs.
   // RB-F4 (R-149 item 4): the off-topic line in the RB-F3 look; its first line is the bold one with ❓.
-  offTopic: "Kabsi cannot help with that\nKabsi looks after your business on Google: review replies, your listing, photos and posts.\n\nSend \"help\" to see what you can send.",
-  offTopicBook: "Kabsi cannot help with that\nKabsi looks after your business on Google and keeps your request book: review replies, your listing, photos, posts and your customers' requests.\n\nSend \"help\" to see what you can send.",
+  // OFFER-2 (Meta's rule: automation must show a way to a person): the one fixed line ends with how to reach a person.
+  offTopic: "Kabsi cannot help with that\nKabsi looks after your business on Google: review replies, your hours and details, photos and posts.\n\nTo talk to a person, send \"talk to a person\" or email hello@kabsi.co.",
+  offTopicBook: "Kabsi cannot help with that\nKabsi looks after your business on Google and keeps your request book: review replies, your hours and details, photos, posts and your customers' requests.\n\nTo talk to a person, send \"talk to a person\" or email hello@kabsi.co.",
+
+  // OFFER-2 (blueprint 11.2): the Google-care tools.
+  waitingNone: "Nothing is waiting\nNo review to answer, nothing to approve and no change found on Google.",
+  waitingList: (lines: string[]) => `Waiting for you\n${lines.map((l, i) => `${i + 1}. ${l}`).join("\n")}\n\nSend a number to open one.`,
+  waitingNotDrafted: "The reply is being written\n\nKabsi sends it here when it is ready.",
+  waitingApproval: (label: string, url: string) => `${label} waiting for your yes\nTap Approve on the message Kabsi sent about it, or open it here: ${url}`,
+  waitingProblem: (label: string, url: string) => `Your ${label} changed on Google\nSee what changed and choose what to keep: ${url}`,
+  waitingGone: "That one is no longer waiting\n\nSend \"waiting\" for the list as it is now.",
+  doneNone: (url: string) => `No weekly summary yet\nYour first weekly summary comes on Monday.\n\nYour account: ${url}`,
+  done: (from: string | null, lines: string[], url: string) =>
+    `Your week${from ? ` from ${from}` : ""}\n${lines.join("\n")}\n\nThe full report: ${url}`,
+  hoursNow: (lines: string[]) => `Your hours on Google\n${lines.join("\n")}\n\nTo change one day, send for example \"Saturdays 10am to 4pm\".`,
+  hoursNowNone: (url: string) => `Kabsi does not have your hours yet\nSet your weekly hours here: ${url}`,
+  weekWhichDay: "Which day, and what hours?\nFor example \"Saturdays 10am to 4pm\" or \"closed on Sundays\".",
+  weekOneDay: "One day at a time\nSend the new hours for one day, for example \"Saturdays 10am to 4pm\".",
+  weekAskTimes: (day: string) => `What are your new hours on ${day}s?\nFor example \"10am to 4pm\", or \"closed\".`,
+  weekBadTime: "Those times do not work\nThe closing time must come after the opening time.\nFor example \"Saturdays 10am to 4pm\".",
+  weekSame: (day: string) => `${day} already says that\nNothing was changed.`,
+  weekShown: (dayLine: string, week: string[]) =>
+    `New weekly hours for Google\n${dayLine}\n\nYour week on Google after this change:\n${week.join("\n")}\n\nKabsi sets them on Google after you tap Approve.`,
+  contactAsk: "What is the new number or website?\nSend it as you want customers to see it, for example \"new phone +1 205 555 0100\".",
+  contactShown: (field: "phone" | "website", value: string) =>
+    `New ${field === "phone" ? "phone number" : "website"} for Google\n${value}\n\nKabsi sets it on Google after you tap Approve.`,
+  listingApproved: "Approved\nKabsi sends it to Google now and checks that Google shows it.",
+  listingTapApprove: "Tap Approve\nA change to your Google profile is approved with the Approve button on the message above.",
+  guideField: (url: string) =>
+    `Kabsi does not change that from a chat\nYour business name, address, category, description and services are changed on Google itself: a wrong change can make Google check your business again.\n\nHow to do it: ${url}`,
+  qrImage: (business: string) => `${business}: your review QR code\nPrint it or show it at the counter. It opens your review link, the same for every customer.`,
   abuseNotice: "Kabsi will not reply to messages like this. If you need help, send \"talk to a person\".",
 
   // Media (18.3, 28.3).

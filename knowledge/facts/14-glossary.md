@@ -11,21 +11,24 @@
 - **About your business:** the facts Kabsi may use in drafts.
 - **Never-say list:** "Anything Kabsi should never say or promise".
 - **Safety check:** the automatic check of each draft against Kabsi's rules and your never-say list.
-- **Kabsi's posts:** the posts Kabsi prepares each month (2 by default, 1 or 4 by choice) for your approval.
+- **Kabsi's posts:** the posts Kabsi prepares each month, up to 2, for your approval.
 - **Search phrases:** words people use to search for a business like yours, worked into a post's first line. They come from your category, your area and the services you listed in About your business, and, once Kabsi is connected to Google live, from Google's own search terms. Never from your reviews.
 - **Special hours:** hours for specific dates, like holidays.
 - **Google Protection:** watches key profile details, alerts you and lets you choose on Kabsi whether to keep your information.
 - **Profile health:** the suggestions list on Home, no score.
+- **Weekly summary:** 3 to 5 lines a week: replies live, anything waiting for a yes, anything found, taps on review links.
+- **Monthly report:** [COMING] the full report of the month: work done, what Kabsi found and what was observed, kept apart.
 - **Review link:** go.kabsi.co/{CODE}, opens your Google review page, or a short Kabsi page with the Google button first if you chose that. Up to 5 per business.
 - **NTAG213 / NTAG215:** common NFC chip types that work for review links.
 - **NFC Tools:** a free app for writing a link onto an NFC tag.
 - **Tap / open:** one opening of your review page. Not a review.
 - **Card code:** the 6-character code under a Kabsi card's QR.
 - **Free:** not a plan. What a business keeps without a plan, after a trial or a plan ends: the review link, the QR code, the printable counter card and a message to share. There is no Free plan.
-- **Free trial:** 14 days, no card, starting when Google access works.
+- **The plan:** Kabsi's one plan, 29 US dollars a month per location. It has no other name.
+- **Free trial:** "14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing." The 14 days start when Google access works.
 - **Kabsi Clients (5481006796):** Kabsi's Google business group. Owners invite it as a Manager.
 - **Waiting for Google access:** Kabsi's Manager access doesn't work yet for that business.
-- **Kabsi Partners:** [COMING] Kabsi's affiliate program (section 6). Not open yet.
+- **Kabsi Partners:** Kabsi's former affiliate program, switched off from 24 Nov 2026 (section 6). Not a public offer.
 - **Place ID:** Google's identifier for a business on Maps, used to build its review link.
 
 ---

@@ -146,6 +146,16 @@ export class World {
   /** Photo Post 1: Kabsi's draft when AI drafting is on (undefined: off; null: the draft failed). */
   photoDraft: string | null | undefined = undefined;
   photoDraftCalls: string[] = [];
+  /** OFFER-2: the weekly hours Kabsi stores per business (Google's regularHours shape); Harbour Lane: Mon to Fri 9 to 5. */
+  weekHours = new Map<string, { periods: { openDay: string; openTime: { hours: number }; closeDay: string; closeTime: { hours: number } }[] }>([[BIZ.harbour, {
+    periods: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"].map((d) => ({ openDay: d, openTime: { hours: 9 }, closeDay: d, closeTime: { hours: 17 } })),
+  }]]);
+  /** OFFER-2: the latest weekly report per business (weekly_reports.data). */
+  reports = new Map<string, { week_of: string; data: Record<string, unknown> }>();
+  /** OFFER-2: changes found on Google, per business. */
+  problems = new Map<string, { id: string; label: string }[]>();
+  /** OFFER-2: every listing write, exactly as sent ("location:user:field:display"). */
+  listingWrites: { location: string; user: string; change: Record<string, unknown> }[] = [];
   private n = 0;
 
   userByPhone = (phone: string) => this.users.find((u) => u.phone === phone && u.optin === "active") ?? null;
@@ -299,6 +309,25 @@ export class World {
         const a = w.actions.get(token);
         if (!a?.used) return { result: "nothing_to_undo" };
         return { result: w.tooLate ? "too_late" : "cancelled" };
+      },
+      // OFFER-2: the Google-care reads and the one listing write, on the fake world.
+      async waiting(loc) {
+        const reviews = [...w.reviews.entries()].filter(([, r]) => r.location === loc && ["new", "drafted"].includes(r.state))
+          .map(([id, r]) => ({ id, stars: r.risk === "high" ? 1 : 5, first_name: r.risk === "high" ? "Sam" : "Maria", drafted: r.state === "drafted" }));
+        return { reviews, problems: w.problems.get(loc) ?? [] };
+      },
+      async lastReport(loc) {
+        return w.reports.get(loc) ?? null;
+      },
+      async currentHours(loc) {
+        return w.weekHours.get(loc) ?? null;
+      },
+      async applyListing(loc, user, change) {
+        const role = w.biz.find((b) => b.id === loc)?.members[user];
+        w.calls.push(`listing:${loc}:${change.field}`);
+        if (role !== "owner" && role !== "manager") return { ok: false, reason: "not_allowed_to_approve" };
+        w.listingWrites.push({ location: loc, user, change: change as unknown as Record<string, unknown> });
+        return { ok: true };
       },
       async openItems(phone) {
         const u = w.userByPhone(phone);

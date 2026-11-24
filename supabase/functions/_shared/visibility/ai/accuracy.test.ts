@@ -309,7 +309,9 @@ Deno.test("the Home item and the report line: the sentence, the assistant, the q
     business: "Rose Lane Salon", counts: {} as never, needs: [], needsTotal: 0, plan: [], activity: null, demo: false, growth: null,
     ai: null, aiThisWeek: false, accuracy: FINDING, rivals: [], tz: "UTC",
   });
-  assertMatch(rc.whatsapp, /It said: "Rose Lane Salon is open/);
+  // PROOF-2: the weekly message is short; the finding stays in the receipt's data and is not a line of the message.
+  assertEquals(rc.accuracy?.line, t.why);
+  assert(!/It said:/.test(rc.whatsapp), "the short weekly message does not carry the AI finding");
   for (const s of [t.title, t.why, t.recommendation, b.heading, rc.whatsapp, freeLine({ fact: "hours", detail: "closed_day", sentence: "s", said: "closed", day: "sun" })]) {
     assert(!/[–—!]/.test(s), `no dashes or exclamation marks: ${s}`);
     assert(!/correct|fix (it|this) for you|we will change|guarantee/i.test(s), `no promise of a correction: ${s}`);

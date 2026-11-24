@@ -3,19 +3,23 @@
     "path": "/",
     "changefreq": "weekly",
     "priority": "1.0",
-    "sources": ["src/routes/index.tsx", "src/lib/home.ts", "src/content/home-examples.ts"]
+    "sources": [
+      "src/routes/index.tsx",
+      "src/components/marketing/v31.tsx",
+      "src/components/marketing/v31-data.ts"
+    ]
   },
   {
     "path": "/pricing",
     "changefreq": "monthly",
     "priority": "0.9",
-    "sources": ["src/routes/pricing.tsx", "src/lib/plans.ts"]
+    "sources": ["src/routes/pricing.tsx", "src/components/marketing/v31.tsx", "src/lib/offer.ts"]
   },
   {
     "path": "/how-it-works",
     "changefreq": "monthly",
     "priority": "0.8",
-    "sources": ["src/routes/how-it-works.tsx"]
+    "sources": ["src/routes/how-it-works.tsx", "src/components/marketing/v31-pages.tsx"]
   },
   {
     "path": "/scan",
@@ -187,31 +191,19 @@
     "path": "/about",
     "changefreq": "yearly",
     "priority": "0.5",
-    "sources": ["src/routes/about.tsx"]
+    "sources": ["src/routes/about.tsx", "src/components/marketing/v31-pages.tsx"]
   },
   {
     "path": "/security",
     "changefreq": "yearly",
     "priority": "0.5",
-    "sources": ["src/routes/security.tsx"]
+    "sources": ["src/routes/security.tsx", "src/components/marketing/v31-pages.tsx"]
   },
   {
     "path": "/faq",
     "changefreq": "monthly",
     "priority": "0.6",
-    "sources": ["src/routes/faq.tsx", "src/components/kabsi/faq-data.ts"]
-  },
-  {
-    "path": "/partners",
-    "changefreq": "monthly",
-    "priority": "0.4",
-    "sources": ["src/routes/partners.tsx"]
-  },
-  {
-    "path": "/partners/terms",
-    "changefreq": "yearly",
-    "priority": "0.2",
-    "sources": ["src/routes/partners_.terms.tsx"]
+    "sources": ["src/routes/faq.tsx", "src/components/marketing/v31-data.ts"]
   },
   {
     "path": "/setup-call",

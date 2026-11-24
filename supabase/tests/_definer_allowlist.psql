@@ -24,6 +24,7 @@ insert into definer_allowlist (role, sig, reason, caller) values
   ('authenticated', 'confirm_business(uuid)', 'owner page: membership/role', 'browser: components/onboarding/stages.tsx lib/onboarding.ts'),
   ('authenticated', 'confirm_business_details(uuid,jsonb)', 'owner page: membership/role', 'browser: lib/confirm-details.ts'),
   ('authenticated', 'confirm_fact(uuid)', 'the caller''s own rows', 'browser: lib/knowledge.ts'),
+  ('authenticated', 'create_placement_link(uuid,text)', 'owner page: membership/role', 'browser: components/review-link/placement-links.tsx'),
   ('authenticated', 'create_review_link(uuid,text)', 'owner page: membership/role', 'browser: routes/_authenticated/app/cards.tsx'),
   ('authenticated', 'entitlements(uuid,uuid)', 'owner page: is_staff(), membership/role', 'browser: components/home/action-center.tsx components/layouts/app-layout.tsx lib/entitlements.ts +5'),
   ('authenticated', 'feature_access(uuid)', 'owner page: is_staff(), membership/role', 'browser: lib/feature-access.ts lib/read-timeout.ts'),

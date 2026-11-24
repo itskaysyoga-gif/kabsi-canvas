@@ -150,7 +150,9 @@ const CASES: Case[] = [
   { name: "owner: stats, headed with business and role", tags: ["owner"], steps: [{ from: PHONES.owner, text: "stats", expect: "stats", head: /^Harbour Lane Coffee \(owner\)/, reply: /last 7 days/, ai: 0 }] },
   { name: "owner: this month", tags: ["owner"], steps: [{ from: PHONES.owner, text: "this month", expect: "stats", reply: /last 30 days/ }] },
   { name: "owner: review link", tags: ["owner"], steps: [{ from: PHONES.owner, text: "review link", expect: "review_link", reply: /kabsi\.co\/review\/ABC234/ }] },
-  { name: "owner: QR", tags: ["owner"], steps: [{ from: PHONES.owner, text: "QR", expect: "qr", reply: /QR card/ }] },
+  // OFFER-2: the QR code is sent as an image, with its line as the caption.
+  { name: "owner: QR", tags: ["owner"], steps: [{ from: PHONES.owner, text: "QR", expect: "qr_image", reply: /your review QR code/ }],
+    check: (w) => assert.ok(w.sent.some((s) => s.to === PHONES.owner && s.kind === "image"), "an image was sent") },
   { name: "owner: no review link yet", tags: ["owner"], steps: [{ from: PHONES.plain, text: "review link", expect: "no_review_link", reply: /Corner Deli has no review link/ }] },
   { name: "owner: Approve names the business and offers Undo, with no AI call", tags: ["owner", "25.5", "speed"], steps: [
     { from: PHONES.owner, button: (w) => `a:${w.alert(PHONES.owner, BIZ.harbour)}`, expect: "approved", reply: /^\*✅ Approved\* · Harbour Lane Coffee\n\nIt goes to Google in 10 seconds\.\n\nPress Undo to stop it\.$/, buttons: ["Undo"], ai: 0 }] },
@@ -340,7 +342,9 @@ const CASES: Case[] = [
       { from: PHONES.owner, text: "are you there", expect: "handoff_quiet", none: true },
       { from: PHONES.owner, button: "a:tok00000000000000000001", expect: "approved" }] },
   // 13b part 2 (30.10 point 7): hours and typed posts are drafted, shown back exactly and approved with a Yes.
-  { name: "owner: hours alone gets one question with examples", tags: ["owner", "9.3", "hours"], steps: [{ from: PHONES.owner, text: "hours", expect: "hours_no_day", reply: /closed tomorrow/ }] },
+  // OFFER-2: "hours" alone is the hours on Google now; a change with no day still gets one question with examples.
+  { name: "owner: hours alone shows the hours on Google", tags: ["owner", "hours"], steps: [{ from: PHONES.owner, text: "hours", expect: "care_hours_now", reply: /Mon to Fri: 09:00 to 17:00/ }] },
+  { name: "owner: an hours change with no day gets one question with examples", tags: ["owner", "9.3", "hours"], steps: [{ from: PHONES.owner, text: "close early", expect: "hours_no_day", reply: /closed tomorrow/ }] },
   { name: "owner: closed tomorrow is shown back, then approved through the pipeline with Undo", tags: ["owner", "9.3", "hours", "30.10"], steps: [
     { from: PHONES.owner, text: "closed tomorrow", expect: "hours_shown", head: /^\*🕒 New hours for Google\* · Harbour Lane Coffee\n\n/, reply: /\n\nTuesday 27 October: closed all day\.\n\nKabsi sets them on Google after your yes\.$/, buttons: ["Approve", "Edit on kabsi.co"] },
     { from: PHONES.owner, text: "yes", expect: "approved", reply: /goes to Google in 10 seconds/ }],
@@ -365,7 +369,7 @@ const CASES: Case[] = [
     { from: PHONES.owner, text: "post: Pumpkin spice lattes are back from Monday", expect: "post_shown" },
     { from: PHONES.owner, text: "yes", expect: "which_one", buttons: ["Hours: Harbour Lane", "Post: Harbour Lane C"] }] },
   // RB-F3 (R-148 item 5): nothing Kabsi does fits, so one fixed line about what Kabsi does and "help", never a question a model wrote.
-  { name: "owner: an unclear message gets the fixed line about what Kabsi does", tags: ["owner"], steps: [{ from: PHONES.owner, text: "the thing from before", expect: "off_topic", reply: /^\*❓ Kabsi cannot help with that\*\n\nKabsi looks after your business on Google: review replies, your listing, photos and posts\.\n\nSend "help"/, ai: 1 }] },
+  { name: "owner: an unclear message gets the fixed line about what Kabsi does", tags: ["owner"], steps: [{ from: PHONES.owner, text: "the thing from before", expect: "off_topic", reply: /^\*❓ Kabsi cannot help with that\*\n\nKabsi looks after your business on Google: review replies, your hours and details, photos and posts\.\n\nTo talk to a person, send "talk to a person" or email hello@kabsi\.co\.$/, ai: 1 }] },
   { name: "owner: a slow answer sends On it first", tags: ["owner", "speed"], setup: (w) => { w.aiSlow = true; w.onItFast = true; w.aiMap["can you put up the lunch special"] = tool("post", { text: "lunch special" }); },
     steps: [{ from: PHONES.owner, text: "can you put up the lunch special", expect: "post_ask", ai: 1 }],
     check: (w) => { const r = w.repliesTo(PHONES.owner).map((s) => s.body); assert.match(r[0], /On it\.$/); assert.match(r[1], /^\*🖼️ Your photo or post\*\n\nSend the words of the post\.\nStart with "post:"/); } },
@@ -430,35 +434,34 @@ const CASES: Case[] = [
           { from: PHONES.owner, button: "k:keep", expect: "billing_kept", reply: /carries on/ },
         ],
         check: (w) => assert.deepEqual(w.calls.filter((c) => /^(cancel|keep):/.test(c)), [`cancel:${BIZ.harbour}`, `keep:${BIZ.harbour}`]) },
-      { name: "owner billing: upgrade shows the price and charges only after Confirm", tags: ["owner", "billing"], setup: paid(),
+      // OFFER-2: one plan. "upgrade" and an old Confirm under "Switch to Pro?" change nothing.
+      { name: "owner billing: there is nothing to upgrade to, and an old Confirm changes nothing", tags: ["owner", "billing"], setup: paid(),
         steps: [
-          { from: PHONES.owner, text: "upgrade", expect: "billing_upgrade_ask", reply: /^\*❓ Switch to Pro\?\*\n\nPrice: \$39 a month\n/, buttons: ["Confirm"] },
-          { from: PHONES.owner, button: "k:upgrade", expect: "billing_upgraded" },
-          { from: PHONES.owner, text: "upgrade", expect: "billing_same_plan" },
+          { from: PHONES.owner, text: "upgrade", expect: "billing_one_plan", reply: /29 US dollars a month per location/ },
+          { from: PHONES.owner, button: "k:upgrade", expect: "billing_one_plan" },
         ],
-        check: (w) => assert.deepEqual(w.calls.filter((c) => c.startsWith("change")), [`change:${BIZ.harbour}:pro`]) },
+        check: (w) => assert.deepEqual(w.calls.filter((c) => c.startsWith("change")), []) },
       { name: "owner billing: downgrade takes effect at renewal", tags: ["owner", "billing"], setup: paid("pro"),
         steps: [
-          { from: PHONES.owner, text: "downgrade", expect: "billing_downgrade_ask", reply: /^\*❓ Switch to Essentials\?\*\n\nPrice: \$19 a month\nFrom your next renewal, 26 November 2026\n/ },
-          { from: PHONES.owner, button: "k:downgrade", expect: "billing_downgraded", reply: /Essentials starts on 26 November 2026/ },
+          { from: PHONES.owner, text: "downgrade", expect: "billing_downgrade_ask", reply: /^\*❓ Move to Kabsi\?\*\n\nPrice: \$19 a month\nFrom your next renewal, 26 November 2026\n/ },
+          { from: PHONES.owner, button: "k:downgrade", expect: "billing_downgraded", reply: /Kabsi at 29 US dollars a month starts on 26 November 2026/ },
         ] },
       // Price 1: a business on the list price is priced and changed at the list price; extra locations cost the same.
-      { name: "owner billing: on the list price, upgrade shows 59 and downgrade 29", tags: ["owner", "billing", "price1"], setup: paid("essentials", "list"),
+      { name: "owner billing: on the list price, a location is 29 and the plan is Kabsi", tags: ["owner", "billing", "price1"], setup: paid("essentials", "list"),
         steps: [
-          { from: PHONES.owner, text: "upgrade", expect: "billing_upgrade_ask", reply: /^\*❓ Switch to Pro\?\*\n\nPrice: \$59 a month\n/, buttons: ["Confirm"] },
-          { from: PHONES.owner, text: "add a location", expect: "billing_add_ask", reply: /^\*❓ Add a location\?\*\n\nPrice: \$15 a month\n/ },
-          { from: PHONES.owner, text: "plan", expect: "billing_status", reply: /^\*📋 Kabsi Essentials, monthly\*\n\nRenews on / },
+          { from: PHONES.owner, text: "add a location", expect: "billing_add_ask", reply: /^\*❓ Add a location\?\*\n\nPrice: \$29 a month\n/ },
+          { from: PHONES.owner, text: "plan", expect: "billing_status", reply: /^\*📋 Kabsi, monthly\*\n\nRenews on / },
         ] },
       { name: "owner billing: on the list price, Pro downgrades to Essentials at 29", tags: ["owner", "billing", "price1"], setup: paid("pro", "list"),
-        steps: [{ from: PHONES.owner, text: "downgrade", expect: "billing_downgrade_ask", reply: /^\*❓ Switch to Essentials\?\*\n\nPrice: \$29 a month\nFrom your next renewal/ }] },
+        steps: [{ from: PHONES.owner, text: "downgrade", expect: "billing_downgrade_ask", reply: /^\*❓ Move to Kabsi\?\*\n\nPrice: \$29 a month\nFrom your next renewal/ }] },
       { name: "owner billing: add a location shows the price, then the Creem payment link", tags: ["owner", "billing"], setup: paid(),
         steps: [
-          { from: PHONES.owner, text: "add a location", expect: "billing_add_ask", reply: /^\*❓ Add a location\?\*\n\nPrice: \$15 a month\nYou pay for it on Creem's page/, buttons: ["Confirm"] },
+          { from: PHONES.owner, text: "add a location", expect: "billing_add_ask", reply: /^\*❓ Add a location\?\*\n\nPrice: \$29 a month\nYou pay for it on Creem's page/, buttons: ["Confirm"] },
           { from: PHONES.owner, button: "k:add_location", expect: "billing_location_link", reply: /^\*✅ Pay for the location\*\n\nhttps:\/\/creem\.io\/test\/checkout\/prod_xm\/ch_extra\n\nKabsi adds it to your plan when the payment goes through\.$/ },
         ],
         check: (w) => assert.deepEqual(w.calls.filter((c) => c.startsWith("add_location")), [`add_location:${BIZ.harbour}`]) },
       { name: "owner billing: plan shows the plan and the renewal", tags: ["owner", "billing"], setup: paid(),
-        steps: [{ from: PHONES.owner, text: "plan", expect: "billing_status", reply: /^\*📋 Kabsi Essentials, monthly\*\n\nRenews on 26 November 2026\n\n/ }] },
+        steps: [{ from: PHONES.owner, text: "plan", expect: "billing_status", reply: /^\*📋 Kabsi, monthly\*\n\nRenews on 26 November 2026\n\n/ }] },
       { name: "manager billing: a Confirm button from a manager's phone changes nothing", tags: ["manager", "billing"], setup: paid(),
         steps: [{ from: PHONES.manager, button: "k:cancel", expect: "billing_owner_only", reply: /Only the owner/ }],
         check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("cancel")).length, 0) },

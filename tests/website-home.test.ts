@@ -4,6 +4,7 @@
 // with no city, Creem as the merchant of record, WhatsApp shown only when the one setting has a number.
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { TRIAL_LINE as OFFER_TRIAL_LINE } from "../src/lib/offer";
 import { describe, expect, it } from "vitest";
 import {
   BRAND_LINE,
@@ -24,8 +25,8 @@ import {
   pageHead,
 } from "../src/lib/site";
 import { PLANS } from "../src/components/kabsi/plans";
-import { HOME_LINE } from "../src/components/kabsi/hero-lines";
-import { HOME2_H1 } from "../src/components/kabsi/home2-hero-data";
+import { HOME_HERO } from "../src/components/marketing/v31-data";
+import { HEADS } from "../src/components/marketing/v31-heads";
 import { readText } from "./helpers/facts";
 import { NEVER_CLAIMS, NEVER_NAMES } from "./helpers/house-rules";
 
@@ -38,6 +39,8 @@ const filesIn = (dir: string) =>
 /** Every public file Web 2 brought in, and the public routes. */
 const PUBLIC_FILES = [
   ...filesIn("src/components/kabsi"),
+  // SITE-1 (blueprint 3.1): the core pages' own files; the rest of src/components/marketing is the guides' (SITE-2).
+  ...filesIn("src/components/marketing").filter((f) => /\/v31[^/]*$/.test(f)),
   ...filesIn("src/content"),
   ...filesIn("src/content/industries"),
   ...[
@@ -110,9 +113,10 @@ describe("the copy rules on every public line (kabsi-copy, K-112, K-144, 30.15)"
     // Home 2 (lane R R-158 item 4, 11 Nov 2026): owners say "my Google listing", so Home's own lines may say "listing".
     // Only Home 2's two data files and Home's route head; every other public line keeps the rule, and no file may say
     // visibility, grid point or the app.
-    // SITE-2 (blueprint 3.1 section 2): "Your listing protected" is one of the three benefits, so the industry template
-    // that repeats them may say "listing". Only that file; every other public line keeps the rule.
-    const HOME2 = /kabsi\/home2-(hero-)?data\.ts$|routes\/index\.tsx$|kabsi\/d9-industry\.tsx$/;
+    // SITE-2: the industry template repeats "Your listing protected", so it shares the exception too.
+    // SITE-1 (blueprint 3.1, R-163): the blueprint's own lines say "listing" ("Your listing protected", the hero line, the
+    // FAQ), so the v31 files share Home 2's exception.
+    const HOME2 = /kabsi\/home2-(hero-)?data\.ts$|routes\/index\.tsx$|marketing\/v31[^/]*$|kabsi\/d9-industry\.tsx$/;
     for (const [f, s] of all.filter(([f]) => !LEGAL.test(f))) {
       expect(s, `${f}: ${s.slice(0, 60)}`).not.toMatch(
         HOME2.test(f)
@@ -136,31 +140,23 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     expect(BRAND_LINE).toBe("Your business on Google. Taken care of.");
     expect(MAIN_CTA).toBe("Check my business free");
     expect(SCAN_LINE).toBe("Free check. No account and no Google access needed.");
-    expect(TRIAL_LINE).toBe("Free for 14 days once Kabsi is connected. No card.");
-    // Home 2 (lane R R-158 item 4): the H1 is the brand line with "through WhatsApp", its last sentence on the yellow
-    // bar; the meta description is HOME_LINE, Home 2's (docs/site4/home.md).
-    const home = read("src/components/kabsi/home2-hero.tsx");
-    expect(home).toContain("<D9Title text={HOME2_H1} />");
-    expect(HOME2_H1).toBe("Your business on Google. Taken care of through WhatsApp.");
-    expect(HOME2_H1.startsWith(BRAND_LINE.replace(/\.$/, ""))).toBe(true);
-    expect(read("src/routes/index.tsx")).toContain("description: HOME_LINE");
-    expect(HOME_LINE).toBe(
-      "Kabsi answers your reviews, keeps your hours, photos and posts fresh, and checks what ChatGPT says about you. Nothing goes live until you tap yes on WhatsApp.",
-    );
-    expect(HOME_LINE.length).toBeLessThanOrEqual(160);
+    expect(TRIAL_LINE).toBe(OFFER_TRIAL_LINE); // SITE-1: blueprint 3.1, src/lib/offer.ts
+    // SITE-1 (blueprint 3.1 section 3): the H1 is the brand line itself, "Taken care of." on the yellow bar; the meta
+    // description is the hero line.
+    const home = read("src/components/marketing/v31.tsx");
+    expect(home).toContain("<Marked text={HOME_HERO.title} mark={HOME_HERO.mark} />");
+    expect(HOME_HERO.title).toBe(BRAND_LINE);
+    expect(HOME_HERO.mark).toBe("Taken care of.");
+    expect(read("src/routes/index.tsx")).toContain("description: HEADS.home.description");
+    expect(HEADS.home.description).toBe(HOME_HERO.line);
+    expect(HOME_HERO.line.length).toBeLessThanOrEqual(160);
     // Go live 1 (30.28): the WhatsApp launch line is gone from the hero.
     expect(home).not.toMatch(/WHATSAPP_LAUNCH_LINE|opens at launch/);
   });
-  it("puts the Site 2 links in the header, Businesses as one link, and three footer groups (30.34 item 4)", () => {
-    expect(NAV_LINKS.map((n) => n.label)).toEqual([
-      "How it works",
-      "Businesses",
-      "Pricing",
-      "Guides",
-      "About",
-    ]);
-    expect(NAV_LINKS.find((n) => n.label === "Businesses")?.to).toBe("/for");
-    expect(HEADER_CTA).toBe("Free check");
+  it("puts How it works and Price in the header, and three footer groups without Partners (SITE-1, blueprint 3.1)", () => {
+    expect(NAV_LINKS.map((n) => n.label)).toEqual(["How it works", "Price"]);
+    expect(NAV_LINKS.find((n) => n.label === "Price")?.to).toBe("/pricing");
+    expect(HEADER_CTA).toBe("Check my business free");
     expect(BUSINESS_MENU.map((n) => n.label)).toEqual([
       "Hair salons",
       "Barbershops",
@@ -176,7 +172,7 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     // No industry links in the footer (Design 9); the free tool stays in the first group (lane R decision 4).
     expect(footer).not.toContain("BUSINESS_MENU");
     expect(footer).toContain('{ label: "Review link and QR code", to: "/google-review-link" }');
-    expect(footer).toContain('{ label: "Partners", to: "/partners" }');
+    expect(footer).not.toMatch(/to: "\/partners|to="\/partners/);
     expect(footer).toContain("SOCIAL_LINKS.map");
     expect(footer).toContain("openPrivacyChoices");
     expect(footer).toContain("WHATSAPP_ON ?");

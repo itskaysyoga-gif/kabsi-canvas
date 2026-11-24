@@ -62,7 +62,6 @@ describe("Style 1 part B: the 30.32 look on every public page", () => {
       ["d8-faq", h.FAQ_HERO.title],
       ["d8-about", h.ABOUT_HERO.title],
       ["d8-security", h.SECURITY_HERO.title],
-      ["d5-founding", h.FOUNDING_HERO.title],
       ["d2-partners", h.PARTNERS_HERO.title],
     ];
     for (const [file, title] of pages) {
@@ -72,6 +71,14 @@ describe("Style 1 part B: the 30.32 look on every public page", () => {
       expect(mark, file).toBeTruthy();
       expect(title.split(mark!).length, file).toBe(2);
     }
+  });
+
+  it("puts the founding page's phrase on the bar once (SITE-1: the mark is a constant beside its title)", async () => {
+    const { FOUNDING_HERO } = await import("../src/components/kabsi/founding-private");
+    expect(readFileSync("src/components/kabsi/d5-founding.tsx", "utf8")).toContain(
+      "mark={FOUNDING_HERO.mark}",
+    );
+    expect(FOUNDING_HERO.title.split(FOUNDING_HERO.mark).length).toBe(2);
   });
 
   it("marks the closing check and the pricing preview by default", () => {

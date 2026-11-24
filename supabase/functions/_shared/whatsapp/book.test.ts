@@ -42,14 +42,16 @@ const HOUSE = /[‒-―!]|\bbooked\b|\bavailable\b/i;
 
 // ─── The snapshot: with the request book off, the model's instructions are byte for byte what they were before RB-E.
 
-// SHA-256 of routerSystem(role) on main before RB-E (commit a77f142), for every role.
+// SHA-256 of routerSystem(role) as OFFER-2 set it (24 Nov 2026: the Google-care tools of blueprint 11), for every role.
+// Before OFFER-2 these were the hashes of main before RB-E (commit a77f142). The guarantee is unchanged: with the request book
+// off the instructions are byte for byte this text, and with it on only the two request tools are added.
 const BEFORE: Record<string, string> = {
-  unknown: "dd12d0319ffdf9538368de0e498d41293b6853b15fd0ec0df421944e5e95f351",
-  prospect: "c3d01ab7509bdb3819119d02fc9e4a7d0748eba9d6adabb90a0da0e59a4767c6",
-  owner: "f467b801d088f2ae4d1d75d1a46605639b930689cec52903452826b66616d045",
-  manager: "adbc54b4ac6aaf7a3d2a57a714cd45c6993af4222ec28595299976d5b727707d",
-  staff: "a89de4e4b78dc3145967418bb035598ed21460d4f4fe11f92bdfde1f50347a26",
-  partner: "ba54f9085f3a9f9a73147c757ee8b7d852cfe4738f7df6743a2628568af613ef",
+  unknown: "4aeb4440b8523d8075029840b6a8ec18064a18ebd1266e2961259f0bb705fad9",
+  prospect: "62971cb6b21187f21ddfea1166372a31f5e0309c08b70317145f6adee3361379",
+  owner: "e53da0902fa1244914b935b452ef58df1a0529168844558db182d3eef938ffcc",
+  manager: "a1368197f2f0aad1d7a5486fb09cc40f50be92c2109381cd0a10d2c3a8742f1f",
+  staff: "0681161d71796a8544221f743d77c5d3950e70647d7b4c14866ba73f2fcceb2e",
+  partner: "e5340b40f415cf4d9d74ab0ffa45c0c14b62e2d2801ea554da107d7198c54e72",
   staff_admin: "b1b31a51e75e0d6222c979ece34d8acc07f5f24aab88ef39ffdba868cb6f9f24",
 };
 const sha = async (s: string) => [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)))].map((b) => b.toString(16).padStart(2, "0")).join("");
