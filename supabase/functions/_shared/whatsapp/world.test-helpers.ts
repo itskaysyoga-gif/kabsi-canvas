@@ -988,11 +988,13 @@ export class World {
     };
   }
 
+  reportDb: Partial<AgentDb> = {};
   deps(): AgentDeps {
     const w = this;
     const out = this.out();
     return {
-      db: this.db(), out, phoneNumberId: PNID, appUrl: "https://kabsi.co",
+      // GATE-2: the report reads a test sets (googleFigures, competitors, feedback, profileHealth, monthlyReport).
+      db: Object.assign(this.db(), this.reportDb), out, phoneNumberId: PNID, appUrl: "https://kabsi.co",
       media: (id) => out.live.media(id),
       ai: async (_system, user) => {
         w.aiCalls++;

@@ -84,9 +84,11 @@ export const TOOLS = {
   // OFFER-2 (blueprint 11): the Google-care tools. waiting, done and hours_now read; week_hours and contact_change are shown
   // back exactly and wait for a tap; guide_field refuses name, address, category, description and services with the guide.
   owner: ["help", "question", "switch", "stats", "cards", "review_link", "referral_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
-    "hours", "post", "billing", "voice", "ask_customer", "person", "waiting", "done", "hours_now", "week_hours", "contact_change", "guide_field"],
+    "hours", "post", "billing", "voice", "ask_customer", "person", "waiting", "done", "hours_now", "week_hours", "contact_change", "guide_field",
+    "competitors", "feedback", "profile_health", "monthly"],
   manager: ["help", "question", "switch", "stats", "cards", "review_link", "referral_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
-    "hours", "post", "voice", "ask_customer", "person", "waiting", "done", "hours_now", "week_hours", "contact_change", "guide_field"],
+    "hours", "post", "voice", "ask_customer", "person", "waiting", "done", "hours_now", "week_hours", "contact_change", "guide_field",
+    "competitors", "feedback", "profile_health", "monthly"],
   staff: ["help", "question", "switch", "photo", "voice", "ask_customer", "person"],
   partner: ["help", "question", "switch", "partner_tool", "person"],
   staff_admin: ["help", "switch", "staff_status", "staff_waiting", "staff_today", "staff_pause", "staff_partners", "staff_payouts", "staff_reset_test", "person"],

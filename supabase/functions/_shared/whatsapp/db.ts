@@ -504,6 +504,12 @@ export const agentDb: AgentDb = {
       return { ok: false, reason: String((e as Error)?.message ?? e).replace(/^apply_(regular_hours|profile_field): /, "").slice(0, 80) };
     }
   },
+  // GATE-2: the report answers, read fresh when asked (monthly-report/on-request.ts); the business is the phone's own.
+  googleFigures: async (l) => (await import("../monthly-report/on-request.ts")).googleFiguresFor(l),
+  monthlyReport: async (l) => (await import("../monthly-report/on-request.ts")).latestMonthlyReport(l),
+  competitors: async (l) => (await import("../monthly-report/on-request.ts")).competitorsFor(l),
+  feedback: async (l) => (await import("../monthly-report/on-request.ts")).feedbackFor(l),
+  profileHealth: async (l) => (await import("../monthly-report/on-request.ts")).profileChecklist(l),
   async mapDetails(scanId) {
     const { data } = await admin().from("visibility_scans").select("location_id, keyword, top3, ranked, average_rank, competitors, state, locations(name)")
       .eq("id", scanId).maybeSingle();

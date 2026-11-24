@@ -60,6 +60,9 @@ import {
 import type { DayKey, GRegularHours } from "../hours.ts";
 import type { ListingChange, WaitingRef } from "./roles.ts";
 import { qrPng } from "./qr-png.ts";
+import { competitorsText, feedbackText, googleStatsBlock, monthlyText, profileHealthText } from "./care-reports.ts";
+import type { DailySeries } from "../insights/summary.ts";
+import type { Checklist, CompetitorResult, MonthlyReport, Theme } from "../monthly-report/api.ts";
 import type { OnboardingAction } from "./router.ts";
 
 export interface AgentDb {
@@ -128,6 +131,18 @@ export interface AgentDb {
   /** The tap on Approve under a weekly hours, phone or website change: the existing listing write and publication pipeline
    *  (apply_regular_hours, apply_profile_field, channel whatsapp). */
   applyListing?(locationId: string, userId: string, change: ListingChange): Promise<{ ok: boolean; reason?: string }>;
+  // GATE-2 (blueprint 11.2 rows 11 to 14, 18): the report reads, on PROOF-2's functions. Each is read fresh from Google when
+  // asked (nothing here is stored); null means there is nothing to read for this business (no Google, or mock for a real owner).
+  /** Google's daily figures for the month that just ended and the month before, from a fresh Performance API read. */
+  googleFigures?(locationId: string): Promise<{ series: DailySeries; source: "live" | "mock" } | null>;
+  /** The latest stored monthly report. */
+  monthlyReport?(locationId: string): Promise<MonthlyReport | null>;
+  /** Nearby totals on request: at most one read a week (competitorTotals "request"), no provider call when too soon. */
+  competitors?(locationId: string): Promise<CompetitorResult>;
+  /** Recurring feedback from a fresh read of the reviews (topics with 3 or more mentions); null when they cannot be read. */
+  feedback?(locationId: string): Promise<Theme[] | null>;
+  /** The Profile Coach checklist (public.coach_checklist). */
+  profileHealth?(locationId: string): Promise<Checklist | null>;
 }
 
 /** Session 10 (master plan 10.2.10): the owner's billing actions, by business. The server checks the owner again. */
@@ -832,8 +847,29 @@ async function businessTool(t: Turn, name: string, arg: string | undefined): Pro
       const days = arg === "30" ? 30 : 7;
       const line = SAY.stats(b.business, days, await t.d.db.stats(b.location_id, days));
       // V3: link opens beside the reviews, never added to them ("An open is not a review.").
-      const g = await t.d.db.growth(b.location_id, days).catch(() => null);
-      return answered(t, g ? `${line}\n\n${growthLine(g)}` : line, "stats");
+      const [g, gf] = await Promise.all([
+        t.d.db.growth(b.location_id, days).catch(() => null),
+        // GATE-2: Google's own calls, direction requests and website clicks, from a fresh read (never stored here).
+        t.d.db.googleFigures ? t.d.db.googleFigures(b.location_id).catch(() => null) : Promise.resolve(null),
+      ]);
+      const google = googleStatsBlock(gf, new Date((t.d.now ?? Date.now)()));
+      return answered(t, [line, g ? growthLine(g) : "", google].filter(Boolean).join("\n\n"), google ? "stats_google" : "stats");
+    }
+    case "competitors": {
+      const r = t.d.db.competitors ? await t.d.db.competitors(b.location_id).catch(() => ({ state: "unavailable" as const })) : { state: "unavailable" as const };
+      return answered(t, competitorsText(r, app), `care_competitors_${r.state}`);
+    }
+    case "feedback": {
+      const r = t.d.db.feedback ? await t.d.db.feedback(b.location_id).catch(() => null) : null;
+      return answered(t, feedbackText(r), r === null ? "care_feedback_unread" : r.length ? "care_feedback" : "care_feedback_none");
+    }
+    case "profile_health": {
+      const c = t.d.db.profileHealth ? await t.d.db.profileHealth(b.location_id).catch(() => null) : null;
+      return answered(t, profileHealthText(c, app), "care_profile_health");
+    }
+    case "monthly": {
+      const r = t.d.db.monthlyReport ? await t.d.db.monthlyReport(b.location_id).catch(() => null) : null;
+      return answered(t, monthlyText(r, app), r ? "care_monthly" : "care_monthly_none");
     }
     case "ask_customer": return askCustomer(t);
     // Cards 2: each card with its place and its taps this week and last week, as a list (a row opens the card).

@@ -107,7 +107,7 @@ export const SAY = {
   // Owner tools (9.3).
   // OFFER-2 (blueprint 11): the Google-care tools only.
   ownerHelp:
-    "You can send\n\"waiting\" for what needs your yes\n\"done\" for what Kabsi did this week\n\"stats\" or \"this month\"\n\"my hours\" for your hours on Google\na new usual time for one day, for example \"Saturdays 10am to 4pm\"\na new phone number or website\na photo, or a few words for a post\n\"review link\" or \"QR\"\n\"cards\" for the taps on your Kabsi cards\n\"reply:\" and your exact reply, or a change to a draft\n\"switch\" to change business\n\"talk to a person\"",
+    "You can send\n\"waiting\" for what needs your yes\n\"done\" for what Kabsi did this week\n\"stats\" or \"this month\"\n\"monthly report\", \"feedback\", \"profile health\" or \"how do I compare\"\n\"my hours\" for your hours on Google\na new usual time for one day, for example \"Saturdays 10am to 4pm\"\na new phone number or website\na photo, or a few words for a post\n\"review link\" or \"QR\"\n\"cards\" for the taps on your Kabsi cards\n\"reply:\" and your exact reply, or a change to a draft\n\"switch\" to change business\n\"talk to a person\"",
   staffHelp: "You can send\nphotos here for the owner to approve\n\"ask a customer\" for the review message\n\"talk to a person\"",
   stats: (business: string, days: number, s: { new_reviews: number; answered: number; waiting: number; average: number | null }) =>
     `${business}, the last ${days} days: ${s.new_reviews} new ${s.new_reviews === 1 ? "review" : "reviews"}${s.average ? `, average ${s.average} stars` : ""}, ${s.answered} answered through Kabsi. ${s.waiting} waiting for you.`,

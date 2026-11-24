@@ -16,16 +16,16 @@ import {
   ALL_METRICS, exampleMonthSeries, figuresRange, type LinkEvent, type Month, monthFigures, monthLabel, type MonthlyInputs, type MonthlyReport,
   monthOfDate, type Nearby, parseMonthOf, type RatingRead, reportedMonth, shiftMonth, type TapRow, zonedMonthStart, composeMonthly,
 } from "./compose.ts";
-import { competitorTotals } from "./competitors.ts";
+import { type CompetitorResult, competitorTotals } from "./competitors.ts";
 import { recurringFeedback } from "./feedback.ts";
 
-type Loc = {
+export type Loc = {
   id: string; name: string; time_zone: string; google_location_id: string | null; google_account_id: string | null;
   is_demo: boolean | null; concierge: boolean | null; emails_paused_until: string | null; status: string;
 };
-const LOC_COLS = "id, name, time_zone, google_location_id, google_account_id, is_demo, concierge, emails_paused_until, status";
+export const LOC_COLS = "id, name, time_zone, google_location_id, google_account_id, is_demo, concierge, emails_paused_until, status";
 const DAY = 86400_000;
-const REVIEWS_READ = 100;
+export const REVIEWS_READ = 100;
 
 async function ratingRead(loc: Loc, now: Date): Promise<RatingRead | null> {
   if (!loc.google_account_id || !loc.google_location_id) return null;
@@ -77,9 +77,15 @@ async function googleBlock(loc: Loc, month: Month, now: Date): Promise<MonthlyIn
 
 /** Up to 3 nearby businesses from one live read. Never in mock mode, never for a demo, never stored. */
 async function nearbyFor(loc: Loc, kind: "monthly" | "request"): Promise<Nearby | null> {
-  if (loc.is_demo || googleMode() === "mock" || performanceSource(loc.google_location_id) !== "live") return null;
+  const r = await competitorRead(loc, kind);
+  return r.state === "ok" ? r.nearby : null;
+}
+
+/** The read itself with its state (GATE-2 shows "too soon" and "none" on WhatsApp). No provider call when too soon. */
+export async function competitorRead(loc: Loc, kind: "monthly" | "request"): Promise<CompetitorResult> {
+  if (loc.is_demo || googleMode() === "mock" || performanceSource(loc.google_location_id) !== "live") return { state: "unavailable" };
   const db = admin();
-  const r = await competitorTotals(kind, {
+  return await competitorTotals(kind, {
     picks: async () => {
       const { data, error } = await db.from("competitor_picks").select("place_id").eq("location_id", loc.id).not("place_id", "is", null).order("picked_at").limit(3);
       if (error) throw error;
@@ -97,7 +103,6 @@ async function nearbyFor(loc: Loc, kind: "monthly" | "request"): Promise<Nearby 
     },
     now: () => new Date(),
   });
-  return r.state === "ok" ? r.nearby : null;
 }
 
 export async function buildMonthly(loc: Loc, month: Month, now = new Date()): Promise<{ report: MonthlyReport; nearby: Nearby | null }> {
