@@ -144,10 +144,12 @@ export function approvalLabel(kind: string, targetType?: string | null): string 
   return k.includes("photo") ? "Photo" : k.includes("post") ? "Post" : k.includes("hours") ? "Hours" : k.includes("protection") || k.includes("revert") ? "Change" : "Reply";
 }
 
-/** "2", "number 2", "#2", "review 2", "2." at the start: the place of an item in the waiting list. */
+/** "2", "number 2", "#2", "review 2", "2." at the start, or one digit on its own ("make 2 shorter"): the place of an item in the
+ *  waiting list. Read only while that list is open. */
 export function numberIn(text: string): number | null {
   const t = norm(text);
-  const m = /(?:^|\s)(?:number|no\.?|#|review|item)\s*(\d{1,2})\b/.exec(t) ?? /^#?(\d{1,2})(?:[.:)\s]|$)/.exec(t);
+  const m = /(?:^|\s)(?:number|no\.?|#|review|item)\s*(\d{1,2})\b/.exec(t) ?? /^#?(\d{1,2})(?:[.:)\s]|$)/.exec(t)
+    ?? /(?:^|\s)(\d)(?:\s|$)/.exec(t);
   const n = m ? Number(m[1]) : NaN;
   return Number.isInteger(n) && n >= 1 && n <= 9 ? n : null;
 }

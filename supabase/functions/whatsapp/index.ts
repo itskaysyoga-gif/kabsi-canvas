@@ -36,7 +36,7 @@ import { onboardingDb } from "../_shared/onboarding/db.ts";
 import { syncPrompts } from "../_shared/visibility/ai/deps.ts";
 import { SAY_ONBOARDING } from "../_shared/onboarding/stages.ts";
 import { VOICE_NOTES } from "../_shared/voice/notes.ts";
-import { alertText, digestDue, morningDigest, type OpsEvent, routeOf, type Summary } from "../_shared/whatsapp/staff-alerts.ts";
+import { type AlertState, digestDue, morningDigest, type OpsEvent, planAlerts, routeOf, type Summary } from "../_shared/whatsapp/staff-alerts.ts";
 import { counted } from "../_shared/webhook-rejections.ts";
 import { isSmoke } from "../_shared/webhook-smoke.ts";
 
@@ -246,15 +246,27 @@ async function tick() {
     const { data } = await admin().rpc("whatsapp_ops_claim", { p_limit: 50 });
     const events = (data ?? []) as OpsEvent[];
     const urgent = events.filter((e) => routeOf(e) === "urgent");
-    const phones = urgent.length ? await staffAdminPhones() : [];
-    for (const e of urgent) {
-      const a = alertText(e);
+    // OFFER-2 item 6: one alert of a kind an hour at most (the rest counted into it) and one "back to normal" line when it clears.
+    const { data: st } = await admin().from("app_settings").select("value").eq("key", "staff_alert_state").maybeSingle();
+    let before: AlertState = {};
+    try {
+      before = st?.value ? JSON.parse(String(st.value)) as AlertState : {};
+    } catch {
+      before = {};
+    }
+    const now = new Date();
+    const plan = planAlerts(urgent, before, now);
+    const lines = [...plan.send, ...plan.clear];
+    const phones = lines.length ? await staffAdminPhones() : [];
+    const hour = now.toISOString().slice(0, 13);
+    for (const a of lines) {
       for (const phone of phones) {
         await notify(deps.out, { phone, userId: null, locationId: null, kind: "staff_alert", urgent: true, body: a.body,
-          template: ref("staff_alert", { summary: a.summary }), dedupe: `ops:${e.id}:${phone}` });
+          template: ref("staff_alert", { summary: a.summary }), dedupe: `ops_kind:${a.kind}:${"count" in a ? "alert" : "clear"}:${hour}:${phone}` });
       }
     }
-    out.alerts = { taken: events.length, urgent: urgent.length };
+    await admin().from("app_settings").upsert({ key: "staff_alert_state", value: JSON.stringify(plan.state), updated_at: now.toISOString() }, { onConflict: "key" });
+    out.alerts = { taken: events.length, urgent: urgent.length, sent: plan.send.length, cleared: plan.clear.length };
   } catch (e) {
     await captureError("whatsapp", e, { step: "staff_alerts" });
   }

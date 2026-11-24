@@ -174,7 +174,9 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
       if (op === "cancel") setNote(`Done. Your plan ends on ${shortDate(r.ends_at ?? null)}.`);
       if (op === "keep") setNote("Done. Your plan carries on.");
       if (op === "downgrade")
-        setNote(`Done. Kabsi at 29 US dollars a month starts on ${shortDate(b?.current_period_end ?? null)}.`);
+        setNote(
+          `Done. Kabsi at 29 US dollars a month starts on ${shortDate(b?.current_period_end ?? null)}.`,
+        );
       if (op === "remove_location")
         setNote(`Done. The extra location ends on ${shortDate(r.ends_at ?? null)}.`);
       setPending(null);
@@ -211,9 +213,7 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
       <Panel className={cn(mine && "ring-2 ring-text-1")}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-display text-h3 font-bold">{PLAN_COPY.oneName}</h2>
-          {mine ? (
-            <StatusPill tone="info">{trial ? "Your trial" : "Your plan"}</StatusPill>
-          ) : null}
+          {mine ? <StatusPill tone="info">{trial ? "Your trial" : "Your plan"}</StatusPill> : null}
         </div>
         <p className="mt-2 font-display text-h2 font-bold">
           ${monthly}
@@ -475,8 +475,7 @@ function StateBanner({
     const founding = (b as Billing & { founding?: boolean }).founding === true;
     return (
       <Banner tone="ok" title={`${name}.`}>
-        Next payment on {longDate(b.current_period_end)}.
-        {founding ? ` ${FOUNDING_LINE}` : ""}
+        Next payment on {longDate(b.current_period_end)}.{founding ? ` ${FOUNDING_LINE}` : ""}
         {units}
       </Banner>
     );

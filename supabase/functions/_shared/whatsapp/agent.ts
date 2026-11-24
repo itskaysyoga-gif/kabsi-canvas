@@ -326,7 +326,8 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   }
   // F-1: a forwarded "Yes" is not the owner's own yes. With something waiting for a yes, nothing is approved and the owner is
   // asked to tap Yes or type it; with nothing waiting it is free text like any other forwarded message.
-  if (cmd.k === "free" && cmd.forwardedYes && businesses(who).length && (RB_QUESTIONS.includes(conv?.open_question?.type ?? "") || (await d.db.openItems(phone)).length)) {
+  if (cmd.k === "free" && cmd.forwardedYes && businesses(who).length && (RB_QUESTIONS.includes(conv?.open_question?.type ?? "")
+    || conv?.open_question?.type === "listing_yes" || (await d.db.openItems(phone)).length)) {
     return answered(t, t.m.fromVoice ? SAY.voiceYes : SAY.forwardedYes, "forwarded_yes");
   }
   // F-1: a forwarded yes, no or number never answers Kabsi's own questions (the search, hours, the monthly question).

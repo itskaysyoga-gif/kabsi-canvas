@@ -1,3 +1,5 @@
+import { FOUNDING_LINE } from "./offer.ts";
+
 // Creem, Kabsi's one payment route (master plan section 10, R-67). One module, no SDK: plain fetch and WebCrypto
 // (10.2.6). The base URL follows CREEM_MODE (test or live); the key is read from Supabase secrets by the caller and
 // sent only to Creem's API (10.2.5). Pure where it can be: the signature check, the product catalogue, the setup plan
@@ -31,6 +33,8 @@ export type Plan = "essentials" | "pro";
 export type Period = "month" | "year";
 export type PriceFamily = "founding" | "list";
 export const PRODUCT_DESCRIPTION = "Your Google profile and reviews, managed from WhatsApp.";
+/** OFFER-2: the founding product's description is the founding line, so Creem's checkout states the month-13 price. */
+export const descriptionOf = (key: ProductKey) => (key === "essentials_month" ? FOUNDING_LINE : PRODUCT_DESCRIPTION);
 // OFFER-2 (blueprint 3.1, R-163): one plan, shown as "Kabsi", internal tier essentials: 29 US dollars a month per location
 // (essentials_month_list, and extra_month for each further location), and the private founding price of 19 a month for the
 // first 12 months (essentials_month). The Pro and yearly products stay here only so a subscription Creem already has is
@@ -53,6 +57,13 @@ export const OFFER_KEYS: readonly ProductKey[] = ["essentials_month_list", "esse
 export const TRIAL_DAYS = 14;
 /** OFFER-2: how long the founding price runs before the list price. */
 export const FOUNDING_MONTHS = 12;
+/** OFFER-2: the day the founding price ends, 12 months after the first payment (billing.ts sets it once). A day past the end of a
+ *  shorter month moves to that month's last day (31 January becomes 31 January a year later; 29 February becomes 28 February). */
+export const foundingEndOf = (firstPaid: Date): Date => {
+  const y = firstPaid.getUTCFullYear() + Math.floor(FOUNDING_MONTHS / 12), m = firstPaid.getUTCMonth() + (FOUNDING_MONTHS % 12);
+  const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(y, m, Math.min(firstPaid.getUTCDate(), last), firstPaid.getUTCHours(), firstPaid.getUTCMinutes(), firstPaid.getUTCSeconds()));
+};
 export const PRODUCT_KEYS = Object.keys(CATALOGUE) as ProductKey[];
 /** The product of a plan in a price family. Every caller names the family, so a change never crosses families. */
 export const planKey = (plan: Plan, period: Period, family: PriceFamily): ProductKey =>
@@ -97,7 +108,7 @@ export function setupPlan(existing: CreemProduct[]): SetupPlan {
     const hit = live.find((p) => p.name === CATALOGUE[key].name) ?? live[0];
     if (hit) {
       taken.add(hit.id);
-      reuse.push({ key, id: hit.id, rename: hit.name !== CATALOGUE[key].name || (hit.description ?? "") !== PRODUCT_DESCRIPTION });
+      reuse.push({ key, id: hit.id, rename: hit.name !== CATALOGUE[key].name || (hit.description ?? "") !== descriptionOf(key) });
     } else if (OFFER_KEYS.includes(key)) create.push(key);
   }
   const unmatched = existing.filter((p) => !taken.has(p.id) && p.status !== "archived")
@@ -105,7 +116,7 @@ export function setupPlan(existing: CreemProduct[]): SetupPlan {
   return { reuse, create, unmatched };
 }
 export const createBody = (key: ProductKey, successUrl: string) => ({
-  name: CATALOGUE[key].name, description: PRODUCT_DESCRIPTION, price: CATALOGUE[key].price, currency: "USD",
+  name: CATALOGUE[key].name, description: descriptionOf(key), price: CATALOGUE[key].price, currency: "USD",
   billing_type: "recurring", billing_period: BILLING_PERIOD[CATALOGUE[key].period], tax_mode: "exclusive",
   tax_category: "saas", default_success_url: successUrl,
 });
@@ -375,7 +386,7 @@ export function creemClient(key: string, mode: Mode, f: Fetch = fetch) {
       return all;
     },
     createProduct: (key: ProductKey, successUrl: string) => call<CreemProduct>("POST", "/products", createBody(key, successUrl)),
-    renameProduct: (id: string, key: ProductKey) => call<CreemProduct>("PATCH", `/products/${encodeURIComponent(id)}`, { name: CATALOGUE[key].name, description: PRODUCT_DESCRIPTION }),
+    renameProduct: (id: string, key: ProductKey) => call<CreemProduct>("PATCH", `/products/${encodeURIComponent(id)}`, { name: CATALOGUE[key].name, description: descriptionOf(key) }),
     // Billing 2: an extra location names the owner's Creem customer by id (Creem takes id or email, never both).
     // OFFER-2: trialDays is Creem's per-checkout free trial (trial_period_days): the card is saved at checkout with a 0 dollar
     // check and the first charge is when the trial ends. Sent only on a business's first plan.

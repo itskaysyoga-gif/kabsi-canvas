@@ -12,7 +12,7 @@ import { paymentFailed, planCancelled } from "./email/account-copy.ts";
 import { outDb } from "./whatsapp/db.ts";
 import { ref } from "./whatsapp/templates.ts";
 import {
-  CATALOGUE, checkoutRequestId, FOUNDING_MONTHS, TRIAL_DAYS, type Creem, creemClient, CreemError, type CreemEvent, effectOf, eventTime, extraKey, familyOfKey,
+  CATALOGUE, checkoutRequestId, foundingEndOf, TRIAL_DAYS, type Creem, creemClient, CreemError, type CreemEvent, effectOf, eventTime, extraKey, familyOfKey,
   isStale, keyOfProduct, ledgerOf, type Message, type Mode, modeOf, orgOf, type Period, type Plan, planKey, type PriceFamily,
   type ProductIds, type ProductKey,
   PRODUCT_KEYS, patchFor, sameMode, scrubEvent, setupPlan, type SubFacts, subFacts, subscriptionOf,
@@ -301,12 +301,6 @@ async function foundingCheck(s: SubRow, family: PriceFamily | null, at: Date = n
     }
   }
 }
-/** OFFER-2: the day the founding price ends, 12 months after the first payment (set only when it is not set yet). */
-export const foundingEndOf = (firstPaid: Date): Date => {
-  const d = new Date(firstPaid.getTime());
-  d.setUTCMonth(d.getUTCMonth() + FOUNDING_MONTHS);
-  return d;
-};
 async function setFoundingEnd(id: string, at: Date) {
   await admin().from("subscriptions").update({ founding_ends_at: foundingEndOf(at).toISOString() }).eq("id", id).is("founding_ends_at", null);
 }

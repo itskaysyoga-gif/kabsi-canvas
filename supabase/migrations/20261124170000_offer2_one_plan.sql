@@ -95,3 +95,53 @@ language sql stable security definer set search_path = '' as $$
 $$;
 revoke all on function public.founding_places_left() from public, anon, authenticated;
 grant execute on function public.founding_places_left() to service_role;
+
+-- 5. WhatsApp (blueprint 11.2 row 6a): a new phone number or website, shown back exactly and approved with a tap, goes through
+-- the existing owner write (apply_profile_field) and its listing_revert publication. apply_profile_field as it stands live
+-- (20261021260000) with its conditions widened for the phone from WhatsApp only, each replaced in its current text; the migration stops if a text is not
+-- found, so nothing else in the function changes. The phone is not a high-risk field (private.protection_high_risk) and the
+-- publication already sends it as phoneNumbers.primaryPhone. The phone is accepted from WhatsApp only (no screen offers it);
+-- the main category stays dashboard only.
+do $$
+declare d text; n text;
+begin
+  d := pg_get_functiondef('public.apply_profile_field(uuid, uuid, text, text, text, jsonb)'::regprocedure);
+  n := replace(d, $x$if p_field not in ('website', 'main_category') then raise exception 'bad_field'; end if;$x$,
+                  $x$if p_field not in ('website', 'main_category') and not (p_field = 'phone' and p_channel = 'whatsapp') then raise exception 'bad_field'; end if;$x$);
+  n := replace(n, $x$if p_channel <> 'dashboard' then raise exception 'bad_channel'; end if;$x$,
+                  $x$if p_channel <> 'dashboard' and not (p_channel = 'whatsapp' and p_field in ('website', 'phone')) then raise exception 'bad_channel'; end if;$x$);
+  n := replace(n, $x$    if trim(p_display) !~ '^https?://[^[:space:]]+$' then raise exception 'bad_value'; end if;
+  else$x$, $x$    if trim(p_display) !~ '^https?://[^[:space:]]+$' then raise exception 'bad_value'; end if;
+  elsif p_field = 'phone' then
+    if trim(p_display) !~ '^\+?[0-9][0-9 ().-]{5,22}[0-9]$'
+       or length(regexp_replace(p_display, '[^0-9]', '', 'g')) not between 7 and 15 then raise exception 'bad_value'; end if;
+  else$x$);
+  n := replace(n, $x$and (p_field = 'website' or f.value -> 'raw' is not distinct from p_raw) then$x$,
+                  $x$and (p_field in ('website', 'phone') or f.value -> 'raw' is not distinct from p_raw) then$x$);
+  n := replace(n, $x$jsonb_build_object('display', trim(p_display), 'raw', case when p_field = 'website' then to_jsonb(trim(p_display)) else p_raw end),$x$,
+                  $x$jsonb_build_object('display', trim(p_display), 'raw', case when p_field = 'website' then to_jsonb(trim(p_display))
+      when p_field = 'phone' then jsonb_build_object('primaryPhone', trim(p_display)) else p_raw end),$x$);
+  n := replace(n, $x$case when p_field = 'website' then 'You changed your website link in Kabsi.' else 'You changed your categories in Kabsi.' end);$x$,
+                  $x$case when p_field = 'website' then 'You changed your website link in Kabsi.'
+         when p_field = 'phone' then 'You changed your phone number in Kabsi.' else 'You changed your categories in Kabsi.' end);$x$);
+  if n = d or n !~ $x$p_field = 'phone' and p_channel = 'whatsapp'\) then raise exception 'bad_field'$x$ or n !~ $x$p_channel = 'whatsapp' and p_field in$x$ or n !~ $x$elsif p_field = 'phone' then$x$
+     or n !~ $x$p_field in \('website', 'phone'\) or f.value$x$ or n !~ 'primaryPhone' or n !~ 'You changed your phone number' then
+    raise exception 'apply_profile_field: the text was not found';
+  end if;
+  execute n;
+end $$;
+
+-- 6. The pipeline's WhatsApp rule (K-129 point 2) refuses identity fields, the phone among them. OFFER-2 narrows it for one
+-- case only: a phone number the owner typed on WhatsApp, saw shown back exactly and approved with a tap (a profile_changes row
+-- of source owner_edit, made only by apply_profile_field). A phone change Google made, and every other identity field, stay
+-- refused on WhatsApp. approve_publication as it stands live, with that one condition replaced in its current text.
+do $$
+declare d text; n text;
+begin
+  d := pg_get_functiondef('public.approve_publication(text, uuid, jsonb, uuid, text, integer)'::regprocedure);
+  n := replace(d, $x$where (id = p_target_id or listing_change_id = p_target_id) and private.whatsapp_identity_field(field)))) then$x$,
+                  $x$where (id = p_target_id or listing_change_id = p_target_id) and private.whatsapp_identity_field(field)
+               and not (field = 'phone' and source = 'owner_edit')))) then$x$);
+  if n = d then raise exception 'approve_publication: the WhatsApp identity condition was not found'; end if;
+  execute n;
+end $$;
