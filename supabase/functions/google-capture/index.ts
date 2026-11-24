@@ -3,6 +3,7 @@
 // writes to Google and never changes GOOGLE_MODE.
 import { accountLocations, capture, categoriesList, inventory, invitations, postsList, reviews, v4Probe } from "../_shared/google/capture.ts";
 import { secretMatches } from "../_shared/sec1/guards.ts";
+import { serviceKey } from "../_shared/service-key.ts";
 
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { "content-type": "application/json" } });
 async function isInternal(req: Request) {
@@ -10,7 +11,7 @@ async function isInternal(req: Request) {
   if (!given) return false;
   const res = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/rpc/internal_secret`, {
     method: "POST",
-    headers: { "content-type": "application/json", apikey: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}` },
+    headers: { "content-type": "application/json", apikey: serviceKey(), authorization: `Bearer ${serviceKey()}` },
     body: JSON.stringify({ p_name: "cron_secret" }),
   });
   // Sec 1: constant time, like isInternal in _shared/kabsi.ts.

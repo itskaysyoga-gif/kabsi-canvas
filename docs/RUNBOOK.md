@@ -265,3 +265,13 @@ drill. Red or missing for two weeks is an incident: follow this page.
    is gone, set a new BACKUP_PASSPHRASE at once so next week's backup is readable, and note the date older sets died.
 
 **Over when:** the last Backup and the last Restore drill are green and the staff summary shows today's or last Sunday's date.
+
+## 11. Nothing syncs, publishes or sends (the scheduler is silent)
+
+**You notice:** the outside monitor on `https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/health` goes red (503: no line in `jobs_log` for 15 minutes), or System health shows jobs waiting.
+
+1. Open that address in a browser. `silent` means the cron ticks are not reaching the functions. `unknown` or a 503 with no body means the function cannot read the database.
+2. Supabase, Edge Functions, Logs for `cron-tick`. A 403 on every call means the functions cannot read `cron_secret`: the database key they send is refused. Settings, API Keys: is the secret key behind `KABSI_SECRET_KEY` still listed? Settings, JWT Keys: was a key rotated?
+3. Make a new secret key (Secret keys, New secret key), then Edge Functions, Secrets, set `KABSI_SECRET_KEY` to it. You type it; nobody pastes it into a chat.
+4. Before the jobs run again, look at what waits: System health, publications in "approved", and any `publish` or `care_posts` job older than two days. Cancel what is stale so nothing old reaches Google.
+5. Over when `/health` answers 200 and a new line appears in `jobs_log` every minute.

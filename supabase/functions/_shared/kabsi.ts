@@ -2,6 +2,7 @@
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.57.4";
 import { unsubscribeHeaders } from "./email/unsubscribe.ts";
 import { carriesUser } from "./jwt-user.ts";
+import { serviceKey } from "./service-key.ts";
 import { RELEASE } from "./release.ts";
 import { scrubFields as scrub, scrubText } from "./log-scrub.ts";
 import { fingerprint, inAutomatedRequest, limiterKey, repeatWindow, REPEAT_WINDOW_MS, withRequest } from "./sentry-gate.ts";
@@ -29,7 +30,7 @@ export function fail(code: string, message: string, status = 400) {
 // ─── clients
 let adminClient: SupabaseClient | null = null;
 export function admin(): SupabaseClient {
-  adminClient ??= createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+  adminClient ??= createClient(Deno.env.get("SUPABASE_URL")!, serviceKey(), {
     auth: { persistSession: false },
   });
   return adminClient;
