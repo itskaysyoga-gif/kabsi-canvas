@@ -1,3 +1,5 @@
+import { FOUNDING_LINE } from "./offer.ts";
+
 // Creem, Kabsi's one payment route (master plan section 10, R-67). One module, no SDK: plain fetch and WebCrypto
 // (10.2.6). The base URL follows CREEM_MODE (test or live); the key is read from Supabase secrets by the caller and
 // sent only to Creem's API (10.2.5). Pure where it can be: the signature check, the product catalogue, the setup plan
@@ -31,17 +33,36 @@ export type Plan = "essentials" | "pro";
 export type Period = "month" | "year";
 export type PriceFamily = "founding" | "list";
 export const PRODUCT_DESCRIPTION = "Your Google profile and reviews, managed from WhatsApp.";
+/** OFFER-2: the founding product's description is the founding line, so Creem's checkout states the month-13 price. */
+export const descriptionOf = (key: ProductKey) => (key === "essentials_month" ? FOUNDING_LINE : PRODUCT_DESCRIPTION);
+// OFFER-2 (blueprint 3.1, R-163): one plan, shown as "Kabsi", internal tier essentials: 29 US dollars a month per location
+// (essentials_month_list, and extra_month for each further location), and the private founding price of 19 a month for the
+// first 12 months (essentials_month). The Pro and yearly products stay here only so a subscription Creem already has is
+// still read correctly; setup never creates them again (OFFER_KEYS).
 export const CATALOGUE: Record<ProductKey, { name: string; price: number; period: Period; plan: Plan | "extra" }> = {
-  essentials_month: { name: "Kabsi Essentials, monthly, launch price", price: 1900, period: "month", plan: "essentials" },
+  essentials_month: { name: "Kabsi, monthly, founding price", price: 1900, period: "month", plan: "essentials" },
   essentials_year: { name: "Kabsi Essentials, yearly, launch price", price: 19000, period: "year", plan: "essentials" },
   pro_month: { name: "Kabsi Pro, monthly, launch price", price: 3900, period: "month", plan: "pro" },
   pro_year: { name: "Kabsi Pro, yearly, launch price", price: 39000, period: "year", plan: "pro" },
-  essentials_month_list: { name: "Kabsi Essentials, monthly", price: 2900, period: "month", plan: "essentials" },
+  essentials_month_list: { name: "Kabsi, monthly", price: 2900, period: "month", plan: "essentials" },
   essentials_year_list: { name: "Kabsi Essentials, yearly", price: 29000, period: "year", plan: "essentials" },
   pro_month_list: { name: "Kabsi Pro, monthly", price: 5900, period: "month", plan: "pro" },
   pro_year_list: { name: "Kabsi Pro, yearly", price: 59000, period: "year", plan: "pro" },
-  extra_month: { name: "Extra location", price: 1500, period: "month", plan: "extra" },
+  extra_month: { name: "Kabsi, extra location, monthly", price: 2900, period: "month", plan: "extra" },
   extra_year: { name: "Extra location", price: 15000, period: "year", plan: "extra" },
+};
+/** OFFER-2: the products the setup action makes. Everything else in the catalogue is only recognised, never created. */
+export const OFFER_KEYS: readonly ProductKey[] = ["essentials_month_list", "essentials_month", "extra_month"];
+/** OFFER-2: Creem's free trial on the first checkout (the card is saved at checkout and charged when the trial ends). */
+export const TRIAL_DAYS = 14;
+/** OFFER-2: how long the founding price runs before the list price. */
+export const FOUNDING_MONTHS = 12;
+/** OFFER-2: the day the founding price ends, 12 months after the first payment (billing.ts sets it once). A day past the end of a
+ *  shorter month moves to that month's last day (31 January becomes 31 January a year later; 29 February becomes 28 February). */
+export const foundingEndOf = (firstPaid: Date): Date => {
+  const y = firstPaid.getUTCFullYear() + Math.floor(FOUNDING_MONTHS / 12), m = firstPaid.getUTCMonth() + (FOUNDING_MONTHS % 12);
+  const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(y, m, Math.min(firstPaid.getUTCDate(), last), firstPaid.getUTCHours(), firstPaid.getUTCMinutes(), firstPaid.getUTCSeconds()));
 };
 export const PRODUCT_KEYS = Object.keys(CATALOGUE) as ProductKey[];
 /** The product of a plan in a price family. Every caller names the family, so a change never crosses families. */
@@ -77,25 +98,28 @@ export type SetupPlan = {
   unmatched: { id: string; name: string; price: number; currency: string; billing_period: string | null }[];
 };
 /** What the setup action does with the products Creem already has: reuse an exact match (renaming it to Kabsi's name),
- * create what is missing, and list everything else for Rashid to archive. It never deletes. */
+ * create what is missing of the one offer (OFFER_KEYS), and list everything else for Rashid to archive. It never deletes. */
 export function setupPlan(existing: CreemProduct[]): SetupPlan {
   const taken = new Set<string>();
   const reuse: SetupPlan["reuse"] = [];
   const create: ProductKey[] = [];
   for (const key of PRODUCT_KEYS) {
     const live = existing.filter((p) => !taken.has(p.id) && matches(p, key));
-    const hit = live.find((p) => p.name === CATALOGUE[key].name) ?? live[0];
+    // OFFER-2 review: the list plan and the extra location are both 29 a month, so where two keys share a price and a period a
+    // product is taken only by its exact name.
+    const shared = PRODUCT_KEYS.some((k) => k !== key && CATALOGUE[k].price === CATALOGUE[key].price && CATALOGUE[k].period === CATALOGUE[key].period);
+    const hit = live.find((p) => p.name === CATALOGUE[key].name) ?? (shared ? undefined : live[0]);
     if (hit) {
       taken.add(hit.id);
-      reuse.push({ key, id: hit.id, rename: hit.name !== CATALOGUE[key].name || (hit.description ?? "") !== PRODUCT_DESCRIPTION });
-    } else create.push(key);
+      reuse.push({ key, id: hit.id, rename: hit.name !== CATALOGUE[key].name || (hit.description ?? "") !== descriptionOf(key) });
+    } else if (OFFER_KEYS.includes(key)) create.push(key);
   }
   const unmatched = existing.filter((p) => !taken.has(p.id) && p.status !== "archived")
     .map((p) => ({ id: p.id, name: p.name, price: p.price, currency: p.currency, billing_period: p.billing_period ?? null }));
   return { reuse, create, unmatched };
 }
 export const createBody = (key: ProductKey, successUrl: string) => ({
-  name: CATALOGUE[key].name, description: PRODUCT_DESCRIPTION, price: CATALOGUE[key].price, currency: "USD",
+  name: CATALOGUE[key].name, description: descriptionOf(key), price: CATALOGUE[key].price, currency: "USD",
   billing_type: "recurring", billing_period: BILLING_PERIOD[CATALOGUE[key].period], tax_mode: "exclusive",
   tax_category: "saas", default_success_url: successUrl,
 });
@@ -300,7 +324,12 @@ export function effectOf(e: CreemEvent, ids: ProductIds): Effect {
     case "dispute.created":
       return { ...none, alert: "dispute" };
     case "subscription.trialing":
-      return { ...none, alert: "trialing" };
+      // A trialing event that arrives late for a subscription already cancelled or expired changes nothing.
+      if (f.status && !["trialing", "scheduled_cancel"].includes(f.status)) return none;
+      // OFFER-2: the 14-day trial with a card. The plan works until the trial ends (Creem's period end); Creem charges then and
+      // sends subscription.paid, or a cancel before day 14 ends it with nothing paid. Not a payment, so no founding check.
+      return { ...none, write: { state: "active", ...plan, units: f.units, periodStart: f.periodStart, periodEnd: f.periodEnd, pastDue: "clear",
+        cancelAtPeriodEnd: f.status === "scheduled_cancel" } };
     default:
       return none;
   }
@@ -362,11 +391,14 @@ export function creemClient(key: string, mode: Mode, f: Fetch = fetch) {
       return all;
     },
     createProduct: (key: ProductKey, successUrl: string) => call<CreemProduct>("POST", "/products", createBody(key, successUrl)),
-    renameProduct: (id: string, key: ProductKey) => call<CreemProduct>("PATCH", `/products/${encodeURIComponent(id)}`, { name: CATALOGUE[key].name, description: PRODUCT_DESCRIPTION }),
+    renameProduct: (id: string, key: ProductKey) => call<CreemProduct>("PATCH", `/products/${encodeURIComponent(id)}`, { name: CATALOGUE[key].name, description: descriptionOf(key) }),
     // Billing 2: an extra location names the owner's Creem customer by id (Creem takes id or email, never both).
-    createCheckout: (b: { productId: string; units?: number; requestId: string; successUrl: string; email?: string | null; customerId?: string | null; metadata: Record<string, string> }) =>
+    // OFFER-2: trialDays is Creem's per-checkout free trial (trial_period_days): the card is saved at checkout with a 0 dollar
+    // check and the first charge is when the trial ends. Sent only on a business's first plan.
+    createCheckout: (b: { productId: string; units?: number; requestId: string; successUrl: string; email?: string | null; customerId?: string | null; metadata: Record<string, string>; trialDays?: number }) =>
       call<{ id: string; checkout_url: string }>("POST", "/checkouts", {
         product_id: b.productId, units: b.units ?? 1, request_id: b.requestId, success_url: b.successUrl,
+        ...(b.trialDays ? { trial_period_days: b.trialDays } : {}),
         ...(b.customerId ? { customer: { id: b.customerId } } : b.email ? { customer: { email: b.email } } : {}), metadata: b.metadata,
       }),
     portalLink: (customerId: string) => call<{ customer_portal_link: string }>("POST", "/customers/billing", { customer_id: customerId }),

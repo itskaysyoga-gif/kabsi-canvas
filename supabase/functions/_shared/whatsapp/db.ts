@@ -4,7 +4,7 @@
 // from code: WHATSAPP_NUMBER (whatsapp-setting.ts) and the KAPSO_PHONE_NUMBER_ID secret.
 import { admin, APP_URL, internalSecret, log, rateLimit, sha256Hex } from "../kabsi.ts";
 import { errorText } from "../log-scrub.ts";
-import { message, MODELS, newMeter, task } from "../ai.ts";
+import { message, MODELS, newMeter } from "../ai.ts";
 import { recordAiUsage } from "../ai-budget.ts";
 import { type Nora, noraUser, noraWhatsAppSystem } from "./nora.ts";
 import { acceptUpload } from "../photos/intake.ts";
@@ -212,7 +212,8 @@ async function publicFacts(): Promise<string> {
 /** Nora on WhatsApp: one call of Nora's chat model (Sonnet, 28.6) with the cached facts, counted per agent (25.8). */
 function noraFor(key: string | undefined): Nora | null {
   if (!key) return null;
-  const chat = task("nora", "chat");
+  // OFFER-2 (blueprint 11.3): answers on WhatsApp use the small model (the check model), not the site assistant's.
+  const chat = { model: MODELS.check, maxTokens: 600, effort: undefined };
   return async (question, o) => {
     // A ceiling for the whole number keeps the credit safe (R-45).
     if (!(await rateLimit("wa_nora", 300, 3600))) throw new Error("nora_rate_limited");
@@ -458,6 +459,51 @@ export const agentDb: AgentDb = {
       p_body: `${summary}. Phone ending ${phone.slice(-4)}. Answer in the Kapso inbox.`, p_dedupe: `wa_handoff:${phone}:${new Date().toISOString().slice(0, 13)}` });
   },
   outboxGet: (phone, ids) => outDb.get(phone, ids),
+  // OFFER-2 (blueprint 11): the Google-care reads. The location is always the phone's own verified business (agent.ts).
+  // No review text is read: the first name and the stars only.
+  async waiting(locationId) {
+    const [r, p] = await Promise.all([
+      admin().from("reviews").select("id, star_rating, reviewer_name, state").eq("location_id", locationId).in("state", ["new", "drafted"])
+        .order("review_created_at", { ascending: false, nullsFirst: false }).limit(9),
+      admin().from("profile_changes").select("id, field").eq("location_id", locationId).in("status", ["detected", "awaiting_review"])
+        .neq("source", "owner_edit").order("created_at", { ascending: false }).limit(5),
+    ]);
+    if (r.error) throw r.error;
+    if (p.error) throw p.error;
+    const label: Record<string, string> = { regular_hours: "opening hours", phone: "phone number", website: "website", name: "business name",
+      address: "address", main_category: "main category", open_status: "open status", map_pin: "map pin" };
+    return {
+      reviews: (r.data ?? []).map((x) => ({ id: x.id as string, stars: (x.star_rating as number | null) ?? null,
+        first_name: String(x.reviewer_name ?? "").trim().split(/\s+/)[0] || null, drafted: x.state === "drafted" })),
+      problems: (p.data ?? []).map((x) => ({ id: x.id as string, label: label[x.field as string] ?? String(x.field).replace(/_/g, " ") })),
+    };
+  },
+  async lastReport(locationId) {
+    const { data, error } = await admin().from("weekly_reports").select("week_of, data").eq("location_id", locationId)
+      .order("week_of", { ascending: false }).limit(1).maybeSingle();
+    if (error) throw error;
+    return data ? { week_of: String(data.week_of), data: (data.data ?? {}) as Record<string, unknown> } : null;
+  },
+  async currentHours(locationId) {
+    const { data, error } = await admin().from("knowledge_facts").select("value").eq("location_id", locationId)
+      .eq("slot", "profile.regular_hours").is("superseded_by", null).maybeSingle();
+    if (error) throw error;
+    const raw = (data?.value as { raw?: unknown } | null)?.raw;
+    return raw && typeof raw === "object" ? raw as { periods?: [] } : null;
+  },
+  // The tap on Approve: the existing listing write (the owner's approval of exactly what was shown) and its publication.
+  async applyListing(locationId, userId, change) {
+    try {
+      if (change.field === "regular_hours") {
+        await rpc("apply_regular_hours", { p_location: locationId, p_user: userId, p_channel: "whatsapp", p_display: change.display, p_raw: change.raw });
+      } else {
+        await rpc("apply_profile_field", { p_location: locationId, p_user: userId, p_channel: "whatsapp", p_field: change.field, p_display: change.value, p_raw: null });
+      }
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, reason: String((e as Error)?.message ?? e).replace(/^apply_(regular_hours|profile_field): /, "").slice(0, 80) };
+    }
+  },
   async mapDetails(scanId) {
     const { data } = await admin().from("visibility_scans").select("location_id, keyword, top3, ranked, average_rank, competitors, state, locations(name)")
       .eq("id", scanId).maybeSingle();

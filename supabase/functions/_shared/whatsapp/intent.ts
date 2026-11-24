@@ -14,19 +14,27 @@ export const inMessage = (part: string | undefined, message: string) => !!part?.
 
 export type Ai = (system: string, user: string) => Promise<string>;
 
+// OFFER-2 (blueprint 11): only the Google-care tools are described to the router; the request book's tools are offered
+// only where the request book is on (off by setting since OFFER-2).
 const DESCRIBE: Record<string, string> = {
   help: "the person asks what they can send or do in this chat (the menu)",
-  question: "a question about Kabsi itself: what it does, how it works, plans, the trial, cancelling, safety, Google, reviews (args.text: the question)",
+  question: "a question about Kabsi itself: what it does, how it works, the plan, the trial, cancelling, safety, Google, reviews (args.text: the question)",
   switch: "the person wants to change business or role",
-  stats: "numbers for the last days (args.days: 7 or 30)",
+  waiting: "what needs the person's attention or yes now: unanswered reviews, things to approve, problems found on the Google profile",
+  done: "what Kabsi did this week, the weekly summary or report",
+  stats: "numbers for the last days, such as how many reviews came in (args.days: 7, or 30 for this month)",
   review_link: "the review link",
-  qr: "the QR card",
+  qr: "the review QR code",
   ask_customer: "the person wants a ready message to send customers asking for a review (Kabsi never sends it and never gets a customer's number)",
-  edit_draft: "change the last review reply draft (args.instruction: what to change, in the person's words)",
+  edit_draft: "change a review reply draft, for example more professional or shorter; a number from the waiting list may name the review (args.instruction: what to change, in the person's words)",
   exact_reply: "the person typed the exact reply text they want (args.text)",
-  hours: "opening hours, early close, closed days or holiday hours (args.text)",
-  post: "a post or news for Google (args.text)",
-  billing: "plan, upgrade, card, invoice or cancel",
+  hours_now: "the person asks what their opening hours on Google are now",
+  week_hours: "a lasting change to the usual weekly opening hours of one day of the week, for example every Saturday (args.text)",
+  hours: "a one-off hours change for a date: closed tomorrow, close early today, holiday hours (args.text)",
+  contact_change: "a new phone number or website for the Google profile (args.text)",
+  guide_field: "a change to the business name, address, category, description or services, which Kabsi does not make from a chat",
+  post: "a post or news for Google, in the person's own words (args.text)",
+  billing: "the plan, card, invoice or cancel",
   person: "the person wants a human",
   scan: "the person gives a business name for a free check (args.name)",
   send_map: "the person wants the full map sent to WhatsApp",
@@ -99,6 +107,6 @@ export async function route(ai: Ai, role: RoleName, text: string, opts: { reques
   if (tool === "exact_reply" && !inMessage(arg("text"), text)) return { command: { k: "free", text }, lang, question: null };
   const value = tool === "stats" ? (arg("days") === "30" ? "30" : "7")
     : tool === "edit_draft" ? arg("instruction") : tool === "exact_reply" ? arg("text") : tool === "scan" ? arg("name")
-    : tool === "hours" || tool === "post" || tool === "question" ? arg("text") : undefined;
+    : tool === "hours" || tool === "post" || tool === "question" || tool === "week_hours" || tool === "contact_change" ? arg("text") : undefined;
   return { command: { k: "tool", tool, arg: value }, lang, question: null };
 }

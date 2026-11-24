@@ -32,6 +32,8 @@ export type Command =
   // F-1: a forwarded message whose words would be a yes, a no or a number. forwardedAnswer: it never answers Kabsi's questions;
   // forwardedYes: it is never the owner's yes (agent.ts).
   | { k: "free"; text: string; forwardedAnswer?: true; forwardedYes?: true }
+  // OFFER-2: Approve under a weekly hours, phone or website change shown back on WhatsApp (by the open question's nonce).
+  | { k: "listing_yes"; nonce: string }
   | { k: "empty" };
 
 export type OnboardingAction = "yes" | "help" | "someone_else" | "cannot_find" | "done" | "skip_first";
@@ -56,6 +58,11 @@ const WORDS: [RegExp, string, string?][] = [
   [/^(hi|hello|hey|hi kabsi|hello kabsi|hola|good (morning|afternoon|evening)|مرحبا|السلام عليكم|اهلا|أهلا)$/, "greet"],
   [/^(show me)$/, "show"],
   [/^(switch|change business|cambiar|تغيير)$/, "switch"],
+  // OFFER-2 (blueprint 11): what is waiting, what Kabsi did, and the hours on Google now. "waiting" from Kabsi's own staff
+  // phone stays the staff tool (agent.ts tool()).
+  [/^(what needs my attention|what is waiting|whats waiting|anything waiting|pending|to do|my list)$/, "waiting"],
+  [/^(done|what did you do( this week)?|what did kabsi do( this week)?|weekly report|my report|report)$/, "done"],
+  [/^(hours|my hours|opening hours|my opening hours|current hours|what are my hours|what are my opening hours)$/, "hours_now"],
   [/^(stats|statistics|numbers|how did we do( this week)?|estadísticas|estadisticas|إحصائيات|احصائيات)$/, "stats", "7"],
   [/^(this month|month|stats month|este mes|هذا الشهر)$/, "stats", "30"],
   [/^(review link|link|my link|enlace|رابط|رابط التقييم)$/, "review_link"],
@@ -171,6 +178,8 @@ export function parseButton(id: string): Command {
   if (pr) return { k: "tool", tool: "staff_payouts", arg: `approve:${pr[1]}` };
   const zr = /^zr:([a-z0-9]{8})$/.exec(id);
   if (zr) return { k: "tool", tool: "staff_reset_test", arg: `confirm:${zr[1]}` };
+  const lw = /^wy:([a-z0-9]{8})$/.exec(id);
+  if (lw) return { k: "listing_yes", nonce: lw[1] };
   const st = /^s:(status|waiting|today)$/.exec(id);
   if (st) return { k: "tool", tool: `staff_${st[1]}` };
   const map = /^m:(s|l)(?::([0-9a-f-]{36}))?$/.exec(id);

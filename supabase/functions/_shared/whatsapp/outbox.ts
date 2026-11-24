@@ -51,13 +51,15 @@ export const listAsText = (body: string, l: ListMsg, footer?: string) =>
  *  Look 2: `extra` carries the footer of a message with buttons or a list, and the list itself. The record keeps the body
  *  and the buttons as before. */
 export async function reply(o: Out, s: SendState, phone: string, body: string, buttons?: Button[], meta: { userId?: string | null; locationId?: string | null } = {},
-  extra: { footer?: string; list?: ListMsg } = {}): Promise<string> {
+  extra: { footer?: string; list?: ListMsg; png?: Uint8Array } = {}): Promise<string> {
   const sender = senderFor(o, s);
   let providerId: string | null = null;
   let state = doneState(sender);
   let error: string | null = null;
   try {
-    const r = extra.list && !buttons?.length
+    // OFFER-2: an image with the line as its caption (the review QR code); a sender that cannot send images sends the line.
+    const r = extra.png?.length && sender.image ? await sender.image(phone, extra.png, body, (buttons ?? []).slice(0, 3))
+      : extra.list && !buttons?.length
       ? (sender.list ? await sender.list(phone, body, extra.list, extra.footer) : await sender.text(phone, listAsText(body, extra.list, extra.footer)))
       : buttons?.length ? await sender.buttons(phone, body, buttons.slice(0, 3), extra.footer) : await sender.text(phone, body);
     providerId = r.id;

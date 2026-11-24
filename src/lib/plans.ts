@@ -85,6 +85,16 @@ export async function billingAction(
 /** Lines of docs/COPY.md sections 19 and 3, and the closed-button label of master plan 10.2.13. */
 export const PLAN_COPY = {
   title: "Your plan",
+  /** OFFER-2 (blueprint 3.1): the one plan, its name, its work (the approved four lines) and its button. */
+  oneName: "Kabsi",
+  work: [
+    "Reply to every review",
+    "Keep your details right",
+    "Post when something changes",
+    "See the work, every Monday",
+  ],
+  nothingWithoutYes: "Nothing goes live without your yes",
+  start: "Start 14 days free",
   chooseEssentials: "Choose Essentials",
   choosePro: "Choose Pro",
   creem: "Card payments will be processed by Creem, our merchant of record.",
@@ -95,7 +105,7 @@ export const PLAN_COPY = {
   afterAccess: "You can choose a plan once Kabsi's access works.",
 } as const;
 export const PAID_NAMES: Record<string, string> = {
-  essentials_month: "Kabsi Essentials, monthly",
+  essentials_month: "Kabsi, monthly",
   essentials_year: "Kabsi Essentials, yearly",
   pro_month: "Kabsi Pro, monthly",
   pro_year: "Kabsi Pro, yearly",

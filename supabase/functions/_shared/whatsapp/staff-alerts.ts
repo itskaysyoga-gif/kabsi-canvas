@@ -153,3 +153,56 @@ export function digestDue(now: Date): { due: boolean; day: string } {
   const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
   return { due: Number(get("hour")) === 8, day: `${get("year")}-${get("month")}-${get("day")}` };
 }
+
+// ─── OFFER-2 item 6: at most one alert of a kind an hour, and one "back to normal" line when it clears.
+// On 24 Nov 2026 the restart after a 10-day outage turned 230 stored warnings into separate WhatsApp alerts until Meta rate-limited
+// them. Now the tick groups the urgent events of one kind into one alert, sends a kind again only an hour after its last alert
+// (the events in between are counted into it), and says once that a kind is back to normal when an hour passes with none.
+
+export const ALERT_GAP_MS = 60 * 60_000;
+/** What the tick remembers about each kind (app_settings staff_alert_state): when it last alerted, when it last saw one, and how
+ *  many it held back since. */
+export type AlertKindState = { title: string; last_sent: string | null; last_seen: string; held: number; open: boolean };
+export type AlertState = Record<string, AlertKindState>;
+export type AlertPlan = {
+  send: { kind: string; body: string; summary: string; count: number }[];
+  clear: { kind: string; body: string; summary: string }[];
+  state: AlertState;
+};
+
+/** The alerts to send now, from the urgent events just taken and what was sent before. Pure. */
+export function planAlerts(events: OpsEvent[], before: AlertState, now: Date): AlertPlan {
+  const state: AlertState = Object.fromEntries(Object.entries(before ?? {}).map(([k, v]) => [k, { ...v }]));
+  const byKind = new Map<string, OpsEvent[]>();
+  for (const e of events.filter((x) => routeOf(x) === "urgent")) byKind.set(e.kind, [...(byKind.get(e.kind) ?? []), e]);
+  const send: AlertPlan["send"] = [];
+  for (const [kind, list] of byKind) {
+    const latest = [...list].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at) || b.id - a.id)[0]!;
+    const a = alertText(latest);
+    const s = state[kind] ?? { title: a.summary, last_sent: null, last_seen: now.toISOString(), held: 0, open: false };
+    s.title = a.summary;
+    s.last_seen = now.toISOString();
+    s.held += list.length;
+    const due = !s.last_sent || now.getTime() - Date.parse(s.last_sent) >= ALERT_GAP_MS;
+    if (due) {
+      const n = s.held;
+      send.push({ kind, summary: a.summary, count: n,
+        body: n > 1 ? `${a.body}\n\n${n} alerts of this kind came in together. Kabsi sends this kind at most once an hour.` : a.body });
+      s.last_sent = now.toISOString();
+      s.held = 0;
+      s.open = true;
+    }
+    state[kind] = s;
+  }
+  const clear: AlertPlan["clear"] = [];
+  for (const [kind, s] of Object.entries(state)) {
+    if (byKind.has(kind) || !s.open || now.getTime() - Date.parse(s.last_seen) < ALERT_GAP_MS) continue;
+    const held = s.held ? ` ${s.held} more came in after the last alert.` : "";
+    clear.push({ kind, summary: `Back to normal: ${s.title}`, body: `Kabsi staff alert: back to normal. ${s.title}: nothing new for an hour.${held}` });
+    s.open = false;
+    s.held = 0;
+  }
+  // Kinds that are closed and quiet for a day are forgotten, so the state stays small.
+  for (const [kind, s] of Object.entries(state)) if (!s.open && now.getTime() - Date.parse(s.last_seen) > 24 * ALERT_GAP_MS) delete state[kind];
+  return { send, clear, state };
+}

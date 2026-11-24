@@ -6,3 +6,5 @@ pnpm-lock.yaml
 package-lock.json
 bun.lock
 routeTree.gen.ts
+# OFFER-2: the shared offer file is kept byte for byte as given (blueprint 3.1, R-163); tests/offer2.test.ts holds it.
+src/lib/offer.ts
