@@ -1586,6 +1586,9 @@ Every guide's words are in its own content file, src/content/guides/<slug>.tsx; 
 | reply-to-reviews-about-no-shows-and-cancellation-fees | nail-technician | Reviews | cancellation fee? |
 | where-to-put-your-google-review-link-salon | barber-shave | Reviews | review link? |
 | why-google-shows-wrong-details-for-your-salon | spa-facial | Problems and fixes | wrong details |
+| where-to-put-your-google-review-link | cafe-barista | Reviews | review link |
+| ask-for-google-reviews-from-jobber | auto-garage | Reviews | from Jobber |
+| ask-for-google-reviews-from-calendly | physio-stretch | Reviews | from Calendly |
 
 ## 56. Industries 3: the industry pages short and scannable (5 Nov 2026, master plan 30.33 item 2)
 

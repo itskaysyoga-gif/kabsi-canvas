@@ -14,7 +14,7 @@ export function getPack(id: string, version: number): Pack | null {
 export { garageV1, gymV1, salonV1 };
 export type { Pack } from "./schema.ts";
 
-// RB-T (master plan 30.50 item 8), kept in this file because it is the one list allowed to name packs: each of Kabsi's 21 industries (src/content/industries, by slug) mapped to the request
+// RB-T (master plan 30.50 item 8), kept in this file because it is the one list allowed to name packs: each of Kabsi's 22 industries (src/content/industries, by slug) mapped to the request
 // book pack that fits it, or to none. Data only, read by nothing that runs yet: no business gets a pack from this table,
 // and the request book stays off until Gate 3. Clinics map to none (30.43 item 1: dental and other clinics stay on Google
 // care only, with no patient or appointment records). "food" is the test-only pack in test-fixtures/food.v1.ts; it ships
@@ -43,6 +43,7 @@ export const INDUSTRY_PACKS: Readonly<Record<string, string | null>> = {
   "florist": null,
   "pet-grooming": null,
   "tattoo-studio": null,
+  "cleaner": null,
 };
 
 /** The industries that must never get a pack: clinics and health (30.43 item 1, 30.50 item 8). */
