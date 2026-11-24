@@ -57,7 +57,8 @@ export const sameSite = (a: URL, b: URL) => stripWww(a.hostname) === stripWww(b.
 export type SafeFetchDeps = {
   /** The A and AAAA answers for a name. */
   resolve(host: string): Promise<string[]>;
-  fetch(url: string, init: { redirect: "manual"; signal: AbortSignal; headers: Record<string, string> }): Promise<Response>;
+  /** `method` is left out (a GET) except by the free check's link look (link-watch.ts linkNow), which tries a HEAD first. */
+  fetch(url: string, init: { redirect: "manual"; signal: AbortSignal; headers: Record<string, string>; method?: "HEAD" }): Promise<Response>;
   timeoutMs?: number;
 };
 export type Page = { url: string; status: number; text: string };

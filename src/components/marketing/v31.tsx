@@ -1,140 +1,59 @@
-// The core public pages on blueprint 3.1 (SITE-1, R-163): Home's nine sections, and the parts Pricing, How it works,
-// FAQ, About and Security share. DESIGN.md tokens only; one key phrase of each light headline on the yellow bar (30.32
-// item 3); one yellow button per screen (the free check). The chat pictures are drawn in Kabsi's own look (ivory and
-// charcoal, the Kabsi mark), labelled Example, never a copy of another app's screens or logo. No photos, no carousel,
-// no autoplay, no pop-up, no counters, testimonials or star ratings of Kabsi.
-import { useState, type ReactNode } from "react";
-import { Check, ImageIcon, Mic } from "lucide-react";
+// Home and Pricing on blueprint 3.1, redone by SITE-3 (R-164 item 7) on the one section system in ./kit.tsx. Home, in
+// order: the hero with the phone, the problem on the charcoal band, a week with Kabsi, just tell Kabsi, how it starts,
+// proof, the price, trust, questions and the closing band. The chat pictures are drawn in Kabsi's own look (ivory and
+// charcoal, the Kabsi mark), labelled Example, never a copy of another app's screens or logo. The yellow bar is on the H1
+// and one other headline only. No carousel of offers, no video, no pop-up, no counters, testimonials or ratings of Kabsi.
+import { useEffect, useState, type ReactNode } from "react";
+import {
+  CalendarClock,
+  Check,
+  ExternalLink,
+  ImageIcon,
+  Mic,
+  Pause,
+  Play,
+  Star,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PRIMARY_CTA } from "@/lib/offer";
-import { ScanBox } from "@/components/kabsi/scan-box";
 import { Marked, YellowNumber } from "@/components/kabsi/highlight";
-import { ButtonLink, ExampleBadge, Faq, KabsiMark, Segmented } from "@/components/kabsi/ui";
+import { ButtonLink, ExampleBadge, Faq, KabsiMark } from "@/components/kabsi/ui";
+import { SiteImg } from "./site-img";
+import { Band, CheckBox, ClosingDark, Head, Lead, MarkRow, PageTop, Sec, Ticks } from "./kit";
 import {
-  ALSO_INCLUDED,
-  BENEFITS,
-  BENEFITS_TITLE,
   CLOSING,
   EXAMPLE_BUSINESS,
-  HERO_CHAT,
-  HERO_EMAIL,
+  HERO_MARKS,
+  HERO_SCENES,
   HOME_FAQ,
   HOME_HERO,
   PRICE,
   PRICING,
+  PROBLEM,
   PROOF,
   START,
   TELL,
   TELL_CHIPS,
   TRUST,
+  WEEK,
+  WEEKLY_SUMMARY,
   type ChatTurn,
 } from "./v31-data";
 
-/* ---------- Shared pieces ---------- */
+export { CheckBox, PageTop, Sec, Ticks } from "./kit";
 
-/** One section: one headline, one idea, sized to fit a phone screen (blueprint 3, rules for the page). */
-export function Sec({
-  id,
-  title,
-  mark,
-  line,
-  children,
-  tone = "page",
-  split = false,
-  className,
-}: {
-  id: string;
-  title: string;
-  mark?: string | undefined;
-  line?: ReactNode;
-  children?: ReactNode;
-  tone?: "page" | "card";
-  /** From 1024 px the headline sits on the left and the content on the right. */
-  split?: boolean;
-  className?: string | undefined;
-}) {
+/* ---------- The chat, in Kabsi's own look ---------- */
+
+function Approve({ done = false }: { done?: boolean }) {
   return (
-    <section
-      aria-labelledby={`${id}-h`}
-      className={cn("border-t border-line", tone === "card" && "bg-surface-1", className)}
+    <span
+      className={cn(
+        "mt-2 inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-label font-bold",
+        done ? "bg-ok-soft text-ok" : "bg-kb-ink text-kb-sand",
+      )}
     >
-      <div
-        className={cn(
-          "container-kb py-12 sm:py-20 lg:py-24",
-          split && "lg:grid lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16",
-        )}
-      >
-        <div>
-          <h2 id={`${id}-h`} className="max-w-[40rem] text-h2 text-balance">
-            <Marked text={title} mark={mark} />
-          </h2>
-          {line ? <p className="mt-3 max-w-[38rem] text-lead text-text-2">{line}</p> : null}
-        </div>
-        {split ? <div className="lg:[&>*:first-child]:mt-0">{children}</div> : children}
-      </div>
-    </section>
-  );
-}
-
-/** The page's H1 block for the inner pages: H1 with its phrase on the bar, the line, and the page's own content. */
-export function PageTop({
-  title,
-  mark,
-  line,
-  children,
-}: {
-  title: string;
-  mark: string;
-  line: string;
-  children?: ReactNode;
-}) {
-  return (
-    <section aria-labelledby="page-h" data-hero className="relative z-10">
-      <div className="container-kb pt-8 pb-10 sm:pt-14 sm:pb-16">
-        <h1 id="page-h" className="max-w-[44rem] text-display text-balance">
-          <Marked text={title} mark={mark} />
-        </h1>
-        <p className="mt-4 max-w-[38rem] text-lead text-text-2">{line}</p>
-        {children}
-      </div>
-    </section>
-  );
-}
-
-/** A tick list. */
-export function Ticks({ items, className }: { items: readonly string[]; className?: string }) {
-  return (
-    <ul className={cn("space-y-2.5", className)}>
-      {items.map((t) => (
-        <li key={t} className="flex gap-3 text-body text-text-1">
-          <Check className="mt-1 size-4.5 shrink-0 text-ok" aria-hidden />
-          <span>{t}</span>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-/** The free check box, the one action. `under` is the line under it. */
-export function CheckBox({
-  id,
-  under,
-  className,
-}: {
-  id: string;
-  under: string;
-  className?: string;
-}) {
-  return <ScanBox id={id} note={under} className={className} />;
-}
-
-/* ---------- The chat picture, in Kabsi's own look ---------- */
-
-function Approve() {
-  return (
-    <span className="mt-2 inline-flex h-8 items-center gap-1.5 rounded-full bg-kb-ink px-3.5 text-label font-bold text-kb-sand">
       <Check className="size-3.5" aria-hidden />
-      Approve
+      {done ? "Approved" : "Approve"}
     </span>
   );
 }
@@ -163,13 +82,34 @@ function OwnerSays({ text, photo }: { text: string; photo?: boolean | undefined 
   return (
     <li className="ms-auto w-fit max-w-[80%] rounded-card rounded-ee-sm bg-kb-ink px-3 py-2.5 text-small text-kb-sand">
       {photo ? (
-        <span className="mb-2 grid aspect-[4/3] w-36 place-items-center rounded-input bg-kb-carbon text-kb-mute">
+        <span className="mb-2 grid aspect-[4/3] w-36 place-items-center rounded-input bg-kb-graphite text-kb-mute">
           <ImageIcon className="size-6" aria-hidden />
           <span className="sr-only">A photo</span>
         </span>
       ) : null}
-      {text}
+      {text === "Approve" ? (
+        <span className="inline-flex items-center gap-1.5 font-bold">
+          <Check className="size-4" aria-hidden />
+          Approve
+        </span>
+      ) : (
+        text
+      )}
     </li>
+  );
+}
+
+function Turns({ turns }: { turns: ChatTurn[] }) {
+  return (
+    <>
+      {turns.map((t, i) =>
+        t.from === "owner" ? (
+          <OwnerSays key={i} text={t.text} photo={t.photo} />
+        ) : (
+          <KabsiSays key={i} turn={t} />
+        ),
+      )}
+    </>
   );
 }
 
@@ -186,7 +126,7 @@ export function ChatCard({
   return (
     <figure
       className={cn(
-        "rounded-panel border border-line bg-surface-2 p-3 shadow-rest sm:p-4",
+        "rounded-panel border border-line bg-surface-0 p-3 shadow-rest sm:p-4",
         className,
       )}
     >
@@ -196,65 +136,111 @@ export function ChatCard({
         <ExampleBadge className="text-text-2" />
       </div>
       <ol className="space-y-2.5" aria-label={label}>
-        {turns.map((t, i) =>
-          t.from === "owner" ? (
-            <OwnerSays key={i} text={t.text} photo={t.photo} />
-          ) : (
-            <KabsiSays key={i} turn={t} />
-          ),
-        )}
+        <Turns turns={turns} />
       </ol>
       <figcaption className="sr-only">{label}</figcaption>
     </figure>
   );
 }
 
-function EmailCard() {
-  return (
-    <figure className="rounded-panel border border-line bg-surface-1 p-4 shadow-rest sm:p-5">
-      <div className="flex items-center gap-2 border-b border-line pb-3">
-        <KabsiMark ring={false} className="size-7" />
-        <div className="min-w-0 flex-1">
-          <p className="text-small font-bold text-text-1">Kabsi</p>
-          <p className="truncate text-label text-text-2">{HERO_EMAIL.subject}</p>
-        </div>
-        <ExampleBadge className="text-text-2" />
-      </div>
-      <div className="pt-3 text-small text-text-1">
-        <p className="font-bold">New 5-star review</p>
-        <p className="mt-1 border-s-2 border-line-strong ps-2 text-text-2">{HERO_EMAIL.quote}</p>
-        <p className="mt-2">Reply ready:</p>
-        <p className="mt-0.5">{HERO_EMAIL.reply}</p>
-        <Approve />
-      </div>
-      <figcaption className="sr-only">
-        An Example email from Kabsi with a reply to approve
-      </figcaption>
-    </figure>
-  );
+/* ---------- The hero phone: three short scenes in turn ---------- */
+
+function useReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const m = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(m.matches);
+    const on = () => setReduced(m.matches);
+    m.addEventListener("change", on);
+    return () => m.removeEventListener("change", on);
+  }, []);
+  return reduced;
 }
 
-/** The hero picture, with the WhatsApp and Email switch (blueprint 3.2). */
-function HeroPicture() {
-  const [via, setVia] = useState<"whatsapp" | "email">("whatsapp");
+const SCENE_MS = 7000;
+
+/**
+ * A phone drawn in Kabsi's own style (never another app's screens or logo), labelled Example. It plays the three scenes
+ * of HERO_SCENES in turn; it is still when the visitor prefers reduced motion, and the pause button stops it (WCAG 2.2.2).
+ */
+function HeroPhone() {
+  const reduced = useReducedMotion();
+  const [at, setAt] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const playing = !reduced && !paused;
+  useEffect(() => {
+    if (!playing) return;
+    const t = window.setTimeout(() => setAt((a) => (a + 1) % HERO_SCENES.length), SCENE_MS);
+    return () => window.clearTimeout(t);
+  }, [at, playing]);
+  const scene = HERO_SCENES[at] ?? HERO_SCENES[0]!;
   return (
-    <div className="w-full max-w-[24rem] lg:justify-self-end">
-      <Segmented
-        label="How Kabsi reaches you"
-        value={via}
-        onChange={setVia}
-        options={[
-          { value: "whatsapp", label: "WhatsApp" },
-          { value: "email", label: "Email" },
-        ]}
-        className="mb-3"
-      />
-      {via === "whatsapp" ? (
-        <ChatCard turns={HERO_CHAT} label={`Example chat with Kabsi for ${EXAMPLE_BUSINESS}`} />
-      ) : (
-        <EmailCard />
-      )}
-    </div>
+    <figure className="mx-auto w-full max-w-[21rem] lg:me-0">
+      <div className="rounded-[2.75rem] bg-kb-ink p-2.5 shadow-float">
+        <div className="overflow-hidden rounded-[2.25rem] bg-surface-0">
+          <div className="mx-auto mt-2.5 h-5 w-24 rounded-full bg-kb-ink" aria-hidden />
+          <div className="flex items-center gap-2 border-b border-line px-4 py-3">
+            <KabsiMark ring={false} className="size-8" />
+            <div className="min-w-0 flex-1">
+              <p className="text-small font-bold text-text-1">Kabsi</p>
+              <p className="truncate text-label text-text-2">{EXAMPLE_BUSINESS}</p>
+            </div>
+            <ExampleBadge className="text-text-2" />
+          </div>
+          <ol
+            key={at}
+            aria-label={`Example: ${scene.name}`}
+            className={cn(
+              "flex h-[23rem] flex-col justify-end gap-2.5 px-3 pb-4 pt-3",
+              playing && "kb-scene",
+            )}
+          >
+            <Turns turns={scene.turns} />
+            <li className="flex items-center gap-2 self-center rounded-full bg-ok-soft px-3 py-1.5 text-label font-bold text-ok">
+              <Check className="size-3.5" aria-hidden />
+              {scene.done}
+            </li>
+          </ol>
+        </div>
+      </div>
+      <div className="mt-4 flex items-center justify-center gap-2">
+        {HERO_SCENES.map((s, i) => (
+          <button
+            key={s.name}
+            type="button"
+            aria-label={s.name}
+            aria-pressed={i === at}
+            onClick={() => setAt(i)}
+            className="press grid size-11 place-items-center rounded-full"
+          >
+            <span
+              className={cn(
+                "block h-2 rounded-full transition-[width,background-color] duration-300",
+                i === at ? "w-6 bg-text-1" : "w-2 bg-line-strong",
+              )}
+            />
+          </button>
+        ))}
+        {reduced ? null : (
+          <button
+            type="button"
+            onClick={() => setPaused((p) => !p)}
+            aria-label={paused ? "Play the example" : "Pause the example"}
+            className="press grid size-11 place-items-center rounded-full text-text-2 hover:text-text-1"
+          >
+            {paused ? (
+              <Play className="size-4" aria-hidden />
+            ) : (
+              <Pause className="size-4" aria-hidden />
+            )}
+          </button>
+        )}
+      </div>
+      <figcaption className="sr-only">
+        An Example of Kabsi on a phone: a review reply, new hours for Saturday and a photo post,
+        each approved by the owner.
+      </figcaption>
+    </figure>
   );
 }
 
@@ -262,18 +248,145 @@ function HeroPicture() {
 
 export function HomeHero() {
   return (
-    <section aria-labelledby="hero-title" data-hero className="relative isolate z-10">
-      <div className="container-kb grid gap-8 pt-6 pb-12 sm:pt-12 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-center lg:gap-16 lg:pt-16 lg:pb-20">
+    <section aria-labelledby="hero-title" data-hero className="relative isolate z-10 bg-surface-0">
+      <div className="container-kb grid gap-10 pt-6 pb-14 sm:pt-12 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-center lg:gap-20 lg:pt-16 lg:pb-24 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <div className="max-w-[40rem]">
           <h1 id="hero-title" className="text-display text-balance">
             <Marked text={HOME_HERO.title} mark={HOME_HERO.mark} />
           </h1>
-          <p className="mt-4 max-w-[36rem] text-lead text-text-2 sm:mt-6">{HOME_HERO.line}</p>
-          <CheckBox id="hero-scan" under={HOME_HERO.under} className="relative z-10 mt-5 sm:mt-7" />
+          <Lead className="mt-4 sm:mt-6">{HOME_HERO.line}</Lead>
+          <CheckBox id="hero-scan" under={HOME_HERO.under} className="relative z-10 mt-6 sm:mt-8" />
+          <MarkRow items={HERO_MARKS} className="mt-4" />
         </div>
-        <HeroPicture />
+        <HeroPhone />
       </div>
     </section>
+  );
+}
+
+/** The problem, on the page's charcoal band: three points from Google's own help pages, each with its link. */
+function Problem() {
+  return (
+    <Band id="problem" tone="dark">
+      <h2 id="problem-h" className="max-w-[24ch] text-h2 text-balance">
+        {PROBLEM.title}
+      </h2>
+      <ol className="mt-10 grid gap-8 md:grid-cols-3 md:gap-10">
+        {PROBLEM.points.map((p) => (
+          <li key={p.title} className="border-t border-line pt-5">
+            <h3 className="text-h3 text-text-1">{p.title}</h3>
+            <p className="mt-3 text-read text-text-2">{p.text}</p>
+            <a
+              href={p.source}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex min-h-11 items-center gap-1.5 text-small font-semibold text-text-1 underline underline-offset-4"
+            >
+              {PROBLEM.sourceLabel}
+              <ExternalLink className="size-3.5" aria-hidden />
+              <span className="sr-only">(opens in a new tab)</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </Band>
+  );
+}
+
+/* A week with Kabsi: four days, each with a small drawn card. */
+
+function MiniCard({ children }: { children: ReactNode }) {
+  return (
+    <div className="rounded-card border border-line bg-surface-0 p-3.5 text-small text-text-1 shadow-rest">
+      {children}
+    </div>
+  );
+}
+
+function Chip({ children }: { children: ReactNode }) {
+  return (
+    <span className="mt-2.5 inline-flex h-7 items-center gap-1 rounded-full bg-ok-soft px-2.5 text-label font-bold text-ok">
+      <Check className="size-3.5" aria-hidden />
+      {children}
+    </span>
+  );
+}
+
+function DayPicture({ n }: { n: number }) {
+  if (n === 0)
+    return (
+      <MiniCard>
+        <p className="flex items-center gap-0.5 text-text-1" aria-label="5 stars">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <Star key={i} className="size-3.5 fill-current" aria-hidden />
+          ))}
+        </p>
+        <p className="mt-1.5 text-text-2">"Friendly and quick. Will be back."</p>
+        <p className="mt-1.5 font-semibold">Reply ready</p>
+        <Chip>Approved</Chip>
+      </MiniCard>
+    );
+  if (n === 1)
+    return (
+      <MiniCard>
+        <p className="font-semibold">Saturday on Google</p>
+        <p className="mt-1 text-text-2 line-through">10:00 to 14:00</p>
+        <p className="mt-0.5">9:00 to 17:00</p>
+        <Chip>Set back</Chip>
+      </MiniCard>
+    );
+  if (n === 2)
+    return (
+      <MiniCard>
+        <span className="grid h-24 place-items-center rounded-input bg-surface-2 text-text-2">
+          <ImageIcon className="size-6" aria-hidden />
+          <span className="sr-only">A photo</span>
+        </span>
+        <Chip>Live on Google</Chip>
+      </MiniCard>
+    );
+  return (
+    <MiniCard>
+      <p className="flex items-center gap-1.5 font-semibold">
+        <CalendarClock className="size-4" aria-hidden />
+        Your week
+      </p>
+      <ul className="mt-1.5 space-y-1 text-text-2">
+        <li>3 replies live</li>
+        <li>1 change set back</li>
+        <li>1 post live</li>
+      </ul>
+    </MiniCard>
+  );
+}
+
+function Week() {
+  return (
+    <Band id="week" tone="ivory">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <Head id="week" title={WEEK.title} mark="with Kabsi." line={WEEK.line} />
+        <ExampleBadge className="text-text-2" />
+      </div>
+      <ol className="relative mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+        {WEEK.days.map((d, i) => (
+          <li
+            key={d.day}
+            className="relative border-s-2 border-line ps-5 lg:border-s-0 lg:border-t-2 lg:ps-0 lg:pt-5"
+          >
+            <span
+              aria-hidden
+              className="absolute -start-[0.4375rem] top-1 size-3 rounded-full bg-text-1 lg:-top-[0.4375rem] lg:start-0"
+            />
+            <p className="text-small font-bold text-text-2">{d.day}</p>
+            <h3 className="mt-1 text-title">{d.title}</h3>
+            <p className="mt-1 text-read text-text-2">{d.text}</p>
+            <div className="mt-4 max-w-[18rem]">
+              <DayPicture n={i} />
+            </div>
+          </li>
+        ))}
+      </ol>
+    </Band>
   );
 }
 
@@ -281,103 +394,120 @@ function TellKabsi() {
   const [at, setAt] = useState(0);
   const chip = TELL_CHIPS[at] ?? TELL_CHIPS[0]!;
   return (
-    <Sec id="tell" title={TELL.title} mark={TELL.mark} line={TELL.line} tone="card">
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_24rem] lg:gap-16">
-        <div>
-          <ul className="flex flex-wrap gap-2" aria-label="Example messages">
-            {TELL_CHIPS.map((c, i) => (
-              <li key={c.ask}>
-                <button
-                  type="button"
-                  aria-pressed={i === at}
-                  onClick={() => setAt(i)}
-                  className={cn(
-                    "press inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-small font-semibold",
-                    i === at
-                      ? "border-text-1 bg-text-1 text-surface-0"
-                      : "border-line-strong bg-surface-1 text-text-1 hover:bg-surface-2",
-                  )}
-                >
-                  {c.photo ? <ImageIcon className="size-4" aria-hidden /> : null}
-                  {c.ask}
-                </button>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-4 inline-flex items-center gap-2 text-small text-text-2">
-            <Mic className="size-4" aria-hidden />
-            {TELL.voice}
-          </p>
-        </div>
-        <div aria-live="polite">
-          <ChatCard
-            turns={[
-              { from: "owner", text: chip.ask, photo: chip.photo },
-              { from: "kabsi", lines: chip.answer, approve: chip.approve },
-            ]}
-            label={`Example: you send "${chip.ask}" and Kabsi answers`}
-          />
+    <Band
+      id="tell"
+      tone="white"
+      inner="lg:grid lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-16 xl:gap-24"
+    >
+      <div>
+        <Head id="tell" title={TELL.title} line={TELL.line} />
+        <ul className="mt-8 flex flex-wrap gap-3" aria-label="Example messages">
+          {TELL_CHIPS.map((c, i) => (
+            <li key={c.ask}>
+              <button
+                type="button"
+                aria-pressed={i === at}
+                onClick={() => setAt(i)}
+                className={cn(
+                  "press inline-flex min-h-12 items-center gap-2 rounded-full border px-5 text-read font-semibold",
+                  i === at
+                    ? "border-text-1 bg-text-1 text-surface-0"
+                    : "border-line-strong bg-surface-0 text-text-1 hover:bg-surface-2",
+                )}
+              >
+                {c.photo ? <ImageIcon className="size-4.5" aria-hidden /> : null}
+                {c.ask}
+              </button>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-6 flex max-w-[34rem] items-start gap-3 rounded-card border border-line bg-surface-0 p-4">
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-text-1 text-surface-0">
+            <Mic className="size-5" aria-hidden />
+          </span>
+          <div>
+            <p className="text-read font-bold text-text-1">{TELL.voice}</p>
+            <p className="mt-0.5 text-read text-text-2">{TELL.voiceLine}</p>
+          </div>
         </div>
       </div>
-    </Sec>
-  );
-}
-
-export function BenefitCards() {
-  return (
-    <>
-      <ul className="mt-6 grid gap-3 sm:grid-cols-3 sm:gap-5">
-        {BENEFITS.map((b, i) => (
-          <li key={b.title} className="rounded-card border border-line bg-surface-1 p-4 sm:p-6">
-            <YellowNumber n={i + 1} />
-            <h3 className="mt-3 text-title">{b.title}</h3>
-            <p className="mt-1 text-small text-text-2">{b.text}</p>
-          </li>
-        ))}
-      </ul>
-      <p className="mt-5 max-w-[38rem] text-small text-text-2">{ALSO_INCLUDED}</p>
-    </>
+      <div aria-live="polite" className="mt-8 lg:mt-0">
+        <ChatCard
+          turns={[
+            { from: "owner", text: chip.ask, photo: chip.photo },
+            { from: "kabsi", lines: chip.answer, approve: chip.approve },
+          ]}
+          label={`Example: you send "${chip.ask}" and Kabsi answers`}
+          className="flex min-h-[21rem] flex-col"
+        />
+      </div>
+    </Band>
   );
 }
 
 export function StartSteps() {
   return (
     <>
-      <ol className="mt-6 grid gap-5 sm:grid-cols-3">
+      <ol className="mt-8 grid gap-6">
         {START.steps.map((s, i) => (
-          <li key={s.title} className="flex gap-3">
+          <li key={s.title} className="flex gap-4">
             <YellowNumber n={i + 1} />
             <div>
               <h3 className="text-title">{s.title}</h3>
-              <p className="mt-0.5 text-small text-text-2">{s.text}</p>
+              <p className="mt-0.5 text-read text-text-2">{s.text}</p>
             </div>
           </li>
         ))}
       </ol>
-      <p className="mt-6 max-w-[38rem] rounded-card border border-line bg-surface-1 p-4 text-body font-semibold text-text-1">
+      <p className="mt-8 max-w-[60ch] border-s-4 border-kb-yellow ps-4 text-read font-semibold text-text-1">
         {START.firstDay}
       </p>
     </>
   );
 }
 
-export function ReportSample() {
+function Starts() {
   return (
-    <figure className="mt-6 max-w-[34rem] rounded-panel border border-line bg-surface-1 p-4 shadow-rest sm:p-6">
+    <Band
+      id="starts"
+      tone="white"
+      inner="lg:grid lg:grid-cols-2 lg:items-center lg:gap-16 xl:gap-24"
+    >
+      <div>
+        <Head id="starts" title={START.title} />
+        <StartSteps />
+      </div>
+      <SiteImg
+        id="heroHow"
+        sizes="(min-width: 1024px) 560px, 100vw"
+        className="mt-10 aspect-[4/3] w-full rounded-panel object-cover lg:mt-0"
+      />
+    </Band>
+  );
+}
+
+export function ReportSample({ className }: { className?: string }) {
+  return (
+    <figure
+      className={cn(
+        "rounded-panel border border-line bg-surface-1 p-5 shadow-lift sm:p-7",
+        className,
+      )}
+    >
       <div className="flex items-center gap-2">
-        <KabsiMark ring={false} className="size-7" />
-        <p className="flex-1 text-small font-bold text-text-1">
-          {PROOF.month} · {EXAMPLE_BUSINESS}
+        <KabsiMark ring={false} className="size-8" />
+        <p className="flex-1 text-read font-bold text-text-1">
+          {PROOF.month}, {EXAMPLE_BUSINESS}
         </p>
         <ExampleBadge className="text-text-2" />
       </div>
-      <div className="mt-3 space-y-3">
+      <div className="mt-5 grid gap-5 sm:grid-cols-3 sm:gap-6">
         {PROOF.bands.map((b) => (
           <div key={b.name}>
-            <p className="text-label font-bold text-text-2">{b.name}</p>
-            <dl className="mt-1 divide-y divide-line border-y border-line">
+            <p className="text-small font-bold text-text-2">{b.name}</p>
+            <dl className="mt-2 divide-y divide-line border-y border-line">
               {b.rows.map(([k, v]) => (
-                <div key={k} className="flex justify-between gap-4 py-1.5 text-small">
+                <div key={k} className="flex justify-between gap-4 py-2 text-small">
                   <dt className="text-text-1">{k}</dt>
                   <dd className="font-bold text-text-1">{v}</dd>
                 </div>
@@ -391,37 +521,81 @@ export function ReportSample() {
   );
 }
 
-/** The one price card (blueprint 3.7 and 4). `items` lists what is included on Pricing. */
-export function PriceCard({ items, className }: { items?: readonly string[]; className?: string }) {
+function WeeklyMessage() {
+  return (
+    <figure className="rounded-panel border border-line bg-surface-0 p-4 shadow-rest sm:p-5">
+      <div className="flex items-center gap-2 pb-3">
+        <KabsiMark ring={false} className="size-7" />
+        <p className="flex-1 text-small font-bold text-text-1">Kabsi</p>
+        <ExampleBadge className="text-text-2" />
+      </div>
+      <div className="rounded-card rounded-es-sm border border-line bg-surface-1 px-3.5 py-3 text-small text-text-1">
+        <p className="font-bold">{WEEKLY_SUMMARY.title}</p>
+        <ul className="mt-1.5 space-y-1">
+          {WEEKLY_SUMMARY.lines.map((l) => (
+            <li key={l}>{l}</li>
+          ))}
+        </ul>
+        <p className="mt-2 text-text-2">{WEEKLY_SUMMARY.next}</p>
+      </div>
+      <figcaption className="sr-only">An Example weekly summary from Kabsi</figcaption>
+    </figure>
+  );
+}
+
+function Proof() {
+  return (
+    <Band id="proof" tone="ivory">
+      <Head
+        id="proof"
+        title={PROOF.title}
+        line="A short summary every week. A full report every month. Work done, what Kabsi found and what Google shows, kept apart."
+      />
+      <div className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start lg:gap-8">
+        <ReportSample />
+        <WeeklyMessage />
+      </div>
+    </Band>
+  );
+}
+
+/** The one price card, full width: the price and the button on the left, what is included on the right. */
+export function PriceCard({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "max-w-[30rem] rounded-panel border border-line bg-surface-1 p-5 shadow-rest sm:p-7",
+        "grid gap-8 rounded-panel border border-line bg-surface-1 p-6 shadow-lift sm:p-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16",
         className,
       )}
     >
-      <p className="font-display text-h2 font-bold text-text-1">{PRICE.amount}</p>
-      <p className="text-body text-text-2">{PRICE.per}</p>
-      {items ? <Ticks items={items} className="mt-5" /> : null}
-      <div data-main-cta className="mt-6">
-        <ButtonLink to="/scan" full>
-          {PRIMARY_CTA}
-        </ButtonLink>
+      <div>
+        <p className="font-display text-display font-bold text-text-1">{PRICE.amount}</p>
+        <p className="mt-1 text-read text-text-2">{PRICE.per}</p>
+        <div data-main-cta className="mt-8 max-w-[24rem]">
+          <ButtonLink to="/scan" full>
+            {PRIMARY_CTA}
+          </ButtonLink>
+        </div>
+        <p className="mt-4 max-w-[44ch] text-read text-text-2">{PRICE.terms}</p>
       </div>
-      <p className="mt-3 text-small text-text-2">{PRICE.terms}</p>
+      <div>
+        <p className="text-small font-bold text-text-2">Included</p>
+        <Ticks items={PRICING.included} cols className="mt-3" />
+        <p className="mt-6 border-t border-line pt-4 text-read text-text-2">
+          {PRICING.notIncluded}
+        </p>
+      </div>
     </div>
   );
 }
 
+/** Trust: the four lines as a quiet row, not cards. */
 export function TrustLines() {
   return (
-    <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+    <ul className="mt-8 grid gap-x-10 gap-y-4 border-y border-line py-6 sm:grid-cols-2 lg:grid-cols-4">
       {TRUST.lines.map((l) => (
-        <li
-          key={l}
-          className="flex items-center gap-3 rounded-card border border-line bg-surface-1 p-4 text-body font-semibold text-text-1"
-        >
-          <Check className="size-5 shrink-0 text-ok" aria-hidden />
+        <li key={l} className="flex gap-2.5 text-read font-semibold text-text-1">
+          <Check className="mt-1 size-5 shrink-0 text-ok" aria-hidden />
           {l}
         </li>
       ))}
@@ -429,44 +603,34 @@ export function TrustLines() {
   );
 }
 
+/** The closing band of every public page: charcoal, the search box and the yellow button. */
 export function ClosingBand({ under }: { under: string }) {
-  return (
-    <section aria-labelledby="closing-h" className="border-t border-line bg-surface-1">
-      <div className="container-kb py-12 sm:py-20">
-        <div className="mx-auto max-w-[40rem]">
-          <h2 id="closing-h" className="text-h2">
-            <Marked text={CLOSING.title} mark={CLOSING.mark} />
-          </h2>
-          <CheckBox id="closing-scan" under={under} className="mt-6" />
-        </div>
-      </div>
-    </section>
-  );
+  return <ClosingDark title={CLOSING.title} under={under} />;
 }
 
 export function V31Home() {
   return (
     <>
       <HomeHero />
+      <Problem />
+      <Week />
       <TellKabsi />
-      <Sec id="does" title={BENEFITS_TITLE.title} mark={BENEFITS_TITLE.mark}>
-        <BenefitCards />
-      </Sec>
-      <Sec id="starts" title={START.title} mark={START.mark} tone="card">
-        <StartSteps />
-      </Sec>
-      <Sec split id="proof" title={PROOF.title} mark={PROOF.mark}>
-        <ReportSample />
-      </Sec>
-      <Sec split id="price" title={PRICE.title} mark={PRICE.mark} tone="card">
-        <PriceCard className="mt-6" />
-      </Sec>
-      <Sec split id="trust" title={TRUST.title} mark={TRUST.mark}>
+      <Starts />
+      <Proof />
+      <Band id="price" tone="white">
+        <Head id="price" title={PRICE.title} />
+        <PriceCard className="mt-8" />
+      </Band>
+      <Band id="trust" tone="ivory" inner="py-10 sm:py-14 lg:py-16">
+        <h2 id="trust-h" className="text-title text-text-2">
+          {TRUST.title}
+        </h2>
         <TrustLines />
-      </Sec>
-      <Sec split id="questions" title="Questions." mark="Questions." tone="card">
-        <Faq items={HOME_FAQ.map((f) => ({ q: f.q, a: f.a }))} className="mt-6 max-w-[44rem]" />
-      </Sec>
+      </Band>
+      <Band id="questions" tone="ivory" inner="pt-4 sm:pt-6 lg:pt-8">
+        <Head id="questions" title="Questions." />
+        <Faq items={HOME_FAQ.map((f) => ({ q: f.q, a: f.a }))} className="mt-8" />
+      </Band>
       <ClosingBand under={HOME_HERO.under} />
     </>
   );
@@ -477,13 +641,17 @@ export function V31Home() {
 export function V31Pricing() {
   return (
     <>
-      <PageTop title={PRICING.title} mark={PRICING.mark} line={PRICING.line}>
-        <PriceCard items={PRICING.included} className="mt-8" />
-      </PageTop>
-      <Sec split id="not" title="What Kabsi does not do." mark="does not do.">
-        <p className="mt-3 max-w-[38rem] text-lead text-text-2">{PRICING.notIncluded}</p>
-        <p className="mt-4 max-w-[38rem] text-small text-text-2">{PRICING.free}</p>
-      </Sec>
+      <PageTop title={PRICING.title} mark={PRICING.mark} line={PRICING.line} />
+      <Band id="plan" tone="white" label="The plan">
+        <PriceCard />
+        <Lead className="mt-6">
+          {PRICING.extra} {PRICING.free}
+        </Lead>
+      </Band>
+      <Band id="trust" tone="ivory">
+        <Head id="trust" title={TRUST.title} />
+        <TrustLines />
+      </Band>
       <ClosingBand under={HOME_HERO.under} />
     </>
   );

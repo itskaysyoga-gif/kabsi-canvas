@@ -1,0 +1,31 @@
+{
+  "_doc": "https://developers.google.com/maps/documentation/places/web-service/reference/rest/v1/places#Review",
+  "_note": "SITE-3: the reviews part of a Place Details answer for the free check (field mask SNAPSHOT_CHECK_FIELD_MASK). Built from the documented schema; replace with a captured response on Gate A day. Places returns at most 5, ordered by relevance, so the code picks the newest with text.",
+  "reviews": [
+    {
+      "name": "places/ChIJmockPlace0000000000000/reviews/r1",
+      "relativePublishTimeDescription": "3 weeks ago",
+      "rating": 5,
+      "text": { "text": "Lovely flat white and the staff remembered my order.", "languageCode": "en" },
+      "originalText": { "text": "Lovely flat white and the staff remembered my order.", "languageCode": "en" },
+      "authorAttribution": { "displayName": "Sam Carter", "uri": "https://www.google.com/maps/contrib/100000000000000000001/reviews" },
+      "publishTime": "2026-11-01T10:00:00Z"
+    },
+    {
+      "name": "places/ChIJmockPlace0000000000000/reviews/r2",
+      "relativePublishTimeDescription": "a week ago",
+      "rating": 2,
+      "text": { "text": "Waited 25 minutes for two coffees on a quiet morning. The cake was good but the wait was too long.", "languageCode": "en" },
+      "originalText": { "text": "Waited 25 minutes for two coffees on a quiet morning. The cake was good but the wait was too long.", "languageCode": "en" },
+      "authorAttribution": { "displayName": "Maya Haddad", "uri": "https://www.google.com/maps/contrib/100000000000000000002/reviews" },
+      "publishTime": "2026-11-15T09:30:00Z"
+    },
+    {
+      "name": "places/ChIJmockPlace0000000000000/reviews/r3",
+      "relativePublishTimeDescription": "2 days ago",
+      "rating": 4,
+      "authorAttribution": { "displayName": "A Google user" },
+      "publishTime": "2026-11-22T08:00:00Z"
+    }
+  ]
+}

@@ -24,6 +24,10 @@ export function weeklyAt(n: number): string {
   return new Date(WEEKLY_START + n * WEEK_MS).toISOString().replace(".000Z", "Z");
 }
 
+/** SITE-3 (R-164 item 5): the three new guides (Jobber, Calendly, where to put your review link) publish now, once their
+ * sources were read again from the raw page text, not on the January schedule. */
+export const SITE3_PUBLISH_AT = "2026-11-24T18:00:00Z";
+
 export const isPublic = (g: Pick<GuideDoc, "publishAt">, now: Date) =>
   Date.parse(g.publishAt) <= now.getTime();
 

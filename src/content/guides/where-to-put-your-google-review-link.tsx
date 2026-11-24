@@ -1,6 +1,6 @@
 import { Callout, DoDont, Steps } from "@/components/marketing/guide-kit";
 import { GuideLink, SiteRef } from "@/components/marketing/guide-links";
-import { weeklyAt } from "./schedule";
+import { SITE3_PUBLISH_AT } from "./schedule";
 import type { GuideDoc } from "./types";
 
 // Weekly guide 9 (the 36th guide), for any business. The salon version is where-to-put-your-google-review-link-salon.
@@ -12,7 +12,7 @@ export const guide: GuideDoc = {
   title: "Where should I put my Google review link?",
   description:
     "Where to put your Google review link and QR code: receipt, thank-you email, email signature, the till. Google's rules: ask everyone, no rewards, no filtering.",
-  publishAt: weeklyAt(8),
+  publishAt: SITE3_PUBLISH_AT,
   updated: READ,
   checked: READ,
   topic: "Reviews",
@@ -29,15 +29,15 @@ export const guide: GuideDoc = {
       id: "get-the-link",
       heading: "How do I get the link and the QR code?",
       answer:
-        "On a computer, go to your Business Profile and open the Read reviews section, then the option to get more reviews. Copy the review link, or right-click the QR code and choose the save option. Google says QR codes can only be made on a computer browser, not on a phone.",
+        "On a computer, go to your Business Profile and select Read reviews, then Get more reviews. Select Copy for the review link, or right-click the QR code and select Save image as. Google says review QR codes can only be made on a computer browser, not on a phone.",
       body: (
         <>
           <Steps
             items={[
-              "On a computer, go to your Business Profile at business.google.com.",
-              "Open the Read reviews section, then the option to get more reviews.",
-              "To copy the review link, use the copy option.",
-              "To save the QR code, right-click it and choose the save option.",
+              "On a computer, go to your Business Profile.",
+              "Select Read reviews, then Get more reviews.",
+              "To copy the review link, select Copy.",
+              "To save the QR code, right-click it and select Save image as.",
             ]}
           />
           <p>
@@ -59,8 +59,10 @@ export const guide: GuideDoc = {
       body: (
         <>
           <p>
-            Any business can use the same short list. Pick the ones that match how your customers
-            already hear from you, so the request feels like part of the visit and not a new chore.
+            Google's list is short. The places below build on it, and some, such as the invoice,
+            the booking confirmation and your email signature, are this guide's own suggestions.
+            Pick the ones that match how your customers already hear from you, so the request feels
+            like part of the visit and not a new chore.
           </p>
           <ul>
             <li>
@@ -209,11 +211,11 @@ export const guide: GuideDoc = {
   faqs: [
     {
       q: "Can I put the link in my email signature?",
-      a: "Yes. Google names thank-you emails and emailed review requests as ways to share your link, and a signature line is the same link in the same words for everyone you write to.",
+      a: "Google does not name email signatures, but it names thank-you emails and review requests sent by email. A signature line is the same link in the same words for everyone you write to.",
     },
     {
       q: "Can I ask customers to leave five stars?",
-      a: "No. Ask for an honest review and let the customer choose the rating. Google's policy does not allow businesses to selectively solicit positive reviews.",
+      a: "No. Ask for an honest review and let the customer choose the rating. Google's policy allows asking for reviews without attempting to influence the rating or the contents of the review.",
     },
     {
       q: "Can I put the QR code on my phone to scan from the app?",

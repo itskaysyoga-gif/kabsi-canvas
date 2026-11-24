@@ -93,6 +93,9 @@ describe("Free Profile Check (P0.4-01)", () => {
       ]),
     );
     expect(mask.toLowerCase()).not.toContain("review");
+    // SITE-3 (free check step 4), changed on purpose: only the check's own details call adds the reviews field, for the
+    // reply Kabsi would write for the latest review (shown once, never stored). The email and WhatsApp copies keep the mask above.
+    expect(live).toMatch(/SNAPSHOT_CHECK_FIELD_MASK = `\$\{SNAPSHOT_FIELD_MASK\},reviews`;/);
     const fn =
       read("supabase/functions/_shared/profile-snapshot.ts") +
       read("supabase/functions/profile-snapshot/index.ts");

@@ -138,10 +138,10 @@ Deno.test("food pack: every order status reads in the pack's words, and an order
   assertStringIncludes(summaryReply(row("appointment", "requested"), ctx).body, "Status: Requested");
 });
 
-// --- RB-T: one table maps each of the 21 industries to a pack or to none.
+// --- RB-T: one table maps each of the 22 industries to a pack or to none.
 
-Deno.test("industries: 21, each a shipped pack, the food test pack, or none; clinics none", () => {
-  assertEquals(Object.keys(INDUSTRY_PACKS).length, 21);
+Deno.test("industries: 22, each a shipped pack, the food test pack, or none; clinics none", () => {
+  assertEquals(Object.keys(INDUSTRY_PACKS).length, 22);
   const known = new Set([...PACKS.map((p) => p.id), foodV1.id]);
   for (const [slug, pack] of Object.entries(INDUSTRY_PACKS)) if (pack !== null) assert(known.has(pack), `${slug} maps to ${pack}`);
   for (const slug of NO_PACK_EVER) assertEquals(packForIndustry(slug), null, slug);

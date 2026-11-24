@@ -71,7 +71,7 @@ function Page() {
         {/* Site 3b (audit E10): the free check is the one yellow action here too. */}
         <div className="mt-6" data-main-cta>
           <ButtonLink to="/scan">{MAIN_CTA}</ButtonLink>
-          <p className="mt-3 text-small text-text-2">{TRIAL_LINE}</p>
+          <p className="mt-3 max-w-[60ch] text-body text-text-2">{TRIAL_LINE}</p>
         </div>
       </section>
       {first && !group ? (

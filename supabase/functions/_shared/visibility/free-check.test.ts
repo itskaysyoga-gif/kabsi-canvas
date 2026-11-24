@@ -5,7 +5,8 @@ import { assert, assertEquals, assertMatch } from "jsr:@std/assert@1";
 import fx from "../../../../tests/fixtures/free-check/scan2-5nov.json" with { type: "json" };
 import type { MapsItem, MapsProvider } from "./dataforseo.ts";
 import {
-  aiLine, aiLines, aiQuestion, type CheckRow, collectCheck, matchLocal, NOT_NEAR, publicView, safeNearby, shownTerm, startCheck, type StartDeps, storeAi,
+  aiLine, aiLines, aiQuestion, type CheckRow, collectCheck, matchLocal, nearbyQuery, nearbyRivals, NOT_NEAR, publicView, safeNearby, shownTerm, startCheck,
+  type StartDeps, startNearbyCheck, storeAi,
 } from "./free-check.ts";
 import { cardLine, type Nearby } from "./nearby.ts";
 import { analyze } from "./ai/analyze.ts";
@@ -388,4 +389,60 @@ Deno.test("copy3: the town from addressComponents, in a Lebanese, a UAE and a UK
   );
   // No components at all (a call made before the mask had them): the address parts as before.
   assertEquals(areaOfPlace({ formattedAddress: "12 High St, Austin, TX 78701, USA" }), "Austin");
+});
+
+// ─── SITE-3 (free check step 4): the free check reads only the 3 nearby businesses, with one Places Text Search.
+const SELF = "ChIJselfPlace000000";
+const NEARBY_INPUT = { name: "Harbour Lane Coffee", address: "12 Harbour Lane, Example Town", country: "US", city: "Example Town", place_id: SELF, term: "coffee shop" };
+const NEARBY_ANSWER = [
+  { id: SELF, displayName: { text: "Harbour Lane Coffee" }, rating: 4.6, userRatingCount: 128 },
+  { id: "ChIJother1", displayName: { text: "Corner Crumb" }, rating: 4.8, userRatingCount: 20 },
+  { id: "ChIJother2", displayName: { text: "مقهى الميناء" }, rating: 4.1, userRatingCount: 9 },
+  { id: "ChIJother3", displayName: { text: "Bean There" }, userRatingCount: 3 },
+  { id: "ChIJother4", displayName: { text: "Harbour Lane Coffee" }, rating: 4.6, userRatingCount: 128 },
+  { id: "ChIJother5", displayName: { text: "Daily Grind" }, rating: 4.3, userRatingCount: 51 },
+  { id: "ChIJother6", displayName: { text: "Fourth Place" }, rating: 4.0, userRatingCount: 7 },
+];
+
+Deno.test("SITE-3: the free check makes one Places search and no rank or AI call", async () => {
+  const asked: string[] = [];
+  const d = { code: () => "NEAR2345", search: (q: string) => (asked.push(q), Promise.resolve(NEARBY_ANSWER)) };
+  // The deps hold no Maps provider, no AI, no spend: the function cannot reach DataForSEO or a model.
+  assertEquals(Object.keys(d).sort(), ["code", "search"]);
+  const r = await startNearbyCheck(d, NEARBY_INPUT);
+  assert(r.ok);
+  assertEquals(asked, ["coffee shop near 12 Harbour Lane, Example Town"]);
+  // The business itself (by place ID and by name) and a name not in Latin letters are left out; 3 at most.
+  assertEquals(r.competitors, [
+    { name: "Corner Crumb", rating: 4.8, reviews: 20 },
+    { name: "Bean There", rating: null, reviews: 3 },
+    { name: "Daily Grind", rating: 4.3, reviews: 51 },
+  ]);
+  // Nothing from Places is stored but the place ID: no competitors, no coordinates, no rank, no AI, no map to wait for.
+  assertEquals(r.row.fast, { rank: null, line: "", competitors: [] });
+  assertEquals(r.row.self, { title: "Harbour Lane Coffee", cid: null, place_id: SELF });
+  assertEquals(r.row.center, {});
+  assertEquals([r.row.ai, r.row.points, r.row.nearby, r.row.state], [null, [], null, "failed"]);
+  const v = publicView({ ...r.row, id: "x", created_at: "2026-11-24T10:00:00Z" });
+  assertEquals(v.map, { state: "failed", line: null });
+  assertEquals(v.ai, null);
+});
+
+Deno.test("SITE-3: the Places cap, no answer, no place and no Latin term are not a check", async () => {
+  const d = (a: Awaited<ReturnType<Parameters<typeof startNearbyCheck>[0]["search"]>>) => ({ code: () => "NEAR2345", search: () => Promise.resolve(a) });
+  assertEquals(await startNearbyCheck(d("back_soon"), NEARBY_INPUT), { ok: false, reason: "back_soon" });
+  assertEquals(await startNearbyCheck(d(null), NEARBY_INPUT), { ok: false, reason: "no_answer" });
+  assertEquals(await startNearbyCheck(d([]), { ...NEARBY_INPUT, place_id: null }), { ok: false, reason: "no_place" });
+  assertEquals(await startNearbyCheck(d([]), { ...NEARBY_INPUT, term: "مقهى" }), { ok: false, reason: "term" });
+  // The industry page's term stands in for a term not in Latin letters.
+  const r = await startNearbyCheck(d([]), { ...NEARBY_INPUT, term: "مقهى", industry_term: "cafe" });
+  assert(r.ok);
+  assertEquals(r.row.term, "cafe");
+  assertEquals(r.competitors, []);
+});
+
+Deno.test("SITE-3: the search words fall back to the town, then the name", () => {
+  assertEquals(nearbyQuery("bakery", { name: "Crumb", address: null, city: "Byblos" }), "bakery near Byblos");
+  assertEquals(nearbyQuery("bakery", { name: "Crumb", address: " ", city: null }), "bakery near Crumb");
+  assertEquals(nearbyRivals([], { place_id: SELF, name: "x" }), []);
 });

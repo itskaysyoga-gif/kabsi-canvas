@@ -7,10 +7,11 @@ import { useMemo, useState } from "react";
 import { ArrowRight, Check, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NOT_AFFILIATED } from "@/lib/site";
-import { PRICE_MONTHLY_USD, PRIMARY_CTA, TRIAL_LINE } from "@/lib/offer";
 import { industriesAtoZ, type Industry } from "@/content/industries";
 import { BLUEPRINT, READ } from "@/content/industries/blueprint";
-import { ExampleBadge, KabsiMark, buttonClass } from "./ui";
+import { ExampleBadge, KabsiMark } from "./ui";
+import { Band, Head, Lead } from "@/components/marketing/kit";
+import { PriceCard, TrustLines } from "@/components/marketing/v31";
 import { Img } from "./photos";
 import { ScanBox } from "./scan-box";
 import { SiteLink } from "./site-link";
@@ -85,20 +86,26 @@ const TRUST = [
 export function IndustryPage({ industry: i }: { industry: Industry }) {
   const b = BLUEPRINT[i.slug];
   const h1 = `Your ${i.name} on Google. Taken care of.`;
+  // SITE-3 (R-164 item 7): the page is built from the same sections as Home and Pricing (marketing/kit.tsx). The H1 is
+  // the only yellow bar; the example review sits beside the hero on a computer, so no section leaves half the width empty.
   return (
     <>
-      <section aria-labelledby="hero-title" data-hero className="relative isolate z-10">
-        <div className="container-kb pt-6 pb-10 md:pt-10 lg:pt-14 lg:pb-16">
+      <section
+        aria-labelledby="hero-title"
+        data-hero
+        className="relative isolate z-10 bg-surface-0"
+      >
+        <div className="container-kb grid gap-10 pt-6 pb-14 md:pt-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:gap-16 lg:pt-14 lg:pb-20">
           <div className="max-w-[40rem]">
             <Breadcrumb current={i.plural} />
             <h1 id="hero-title" className="mt-4 text-display text-balance">
               <Marked text={h1} mark="Taken care of." />
             </h1>
-            <p className="mt-4 max-w-[34rem] text-lead text-text-2 sm:mt-5">
+            <Lead className="mt-4 sm:mt-5">
               Kabsi answers your reviews, protects your listing and keeps your profile fresh. You
               approve and make changes from WhatsApp or email.
-            </p>
-            <div className="relative z-10 mt-5 max-w-[34rem] sm:mt-7">
+            </Lead>
+            <div className="relative z-10 mt-6 max-w-[34rem] sm:mt-8">
               <ScanBox
                 id="hero-scan"
                 keyword={i.keyword}
@@ -108,63 +115,23 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
               />
             </div>
           </div>
-        </div>
-      </section>
-
-      <section aria-labelledby="benefits-h" className="border-y border-line bg-surface-1">
-        <div className={cn("container-kb", sectionY)}>
-          <Headline
-            id="benefits-h"
-            text="What Kabsi does without being asked"
-            mark="without being asked"
-          />
-          <ol className="mt-8 grid gap-6 md:grid-cols-3 md:gap-8">
-            {BENEFITS.map((x, n) => (
-              <li key={x.title} className="flex gap-3 md:block">
-                <YellowNumber n={n + 1} />
-                <div className="md:mt-4">
-                  <h3 className="text-title">{x.title}</h3>
-                  <p className="mt-1 text-body text-text-2">{x.text}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      {b && (
-        <section aria-labelledby="review-h">
-          <div
-            className={cn(
-              "container-kb grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-16",
-              sectionY,
-            )}
-          >
-            <div>
-              <Headline
-                id="review-h"
-                label="Example"
-                text={`A review at ${i.example.business}, and the reply Kabsi writes`}
-                mark="the reply Kabsi writes"
-              />
-              <p className="mt-4 max-w-[34rem] text-body text-text-2 sm:text-lead">
-                Kabsi writes the reply from the facts you gave it. It waits for your yes before
-                anything reaches Google.
-              </p>
-            </div>
-            <figure>
+          {b && (
+            <figure aria-labelledby="review-h">
+              <h2 id="review-h" className="mb-3 text-title text-text-1">
+                {`A review at ${i.example.business}, and the reply Kabsi writes`}
+              </h2>
               <div className="rounded-panel border border-line bg-surface-1 p-4 shadow-lift sm:p-6">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-small font-bold">{`${b.review.name}, ${b.review.stars} stars`}</p>
                   <ExampleBadge />
                 </div>
-                <p className="mt-2 text-body">{b.review.text}</p>
+                <p className="mt-2 text-read">{b.review.text}</p>
                 <div className="mt-4 rounded-inner bg-surface-2 p-3 sm:p-4">
                   <div className="flex items-start gap-2">
                     <KabsiMark ring={false} className="mt-0.5 size-7 shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="text-label font-semibold text-text-2">Kabsi's reply, ready</p>
-                      <p className="mt-1 text-small">{b.reply}</p>
+                      <p className="mt-1 text-read">{b.reply}</p>
                       <div className="mt-3 grid grid-cols-2 gap-2" aria-hidden>
                         <span className="grid min-h-10 place-items-center rounded-pill bg-kb-ink px-2 text-center text-label font-bold text-kb-white">
                           Approve
@@ -177,25 +144,40 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
                   </div>
                 </div>
               </div>
-              <figcaption className="sr-only">
-                {`Example: an invented review for ${i.example.business} and the reply Kabsi prepares. The owner approves or changes it.`}
+              <figcaption className="mt-3 text-small text-text-2">
+                Kabsi writes the reply from the facts you gave it. It waits for your yes before
+                anything reaches Google.
               </figcaption>
             </figure>
-          </div>
-        </section>
-      )}
+          )}
+        </div>
+      </section>
+
+      <Band id="benefits" tone="white">
+        <Head id="benefits" title="What Kabsi does without being asked." />
+        <ol className="mt-8 grid gap-8 md:grid-cols-3 md:gap-10">
+          {BENEFITS.map((x, n) => (
+            <li key={x.title} className="flex gap-4 md:block">
+              <YellowNumber n={n + 1} />
+              <div className="md:mt-4">
+                <h3 className="text-h3">{x.title}</h3>
+                <p className="mt-2 text-read text-text-2">{x.text}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </Band>
 
       {b && (
-        <section aria-labelledby="fact-h" className="border-y border-line bg-surface-1">
-          <div className={cn("container-kb max-w-[48rem]", sectionY)}>
-            <Headline
-              id="fact-h"
-              label={`For ${i.plural.toLowerCase()}`}
-              text="One thing Google says"
-              mark="Google says"
-            />
-            <p className="mt-4 text-lead">{b.fact.text}</p>
-            <p className="mt-2 text-small text-text-2">
+        <Band
+          id="fact"
+          tone="ivory"
+          inner="lg:grid lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16"
+        >
+          <Head id="fact" title={`One thing Google says about ${i.plural.toLowerCase()}.`} />
+          <div className="mt-6 lg:mt-0">
+            <p className="max-w-[60ch] text-lead text-text-1">{b.fact.text}</p>
+            <p className="mt-4 max-w-[60ch] text-read text-text-2">
               {"Source: "}
               <a href={b.fact.source.url} rel="noreferrer" className="underline underline-offset-4">
                 {b.fact.source.title}
@@ -203,60 +185,41 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
               {`, read on ${READ}.`}
             </p>
           </div>
-        </section>
+        </Band>
       )}
 
-      <section aria-labelledby="price-h">
-        <div className={cn("container-kb max-w-[48rem]", sectionY)}>
-          <Headline id="price-h" text="One plan, one price" mark="one price" />
-          <div className="mt-6 rounded-panel border border-text-1 bg-surface-1 p-5 shadow-lift sm:p-7">
-            <p className="font-display text-h2 font-bold">{`${PRICE_MONTHLY_USD} US dollars a month`}</p>
-            <p className="mt-1 text-body text-text-2">Per location.</p>
-            <p className="mt-3 text-body">{TRIAL_LINE}</p>
-            <SiteLink to="/scan" className={cn(buttonClass("primary"), "mt-5 w-full sm:w-auto")}>
-              {PRIMARY_CTA}
-            </SiteLink>
-          </div>
-        </div>
-      </section>
+      <Band id="price" tone="white">
+        <Head id="price" title="One plan, one price." />
+        {/* The price card of Home and Pricing: TRIAL_LINE beside the button, the included list, the not included line. */}
+        <PriceCard className="mt-8" />
+      </Band>
 
-      <section aria-labelledby="trust-h" className="border-t border-line bg-surface-1">
-        <div className={cn("container-kb", sectionY)}>
-          <h2 id="trust-h" className="sr-only">
-            What to know first
+      <Band id="trust" tone="ivory" inner="py-10 sm:py-14 lg:py-16">
+        <h2 id="trust-h" className="text-title text-text-2">
+          What to know first
+        </h2>
+        <TrustLines />
+        <SiteLink to="/for" className={cn(linkCls, "mt-6 text-read")}>
+          See every business
+          <Arrow />
+        </SiteLink>
+      </Band>
+
+      <Band id="closing" tone="dark">
+        <div className="mx-auto max-w-[44rem] text-center">
+          <h2 id="closing-h" className="text-h2 text-balance">
+            Check your business, free.
           </h2>
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {TRUST.map((t) => (
-              <li key={t} className="flex items-start gap-3 text-body font-semibold">
-                <Check className="mt-1 size-4 shrink-0 text-ok" strokeWidth={2.5} aria-hidden />
-                {t}
-              </li>
-            ))}
-          </ul>
-          <SiteLink to="/for" className={cn(linkCls, "mt-6 text-body")}>
-            See every business
-            <Arrow />
-          </SiteLink>
+          <ScanBox
+            id="closing-scan"
+            keyword={i.keyword}
+            keywordHint={false}
+            industry={i.slug}
+            className="mt-8 text-start"
+            note={FREE_CHECK_NOTE}
+          />
         </div>
-      </section>
-
-      <section aria-labelledby="closing-title">
-        <div className={cn("container-kb", sectionY)}>
-          <div className="mx-auto max-w-[44rem]">
-            <h2 id="closing-title" className="text-h2 text-balance">
-              <Marked text="Check your business, free." mark="free." />
-            </h2>
-            <ScanBox
-              id="closing-scan"
-              keyword={i.keyword}
-              keywordHint={false}
-              industry={i.slug}
-              className="mt-6"
-              note={FREE_CHECK_NOTE}
-            />
-          </div>
-        </div>
-      </section>
+      </Band>
     </>
   );
 }
@@ -314,7 +277,7 @@ function TradeCard({
       </span>
       <span className="flex flex-1 flex-col p-3 sm:p-4">
         <span className="text-body font-bold sm:text-title">{i.plural}</span>
-        {line && <span className="mt-1 text-small text-text-2">{i.page.card}</span>}
+        {line && <span className="mt-1 text-body text-text-2">{i.page.card}</span>}
       </span>
     </SiteLink>
   );
@@ -385,7 +348,7 @@ export function ForIndex() {
             <h1 id="hero-title" className="text-display text-balance">
               <Marked text={FOR_HERO.h1} mark={FOR_HERO.mark} />
             </h1>
-            <p className="mt-4 text-lead text-text-2 sm:mt-5">{FOR_HERO.line}</p>
+            <Lead className="mt-4 sm:mt-5">{FOR_HERO.line}</Lead>
             <div className="relative z-10 mt-5 sm:mt-7">
               <ScanBox id="hero-scan" note={FREE_CHECK_NOTE} />
             </div>
@@ -396,12 +359,9 @@ export function ForIndex() {
       <section aria-labelledby="list-h" className="border-t border-line bg-surface-1">
         <div className={cn("container-kb", sectionY)}>
           <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
-            <Headline
-              id="list-h"
-              label="Businesses"
-              text="Pick your business"
-              mark="your business"
-            />
+            <h2 id="list-h" className="text-h2 text-balance">
+              Pick your business.
+            </h2>
             <div className="w-full sm:w-[20rem]">
               <label htmlFor="for-filter" className="text-label font-semibold text-text-2">
                 Find your kind of business
@@ -463,19 +423,17 @@ export function ForIndex() {
           )}
         </div>
       </section>
-      <section aria-labelledby="any-h">
-        <div className={cn("container-kb", sectionY)}>
-          <div className="mx-auto max-w-[44rem]">
-            <h2 id="any-h" className="text-h2 text-balance">
-              <Marked text="Not on the list?" mark="the list?" />
-            </h2>
-            <p className="mt-3 text-lead text-text-2">
-              Kabsi works for any local business with a Google profile.
-            </p>
-            <ScanBox id="closing-scan" className="mt-6" note={FREE_CHECK_NOTE} />
-          </div>
+      <Band id="any" tone="dark">
+        <div className="mx-auto max-w-[44rem] text-center">
+          <h2 id="any-h" className="text-h2 text-balance">
+            Not on the list?
+          </h2>
+          <Lead className="mx-auto mt-4">
+            Kabsi works for any local business with a Google profile.
+          </Lead>
+          <ScanBox id="closing-scan" className="mt-8 text-start" note={FREE_CHECK_NOTE} />
         </div>
-      </section>
+      </Band>
     </>
   );
 }

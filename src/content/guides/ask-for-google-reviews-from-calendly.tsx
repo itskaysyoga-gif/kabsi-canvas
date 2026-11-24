@@ -1,6 +1,6 @@
 import { Callout, DoDont, Steps } from "@/components/marketing/guide-kit";
 import { GuideLink, SiteRef } from "@/components/marketing/guide-links";
-import { weeklyAt } from "./schedule";
+import { SITE3_PUBLISH_AT } from "./schedule";
 import type { GuideDoc } from "./types";
 
 // Weekly guide 11 (the 38th guide), for Calendly users. Every claim about Calendly is from Calendly's help centre pages and
@@ -12,7 +12,7 @@ export const guide: GuideDoc = {
   title: "How do I ask for Google reviews from Calendly?",
   description:
     "How to use a Calendly Automation that sends a thank-you email when an event ends, with your Google review link in it, and the Google rules to follow.",
-  publishAt: weeklyAt(10),
+  publishAt: SITE3_PUBLISH_AT,
   updated: READ,
   checked: READ,
   topic: "Reviews",
@@ -33,9 +33,10 @@ export const guide: GuideDoc = {
       body: (
         <>
           <p>
-            Calendly says Automations are available on paid plans from Professional through
-            Enterprise, and that your role, plan, account creation date and add-ons can affect
-            access. Check your own account under Automations.
+            Calendly lists Automations on the Professional, Standard, Standard Plus, Teams, Teams
+            Plus and Enterprise plans, and says access may vary based on your plan, when your account
+            was created and any add-ons. Your role also controls which team settings you can manage.
+            Check your own account under Automations.
           </p>
           <p>
             You can create up to 50 per user or team, across all event types. Calendly says updates
@@ -56,9 +57,9 @@ export const guide: GuideDoc = {
               "Go to Automations.",
               'Choose a template and click "Use automation", or click "Create your own automation".',
               "For a custom Automation, choose the trigger Event ends and set its timing.",
-              "Pick an action, such as an email to the invitee.",
+              "Pick an action, such as an email to the invitee, then select Next.",
               "Name the Automation.",
-              "Select the event types it applies to.",
+              "Select the event types it applies to, then select Apply.",
               "Edit the email, write your message and click Done.",
               "Click Save.",
             ]}
@@ -83,8 +84,8 @@ export const guide: GuideDoc = {
             ]}
           />
           <p>
-            Calendly says a text message Automation has no link button: you type or paste the URL
-            into the Body as plain text. Get your link from Google first, as shown in{" "}
+            Calendly says text message Automations support URLs as plain text: you type or paste
+            the URL into the Body. Get your link from Google first, as shown in{" "}
             <GuideLink slug="google-review-link-and-qr-code">
               how to get your Google review link and QR code
             </GuideLink>
@@ -108,8 +109,8 @@ export const guide: GuideDoc = {
           <p>
             When you select the event types the Automation applies to, choose every event type your
             customers book, so no group is left out. Calendly says invitees marked as no-shows only
-            get no-show Automations, so someone who did not come will not get the thank-you email,
-            which is as it should be: they have nothing to review.
+            get no-show Automations, so an invitee you mark as a no-show will not get the thank-you
+            email, which is as it should be: they have nothing to review.
           </p>
           <p>
             Calendly's Automations can also send a post-meeting feedback survey. Do not use a survey
@@ -184,11 +185,11 @@ export const guide: GuideDoc = {
   faqs: [
     {
       q: "Which Calendly plans have Automations?",
-      a: "Calendly lists paid plans from Professional through Enterprise, and says role, plan, account creation date and add-ons can affect access.",
+      a: "Calendly lists Professional, Standard, Standard Plus, Teams, Teams Plus and Enterprise, and says access may vary based on your plan, when your account was created and any add-ons.",
     },
     {
       q: "Can I add the link to a text message instead?",
-      a: "Calendly says text message Automations have no link button, so you type or paste the URL into the Body as plain text.",
+      a: "Yes. Calendly says text message Automations support URLs as plain text, so you type or paste the URL into the Body.",
     },
   ],
   sources: [

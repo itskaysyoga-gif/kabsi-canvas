@@ -11,6 +11,7 @@ import {
   isPublic,
   publicGuides,
   weeklyAt,
+  SITE3_PUBLISH_AT,
 } from "../src/content/guides/schedule";
 import { sitemapXml } from "../src/lib/sitemap";
 import { llmsText } from "../src/lib/llms";
@@ -72,12 +73,15 @@ describe("the schedule", () => {
     expect(isPublic({ publishAt: weeklyAt(0) }, at("2026-11-16T05:59:59Z"))).toBe(false);
   });
 
-  it("the weekly guides (8 salon and barber, then 3 review link guides, SITE-2) are one a week from 16 Nov 2026, in the WEEKLY order, each public only from its day", () => {
+  it("the weekly guides (8 salon and barber) are one a week from 16 Nov 2026, in the WEEKLY order; the 3 review link guides publish on 24 Nov (SITE-3, R-164 item 5)", () => {
     expect(WEEKLY).toHaveLength(11);
-    WEEKLY.forEach((s, n) => {
+    const SITE3 = WEEKLY.slice(8);
+    WEEKLY.slice(0, 8).forEach((s, n) => {
       const g = ALL_GUIDES.find((x) => x.slug === s);
       expect(g?.publishAt, s).toBe(weeklyAt(n));
     });
+    for (const s of SITE3)
+      expect(ALL_GUIDES.find((x) => x.slug === s)?.publishAt, s).toBe(SITE3_PUBLISH_AT);
     // The holiday guides come before their holidays: UAE National Day on 2 Dec, Christmas on 25 Dec.
     expect(Date.parse(weeklyAt(0))).toBeLessThan(Date.parse("2026-12-02T00:00:00Z"));
     expect(Date.parse(weeklyAt(1))).toBeLessThan(Date.parse("2026-11-30T00:00:00Z"));
@@ -87,8 +91,11 @@ describe("the schedule", () => {
     const monday = publicGuides(ALL_GUIDES, at("2026-11-16T06:00:00Z")).map((g) => g.slug);
     expect(monday[0]).toBe(WEEKLY[0]);
     expect(monday).toHaveLength(27);
-    const all = publicGuides(ALL_GUIDES, new Date(weeklyAt(WEEKLY.length - 1))).map((g) => g.slug);
-    expect(all.slice(0, WEEKLY.length)).toEqual([...WEEKLY].reverse());
+    // From 24 Nov 18:00 UTC the three SITE-3 guides are public.
+    const site3 = publicGuides(ALL_GUIDES, new Date(SITE3_PUBLISH_AT)).map((g) => g.slug);
+    for (const s of SITE3) expect(site3).toContain(s);
+    const all = publicGuides(ALL_GUIDES, new Date(weeklyAt(7))).map((g) => g.slug);
+    expect(all.filter((s) => WEEKLY.slice(0, 8).includes(s as never))).toEqual([...WEEKLY.slice(0, 8)].reverse());
     expect(all).toHaveLength(26 + WEEKLY.length);
   });
 

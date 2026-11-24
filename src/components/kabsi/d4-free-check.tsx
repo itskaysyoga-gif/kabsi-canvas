@@ -124,10 +124,10 @@ export function WhatYouGetBack({ photo = false }: { photo?: boolean }) {
               </li>
             ))}
           </ul>
-          <p className="mt-5 text-small text-text-2">
+          <p className="mt-5 text-body text-text-2">
             What Google shows about the business is shown to you and not kept.
           </p>
-          <p className="mt-2 text-small text-text-2">{TRIAL_LINE}</p>
+          <p className="mt-2 text-body text-text-2">{TRIAL_LINE}</p>
           {/* Scan 3 (30.34 item 2): a library photo on the empty /scan page (docs/PHOTOS.md, salon-tablet). */}
           {photo && (
             <img

@@ -47,7 +47,8 @@ describe("Places field masks (P0.2-06)", () => {
         seen++;
       }
     }
-    // The daily rating no longer reads Places (master plan 30.10): four calls outside the layer.
-    expect(seen).toBe(4);
+    // The daily rating no longer reads Places (master plan 30.10). SITE-3 adds the free check's nearby Text Search
+    // (visibility/index.ts): five calls outside the layer.
+    expect(seen).toBe(5);
   });
 });

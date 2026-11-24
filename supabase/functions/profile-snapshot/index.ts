@@ -11,6 +11,8 @@ import { type CheckRow, reportParts } from "../_shared/visibility/free-check.ts"
 import { whatsappCtx } from "../_shared/whatsapp/db.ts";
 import { WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
 import { BODY_LIMITS, withBodyCap } from "../_shared/body-cap.ts";
+import { linkNow } from "../_shared/link-watch/link-watch.ts";
+import { resolveHost } from "../_shared/link-watch/job.ts";
 
 // Sec 2: the body is capped before the handler reads it (413 past BODY_LIMITS.small).
 serve(withBodyCap(makeHandler({
@@ -26,6 +28,9 @@ serve(withBodyCap(makeHandler({
   searchText,
   autocomplete,
   getSnapshotPlace,
+  // SITE-3: "Do your links work now?": one look at the website, 4 seconds at most, through the link watch's safe fetch
+  // (public addresses only, redirects on the same site). Nothing about it is stored.
+  linkNow: (url) => linkNow("website", url, { resolve: resolveHost, fetch: (u, init) => fetch(u, init) }),
   saveEmail: async (row) => {
     const { error } = await admin().from("profile_check_emails").insert(row);
     if (error) throw error;

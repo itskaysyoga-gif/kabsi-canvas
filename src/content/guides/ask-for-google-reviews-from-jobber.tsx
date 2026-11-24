@@ -1,27 +1,28 @@
 import { Callout, DoDont, Steps } from "@/components/marketing/guide-kit";
 import { GuideLink, SiteRef } from "@/components/marketing/guide-links";
-import { weeklyAt } from "./schedule";
+import { SITE3_PUBLISH_AT } from "./schedule";
 import type { GuideDoc } from "./types";
 
-// Weekly guide 10 (the 37th guide), for Jobber users. Every claim about Jobber is from Jobber's help centre page and every
-// claim about Google from the Google sources below, all read on 24 Nov 2026.
+// Weekly guide 10 (the 37th guide), for Jobber users. Every claim about Google is from the Google sources below, read on
+// 24 Nov 2026. Jobber's help centre page did not load as raw text that day (a bot check), so the Jobber lines stay general:
+// no menu paths, triggers, timings, plans or limits.
 const READ = "2026-11-24";
 
 export const guide: GuideDoc = {
   slug: "ask-for-google-reviews-from-jobber",
   title: "How do I ask for Google reviews from Jobber?",
   description:
-    "How to use Jobber's Reviews tool to ask every client for a Google review, what it needs, when it sends, and how to stay inside Google's review rules.",
-  publishAt: weeklyAt(9),
+    "How to ask every Jobber client for a Google review with Jobber's reviews tool, what to check in Jobber, and how to stay inside Google's review rules.",
+  publishAt: SITE3_PUBLISH_AT,
   updated: READ,
   checked: READ,
   topic: "Reviews",
   answer:
-    "Jobber has a Reviews tool under Marketing that sends a review request after a visit, a closed job or a paid invoice. Keep it on for every client, and do not leave out clients you think were unhappy.",
+    "Jobber's help centre has an article on a Reviews tool in its Marketing Tools. Check in Jobber how it sends requests, keep it on for every client, and do not leave out clients you think were unhappy.",
   inShort: [
-    "In Jobber, select Marketing, then Reviews, then Connect. You need a verified Google Business Profile.",
-    "Jobber sends the request after a completed visit, a closed job or a paid invoice.",
-    "The request goes to every client unless you turn off Ask for review on a client's profile.",
+    "In Jobber, look for the reviews tool. Jobber's help centre covers it in an article called Reviews (Marketing Tools).",
+    "Check in Jobber when the request goes out, how it is sent and who it goes to.",
+    "Send the same request to every client who finishes a job.",
     "No discount or gift for a review, and no switching clients off because they seemed unhappy.",
   ],
   sections: [
@@ -29,21 +30,20 @@ export const guide: GuideDoc = {
       id: "what-it-is",
       heading: "Does Jobber have a way to ask for Google reviews?",
       answer:
-        "Yes. Jobber's help centre describes a Reviews tool, part of Jobber's Marketing Suite. It is available in the United States, Canada and the United Kingdom on all plans as part of the Marketing Suite. Add-on details are in a separate Jobber article, so check your plan in Jobber.",
+        "Jobber's help centre has an article called Reviews (Marketing Tools), so look for the reviews tool in Jobber. Which plans, countries and users can use it is up to Jobber, so check your own account.",
       body: (
         <>
           <p>
-            Only admin users, or users with the Marketing Suite permission, can view the Reviews
-            dashboard or manage the review settings. You also need a verified Google Business
-            Profile. If yours is not verified yet, start with{" "}
+            Check which users in your account can manage the review settings. If your Google
+            Business Profile is not verified yet, start with{" "}
             <GuideLink slug="how-to-verify-google-business-profile">
               how to verify your Google Business Profile
             </GuideLink>
             .
           </p>
           <p>
-            Check your own plan inside Jobber. The page points to a separate Jobber article for
-            add-on details and gives no price.
+            Check your own plan, and any add-on, inside Jobber. This guide does not quote Jobber's
+            plans or prices.
           </p>
         </>
       ),
@@ -52,23 +52,21 @@ export const guide: GuideDoc = {
       id: "set-up",
       heading: "How do I set up Reviews in Jobber?",
       answer:
-        "Select Marketing, then Reviews, then Connect. Choose your Google Business account and grant Jobber access, review the sample message, then select Complete Setup.",
+        "In Jobber, look for the reviews tool and follow its setup steps. Read what access it asks for on your Google account before you grant it, and read the message before you turn it on.",
       body: (
         <>
           <Steps
             items={[
-              "Select Marketing, then Reviews.",
-              "Click Connect.",
-              "Choose your Google Business account and grant Jobber access.",
-              "Review the sample message.",
-              "Select Complete Setup.",
+              "In Jobber, look for the reviews tool.",
+              "Follow Jobber's setup steps to connect your Google Business Profile.",
+              "Read what access Jobber asks for before you grant it.",
+              "Read the message Jobber will send.",
+              "Finish the setup.",
             ]}
           />
           <p>
-            Jobber says the Google permission covers seeing, editing, creating and deleting Google
-            Business listings, that it needs it to pull review data, and that it will not edit or
-            delete any listing. Jobber also says you can turn off its job follow-ups under Settings,
-            then Emails & Text Messages, then Jobs, so clients are not asked twice.
+            If Jobber also sends its own follow-up emails or texts after a job, check your Jobber
+            settings so clients are not asked for a review twice.
           </p>
         </>
       ),
@@ -77,26 +75,26 @@ export const guide: GuideDoc = {
       id: "when",
       heading: "When does Jobber send the request?",
       answer:
-        "The first request is triggered by one of three events: Visit is completed, Job closes, or Invoice is paid. You can send it by email or text, and Jobber sends at most one request per client every six months.",
+        "Jobber's help centre describes when its reviews tool sends the request. Check the options in your own account, and pick a moment that every client reaches, such as when the work is done.",
       body: (
         <>
           <ul>
             <li>
-              <b>Visit is completed:</b> the ask goes out after a completed visit.
+              <b>The same moment for everyone:</b> one point every client reaches, so nobody is
+              skipped.
             </li>
             <li>
-              <b>Job closes:</b> the ask goes out when the job is closed.
+              <b>Email or text:</b> check which ones Jobber offers and which your clients can
+              receive.
             </li>
             <li>
-              <b>Invoice is paid:</b> partial payments do not trigger the ask until the balance is
-              0.00.
+              <b>Reminders:</b> check whether Jobber sends reminders and how often, so clients are
+              not asked too many times.
             </li>
           </ul>
           <p>
-            Jobber says requests triggered by a closed job or a completed visit between 9 PM and 9
-            AM local time go by email only, and that a client needs a phone number that can receive
-            texts for a text request. If a client does not click the link, Jobber sends up to two
-            reminders, the first three days after the first ask and the second five days after that.
+            This guide does not repeat Jobber's exact timings or limits. They are in Jobber's help
+            centre and in your account, and Jobber can change them.
           </p>
         </>
       ),
@@ -105,23 +103,22 @@ export const guide: GuideDoc = {
       id: "message",
       heading: "Can I change what the message says?",
       answer:
-        "Yes, the first message can be edited. The text message template is not customizable unless you have a dedicated phone number, and the reminder text is not customizable.",
+        "Check in Jobber which parts of the message and any reminders you can edit. Whatever you can edit, ask for an honest review, in the same words for every client.",
       body: (
         <>
           <p>
-            You can add details such as the client's name to the first message. Jobber's page does
-            not say you can use a different review link, so leave the link part as Jobber has it.
+            Read the message before you turn the tool on. If you are not sure whether you can change
+            the review link in it, leave the link as Jobber has it.
           </p>
           <Callout kind="tip" title="Keep it neutral">
             "Thank you for choosing us. If you have a minute, we would love an honest review." The
             same words for every client. No stars, no discount, no wording about what to write.
           </Callout>
           <p>
-            Jobber's default follow-up wording asks clients to leave a review "if you're happy with
-            our work". Google's policy does not allow businesses to selectively solicit positive
-            reviews, so edit the first message to ask for an honest review. Jobber's reminder text
-            cannot be edited, so accept the reminders knowingly, and never use that wording to steer
-            happy clients towards Google.
+            If any wording in the message or a reminder only invites happy clients, such as "if
+            you're happy with our work", change it where Jobber lets you. Google's policy does not
+            allow businesses to selectively solicit positive reviews, so the message should ask
+            everyone for an honest review.
           </p>
         </>
       ),
@@ -130,15 +127,13 @@ export const guide: GuideDoc = {
       id: "exclude",
       heading: "Can I leave some clients out?",
       answer:
-        "Jobber lets you turn off Ask for review on one client's profile, but do not use it to skip clients who seemed unhappy. Google's policy does not allow businesses to selectively solicit positive reviews from customers.",
+        "If Jobber lets you turn review requests off for one client, do not use it to skip clients who seemed unhappy. Google's policy does not allow businesses to selectively solicit positive reviews from customers.",
       body: (
         <>
           <p>
-            In Jobber, open the client's profile, select Edit, go to Communication settings and
-            toggle off Ask for review. There are good reasons to use it, such as a client who has
-            asked not to be contacted. Jobber also says that if a client's name matches an existing
-            Google reviewer, it flags it and turns the toggle off. The reason must never be how you
-            think the job went.
+            There are good reasons to turn requests off for one client, such as a client who has
+            asked not to be contacted. Check Jobber's client settings for how to do it. The reason
+            must never be how you think the job went.
           </p>
           <DoDont
             yesTitle="Fine"
@@ -186,8 +181,7 @@ export const guide: GuideDoc = {
         "Anywhere your clients already look: Google says it can go on receipts, in thank-you emails, at the end of a chat, or as a QR code printed and displayed in your store. Jobber's tool covers the message it sends. Printed things are up to you.",
       body: (
         <p>
-          Jobber's page does not describe printed items, so use a link or QR code from Google for
-          the van sign, the business card or the counter. The same rules apply: one request for
+          For the van sign, the business card or the counter, use a link or QR code from Google. The same rules apply: one request for
           everyone, no reward. The full list is in{" "}
           <GuideLink slug="where-to-put-your-google-review-link">
             where to put your Google review link
@@ -218,15 +212,15 @@ export const guide: GuideDoc = {
   faqs: [
     {
       q: "Do I need a Jobber add-on to ask for reviews?",
-      a: "Jobber says Reviews is available in the United States, Canada and the United Kingdom on all plans as part of its Marketing Suite. Add-on details are in a separate Jobber article, so check your plan in Jobber.",
+      a: "Check your plan in Jobber or in Jobber's help centre. This guide does not quote Jobber's plans, add-ons or prices.",
     },
     {
       q: "Does Jobber only ask happy clients?",
-      a: "Jobber sends by trigger, not by rating. Its default reminder wording refers to being happy with the work, and the reminder text cannot be edited. Accept the reminders knowingly, and never use that wording to steer happy clients to Google, which does not allow selectively soliciting positive reviews.",
+      a: "Read the message and any reminders before you turn the tool on. If any wording only invites happy clients, change it where Jobber lets you, and never pick who gets the request by how you think the job went. Google does not allow selectively soliciting positive reviews.",
     },
     {
       q: "How often can the same client be asked?",
-      a: "Jobber says it sends at most one request per client every six months, with up to two reminders if the client does not click the link, the first three days after the first ask and the second five days after that.",
+      a: "Check Jobber's settings and help centre for how often it asks the same client and whether it sends reminders. This guide does not repeat Jobber's limits.",
     },
   ],
   sources: [
@@ -259,5 +253,5 @@ export const guide: GuideDoc = {
     "google-review-link-and-qr-code",
   ],
   summary:
-    "How to use Jobber's Reviews tool to ask every client for a Google review: setup, the three triggers, editing the message, and Google's rules against filtering, rewards and staff targets.",
+    "How to use Jobber's reviews tool to ask every client for a Google review: what to check in Jobber, the message, and Google's rules against filtering, rewards and staff targets.",
 };

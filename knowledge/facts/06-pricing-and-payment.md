@@ -30,6 +30,8 @@ The trial terms, word for word, beside every signup button and at checkout: "14 
 - **No public offer.** There is no public discount or special offer. A business that was invited should open the link in its invitation.
 - **Same everywhere:** Kabsi is software only, at the same price in every country. Kabsi sells no cards. Every business gets a free review link and QR code, which work with your own QR codes and NFC cards (section 5), with no plan.
 - The plan is monthly. Monthly plans can be cancelled at any time.
+- **The Plan page** (signed in, OFFER-2, 24 Nov 2026) shows one card, "Kabsi": 29 US dollars a month per location, the trial terms above, the four lines of work, "Nothing goes live without your yes" and the button "Start 14 days free" ("Plans open soon" while card checkout is closed). There is no Pro and no yearly choice. A business already on the older Pro plan sees "Move to Kabsi", which moves it at its next renewal.
+- **On WhatsApp**, asking to upgrade gets: "Kabsi has one plan: 29 US dollars a month per location. There is nothing to upgrade to." The owner's plan message offers "card", "invoice", "add a location" and "cancel"; "upgrade" is no longer one of them.
 - Kabsi may change prices for future purchases. A plan already paid for keeps its price.
 - **Help from a person:** "A person answers on WhatsApp the same working day." "Working hours: Monday to Friday, 9:00 to 18:00, UAE time."
 - **Currency:** prices are in US dollars only. Creem, Kabsi's merchant of record, prices products in US dollars or euros, not pounds or dirhams, so Kabsi shows no local-currency price and never a converted estimate.

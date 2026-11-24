@@ -6,7 +6,6 @@ import { Check, CircleSlash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TRIAL_LINE } from "@/lib/offer";
 import { BLUEPRINT } from "@/content/industries/blueprint";
-import { Marked } from "./highlight";
 import { ExampleBadge, KabsiMark, buttonClass } from "./ui";
 
 const card = "rounded-panel border border-line bg-surface-1 p-5 sm:p-8";
@@ -16,7 +15,7 @@ export type LinkState = "loads" | "fails" | null;
 /** What the server may add to a snapshot. Both are optional: a part that is missing is shown as not read, never invented. */
 export type ResultExtras = {
   links?: { website?: LinkState; booking?: LinkState } | undefined;
-  latest_review?: { stars: number; text: string; reply: string } | undefined;
+  latest_review?: { stars: number; text: string; reply: string; author?: string | null } | undefined;
 };
 
 const figures = (r: NearbyRow) =>
@@ -44,7 +43,7 @@ export function NearbyTable({
   return (
     <section aria-labelledby="near-h" className={card}>
       <h2 id="near-h" className="text-h3">
-        <Marked text="You beside 3 nearby businesses" mark="nearby businesses" />
+        You beside 3 nearby businesses
       </h2>
       {rows.length === 0 ? (
         <p className="mt-3 text-body text-text-2">
@@ -84,7 +83,7 @@ export function BasicsList({ rows }: { rows: { label: string; value: string | nu
   return (
     <section aria-labelledby="basics-h" className={card}>
       <h2 id="basics-h" className="text-h3">
-        <Marked text="Your profile basics" mark="profile basics" />
+        Your profile basics
       </h2>
       <ul className="mt-4 divide-y divide-line">
         {rows.map((r) => (
@@ -124,7 +123,7 @@ export function LinksNow({
   return (
     <section aria-labelledby="links-h" className={card}>
       <h2 id="links-h" className="text-h3">
-        <Marked text="Do your links work now?" mark="links work" />
+        Do your links work now?
       </h2>
       <ul className="mt-3 space-y-2 text-body">
         <li>{linkLine("Website", hasWebsite, links?.website)}</li>
@@ -157,24 +156,26 @@ export function ReplyWould({
   return (
     <section aria-labelledby="reply-h" className={card}>
       <h2 id="reply-h" className="text-h3">
-        <Marked text="The reply Kabsi would write" mark="would write" />
+        The reply Kabsi would write
       </h2>
       {shown ? (
         <div className="mt-4 rounded-inner bg-surface-2 p-3 sm:p-4">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-small font-bold">{`${shown.stars} stars`}</p>
+            <p className="text-small font-bold">
+              {real?.author ? `${real.author}, ${shown.stars} stars` : `${shown.stars} stars`}
+            </p>
             {sample && <ExampleBadge />}
           </div>
           <p className="mt-1 text-body">{shown.text}</p>
           <div className="mt-3 flex items-start gap-2">
             <KabsiMark ring={false} className="mt-0.5 size-7 shrink-0" />
-            <p className="min-w-0 flex-1 text-small">{shown.reply}</p>
+            <p className="min-w-0 flex-1 text-body">{shown.reply}</p>
           </div>
         </div>
       ) : null}
       <p className="mt-3 text-body text-text-2">
         {real
-          ? "You approve it, change it or skip it. Nothing reaches Google until you say yes."
+          ? "Your latest review on Google, with a first reply. Once Kabsi is connected, each reply is written in your voice from your business facts, and nothing reaches Google until you say yes."
           : "Once Kabsi is connected, every review arrives with a reply like this, ready for your yes."}
       </p>
     </section>
@@ -192,7 +193,7 @@ export function MonthlyDo() {
   return (
     <section aria-labelledby="month-h" className={card}>
       <h2 id="month-h" className="text-h3">
-        <Marked text="What Kabsi would do each month" mark="each month" />
+        What Kabsi would do each month
       </h2>
       <ul className="mt-4 space-y-3">
         {MONTHLY.map((l) => (
@@ -218,7 +219,7 @@ export function StartCard({ onStart }: { onStart: () => void }) {
       className="rounded-panel border border-text-1 bg-surface-1 p-5 shadow-lift sm:p-7"
     >
       <h2 id="trial-h" className="text-h3">
-        <Marked text="Your next step" mark="next step" />
+        Your next step
       </h2>
       <button type="button" onClick={onStart} className={cn(buttonClass("primary"), "mt-4 w-full")}>
         Start 14 days free

@@ -234,7 +234,8 @@ export async function gbp(url: string, init: RequestInit = {}): Promise<any> {
   }
 }
 
-// Places API (New) request with a field mask (always required by Google, and by K-100: never the reviews field).
+// Places API (New) request with a field mask (always required by Google; by K-100 never the reviews field, except the
+// free check's one details call, SITE-3, places/live.ts SNAPSHOT_CHECK_FIELD_MASK).
 // Autocomplete is the one Places call that takes no field mask (its answer is only place IDs and text), so it passes
 // null. Returns the raw response so callers keep their own error handling.
 export function places(path: string, key: string, fieldMask: string | null, init: RequestInit = {}) {
