@@ -63,6 +63,11 @@ const WORDS: [RegExp, string, string?][] = [
   [/^(what needs my attention|what is waiting|whats waiting|anything waiting|pending|to do|my list)$/, "waiting"],
   [/^(done|what did you do( this week)?|what did kabsi do( this week)?|weekly report|my report|report)$/, "done"],
   [/^(hours|my hours|opening hours|my opening hours|current hours|what are my hours|what are my opening hours)$/, "hours_now"],
+  // GATE-2 (blueprint 11.2 rows 12 to 14, 18): nearby totals, recurring feedback, profile health and the monthly report.
+  [/^(competitors|my competitors|nearby|nearby businesses|how do i compare|compare me|compare)\??$/, "competitors"],
+  [/^(feedback|customer feedback|what do customers say|what are customers saying|what do my customers say|recurring feedback)\??$/, "feedback"],
+  [/^(profile health|health|profile check|my profile|how is my profile|how is my google profile)\??$/, "profile_health"],
+  [/^(monthly report|month report|my monthly report|last month|report for last month)\??$/, "monthly"],
   [/^(stats|statistics|numbers|how did we do( this week)?|estadísticas|estadisticas|إحصائيات|احصائيات)$/, "stats", "7"],
   [/^(this month|month|stats month|este mes|هذا الشهر)$/, "stats", "30"],
   [/^(review link|link|my link|enlace|رابط|رابط التقييم)$/, "review_link"],

@@ -1,0 +1,3 @@
+# GATE-2 (24 Nov 2026): the private founding price at checkout (team only)
+
+Never on a public page, in Nora's facts or in the llms files. A Founding 25 place that staff link to a business (Staff, Programs, Founding 25, "Link for the founding price") checks out at 19 US dollars a month for its first 12 months, with the same 14-day trial and a card. The 90 days with no card are retired (30.54 item 3); a place linked before GATE-2 keeps its 90 days (founding_applications.card_checkout false). 14 days before month 13 Kabsi emails the owner (and WhatsApp), and 3 days before it moves the plan to 29 in Creem with no proration. A late notice moves the change one renewal later, so the owner always has 14 days.

@@ -163,48 +163,84 @@ describe("the four stages (V4, master plan 30.16 section 3)", () => {
   };
   const at = (s: Partial<OnboardingStatus>, seen = {}, whatsappOn = true, now?: number) =>
     screenOf({ status: { ...base, ...s }, whatsappOn, seen, ...(now ? { now } : {}) });
-  it("names them in order", () => {
-    expect([...STAGES]).toEqual([
-      "Your free check",
-      "Sign in",
-      "Connect WhatsApp",
-      "Add Kabsi on Google",
-    ]);
+  it("names the three steps in order (GATE-2)", () => {
+    expect([...STAGES]).toEqual(["Find your business", "Add Kabsi on Google", "WhatsApp or email"]);
   });
-  it("opens the next unfinished stage", () => {
+  it("opens the next unfinished screen: find, Manager access, WhatsApp or email, then the trial with a card", () => {
     expect(screenOf({ status: null, whatsappOn: true, seen: {} })).toBe("find");
     expect(at({ confirmed: false, check: { code: "RLS2345A", term: "hair salon" } })).toBe("check");
     expect(
       at({ confirmed: false, check: { code: "RLS2345A", term: "hair salon" } }, { check: true }),
     ).toBe("confirm");
     expect(at({ confirmed: false })).toBe("confirm");
-    expect(at({ whatsapp: false })).toBe("whatsapp");
-    expect(at({ whatsapp: false, checked: false }, { whatsapp: true })).toBe("manager");
+    // Step 2 comes before WhatsApp now.
+    expect(at({ whatsapp: false, checked: false })).toBe("manager");
     expect(at({ accepted: false, checked: false })).toBe("manager");
     expect(at({ checked: false })).toBe("manager");
+    // Access works, once.
+    expect(at({ whatsapp: false })).toBe("checked");
+    // Step 3: WhatsApp or email.
+    expect(at({ whatsapp: false }, { checked: true })).toBe("channel");
+    expect(at({ whatsapp: false }, { checked: true, whatsapp: true })).toBe("whatsapp");
+    expect(at({ whatsapp: false }, { checked: true, whatsapp: true }, false)).toBe("channel");
+    expect(
+      screenOf({
+        status: { ...base, whatsapp: false },
+        whatsappOn: true,
+        seen: { checked: true },
+        channel: "email",
+        trial: "needed",
+      }),
+    ).toBe("trial");
+    // The trial with a card: no trial starts without one.
+    expect(
+      screenOf({ status: base, whatsappOn: true, seen: { checked: true }, trial: "needed" }),
+    ).toBe("trial");
+    expect(
+      screenOf({ status: base, whatsappOn: true, seen: { checked: true }, trial: undefined }),
+    ).toBe("trial");
+    expect(
+      screenOf({ status: base, whatsappOn: true, seen: { checked: true }, trial: "started" }),
+    ).toBe("first_task");
+    expect(
+      screenOf({ status: base, whatsappOn: true, seen: { checked: true }, trial: "closed" }),
+    ).toBe("trial");
+    expect(
+      screenOf({
+        status: base,
+        whatsappOn: true,
+        seen: { checked: true, trial: true },
+        trial: "closed",
+      }),
+    ).toBe("first_task");
+    // Paid on the needed state never passes: Continue exists only while plans are closed.
+    expect(
+      screenOf({
+        status: base,
+        whatsappOn: true,
+        seen: { checked: true, trial: true },
+        trial: "needed",
+      }),
+    ).toBe("trial");
     expect(at({ first_task_done: true })).toBe("later");
   });
-  it("without a WhatsApp number, stage 3 is behind the owner once they authorise access", () => {
-    expect(
-      at({ whatsapp: false, consent: false, accepted: false, checked: false }, {}, false),
-    ).toBe("whatsapp");
-    expect(at({ whatsapp: false, accepted: false, checked: false }, {}, false)).toBe("manager");
+  it("a demo business skips step 3 and the trial", () => {
+    expect(at({ is_demo: true, whatsapp: false })).toBe("first_task");
   });
-  it("shows Access works. on the day the trial starts, then the first task", () => {
+  it("trialStartedToday still reads an older Kabsi trial", () => {
     const now = Date.parse("2026-10-27T10:00:00Z");
-    expect(at({ trial_ends_at: "2026-11-10T10:00:00Z" }, {}, true, now)).toBe("checked");
-    expect(at({ trial_ends_at: "2026-11-10T10:00:00Z" }, { checked: true }, true, now)).toBe(
-      "first_task",
-    );
-    expect(at({ trial_ends_at: "2026-11-05T10:00:00Z" }, {}, true, now)).toBe("first_task");
+    expect(trialStartedToday("2026-11-10T10:00:00Z", now)).toBe(true);
+    expect(trialStartedToday("2026-11-05T10:00:00Z", now)).toBe(false);
     expect(trialStartedToday(null)).toBe(true);
   });
-  it("puts each screen on its stage", () => {
+  it("puts each screen on its step", () => {
     expect(STAGE_OF.check).toBe(0);
-    expect(STAGE_OF.confirm).toBe(1);
+    expect(STAGE_OF.confirm).toBe(0);
+    expect(STAGE_OF.manager).toBe(1);
+    expect(STAGE_OF.channel).toBe(2);
     expect(STAGE_OF.whatsapp).toBe(2);
-    expect(STAGE_OF.manager).toBe(3);
-    expect(STAGE_OF.first_task).toBe(4);
+    expect(STAGE_OF.trial).toBe(3);
+    expect(STAGE_OF.first_task).toBe(3);
   });
   it("tracks access in three states", () => {
     expect(accessOf({ consent: false, accepted: false, checked: false })).toBe("not_started");

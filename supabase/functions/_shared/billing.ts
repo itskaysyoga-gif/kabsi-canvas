@@ -5,14 +5,14 @@
 import { admin, APP_URL, captureError, jobLog, log } from "./kabsi.ts";
 import { notify as notifyEmail } from "./notify.ts";
 import { esc } from "./email-layout.ts";
-import { billingLineAt, type Line, staffPlanLine } from "./billing-lines.ts";
+import { billingLineAt, foundingEndingLine, type Line, staffPlanLine } from "./billing-lines.ts";
 import { ACCESS_FIRST_LINE, type AccessRow, accessWorks } from "./billing-access.ts";
 import type { EmailContent } from "./email/template.ts";
 import { paymentFailed, planCancelled } from "./email/account-copy.ts";
 import { outDb } from "./whatsapp/db.ts";
 import { ref } from "./whatsapp/templates.ts";
 import {
-  CATALOGUE, checkoutRequestId, foundingEndOf, TRIAL_DAYS, type Creem, creemClient, CreemError, type CreemEvent, effectOf, eventTime, extraKey, familyOfKey,
+  CATALOGUE, checkoutRequestId, foundingChangeDate, foundingEndOf, type FoundingFacts, foundingStep, TRIAL_DAYS, type Creem, creemClient, CreemError, type CreemEvent, effectOf, eventTime, extraKey, familyOfKey,
   isStale, keyOfProduct, ledgerOf, type Message, type Mode, modeOf, orgOf, type Period, type Plan, planKey, type PriceFamily,
   type ProductIds, type ProductKey,
   PRODUCT_KEYS, patchFor, sameMode, scrubEvent, setupPlan, type SubFacts, subFacts, subscriptionOf,
@@ -400,6 +400,48 @@ async function tellOwner(m: Message | "payment_reminder", s: SubRow, key: string
         p_payload: { subscription_id: s.id, day }, p_run_at: addDays(start, day).toISOString() });
     }
   }
+}
+
+/**
+ * GATE-2: the month-13 switch of a founding plan (job founding_switch, offered daily by private.offer_founding_switch). 14 days
+ * before founding_ends_at the owner gets the notice on email and WhatsApp; 3 days before, the subscription moves to the 29 list
+ * product in Creem with no proration, so the payment at the end of month 12 is the first at 29. Each step is recorded once.
+ */
+export async function foundingSwitch(subscriptionRowId: string, now = new Date()): Promise<string> {
+  const { data } = await admin().from("subscriptions").select("*").eq("id", subscriptionRowId).maybeSingle();
+  const s = data as (SubRow & FoundingFacts & { provider?: string }) | null;
+  if (!s || s.provider !== "creem") return "not_found";
+  const step = foundingStep(s, now);
+  if (step === "notice") {
+    // Sent first, stamped after (review of GATE-2): a failed send retries, and the outbox and email keys keep a retry to one
+    // message each. No one to tell: nothing is stamped, so no switch follows, and staff hear about it.
+    const people = await contacts(s.organization_id);
+    if (!people.length) {
+      await staffAlert(`Founding price ending for a business with no owner contact (subscription ${s.id}); the move to 29 waits`, `founding_no_contact:${s.id}`);
+      return "notice_no_contact";
+    }
+    const line = foundingEndingLine({ business: people[0].business, endsAt: foundingChangeDate(s.founding_ends_at!, now).toISOString() }, APP_URL);
+    for (const p of people) {
+      if (p.phone) {
+        await outDb.add({ phone: p.phone, userId: p.user_id, locationId: p.location_id, kind: "billing_founding_ending", body: line.whatsapp,
+          dedupe: `billing:founding_ending:${s.id}:${p.user_id}`, template: ref("billing_notice", { business: people[0].business }) });
+      }
+    }
+    await notifyEmail({ category: "billing", kind: "billing_founding_ending", key: `billing:founding_ending:${s.id}`, locationId: people[0].location_id,
+      to: "owners", content: line.email! });
+    await admin().from("subscriptions").update({ founding_notice_at: now.toISOString() }).eq("id", s.id).is("founding_notice_at", null);
+    return "notice_sent";
+  }
+  if (step === "switch") {
+    if ((s.mode ?? CREEM_MODE) !== CREEM_MODE) return "other_mode";
+    const ids = await productIds();
+    const list = ids.essentials_month_list;
+    if (!list) throw new Error("founding_switch: the 29 product is not set up in this mode");
+    if (s.product_id !== list) await creem().upgrade(s.provider_subscription_id!, list, "proration-none");
+    await admin().from("subscriptions").update({ founding_switched_at: now.toISOString() }).eq("id", s.id).is("founding_switched_at", null);
+    return "switched";
+  }
+  return "nothing_due";
 }
 
 /** The day 3 and day 6 reminder of a failed payment (a job). Sent only while the payment is still failing. */

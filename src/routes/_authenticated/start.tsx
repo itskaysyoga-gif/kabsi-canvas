@@ -40,6 +40,10 @@ import { WHATSAPP_ON } from "@/lib/site";
 import { track } from "@/lib/telemetry";
 import { contactEmailStatus } from "@/lib/wa-signin";
 import { ContactEmailStage } from "@/components/onboarding/contact-email";
+import { ChannelStage, TrialStage } from "@/components/onboarding/choose-stages";
+import { loadRoutineChannel, saveRoutineChannel } from "@/lib/notifications";
+import { loadPlanSummary, type PlanSummary } from "@/lib/plans";
+import type { TrialState } from "@/lib/onboarding-flow";
 
 export const Route = createFileRoute("/_authenticated/start")({
   validateSearch: readStartSearch,
@@ -58,13 +62,31 @@ const HELP_STEP: Record<Screen, HelpStep> = {
   check: "snapshot",
   confirm: "find",
   questions: "find",
-  email: "find",
-  whatsapp: "find",
   manager: "access",
   checked: "waiting",
+  email: "waiting",
+  channel: "waiting",
+  whatsapp: "waiting",
+  trial: "waiting",
   first_task: "waiting",
   later: "waiting",
 };
+
+/** GATE-2: where the trial stands, from plan_summary. A Creem plan or trial that runs (a trial with a card reads "active"),
+ *  or an older Kabsi trial or plan, is started; otherwise the checkout is open for this account or plans are not open yet. */
+function trialOf(sum: PlanSummary | undefined): TrialState | undefined {
+  if (!sum) return undefined;
+  const b = sum.entitlements?.billing;
+  if (b && ["active", "past_due", "paused"].includes(b.state)) return "started";
+  if (
+    sum.tier === "trial" ||
+    sum.tier === "pro" ||
+    sum.tier === "essentials" ||
+    sum.tier === "early_access"
+  )
+    return "started";
+  return sum.checkout_open ? "needed" : "closed";
+}
 
 // "Access works." shows once, until the owner taps "See your first task"; remembered in this browser.
 const CHECKED_KEY = (id: string) => `kabsi.onboarding.checked.${id}`;
@@ -109,6 +131,7 @@ function StartPage() {
     whatsapp?: boolean;
     checked?: boolean;
     email?: boolean;
+    trial?: boolean;
   }>({});
   // Signup 1: an owner who signed up with WhatsApp is asked once for the contact email.
   const contact = useQuery({ queryKey: ["contact-email"], queryFn: contactEmailStatus });
@@ -127,6 +150,17 @@ function StartPage() {
     // While Kabsi waits for the invite or checks access, look again every 10 seconds.
     refetchInterval: (q) => (q.state.data && !q.state.data.checked ? 10_000 : false),
   });
+  // GATE-2: step 3's stored choice and the trial, read once access works.
+  const routine = useQuery({
+    queryKey: ["routine-channel"],
+    queryFn: loadRoutineChannel,
+    enabled: !!status.data?.checked,
+  });
+  const plan = useQuery({
+    queryKey: ["plan-summary", location?.id],
+    queryFn: () => loadPlanSummary(location!.id),
+    enabled: !!location && !!status.data?.checked,
+  });
   const screen: Screen = waHold
     ? "whatsapp"
     : screenOf({
@@ -134,6 +168,8 @@ function StartPage() {
         whatsappOn,
         seen: { ...seen, checked: checkedSeen },
         askEmail,
+        channel: routine.data ?? null,
+        trial: plan.isError ? "closed" : trialOf(plan.data),
       });
 
   // Email 1: "Kabsi also sent it to your email." only once the setup email with the link went to this person.
@@ -190,6 +226,11 @@ function StartPage() {
     void run(async () => {
       await confirmBusiness(location!.id);
       await status.refetch();
+    });
+  const chooseEmail = () =>
+    void run(async () => {
+      await saveRoutineChannel("email");
+      await routine.refetch();
     });
   const toFirstTask = () =>
     void run(async () => {
@@ -292,6 +333,22 @@ function StartPage() {
           }}
         />
       ) : null}
+      {screen === "channel" ? (
+        <ChannelStage
+          whatsappOn={whatsappOn}
+          busy={busy}
+          error={error}
+          onWhatsApp={() => setSeen((x) => ({ ...x, whatsapp: true }))}
+          onEmail={chooseEmail}
+        />
+      ) : null}
+      {screen === "trial" && location ? (
+        <TrialStage
+          locationId={location.id}
+          trial={plan.isError ? "closed" : trialOf(plan.data)}
+          onLater={() => setSeen((x) => ({ ...x, trial: true }))}
+        />
+      ) : null}
       {screen === "whatsapp" && s ? (
         <WhatsAppStage
           status={s}
@@ -307,6 +364,18 @@ function StartPage() {
             setSeen((x) => ({ ...x, whatsapp: true }));
           }}
         />
+      ) : null}
+      {screen === "whatsapp" && !waHold && !s?.whatsapp ? (
+        <p className="mt-4 text-small">
+          <button
+            type="button"
+            className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4"
+            onClick={chooseEmail}
+            disabled={busy}
+          >
+            Use email instead
+          </button>
+        </p>
       ) : null}
       {screen === "manager" && location && s ? (
         // A situation the owner reported (K-94) shows its own screen until "I've done it".

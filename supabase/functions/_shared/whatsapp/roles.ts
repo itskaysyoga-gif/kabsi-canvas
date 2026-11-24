@@ -58,7 +58,8 @@ export type OpenQuestion =
   // Cards 2: the place of a card just linked or opened, typed back within 10 minutes (the card code only, never a business).
   | { type: "card_label"; code: string; at: string }
   // OFFER-2: the numbered "waiting" list (ids only), so "2" or "make 2 shorter" names an item; open 30 minutes.
-  | { type: "waiting"; location_id: string; items: WaitingRef[]; at: string }
+  // GATE-2: the first-day list (every unanswered review of the last 90 days) uses the same shape, open 48 hours (open_ms).
+  | { type: "waiting"; location_id: string; items: WaitingRef[]; at: string; open_ms?: number }
   // OFFER-2: a weekly hours change for one day that still needs its times (the one question back).
   | { type: "week_ask"; location_id: string; day: string; at: string }
   // OFFER-2: a weekly hours, phone or website change shown back exactly, waiting for the tap on Approve (its nonce is in the button).
@@ -84,9 +85,11 @@ export const TOOLS = {
   // OFFER-2 (blueprint 11): the Google-care tools. waiting, done and hours_now read; week_hours and contact_change are shown
   // back exactly and wait for a tap; guide_field refuses name, address, category, description and services with the guide.
   owner: ["help", "question", "switch", "stats", "cards", "review_link", "referral_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
-    "hours", "post", "billing", "voice", "ask_customer", "person", "waiting", "done", "hours_now", "week_hours", "contact_change", "guide_field"],
+    "hours", "post", "billing", "voice", "ask_customer", "person", "waiting", "done", "hours_now", "week_hours", "contact_change", "guide_field",
+    "competitors", "feedback", "profile_health", "monthly"],
   manager: ["help", "question", "switch", "stats", "cards", "review_link", "referral_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
-    "hours", "post", "voice", "ask_customer", "person", "waiting", "done", "hours_now", "week_hours", "contact_change", "guide_field"],
+    "hours", "post", "voice", "ask_customer", "person", "waiting", "done", "hours_now", "week_hours", "contact_change", "guide_field",
+    "competitors", "feedback", "profile_health", "monthly"],
   staff: ["help", "question", "switch", "photo", "voice", "ask_customer", "person"],
   partner: ["help", "question", "switch", "partner_tool", "person"],
   staff_admin: ["help", "switch", "staff_status", "staff_waiting", "staff_today", "staff_pause", "staff_partners", "staff_payouts", "staff_reset_test", "person"],

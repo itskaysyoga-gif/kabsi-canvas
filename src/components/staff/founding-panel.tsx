@@ -17,7 +17,8 @@ import { cn } from "@/lib/utils";
 
 // Founding 25 (master plan 30.17 section 1): applications to accept, waitlist or decline against the mix (10 beauty and
 // hair, 5 food, 5 health, 5 other; a trade's open place goes to any trade after 30 days), the real places left, the
-// link from an accepted place to its business (Pro for 90 days from the day Google access works, no card), and the
+// link from an accepted place to its business (GATE-2, 30.54 item 3: its checkout is then 19 a month for 12 months, with the
+// 14-day trial and a card; the 90 days with no card are retired), and the
 // day-45 kill gate: fewer than 10 of the 25 approving work at least once a week pauses new places.
 type Business = { id: string; name: string; organization_id?: string | null };
 
@@ -322,13 +323,14 @@ function Application({ app, businesses }: { app: FoundingApplication; businesses
             disabled={!location || run.isPending}
             onClick={() => run.mutate(() => linkFounding(app.id, location))}
           >
-            Link and give 90 days of Pro
+            Link for the founding price
           </Button>
         </div>
       ) : null}
       {app.organization_id ? (
         <p className="mt-3 text-small text-text-2">
-          Linked {app.linked_at ? fmtDate(app.linked_at) : ""}
+          Linked {app.linked_at ? fmtDate(app.linked_at) : ""}. Their checkout is 19 US dollars a
+          month for 12 months, with a card.
         </p>
       ) : null}
       {msg ? <p className="mt-3 text-small text-bad">{msg}</p> : null}

@@ -42,14 +42,15 @@ const HOUSE = /[‒-―!]|\bbooked\b|\bavailable\b/i;
 
 // ─── The snapshot: with the request book off, the model's instructions are byte for byte what they were before RB-E.
 
-// SHA-256 of routerSystem(role) as OFFER-2 set it (24 Nov 2026: the Google-care tools of blueprint 11), for every role.
+// SHA-256 of routerSystem(role) as OFFER-2 set it (24 Nov 2026: the Google-care tools of blueprint 11), for every role;
+// GATE-2 changed owner and manager (four report tools: competitors, feedback, profile_health, monthly).
 // Before OFFER-2 these were the hashes of main before RB-E (commit a77f142). The guarantee is unchanged: with the request book
 // off the instructions are byte for byte this text, and with it on only the two request tools are added.
 const BEFORE: Record<string, string> = {
   unknown: "4aeb4440b8523d8075029840b6a8ec18064a18ebd1266e2961259f0bb705fad9",
   prospect: "62971cb6b21187f21ddfea1166372a31f5e0309c08b70317145f6adee3361379",
-  owner: "e53da0902fa1244914b935b452ef58df1a0529168844558db182d3eef938ffcc",
-  manager: "a1368197f2f0aad1d7a5486fb09cc40f50be92c2109381cd0a10d2c3a8742f1f",
+  owner: "5a844a95a05b1bf3af80cc9aa2115d2f306144c285f91c9005fed0da33cbd912",
+  manager: "262e056c7e913f90168350b12b80d8a398b714ca4b27601cb9781bc12bad93b6",
   staff: "0681161d71796a8544221f743d77c5d3950e70647d7b4c14866ba73f2fcceb2e",
   partner: "e5340b40f415cf4d9d74ab0ffa45c0c14b62e2d2801ea554da107d7198c54e72",
   staff_admin: "b1b31a51e75e0d6222c979ece34d8acc07f5f24aab88ef39ffdba868cb6f9f24",
