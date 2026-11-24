@@ -16,14 +16,28 @@ const between = (text: string, from: string, to: string) => {
 describe("SITE-3: the free check without rank or AI work", () => {
   const index = read("supabase/functions/visibility/index.ts");
   // The function's code without its comments (which explain what it no longer does).
-  const start = between(index, "async function startFreeCheck(", "\n}\n").split("\n").filter((l) => !/^\s*\/\//.test(l)).join("\n");
+  const start = between(index, "async function startFreeCheck(", "\n}\n")
+    .split("\n")
+    .filter((l) => !/^\s*\/\//.test(l))
+    .join("\n");
 
   it("calls the nearby check, never the rank provider, DataForSEO's spend or an AI answer", () => {
     expect(start).toContain("startNearbyCheck(");
-    for (const banned of ["startCheck(", "provider(", "freeScanCheck", "dataforseo_mode", "deps.room", "deps.spend", "aiSetting", "liveProfile"]) {
+    for (const banned of [
+      "startCheck(",
+      "provider(",
+      "freeScanCheck",
+      "dataforseo_mode",
+      "deps.room",
+      "deps.spend",
+      "aiSetting",
+      "liveProfile",
+    ]) {
       expect(start, banned).not.toContain(banned);
     }
-    expect(start).toMatch(/searchText\(key, q, 8, "places\.id,places\.displayName,places\.rating,places\.userRatingCount"\)/);
+    expect(start).toMatch(
+      /searchText\(key, q, 8, "places\.id,places\.displayName,places\.rating,places\.userRatingCount"\)/,
+    );
   });
 
   it("keeps the rank and AI code for the Visibility Map and the AI jobs", () => {
@@ -36,7 +50,9 @@ describe("SITE-3: the free check without rank or AI work", () => {
   it("never stores the nearby businesses: the saved row has none, the answer has them", () => {
     expect(start).toMatch(/fast: r\.fast/);
     expect(start).toMatch(/competitors: started\.competitors/);
-    expect(read("supabase/functions/_shared/visibility/free-check.ts")).toMatch(/fast: \{ rank: null, line: "", competitors: \[\] \}/);
+    expect(read("supabase/functions/_shared/visibility/free-check.ts")).toMatch(
+      /fast: \{ rank: null, line: "", competitors: \[\] \}/,
+    );
   });
 });
 
@@ -44,12 +60,21 @@ describe("SITE-3: the profile check's extra parts", () => {
   it("the website look goes through the link watch's safe fetch with the 4 second limit", () => {
     const fn = read("supabase/functions/profile-snapshot/index.ts");
     expect(fn).toMatch(/linkNow\("website", url, \{ resolve: resolveHost, fetch:/);
-    expect(read("supabase/functions/_shared/link-watch/link-watch.ts")).toMatch(/export const NOW_MS = 4_000;/);
+    expect(read("supabase/functions/_shared/link-watch/link-watch.ts")).toMatch(
+      /export const NOW_MS = 4_000;/,
+    );
   });
 
   it("the reply is a template: the free check makes no model call", () => {
-    const imports = (p: string) => read(p).split("\n").filter((l) => /^import /.test(l)).join("\n");
-    for (const f of ["supabase/functions/_shared/free-reply.ts", "supabase/functions/_shared/profile-snapshot.ts"]) {
+    const imports = (p: string) =>
+      read(p)
+        .split("\n")
+        .filter((l) => /^import /.test(l))
+        .join("\n");
+    for (const f of [
+      "supabase/functions/_shared/free-reply.ts",
+      "supabase/functions/_shared/profile-snapshot.ts",
+    ]) {
       expect(imports(f), f).not.toMatch(/"\.\/ai\.ts"|ai\/client|ai\/reply\.ts|anthropic/i);
     }
   });

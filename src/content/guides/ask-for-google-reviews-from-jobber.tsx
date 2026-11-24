@@ -181,8 +181,8 @@ export const guide: GuideDoc = {
         "Anywhere your clients already look: Google says it can go on receipts, in thank-you emails, at the end of a chat, or as a QR code printed and displayed in your store. Jobber's tool covers the message it sends. Printed things are up to you.",
       body: (
         <p>
-          For the van sign, the business card or the counter, use a link or QR code from Google. The same rules apply: one request for
-          everyone, no reward. The full list is in{" "}
+          For the van sign, the business card or the counter, use a link or QR code from Google. The
+          same rules apply: one request for everyone, no reward. The full list is in{" "}
           <GuideLink slug="where-to-put-your-google-review-link">
             where to put your Google review link
           </GuideLink>

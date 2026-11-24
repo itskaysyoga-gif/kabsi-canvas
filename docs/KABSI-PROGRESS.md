@@ -64,14 +64,13 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 24 Nov 2026, SITE-3 (R-164 item 7): one section system on every public page, Home redone (phone scenes, Google-sourced problem band, a week with Kabsi, full-width price), SITE-2 finished, free check without rank or AI, three guides public. `2026-11-24-site3.md`.
 - 24 Nov 2026, SITE-2 (blueprint 3.1): industry pages on one template, guides cleaned and 3 added, free check result and tool pages brought to 3.1; `2026-11-24-site2.md`.
 - 24 Nov 2026, SITE-1 (R-163, PR 594): Home in the nine sections of blueprint 3.1, one price card at 29, How it works, FAQ word for word, About and Security shortened, Partners out of the navigation and sitemap, src/lib/offer.ts, facts and Nora's evaluation sets on the new offer. `2026-11-24-site1.md`.
 - 24 Nov 2026, OFFER-2 (R-163): one plan at 29 with a 14-day card trial, founding 19 private, costly jobs off by setting, 2 posts a month, WhatsApp Google-care tools, staff alerts once an hour a kind. `2026-11-24-offer2.md`.
 - 24 Nov 2026, FIX-0: Edge Functions refused by the database API since 14 Nov 05:37 UTC; stale work cancelled; key resolver and public /health built; waiting for Rashid's new secret key. `2026-11-24-fix0.md`.
 - 24 Nov 2026, PROOF-2: link watch, short weekly summary, monthly report, placement links, pure functions for GATE-2. Migration applied; nothing run live (FIX-0's key). `2026-11-24-proof2.md`.
 - Older entries (Site 3b and Fix 6 `2026-11-12-<name>.md`; Home 2, Fix 5, Cards 2, Growth 1 and Partners 3 `2026-11-11-<name>.md`; Partners 2, Outbound 2, Site 3a, Clean 4, Look 2 and 2b, Founding 1, RB-T, Safe 1, Signup 1, Plan 1, RB-F4, Ops 1 `2026-11-10-<name>.md`; Partners 1, RB-F3 and Tidy 2 in `2026-11-10-tidy2.md`; earlier ones in `2026-11-09-progress-moved.md`).
-- 12 Nov 2026, Fix 6 (R-162): records 30.52 and four small fixes. `2026-11-12-fix6.md`.
-- Older entries (Site 3b `2026-11-12-site3b.md`; Home 2, Fix 5, Cards 2, Growth 1 and Partners 3 `2026-11-11-<name>.md`; Partners 2, Outbound 2, Site 3a, Clean 4, Look 2 and 2b, Founding 1, RB-T, Safe 1, Signup 1, Plan 1, RB-F4, Ops 1 `2026-11-10-<name>.md`; Partners 1, RB-F3 and Tidy 2 in `2026-11-10-tidy2.md`; earlier ones in `2026-11-09-progress-moved.md`).
 
 ## How a session updates this page
 

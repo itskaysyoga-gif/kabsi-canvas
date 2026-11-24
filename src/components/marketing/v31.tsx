@@ -29,6 +29,7 @@ import {
   HOME_HERO,
   PRICE,
   PRICING,
+  PRICING_FAQ,
   PROBLEM,
   PROOF,
   START,
@@ -135,7 +136,7 @@ export function ChatCard({
         <p className="flex-1 text-small font-bold text-text-1">Kabsi</p>
         <ExampleBadge className="text-text-2" />
       </div>
-      <ol className="space-y-2.5" aria-label={label}>
+      <ol className="mt-auto space-y-2.5" aria-label={label}>
         <Turns turns={turns} />
       </ol>
       <figcaption className="sr-only">{label}</figcaption>
@@ -191,7 +192,7 @@ function HeroPhone() {
             key={at}
             aria-label={`Example: ${scene.name}`}
             className={cn(
-              "flex h-[23rem] flex-col justify-end gap-2.5 px-3 pb-4 pt-3",
+              "flex h-[20rem] flex-col justify-end gap-2.5 px-3 pb-4 pt-3",
               playing && "kb-scene",
             )}
           >
@@ -338,9 +339,16 @@ function DayPicture({ n }: { n: number }) {
   if (n === 2)
     return (
       <MiniCard>
-        <span className="grid h-24 place-items-center rounded-input bg-surface-2 text-text-2">
-          <ImageIcon className="size-6" aria-hidden />
-          <span className="sr-only">A photo</span>
+        <span
+          role="img"
+          aria-label="A drawn photo of fresh colour work"
+          className="relative block h-24 overflow-hidden rounded-input bg-kb-graphite"
+        >
+          <span className="absolute -end-4 -top-6 size-20 rounded-full bg-kb-yellow/80" />
+          <span className="absolute -start-6 bottom-0 h-12 w-40 rounded-t-full bg-kb-smoke" />
+          <span className="absolute end-2 bottom-2 rounded-full bg-surface-0 px-2 py-0.5 text-label font-semibold text-text-1">
+            Fresh colour, done this week
+          </span>
         </span>
         <Chip>Live on Google</Chip>
       </MiniCard>
@@ -480,7 +488,7 @@ function Starts() {
       <SiteImg
         id="heroHow"
         sizes="(min-width: 1024px) 560px, 100vw"
-        className="mt-10 aspect-[4/3] w-full rounded-panel object-cover lg:mt-0"
+        className="mt-10 aspect-[4/3] w-full rounded-panel bg-surface-2 object-cover lg:mt-0"
       />
     </Band>
   );
@@ -496,9 +504,10 @@ export function ReportSample({ className }: { className?: string }) {
     >
       <div className="flex items-center gap-2">
         <KabsiMark ring={false} className="size-8" />
-        <p className="flex-1 text-read font-bold text-text-1">
-          {PROOF.month}, {EXAMPLE_BUSINESS}
-        </p>
+        <div className="min-w-0 flex-1">
+          <p className="text-read font-bold text-text-1">{PROOF.month}</p>
+          <p className="text-small text-text-2">{EXAMPLE_BUSINESS}</p>
+        </div>
         <ExampleBadge className="text-text-2" />
       </div>
       <div className="mt-5 grid gap-5 sm:grid-cols-3 sm:gap-6">
@@ -641,16 +650,20 @@ export function V31Home() {
 export function V31Pricing() {
   return (
     <>
-      <PageTop title={PRICING.title} mark={PRICING.mark} line={PRICING.line} />
+      <PageTop title={PRICING.title} mark={PRICING.mark} line={PRICING.line}>
+        <MarkRow items={HERO_MARKS} className="mt-6" />
+      </PageTop>
       <Band id="plan" tone="white" label="The plan">
         <PriceCard />
-        <Lead className="mt-6">
-          {PRICING.extra} {PRICING.free}
-        </Lead>
+        <Lead className="mt-6">{PRICING.free}</Lead>
       </Band>
       <Band id="trust" tone="ivory">
         <Head id="trust" title={TRUST.title} />
         <TrustLines />
+      </Band>
+      <Band id="questions" tone="white">
+        <Head id="questions" title="Questions about the plan." />
+        <Faq items={PRICING_FAQ.map((f) => ({ q: f.q, a: f.a }))} className="mt-8" />
       </Band>
       <ClosingBand under={HOME_HERO.under} />
     </>

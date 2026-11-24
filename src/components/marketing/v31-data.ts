@@ -74,7 +74,6 @@ export const HERO_SCENES: { name: string; turns: ChatTurn[]; done: string }[] = 
         lines: ["Reply ready:", "Thank you, Jess. We are glad Sam took care of you."],
         approve: true,
       },
-      { from: "owner", text: "Approve" },
     ],
     done: "Your reply is live on Google.",
   },
@@ -88,7 +87,6 @@ export const HERO_SCENES: { name: string; turns: ChatTurn[]; done: string }[] = 
         lines: ["Saturday 29 November: 9:00 to 15:00.", "Every other day stays the same."],
         approve: true,
       },
-      { from: "owner", text: "Approve" },
     ],
     done: "Your new hours are live on Google.",
   },
@@ -102,7 +100,6 @@ export const HERO_SCENES: { name: string; turns: ChatTurn[]; done: string }[] = 
         lines: ["Fresh colour, done in the salon this week. Book a visit any day."],
         approve: true,
       },
-      { from: "owner", text: "Approve" },
     ],
     done: "Your post is live on Google.",
   },
@@ -277,7 +274,7 @@ export const START = {
 export const PROOF = {
   title: "See exactly what was done.",
   mark: "exactly",
-  month: "Monthly report, November",
+  month: "November report",
   bands: [
     {
       name: "Work done",
@@ -370,6 +367,9 @@ export const FAQ_V31 = [
   },
 ] as const;
 
+/** Pricing's questions: the ones about paying, doing and leaving (SITE-3). */
+export const PRICING_FAQ = [1, 4, 7, 8, 9].map((i) => FAQ_V31[i]!);
+
 /** Home shows six at most (blueprint 3.9). */
 export const HOME_FAQ = [0, 1, 2, 3, 4, 6].map((i) => FAQ_V31[i]!);
 
@@ -378,9 +378,9 @@ export const CLOSING = { title: "Start with a free check.", mark: "free check." 
 /* ---------- Pricing (blueprint section 4) ---------- */
 
 export const PRICING = {
-  title: "One plan. 29 US dollars a month.",
-  mark: "29 US dollars a month.",
-  line: "Everything Kabsi does, for one location. You approve every change.",
+  title: "One plan. Everything Kabsi does.",
+  mark: "Everything Kabsi does.",
+  line: "One price for one location, with nothing extra to unlock. You approve every change.",
   included: [
     "A reply to every review",
     "Alerts for bad reviews",
@@ -393,7 +393,6 @@ export const PRICING = {
   ],
   notIncluded:
     "Kabsi does not message your customers, run ads, build websites or promise rankings.",
-  extra: `An extra location is ${PRICE_MONTHLY_USD} US dollars a month, the same as the first.`,
   free: "Google Business Profile is free from Google. Kabsi is an independent paid service.",
 } as const;
 

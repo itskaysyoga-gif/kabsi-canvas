@@ -15,7 +15,8 @@ export type LinkState = "loads" | "fails" | null;
 /** What the server may add to a snapshot. Both are optional: a part that is missing is shown as not read, never invented. */
 export type ResultExtras = {
   links?: { website?: LinkState; booking?: LinkState } | undefined;
-  latest_review?: { stars: number; text: string; reply: string; author?: string | null } | undefined;
+  latest_review?:
+    { stars: number; text: string; reply: string; author?: string | null } | undefined;
 };
 
 const figures = (r: NearbyRow) =>

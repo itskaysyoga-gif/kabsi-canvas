@@ -95,7 +95,9 @@ describe("the schedule", () => {
     const site3 = publicGuides(ALL_GUIDES, new Date(SITE3_PUBLISH_AT)).map((g) => g.slug);
     for (const s of SITE3) expect(site3).toContain(s);
     const all = publicGuides(ALL_GUIDES, new Date(weeklyAt(7))).map((g) => g.slug);
-    expect(all.filter((s) => WEEKLY.slice(0, 8).includes(s as never))).toEqual([...WEEKLY.slice(0, 8)].reverse());
+    expect(all.filter((s) => WEEKLY.slice(0, 8).includes(s as never))).toEqual(
+      [...WEEKLY.slice(0, 8)].reverse(),
+    );
     expect(all).toHaveLength(26 + WEEKLY.length);
   });
 

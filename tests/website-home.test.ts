@@ -116,7 +116,8 @@ describe("the copy rules on every public line (kabsi-copy, K-112, K-144, 30.15)"
     // SITE-2: the industry template repeats "Your listing protected", so it shares the exception too.
     // SITE-1 (blueprint 3.1, R-163): the blueprint's own lines say "listing" ("Your listing protected", the hero line, the
     // FAQ), so the v31 files share Home 2's exception.
-    const HOME2 = /kabsi\/home2-(hero-)?data\.ts$|routes\/index\.tsx$|marketing\/v31[^/]*$|kabsi\/d9-industry\.tsx$/;
+    const HOME2 =
+      /kabsi\/home2-(hero-)?data\.ts$|routes\/index\.tsx$|marketing\/v31[^/]*$|kabsi\/d9-industry\.tsx$/;
     for (const [f, s] of all.filter(([f]) => !LEGAL.test(f))) {
       expect(s, `${f}: ${s.slice(0, 60)}`).not.toMatch(
         HOME2.test(f)

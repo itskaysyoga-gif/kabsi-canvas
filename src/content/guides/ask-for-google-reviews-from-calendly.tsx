@@ -34,9 +34,9 @@ export const guide: GuideDoc = {
         <>
           <p>
             Calendly lists Automations on the Professional, Standard, Standard Plus, Teams, Teams
-            Plus and Enterprise plans, and says access may vary based on your plan, when your account
-            was created and any add-ons. Your role also controls which team settings you can manage.
-            Check your own account under Automations.
+            Plus and Enterprise plans, and says access may vary based on your plan, when your
+            account was created and any add-ons. Your role also controls which team settings you can
+            manage. Check your own account under Automations.
           </p>
           <p>
             You can create up to 50 per user or team, across all event types. Calendly says updates
@@ -84,8 +84,8 @@ export const guide: GuideDoc = {
             ]}
           />
           <p>
-            Calendly says text message Automations support URLs as plain text: you type or paste
-            the URL into the Body. Get your link from Google first, as shown in{" "}
+            Calendly says text message Automations support URLs as plain text: you type or paste the
+            URL into the Body. Get your link from Google first, as shown in{" "}
             <GuideLink slug="google-review-link-and-qr-code">
               how to get your Google review link and QR code
             </GuideLink>

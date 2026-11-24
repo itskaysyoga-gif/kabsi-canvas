@@ -9,8 +9,9 @@ import { cn } from "@/lib/utils";
 import { NOT_AFFILIATED } from "@/lib/site";
 import { industriesAtoZ, type Industry } from "@/content/industries";
 import { BLUEPRINT, READ } from "@/content/industries/blueprint";
-import { ExampleBadge, KabsiMark } from "./ui";
-import { Band, Head, Lead } from "@/components/marketing/kit";
+import { ExampleBadge, Faq, KabsiMark } from "./ui";
+import { Band, Head, Lead, MarkRow } from "@/components/marketing/kit";
+import { HERO_MARKS, HOME_FAQ } from "@/components/marketing/v31-data";
 import { PriceCard, TrustLines } from "@/components/marketing/v31";
 import { Img } from "./photos";
 import { ScanBox } from "./scan-box";
@@ -113,6 +114,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
                 industry={i.slug}
                 note={FREE_CHECK_NOTE}
               />
+              <MarkRow items={HERO_MARKS} className="mt-4" />
             </div>
           </div>
           {b && (
@@ -189,7 +191,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
       )}
 
       <Band id="price" tone="white">
-        <Head id="price" title="One plan, one price." />
+        <Head id="price" title="One price." />
         {/* The price card of Home and Pricing: TRIAL_LINE beside the button, the included list, the not included line. */}
         <PriceCard className="mt-8" />
       </Band>
@@ -203,6 +205,11 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
           See every business
           <Arrow />
         </SiteLink>
+      </Band>
+
+      <Band id="questions" tone="white">
+        <Head id="questions" title="Questions." />
+        <Faq items={HOME_FAQ.map((f) => ({ q: f.q, a: f.a }))} className="mt-8" />
       </Band>
 
       <Band id="closing" tone="dark">

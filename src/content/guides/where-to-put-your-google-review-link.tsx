@@ -59,10 +59,10 @@ export const guide: GuideDoc = {
       body: (
         <>
           <p>
-            Google's list is short. The places below build on it, and some, such as the invoice,
-            the booking confirmation and your email signature, are this guide's own suggestions.
-            Pick the ones that match how your customers already hear from you, so the request feels
-            like part of the visit and not a new chore.
+            Google's list is short. The places below build on it, and some, such as the invoice, the
+            booking confirmation and your email signature, are this guide's own suggestions. Pick
+            the ones that match how your customers already hear from you, so the request feels like
+            part of the visit and not a new chore.
           </p>
           <ul>
             <li>
