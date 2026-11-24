@@ -2,7 +2,7 @@
 
 ### 8.1 How Google local results work
 
-Kabsi does the parts an owner controls: accurate details, a reply to every review, regular updates, and easy reviewing for every customer. It promises no rankings and does not say what Google's ranking uses or rewards.
+Kabsi does the parts an owner controls: accurate details, a reply to every review, regular updates, and easy reviewing for every customer. It promises no rankings and does not say what Google's ranking uses or rewards. Asked about rankings, the short answer is the FAQ's ("Kabsi does not promise rankings. It does the work that keeps a listing healthy."), and the longer one: Nobody can promise a ranking, and we don't. Kabsi does the parts you control: a reply ready for every review, complete and accurate details, opening hours kept right, photos and posts you approve, and an easy way for every customer to leave a review.
 
 ### 8.2 Replying to reviews (Google's steps)
 

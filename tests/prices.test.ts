@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { TRIAL_LINE as OFFER_TRIAL_LINE } from "../src/lib/offer";
 import { describe, expect, it } from "vitest";
 import {
   FOUNDING_PRICES,
@@ -122,18 +123,19 @@ describe("no retired price (lane R, 22 Oct 2026)", () => {
       );
     }
   });
-  it("the facts file and llms-full.txt quote the six prices and no other Pro price", () => {
+  // SITE-1 (blueprint 3.1, R-163): one plan at 29 US dollars a month per location, the trial line of src/lib/offer.ts,
+  // and none of the retired prices quoted as current.
+  it("the facts file and llms-full.txt quote the one plan, its trial line and no retired price", () => {
     for (const f of ["knowledge/kabsi-facts.md", "public/llms-full.txt"]) {
       const text = readText(f);
-      expect(text).toContain("Essentials is $29 a month or $290 a year");
-      expect(text).toContain("Pro is $59 a month or $590 a year");
-      expect(text).toContain(
-        "Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year",
-      );
-      expect(text).toContain("An extra location is $15 a month or $150 a year");
-      expect(text).toContain(
-        "Card payments in US dollars are coming. Until they open there is nothing to pay.",
-      );
+      expect(text).toContain("29 US dollars a month per location");
+      expect(text).toContain(OFFER_TRIAL_LINE);
+      expect(text).not.toContain("Essentials is $29 a month or $290 a year");
+      expect(text).not.toContain("Pro is $59 a month or $590 a year");
+      expect(text).not.toContain("An extra location is $15 a month or $150 a year");
+      // The no-card trial is named only on lines that say it was replaced.
+      for (const line of text.split("\n").filter((l) => /trial,? (with )?no card/i.test(l)))
+        expect(line, line.slice(0, 80)).toMatch(/retired|RETIRED|replaces?d?|switched off|never quote|no longer/i);
     }
   });
 });
