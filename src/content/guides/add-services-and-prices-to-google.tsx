@@ -177,10 +177,8 @@ export const guide: GuideDoc = {
       <>
         <p>
           Kabsi does not add or edit services, menus or products on Google yet: you do that on your
-          profile with the steps above, and filling them in through Kabsi comes later. Today the
-          Profile Coach checklist, on Essentials and Pro, lists services and products as part of a
-          complete Google profile and shows them as missing from what you told Kabsi, with a plain
-          reason.
+          profile with the steps above. Kabsi checks your listing every day and tells you when
+          something on Google changes.
         </p>
         <p>
           The services and prices you confirm in Kabsi are what it uses in review replies and posts,

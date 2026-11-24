@@ -42,14 +42,17 @@ describe("the schedule", () => {
     expect(isPublic(g, at("2026-11-07T06:00:00Z"))).toBe(true);
   });
 
-  it("before the moment only guide 1 and the earlier guides are public; from it all 27 are, in the Guides 3 order", () => {
+  it("before the moment only guide 1 and the earlier guides are public; from it all 26 are (the ChatGPT guide is noindex and unlisted), in the Guides 3 order", () => {
     const before = publicGuides(ALL_GUIDES, at("2026-11-05T12:00:00Z")).map((g) => g.slug);
     expect(before).toContain(FIRST);
     expect(before).not.toContain(SECOND);
-    expect(before).toHaveLength(8);
+    expect(before).toHaveLength(7);
     const all = publicGuides(ALL_GUIDES, new Date(PUBLISH_ALL_AT));
-    expect(all).toHaveLength(27);
-    expect(all.map((g) => g.slug)).toEqual([...ORDER, ...EARLIER]);
+    expect(all).toHaveLength(26);
+    // SITE-2: a guide about a switched-off feature carries noindex and leaves every list.
+    expect(all.map((g) => g.slug)).toEqual(
+      [...ORDER, ...EARLIER].filter((s) => s !== "why-chatgpt-describes-your-business-wrongly"),
+    );
     expect(sitemapXml(all)).toContain(`/guides/${SECOND}<`);
     expect(llmsText(all)).toContain(`/guides/${SECOND})`);
   });
@@ -69,8 +72,8 @@ describe("the schedule", () => {
     expect(isPublic({ publishAt: weeklyAt(0) }, at("2026-11-16T05:59:59Z"))).toBe(false);
   });
 
-  it("the 8 salon and barber guides are one a week from 16 Nov 2026, in the WEEKLY order, each public only from its day", () => {
-    expect(WEEKLY).toHaveLength(8);
+  it("the weekly guides (8 salon and barber, then 3 review link guides, SITE-2) are one a week from 16 Nov 2026, in the WEEKLY order, each public only from its day", () => {
+    expect(WEEKLY).toHaveLength(11);
     WEEKLY.forEach((s, n) => {
       const g = ALL_GUIDES.find((x) => x.slug === s);
       expect(g?.publishAt, s).toBe(weeklyAt(n));
@@ -80,13 +83,13 @@ describe("the schedule", () => {
     expect(Date.parse(weeklyAt(1))).toBeLessThan(Date.parse("2026-11-30T00:00:00Z"));
     const sunday = publicGuides(ALL_GUIDES, at("2026-11-15T12:00:00Z")).map((g) => g.slug);
     for (const s of WEEKLY) expect(sunday).not.toContain(s);
-    expect(sunday).toHaveLength(27);
+    expect(sunday).toHaveLength(26);
     const monday = publicGuides(ALL_GUIDES, at("2026-11-16T06:00:00Z")).map((g) => g.slug);
     expect(monday[0]).toBe(WEEKLY[0]);
-    expect(monday).toHaveLength(28);
-    const all = publicGuides(ALL_GUIDES, new Date(weeklyAt(7))).map((g) => g.slug);
-    expect(all.slice(0, 8)).toEqual([...WEEKLY].reverse());
-    expect(all).toHaveLength(35);
+    expect(monday).toHaveLength(27);
+    const all = publicGuides(ALL_GUIDES, new Date(weeklyAt(WEEKLY.length - 1))).map((g) => g.slug);
+    expect(all.slice(0, WEEKLY.length)).toEqual([...WEEKLY].reverse());
+    expect(all).toHaveLength(26 + WEEKLY.length);
   });
 
   it("before part A merged nothing new was public, and the earlier guides always are", () => {
@@ -110,7 +113,7 @@ describe("the schedule", () => {
     expect(page).toContain("getGuidePage");
     expect(page).toContain("throw notFound()");
     expect(readFileSync("src/routes/guides.index.tsx", "utf8")).toContain("getGuideList");
-    expect(readFileSync("src/routes/for.$trade.tsx", "utf8")).toContain("getIndustryGuides");
+    // SITE-2: the industry pages are one template and no longer list guides (blueprint 3.1 section 5).
     const server = readFileSync("src/lib/guides-server.ts", "utf8");
     expect(server).toContain("createServerFn");
     expect(server).toContain("publicGuides(ALL_GUIDES, new Date())");

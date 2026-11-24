@@ -43,7 +43,10 @@ describe("Go live 1: no At launch label and no launch line (master plan 30.28)",
     expect(ex).toContain("An answer customers might see");
     expect(ex).not.toMatch(LAUNCH);
     const list = renderToStaticMarkup(createElement(CheckLooksAtVisual));
-    expect(list).toContain("What ChatGPT says");
+    // SITE-2 (blueprint 3.1 section 3): the list is what the new result shows, with no AI answer line.
+    expect(list).toContain("Your rating and reviews");
+    expect(list).toContain("The reply Kabsi would write for it");
+    expect(list).not.toContain("ChatGPT");
     expect(list).not.toMatch(LAUNCH);
   });
   it("ends the FAQ's nearby answer at what you can do next", () => {
@@ -93,26 +96,32 @@ describe("Polish 3: the free check result's order (decision 1)", () => {
     expect(i, s).toBeGreaterThan(-1);
     return i;
   };
-  // Scan 3 (master plan 30.34 item 2) replaced Polish 3's order with a progressive result: the business, one main finding,
-  // what Kabsi would do in three lines, the details on request, then the one trial button, Manager access and the report.
-  it("Scan 3: the business, the main finding, what Kabsi would do, the details on request, then the trial, access and the report", () => {
+  // SITE-2 (blueprint 3.1 section 3) replaced Scan 3's order: you beside 3 nearby businesses, the listing basics, whether
+  // your links work, the reply Kabsi would write, what Kabsi does each month, then the one trial button, Manager access
+  // and the report. The parts are in scan-result.tsx; LiveResult lays them out.
+  it("SITE-2: the business, nearby, the basics, the links, the reply, the monthly work, then the trial, access and the report", () => {
     const order = [
       "<ResultHead",
-      "<MainFindingCard",
-      "<WouldDoCard",
-      'id="google"',
-      'id="nearby"',
-      'id="ai"',
-      "<TrialCard",
+      "<NearbyTable",
+      "<BasicsList",
+      "<LinksNow",
+      "<ReplyWould",
+      "<MonthlyDo",
+      "<StartCard",
       "<AccessCard />",
       "<SendReport",
     ].map(at);
     expect(order).toEqual([...order].sort((a, b) => a - b));
-    // One primary button in the result: the trial.
+    // The old main finding, the AI answer and the details on request are gone.
+    for (const gone of ["<MainFindingCard", "<WouldDoCard", 'id="ai"', "<TrialCard"])
+      expect(live, gone).not.toContain(gone);
+    // One primary button in the result: the trial (Start 14 days free).
     expect(
       live.slice(0, live.indexOf("/* ---------- Save my place")).match(/buttonClass\("primary"\)/g),
     ).toBeNull();
-    expect(src.match(/\{TRIAL_BUTTON\}/g)?.length).toBe(1);
+    const parts = readFileSync("src/components/kabsi/scan-result.tsx", "utf8");
+    expect(parts.match(/buttonClass\("primary"\)/g)).toHaveLength(1);
+    expect(parts).toContain("Start 14 days free");
   });
   it("keeps every analytics and Meta event with the same name and trigger", () => {
     const events = [...src.matchAll(/(track|pixelEvent|pixelCustom)\(\s*"([^"]+)"[^)]*\)/g)].map(

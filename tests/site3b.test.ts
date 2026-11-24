@@ -65,18 +65,25 @@ describe("Site 3b: the footer, the contents links and the headings (audit E1, E2
     );
   });
   it("an industry page's cards are h3 straight under their section headline", () => {
+    // SITE-2: the page is one template (blueprint 3.1 section 5); its cards are the three benefits and the price card,
+    // each an h3 straight under an h2 section headline, and the old profile card grid is gone.
     const d = read("src/components/kabsi/d9-industry.tsx");
-    expect(d).toMatch(/<CardGrid items=\{i\.profile\} className="mt-8" level="h3" \/>/);
+    expect(d).not.toContain("i.profile");
+    expect(d).toMatch(/<h2 id="benefits-h"|id="benefits-h"/);
+    expect(d).toContain('<h3 className="text-title">{x.title}</h3>');
   });
 });
 
 describe("Site 3b: one reassurance under the search on /for and the industry pages (audit E8, E9)", () => {
   const d = read("src/components/kabsi/d9-industry.tsx");
-  it("the hero boxes and the closing say the trial line only", () => {
+  it("the hero boxes and the closing say the free check line only, and the price card says the trial line (SITE-2)", () => {
     expect(d).not.toContain("trialSeparate");
-    expect(d.match(/note=\{TRIAL_LINE\}/g)).toHaveLength(3);
+    // The industry page's two boxes and /for's two boxes (blueprint 3.1 section 3).
+    expect(d.match(/note=\{FREE_CHECK_NOTE\}/g)).toHaveLength(4);
     expect(d).toMatch(/keywordHint=\{false\}/);
-    expect(TRIAL_LINE).toBe("Free for 14 days once Kabsi is connected. No card.");
+    expect(d).toContain("{TRIAL_LINE}");
+    // The wording of the line is owned by src/lib/offer.ts and its own tests; here it only has to be the one shared line.
+    expect(TRIAL_LINE).toMatch(/14 days/);
   });
 });
 

@@ -31,12 +31,12 @@ describe("Free Profile Check, status flags and WhatsApp (lane R sync, item D)", 
     const route = read("src/routes/google-profile-check.tsx");
     expect(route).toContain("<FreeCheckStart />");
     expect(route).toContain("${SITE_URL}/scan");
-    // The free check result shows the profile check's first red flag, else its first amber one, as the main finding
-    // (Scan 3: the shared scan-words.ts mainFinding, used by scan-live.tsx).
+    // The shared scan-words.ts still picks the profile check's first red flag, else its first amber one (the saved report
+    // and the email use it). SITE-2 (blueprint 3.1 section 3): the free check result no longer has a main finding.
     expect(read("supabase/functions/_shared/visibility/scan-words.ts")).toMatch(
       /x\.tone === "danger"/,
     );
-    expect(read("src/components/kabsi/scan-live.tsx")).toContain("mainFinding(s.flags)");
+    expect(read("src/components/kabsi/scan-live.tsx")).not.toContain("mainFinding(");
   });
 
   it("no fear claim, statistic or score wording on the check screens", () => {

@@ -222,17 +222,15 @@ export const guide: GuideDoc = {
         <p>
           Kabsi does not edit menu items, ordering settings or booking links on Google today, and it
           works only with your Google profile, not with delivery or booking platforms. Once it is a
-          Manager on your profile, Profile Coach lists what your profile is missing, and Kabsi
-          checks your details every day, hours and phone included, and tells you when something on
-          Google changes.
+          Manager on your profile, Kabsi checks your details every day, hours and phone included,
+          and tells you when something on Google changes.
         </p>
         <p>
           Send a photo of a new menu or a dish and Kabsi checks it for light, focus and size, then
           adds it to your profile once you say yes. Five days before a public holiday it asks what
-          you will do and sets special hours after your yes. It drafts posts (2 a month on
-          Essentials, every week on Pro) and a reply for each new review, naming a dish only when
-          the guest did. Nothing goes on Google until you approve it.{" "}
-          <SiteRef to="/scan">Run the free check</SiteRef>.
+          you will do and sets special hours after your yes. It prepares up to 2 posts a month and a
+          reply for each new review, naming a dish only when the guest did. Nothing goes on Google
+          until you approve it. <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>
     ),

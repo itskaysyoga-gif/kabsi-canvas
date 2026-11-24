@@ -13,12 +13,18 @@ export type GuidePageData = {
 };
 
 async function publicNow(withHidden = false) {
-  const [{ ALL_GUIDES }, { metaOf, publicGuides, publicGuidesWithHidden }, { guideText, wordCount }] = await Promise.all([
+  const [
+    { ALL_GUIDES },
+    { metaOf, publicGuides, publicGuidesWithHidden },
+    { guideText, wordCount },
+  ] = await Promise.all([
     import("@/content/guides"),
     import("@/content/guides/schedule"),
     import("@/content/guides/text"),
   ]);
-  const open = (withHidden ? publicGuidesWithHidden : publicGuides)(ALL_GUIDES, new Date());
+  const open = withHidden
+    ? publicGuidesWithHidden(ALL_GUIDES, new Date())
+    : publicGuides(ALL_GUIDES, new Date());
   return open.map((g) => metaOf(g, wordCount(guideText(g)) || 600));
 }
 

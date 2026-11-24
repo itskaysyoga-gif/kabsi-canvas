@@ -36,7 +36,10 @@ export function publicGuides<T extends Pick<GuideDoc, "publishAt"> & { noindex?:
   all: T[],
   now: Date,
 ): T[] {
-  return publicGuidesWithHidden(all.filter((g) => !g.noindex), now);
+  return publicGuidesWithHidden(
+    all.filter((g) => !g.noindex),
+    now,
+  );
 }
 
 /** SITE-2: every guide whose page answers, including the noindex ones. Only guides-server's page lookup uses it. */

@@ -151,8 +151,8 @@ export const guide: GuideDoc = {
       body: (
         <>
           <p>
-            Google keeps the details of its ranking private, and nobody outside Google can promise a
-            position.
+            Google keeps the details of how it orders results private, and nobody outside Google can
+            promise a position.
           </p>
           <p>
             What you control: the right main category, true opening hours, your address or service
@@ -188,9 +188,9 @@ export const guide: GuideDoc = {
       <>
         <p>
           The free check shows what Google shows about your business today, without any Google
-          access: the details on your profile, where you come up for one search at your address, the
-          three businesses that come up around you, and one ChatGPT answer. It is a quick way to
-          tell a missing profile from one that is simply not coming up.
+          access: your rating and reviews beside 3 nearby businesses, and the basics of your
+          listing. It is a quick way to tell a missing profile from one that is simply not coming
+          up.
         </p>
         <p>
           Kabsi itself works with a verified profile that you own or manage, and it cannot verify a
@@ -210,7 +210,7 @@ export const guide: GuideDoc = {
     },
     {
       q: "Can I pay Google to show my business higher on Maps?",
-      a: "No. Google's help says there is no way to request or pay for a better local ranking.",
+      a: "No. Google's help says there is no way to request or pay for a better place in local results.",
     },
     {
       q: "Should I delete my profile and start again?",

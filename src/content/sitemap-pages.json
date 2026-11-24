@@ -174,6 +174,16 @@
     ]
   },
   {
+    "path": "/for/cleaner",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": [
+      "src/content/industries/cleaner.ts",
+      "src/content/industries/blueprint.ts",
+      "src/components/kabsi/d9-industry.tsx"
+    ]
+  },
+  {
     "path": "/about",
     "changefreq": "yearly",
     "priority": "0.5",

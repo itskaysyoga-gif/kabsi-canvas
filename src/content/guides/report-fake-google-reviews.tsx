@@ -221,13 +221,9 @@ export const guide: GuideDoc = {
     body: (
       <>
         <p>
-          On Pro, Report this review on a review in Kabsi opens a guide for a review you believe
-          breaks Google's rules: Google's content categories in plain words, an evidence checklist
-          (you keep the evidence; Kabsi remembers only which boxes you ticked), the steps and a link
-          to the Reviews Management Tool, and a place to record what happened, with a reminder a
-          week later. Every new review also reaches you with a reply drafted, and a review with a
-          threat, harassment or an accusation of a crime gets no draft, only a short checklist, so
-          you decide what to say.
+          Every new review reaches you with a reply drafted, and a review with a threat, harassment
+          or an accusation of a crime gets no draft, only a short checklist, so you decide what to
+          say.
         </p>
         <p>
           Kabsi cannot remove a review, does not report it for you, never promises a removal and

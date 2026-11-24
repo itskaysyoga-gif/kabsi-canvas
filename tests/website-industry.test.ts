@@ -7,6 +7,7 @@ import { createRouter, rootRouteId } from "@tanstack/react-router";
 import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
 import { routeTree } from "../src/routeTree.gen";
+import { BLUEPRINT } from "../src/content/industries/blueprint";
 import { INDUSTRIES, MOVED, OLD_GROUPS, industry, type Industry } from "../src/content/industries";
 import { HOME_EXAMPLES } from "../src/content/home-examples";
 import { GUIDE_TITLES } from "../src/lib/guide-titles";
@@ -93,10 +94,10 @@ describe("industry pages (Design 5, Web 2)", () => {
     expect(overlap(salon, swapped)).toBeGreaterThan(0.9);
   });
 
-  it("twenty-one industries, all finished (Content 1, and nine more in Industries 2)", () => {
-    // Site 2 (master plan 30.34 item 4): Beauty salon is the 21st industry.
-    expect(INDUSTRIES).toHaveLength(21);
-    expect(new Set(INDUSTRIES.map((i) => i.slug)).size).toBe(21);
+  it("twenty-two industries, all finished (Content 1, nine more in Industries 2, the cleaner in SITE-2)", () => {
+    // Site 2 (master plan 30.34 item 4): Beauty salon is the 21st industry. SITE-2 (blueprint 3.1): the cleaner is the 22nd.
+    expect(INDUSTRIES).toHaveLength(22);
+    expect(new Set(INDUSTRIES.map((i) => i.slug)).size).toBe(22);
     expect(INDUSTRIES.filter((i) => !i.finished).map((i) => i.slug)).toEqual([]);
   });
 
@@ -105,8 +106,8 @@ describe("industry pages (Design 5, Web 2)", () => {
     for (const i of INDUSTRIES) {
       expect(i.searches.length, i.slug).toBeGreaterThanOrEqual(5);
       expect(i.page.jobs, i.slug).toHaveLength(3);
-      // Industries 3 (30.33 item 2): Your Google profile is two to four cards (tests/industries3.test.ts has the rest).
-      expect(i.profile.length, i.slug).toBeGreaterThanOrEqual(2);
+      // SITE-2: the page is one template with no profile cards (blueprint 3.1 section 5); the cards of the old pages stay
+      // in their files and tests/industries3.test.ts keeps their limits.
       expect(i.keyword, i.slug).toBeTruthy();
       for (const p of i.photos) expect(p.alt, i.slug).toBeTruthy();
       businesses.add(i.example.business);
@@ -114,21 +115,14 @@ describe("industry pages (Design 5, Web 2)", () => {
     expect(businesses.size).toBe(INDUSTRIES.length);
   });
 
-  // Industries 3 (master plan 30.33 item 2, 5 Nov 2026): the pages were cut to short cards, so the 600-word floor of
-  // Content 1 no longer fits; each page keeps its own words (the 40 percent similarity check above still holds) and at
-  // least 250 of them, and every section it had.
-  it("finished pages carry every section, and at least 250 words of their own", () => {
+  // SITE-2 (blueprint 3.1 section 5): the page is one template. A finished industry has the page facts the list, the
+  // head and the free check use, and its own example review, reply and Google fact in BLUEPRINT (tests/industries2.test.ts
+  // checks the blueprint entry; tests/industry1-dup.test.ts checks that pages differ only in those).
+  it("finished pages carry their head, their list card and a blueprint entry", () => {
     for (const i of INDUSTRIES.filter((x) => x.finished)) {
-      expect(i.faqs?.length, i.slug).toBeGreaterThanOrEqual(4);
-      expect(pageText(i).length, i.slug).toBeGreaterThanOrEqual(250);
-      expect(i.guides, i.slug).toHaveLength(3);
-      // The Content 1 pages keep their review, holiday and photo groups; the Industries 2 trades their categories.
-      // Industry 1 (R-144) gave the Design 8 pages review groups too; the restaurant page has no category sourced yet.
-      if (i.reviews && !i.d8) {
-        expect(i.categories, i.slug).toBeDefined();
-        expect(i.holidays, i.slug).toBeDefined();
-        expect(i.photoCards, i.slug).toBeDefined();
-      }
+      for (const k of ["title", "description", "h1", "mark", "line", "card", "answer"] as const)
+        expect(i.page[k], `${i.slug} ${k}`).toBeTruthy();
+      expect(BLUEPRINT[i.slug], i.slug).toBeDefined();
     }
   });
 
@@ -190,13 +184,13 @@ describe("the guides' search titles (Go live 1, B-017)", () => {
 });
 
 describe("a page that is noindex is not linked (Go live 1, B-013)", () => {
-  it("/for, the related links and the guides' links use industryIndexed", () => {
+  it("/for and the page's own head use industryIndexed (SITE-2: the page has no related or guide links any more)", () => {
     expect(readFileSync("src/content/industries/index.ts", "utf8")).toContain(
       "INDUSTRIES.filter(industryIndexed)",
     );
-    expect(readFileSync("src/routes/for.$trade.tsx", "utf8")).toContain(
-      ".filter((r) => r && industryIndexed(r))",
-    );
+    const route = readFileSync("src/routes/for.$trade.tsx", "utf8");
+    expect(route).toContain("indexed: industryIndexed(i)");
+    expect(route).toContain("noindex: !d.indexed");
     expect(readFileSync("src/components/marketing/business-grid.tsx", "utf8")).toContain(
       "INDUSTRIES.filter(industryIndexed)",
     );

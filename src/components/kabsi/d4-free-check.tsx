@@ -1,10 +1,11 @@
 import { Check } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { TRIAL_LINE } from "@/lib/site";
+import { TRIAL_LINE } from "@/lib/offer";
 import { ScanBox } from "./scan-box";
 import { PageHero, popCls, stagger } from "./page-hero";
-import { ResultPreview } from "./result-preview";
+import { ExampleBadge } from "./ui";
+import { BLUEPRINT } from "@/content/industries/blueprint";
 import { CHECK_HERO } from "./hero-lines";
 import { Marked, YellowLabel, YellowNumber } from "@/components/kabsi/highlight";
 import salonTablet1600 from "@/assets/photos/salon-tablet-1600.webp";
@@ -17,20 +18,16 @@ import salonTablet800 from "@/assets/photos/salon-tablet-800.webp";
  * public data (lane R decision 1; K-82: no review replies, holiday hours or post dates).
  */
 
-/** "What ChatGPT says" is the AI answer (open from 5 Nov 2026, Go live 1). */
+/** SITE-2 (blueprint 3.1 section 5): what the check reads. Only public Google data; no score, no AI answer. */
 const LOOKS_AT: { title: string; text: string }[] = [
-  { title: "Your hours", text: "The opening hours Google shows customers." },
-  { title: "Your reviews", text: "How many there are, and your rating." },
-  { title: "Photos and links", text: "Photos, your website and your phone." },
-  { title: "Your category", text: "What Google calls your business." },
-  {
-    title: "What ChatGPT says",
-    text: "Whether its answer about you matches your Google profile.",
-  },
+  { title: "Your rating and reviews", text: "Beside 3 nearby businesses." },
+  { title: "Your profile basics", text: "Hours, phone, website, category and photos." },
+  { title: "Your links", text: "Whether your website and booking link work now." },
+  { title: "Your latest review", text: "The reply Kabsi would write for it." },
 ];
 
 const GET_BACK = [
-  "About 30 seconds.",
+  "About 20 seconds.",
   "No Google access needed, no password, no card.",
   "Kabsi asks for nothing before you see the result.",
 ] as const;
@@ -39,7 +36,7 @@ export function CheckLooksAtVisual() {
   // Scan 3 (30.34 item 2): yellow number markers and a short label pill (DESIGN.md, the highlight bar's other yellow uses).
   return (
     <figure className="relative rounded-panel border border-line bg-surface-1 p-5 shadow-float sm:p-6">
-      <YellowLabel>About 30 seconds</YellowLabel>
+      <YellowLabel>About 20 seconds</YellowLabel>
       <p className="mt-3 text-title font-bold">What Kabsi checks</p>
       <p className="text-body text-text-2">On your public Google profile. No access needed.</p>
       <ol className="mt-5 space-y-2.5">
@@ -64,6 +61,47 @@ export function CheckLooksAtVisual() {
   );
 }
 
+/** The Example result: three nearby businesses and the reply Kabsi would write. Invented names, labelled Example. */
+function ExampleResult({ className }: { className?: string }) {
+  const ex = BLUEPRINT["hair-salon"]!;
+  const rows = [
+    { name: "Hollis Hair (you)", line: "4.8, 38 reviews", mine: true },
+    { name: "Juniper Hair Studio", line: "4.6, 112 reviews", mine: false },
+    { name: "Lark Salon", line: "4.7, 64 reviews", mine: false },
+    { name: "Studio Nine", line: "4.4, 25 reviews", mine: false },
+  ];
+  return (
+    <figure
+      className={cn(
+        "relative rounded-panel border border-line bg-surface-1 p-5 shadow-float sm:p-7",
+        className,
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-label font-bold text-text-2">Free check result</p>
+        <ExampleBadge className="shrink-0" />
+      </div>
+      <ul className="mt-3 divide-y divide-line">
+        {rows.map((r) => (
+          <li key={r.name} className="flex items-baseline justify-between gap-3 py-2.5 text-small">
+            <span className={r.mine ? "font-bold" : ""}>{r.name}</span>
+            <span className="text-end font-semibold">{r.line}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-2 border-t border-line pt-3">
+        <p className="text-label font-bold text-text-2">The reply Kabsi would write</p>
+        <p className="mt-1 text-small text-text-2">{`${ex.review.stars} stars: ${ex.review.text}`}</p>
+        <p className="mt-1 text-small text-text-1">{ex.reply}</p>
+      </div>
+      <figcaption className="sr-only">
+        An Example free check result for an invented salon: its rating and reviews beside three
+        nearby businesses, and the reply Kabsi would write for a 5 star review.
+      </figcaption>
+    </figure>
+  );
+}
+
 /** "What you get back" with the Example result: under the start page and under every state of the check. */
 export function WhatYouGetBack({ photo = false }: { photo?: boolean }) {
   return (
@@ -74,8 +112,9 @@ export function WhatYouGetBack({ photo = false }: { photo?: boolean }) {
             <Marked text="What you get back" mark="get back" />
           </h2>
           <p className="mt-4 max-w-[34rem] text-lead text-text-2">
-            The most important thing to fix, and why it matters. Then what customers see today, and
-            what Kabsi would do from day one.
+            Your rating and reviews beside 3 nearby businesses, your profile basics, and whether
+            your links work now. Then the reply Kabsi would write for your latest review, and what
+            Kabsi would do each month.
           </p>
           <ul className="mt-6 space-y-2.5">
             {GET_BACK.map((l) => (
@@ -104,7 +143,7 @@ export function WhatYouGetBack({ photo = false }: { photo?: boolean }) {
             />
           )}
         </div>
-        <ResultPreview className="lg:ms-auto lg:w-[30rem]" />
+        <ExampleResult className="lg:ms-auto lg:w-[30rem]" />
       </div>
     </section>
   );
@@ -141,7 +180,7 @@ export function FreeCheckFrame({
 export function FreeCheckStart() {
   return (
     <FreeCheckFrame photo>
-      <ScanBox id="check-scan" className="max-w-xl" trialSeparate />
+      <ScanBox id="check-scan" className="max-w-xl" />
     </FreeCheckFrame>
   );
 }

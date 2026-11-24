@@ -44,7 +44,8 @@ function CheckToo() {
           <Marked text="See what Google shows about you." mark="Google shows" />
         </h2>
         <p className="mt-3 text-lead text-text-2">
-          The free check reads your Google profile and names the one thing to do first.
+          The free check shows your rating and reviews beside 3 nearby businesses, and what your
+          Google profile shows.
         </p>
         <ScanBox under="scan" className="mt-8" />
       </div>

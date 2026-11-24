@@ -16,6 +16,7 @@ export const guide: GuideDoc = {
   updated: READ,
   checked: READ,
   topic: "AI assistants",
+  noindex: true as const,
   answer:
     "When ChatGPT or Perplexity answers with a web search, it builds the answer from pages it finds and cites some of them, so an old page or a site that still lists your old hours or phone number can end up in the answer. Open the sources the answer cites, then correct your Google profile, your website and the other sites that list you, so every page it might read says the same thing.",
   inShort: [

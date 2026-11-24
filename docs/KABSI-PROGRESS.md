@@ -64,6 +64,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 24 Nov 2026, SITE-2 (blueprint 3.1): industry pages on one template, guides cleaned and 3 added, free check result and tool pages brought to 3.1; `2026-11-24-site2.md`.
 - 24 Nov 2026, FIX-0: Edge Functions refused by the database API since 14 Nov 05:37 UTC; stale work cancelled; key resolver and public /health built; waiting for Rashid's new secret key. `2026-11-24-fix0.md`.
 - 12 Nov 2026, Fix 6 (R-162): records 30.52 and four small fixes. `2026-11-12-fix6.md`.
 - 12 Nov 2026, Site 3b (R-161): sign-in code on intent (PR 584), the rest of the site (19 of 25 findings closed). `2026-11-12-site3b.md`.

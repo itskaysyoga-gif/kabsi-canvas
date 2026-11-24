@@ -55,8 +55,12 @@ describe("Industries 3: short, scannable industry pages (30.33 item 2)", () => {
 
   it("gives Your Google profile two to four cards and every other group two or three, never one alone", () => {
     for (const i of pages) {
-      expect(i.profile.length, i.slug).toBeGreaterThanOrEqual(2);
-      expect(i.profile.length, i.slug).toBeLessThanOrEqual(4);
+      // SITE-2: the page no longer shows these cards, so a page made for the one template (the cleaner) has none;
+      // a page that keeps them keeps the two to four limit, so no card is ever alone.
+      if (i.profile.length > 0) {
+        expect(i.profile.length, i.slug).toBeGreaterThanOrEqual(2);
+        expect(i.profile.length, i.slug).toBeLessThanOrEqual(4);
+      }
       for (const [group, list] of cards(i).slice(1, 4)) {
         if (!list) continue;
         expect(list.length, `${i.slug} ${group}`).toBeGreaterThanOrEqual(2);

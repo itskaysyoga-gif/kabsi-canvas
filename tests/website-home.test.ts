@@ -110,7 +110,9 @@ describe("the copy rules on every public line (kabsi-copy, K-112, K-144, 30.15)"
     // Home 2 (lane R R-158 item 4, 11 Nov 2026): owners say "my Google listing", so Home's own lines may say "listing".
     // Only Home 2's two data files and Home's route head; every other public line keeps the rule, and no file may say
     // visibility, grid point or the app.
-    const HOME2 = /kabsi\/home2-(hero-)?data\.ts$|routes\/index\.tsx$/;
+    // SITE-2 (blueprint 3.1 section 2): "Your listing protected" is one of the three benefits, so the industry template
+    // that repeats them may say "listing". Only that file; every other public line keeps the rule.
+    const HOME2 = /kabsi\/home2-(hero-)?data\.ts$|routes\/index\.tsx$|kabsi\/d9-industry\.tsx$/;
     for (const [f, s] of all.filter(([f]) => !LEGAL.test(f))) {
       expect(s, `${f}: ${s.slice(0, 60)}`).not.toMatch(
         HOME2.test(f)
@@ -241,16 +243,17 @@ describe("no invented proof or number (plan 2.11, Web 2 item 4)", () => {
     expect(read("src/components/kabsi/d2-partners.tsx")).toContain("usePartnerPlaces()");
   });
   it("labels every example, and the fixtures of the prototype are gone", () => {
-    for (const gone of [
-      "d2-data.ts",
-      "scan-data.ts",
-      "scan-result.tsx",
-      "d2-customer.tsx",
-      "home-sections.tsx",
-    ])
+    for (const gone of ["d2-data.ts", "scan-data.ts", "d2-customer.tsx", "home-sections.tsx"])
       expect(readdirSync("src/components/kabsi"), gone).not.toContain(gone);
+    // SITE-2: scan-result.tsx is a new file with the real result parts (the prototype's fixtures file of that name is gone).
+    expect(read("src/components/kabsi/scan-result.tsx")).not.toMatch(/scan-data|d2-data/);
     expect(read("src/components/kabsi/nearby-places.tsx")).toContain("example = true");
-    expect(read("src/components/kabsi/scan-live.tsx")).toContain("example={false}");
+    // SITE-2: the live result no longer draws the nearby cards (so no example={false} prop); a made-up part is never
+    // shown as real: the sample reply in the result carries the Example label, and the nearby part takes only the check.
+    expect(read("src/components/kabsi/scan-result.tsx")).toContain("{sample && <ExampleBadge />}");
+    expect(read("src/components/kabsi/scan-live.tsx")).toContain(
+      "nearby={check?.fast.competitors ?? null}",
+    );
     expect(read("src/components/kabsi/whatsapp.tsx")).toContain("ExampleBadge");
   });
   it("keeps the ?state= links of the prototype to development", () => {
