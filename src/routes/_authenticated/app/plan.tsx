@@ -16,21 +16,10 @@ import {
   type PlanSummary,
 } from "@/lib/plans";
 import { daysUntil } from "@/lib/dashboard";
-import {
-  ACCOUNT_STAYS_LINE,
-  FOUNDING_PRICES,
-  FOUNDING_SENTENCE,
-  PLAN_PRICES,
-  PLAN_PRICE_ROWS,
-  TAX_NOTE,
-  WHATSAPP_ON,
-  WORKING_HOURS,
-  foundingPlacesLine,
-} from "@/lib/site";
-import { PLANS } from "@/components/kabsi/plans";
-import { FoundingPriceLine, useFoundingLeft } from "@/components/kabsi/founding-price";
+import { ACCOUNT_STAYS_LINE, TAX_NOTE, WHATSAPP_ON, WORKING_HOURS } from "@/lib/site";
+import { FOUNDING_LINE, FOUNDING_MONTHLY_USD, PRICE_MONTHLY_USD, TRIAL_LINE } from "@/lib/offer";
 import { AccountTop, Panel } from "@/components/kabsi/d3-account";
-import { Banner, Button, Segmented, StatusPill, buttonClass } from "@/components/kabsi/ui";
+import { Banner, Button, StatusPill, buttonClass } from "@/components/kabsi/ui";
 import { cn } from "@/lib/utils";
 
 // Your plan (UX 1, Design 3): the state first as one banner (trial, paid, a payment that did not go through, a plan that
@@ -158,7 +147,6 @@ type Pending = { op: BillingOp; line: string; plan?: "essentials" | "pro" } | nu
 
 function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSummary; d: PlanData }) {
   const qc = useQueryClient();
-  const [period, setPeriod] = useState<"month" | "year">("month");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
@@ -169,11 +157,6 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
   // not started). The server refuses the same way (billing-access.ts), so this only keeps the buttons honest.
   const accessNow = sum.tier !== "none";
   const open = !!sum.checkout_open && accessNow;
-  // Price 1: a running plan shows the price family it is on; a new checkout shows the founding price while places remain
-  // (the server decides under its lock, and Creem's page shows the exact price before paying).
-  const left = useFoundingLeft();
-  const founding = running ? !!b.founding : left !== null && left > 0;
-
   async function run(
     op: BillingOp,
     extra: { plan?: "essentials" | "pro"; period?: "month" | "year" } = {},
@@ -190,9 +173,8 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
       }
       if (op === "cancel") setNote(`Done. Your plan ends on ${shortDate(r.ends_at ?? null)}.`);
       if (op === "keep") setNote("Done. Your plan carries on.");
-      if (op === "upgrade") setNote("Done. You are on Pro now.");
       if (op === "downgrade")
-        setNote(`Done. Essentials starts on ${shortDate(b?.current_period_end ?? null)}.`);
+        setNote(`Done. Kabsi at 29 US dollars a month starts on ${shortDate(b?.current_period_end ?? null)}.`);
       if (op === "remove_location")
         setNote(`Done. The extra location ends on ${shortDate(r.ends_at ?? null)}.`);
       setPending(null);
@@ -204,23 +186,11 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
     }
   }
 
-  const price = (plan: "essentials" | "pro" | "extra") => {
-    const p = founding ? { ...PLAN_PRICES, ...FOUNDING_PRICES } : PLAN_PRICES;
-    const per = (b?.period ?? period) === "year";
-    const n =
-      plan === "essentials"
-        ? per
-          ? p.essentialsYearly
-          : p.essentialsMonthly
-        : plan === "pro"
-          ? per
-            ? p.proYearly
-            : p.proMonthly
-          : per
-            ? p.extraLocationYearly
-            : p.extraLocationMonthly;
-    return `$${n} ${per ? "a year" : "a month"}${founding && plan !== "extra" ? ", launch price" : ""}`;
-  };
+  // OFFER-2 (blueprint 3.1): one plan, shown as "Kabsi", 29 US dollars a month per location; the founding price (19 for the
+  // first 12 months) only through the private invitation, so it shows only on a plan already on it.
+  const monthly = running && b.founding ? FOUNDING_MONTHLY_USD : PRICE_MONTHLY_USD;
+  const price = (plan: "essentials" | "pro" | "extra") =>
+    `$${plan === "extra" ? PRICE_MONTHLY_USD : monthly} a month`;
 
   const cancelLine = () =>
     b
@@ -230,94 +200,52 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
         })
       : undefined;
 
-  // Which plan card carries the pill: the trial is Pro; a Creem plan names itself.
   const trial = sum.tier === "trial" && !!sum.plan && !b;
-  const mine: "essentials" | "pro" | null = b
-    ? b.state === "cancelled" || b.state === "expired"
-      ? null
-      : b.plan
-    : trial
-      ? "pro"
-      : null;
+  const mine = (!!b && b.state !== "cancelled" && b.state !== "expired") || trial;
   const showChoose = !running;
 
   return (
     <div className="space-y-4">
       <StateBanner sum={sum} d={d} b={b} busy={busy} run={run} />
 
-      {showChoose ? (
-        <Segmented
-          label="Billing period"
-          value={period}
-          onChange={setPeriod}
-          options={[
-            { value: "month", label: PLAN_COPY.monthly },
-            { value: "year", label: PLAN_COPY.yearly },
-          ]}
-        />
-      ) : null}
-
-      <div className="grid gap-4 md:grid-cols-2">
-        {PLANS.map((p) => {
-          const per = (b?.period ?? period) === "year";
-          return (
-            <Panel key={p.id} className={cn(mine === p.id && "ring-2 ring-text-1")}>
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="font-display text-h3 font-bold">{p.name}</h2>
-                {mine === p.id ? (
-                  <StatusPill tone="info">{trial ? "Your trial" : "Your plan"}</StatusPill>
-                ) : null}
-              </div>
-              <p className="mt-2 font-display text-h2 font-bold">
-                $
-                {running && b.founding
-                  ? per
-                    ? p.foundingYearly
-                    : p.foundingMonthly
-                  : per
-                    ? p.yearly
-                    : p.monthly}
-                <span className="text-body font-semibold text-text-2">
-                  {per ? " a year" : " a month"}
-                </span>
-              </p>
-              {running && b.founding ? (
-                <p className="mt-1 text-small font-semibold text-text-1">
-                  Launch price, kept while you stay subscribed.
-                </p>
-              ) : running ? null : (
-                <FoundingPriceLine plan={p.id} yearly={per} left={left} />
-              )}
-              {p.lead && <p className="mt-4 text-small font-bold">{p.lead}</p>}
-              <ul className={cn("space-y-2", p.lead ? "mt-2" : "mt-4")}>
-                {p.work.map((w) => (
-                  <li key={w} className="flex gap-2 text-body">
-                    <Check className="mt-1 size-4 shrink-0 text-ok" strokeWidth={3} aria-hidden />
-                    {w}
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-4 text-small font-bold">{p.help}</p>
-              <p className="text-small text-text-2">{WORKING_HOURS}</p>
-              {showChoose ? (
-                <Button
-                  full
-                  size="md"
-                  variant={p.id === "pro" ? "primary" : "secondary"}
-                  className="mt-5"
-                  disabled={!open || busy}
-                  onClick={() => void run("checkout", { plan: p.id, period })}
-                  {...(p.id === "pro" ? { "data-main-cta": true } : {})}
-                >
-                  {sum.checkout_open
-                    ? `${p.id === "pro" ? PLAN_COPY.choosePro : PLAN_COPY.chooseEssentials}, ${price(p.id)}`
-                    : PLAN_COPY.openSoon}
-                </Button>
-              ) : null}
-            </Panel>
-          );
-        })}
-      </div>
+      <Panel className={cn(mine && "ring-2 ring-text-1")}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-display text-h3 font-bold">{PLAN_COPY.oneName}</h2>
+          {mine ? (
+            <StatusPill tone="info">{trial ? "Your trial" : "Your plan"}</StatusPill>
+          ) : null}
+        </div>
+        <p className="mt-2 font-display text-h2 font-bold">
+          ${monthly}
+          <span className="text-body font-semibold text-text-2"> a month per location</span>
+        </p>
+        <p className="mt-1 text-small text-text-2">
+          {running && b.founding ? FOUNDING_LINE : TRIAL_LINE}
+        </p>
+        <ul className="mt-4 space-y-2">
+          {PLAN_COPY.work.map((w) => (
+            <li key={w} className="flex gap-2 text-body">
+              <Check className="mt-1 size-4 shrink-0 text-ok" strokeWidth={3} aria-hidden />
+              {w}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-4 text-small font-bold">{PLAN_COPY.nothingWithoutYes}</p>
+        <p className="text-small text-text-2">{WORKING_HOURS}</p>
+        {showChoose ? (
+          <Button
+            full
+            size="md"
+            variant="primary"
+            className="mt-5"
+            disabled={!open || busy}
+            onClick={() => void run("checkout", { plan: "essentials", period: "month" })}
+            data-main-cta
+          >
+            {sum.checkout_open ? PLAN_COPY.start : PLAN_COPY.openSoon}
+          </Button>
+        ) : null}
+      </Panel>
       {showChoose && open ? (
         <p className="text-small text-text-2">Creem's page shows the exact price before you pay.</p>
       ) : null}
@@ -338,26 +266,21 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
             </Button>
             {b.cancel_at_period_end ? null : (
               <>
-                <Button
-                  variant="secondary"
-                  size="md"
-                  disabled={busy}
-                  onClick={() =>
-                    setPending(
-                      b.plan === "pro"
-                        ? {
-                            op: "downgrade",
-                            line: `Switch to Essentials at your next renewal, ${price("essentials")}.`,
-                          }
-                        : {
-                            op: "upgrade",
-                            line: `Switch to Pro now, ${price("pro")}. Creem charges the difference today.`,
-                          },
-                    )
-                  }
-                >
-                  {b.plan === "pro" ? "Switch to Essentials" : "Switch to Pro"}
-                </Button>
+                {b.plan === "pro" ? (
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    disabled={busy}
+                    onClick={() =>
+                      setPending({
+                        op: "downgrade",
+                        line: `Move to Kabsi at your next renewal, ${price("essentials")}.`,
+                      })
+                    }
+                  >
+                    Move to Kabsi
+                  </Button>
+                ) : null}
                 <Button
                   variant="secondary"
                   size="md"
@@ -441,27 +364,12 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
         </p>
       ) : null}
 
-      <Panel title="Plans and prices" id="prices">
-        <dl className="divide-y divide-line">
-          {PLAN_PRICE_ROWS.map((r) => (
-            <div
-              key={r.name}
-              className="flex flex-wrap items-baseline justify-between gap-x-4 py-2.5"
-            >
-              <dt className="text-small font-bold">{r.name}</dt>
-              <dd className="text-small text-text-2">{r.price}</dd>
-            </div>
-          ))}
-        </dl>
-        <p className="mt-3 text-small text-text-2">
-          Prices are in US dollars, {TAX_NOTE}, and the same in every country.
+      <Panel title="Price" id="prices">
+        <p className="text-small">{TRIAL_LINE}</p>
+        <p className="mt-2 text-small text-text-2">
+          Each further location is {price("extra")}. Prices are in US dollars, {TAX_NOTE}, and the
+          same in every country.
         </p>
-        <p className="mt-1 text-small text-text-2">Every trial is 14 days of Pro with no card.</p>
-        {left !== null && left > 0 ? (
-          <p className="mt-2 text-small text-text-2">
-            {FOUNDING_SENTENCE} {foundingPlacesLine(left)}
-          </p>
-        ) : null}
       </Panel>
 
       <Panel title="Receipts" id="receipts">
@@ -486,7 +394,6 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
 
       <div className="space-y-2">
         <p className="text-small text-text-2">{PLAN_COPY.creem}</p>
-        <p className="text-small text-text-2">Yearly plans are refundable within 14 days.</p>
         <p className="text-small text-text-2">
           If your plan ends, your review link and QR code keep working; only reply drafts, Google
           Protection and reports stop.
@@ -569,7 +476,7 @@ function StateBanner({
     return (
       <Banner tone="ok" title={`${name}.`}>
         Next payment on {longDate(b.current_period_end)}.
-        {founding ? " Launch price, kept while your subscription stays paid." : ""}
+        {founding ? ` ${FOUNDING_LINE}` : ""}
         {units}
       </Banner>
     );

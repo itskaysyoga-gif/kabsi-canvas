@@ -4,6 +4,8 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 select * from no_plan();
+-- OFFER-2: since 24 Nov 2026 the trial needs a card (trial_mode 'card'). This file tests the Kabsi trial's own rules, kept for a switch back.
+update public.app_settings set value = 'kabsi' where key = 'trial_mode';
 
 \ir _fixtures.psql
 
