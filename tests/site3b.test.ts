@@ -70,8 +70,10 @@ describe("Site 3b: the footer, the contents links and the headings (audit E1, E2
     // each an h3 straight under an h2 section headline, and the old profile card grid is gone.
     const d = read("src/components/kabsi/d9-industry.tsx");
     expect(d).not.toContain("i.profile");
-    expect(d).toMatch(/<h2 id="benefits-h"|id="benefits-h"/);
-    expect(d).toContain('<h3 className="text-title">{x.title}</h3>');
+    // SITE-3: the band and its headline come from marketing/kit.tsx (Band id="benefits", Head id "benefits-h").
+    expect(d).toMatch(/<Band id="benefits"/);
+    expect(d).toMatch(/<Head id="benefits"/);
+    expect(d).toContain('<h3 className="text-h3">{x.title}</h3>');
   });
 });
 
@@ -82,7 +84,9 @@ describe("Site 3b: one reassurance under the search on /for and the industry pag
     // The industry page's two boxes and /for's two boxes (blueprint 3.1 section 3).
     expect(d.match(/note=\{FREE_CHECK_NOTE\}/g)).toHaveLength(4);
     expect(d).toMatch(/keywordHint=\{false\}/);
-    expect(d).toContain("{TRIAL_LINE}");
+    // SITE-3: the price card is Home's and Pricing's PriceCard, which shows TRIAL_LINE beside its button.
+    expect(d).toContain("<PriceCard");
+    expect(read("src/components/marketing/v31-data.ts")).toContain("terms: TRIAL_LINE");
     expect(TRIAL_LINE).toBe(OFFER_TRIAL_LINE); // SITE-1: blueprint 3.1, src/lib/offer.ts
   });
 });

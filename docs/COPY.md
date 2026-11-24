@@ -2418,6 +2418,29 @@ Source: docs/kabsi-final/KABSI-WEBSITE-AND-CONVERSION-BLUEPRINT.md (sections 3 t
 
 **Titles and descriptions**: in v31-heads.ts (new).
 
+## 91. SITE-3: one design system and the home page redone (24 Nov 2026, lane R R-164 item 7)
+
+The words are in `src/components/marketing/v31-data.ts` (Home, Pricing, How it works, About, Security), `src/components/kabsi/d9-industry.tsx` (industry pages) and `src/components/kabsi/scan-result.tsx` (the free check result). Section 90 still holds every SITE-1 line that did not change.
+
+**Home, in order**
+- Hero: H1 "Your business on Google. Taken care of." ("Taken care of." on the yellow bar), the line, the search box, "Check my business free", "Free check. No card. 20 seconds.", then three marks: "No Google password", "Nothing goes live without your yes", "Cancel any time".
+- The phone (Example, Maple Street Salon), three scenes: "A review reply approved" (ends "Your reply is live on Google."), "Saturday's hours approved" (ends "Your new hours are live on Google."), "A photo posted" (ends "Your post is live on Google."). Buttons: "Pause the example" and "Play the example".
+- The problem (charcoal band): "Your Google profile is working for you, or against you." Points: "Reviews and replies shape the choice." "Google says positive reviews and helpful replies can help your business stand out, and that a reply shows customers you value their feedback." (support.google.com/business/answer/7091); "Your details can change without you." "Google updates profiles from what users suggest and from other sources. If you do not answer a suggested edit within 4 days, Google may publish it." (answer/3480441); "Wrong hours cost visits." "Google says your hours tell customers when they can visit, and that a profile with wrong details may not show up for searches near you." (answer/7091). Link: "Read it on Google's help page". All three read as raw page text on 24 Nov 2026.
+- "A week with Kabsi." ("with Kabsi." on the bar, the page's one other bar) "What a normal week looks like. You spend a few taps on it." Monday "A new review arrives." "The reply is ready. You approve it with one tap." Wednesday "Google changed your hours." "Kabsi caught it and set them back after your yes." Friday "A photo from your phone is live." "You sent it with two words. Kabsi wrote the post." Next Monday "Your weekly summary arrives." "What was done, what waits for you, and one next step." (The prompt said Sunday; the weekly summary is sent on Monday, facts 04, so the page says Next Monday.)
+- "Just tell Kabsi." The six chips of section 90, then "Or send a voice note." "Say it out loud. Kabsi shows you the change in writing before anything goes to Google."
+- "How it starts." the three steps and the first-day line of section 90, beside the photo heroHow.
+- "See exactly what was done." "A short summary every week. A full report every month. Work done, what Kabsi found and what Google shows, kept apart." The monthly report Example and the weekly summary Example: "Your week, Maple Street Salon", "3 replies live on Google.", "1 change caught on Google and set back.", "1 post live on Google.", "Your review link was tapped 6 times.", "Nothing waits for you. Next: holiday hours for December."
+- "One price." the full-width card: "29 US dollars", "a month per location.", the button, TRIAL_LINE, "Included" and the eight lines of blueprint section 4, the not included line.
+- "You stay in charge." the four trust lines as a quiet row. "Questions." six. Closing band: "Start with a free check."
+
+**Pricing**: the H1 and line of section 90, the same price card, then "An extra location is 29 US dollars a month, the same as the first. Google Business Profile is free from Google. Kabsi is an independent paid service.", "You stay in charge.", the closing band.
+
+**How it works**: the box under the H1; the five steps and "Or just tell Kabsi."; "See what was done." "A short summary every week and a full report every month: work done, what Kabsi found and what Google shows, kept apart."; the closing band.
+
+**Industry pages**: the example review now sits beside the hero, its headline "A review at <business>, and the reply Kabsi writes", caption "Kabsi writes the reply from the facts you gave it. It waits for your yes before anything reaches Google."; "What Kabsi does without being asked."; "One thing Google says about <plural>."; "One plan, one price." with the shared price card; "What to know first"; the closing band "Check your business, free." /for: "Pick your business." and the closing band "Not on the list?".
+
+**Free check result**: headlines without the yellow bar. The latest review shows "<reviewer>, <n> stars" and the line "Your latest review on Google, with a first reply. Once Kabsi is connected, each reply is written in your voice from your business facts, and nothing reaches Google until you say yes." The first reply (server, `_shared/free-reply.ts`): 4 or 5 stars "Thank you, <Name>. We are glad you took the time to write this, and we hope to see you again."; 1 to 3 stars "Thank you for writing this, <Name>. We are sorry it was not better, and we would like to hear more. Please contact us through the details on our profile."
+
 ## 92. OFFER-2 and PROOF-2: owner-facing lines (recorded by SITE-3, 24 Nov 2026)
 
 OFFER-2 and PROOF-2 (both 24 Nov 2026) shipped these lines in code; this section records them word for word, as the code has them. How to read it: ` / ` is a new line in the message, ` // ` is an empty line between parts, and `<...>` is a value Kabsi fills in. The code is the source; a change to a line changes the code and this section together.
