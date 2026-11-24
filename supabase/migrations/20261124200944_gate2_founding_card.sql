@@ -1,7 +1,7 @@
 -- GATE-2 (master plan 30.54 item 3, blueprint 3.1): the founding price goes through the card checkout, and month 13 moves to 29.
---   1. The Founding 25 90-day trial with no card is retired. private.founding_days answers null for every business, so
---      private.start_trial gives no 90 days, and the trial caps and checks treat a Founding 25 business like any other.
---      A trial already running keeps its end date (nothing here changes a stored row).
+--   1. The Founding 25 90-day trial with no card is retired. private.founding_days answers null for a place linked by the
+--      new staff_founding_link (card_checkout true), so private.start_trial gives no 90 days and the trial caps treat it like
+--      any other business. A place linked before keeps 90 days and no caps; nothing here changes a stored row.
 --   2. public.staff_founding_link (same signature) only links the accepted application to the business. It starts no trial:
 --      the owner starts the 14-day trial with a card at the checkout, and billing_checkout_family gives a linked business the
 --      founding price of 19 (unchanged). The answer keeps its keys; trial_started is always false now.
