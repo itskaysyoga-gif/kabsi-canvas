@@ -6,6 +6,8 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 select * from no_plan();
+-- OFFER-2: since 24 Nov 2026 the trial needs a card (trial_mode 'card'). This file tests the Kabsi trial's own rules, kept for a switch back.
+update public.app_settings set value = 'kabsi' where key = 'trial_mode';
 
 \ir _fixtures.psql
 
@@ -131,6 +133,10 @@ select is((select count(*)::int from public.subscriptions s join public.location
 select tests.act_as('00000000-0000-4000-8000-0000000009a4');
 select public.clear_onboarding_scenario('00000000-0000-4000-8000-0000000009c2');
 reset role;
+-- OFFER-2: with the trial with a card (trial_mode 'card') no trial without a card starts at all.
+update public.app_settings set value = 'card' where key = 'trial_mode';
+select is(public.grant_trial_if_eligible('00000000-0000-4000-8000-0000000009c2', true), null, 'OFFER-2: no trial without a card in card mode');
+update public.app_settings set value = 'kabsi' where key = 'trial_mode';
 select isnt(public.grant_trial_if_eligible('00000000-0000-4000-8000-0000000009c2', true), null, 'once the owner says it was a mistake the trial can start');
 
 -- 7. The 72 hour WhatsApp nudge ---------------------------------------------------------------------------------------------

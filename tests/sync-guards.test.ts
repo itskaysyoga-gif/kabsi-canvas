@@ -2,6 +2,7 @@
 // website-home.test.ts and the email, WhatsApp and request book tests each keep watching their own screens; this file
 // runs one set of rules over all of them at once: the plan prices, the founding prices, the extra location and the founding
 // places (read from src/lib/site.ts), the never-say names and claims, and the house style.
+import { PRICE_MONTHLY_USD } from "@/lib/offer";
 import { describe, expect, it } from "vitest";
 import { CATALOGUE } from "../supabase/functions/_shared/creem";
 import { FOUNDING_PRICES, PLAN_PRICES } from "../src/lib/site";
@@ -66,7 +67,8 @@ describe("a Kabsi plan costs what src/lib/site.ts says, on every surface", () =>
       essentials_year_list: PLAN_PRICES.essentialsYearly,
       pro_month_list: PLAN_PRICES.proMonthly,
       pro_year_list: PLAN_PRICES.proYearly,
-      extra_month: PLAN_PRICES.extraLocationMonthly,
+      // OFFER-2 (R-163): 29 US dollars a month per location; src/lib/offer.ts is the one place for that price.
+      extra_month: PRICE_MONTHLY_USD,
       extra_year: PLAN_PRICES.extraLocationYearly,
     };
     expect(Object.keys(CATALOGUE).sort()).toEqual(Object.keys(want).sort());

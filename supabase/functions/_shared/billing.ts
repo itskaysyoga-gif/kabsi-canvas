@@ -12,7 +12,7 @@ import { paymentFailed, planCancelled } from "./email/account-copy.ts";
 import { outDb } from "./whatsapp/db.ts";
 import { ref } from "./whatsapp/templates.ts";
 import {
-  CATALOGUE, checkoutRequestId, type Creem, creemClient, CreemError, type CreemEvent, effectOf, eventTime, extraKey, familyOfKey,
+  CATALOGUE, checkoutRequestId, foundingEndOf, TRIAL_DAYS, type Creem, creemClient, CreemError, type CreemEvent, effectOf, eventTime, extraKey, familyOfKey,
   isStale, keyOfProduct, ledgerOf, type Message, type Mode, modeOf, orgOf, type Period, type Plan, planKey, type PriceFamily,
   type ProductIds, type ProductKey,
   PRODUCT_KEYS, patchFor, sameMode, scrubEvent, setupPlan, type SubFacts, subFacts, subscriptionOf,
@@ -73,7 +73,7 @@ type SubRow = {
   id: string; organization_id: string; plan: string; state: string; period: string | null; units: number;
   current_period_end: string | null; cancel_at_period_end: boolean | null; provider_customer_id: string | null;
   provider_subscription_id: string | null; past_due_at: string | null; last_event_at: string | null; founding: boolean;
-  mode: string | null; ended_at: string | null; product_id?: string | null;
+  mode: string | null; ended_at: string | null; product_id?: string | null; founding_ends_at?: string | null; first_paid_at?: string | null;
 };
 
 export async function applyEvent(eventKey: string): Promise<string> {
@@ -105,7 +105,8 @@ export async function applyEvent(eventKey: string): Promise<string> {
     if (older) {
       result = "older_ignored";
     } else {
-      const wasPaying = existing?.state === "active";
+      // OFFER-2 review: a trial with a card is "active" before any payment, so a new paying customer is the first payment.
+      const wasPaying = !!existing?.first_paid_at;
       // The plan row's units are the running extra locations (synced below), never what the plan's own items say.
       existing = await writeSub(org, subId, e, { ...effect, write: { ...effect.write, units: undefined } }, existing, at, ids);
       result = `applied:${existing?.state ?? "?"}`;
@@ -114,7 +115,18 @@ export async function applyEvent(eventKey: string): Promise<string> {
       if (existing && (effect.message === "scheduled_cancel" || effect.message === "ended" || e.eventType === "subscription.expired" || e.eventType === "subscription.paused")) {
         await endExtrasWithPlan(org).catch((x) => captureError("billing", x, { step: "end_extras", event: e.eventType }));
       }
-      if (effect.paid && existing) await foundingCheck(existing, facts.family);
+      if (effect.paid && existing && !existing.first_paid_at) {
+        await db.from("subscriptions").update({ first_paid_at: at.toISOString() }).eq("id", existing.id).is("first_paid_at", null);
+        existing = { ...existing, first_paid_at: at.toISOString() };
+      }
+      if (effect.paid && existing) await foundingCheck(existing, facts.family, at);
+      // OFFER-2: a trial with a card uses the business's one trial, the same way a Kabsi trial does.
+      if (e.eventType === "subscription.trialing" && existing) {
+        await markTrialUsed(org).catch((x) => captureError("billing", x, { step: "trial_used" }));
+        const test = existing.mode === "live" ? "" : " (test mode)";
+        await staffAlert(`Trial with a card started: ${await businessName(org)}, first charge on ${existing.current_period_end ? longDate(existing.current_period_end) : "day 14"}${test}`, `trial:${e.id}`)
+          .catch((x) => captureError("billing", x, { step: "staff_alert" }));
+      }
       if (e.eventType === "checkout.completed") {
         const requestId = typeof e.object.request_id === "string" ? e.object.request_id : null;
         if (requestId) await db.from("billing_checkouts").update({ completed_at: new Date().toISOString(), checkout_id: String(e.object.id ?? "") || null }).eq("request_id", requestId);
@@ -133,7 +145,7 @@ export async function applyEvent(eventKey: string): Promise<string> {
     await staffAlert(`Creem ${e.eventType} with no Kabsi business (${subId ?? "no subscription"})`, `nobiz:${e.id}`);
   }
   if (effect.alert) {
-    const what = effect.alert === "refund" ? "a refund" : effect.alert === "dispute" ? "a chargeback" : "a trial event that should never come";
+    const what = effect.alert === "refund" ? "a refund" : effect.alert === "dispute" ? "a chargeback" : "an unexpected event";
     const business = org ? await businessName(org) : "an unknown business";
     await staffAlert(`Creem reported ${what} for ${business}`, `${effect.alert}:${e.id}`);
   }
@@ -274,8 +286,13 @@ async function writeSub(org: string, subId: string, e: CreemEvent, effect: Retur
 // The first 30 paying businesses keep their price while subscribed (10.2.4, Price 1). The place is taken at checkout, under
 // a database lock (billing_checkout_family), so a payment on a founding product marks its subscription founding. A Founding
 // 25 business (30.17) that chooses a plan keeps the founding price too, in either mode.
-async function foundingCheck(s: SubRow, family: PriceFamily | null) {
-  if (s.founding) return;
+async function foundingCheck(s: SubRow, family: PriceFamily | null, at: Date = new Date()) {
+  // OFFER-2: the founding price runs 12 months from the first payment; the date is set once and never moved.
+  const first = s.first_paid_at ? new Date(s.first_paid_at) : at;
+  if (s.founding) {
+    if (!s.founding_ends_at) await setFoundingEnd(s.id, first);
+    return;
+  }
   let founding = family === "founding";
   if (!founding) {
     const { data: f25 } = await admin().from("founding_applications").select("id").eq("organization_id", s.organization_id)
@@ -284,6 +301,7 @@ async function foundingCheck(s: SubRow, family: PriceFamily | null) {
   }
   if (!founding) return;
   await admin().from("subscriptions").update({ founding: true }).eq("id", s.id);
+  await setFoundingEnd(s.id, first);
   // Review of Price 1: an old founding checkout link paid after its 24-hour hold can make a 31st founding business. The price
   // the owner was shown stands; staff hear about it.
   if (family === "founding" && s.mode === "live") {
@@ -294,6 +312,41 @@ async function foundingCheck(s: SubRow, family: PriceFamily | null) {
     }
   }
 }
+async function setFoundingEnd(id: string, at: Date) {
+  await admin().from("subscriptions").update({ founding_ends_at: foundingEndOf(at).toISOString() }).eq("id", id).is("founding_ends_at", null);
+}
+
+/** OFFER-2: the one trial of a business, now taken by a trial with a card (the same records private.start_trial writes). */
+async function markTrialUsed(org: string) {
+  const db = admin();
+  const { data: locs } = await db.from("locations").select("id, place_id").eq("organization_id", org);
+  const rows = (locs ?? []).filter((l) => l.place_id).map((l) => ({ place_id: l.place_id as string, location_id: l.id as string }));
+  if (rows.length) await db.from("trial_grants").upsert(rows, { onConflict: "place_id", ignoreDuplicates: true });
+}
+
+/** OFFER-2: has this business had its one trial (a Kabsi trial, a trial with a card, or a plan before)? Then no second trial. */
+async function trialUsed(org: string, requestId: string): Promise<boolean> {
+  const db = admin();
+  // Any subscription of the business, in any state (a Kabsi trial, a Creem plan, a checkout already completed).
+  const { data: subs } = await db.from("subscriptions").select("id").eq("organization_id", org).limit(1);
+  if ((subs ?? []).length) return true;
+  // Any plan checkout before this one, open or completed: two checkouts on two days never make two trials.
+  const { data: other } = await db.from("billing_checkouts").select("request_id").eq("organization_id", org).neq("request_id", requestId)
+    .not("product_key", "like", "extra%").limit(1);
+  if ((other ?? []).length) return true;
+  const { data: locs } = await db.from("locations").select("id, place_id").eq("organization_id", org);
+  // A payment before Creem (the earlier plans) counts as the trial used.
+  const ids = (locs ?? []).map((l) => l.id as string);
+  if (ids.length) {
+    const { data: paid } = await db.from("payments").select("id").in("location_id", ids).limit(1);
+    if ((paid ?? []).length) return true;
+  }
+  const places = (locs ?? []).map((l) => l.place_id as string | null).filter((x): x is string => !!x);
+  if (!places.length) return false;
+  const { data: g } = await db.from("trial_grants").select("place_id").in("place_id", places).limit(1);
+  return (g ?? []).length > 0;
+}
+
 /** The price family a running subscription is on: its product's family, else its founding flag. Changes stay in it. */
 export function familyOfSub(s: Pick<SubRow, "founding" | "product_id">, ids: ProductIds): PriceFamily {
   return familyOfKey(keyOfProduct(ids, s.product_id ?? null)) ?? (s.founding ? "founding" : "list");
@@ -413,6 +466,8 @@ async function accessRows(org: string): Promise<AccessRow[]> {
 }
 
 export async function startCheckout(org: string, userId: string | null, email: string | null, plan: Plan, period: Period, now = new Date()): Promise<string> {
+  // OFFER-2: one plan, monthly. Pro and yearly are not sold to new businesses; a Pro plan a business already has keeps working.
+  if (plan !== "essentials" || period !== "month") throw new BillingError("one_plan", "Kabsi has one plan now: 29 US dollars a month.");
   if (!(await checkoutOpen(org))) throw new BillingError("plans_closed", "Plans open soon.");
   // Tidy 1 (R-143 item 3): card checkout is offered only to a business whose Google access works. Before anything is
   // created at Creem or the database, so a refused business holds no founding place and no checkout row.
@@ -442,7 +497,9 @@ export async function startCheckout(org: string, userId: string | null, email: s
   const location = (await contacts(org))[0]?.location_id ?? "";
   let c: { id: string; checkout_url: string };
   try {
-    c = await creem().createCheckout({ productId, units: 1, requestId, successUrl: SUCCESS_URL, email,
+    // OFFER-2: the 14-day trial with a card, on the business's first plan only.
+    const trialDays = (await trialUsed(org, requestId)) ? undefined : TRIAL_DAYS;
+    c = await creem().createCheckout({ productId, units: 1, requestId, successUrl: SUCCESS_URL, email, trialDays,
       metadata: { referenceId: org, business_id: location, price_family: picked.family } });
   } catch (err) {
     await release();
@@ -502,20 +559,17 @@ export function priceOf(key: ProductKey): number {
   return CATALOGUE[key].price / 100;
 }
 
-/** "upgrade" charges the difference now; "downgrade" takes effect at renewal (10.2.10). */
+/** "downgrade" takes effect at renewal (10.2.10). OFFER-2: "upgrade" is refused: there is one plan, and no new Pro plans.
+ *  A business on Pro moves to the one plan (Essentials, shown as "Kabsi") at its renewal and keeps Pro until then. */
 export async function changePlan(org: string, to: Plan): Promise<{ effective: "now" | "renewal"; until: string | null }> {
+  if (to === "pro") throw new BillingError("one_plan", "Kabsi has one plan now. Pro is not offered to new plans.");
   const s = await mustRun(org);
-  if (s.plan === to) throw new BillingError("same_plan", `You are already on ${to === "pro" ? "Pro" : "Essentials"}.`);
+  if (s.plan === "essentials") throw new BillingError("same_plan", "You are already on Kabsi.");
   const period = (s.period === "year" ? "year" : "month") as Period;
   const ids = await productIds();
-  // Price 1: an upgrade or downgrade stays in the price family the business is on.
-  const productId = ids[planKey(to, period, familyOfSub(s, ids))];
+  // Price 1: the change stays in the price family the business is on.
+  const productId = ids[planKey("essentials", period, familyOfSub(s, ids))];
   if (!productId) throw new BillingError("not_configured", "Payments are not set up yet.");
-  if (to === "pro") {
-    await creem().upgrade(s.provider_subscription_id!, productId, "proration-charge-immediately");
-    await admin().from("subscriptions").update({ kept_plan: null, kept_plan_until: null }).eq("id", s.id);
-    return { effective: "now", until: null };
-  }
   // Creem bills the new price from the next renewal (no proration); Kabsi keeps Pro until then.
   await creem().upgrade(s.provider_subscription_id!, productId, "proration-none");
   await admin().from("subscriptions").update({ kept_plan: "pro", kept_plan_until: s.current_period_end }).eq("id", s.id);
