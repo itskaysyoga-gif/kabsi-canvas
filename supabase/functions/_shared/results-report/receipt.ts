@@ -1,7 +1,9 @@
 // The Monday weekly report as a work receipt (master plan 30.15 section 3.6, 30.18 section 3; V4 item 4). Data and WhatsApp
-// text only; Email 1 designs the email. In this order: what Kabsi did, what waits for a yes, one next step. Then Google's numbers,
-// with calls and direction requests shown apart; review link opens, never counted as reviews; once a month "An answer customers
-// might see" (30.15 3.8); and a Competitor Watch line only when something changed that matters (3.9).
+// text only; Email 1 designs the email. In this order: what Kabsi did, what waits for a yes, one next step.
+// PROOF-2: the weekly summary is short, 3 to 5 lines in the message: the week, what Kabsi did (the first 3 kinds), what it found,
+// taps on review links, then what waits for a yes and one next step. Google's own figures, nearby totals and recurring feedback
+// are in the monthly report (monthly-report/), not here. The older blocks stay in this data (google, ai, accuracy, competitor)
+// for a caller that still passes them, and for reports already stored; the weekly build no longer asks for them.
 //
 // A real owner's report never shows example figures (30.18 section 3): Google's numbers appear only when they were read live
 // from the owner's own profile. The demo business keeps its labelled examples. Pure.
@@ -88,11 +90,11 @@ export function receipt(o: {
   activity: WeekActivity | null;
   demo: boolean;
   growth: GrowthStats | null;
-  ai: AiAnswer | null;
-  aiThisWeek: boolean;
+  ai?: AiAnswer | null;
+  aiThisWeek?: boolean;
   /** AI Answers 1: the week's latest clear difference, or null. */
   accuracy?: Finding | null;
-  rivals: RivalChange[];
+  rivals?: RivalChange[];
   tz: string;
   /** The week in words ("19 to 25 October", email/report-body.ts dateRange), the start of the WhatsApp line. */
   dates?: string;
@@ -124,15 +126,15 @@ export function receipt(o: {
       line: `${o.growth.new_reviews} new ${o.growth.new_reviews === 1 ? "review" : "reviews"} on Google. Your review link was opened ${opens} ${opens === 1 ? "time" : "times"}. ${OPEN_NOTE}`,
     }
     : null;
-  const ai = o.aiThisWeek ? aiBlock(o.ai, o.tz) : null;
+  const ai = o.aiThisWeek ? aiBlock(o.ai ?? null, o.tz) : null;
   const accuracy = accuracyBlock(o.accuracy ?? null, o.tz);
-  const rival = rivalLine(o.rivals);
+  const rival = rivalLine(o.rivals ?? []);
   return {
     v: 3 as const,
     did, did_total: did.reduce((s, c) => s + c.count, 0), updates: updatesCount(o.counts),
     waiting, next_step: next ? { title: next.title, path: next.path } : null,
     google, growth, ai, accuracy, competitor: rival, cards: cardLines(o.cards ?? null),
-    whatsapp: receiptText({ business: o.business, dates: o.dates, did, waiting: waiting.count, next: next?.title ?? null, google, growth, ai, accuracy, rival }),
+    whatsapp: receiptText({ business: o.business, dates: o.dates, did, waiting: waiting.count, next: next?.title ?? null, taps: opens, found: o.counts.changes_found }),
   };
 }
 export type Receipt = ReturnType<typeof receipt>;
@@ -149,21 +151,23 @@ export function cardLines(cards: { code: string; label: string | null; this_week
  * The WhatsApp version, in look 2 (30.50 item 2): a receipt marker and "Your weekly report" (K-02) with the business, then the
  * week, the work and the numbers one per line (a list), then the one next step. The work first.
  */
+export const WEEKLY_DID_LINES = 3;
 export function receiptText(o: {
   business: string; dates?: string | undefined; did: Chip[]; waiting: number; next: string | null;
-  google: { example: boolean; lines: string[] } | null; growth: { line: string } | null;
-  ai: { line: string; label: string } | null; rival: string | null;
+  google?: { example: boolean; lines: string[] } | null; growth?: { line: string } | null;
+  ai?: { line: string; label: string } | null; rival?: string | null;
   accuracy?: { line: string; action: string; label: string } | null;
+  /** Taps on review links and cards this week (never reviews). */
+  taps?: number;
+  /** Changes to the Google profile Kabsi found this week. */
+  found?: number;
 }): string {
   const facts: string[] = [];
   if (o.dates) facts.push(o.dates);
-  if (o.did.length) for (const c of o.did) facts.push(`${c.label}: ${c.count}`);
+  if (o.did.length) for (const c of o.did.slice(0, WEEKLY_DID_LINES)) facts.push(`${c.label}: ${c.count}`);
   else facts.push("A quiet week. Kabsi kept watching your Google profile.");
-  if (o.google) facts.push(...o.google.lines.map((l) => `${l.replace(/\.$/, "")}${o.google!.example ? " (example figures)" : ""}`));
-  if (o.growth) facts.push(o.growth.line);
-  if (o.rival) facts.push(o.rival);
-  if (o.ai) facts.push(`${o.ai.line} ${o.ai.label}`);
-  if (o.accuracy) facts.push(`${o.accuracy.line} ${o.accuracy.action} ${o.accuracy.label}`);
+  if (o.found) facts.push(`Found on your profile: ${o.found} ${o.found === 1 ? "change" : "changes"}.`);
+  if (o.taps) facts.push(`Review link taps: ${o.taps}.`);
   const wait = o.waiting ? `Waiting for your yes: ${o.waiting}.` : "Nothing is waiting for your yes.";
   const end = o.next ? `${wait} Next step: ${o.next}.`.replace(/\.\.$/, ".") : wait;
   return render({ mark: MARK.receipt, title: "Your weekly report", business: o.business, facts, end });

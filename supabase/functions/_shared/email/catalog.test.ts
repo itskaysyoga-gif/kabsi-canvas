@@ -62,6 +62,8 @@ const OWN_SUBJECTS: Record<string, string> = {
   receipt: "Receipt: Kabsi Pro, monthly",
   // R-126 (EMAIL-01): the weekly report subject counts the work and leaves out a part that is zero.
   weekly_report: "Your Kabsi week: 4 replies, 1 post, 4 profile changes",
+  // PROOF-2: the monthly report subject counts what was sent to Google.
+  monthly_report: "Your Kabsi month: 19 things sent to Google in October",
   payment_failed: "Your payment for Kabsi did not go through",
   plan_cancelled: "Your Kabsi plan is cancelled",
   profile_check: "Rose Lane Salon: your Google Profile Check",
@@ -323,21 +325,31 @@ Deno.test("Email 1: under 100 KB of HTML, light and dark, the logo with alt text
   }
 });
 
-Deno.test("Email 1: the weekly report is the work receipt; a row without real numbers hides", async () => {
+Deno.test("PROOF-2: the weekly report is short: the work, what waits, one next step, taps; no Google figures and no check counted as work", async () => {
   const { renderReport } = await import("./report-body.ts");
-  const { REPORT_NO_GOOGLE } = await import("./catalog.ts");
   const c = catalog().find((x) => x.kind === "weekly_report")!;
   const { text, html } = render(c);
   assert.match(text, /What Kabsi did: Replies sent to Google 4/);
   assert.match(text, /Waiting for your yes: A reply to Maya K\.'s review/);
   assert.match(text, /One next step: Send your review link/);
-  assert.match(text, /- Calls: 18 \(4 more than last week\)/);
-  assert.match(text, /- Direction requests: 31 \(2 fewer than last week\)/);
   assert.equal(c.content.button?.label, "Review and approve");
-  assert.doesNotMatch(`${text}\n${html}`, /example figures/i, "a real owner's report never shows example figures");
-  const none = renderReport({ name: "Rose Lane Salon" }, REPORT_NO_GOOGLE as never);
-  assert.doesNotMatch(none.text, /Calls|Direction requests|Website clicks/);
-  assert.match(none.text, /From Kabsi's record of your reviews: 3 new reviews\./);
+  // Google's own figures, nearby totals and recurring feedback are in the monthly report, not the week.
+  assert.doesNotMatch(`${text}\n${html}`, /Calls|Direction requests|Website clicks|example figures|Competitor Watch/);
+  assert.doesNotMatch(`${text}\n${html}`, /Checked [\d,]+ times/, "a check is never counted as work");
+  const quiet = renderReport({ name: "Rose Lane Salon" }, { period: { from: "2026-11-02", to: "2026-11-08" }, rating: null, rating_count: null,
+    rating_change: null, rating_drop: false, new_reviews: 0, new_avg: null, replied: 0, waiting: 0, taps: { total: 0, nfc: 0, qr: 0 } });
+  assert.match(quiet.text, /What Kabsi did: a quiet week\. Kabsi kept watching your Google profile\./);
+});
+
+Deno.test("PROOF-2: the monthly report email has the three bands in order, then feedback and nearby totals only when there are some", () => {
+  const c = catalog().find((x) => x.kind === "monthly_report")!;
+  assert.ok(c, "the monthly report is in the catalog");
+  const { text, html } = render(c);
+  const order = ["Work done", "Results", "What customers mention", "Nearby businesses", "What is next"].map((h) => text.indexOf(h));
+  assert.ok(order.every((n) => n >= 0) && order.every((n, i) => i === 0 || n > order[i - 1]!), `bands in order: ${order}`);
+  assert.match(text, /Review link and card taps: 9\. A tap is not a review\./);
+  assert.match(text, /Read live from Google when this report was made\. Kabsi does not keep these figures\./);
+  assert.doesNotMatch(text, /[\u2013\u2014!]/, "no dashes or exclamation marks");
 });
 
 Deno.test("Email 1: lifecycle mail goes from send.kabsi.co until news.kabsi.co is verified, account mail always from send", async () => {
