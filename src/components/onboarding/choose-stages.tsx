@@ -5,7 +5,7 @@ import { Check, Mail } from "lucide-react";
 import { Button, WhatsAppGlyph } from "@/components/kabsi/ui";
 import { ErrorNote, StepTitle } from "@/components/onboarding/onboarding-shell";
 import { PLAN_COPY, billingAction } from "@/lib/plans";
-import { PRICE_MONTHLY_USD, TRIAL_LINE } from "@/lib/offer";
+import { FOUNDING_LINE, PRICE_MONTHLY_USD, TRIAL_LINE } from "@/lib/offer";
 import type { TrialState } from "@/lib/onboarding-flow";
 
 /** Step 3: where approvals and reports go. WhatsApp opens the connect screen; email is saved at once. */
@@ -115,6 +115,9 @@ export function TrialStage({
           ))}
         </ul>
         <p className="mt-3 text-small font-bold">{PLAN_COPY.nothingWithoutYes}</p>
+        <p className="mt-3 text-small text-text-2">
+          Invited to the founding price? {FOUNDING_LINE}
+        </p>
       </div>
       <div className="mt-8" data-main-cta>
         {trial === "needed" ? (

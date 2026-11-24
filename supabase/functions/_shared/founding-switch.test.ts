@@ -3,7 +3,7 @@
 // plan moves to 29 with no proration, so the payment at the end of month 12 is the first at 29. Never for a plan that ends,
 // a yearly plan, a plan not on the founding price, or one already switched.
 import assert from "node:assert/strict";
-import { FOUNDING_NOTICE_DAYS, FOUNDING_SWITCH_DAYS, foundingEndOf, type FoundingFacts, foundingStep } from "./creem.ts";
+import { FOUNDING_NOTICE_DAYS, FOUNDING_SWITCH_DAYS, foundingChangeDate, foundingEndOf, type FoundingFacts, foundingStep } from "./creem.ts";
 import { foundingEndingLine } from "./billing-lines.ts";
 import { FOUNDING_LINE } from "./offer.ts";
 
@@ -22,11 +22,22 @@ Deno.test("the founding price ends 12 months after the first payment", () => {
 Deno.test("nothing before day -14; the notice at day -14 once; the switch at day -3 only after the notice", () => {
   assert.equal(foundingStep(sub(), before(15)), null);
   assert.equal(foundingStep(sub(), before(14)), "notice");
-  assert.equal(foundingStep(sub(), before(5)), "notice", "a late notice still goes first");
-  assert.equal(foundingStep(sub({ founding_notice_at: before(14).toISOString() }), before(5)), null);
-  assert.equal(foundingStep(sub({ founding_notice_at: before(14).toISOString() }), before(FOUNDING_SWITCH_DAYS)), "switch");
-  assert.equal(foundingStep(sub({ founding_notice_at: before(14).toISOString() }), before(-2)), "switch", "a late run still switches");
+  const onTime = before(14).toISOString();
+  assert.equal(foundingStep(sub({ founding_notice_at: onTime }), before(5)), null);
+  assert.equal(foundingStep(sub({ founding_notice_at: onTime }), before(FOUNDING_SWITCH_DAYS)), "switch");
+  assert.equal(foundingStep(sub({ founding_notice_at: onTime }), before(-2)), "switch", "a late run still switches");
   assert.equal(foundingStep(sub(), before(2)), "notice", "never a switch without the notice first");
+});
+
+Deno.test("a late notice moves the change one renewal later, so the owner always has 14 days", () => {
+  const late = before(2).toISOString();
+  assert.equal(foundingChangeDate(ends, late).toISOString(), "2028-01-08T10:00:00.000Z");
+  assert.equal(foundingChangeDate(ends, before(14)).toISOString(), ends);
+  assert.equal(foundingStep(sub({ founding_notice_at: late }), before(1)), null, "no switch two days after a late notice");
+  assert.equal(foundingStep(sub({ founding_notice_at: late }), new Date("2028-01-04T10:00:00Z")), null);
+  assert.equal(foundingStep(sub({ founding_notice_at: late }), new Date("2028-01-05T10:00:00Z")), "switch");
+  // 31 January plus one month is the last day of February.
+  assert.equal(foundingChangeDate("2028-01-31T10:00:00Z", "2028-01-30T10:00:00Z").toISOString(), "2028-02-29T10:00:00.000Z");
 });
 
 Deno.test("never for a switched, cancelled, yearly, ended or list-price plan", () => {

@@ -73,7 +73,20 @@ export type FoundingFacts = {
   founding: boolean; founding_ends_at: string | null; founding_notice_at?: string | null; founding_switched_at?: string | null;
   state: string; cancel_at_period_end?: boolean | null; period?: string | null;
 };
-/** What the month-13 job does now for one subscription: tell the owner, switch the price, or nothing. Pure. */
+const DAY_MS = 86_400_000;
+/** The same day a month later (31 January becomes 28 February), keeping the time. */
+const nextMonth = (d: Date): Date => {
+  const last = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 2, 0)).getUTCDate();
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, Math.min(d.getUTCDate(), last), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds()));
+};
+/** The day the price actually becomes 29. A notice sent less than 13 days before the founding end (a late job) moves the change
+ *  one renewal later, so the owner always has 14 days: one more payment at 19, never an early 29. */
+export function foundingChangeDate(endsAt: string, noticeAt: Date | string): Date {
+  const end = new Date(endsAt);
+  return end.getTime() - new Date(noticeAt).getTime() < 13 * DAY_MS ? nextMonth(end) : end;
+}
+/** What the month-13 job does now for one subscription: tell the owner, switch the price, or nothing. Pure. The switch comes 3
+ *  days before the change date, and only after the notice was sent. */
 export function foundingStep(s: FoundingFacts, now: Date): "notice" | "switch" | null {
   if (!s.founding || !s.founding_ends_at || s.founding_switched_at) return null;
   if (s.state !== "active" && s.state !== "past_due") return null;
@@ -81,10 +94,11 @@ export function foundingStep(s: FoundingFacts, now: Date): "notice" | "switch" |
   if (s.period && s.period !== "month") return null;
   const end = Date.parse(s.founding_ends_at);
   if (!Number.isFinite(end)) return null;
-  const day = 86_400_000;
-  if (now.getTime() >= end - FOUNDING_SWITCH_DAYS * day && s.founding_notice_at) return "switch";
-  if (now.getTime() >= end - FOUNDING_NOTICE_DAYS * day && !s.founding_notice_at) return "notice";
-  return null;
+  if (s.founding_notice_at) {
+    const change = foundingChangeDate(s.founding_ends_at, s.founding_notice_at).getTime();
+    return now.getTime() >= change - FOUNDING_SWITCH_DAYS * DAY_MS ? "switch" : null;
+  }
+  return now.getTime() >= end - FOUNDING_NOTICE_DAYS * DAY_MS ? "notice" : null;
 }
 export const PRODUCT_KEYS = Object.keys(CATALOGUE) as ProductKey[];
 /** The product of a plan in a price family. Every caller names the family, so a change never crosses families. */

@@ -12,7 +12,7 @@ import { paymentFailed, planCancelled } from "./email/account-copy.ts";
 import { outDb } from "./whatsapp/db.ts";
 import { ref } from "./whatsapp/templates.ts";
 import {
-  CATALOGUE, checkoutRequestId, foundingEndOf, type FoundingFacts, foundingStep, TRIAL_DAYS, type Creem, creemClient, CreemError, type CreemEvent, effectOf, eventTime, extraKey, familyOfKey,
+  CATALOGUE, checkoutRequestId, foundingChangeDate, foundingEndOf, type FoundingFacts, foundingStep, TRIAL_DAYS, type Creem, creemClient, CreemError, type CreemEvent, effectOf, eventTime, extraKey, familyOfKey,
   isStale, keyOfProduct, ledgerOf, type Message, type Mode, modeOf, orgOf, type Period, type Plan, planKey, type PriceFamily,
   type ProductIds, type ProductKey,
   PRODUCT_KEYS, patchFor, sameMode, scrubEvent, setupPlan, type SubFacts, subFacts, subscriptionOf,
@@ -413,12 +413,14 @@ export async function foundingSwitch(subscriptionRowId: string, now = new Date()
   if (!s || s.provider !== "creem") return "not_found";
   const step = foundingStep(s, now);
   if (step === "notice") {
-    const { data: claimed } = await admin().from("subscriptions").update({ founding_notice_at: now.toISOString() }).eq("id", s.id)
-      .is("founding_notice_at", null).select("id");
-    if (!claimed?.length) return "notice_already_sent";
+    // Sent first, stamped after (review of GATE-2): a failed send retries, and the outbox and email keys keep a retry to one
+    // message each. No one to tell: nothing is stamped, so no switch follows, and staff hear about it.
     const people = await contacts(s.organization_id);
-    if (!people.length) return "notice_no_contact";
-    const line = foundingEndingLine({ business: people[0].business, endsAt: s.founding_ends_at! }, APP_URL);
+    if (!people.length) {
+      await staffAlert(`Founding price ending for a business with no owner contact (subscription ${s.id}); the move to 29 waits`, `founding_no_contact:${s.id}`);
+      return "notice_no_contact";
+    }
+    const line = foundingEndingLine({ business: people[0].business, endsAt: foundingChangeDate(s.founding_ends_at!, now).toISOString() }, APP_URL);
     for (const p of people) {
       if (p.phone) {
         await outDb.add({ phone: p.phone, userId: p.user_id, locationId: p.location_id, kind: "billing_founding_ending", body: line.whatsapp,
@@ -427,6 +429,7 @@ export async function foundingSwitch(subscriptionRowId: string, now = new Date()
     }
     await notifyEmail({ category: "billing", kind: "billing_founding_ending", key: `billing:founding_ending:${s.id}`, locationId: people[0].location_id,
       to: "owners", content: line.email! });
+    await admin().from("subscriptions").update({ founding_notice_at: now.toISOString() }).eq("id", s.id).is("founding_notice_at", null);
     return "notice_sent";
   }
   if (step === "switch") {

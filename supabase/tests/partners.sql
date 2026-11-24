@@ -97,7 +97,7 @@ select ok((public.staff_founding_link(pg_temp.fid('+971500000001'),
 select throws_ok($$ select public.staff_founding_decide(pg_temp.fid('+971500000001'), 'declined') $$,
   'P0001', 'linked', 'a linked place cannot be declined');
 reset role;
-select is(private.founding_days(pg_temp.org('00000000-0000-4000-8000-0000000020c1')), null, 'the 90-day founding trial is retired');
+select is(private.founding_days(pg_temp.org('00000000-0000-4000-8000-0000000020c1')), null, 'the 90-day founding trial is retired for a place linked now');
 select is((select trial_ends_at::date from public.subscriptions
            where organization_id = pg_temp.org('00000000-0000-4000-8000-0000000020c1') and provider = 'manual'),
   (now() - interval '47 days')::date, 'the link does not move a trial');
@@ -111,6 +111,7 @@ select is(public.billing_checkout_family(pg_temp.org('00000000-0000-4000-8000-00
 -- The day-60, 85 and 90 messages belong to the old trial: a place linked now gets none; one linked before GATE-2 still does.
 select is(private.founding_tick(), 0, 'a place linked after GATE-2 gets no day-60 message');
 update public.founding_applications set linked_at = timestamptz '2026-11-01 00:00:00+00' where whatsapp = '+971500000001';
+select is(private.founding_days(pg_temp.org('00000000-0000-4000-8000-0000000020c1')), 90, 'a place linked before GATE-2 keeps its 90 days and no caps');
 select is(private.founding_tick(), 1, 'day 60 queues the message for a place linked before');
 select is((select count(*)::int from public.jobs where kind = 'founding_message'), 1, 'one founding_message job');
 select is(private.founding_tick(), 1, 'a second tick offers it again while it is pending');

@@ -19,10 +19,13 @@ comment on column public.subscriptions.founding_notice_at is
 comment on column public.subscriptions.founding_switched_at is
   'GATE-2: when the subscription moved to the 29 list product in Creem (3 days before founding_ends_at, no proration).';
 
--- 1. The 90-day founding trial is retired (30.54 item 3).
+-- 1. The 90-day founding trial is retired (30.54 item 3). A place linked before GATE-2 keeps its 90 days and no trial caps
+--    (private.entitlements and private.trial_take read this), so a trial already running is not changed.
 create or replace function private.founding_days(p_org uuid) returns integer
 language sql stable security definer set search_path = '' as $$
-  select null::integer
+  select case when exists (select 1 from public.founding_applications a
+                            where a.organization_id = p_org and a.status = 'accepted'
+                              and a.linked_at < timestamptz '2026-11-24 20:00:00+00') then 90 end
 $$;
 revoke all on function private.founding_days(uuid) from public, anon, authenticated;
 
