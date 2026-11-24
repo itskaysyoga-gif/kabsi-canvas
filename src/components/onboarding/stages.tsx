@@ -30,12 +30,7 @@ import {
 import { ErrorNote, StepTitle } from "@/components/onboarding/onboarding-shell";
 import { ScenarioPicker } from "@/components/onboarding/scenario-picker";
 import { accessPill } from "@/lib/access-status";
-import {
-  LATER,
-  accessOf,
-  resumePath,
-  type OnboardingStatus,
-} from "@/lib/onboarding-flow";
+import { LATER, accessOf, resumePath, type OnboardingStatus } from "@/lib/onboarding-flow";
 import {
   CONSENT_TEXT,
   friendlyError,

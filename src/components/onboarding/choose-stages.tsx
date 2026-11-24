@@ -76,7 +76,10 @@ export function TrialStage({
     setBusy(true);
     setError("");
     try {
-      const r = await billingAction("checkout", locationId, { plan: "essentials", period: "month" });
+      const r = await billingAction("checkout", locationId, {
+        plan: "essentials",
+        period: "month",
+      });
       if (r.url) {
         window.location.assign(r.url);
         return;

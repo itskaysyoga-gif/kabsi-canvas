@@ -3,6 +3,8 @@
 // unanswered reviews wait ("archived"); they are never drafted on their own. The trial needs a card since OFFER-2 (30.53), so
 // there is no trial cap any more. Pure rules first, then the small read they need.
 
+import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+
 export const FIRST_DAY_DAYS = 90;
 const DAY = 86_400_000;
 

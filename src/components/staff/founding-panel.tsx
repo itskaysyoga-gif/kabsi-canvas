@@ -329,7 +329,8 @@ function Application({ app, businesses }: { app: FoundingApplication; businesses
       ) : null}
       {app.organization_id ? (
         <p className="mt-3 text-small text-text-2">
-          Linked {app.linked_at ? fmtDate(app.linked_at) : ""}. Their checkout is 19 US dollars a month for 12 months, with a card.
+          Linked {app.linked_at ? fmtDate(app.linked_at) : ""}. Their checkout is 19 US dollars a
+          month for 12 months, with a card.
         </p>
       ) : null}
       {msg ? <p className="mt-3 text-small text-bad">{msg}</p> : null}

@@ -183,15 +183,45 @@ describe("the four stages (V4, master plan 30.16 section 3)", () => {
     expect(at({ whatsapp: false }, { checked: true })).toBe("channel");
     expect(at({ whatsapp: false }, { checked: true, whatsapp: true })).toBe("whatsapp");
     expect(at({ whatsapp: false }, { checked: true, whatsapp: true }, false)).toBe("channel");
-    expect(screenOf({ status: { ...base, whatsapp: false }, whatsappOn: true, seen: { checked: true }, channel: "email", trial: "needed" })).toBe("trial");
+    expect(
+      screenOf({
+        status: { ...base, whatsapp: false },
+        whatsappOn: true,
+        seen: { checked: true },
+        channel: "email",
+        trial: "needed",
+      }),
+    ).toBe("trial");
     // The trial with a card: no trial starts without one.
-    expect(screenOf({ status: base, whatsappOn: true, seen: { checked: true }, trial: "needed" })).toBe("trial");
-    expect(screenOf({ status: base, whatsappOn: true, seen: { checked: true }, trial: undefined })).toBe("trial");
-    expect(screenOf({ status: base, whatsappOn: true, seen: { checked: true }, trial: "started" })).toBe("first_task");
-    expect(screenOf({ status: base, whatsappOn: true, seen: { checked: true }, trial: "closed" })).toBe("trial");
-    expect(screenOf({ status: base, whatsappOn: true, seen: { checked: true, trial: true }, trial: "closed" })).toBe("first_task");
+    expect(
+      screenOf({ status: base, whatsappOn: true, seen: { checked: true }, trial: "needed" }),
+    ).toBe("trial");
+    expect(
+      screenOf({ status: base, whatsappOn: true, seen: { checked: true }, trial: undefined }),
+    ).toBe("trial");
+    expect(
+      screenOf({ status: base, whatsappOn: true, seen: { checked: true }, trial: "started" }),
+    ).toBe("first_task");
+    expect(
+      screenOf({ status: base, whatsappOn: true, seen: { checked: true }, trial: "closed" }),
+    ).toBe("trial");
+    expect(
+      screenOf({
+        status: base,
+        whatsappOn: true,
+        seen: { checked: true, trial: true },
+        trial: "closed",
+      }),
+    ).toBe("first_task");
     // Paid on the needed state never passes: Continue exists only while plans are closed.
-    expect(screenOf({ status: base, whatsappOn: true, seen: { checked: true, trial: true }, trial: "needed" })).toBe("trial");
+    expect(
+      screenOf({
+        status: base,
+        whatsappOn: true,
+        seen: { checked: true, trial: true },
+        trial: "needed",
+      }),
+    ).toBe("trial");
     expect(at({ first_task_done: true })).toBe("later");
   });
   it("a demo business skips step 3 and the trial", () => {

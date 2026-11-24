@@ -62,8 +62,26 @@ describe("onboarding asks for the contact email only of WhatsApp sign-ups", () =
   it("shows Where should receipts go? once, in step 3 after access works; WhatsApp is already connected", () => {
     expect(screenOf({ status, whatsappOn: true, seen: {}, askEmail: true })).toBe("manager");
     const ok = { ...status, checked: true, accepted: true, consent: true } as OnboardingStatus;
-    expect(screenOf({ status: ok, whatsappOn: true, seen: { checked: true }, askEmail: true })).toBe("email");
-    expect(screenOf({ status: ok, whatsappOn: true, seen: { checked: true, email: true }, askEmail: true, trial: "needed" })).toBe("trial");
-    expect(screenOf({ status: ok, whatsappOn: true, seen: { checked: true }, askEmail: false, trial: "needed" })).toBe("trial");
+    expect(
+      screenOf({ status: ok, whatsappOn: true, seen: { checked: true }, askEmail: true }),
+    ).toBe("email");
+    expect(
+      screenOf({
+        status: ok,
+        whatsappOn: true,
+        seen: { checked: true, email: true },
+        askEmail: true,
+        trial: "needed",
+      }),
+    ).toBe("trial");
+    expect(
+      screenOf({
+        status: ok,
+        whatsappOn: true,
+        seen: { checked: true },
+        askEmail: false,
+        trial: "needed",
+      }),
+    ).toBe("trial");
   });
 });

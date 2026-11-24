@@ -78,7 +78,13 @@ function trialOf(sum: PlanSummary | undefined): TrialState | undefined {
   if (!sum) return undefined;
   const b = sum.entitlements?.billing;
   if (b && ["active", "past_due", "paused"].includes(b.state)) return "started";
-  if (sum.tier === "trial" || sum.tier === "pro" || sum.tier === "essentials" || sum.tier === "early_access") return "started";
+  if (
+    sum.tier === "trial" ||
+    sum.tier === "pro" ||
+    sum.tier === "essentials" ||
+    sum.tier === "early_access"
+  )
+    return "started";
   return sum.checkout_open ? "needed" : "closed";
 }
 

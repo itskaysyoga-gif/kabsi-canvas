@@ -82,7 +82,13 @@ export type ScreenInput = {
   whatsappOn: boolean;
   /** Choices the server does not keep, remembered in this browser: past the free check, "Access works.", the contact email,
    *  WhatsApp chosen (the connect screen is open), and past the trial screen while plans are closed. */
-  seen: { check?: boolean; whatsapp?: boolean; checked?: boolean; email?: boolean; trial?: boolean };
+  seen: {
+    check?: boolean;
+    whatsapp?: boolean;
+    checked?: boolean;
+    email?: boolean;
+    trial?: boolean;
+  };
   /** Signup 1: the owner signed up with WhatsApp and has given no contact email yet. */
   askEmail?: boolean;
   /** The stored choice for approvals and reports (routine_channels); null until the owner chose. */
