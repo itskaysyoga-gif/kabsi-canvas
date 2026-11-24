@@ -1,16 +1,13 @@
-// Onboarding in four stages (master plan 30.16 section 3, V4): 1. the free check, public, before any sign-up; 2. sign in
-// and confirm the business and who looks after its Google profile; 3. connect WhatsApp (the owner sends the first message);
-// 4. add Kabsi as a Manager on Google (invite pending, accepted, access checked). Then the first task, and only after it
-// the rest of setup. One list of stage names, read by the progress strip and the screens, so the order is said once.
-// Pure, so a test reads every rule. The server's own copy of the stages is supabase/functions/_shared/onboarding/stages.ts.
+// Onboarding in three steps (GATE-2, blueprint 3.1 section 9, engineering plan GATE-2): 1. find your business (the free
+// check's result first when the owner came from one, then "Is this your business?"); 2. add Kabsi as a Manager on Google
+// (invite pending, accepted, access checked); 3. choose WhatsApp or email for approvals and reports. Then the 14-day trial
+// starts at the Creem checkout with a card (no trial starts without one, 30.53), and the first task. One list of step names,
+// read by the progress strip and the screens, so the order is said once. Pure, so a test reads every rule.
+// The server's own stages (supabase/functions/_shared/onboarding/stages.ts) only pick the WhatsApp setup messages; every
+// setup page is /start, which finds its own screen here.
 import type { Location } from "@/lib/onboarding";
 
-export const STAGES = [
-  "Your free check",
-  "Sign in",
-  "Connect WhatsApp",
-  "Add Kabsi on Google",
-] as const;
+export const STAGES = ["Find your business", "Add Kabsi on Google", "WhatsApp or email"] as const;
 
 /** What public.onboarding_status answers for a member of the business (V4 migration 20261026194327). */
 export type OnboardingStatus = {
@@ -46,74 +43,93 @@ export type OnboardingStatus = {
 
 /** The screens of /start, in order. */
 export type Screen =
-  | "find" // no business yet: find it on Google Maps (stage 2)
-  | "check" // the claimed free check, before anything is asked (stage 1)
-  | "confirm" // is this your business, who looks after its Google profile (stage 2)
-  | "questions" // two optional questions, right after the business is chosen (Onboarding 1, R-145; stage 2)
-  | "email" // "Where should receipts go?", only for an owner who signed up with WhatsApp (Signup 1; stage 2)
-  | "whatsapp" // send Kabsi one message (stage 3)
-  | "manager" // add Kabsi as a Manager: invite pending or accepted (stage 4)
-  | "checked" // access works, the trial dates (end of stage 4)
+  | "find" // no business yet: find it on Google Maps (step 1)
+  | "check" // the claimed free check, before anything is asked (step 1)
+  | "confirm" // is this your business, who looks after its Google profile (step 1)
+  | "questions" // Onboarding 1 (R-145): kept for the request book, which is off (30.53); screenOf never opens it now
+  | "manager" // add Kabsi as a Manager: invite pending or accepted (step 2)
+  | "checked" // access works (end of step 2)
+  | "email" // "Where should receipts go?", only for an owner who signed up with WhatsApp (step 3)
+  | "channel" // WhatsApp or email for approvals and reports (step 3)
+  | "whatsapp" // send Kabsi one message, after choosing WhatsApp (step 3)
+  | "trial" // start the 14-day trial at the Creem checkout, with a card
   | "first_task" // the first task, then what comes after it
   | "later"; // the rest of setup, open after the first task is done
 
-/** The stage each screen belongs to, 0 based; 4 means the four stages are done. */
+/** The step each screen belongs to, 0 based; 3 means the three steps are done. */
 export const STAGE_OF: Record<Screen, number> = {
   check: 0,
-  find: 1,
-  confirm: 1,
-  questions: 1,
-  email: 1,
+  find: 0,
+  confirm: 0,
+  questions: 0,
+  manager: 1,
+  checked: 1,
+  email: 2,
+  channel: 2,
   whatsapp: 2,
-  manager: 3,
-  checked: 4,
-  first_task: 4,
-  later: 4,
+  trial: 3,
+  first_task: 3,
+  later: 3,
 };
+
+/** Where the trial stands for this business: started (a Creem plan or trial runs, or an older Kabsi trial), needed (the
+ *  checkout is open and nothing runs yet), or closed (plans are not open yet for this account). */
+export type TrialState = "started" | "needed" | "closed";
 
 export type ScreenInput = {
   status: OnboardingStatus | null;
   /** WHATSAPP_ON: Kabsi has a WhatsApp number. */
   whatsappOn: boolean;
-  /** Choices the server does not keep: past the free check, past WhatsApp, past "Access works." (kept in this browser). */
-  seen: { check?: boolean; whatsapp?: boolean; checked?: boolean; email?: boolean };
+  /** Choices the server does not keep, remembered in this browser: past the free check, "Access works.", the contact email,
+   *  WhatsApp chosen (the connect screen is open), and past the trial screen while plans are closed. */
+  seen: { check?: boolean; whatsapp?: boolean; checked?: boolean; email?: boolean; trial?: boolean };
   /** Signup 1: the owner signed up with WhatsApp and has given no contact email yet. */
   askEmail?: boolean;
+  /** The stored choice for approvals and reports (routine_channels); null until the owner chose. */
+  channel?: "email" | "whatsapp" | null;
+  /** Where the trial stands; undefined while it is read (the trial screen then waits). */
+  trial?: TrialState | undefined;
   now?: number;
 };
 
 const DAY = 86_400_000;
-/** The trial is 14 days from the day access is checked: it started today while more than 13 days are left. */
+/** The trial is 14 days from its start: it started today while more than 13 days are left. */
 export function trialStartedToday(endsAt: string | null, now = Date.now()): boolean {
   if (!endsAt) return true;
   return new Date(endsAt).getTime() - now > 13 * DAY;
 }
 
-/** The next unfinished screen. Mirrors stageOf in the server's stages.ts, plus the screens only the website shows. */
+/** The next unfinished screen. */
 export function screenOf({
   status,
   whatsappOn,
   seen,
   askEmail = false,
-  now = Date.now(),
+  channel = null,
+  trial,
 }: ScreenInput): Screen {
+  // Step 1: find the business (the free check first when there is one), then confirm it.
   if (!status) return "find";
   if (!status.confirmed) return status.check && !seen.check ? "check" : "confirm";
-  // Onboarding 1 (R-145): once, for a real business that is not yet through the four stages. Continue or Skip both end it.
-  if (status.questions_done === false && !status.is_demo && !status.checked) return "questions";
-  if (askEmail && !seen.email && !status.is_demo) return "email";
-  if (!status.whatsapp && !seen.whatsapp && whatsappOn) return "whatsapp";
-  // While Kabsi has no WhatsApp number, stage 3 shows what Settings shows ("coming soon") until the owner moves on;
-  // after the authorisation on stage 4 it is behind them.
-  if (!status.whatsapp && !seen.whatsapp && !whatsappOn && !status.consent && !status.accepted)
-    return "whatsapp";
+  // Step 2: add Kabsi as a Manager; the screen follows the invite until access is checked.
   if (!status.checked) return "manager";
+  // An owner who finished setup before this order existed goes straight on.
   if (status.first_task_done) return "later";
-  // "Access works." is the moment the trial starts; a day later, or once seen, the first task comes first.
-  if (seen.checked || !trialStartedToday(status.trial_ends_at, now)) return "first_task";
-  return "checked";
+  if (!seen.checked && !status.is_demo) return "checked";
+  // Step 3: WhatsApp or email. WhatsApp already connected counts as chosen; choosing WhatsApp opens the connect screen
+  // until the phone is connected (or the owner picks email instead).
+  if (!status.is_demo) {
+    if (askEmail && !seen.email) return "email";
+    if (!status.whatsapp && channel !== "email") {
+      if (seen.whatsapp && whatsappOn) return "whatsapp";
+      return "channel";
+    }
+  }
+  // The trial with a card (no trial starts without one). Plans closed: the screen says so once, then the owner moves on with
+  // nothing started. While the trial is read (undefined) the trial screen shows that it is loading.
+  if (!status.is_demo && trial !== "started" && !(trial === "closed" && seen.trial)) return "trial";
+  return "first_task";
 }
-
 /** The three states of Google access on stage 4 (the server's accessOf). */
 export type Access = "not_started" | "invite_pending" | "accepted" | "checked";
 export function accessOf(s: Pick<OnboardingStatus, "consent" | "accepted" | "checked">): Access {

@@ -23,6 +23,20 @@ function emailOf(subject: string, title: string, lines: string[], button?: { lab
 }
 
 /** The words of each billing message (10.2.9). Pure, so tests read them. */
+/** GATE-2: 14 days before the founding price ends (FOUNDING_LINE: "We email you 14 days before the change."). */
+export function foundingEndingLine(c: { business: string; endsAt: string }, appUrl: string): Line {
+  const day = longDate(c.endsAt);
+  const lines = [
+    `Your founding price for ${c.business} ends on ${day}.`,
+    `From ${day} Kabsi is 29 US dollars a month, the same as everyone else. Until then you pay 19 US dollars a month. Nothing else changes.`,
+    `You can cancel at any time before then on your Plan page, and nothing more is charged: ${appUrl}/app/plan`,
+  ];
+  return {
+    whatsapp: lines.join("\n"),
+    email: emailOf(`${c.business}: your Kabsi price changes on ${day}`, "Your founding price is ending", lines, { label: "Open your plan", url: `${appUrl}/app/plan` }),
+  };
+}
+
 export function billingLineAt(m: Message | "payment_reminder", c: { business: string; periodEnd?: string | null; graceEnds?: Date; portal?: string | null }, appUrl: string): Line {
   const end = c.periodEnd ? longDate(c.periodEnd) : null;
   switch (m) {

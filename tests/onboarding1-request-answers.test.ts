@@ -170,21 +170,11 @@ describe("where the questions come in the setup", () => {
   const at = (s: Partial<OnboardingStatus>) =>
     screenOf({ status: { ...base, ...s }, whatsappOn: true, seen: {} });
 
-  it("right after the business is chosen and confirmed, before Connect WhatsApp", () => {
-    expect(at({})).toBe("questions");
+  // GATE-2: onboarding is three steps and the request book is off (30.53), so the two questions are no longer asked.
+  it("is not part of the three steps any more", () => {
+    expect(at({})).toBe("manager");
     expect(at({ confirmed: false })).toBe("confirm");
-    expect(at({ questions_done: true })).toBe("whatsapp");
     expect(STAGE_OF.questions).toBe(STAGE_OF.confirm);
-  });
-
-  it("is asked once: Continue and Skip both mark it done, and a status that does not say counts as done", () => {
-    expect(at({ questions_done: true })).not.toBe("questions");
-    const { questions_done: _gone, ...older } = base;
-    expect(screenOf({ status: older, whatsappOn: true, seen: {} })).toBe("whatsapp");
-  });
-
-  it("is not asked of a demo business or one already through the four stages", () => {
-    expect(at({ is_demo: true })).toBe("whatsapp");
     expect(at({ checked: true, whatsapp: true, consent: true, accepted: true })).toBe("checked");
   });
 });

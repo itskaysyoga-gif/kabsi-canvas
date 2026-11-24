@@ -64,6 +64,28 @@ export const foundingEndOf = (firstPaid: Date): Date => {
   const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
   return new Date(Date.UTC(y, m, Math.min(firstPaid.getUTCDate(), last), firstPaid.getUTCHours(), firstPaid.getUTCMinutes(), firstPaid.getUTCSeconds()));
 };
+/** GATE-2: the owner hears 14 days before the founding price ends (FOUNDING_LINE says so). */
+export const FOUNDING_NOTICE_DAYS = 14;
+/** GATE-2: the move to the list product is made 3 days before the end, after the 12th founding payment and before the 13th, with
+ *  no proration, so the payment at the end of month 12 is the first at 29. A late run still switches (the next renewal is 29). */
+export const FOUNDING_SWITCH_DAYS = 3;
+export type FoundingFacts = {
+  founding: boolean; founding_ends_at: string | null; founding_notice_at?: string | null; founding_switched_at?: string | null;
+  state: string; cancel_at_period_end?: boolean | null; period?: string | null;
+};
+/** What the month-13 job does now for one subscription: tell the owner, switch the price, or nothing. Pure. */
+export function foundingStep(s: FoundingFacts, now: Date): "notice" | "switch" | null {
+  if (!s.founding || !s.founding_ends_at || s.founding_switched_at) return null;
+  if (s.state !== "active" && s.state !== "past_due") return null;
+  if (s.cancel_at_period_end) return null;
+  if (s.period && s.period !== "month") return null;
+  const end = Date.parse(s.founding_ends_at);
+  if (!Number.isFinite(end)) return null;
+  const day = 86_400_000;
+  if (now.getTime() >= end - FOUNDING_SWITCH_DAYS * day && s.founding_notice_at) return "switch";
+  if (now.getTime() >= end - FOUNDING_NOTICE_DAYS * day && !s.founding_notice_at) return "notice";
+  return null;
+}
 export const PRODUCT_KEYS = Object.keys(CATALOGUE) as ProductKey[];
 /** The product of a plan in a price family. Every caller names the family, so a change never crosses families. */
 export const planKey = (plan: Plan, period: Period, family: PriceFamily): ProductKey =>

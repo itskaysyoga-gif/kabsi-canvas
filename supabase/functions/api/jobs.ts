@@ -47,7 +47,7 @@ import { sendTeamInvite, type TeamInvite, teamInviteEmail } from "../_shared/tea
 import { whatsappPostAlert } from "../_shared/whatsapp/db.ts";
 import { useTool } from "../_shared/ai/agents.ts";
 import { liveAccessWhatsapp } from "../_shared/access-notice.ts";
-import { applyEvent, paymentReminder } from "../_shared/billing.ts";
+import { applyEvent, foundingSwitch, paymentReminder } from "../_shared/billing.ts";
 import { foundingMessage, partnerPayoutsReady } from "../_shared/founding.ts";
 import { sendCapi } from "../_shared/meta-capi.ts";
 import { aiDeps, sendOwnerLine } from "../_shared/visibility/ai/deps.ts";
@@ -502,6 +502,12 @@ const HANDLERS: Record<string, JobHandler> = {
     const id = String(job.payload.subscription_id ?? "");
     if (!id) throw new PermanentJobError("billing_reminder needs a subscription");
     await paymentReminder(id, Number(job.payload.day ?? 0));
+  },
+  // GATE-2: the founding plan's month 13: the owner's notice 14 days before, then the move to 29 (billing.ts foundingSwitch).
+  founding_switch: async (job) => {
+    const id = String(job.payload.subscription_id ?? "");
+    if (!id) throw new PermanentJobError("founding_switch needs a subscription");
+    await foundingSwitch(id);
   },
   // Partners session (30.17 section 1): the day-60, day-85 and day-90 messages to a Founding 25 business, once each.
   founding_message: async (job) => {

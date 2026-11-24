@@ -1,6 +1,6 @@
 -- Partners session (master plan 30.15 section 5, 30.17 section 1): Founding 25 and Kabsi Partners.
 -- Founding 25: the application is closed to browsers; one open application per WhatsApp number; the mix of 10, 5, 5
--- and 5; the real count of places; only staff decide; a linked place makes the trial 90 days from its start; the day-60
+-- and 5; the real count of places; only staff decide; a linked place checks out at 19 with a card (GATE-2); the day-60
 -- message is queued once. Kabsi Partners: the tables are closed to browsers; approval gives a handle and a code; the
 -- via code attributes the business once and gives the 30-day trial; a self referral earns nothing; a payment makes a
 -- 25 percent line held 30 days; a refund inside the hold cancels it; a refund after a payout comes off the next one;
@@ -87,7 +87,7 @@ select is((public.staff_founding_decide(pg_temp.fid('+971500000106'), 'accepted'
   18, 'after 30 days the sixth food applicant takes an open place');
 reset role;
 
--- Linking: a running trial becomes 90 days from its start; the trial length reads the founding flag.
+-- Linking (GATE-2, 30.54 item 3): the link starts no trial and changes no trial; the checkout gives the founding price at 19.
 insert into public.subscriptions (organization_id, plan, state, provider, trial_started_at, trial_ends_at, grace_ends_at)
 values (pg_temp.org('00000000-0000-4000-8000-0000000020c1'), 'pro', 'trialing', 'manual', now() - interval '61 days',
   now() - interval '47 days', now() - interval '40 days');
@@ -97,16 +97,21 @@ select ok((public.staff_founding_link(pg_temp.fid('+971500000001'),
 select throws_ok($$ select public.staff_founding_decide(pg_temp.fid('+971500000001'), 'declined') $$,
   'P0001', 'linked', 'a linked place cannot be declined');
 reset role;
-select is(private.founding_days(pg_temp.org('00000000-0000-4000-8000-0000000020c1')), 90, 'the founding flag gives 90 days');
-select ok((select trial_ends_at::date - trial_started_at::date from public.subscriptions
-           where organization_id = pg_temp.org('00000000-0000-4000-8000-0000000020c1') and provider = 'manual') between 90 and 91,
-  'the running trial now ends 90 days after it started');
-select is(private.entitlements(pg_temp.org('00000000-0000-4000-8000-0000000020c1'), null) ->> 'state', 'trial', 'and the business is on Pro again');
-select is(private.founding_days(pg_temp.org('00000000-0000-4000-8000-0000000020c2')), null, 'another business has no founding flag');
-select is(jsonb_typeof(private.entitlements(pg_temp.org('00000000-0000-4000-8000-0000000020c1'), null) -> 'caps'), 'null', 'a founding business has no trial caps');
+select is(private.founding_days(pg_temp.org('00000000-0000-4000-8000-0000000020c1')), null, 'the 90-day founding trial is retired');
+select is((select trial_ends_at::date from public.subscriptions
+           where organization_id = pg_temp.org('00000000-0000-4000-8000-0000000020c1') and provider = 'manual'),
+  (now() - interval '47 days')::date, 'the link does not move a trial');
+select is((select count(*)::int from public.subscriptions where organization_id = pg_temp.org('00000000-0000-4000-8000-0000000020c1')), 1,
+  'and starts none');
+select is(public.billing_checkout_family(pg_temp.org('00000000-0000-4000-8000-0000000020c1'), 'gate2-f25-test', 'test', 'essentials', 'month', null) ->> 'family',
+  'founding', 'the linked business checks out at the founding price, with a card');
+select is(public.billing_checkout_family(pg_temp.org('00000000-0000-4000-8000-0000000020c2'), 'gate2-list-test', 'test', 'essentials', 'month', null) ->> 'family',
+  'list', 'another business checks out at the list price');
 
--- Day 60: one message queued, once.
-select is(private.founding_tick(), 1, 'day 60 queues the message');
+-- The day-60, 85 and 90 messages belong to the old trial: a place linked now gets none; one linked before GATE-2 still does.
+select is(private.founding_tick(), 0, 'a place linked after GATE-2 gets no day-60 message');
+update public.founding_applications set linked_at = timestamptz '2026-11-01 00:00:00+00' where whatsapp = '+971500000001';
+select is(private.founding_tick(), 1, 'day 60 queues the message for a place linked before');
 select is((select count(*)::int from public.jobs where kind = 'founding_message'), 1, 'one founding_message job');
 select is(private.founding_tick(), 1, 'a second tick offers it again while it is pending');
 select is((select count(*)::int from public.jobs where kind = 'founding_message'), 1, 'and the queue keeps one');

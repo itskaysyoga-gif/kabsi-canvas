@@ -33,9 +33,7 @@ import { accessPill } from "@/lib/access-status";
 import {
   LATER,
   accessOf,
-  longDate,
   resumePath,
-  trialStartedToday,
   type OnboardingStatus,
 } from "@/lib/onboarding-flow";
 import {
@@ -242,7 +240,7 @@ export function WhatsAppStage({
         </div>
         <MainCta>
           <Button full onClick={onNext}>
-            Next: add Kabsi on Google
+            Next: start your trial
           </Button>
         </MainCta>
       </>
@@ -336,7 +334,7 @@ function WhatsAppConnect({
         </div>
         <MainCta className="mt-2">
           <Button full onClick={onNext}>
-            Next: add Kabsi on Google
+            Next: start your trial
           </Button>
         </MainCta>
       </>
@@ -695,7 +693,7 @@ export function FounderHelp() {
   );
 }
 
-/* ---------- Access works: the trial starts ---------- */
+/* ---------- Access works (end of step 2) ---------- */
 
 export function CheckedStage({
   status,
@@ -706,8 +704,6 @@ export function CheckedStage({
   busy: boolean;
   onNext: () => void;
 }) {
-  const ends = status.trial_ends_at;
-  const startedToday = trialStartedToday(ends);
   return (
     <>
       <StepTitle
@@ -715,22 +711,9 @@ export function CheckedStage({
         sub={`Kabsi now has Manager access to ${status.business}. Nothing has been published.`}
       />
       <AccessTrack status={status} />
-      {ends ? (
-        <Banner
-          tone="ok"
-          className="mt-6"
-          title={
-            startedToday
-              ? `Your free trial starts today and ends on ${longDate(ends, status.time_zone)}.`
-              : `Your free trial ends on ${longDate(ends, status.time_zone)}.`
-          }
-        >
-          No card, and no charge unless you choose a plan.
-        </Banner>
-      ) : null}
       <MainCta>
         <Button full onClick={onNext} loading={busy}>
-          See your first task
+          Next: WhatsApp or email
         </Button>
       </MainCta>
     </>
