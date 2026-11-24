@@ -1,58 +1,68 @@
 ## 4. Pricing and payment
 
-### 4.1 Prices (US dollars, same in every country)
+### 4.1 The price (US dollars, same in every country)
 
-Essentials is $29 a month or $290 a year. Pro is $59 a month or $590 a year. An extra location is $15 a month or $150 a year. Prices are in US dollars, plus tax where it applies. The first 30 paying businesses pay the launch price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year. (Price 1, 30 Oct 2026, master plan 30.20 section 6.) Yearly is ten months for the price of twelve ("2 months free" on the pricing page). The website, the Plan page, the Home plan card, the trial emails (day 7, day 11, day 14 and the two follow-ups), the FAQ and the terms all say exactly this.
+There is one plan: **29 US dollars a month per location.** (Blueprint 3.1, 24 Nov 2026, R-163.) It has no name to quote: say "the plan" or "Kabsi". Prices are in US dollars, plus tax where it applies. One plan covers one Google profile; each further location has its own plan at the same price.
 
-**[COMING]** Card payments in US dollars are coming. Until they open there is nothing to pay and nothing to buy. The Plan page lists the prices and shows **Choose Essentials** and **Choose Pro** with a Monthly or Yearly switch; until plans open both buttons read **Plans open soon** and do nothing (only Kabsi's own test accounts can try a test checkout). The pricing page shows the launch price with the real number of places left ("[n] of 30 launch places left."), and hides it at 0. (Session 10, 25 Oct 2026, master plan section 10.)
+The trial terms, word for word, beside every signup button and at checkout: "14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing."
 
 | Item | Price | Notes |
 |---|---|---|
-| Kabsi Essentials, monthly | $29 a month (launch price $19) | Cancel any time |
-| Kabsi Essentials, yearly | $290 a year (launch price $190) | Two months free |
-| Kabsi Pro, monthly | $59 a month (launch price $39) | Everything in Essentials and the Pro additions listed at the top of this file. Cancel any time |
-| Kabsi Pro, yearly | $590 a year (launch price $390) | Two months free |
-| Extra location | $15 a month or $150 a year | One plan covers one Google profile; each extra profile is added on top |
+| Kabsi, one location | 29 US dollars a month | 14 days free first. Cancel any time |
+| Each further location | 29 US dollars a month | Each Google profile is its own plan |
 
-- **Free trial: 14 days, no card**, for everyone, with the whole of Pro. It starts when Kabsi's access to your Google profile works, so waiting for access costs you nothing. There is one trial per Google business.
-- **Same everywhere:** Kabsi is software only, at the same price in every country. Kabsi sells no cards. Every business everywhere gets a free review link and QR code, which work with your own QR codes and NFC cards (section 5), with no plan.
-- Monthly plans can be cancelled at any time. Yearly plans are refundable within 14 days.
+**Included in the plan:**
+
+- a reply to every review;
+- alerts for bad reviews;
+- your listing checked every day;
+- website and booking link checked every day;
+- holiday hours;
+- up to 2 posts a month and photos from your phone;
+- review link, QR code and counter card tools;
+- a weekly summary and a monthly report.
+
+"Kabsi does not message your customers, run ads, build websites or promise rankings."
+
+"Google Business Profile is free from Google. Kabsi is an independent paid service."
+
+- **One plan only.** There is no Free plan, no yearly price, no second plan and no separate price for extra locations. Older names and prices (Essentials, Pro, yearly prices, a 15 dollar extra location, a launch price for the first 30 paying businesses) were retired on 24 Nov 2026. Never quote them.
+- **No public offer.** There is no public discount or special offer. A business that was invited should open the link in its invitation.
+- **Same everywhere:** Kabsi is software only, at the same price in every country. Kabsi sells no cards. Every business gets a free review link and QR code, which work with your own QR codes and NFC cards (section 5), with no plan.
+- The plan is monthly. Monthly plans can be cancelled at any time.
 - Kabsi may change prices for future purchases. A plan already paid for keeps its price.
-- **Launch price (Price 1, 30 Oct 2026; called the launch price from 10 Nov 2026):** the first 30 paying businesses check out at the launch price ($19 or $39 a month, $190 or $390 a year) and keep it while their subscription stays paid, monthly or yearly. The place is decided when the checkout starts: a checkout already started keeps the price it showed, and an open launch checkout holds its place for 24 hours. Upgrades and downgrades stay at the price the business is on (launch or list). The pricing page, Home and the Plan page show "Launch price for the first 30 paying businesses: 19 US dollars a month, kept while you stay subscribed. Then 29." (and the same for Pro and yearly) and "[n] of 30 launch places left." with the real number of places left, and hide it at 0. There is no crossed-out price. Under the plan cards: "Nothing to pay today. Card payments in US dollars are coming.", "Prices are in US dollars, plus tax where it applies." and "Monthly plans can be cancelled at any time. Yearly plans are refundable within 14 days."
-- **Help from a person (master plan 30.21 section 2):** Essentials: "A person answers on WhatsApp the same working day." Pro: "Priority help: a person answers on WhatsApp within 4 working hours, and a call when you need one." "Working hours: Monday to Friday, 9:00 to 18:00, UAE time." The plan cards, the Plan page and the terms (section 14) say so.
-- **Currency:** prices are in US dollars only. Creem, Kabsi's merchant of record, prices products in US dollars or euros, not pounds or dirhams, so Kabsi shows no local-currency price and never a converted estimate. (Partners session, 26 Oct 2026, master plan 30.15 section 5.)
-- There is no public founding offer. A business that was invited should open the link in its invitation.
-- The assistant may quote these prices, always with: card payments are coming and nothing can be bought today.
+- **Help from a person:** "A person answers on WhatsApp the same working day." "Working hours: Monday to Friday, 9:00 to 18:00, UAE time."
+- **Currency:** prices are in US dollars only. Creem, Kabsi's merchant of record, prices products in US dollars or euros, not pounds or dirhams, so Kabsi shows no local-currency price and never a converted estimate.
+- **[COMING]** Card checkout opens at launch. Until then nothing is charged and nothing can be bought. The assistant may quote the price, always with: card payments are not open yet.
 
 ### 4.2 How to pay
 
-By card, in US dollars, and nothing else that Kabsi offers itself. Card payments will be processed by Creem, our merchant of record. Creem lists Apple Pay and Google Pay as supported, so one may appear at Creem's checkout; what shows depends on the product, the country and the device, so say it may appear and that cards work. **[COMING]** Card checkout through Creem is not open yet (it is built and runs in Creem's test mode; it opens at the launch gate). Until it opens there is nothing to pay: the Plan page says "Card payments in US dollars are coming. Until they open there is nothing to pay." Kabsi takes no crypto, cash or bank transfer, and offers no pay-later plan. Never give a wallet address or a payment ID. Anything else about paying: hand off.
+By card, in US dollars, and nothing else that Kabsi offers itself. Card payments will be processed by Creem, our merchant of record. Creem lists Apple Pay and Google Pay as supported, so one may appear at Creem's checkout; what shows depends on the product, the country and the device, so say it may appear and that cards work. **[COMING]** Card checkout through Creem is not open yet (it is built and runs in Creem's test mode; it opens at the launch gate). Until it opens there is nothing to pay. Kabsi takes no crypto, cash or bank transfer, and offers no pay-later plan. Never give a wallet address or a payment ID. Anything else about paying: hand off.
 
-**[COMING] How paying will work once plans open (built 25 Oct 2026, session 10).** Not available yet, no date. Say only what is below.
-- Choosing a plan opens Creem's secure checkout for that business, in US dollars, plus tax where it applies; Creem is the merchant of record and handles sales tax and VAT. The paid period starts the day the owner pays.
-- The owner manages billing on WhatsApp or the Plan page, and only the owner can: "card" or "invoice" sends a fresh link to Creem's page for the card, invoices and receipts; "upgrade" moves to Pro at once after a Confirm that shows the price (Creem charges the difference for the rest of the period that day); "downgrade" moves to Essentials from the next renewal (Pro stays until then); "add a location" shows the price and, after a Confirm, sends a link to Creem's page to pay for that extra location (built 28 Oct 2026, Billing 2); "cancel" asks first, then ends the plan at the end of the paid period, never at once, and everything keeps working until that date; "Keep my plan" undoes a cancel before it happens.
-- **Which cancel is which:** Kabsi's own Cancel (the Plan page and WhatsApp) asks Creem to end the plan at the end of the paid period (scheduled), so everything works until that date. Creem's billing page (the portal, reached through "Card and invoices") is for the card, invoices and receipts; if the owner cancels there, Creem ends the plan at once and Kabsi's work stops that day.
-- An extra location is its own payment through Creem on the owner's same Creem account: it is paid on Creem's page when it is added and renews every month (or year) from that day, on its own date. It joins the plan when the payment goes through. **Remove a location** on the Plan page ends one extra location at the end of its paid period, never at once; then Kabsi stops its work for the newest business on the plan, and nothing changes on its Google profile. Cancelling the plan ends the extra locations with it, and Keep my plan carries them on too.
+**[COMING] How paying will work once card payments open.** Not available yet, no date. Say only what is below.
+
+- Starting the trial opens Creem's secure checkout for that business, in US dollars, plus tax where it applies; Creem is the merchant of record and handles sales tax and VAT. The card is needed to start. Nothing is charged during the 14 days. If the owner has not cancelled by day 14, the plan starts at 29 US dollars a month.
+- Only the owner manages billing. "card" or "invoice" on WhatsApp, or the Plan page, gives a fresh link to Creem's page for the card, invoices and receipts. Card changes happen only on Creem's secure page.
+- **Cancelling:** one tap in Settings, or tell Kabsi on WhatsApp. Kabsi asks first, then ends the plan at the end of the paid month, never at once, and everything keeps working until that date. A cancel during the trial means nothing is charged. "Keep my plan" undoes a cancel before it happens. Creem's own billing page (Card and invoices) ends the plan at once; that is said on the Plan page and in these facts only.
 - If a payment fails, Kabsi keeps working for 7 days and sends "Your card did not go through. Update it here" with the card link on WhatsApp and by email, with reminders on day 3 and day 6. After the 7 days the plan is paused: Kabsi keeps watching and preparing, publishes nothing, and nothing is lost.
 - A paused or ended plan keeps the business's data for 30 days. The review link and QR code keep working.
 
 ### 4.3 When the trial and the plan start
 
-- A **free trial** starts when Kabsi's access to your Google profile works and Google shows the profile as verified. It is 14 days. The Plan page shows the last day and how many days are left. It never starts for a profile that is not verified.
-- **One trial per business and per person:** one per Google profile (place) and one per Google account (the owner's Google sign-in or email; Gmail dots and +tags count as the same address). A business or account that already had a trial goes straight to a paid plan.
-- **During the trial** you get the full product (new review drafts and publishing, Google Protection, the weekly report, one post a week, the review link and QR code, the assistant) with three limits: Kabsi lists every profile fix it finds but applies **3 of your choice** (the rest when you subscribe); it drafts replies for up to **10** older unanswered reviews (the rest when you subscribe); and after **100 drafts** it asks you to choose a plan or book a free setup call.
-- A **paid plan** starts when payment is confirmed. **Card checkout is offered only to a business whose Google access works** (R-143 item 3, 9 Nov 2026): the same test as the trial (Kabsi's access works and Google shows the profile as verified). Until Kabsi's access has started, the Plan page keeps the choose buttons off and says a plan can be chosen once Kabsi's access works; for any other case (for example a profile Google does not show as verified, or access that was lost) the buttons show and the checkout refuses with the same plain line when tapped. Nothing is charged. A plan can therefore never be paid before access works.
-- If you pay during your trial, your paid plan starts the day the trial ends. You keep every trial day. **[CHANGING]** Once card payments open, the paid period starts the day you pay (master plan 10.2.2).
+- The **14 days free** start when Kabsi's access to your Google profile works and Google shows the profile as verified, so waiting for access costs no days. The Plan page shows the last day and how many days are left. The trial never starts for a profile that is not verified.
+- **One trial per business and per person:** one per Google profile (place) and one per Google account (the owner's Google sign-in or email; Gmail dots and +tags count as the same address). A business or account that already had a trial goes straight to the paid plan.
+- **During the trial** you get the whole plan. On the first day every unanswered review from the last 90 days arrives with a reply ready to approve, together with the first check of the listing and links.
+- **Card checkout is offered only to a business whose Google access works** (R-143 item 3): Kabsi's access works and Google shows the profile as verified. Until then nothing is charged.
 
 ### 4.4 Renewals and reminders
 
-Kabsi sends no renewal reminder emails (retired 9 Nov 2026, R-142): a plan is a Creem subscription, so Creem renews it by itself and sends its own receipt. **Applying once card payments open (R-143, 9 Nov 2026):** a plan renews every month or every year, from the day it was paid, until the owner cancels, and Creem charges the card the owner gave at checkout at each renewal; Kabsi itself never charges a card. Until card payments open nothing is charged and nothing renews. Home shows the plan and the days left in its top strip, and a card when the plan is about to end. **[COMING]** Renewing by card opens with card payments; until then the Plan page says card payments are coming.
+A plan is a Creem subscription. Once card payments open, it renews every month from the day it started, until the owner cancels, and Creem charges the card the owner gave at checkout and sends its own receipt. Kabsi itself never charges a card and sends no separate renewal reminder. Until card payments open nothing is charged and nothing renews.
 
-During a trial, Kabsi sends a few short emails, each only once and only while it is true for your business: a welcome with the one next step (invite Kabsi as a Manager); if access is still missing, a reminder 1 hour, 24 hours and 72 hours after you asked for it (they stop as soon as Kabsi has access); if you told Kabsi your profile needs verifying or Google is reviewing it, a short "Verified yet? Tap to continue" every 2 days, up to 5 times; if you asked Google for ownership of the profile and tapped "I've done it", a note on day 3 and on day 7 (all of these stop when Kabsi has access or you go back to the steps); a thank-you after your first approved reply; on day 2 what Kabsi has done so far; on day 7 your week, counted from the record of what Kabsi did and what you approved, with the prices of Essentials, Pro and an extra location and a line that card payments are coming; on day 11 that your trial ends in 3 days, what happens next and the same prices; and on day 14 that the trial has ended (Kabsi keeps watching and drafting for 7 more days but publishes nothing until you choose a plan), with the same prices. The two follow-ups after the trial carry them too. The one button in these emails is See your plan, and it opens the Plan page, never a checkout. These are the only trial emails: the older day 7, day 1 and last-day trial reminders were retired on 21 Oct 2026, so nobody gets two sets. There is no end-of-trial discount. The tips can be switched off: the "Verified yet?" and ownership notes (since 22 Oct 2026), the thank-you, and the day 2, day 7 and day 11 emails all carry **Unsubscribe from these emails** at the bottom, and Settings, What Kabsi tells you, under **Trial tips**, has the same switch. The welcome, the 1, 24 and 72 hour access reminders and the day 14 notice cannot be switched off. If you do not continue, you may get one note about the replies and changes still waiting, about 17 days and 30 days after the trial ended, only if you said yes to marketing emails (in the UK, the EU and EEA, Saudi Arabia, the UAE and wherever your country is not known, always only with your yes). A business that pays and a business set up by the Kabsi team get none of the trial emails.
+During the trial Kabsi sends a few short emails, each only once and only while it is true for your business: a welcome with the one next step (add Kabsi as a Manager); if access is still missing, a reminder 1 hour, 24 hours and 72 hours after you asked for it (they stop as soon as Kabsi has access); a thank-you after your first approved reply; and a note before the trial ends that says what happens next and the price. The one button in these emails opens the Plan page, never a checkout. There is no end-of-trial discount. The tips can be switched off with **Unsubscribe from these emails** at the bottom, or in Settings, What Kabsi tells you, under **Trial tips**. The welcome, the access reminders and the notice that the trial is ending cannot be switched off. A business set up by the Kabsi team gets none of the trial emails.
 
 ### 4.5 Refunds
 
-- Yearly plans are refundable in full within 14 days of the plan starting. Email hello@kabsi.co. Kabsi refunds by the method you paid with where possible.
+- Cancel before day 14 and you pay nothing.
 - A monthly plan runs to the end of the month paid for and is not refunded for that month. Cancelling a plan never removes Kabsi's Google access; disconnecting is a separate step the owner chooses (section 8.6).
 - The unused part is refunded if a paid feature stops for good because Google changed its APIs, if Kabsi stops the service without you breaking the terms, or if the terms change in a way that matters and you don't agree.
 - Nothing in the terms limits a refund you're entitled to by law.
@@ -60,14 +70,12 @@ During a trial, Kabsi sends a few short emails, each only once and only while it
 
 ### 4.6 When a trial or plan ends
 
-- **After a free trial (day 14 to day 21):** 7 days of grace. Kabsi keeps watching your profile and drafting replies, but publishes nothing; Home says what is waiting ("1 reply ready, 1 change caught"). Choose a plan and everything that is waiting can be approved. On day 21 without a plan, Kabsi removes its Manager access and emails you. **[TIME-SENSITIVE]** Until card payments are live, Kabsi does not remove access on day 21; the team gets in touch instead.
-- **After a paid plan:** the business has no plan. Reply drafts, Google Protection and the weekly report stop. The cancelled, ended and paused emails and WhatsApp messages say "Your account and its history stay. Ask us any time to delete them." Kabsi deletes nothing on a timer after a plan ends, and while card payments are closed these messages and the billing replies add "Nothing to pay today. Card payments in US dollars are coming." Kabsi's Google access is not removed by a plan ending; disconnecting is your choice (section 8.6).
-- The review link and QR code keep working, for as long as Kabsi operates, and so does any NFC card that carries the link. Choose a plan on the Plan page to turn everything back on.
+- **A trial cancelled before day 14:** nothing is charged. Kabsi stops its work and publishes nothing more. Kabsi's Google access is not removed by this; disconnecting is your choice (section 8.6).
+- **After a paid plan:** the business has no plan. Reply drafts, Google Protection and the weekly report stop, and so does the monthly report. The cancelled, ended and paused emails and WhatsApp messages say "Your account and its history stay. Ask us any time to delete them." Kabsi deletes nothing on a timer after a plan ends. Kabsi's Google access is not removed by a plan ending; disconnecting is your choice (section 8.6).
+- The review link and QR code keep working, for as long as Kabsi operates, and so does any NFC card that carries the link. Choose the plan again on the Plan page to turn everything back on.
 
 ---
 
-### Copy 3: Pricing's hero and buttons (5 Nov 2026, master plan 30.29 item 2)
+### Public answer to "How do I cancel?"
 
-- Pricing's hero line is "Each plan does the Google work for one business, and you approve every change." The tax line stays under the cards: "Prices are in US dollars, plus tax where it applies."
-- On Pricing only Pro's "Start free" button is yellow, because the trial is Pro; Essentials' button is charcoal with ivory text.
-- Public answer to "Can I cancel?": "Yes, any time. Cancel on the Plan page or on WhatsApp, and your plan runs to the end of the period you paid for." Creem's own billing page (Card and invoices) ends the plan at once; that is said on the Plan page and in these facts only.
+"One tap in Settings, or tell Kabsi on WhatsApp." Your plan runs to the end of the month you paid for. Cancel before day 14 and you pay nothing.

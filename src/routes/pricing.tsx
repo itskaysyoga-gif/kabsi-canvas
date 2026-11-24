@@ -1,27 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { pageHead, serverOnlyLd } from "@/lib/site";
-import { faqJsonLd } from "@/lib/faq";
+import { pageHead } from "@/lib/site";
 import { SiteShell } from "@/components/kabsi/site-chrome";
-import { PRICING_HERO } from "@/components/kabsi/hero-lines";
-import { BILLING_FAQ } from "@/components/kabsi/faq-data";
-import { D8Pricing } from "@/components/kabsi/d8-pricing";
+import { V31Pricing } from "@/components/marketing/v31";
+import { HEADS } from "@/components/marketing/v31-heads";
 
+// Pricing on blueprint 3.1 section 4 (SITE-1): one card at 29 US dollars a month per location, the trial terms beside
+// the button, what is not included said once. No Product or Offer markup. The founding line is only on its private page.
 export const Route = createFileRoute("/pricing")({
   head: () =>
     pageHead({
-      // docs/SEO-PLAN.md: "Kabsi: " and the hero headline, the hero line as description. No Product or Offer markup
-      // (prices change with the founding count); BreadcrumbList and FAQPage from "Billing questions".
-      title: `Kabsi: ${PRICING_HERO.title}`,
-      description: PRICING_HERO.line,
+      title: HEADS.pricing.title,
+      description: HEADS.pricing.description,
       path: "/pricing",
       image: "pricing",
       crumbs: [{ name: "Pricing", path: "/pricing" }],
-      jsonLd: [import.meta.env.SSR ? faqJsonLd(BILLING_FAQ) : serverOnlyLd("/pricing")],
     }),
   component: function Pricing() {
     return (
       <SiteShell>
-        <D8Pricing />
+        <V31Pricing />
       </SiteShell>
     );
   },

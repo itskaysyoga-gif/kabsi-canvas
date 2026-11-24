@@ -420,7 +420,8 @@ describe("the partners page", () => {
       INSERT.big,
     ])
       expect(copy, line).toContain(line);
-    expect(read("knowledge/facts/08-partners.md")).toContain("Partners 3");
+    // SITE-1 (blueprint 3.1, R-163): partners are switched off; facts 08 says so and describes none of the kit.
+    expect(read("knowledge/facts/08-partners.md")).toContain("Kabsi Partners is switched off");
     expect(read("src/components/partners/partner-home.tsx")).toContain("<PartnerKit");
   });
 });

@@ -17,8 +17,8 @@ import { openPrivacyChoices } from "@/lib/consent";
 
 /**
  * The short footer (Site 2, master plan 30.34 item 4): the logo, the brand line and the SOCIAL_LINKS icons; three short
- * groups (Product, Explore, Company) with no industry links; then the legal row (Privacy, Terms, Partner terms, Your
- * privacy choices) and the small print: the independence line and the year, then the operator and Creem lines (Site 3b,
+ * groups (Product, Explore, Company) with no industry links; then the legal row (Privacy, Terms, Your privacy choices;
+ * SITE-1 took Partners and Partner terms out, blueprint 3.1 section 5) and the small print: the independence line and the year, then the operator and Creem lines (Site 3b,
  * audit E1: DESIGN.md lists them for the footer; they are also at the top of /terms and /privacy). Google's third-party
  * guidance link is in the FAQ answer on adding Kabsi as a Manager.
  * WhatsApp shows only while WHATSAPP_ON, with its glyph; hello@kabsi.co is always there.
@@ -40,7 +40,6 @@ const GROUPS: { title: string; links: FootLink[] }[] = [
       { label: "Businesses", to: "/for" },
       { label: "Guides", to: "/guides" },
       { label: "FAQ", to: "/faq" },
-      { label: "Partners", to: "/partners" },
     ],
   },
   {
@@ -151,11 +150,6 @@ export function SiteFooter() {
             <li>
               <SiteLink to="/terms" className={quietLink}>
                 Terms
-              </SiteLink>
-            </li>
-            <li>
-              <SiteLink to="/partners/terms" className={quietLink}>
-                Partner terms
               </SiteLink>
             </li>
             <li>

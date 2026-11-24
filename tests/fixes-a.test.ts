@@ -5,21 +5,19 @@ import {
   BOOKING_EMAIL_HELPER,
   BOOKING_EMAIL_LABEL,
   BOOKING_READY,
-  HERO_PRICE_LINE,
   PLAN_PRICES,
   SCAN_LINE,
   TRIAL_LINE,
   TRIAL_SEPARATE_LINE,
   bookingLabel,
 } from "../src/lib/site";
+import { TRIAL_LINE as OFFER_TRIAL_LINE } from "../src/lib/offer";
 
 describe("Fixes A lines", () => {
-  it("the hero price line is the plan price and the trial line, no number typed twice", () => {
-    expect(HERO_PRICE_LINE).toBe(
-      "Plans from 29 US dollars a month. Free for 14 days once Kabsi is connected. No card.",
-    );
-    expect(HERO_PRICE_LINE).toContain(String(PLAN_PRICES.essentialsMonthly));
-    expect(HERO_PRICE_LINE.endsWith(TRIAL_LINE)).toBe(true);
+  it("the trial line is the one in src/lib/offer.ts (SITE-1, blueprint 3.1; the plans line of Fixes A is gone)", () => {
+    expect(TRIAL_LINE).toBe(OFFER_TRIAL_LINE);
+    expect(TRIAL_LINE).not.toMatch(/no card/i);
+    expect(TRIAL_LINE).toContain(String(PLAN_PRICES.essentialsMonthly));
   });
   it("the free check line and the separate trial line", () => {
     expect(SCAN_LINE).toBe("Free check. No account and no Google access needed.");
@@ -45,13 +43,7 @@ describe("Fixes A lines", () => {
     );
   });
   it("no dash and no exclamation mark in the new lines", () => {
-    for (const s of [
-      HERO_PRICE_LINE,
-      SCAN_LINE,
-      TRIAL_SEPARATE_LINE,
-      BOOKING_EMAIL_LABEL,
-      BOOKING_EMAIL_HELPER,
-    ])
+    for (const s of [SCAN_LINE, TRIAL_SEPARATE_LINE, BOOKING_EMAIL_LABEL, BOOKING_EMAIL_HELPER])
       expect(s).not.toMatch(new RegExp("[\\u2013\\u2014!]"));
   });
 });

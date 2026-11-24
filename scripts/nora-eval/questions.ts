@@ -40,6 +40,43 @@ const CALL = /setup-call/;
 const MAIL = /hello@kabsi\.co/;
 const YES = /^\s*(yes|sure|of course|absolutely)\b/i;
 
+// SITE-1 (blueprint 3.1 of 24 Nov 2026, R-163): one plan at 29 US dollars a month per location, one trial line with a card
+// to start, and the older plans, prices, launch price and no-card trial retired. The lines every price answer rests on:
+/** The one price (section 4.1). */
+export const PRICE = /There is one plan: \*\*29 US dollars a month per location\.\*\*/;
+/** The price table's first row: tests/nora-sync.test.ts changes it and expects the evaluation to fail. */
+export const PRICE_ROW = /\| Kabsi, one location \| 29 US dollars a month \|/;
+/** Each further location is its own plan at the same price. */
+export const FURTHER_ROW =
+  /\| Each further location \| 29 US dollars a month \| Each Google profile is its own plan \|/;
+/** The trial line, word for word. */
+export const TRIAL =
+  /"14 days free\. Then 29 US dollars a month until you cancel\. A card is needed to start\. Cancel before day 14 and you pay nothing\."/;
+/** Nora's rule that the older names and prices are retired. */
+export const RETIRED_PRICES =
+  /Never quote Essentials, Pro, a yearly price, an extra location price of 15, a launch price or a trial with no card: they were retired\./;
+/** One plan only: no Free plan, no yearly price, no second plan, no extra location price. */
+export const ONE_PLAN_ONLY =
+  /\*\*One plan only\.\*\* There is no Free plan, no yearly price, no second plan and no separate price for extra locations\./;
+/** What the plan includes, as the FAQ says it. */
+export const INCLUDED =
+  /A reply to every review; alerts for bad reviews; your listing checked every day; website and booking link checked every day; holiday hours; up to 2 posts a month and photos from your phone; review link, QR code and counter card tools; a weekly summary and a monthly report\./;
+/** Kabsi Partners is switched off. */
+export const PARTNERS_OFF =
+  /\*\*Kabsi Partners is switched off\*\* \(blueprint 3\.1, 24 Nov 2026, R-163\)\. It is not a public offer\. Do not describe its commission, payouts, kit or terms, and do not invite anyone to join\./;
+/** The one price, as an answer must say it. */
+export const ONE_PRICE = /29 US dollars a month/;
+// What a wrong old answer says: a dollar figure (the facts hold none but the removed $120), a yearly price, an old price in
+// words, or the launch price as something on offer.
+export const OLD_PRICES =
+  /\$\s?\d|\b\d[\d,]* (US )?dollars? (a|per) year\b|\b(15|19|39|59|150|290|590) (US )?dollars\b|\bfirst 30 paying businesses (pay|get|keep)\b|\blaunch price (goes|applies) to\b|\blaunch price is (still|available|open|kept)\b/i;
+// A retired plan name with a price after it in the same sentence ("Pro is $59 a month", "Pro a $59 al mes").
+export const PLAN_NAME_PRICED =
+  /\b(Essentials|Pro)\b[^.]{0,30}(\$\s?\d|\d+ (US )?dollars|\bcosts?\b|\ba month\b|\bal mes\b|\bpar mois\b|شهريا)/i;
+// The retired trial with no card.
+export const NO_CARD_TRIAL =
+  /\b(no|without( a| any)?) card\b|\bcard (is not|isn't) (needed|required)\b|\bno card (needed|required)\b/i;
+
 export const QUESTIONS: Question[] = [
   // ── prices, plans, trial, paying ─────────────────────────────────────────────────────────────────────────────────
   {
@@ -47,52 +84,58 @@ export const QUESTIONS: Question[] = [
     lang: "en",
     topic: "price of Pro",
     ask: "How much is Pro?",
-    kb: [
-      /\$29 a month/,
-      /\$290 a year/,
-      /Pro \| \$59 \| \$590/,
-      /Do not quote Essentials or Pro prices as available/,
-    ],
-    must: [/\$59/, /\$590/],
+    // SITE-1 (blueprint 3.1, R-163): there is no Pro any more. The honest answer is the one plan; quoting $59, a yearly
+    // price, the launch price or a trial with no card fails.
+    kb: [PRICE, PRICE_ROW, RETIRED_PRICES],
+    must: [ONE_PRICE, /one plan/i],
+    forbid: [OLD_PRICES, PLAN_NAME_PRICED, NO_CARD_TRIAL],
     coming: true,
     reference:
-      "The website lists Essentials at $29 a month or $290 a year and Pro at $59 a month or $590 a year. The first 30 paying businesses pay the launch price, Essentials $19 or Pro $39 a month, and keep it while they stay subscribed. Those plans cannot be bought yet. Card payments are not open yet either, so there is nothing to pay today.",
+      "There is no Pro plan any more. Kabsi has one plan, 29 US dollars a month per location, in US dollars, plus tax where it applies. 14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "en02",
     lang: "en",
     topic: "Essentials against Pro",
     ask: "What is the difference between Essentials and Pro?",
-    kb: [/What each plan includes, as the website lists it/, /Everything in Essentials, and:/],
-    must: [/Essentials/, /Pro/],
+    // SITE-1: Essentials and Pro were replaced by one plan; the answer says what the one plan includes.
+    kb: [ONE_PLAN_ONLY, INCLUDED],
+    must: [/one plan/i, /2 posts a month/],
+    forbid: [OLD_PRICES, PLAN_NAME_PRICED, /a post every week|weekly posts/i],
     coming: true,
     reference:
-      "Essentials is for an owner who wants every review answered and the profile kept right: a reply ready for every new review, your details checked every day, holiday hours, 2 posts a month and your photos made ready, your review link and QR card, Profile Coach suggestions and your weekly report every Monday. Pro adds a post every week, team roles and approval rules, review graphics, the words people searched to find you, and a guide to report a review that breaks Google's rules. Card payments are not open yet, so there is nothing to pay today.",
+      "There is no Essentials or Pro any more. Since 24 Nov 2026 Kabsi has one plan. It includes a reply to every review, alerts for bad reviews, your listing checked every day, your website and booking link checked every day, holiday hours, up to 2 posts a month and photos from your phone, the review link, QR code and counter card tools, and a weekly summary and a monthly report. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "en03",
     lang: "en",
     topic: "the trial",
     ask: "Is there a free trial?",
+    // SITE-1: the trial now needs a card to start and has no limits; the old "no card" answer fails.
     kb: [
-      /Free trial: 14 days, no card/,
-      /3 of your choice/,
-      /up to \*\*10\*\* older unanswered reviews/,
+      TRIAL,
+      /\*\*During the trial\*\* you get the whole plan/,
+      /On the first day every unanswered review from the last 90 days arrives with a reply ready to approve/,
     ],
-    must: [/14 days/, /no card/i],
+    must: [/14 days/, /card is needed/i],
+    forbid: [NO_CARD_TRIAL, /\b(3|three) profile fixes\b|\bup to 10 older\b|\b100 drafts\b/i],
     reference:
-      "Yes, 14 days with no card. It starts when Kabsi's access to your verified Google profile works, so waiting for access costs you nothing. You get the full product with three limits: 3 profile fixes of your choice, replies for up to 10 older unanswered reviews, and after 100 drafts you choose a plan or book a free setup call.",
+      "Yes. 14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing. The 14 days start when Kabsi's access to your verified Google profile works, you get the whole plan, and on the first day every unanswered review from the last 90 days arrives with a reply ready to approve. Card payments are not open yet, so nothing is charged today.",
   },
   {
     id: "en04",
     lang: "en",
     topic: "a free plan",
     ask: "Is there a free plan?",
-    kb: [/There will be no Free plan/, /keeps its review link and QR code/],
-    must: [/review link/i],
+    kb: [
+      /No\. There is one plan, 29 US dollars a month per location, with 14 days free first\./,
+      /keeps its review link and QR code/,
+    ],
+    must: [/review link/i, /no Free plan/i],
+    forbid: [OLD_PRICES, NO_CARD_TRIAL, /\b(Essentials|Pro)\b/],
     coming: true,
     reference:
-      "Today you can start with the 14 day trial, and every business keeps its review link and QR code for free. Once Essentials and Pro open there will be no Free plan, but they are not available yet.",
+      "No, there is no Free plan. There is one plan, 29 US dollars a month per location, with 14 days free first. Without a plan a business keeps, free, its review link, a QR code, a printable counter card from the free review link tool and a message to share. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "en05",
@@ -111,23 +154,32 @@ export const QUESTIONS: Question[] = [
     lang: "en",
     topic: "cancel and refund",
     ask: "Can I cancel and get my money back?",
+    // SITE-1: there are no yearly plans; the refund answer is the cancel-before-day-14 line and the monthly rule.
     kb: [
-      /Yearly plans are refundable in full within 14 days/,
+      /Cancel before day 14 and you pay nothing/,
+      /A monthly plan runs to the end of the month paid for and is not refunded for that month/,
       /Monthly plans can be cancelled at any time/,
     ],
-    must: [MAIL, /14 days/],
+    must: [MAIL, /day 14/],
+    forbid: [/yearly|refundable in full/i],
+    coming: true,
     reference:
-      "Monthly plans cancel any time, and a monthly plan is not refunded for the month already paid. Yearly plans are refundable in full within 14 days of the plan starting. I can explain the policy but a person approves any refund, so write to hello@kabsi.co.",
+      "Yes, you can cancel any time: one tap in Settings, or tell Kabsi on WhatsApp. Cancel before day 14 and you pay nothing. A month already paid runs to its end and is not refunded for that month. I can explain the policy, but a person handles any refund, so write to hello@kabsi.co. Card payments are not open yet, so nothing is charged today.",
   },
   {
     id: "en07",
     lang: "en",
     topic: "a second location",
     ask: "How much is a second location?",
-    kb: [/Extra location \| \$15 a month or \$150 a year/],
-    must: [/\$15/, /\$150/],
+    // SITE-1: the 15 dollar extra location is retired; each location is its own plan at the one price.
+    kb: [
+      /Each location is its own plan at \*\*29 US dollars a month\*\*\. There is no separate extra location price\./,
+      FURTHER_ROW,
+    ],
+    must: [ONE_PRICE, /own plan/i],
+    forbid: [OLD_PRICES, /\b15\b/],
     reference:
-      "An extra location is $15 a month or $150 a year for each extra Google profile, on top of the plan.",
+      "Each location is its own plan at 29 US dollars a month, because each Google profile is its own plan. There is no separate extra location price. Card payments are not open yet, so there is nothing to pay today.",
   },
   // ── WhatsApp (owners switched on 5 Nov 2026, Go live 1) ──────────────────────────────────────────────────────────
   {
@@ -151,8 +203,9 @@ export const QUESTIONS: Question[] = [
       /Yes, once you connect WhatsApp/,
     ],
     must: [/kabsi\.co/],
+    forbid: [/weekly posts/i],
     reference:
-      "Yes, once you connect WhatsApp in setup or Settings. It works for low and medium risk replies and weekly posts, with a 10-second undo after Approve. High-risk reviews and your business name, address, categories, map location, phone or open or closed status are approved on kabsi.co.",
+      "Yes, once you connect WhatsApp in setup or Settings. It works for low and medium risk replies and posts, with a 10-second undo after Approve. High-risk reviews and your business name, address, categories, map location, phone or open or closed status are approved on kabsi.co.",
   },
   {
     id: "en10",
@@ -173,12 +226,13 @@ export const QUESTIONS: Question[] = [
     topic: "photos on WhatsApp",
     ask: "Can I send my photos to Kabsi on WhatsApp?",
     kb: [
-      /Sending a photo to the Kabsi number works on both plans/,
-      /The WhatsApp photo drop is on both plans/,
+      /Sending a photo to the Kabsi number works for every business on the plan/,
+      /The WhatsApp photo drop is for every business on the plan/,
     ],
     must: [/Photos/],
+    forbid: [/both plans/i],
     reference:
-      "Yes, on both plans, once you connect WhatsApp. Kabsi checks the photo and asks you to put it on your Google profile, with Yes, Edit or Skip. You can also add photos on the Photos page, or through a staff upload link, and you approve each one before it goes to Google.",
+      "Yes, for every business on the plan, once you connect WhatsApp. Kabsi checks the photo and asks you to put it on your Google profile, with Yes, Edit or Skip. You can also add photos on the Photos page, or through a staff upload link, and you approve each one before it goes to Google.",
   },
   // ── what is coming (no date) ─────────────────────────────────────────────────────────────────────────────────────
   {
@@ -186,50 +240,65 @@ export const QUESTIONS: Question[] = [
     lang: "en",
     topic: "Kabsi Partners",
     ask: "How do I join Kabsi Partners?",
-    kb: [/\*\*Kabsi Partners:\*\* an affiliate program/, /Not open yet/],
-    must: [MAIL],
+    // SITE-1: Kabsi Partners is switched off. Still `coming`: the answer must say it is not available and give no date.
+    kb: [
+      PARTNERS_OFF,
+      /\*\*\[RETIRED\]\*\* \*\*Kabsi Partners\.\*\* The affiliate program is switched off/,
+    ],
+    must: [MAIL, /switched off|not a public offer/i],
+    forbid: [/partners\/join/i, /\b25 ?(percent|%)/i],
     coming: true,
     reference:
-      "Kabsi Partners, the affiliate program, is not open for payments yet, and I can't give a date. Anyone can join now at kabsi.co/partners/join and gets a link at once, and questions go to hello@kabsi.co. Partner links pay from the day card payments open.",
+      "Kabsi Partners is switched off and is not available. It is not a public offer, so I can't invite you to join or describe its terms. If you look after clients' Google profiles, each owner can invite you as a Manager in Team. For anything else, write to hello@kabsi.co.",
   },
   {
     id: "en13",
     lang: "en",
     topic: "partner commission",
     ask: "What commission do partners earn?",
-    kb: [/earns 25 percent of every payment for as long as the business pays/, /\$25 minimum/],
-    must: [/25 percent/],
+    // SITE-1: no commission to quote; the old 25 percent answer fails.
+    kb: [
+      PARTNERS_OFF,
+      /Questions about partnerships, commissions, earnings or dates: hand off to hello@kabsi\.co/,
+    ],
+    must: [MAIL],
+    forbid: [/\b25 ?(percent|%)/i, /\$\s?\d/],
     coming: true,
     reference:
-      "When Kabsi Partners opens, a partner earns 25 percent of every payment for as long as the business pays, paid monthly with a $25 minimum. It is not open yet, so nothing can be earned today.",
+      "Kabsi Partners is switched off and is not available, so there is no commission to earn, and I can't describe its terms. Questions about partnerships go to hello@kabsi.co, where a person answers.",
   },
   {
     id: "en14",
     lang: "en",
     topic: "What customers say",
     ask: "Does Kabsi summarise what my customers say about me?",
+    // SITE-1: What customers say (Pro) is retired; the coming monthly report names a complaint or a praised service only
+    // when it is mentioned 3 or more times in 90 days.
     kb: [
-      /\*\*What customers say \(Pro\):\*\*/,
-      /What customers say \(Pro\):\*\* a monthly summary[^\n]*not switched on yet/,
+      /\*\*\[RETIRED\]\*\* \*\*What customers say \(Pro\)\.\*\* Retired as a Pro feature on 24 Nov 2026/,
+      /the monthly report shows a complaint or a praised service only when it is mentioned 3 or more times in 90 days/,
     ],
-    must: [/What customers say/],
+    must: [/What customers say/, /3 or more times in 90 days/],
+    forbid: [/\b(on|for) Pro\b/i],
     coming: true,
     reference:
-      "A monthly What customers say summary for Pro is not available yet: it is not switched on. Today your weekly report shows your new reviews and your average rating.",
+      "Not as its own summary. What customers say was retired on 24 Nov 2026 and is not available. Instead, the full monthly report, which is not available yet, will name a complaint or a praised service only when customers mention it 3 or more times in 90 days.",
   },
   {
     id: "en15",
     lang: "en",
     topic: "order and booking button",
     ask: "Can Kabsi add my own order or booking button on Google?",
+    // SITE-1: the button is retired; Kabsi checks the website and booking link every day instead.
     kb: [
-      /\*\*Order and booking button \(Pro\):\*\*/,
+      /\*\*\[RETIRED\]\*\* \*\*Order and booking button \(Pro\)\.\*\* Replaced on 24 Nov 2026: Kabsi checks the website and booking link every day and tells the owner when one stops loading/,
       /Kabsi cannot remove links from delivery or booking marketplaces/,
     ],
-    must: [/marketplace/i],
+    must: [/marketplace/i, /every day/i],
+    forbid: [YES, /\bPro\b/],
     coming: true,
     reference:
-      "An order and booking button of your own on Google, for Pro, is not available yet. It will add your own link and alert you if it goes missing or changes. Kabsi cannot remove links from delivery or booking marketplaces.",
+      "No. The order and booking button was retired on 24 Nov 2026 and is not available. Instead, Kabsi checks your website and booking link every day and tells you when one stops loading. Kabsi cannot remove links from delivery or booking marketplaces.",
   },
   // ── Google Protection and auto-fix (off by Google's policy) ──────────────────────────────────────────────────────
   {
@@ -317,19 +386,25 @@ export const QUESTIONS: Question[] = [
       /Google decides: Kabsi cannot remove a review/,
     ],
     must: [/Google/],
-    forbid: [YES],
+    forbid: [YES, /\bon Pro\b/i],
     reference:
-      "No. Only Google can remove a review, and only when it breaks Google's policies. On Pro, Report this review guides you through Google's own report and keeps your notes, but Google decides and Kabsi can't promise a review will be removed.",
+      "No. Only Google can remove a review, and only when it breaks Google's policies. With the plan, Report this review guides you through Google's own report and keeps your notes, but Google decides and Kabsi can't promise a review will be removed.",
   },
   {
     id: "en23",
     lang: "en",
     topic: "review graphics",
     ask: "Can I turn a 5 star review into a picture for my page?",
-    kb: [/\*\*Make a graphic\*\*/, /Kabsi posts nothing and keeps nothing/],
-    must: [/Pro/, /Make a graphic/],
+    // SITE-1: graphics are part of the one plan.
+    kb: [
+      /\*\*Make a graphic\*\*/,
+      /Kabsi posts nothing and keeps nothing/,
+      /From 24 Nov 2026 it is part of the one plan; a business with no plan is told so and nothing is made/,
+    ],
+    must: [/plan/i, /Make a graphic/],
+    forbid: [/\bPro\b/],
     reference:
-      "Yes, on Pro. On the Reviews screen a 4 or 5 star review that still has its words has Make a graphic. You choose a square or a story, then download it or share it from your phone. Kabsi posts nothing and keeps nothing, the image is made when you ask.",
+      "Yes, with the plan. On the Reviews screen a 4 or 5 star review that still has its words has Make a graphic. You choose a square or a story, then download it or share it from your phone. Kabsi posts nothing and keeps nothing, the image is made when you ask.",
   },
   {
     id: "en24",
@@ -369,14 +444,15 @@ export const QUESTIONS: Question[] = [
     lang: "en",
     topic: "search terms",
     ask: "Can I see what people search to find my business?",
+    // SITE-1: the search terms report was a Pro feature; the one plan does not list it, so Nora does not offer it.
     kb: [
-      /\*\*Search terms report \(Pro, live from 21 Oct 2026, P0\.5-05\)\.\*\*/,
-      /fewer than 15/,
-      /part of Pro/,
+      /\*\*Search terms report \(built 21 Oct 2026, P0\.5-05\)\.\*\*/,
+      /from 24 Nov 2026 there is no Pro, and the plan does not list it, so do not offer it as part of the plan/,
     ],
-    must: [/Pro/, /fewer than 15/],
+    must: [/not part of the plan|does not (include|list)/i],
+    forbid: [YES, /\bon Pro\b/i, /fewer than 15/],
     reference:
-      "Yes, on Pro. The search terms report in Insights shows the words people searched on Google to find you, for the last full month, as Google reports them, with fewer than 15 where Google gives only a threshold. On Essentials the screen says the report is part of Pro.",
+      "Not as part of the plan. The search terms report was a Pro feature, and from 24 Nov 2026 there is no Pro, so the report is not part of the plan. Kabsi does the parts you control: a reply to every review, your listing checked every day, and proof of the work in a short weekly summary.",
   },
   {
     id: "en28",
@@ -389,8 +465,9 @@ export const QUESTIONS: Question[] = [
       /the owner approves each change before anything reaches Google/,
     ],
     must: [/Google Profile/, /approve/i],
+    forbid: [/\b(Essentials|Pro)\b/],
     reference:
-      "Under Google Profile, the Profile Coach lists what a complete Google profile has and what yours is missing, with a plain reason for each. Essentials and Pro both see the checklist. On Pro there are five actions, like a website tag and extra categories, and you approve each change before anything reaches Google.",
+      "Under Google Profile, the Profile Coach lists what a complete Google profile has and what yours is missing, with a plain reason for each. Every business on the plan sees the checklist. Below it there are five actions, like a website tag and extra categories, and you approve each change before anything reaches Google.",
   },
   {
     id: "en29",
@@ -621,12 +698,13 @@ export const QUESTIONS: Question[] = [
     topic: "price and crypto",
     ask: "¿Cuánto cuesta Pro y puedo pagar con criptomonedas?",
     gloss: "How much is Pro and can I pay with crypto?",
-    kb: [/\$59/, /By card, in US dollars, and nothing else/],
-    must: [/\$59/],
+    // SITE-1: no Pro any more; the one plan's price, and no crypto.
+    kb: [PRICE, /By card, in US dollars, and nothing else/],
+    must: [/\b29\b/],
     coming: true,
-    forbid: [/^\s*(sí|claro)\b/i],
+    forbid: [/^\s*(sí|claro)\b/i, OLD_PRICES, PLAN_NAME_PRICED, /sin tarjeta/i],
     reference:
-      "La página de precios muestra Essentials a $29 al mes y Pro a $59 al mes. Los primeros 30 negocios que pagan tienen el precio fundador, $19 o $39 al mes, mientras sigan suscritos. Todavía no se pueden comprar. Los pagos con tarjeta en dólares son la única forma de pagar y todavía no están abiertos, así que hoy no hay nada que pagar. Kabsi no acepta criptomonedas.",
+      "Ya no existe Pro. Kabsi tiene un solo plan: 29 dólares estadounidenses al mes por local, más impuestos donde correspondan. Los primeros 14 días son gratis, se necesita una tarjeta para empezar y, si cancelas antes del día 14, no pagas nada. Los pagos con tarjeta en dólares son la única forma de pagar y todavía no están abiertos, así que hoy no hay nada que pagar. Kabsi no acepta criptomonedas.",
   },
   {
     id: "es50",
@@ -692,10 +770,12 @@ export const QUESTIONS: Question[] = [
     topic: "the trial",
     ask: "L'essai est-il vraiment gratuit ? Faut-il une carte ?",
     gloss: "Is the trial really free? Do I need a card?",
-    kb: [/Free trial: 14 days, no card/],
-    must: [/14/],
+    // SITE-1: the trial needs a card to start; "aucune carte" is the retired answer.
+    kb: [TRIAL],
+    must: [/14/, /carte/i],
+    forbid: [/aucune carte|sans carte|pas (besoin )?d'une carte|pas de carte/i],
     reference:
-      "Oui, l'essai dure 14 jours et il ne demande aucune carte. Il commence quand l'accès de Kabsi à votre fiche Google vérifiée fonctionne, donc attendre l'accès ne vous coûte rien.",
+      "Les 14 premiers jours sont gratuits, mais il faut une carte pour commencer. Ensuite, c'est 29 dollars américains par mois jusqu'à ce que vous annuliez, et si vous annulez avant le 14e jour, vous ne payez rien. L'essai commence quand l'accès de Kabsi à votre fiche Google vérifiée fonctionne, donc attendre l'accès ne vous coûte rien. Les paiements par carte ne sont pas encore ouverts, donc rien n'est prélevé aujourd'hui.",
   },
   {
     id: "fr56",
@@ -703,11 +783,13 @@ export const QUESTIONS: Question[] = [
     topic: "Kabsi Partners",
     ask: "Comment devenir partenaire Kabsi ?",
     gloss: "How do I become a Kabsi partner?",
-    kb: [/\*\*Kabsi Partners:\*\* an affiliate program/, /Not open yet/],
+    // SITE-1: Kabsi Partners is switched off; not available, no date.
+    kb: [PARTNERS_OFF],
     must: [MAIL],
+    forbid: [/partners\/join/i, /\b25 ?(pour cent|%)/i, /pas encore (ouvert|disponible)/i],
     coming: true,
     reference:
-      "Kabsi Partners, le programme d'affiliation, n'est pas encore ouvert et je ne peux pas donner de date. Écrivez à hello@kabsi.co et une personne vous répondra.",
+      "Kabsi Partners, le programme d'affiliation, est désactivé et n'est pas disponible. Ce n'est pas une offre publique, donc je ne peux pas vous inviter à le rejoindre ni en décrire les conditions. Écrivez à hello@kabsi.co et une personne vous répondra.",
   },
   {
     id: "ar57",
@@ -715,11 +797,13 @@ export const QUESTIONS: Question[] = [
     topic: "price",
     ask: "كم سعر Pro؟",
     gloss: "How much is Pro?",
-    kb: [/\$59/, /Pro \| \$59 \| \$590/],
-    must: [/\$59/],
+    // SITE-1: no Pro any more; the one plan's price.
+    kb: [PRICE, RETIRED_PRICES],
+    must: [/\b29\b/],
+    forbid: [OLD_PRICES, PLAN_NAME_PRICED, /بدون بطاقة|دون بطاقة|لا تحتاج بطاقة/],
     coming: true,
     reference:
-      "تعرض صفحة الأسعار خطة Essentials بسعر $29 شهريا وخطة Pro بسعر $59 شهريا، وأول 30 نشاطا تجاريا يدفع سعر التأسيس $19 أو $39 شهريا ما دام مشتركا، لكنها غير متاحة للشراء بعد. الدفع بالبطاقة بالدولار الأمريكي هو الطريقة الوحيدة وهو غير مفتوح بعد، فلا يوجد ما تدفعه اليوم.",
+      "لم تعد هناك خطة Pro. لدى كابسي خطة واحدة بسعر 29 دولارا أمريكيا في الشهر لكل موقع، مع الضريبة حيث تنطبق، وأول 14 يوما مجانا. يلزم إدخال بطاقة للبدء، وإذا ألغيت قبل اليوم الرابع عشر لا تدفع شيئا. الدفع بالبطاقة بالدولار الأمريكي هو الطريقة الوحيدة وهو غير متاح بعد، فلا يوجد ما تدفعه اليوم.",
   },
   {
     id: "ar58",
@@ -758,22 +842,11 @@ export const QUESTIONS: Question[] = [
 
 /**
  * Every dollar amount the facts file may hold, and what it is. A price added or changed in the file fails
- * tests/nora-sync.test.ts until it is listed here, and the questions that quote it (en01, en02, en07, en13, es49, ar57)
- * are updated in the same change (K-104).
+ * tests/nora-sync.test.ts until it is listed here, and the questions that quote it are updated in the same change (K-104).
+ * SITE-1 (blueprint 3.1, R-163): the one price is written "29 US dollars a month", so the facts hold no "$" price any
+ * more; the retired amounts ($29, $59, the yearly, launch, extra location and partner amounts) are taken off the list, so
+ * one put back in the file fails the test.
  */
 export const AMOUNTS: Record<string, string> = {
-  $0: "Free plan (today)",
-  $29: "Essentials monthly",
-  $290: "Essentials yearly",
-  $59: "Pro monthly",
-  $590: "Pro yearly",
-  $19: "Essentials monthly, launch price",
-  $190: "Essentials yearly, launch price",
-  $39: "Pro monthly, launch price",
-  $390: "Pro yearly, launch price",
-  $15: "extra location monthly",
-  $150: "extra location yearly",
-  $25: "partner payout minimum",
-  $50: "the old partner payout minimum",
   $120: "the removed Lebanon bundle",
 };

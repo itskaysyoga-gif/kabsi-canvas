@@ -6,7 +6,16 @@
 // way owners write; six in Arabic and two in French, each with a gloss. Every business detail in a question is invented.
 // Where the facts do not answer what an owner asks (a price in dirhams or pounds, the VAT rate, a pause, a manager on
 // WhatsApp), the reference says what the facts hold and offers hello@kabsi.co: those questions mark the facts' gaps.
-import type { Question } from "./questions.ts";
+import {
+  NO_CARD_TRIAL,
+  OLD_PRICES,
+  ONE_PRICE,
+  PLAN_NAME_PRICED,
+  PRICE,
+  RETIRED_PRICES,
+  TRIAL,
+  type Question,
+} from "./questions.ts";
 
 const CALL = /setup-call/;
 const MAIL = /hello@kabsi\.co/;
@@ -18,25 +27,28 @@ const NOT_PROMISED =
   /(?<!n['’]t\s)(?<!\bnot\s)(?<!\bnever\s)(?<!\bno\s)(?<!\bcannot\s)\bguarantee[sd]?\b|\b(we will get you|you will rank|top of google|#1)\b/i;
 const DELETE_WARNING = /do not delete|don't delete|never delete/i;
 
-// Lines of the facts the price answers rest on.
-const PRICES = /Essentials is \$29 a month or \$290 a year\. Pro is \$59 a month or \$590 a year\./;
-const NOT_AS_AVAILABLE = /Do not quote Essentials or Pro prices as available/;
+// Lines of the facts the price answers rest on. SITE-1 (blueprint 3.1 of 24 Nov 2026, R-163): one plan at 29 US dollars
+// a month per location, the trial needs a card to start, and Essentials, Pro, the yearly prices, the 15 dollar extra
+// location, the launch price for the first 30 paying businesses and the 30-day partner trial are retired. The asks stay as
+// owners write them; an answer that quotes a retired price or offer fails.
 const CURRENCY =
   /Creem, Kabsi's merchant of record, prices products in US dollars or euros, not pounds or dirhams, so Kabsi shows no local-currency price and never a converted estimate/;
-const LAUNCH_PRICE =
-  /The first 30 paying businesses pay the launch price and keep it while they stay subscribed/;
 const NO_PUBLIC_OFFER =
-  /There is no public founding offer\. A business that was invited should open the link in its invitation\./;
+  /\*\*No public offer\.\*\* There is no public discount or special offer\. A business that was invited should open the link in its invitation\./;
 const NEVER_DESCRIBE_INVITE =
-  /Never give or guess an address for it, never describe the terms of an invitation or a free place/;
-const LAUNCH_PLACES = /\[n\] of 30 launch places left/;
+  /Never give or guess an address for it, never describe the terms of an invitation, never say how many places are left or how to apply/;
+const EACH_LOCATION =
+  /Each location is its own plan at \*\*29 US dollars a month\*\*\. There is no separate extra location price\./;
+const NO_YEARLY =
+  /\*\*One plan only\.\*\* There is no Free plan, no yearly price, no second plan and no separate price for extra locations\./;
 const NO_DISCOUNTS = /No discounts are listed\. For anything special, email hello@kabsi\.co/;
 const NOTHING_TO_PAY = /Until it opens there is nothing to pay/;
 const STOP = /Reply STOP at any time and nothing more is sent/;
 const GROUP_ID = /Kabsi Clients, ID 5481006796/;
 const ADD_STEPS = /Paste 5481006796, choose Manager, then Add \(on some screens, Invite\)/;
+// SITE-1: the cancel line of blueprint 3.1 (the older "Cancel on the Plan page or on WhatsApp" line is a dated record).
 const CANCEL_LINE =
-  /Yes, any time\. Cancel on the Plan page or on WhatsApp, and your plan runs to the end of the period you paid for\./;
+  /Cancel with one tap in Settings, or tell Kabsi on WhatsApp\. The plan runs to the end of the month paid for\./;
 
 export const QUESTIONS_OWNERS: Question[] = [
   // ── the price, in dollars, dirhams and pounds ────────────────────────────────────────────────────────────────────
@@ -45,23 +57,24 @@ export const QUESTIONS_OWNERS: Question[] = [
     lang: "en",
     topic: "the monthly price",
     ask: "how much is kabsi per month? i have a small salon in JLT",
-    kb: [PRICES, NOT_AS_AVAILABLE],
-    must: [/\$29/, /\$59/],
+    kb: [PRICE, TRIAL, RETIRED_PRICES],
+    must: [ONE_PRICE],
+    forbid: [OLD_PRICES, PLAN_NAME_PRICED, NO_CARD_TRIAL],
     coming: true,
     reference:
-      "Essentials is $29 a month and Pro is $59 a month, or $290 and $590 a year, in US dollars, plus tax where it applies. The first 30 paying businesses pay the launch price, Essentials $19 or Pro $39 a month, and keep it while they stay subscribed. Card payments are not open yet, so neither plan can be bought and there is nothing to pay today. You can start with the 14 day trial, with no card.",
+      "Kabsi is 29 US dollars a month per location, in US dollars, plus tax where it applies. 14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "o02",
     lang: "en",
     topic: "the price in pounds",
     ask: "whats that in pounds? I'm a barber in Manchester",
-    kb: [CURRENCY, /Prices are in US dollars, plus tax where it applies/],
-    must: [/US dollars/i],
-    forbid: [LOCAL_PRICE],
+    kb: [CURRENCY, /Prices are in US dollars, plus tax where it applies/, PRICE],
+    must: [/US dollars/i, ONE_PRICE],
+    forbid: [LOCAL_PRICE, OLD_PRICES],
     coming: true,
     reference:
-      "Kabsi's prices are in US dollars only, the same in every country: Essentials $29 a month and Pro $59 a month. Creem, Kabsi's merchant of record, prices in US dollars or euros, not pounds, so Kabsi gives no price in pounds and no converted estimate. Card payments are not open yet, so there is nothing to pay today. If you want to talk it through, write to hello@kabsi.co.",
+      "Kabsi's price is in US dollars only, the same in every country: 29 US dollars a month per location. Creem, Kabsi's merchant of record, prices in US dollars or euros, not pounds, so Kabsi gives no price in pounds and no converted estimate. Card payments are not open yet, so there is nothing to pay today. If you want to talk it through, write to hello@kabsi.co.",
   },
   {
     id: "o03",
@@ -101,39 +114,44 @@ export const QUESTIONS_OWNERS: Question[] = [
     topic: "two branches",
     ask: "We have 2 branches, Al Barsha and Dubai Marina. do i pay twice??",
     kb: [
-      /One plan covers one Google profile/,
-      /Each extra one is \$15 a month or \$150 a year on the same plan/,
+      /One plan covers one Google profile; each further location has its own plan at the same price\./,
+      EACH_LOCATION,
     ],
-    must: [/\$15/],
+    must: [ONE_PRICE, /own plan/i],
+    forbid: [OLD_PRICES, /\b15\b/],
     coming: true,
     reference:
-      "One plan covers one Google profile, and each branch has its own. The second branch is an extra location at $15 a month or $150 a year on the same plan. Card payments are not open yet, so there is nothing to pay today.",
+      "Yes, each branch is its own plan. One plan covers one Google profile, and each further location has its own plan at the same price, 29 US dollars a month. There is no separate extra location price. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "o06",
     lang: "en",
     topic: "the launch price for a second location",
     ask: "if I get the launch price, is my second shop also on the launch price?",
+    // SITE-1: there is no launch price any more; each location is its own plan at the one price.
     kb: [
-      /An extra location has one price for everyone, \$15 a month or \$150 a year, launch place or not/,
-      LAUNCH_PRICE,
-      /Extra location \| \$15 a month or \$150 a year/,
+      RETIRED_PRICES,
+      NO_PUBLIC_OFFER,
+      /Each location is its own plan at 29 US dollars a month, the same for everyone/,
     ],
-    must: [/\$15/],
+    must: [ONE_PRICE, /no launch price/i],
+    forbid: [OLD_PRICES, /\b15\b/],
     coming: true,
     reference:
-      "No. The launch price is for the plan: Essentials $19 or Pro $39 a month for the first 30 paying businesses, kept while they stay subscribed. An extra location has one price for everyone, $15 a month or $150 a year, launch place or not. Card payments are not open yet, so there is nothing to pay today.",
+      "There is no launch price any more: it was retired on 24 Nov 2026, and there is no public discount or special offer. Each location is its own plan at 29 US dollars a month, the same for everyone. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "o07",
     lang: "en",
     topic: "yearly against monthly",
     ask: "is it cheaper if I pay yearly",
-    kb: [/Yearly is ten months for the price of twelve/, PRICES],
-    must: [/\$290|\$590/],
+    // SITE-1: no yearly price; the old "ten months for the price of twelve" answer fails.
+    kb: [NO_YEARLY, PRICE, /The plan is monthly\. Monthly plans can be cancelled at any time\./],
+    must: [/no yearly/i, ONE_PRICE],
+    forbid: [YES, OLD_PRICES, /ten months|refundable in full/i],
     coming: true,
     reference:
-      "Yes. Yearly is ten months for the price of twelve: Essentials is $290 a year and Pro is $590 a year. A yearly plan is also refundable in full within 14 days of the plan starting. Card payments are not open yet, so nothing can be bought today.",
+      "No. There is no yearly price: the plan is monthly, 29 US dollars a month per location, and there is no public discount. Card payments are not open yet, so nothing can be bought today.",
   },
   {
     id: "o08",
@@ -141,24 +159,24 @@ export const QUESTIONS_OWNERS: Question[] = [
     topic: "the price in dirhams",
     ask: "كم السعر بالدرهم؟ عندي صالون في دبي",
     gloss: "How much is it in dirhams? I have a salon in Dubai.",
-    kb: [CURRENCY, PRICES],
-    must: [/\$29|\$59/],
-    forbid: [LOCAL_PRICE],
+    kb: [CURRENCY, PRICE],
+    must: [/\b29\b/],
+    forbid: [LOCAL_PRICE, OLD_PRICES, PLAN_NAME_PRICED],
     coming: true,
     reference:
-      "الأسعار بالدولار الأمريكي فقط، وهي نفسها في كل بلد، ولا تعرض كابسي سعرا بالدرهم ولا تقديرا محولا. خطة Essentials بسعر $29 شهريا وخطة Pro بسعر $59 شهريا، مع الضريبة حيث تنطبق، لكنها غير متاحة للشراء بعد لأن الدفع بالبطاقة لم يفتح بعد، فلا يوجد ما تدفعه اليوم.",
+      "الأسعار بالدولار الأمريكي فقط، وهي نفسها في كل بلد، ولا تعرض كابسي سعرا بالدرهم ولا تقديرا محولا. لدى كابسي خطة واحدة بسعر 29 دولارا أمريكيا في الشهر لكل موقع، مع الضريبة حيث تنطبق. الدفع بالبطاقة غير متاح بعد، فلا يوجد ما تدفعه اليوم.",
   },
   {
     id: "o09",
     lang: "en",
     topic: "a discount",
     ask: "any discount if i pay upfront? or a ramadan offer?",
-    kb: [/No discounts are listed\. For anything special, email hello@kabsi\.co/, LAUNCH_PRICE],
+    kb: [NO_DISCOUNTS, NO_PUBLIC_OFFER],
     must: [MAIL],
-    forbid: [/\d+\s?% off/i, YES],
+    forbid: [/\d+\s?% off/i, YES, /launch price|ten months|yearly (price|plan)s? (is|are)/i],
     coming: true,
     reference:
-      "No discounts are listed. Yearly is ten months for the price of twelve, and the first 30 paying businesses pay the launch price and keep it while they stay subscribed. For anything special, email hello@kabsi.co. Card payments are not open yet, so there is nothing to pay today.",
+      "No discounts are listed, and there is no public discount or special offer, so there is no price for paying upfront and no Ramadan offer. Kabsi is 29 US dollars a month per location. For anything special, email hello@kabsi.co. Card payments are not open yet, so there is nothing to pay today.",
   },
   // ── the free trial ───────────────────────────────────────────────────────────────────────────────────────────────
   {
@@ -166,10 +184,12 @@ export const QUESTIONS_OWNERS: Question[] = [
     lang: "en",
     topic: "the trial and a card",
     ask: "free trial? do I have to put my card in",
-    kb: [/Free trial: 14 days, no card/, /one trial per Google business/],
-    must: [/14 days/, /no card/i],
+    // SITE-1: yes, a card is needed to start; the old "no card" answer fails.
+    kb: [TRIAL, /one trial per Google business/],
+    must: [/14 days/, /card is needed/i],
+    forbid: [NO_CARD_TRIAL],
     reference:
-      "Yes, 14 days with no card. The trial starts when Kabsi's access to your verified Google profile works, so waiting for access costs you nothing, and there is one trial per Google business.",
+      "Yes, 14 days free, and a card is needed to start. Then 29 US dollars a month until you cancel, and if you cancel before day 14 you pay nothing. The 14 days start when Kabsi's access to your verified Google profile works, and there is one trial per Google business. Card payments are not open yet, so nothing is charged today.",
   },
   {
     id: "o11",
@@ -189,52 +209,72 @@ export const QUESTIONS_OWNERS: Question[] = [
     lang: "en",
     topic: "the end of the trial",
     ask: "what happens on day 14, will you charge my card?",
-    kb: [/on day 14 choose a plan or stop, nothing is charged by itself/, /7 days of grace/],
-    forbid: [YES],
+    // SITE-1: once card payments open, the plan starts on day 14 unless the owner cancelled; the old "nothing is charged
+    // by itself, 7 days of grace" answer fails.
+    kb: [
+      /If the owner has not cancelled by day 14, the plan starts at 29 US dollars a month/,
+      /Cancel before day 14 and you pay nothing/,
+    ],
+    must: [/day 14/, ONE_PRICE],
+    forbid: [NO_CARD_TRIAL, /nothing is charged by itself/i, /\bgrace\b/i],
+    coming: true,
     reference:
-      "No. Nothing is charged by itself, and the trial needs no card. On day 14 you choose a plan or stop. For 7 more days Kabsi keeps watching and drafting, but publishes nothing until you choose. Card payments are not open yet, so there is nothing to pay today.",
+      "Once card payments open, a card is needed to start, and if you have not cancelled by day 14 the plan starts at 29 US dollars a month. Cancel before day 14 and you pay nothing: one tap in Settings, or tell Kabsi on WhatsApp. Card payments are not open yet, so nothing is charged today.",
   },
   {
     id: "o13",
     lang: "en",
     topic: "what the trial includes",
     ask: "is the trial the full thing or a cut down version?",
-    kb: [/with the whole of Pro/, /3 of your choice/, /up to \*\*10\*\* older unanswered reviews/],
-    must: [/Pro/],
+    // SITE-1: the whole plan, with no trial limits.
+    kb: [
+      /\*\*During the trial\*\* you get the whole plan/,
+      /On the first day every unanswered review from the last 90 days arrives with a reply ready to approve/,
+    ],
+    must: [/whole plan/i],
+    forbid: [/\b(3|three) profile fixes\b|\bup to 10 older\b|\b100 drafts\b|\bPro\b/i],
     reference:
-      "It is the whole of Pro, with three limits: Kabsi applies 3 profile fixes of your choice, drafts replies for up to 10 older unanswered reviews, and after 100 drafts asks you to choose a plan or book a free setup call. The rest comes when you subscribe.",
+      "It is the whole plan. On the first day every unanswered review from the last 90 days arrives with a reply ready to approve, together with the first check of your listing and links.",
   },
   {
     id: "o14",
     lang: "en",
     topic: "a trial for each salon",
     ask: "i have 2 salons, do I get 2 free trials?",
-    kb: [/One trial per business and per person/, /one per Google account/],
-    must: [/\$15/],
-    forbid: [YES],
+    kb: [/One trial per business and per person/, /one per Google account/, EACH_LOCATION],
+    must: [ONE_PRICE],
+    forbid: [YES, OLD_PRICES],
     reference:
-      "No. There is one trial per Google business and one per Google account, so a second salon added from the same Google account goes straight to a plan. A second salon is an extra location at $15 a month or $150 a year. Card payments are not open yet, so there is nothing to pay today. To talk it through, write to hello@kabsi.co.",
+      "No. There is one trial per Google business and one per Google account, so a second salon added from the same Google account goes straight to the paid plan. Each location is its own plan at 29 US dollars a month. Card payments are not open yet, so there is nothing to pay today. To talk it through, write to hello@kabsi.co.",
   },
   {
     id: "o15",
     lang: "en",
     topic: "a 30 day trial",
     ask: "my friend said she got 30 days trial, why do I only get 14?",
-    kb: [/\*\*30 days\*\* through a partner link/, /\*\*Kabsi Partners:\*\* an affiliate program/],
+    // SITE-1: the 30-day partner trial is retired and Kabsi Partners is switched off.
+    kb: [
+      /It replaces the 14-day trial with no card and the 30-day trial through a partner link/,
+      /\*\*Kabsi Partners is switched off\*\*/,
+    ],
     must: [/14 days/],
+    forbid: [
+      /30 days through a partner|partner link (gives|gets)|is 30 days (only )?for|Kabsi Partners is not open yet/i,
+    ],
     coming: true,
     reference:
-      "The trial is 14 days for everyone. It is 30 days only for a business that comes through a partner link, and Kabsi Partners is not open yet. There are no discount codes.",
+      "The trial is 14 days for everyone. The 30-day trial through a partner link was retired on 24 Nov 2026, and Kabsi Partners is switched off, so it is not available. There are no discount codes.",
   },
   {
     id: "o16",
     lang: "en",
     topic: "starting over Christmas",
     ask: "can I start the trial over christmas and decide in january? salon in Didsbury",
-    kb: [/Free trial: 14 days, no card/, /the United Kingdom by nation \(GOV\.UK bank holidays/],
-    must: [/14 days/],
+    kb: [TRIAL, /the United Kingdom by nation \(GOV\.UK bank holidays/],
+    must: [/14 days/, /card is needed/i],
+    forbid: [NO_CARD_TRIAL, /nothing is charged by itself/i],
     reference:
-      "Yes. The trial is 14 days with no card, and it starts when Kabsi's access to your Google profile works. On day 14 you choose a plan or stop, and nothing is charged by itself. Over the bank holidays, Kabsi asks you about your hours five days before each one, and nothing changes on Google until you confirm.",
+      "You can start whenever you like. 14 days free. Then 29 US dollars a month until you cancel. A card is needed to start, and if you cancel before day 14 you pay nothing, so decide within the 14 days. They start when Kabsi's access to your Google profile works. Over the bank holidays, Kabsi asks you about your hours five days before each one, and nothing changes on Google until you confirm.",
   },
   {
     id: "o17",
@@ -242,25 +282,28 @@ export const QUESTIONS_OWNERS: Question[] = [
     topic: "the trial and a card",
     ask: "التجربة المجانية تحتاج بطاقة؟",
     gloss: "Does the free trial need a card?",
-    kb: [/Free trial: 14 days, no card/],
-    must: [/14/],
+    kb: [TRIAL],
+    must: [/14/, /بطاقة/],
+    forbid: [/بدون بطاقة|دون بطاقة|لا تحتاج بطاقة|لا تحتاج إلى بطاقة/],
     reference:
-      "لا. التجربة المجانية مدتها 14 يوما ولا تحتاج بطاقة. تبدأ عندما يعمل وصول كابسي إلى ملفك على جوجل، فالانتظار لا يكلفك شيئا، وفي اليوم الأخير تختار خطة أو تتوقف ولا يتم خصم أي مبلغ.",
+      "نعم. أول 14 يوما مجانا، لكن يلزم إدخال بطاقة للبدء. بعدها 29 دولارا أمريكيا في الشهر حتى تلغي، وإذا ألغيت قبل اليوم الرابع عشر لا تدفع شيئا. تبدأ التجربة عندما يعمل وصول كابسي إلى ملفك على جوجل، فالانتظار لا يكلفك شيئا. الدفع بالبطاقة غير متاح بعد، فلا يتم خصم أي مبلغ اليوم.",
   },
   {
     id: "o18",
     lang: "en",
     topic: "after the trial",
     ask: "if I don't continue after the trial what happens to the replies waiting",
+    // SITE-1: a trial cancelled before day 14 ends the work; there are no days of grace.
     kb: [
-      /Kabsi keeps watching and preparing replies but publishes nothing until a plan is chosen/,
+      /\*\*A trial cancelled before day 14:\*\* nothing is charged\. Kabsi stops its work and publishes nothing more/,
       /The review link and QR code keep working, for as long as Kabsi operates/,
     ],
     must: [/publishes nothing/i],
+    forbid: [/\bgrace\b/i],
     reference:
-      "After the trial there are 7 days of grace: Kabsi keeps watching and preparing replies but publishes nothing until a plan is chosen, and whatever is waiting stays waiting. Choose a plan and it can be approved. Your review link and QR code keep working with no plan.",
+      "If you cancel before day 14, nothing is charged, and Kabsi stops its work and publishes nothing more, so the replies waiting are not published. Your review link and QR code keep working with no plan.",
   },
-  // ── the founding places: no public offer since 10 Nov 2026 (R-151); the launch price stays ─────────────────────────
+  // ── the founding places: no public offer since 10 Nov 2026 (R-151); the launch price retired 24 Nov 2026 (SITE-1) ─
   {
     id: "o19",
     lang: "en",
@@ -270,42 +313,49 @@ export const QUESTIONS_OWNERS: Question[] = [
     must: [/no public/i, /invitation/i],
     forbid: [/\/founding/i, /for beauty and hair/i, /how to apply/i],
     reference:
-      "There is no public founding offer, so I cannot describe free months or places. A business that was invited should open the link in its invitation. If you were not invited and want to ask, write to hello@kabsi.co and a person will answer.",
+      "There is no public offer or discount, so I cannot describe free months or places. A business that was invited should open the link in its invitation. If you were not invited and want to ask, write to hello@kabsi.co and a person will answer.",
   },
   {
     id: "o20",
     lang: "en",
     topic: "no public offer, few reviews",
     ask: "barbershop in Manchester, only 6 reviews on google. can I still apply for founding?",
-    kb: [NO_PUBLIC_OFFER, LAUNCH_PRICE, NO_DISCOUNTS],
+    kb: [NO_PUBLIC_OFFER, RETIRED_PRICES, NO_DISCOUNTS],
     must: [/no public/i, MAIL],
-    forbid: [/\/founding/i, /at least 10 reviews/i],
+    forbid: [/\/founding/i, /at least 10 reviews/i, /launch price/i, OLD_PRICES],
     coming: true,
     reference:
-      "There is no public founding offer, so there is nothing to apply for, and I cannot say what an invitation asks. If you were invited, open the link in your invitation. For anything else, write to hello@kabsi.co. The launch price, Essentials $19 or Pro $39 a month, is for the first 30 paying businesses; card payments are not open yet, so nothing can be bought today.",
+      "There is no public offer or discount, so there is nothing to apply for, and I cannot say what an invitation asks. If you were invited, open the link in your invitation. For anything else, write to hello@kabsi.co. Kabsi itself is 29 US dollars a month per location, and card payments are not open yet, so nothing can be bought today.",
   },
   {
     id: "o21",
     lang: "en",
     topic: "an invitation against the launch price",
     ask: "confused. founding 25 and launch price, same thing?",
-    kb: [NO_PUBLIC_OFFER, LAUNCH_PRICE],
-    must: [/no public/i, /30/],
-    forbid: [/\/founding/i, /three months|3 months/i],
+    // SITE-1: the launch price is retired; the answer says so instead of quoting it.
+    kb: [NO_PUBLIC_OFFER, RETIRED_PRICES],
+    must: [/no public/i, /retired/i],
+    forbid: [/\/founding/i, /three months|3 months/i, OLD_PRICES, /(pay|keep) the launch price/i],
     coming: true,
     reference:
-      "No. There is no public founding offer, and I cannot describe an invitation. The launch price is public: the first 30 paying businesses pay Essentials $19 or Pro $39 a month and keep it while they stay subscribed. Card payments are not open yet, so nothing can be bought today.",
+      "Neither is on offer. There is no public offer or discount, and I cannot describe an invitation. The launch price for the first 30 paying businesses was retired on 24 Nov 2026: Kabsi has one plan, 29 US dollars a month per location. Card payments are not open yet, so nothing can be bought today.",
   },
   {
     id: "o22",
     lang: "en",
     topic: "places left for salons",
     ask: "how many founding places left for salons?",
-    kb: [NO_PUBLIC_OFFER, LAUNCH_PLACES, NEVER_DESCRIBE_INVITE],
+    kb: [NO_PUBLIC_OFFER, RETIRED_PRICES, NEVER_DESCRIBE_INVITE],
     must: [/no public/i],
-    forbid: [/\/founding/i, /for beauty and hair/i, /\b(10|5) places\b/i],
+    forbid: [
+      /\/founding/i,
+      /for beauty and hair/i,
+      /\b\d+ (of 30 )?(launch )?places\b/i,
+      /places left:/i,
+      /launch places/i,
+    ],
     reference:
-      "There is no public founding offer, so I have no places to count for it. What the pricing page shows is the launch price for the first 30 paying businesses, with the real number of launch places left. I cannot see that live count here. A business that was invited should open the link in its invitation.",
+      "There is no public offer or discount, so there are no places to count. The launch price for the first 30 paying businesses was retired on 24 Nov 2026, and Kabsi has one plan for everyone. A business that was invited should open the link in its invitation.",
   },
   {
     id: "o23",
@@ -317,7 +367,7 @@ export const QUESTIONS_OWNERS: Question[] = [
     forbid: [/\/founding/i, /day 90/i, /90 days/i],
     coming: true,
     reference:
-      "There is no public founding offer, so I cannot describe its terms. If you were invited, the invitation or a person at Kabsi will tell you; you can write to hello@kabsi.co. Card payments are not open yet, so there is nothing to pay today.",
+      "There is no public offer or discount, so I cannot describe the terms of an invitation. If you were invited, the invitation or a person at Kabsi will tell you; you can write to hello@kabsi.co. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "o24",
@@ -328,7 +378,7 @@ export const QUESTIONS_OWNERS: Question[] = [
     must: [/invitation/i, MAIL],
     forbid: [/\/founding/i, /approve the final text/i],
     reference:
-      "I cannot describe the terms of an invitation, because there is no public founding offer. If you were invited, ask the person who invited you before you agree to anything, or write to hello@kabsi.co and say you do not want to be named.",
+      "I cannot describe the terms of an invitation, because there is no public offer. If you were invited, ask the person who invited you before you agree to anything, or write to hello@kabsi.co and say you do not want to be named.",
   },
   {
     id: "o25",
@@ -339,7 +389,7 @@ export const QUESTIONS_OWNERS: Question[] = [
     must: [MAIL, /invitation/i],
     forbid: [/\/founding/i, /2 working days/i],
     reference:
-      "I cannot see applications from here, and there is no public founding offer. Open the link in your invitation if you have one. If you have no answer, write to hello@kabsi.co and a person will check.",
+      "I cannot see applications from here, and there is no public offer to apply for. Open the link in your invitation if you have one. If you have no answer, write to hello@kabsi.co and a person will check.",
   },
   {
     id: "o26",
@@ -358,14 +408,16 @@ export const QUESTIONS_OWNERS: Question[] = [
     lang: "en",
     topic: "keeping the launch price",
     ask: "is the launch price locked forever even if you put prices up later",
+    // SITE-1: there is no launch price to keep; the price rule for a plan already paid for still holds.
     kb: [
       /Kabsi may change prices for future purchases\. A plan already paid for keeps its price\./,
-      /Upgrades and downgrades stay at the price the business is on/,
+      RETIRED_PRICES,
     ],
-    forbid: [/\b(forever|for life|lifetime)\b/i],
+    must: [/no launch price/i],
+    forbid: [/\b(forever|for life|lifetime)\b/i, OLD_PRICES, /keep the launch price/i],
     coming: true,
     reference:
-      "The first 30 paying businesses keep the launch price while they stay subscribed. Kabsi may change prices for future purchases, and a plan already paid for keeps its price. Upgrades and downgrades stay at the price the business is on. Card payments are not open yet, so nothing can be bought today.",
+      "There is no launch price any more: it was retired on 24 Nov 2026, and Kabsi has one plan, 29 US dollars a month per location. Kabsi may change prices for future purchases, and a plan already paid for keeps its price. Card payments are not open yet, so nothing can be bought today.",
   },
   // ── card payments, not open yet ──────────────────────────────────────────────────────────────────────────────────
   {
@@ -373,11 +425,11 @@ export const QUESTIONS_OWNERS: Question[] = [
     lang: "en",
     topic: "paying now",
     ask: "can I pay now? want to lock my spot before it fills",
-    kb: [/By card, in US dollars, and nothing else/, NOTHING_TO_PAY],
-    forbid: [YES],
+    kb: [/By card, in US dollars, and nothing else/, NOTHING_TO_PAY, NO_PUBLIC_OFFER],
+    forbid: [YES, /launch price (goes|is for)|first 30 paying/i, NO_CARD_TRIAL],
     coming: true,
     reference:
-      "Not yet. Card payments in US dollars are not open yet, so there is nothing to pay today. The launch price goes to the first 30 paying businesses once card payments open. You can start the 14 day trial now, with no card.",
+      "Not yet. Card payments in US dollars are not open yet, so there is nothing to pay today, and there is no spot to lock: there is no public offer or discount. When checkout opens, it is 14 days free, then 29 US dollars a month until you cancel, and a card is needed to start.",
   },
   {
     id: "o29",
@@ -401,12 +453,12 @@ export const QUESTIONS_OWNERS: Question[] = [
     topic: "paying by card",
     ask: "Je peux payer par carte maintenant ?",
     gloss: "Can I pay by card now?",
-    kb: [/By card, in US dollars, and nothing else/, NOTHING_TO_PAY],
+    kb: [/By card, in US dollars, and nothing else/, NOTHING_TO_PAY, TRIAL],
     must: [/carte/i],
-    forbid: [/^\s*oui\b/i],
+    forbid: [/^\s*oui\b/i, /aucune carte|sans carte/i],
     coming: true,
     reference:
-      "Pas encore. Le paiement par carte, en dollars américains, n'est pas encore ouvert, donc il n'y a rien à payer aujourd'hui. L'essai de 14 jours ne demande aucune carte.",
+      "Pas encore. Le paiement par carte, en dollars américains, n'est pas encore ouvert, donc il n'y a rien à payer aujourd'hui. Une carte sera nécessaire pour commencer les 14 jours gratuits, et si vous annulez avant le 14e jour, vous ne payez rien.",
   },
   {
     id: "o31",
@@ -441,11 +493,16 @@ export const QUESTIONS_OWNERS: Question[] = [
     lang: "en",
     topic: "Plans open soon",
     ask: "the plan page just says Plans open soon and the button does nothing, is it broken",
-    kb: [/both buttons read \*\*Plans open soon\*\* and do nothing/],
-    must: [/Plans open soon/],
+    // SITE-1: the two plan buttons are gone; the Plan page says card payments are not open yet.
+    kb: [
+      /the Plan page says card payments are not open yet/,
+      /Card checkout opens at launch\. Until then nothing is charged and nothing can be bought\./,
+    ],
+    must: [/not open yet/],
+    forbid: [/Choose (Essentials|Pro)/],
     coming: true,
     reference:
-      "It is not broken. Until card payments open, the Choose Essentials and Choose Pro buttons read Plans open soon and do nothing. Card payments are not open yet, so there is nothing to pay today, and your trial needs no card.",
+      "It is not broken. Until card payments open, nothing can be bought, and the Plan page says card payments are not open yet. Kabsi has one plan, 29 US dollars a month per location, and nothing is charged today.",
   },
   {
     id: "o34",
@@ -454,12 +511,13 @@ export const QUESTIONS_OWNERS: Question[] = [
     ask: "who actually takes the money, is it safe",
     kb: [
       /Card payments will be processed by Creem, our merchant of record/,
-      /Choosing a plan opens Creem's secure checkout/,
+      /Starting the trial opens Creem's secure checkout for that business/,
     ],
     must: [/Creem/],
+    forbid: [/Choosing a plan/i],
     coming: true,
     reference:
-      "Card payments will be processed by Creem, Kabsi's merchant of record. Choosing a plan will open Creem's secure checkout, by card in US dollars. Card payments are not open yet, so there is nothing to pay today, and Kabsi never asks for a card number in a chat.",
+      "Card payments will be processed by Creem, Kabsi's merchant of record. Starting the trial will open Creem's secure checkout, by card in US dollars, and card changes happen only on Creem's secure page. Card payments are not open yet, so there is nothing to pay today, and Kabsi never asks for a card number in a chat.",
   },
   {
     id: "o35",
@@ -585,12 +643,13 @@ export const QUESTIONS_OWNERS: Question[] = [
     topic: "photos on WhatsApp",
     ask: "can I send you pics of my nail sets on whatsapp and you post them",
     kb: [
-      /Sending a photo to the Kabsi number works on both plans/,
+      /Sending a photo to the Kabsi number works for every business on the plan/,
       /A photo with words becomes a post/,
     ],
     must: [/yes|approve/i],
+    forbid: [/both plans/i],
     reference:
-      "Yes, on both plans, once you connect WhatsApp. Send a photo and Kabsi checks it and asks whether to put it on your Google profile. Send it with a line about it and Kabsi turns it into a Google post for your yes. Nothing goes on Google until you approve, and you have 10 seconds to undo.",
+      "Yes, for every business on the plan, once you connect WhatsApp. Send a photo and Kabsi checks it and asks whether to put it on your Google profile. Send it with a line about it and Kabsi turns it into a Google post for your yes. Nothing goes on Google until you approve, and you have 10 seconds to undo.",
   },
   {
     id: "o45",
@@ -718,10 +777,14 @@ export const QUESTIONS_OWNERS: Question[] = [
     lang: "en",
     topic: "a promised ranking",
     ask: "can you guarantee we will be top 3 on google maps in Business Bay",
-    kb: [/Nobody can promise a ranking, and we don't/],
-    forbid: [NOT_PROMISED, YES],
+    // SITE-1: the nearby check is switched off, so the answer no longer points to it.
+    kb: [
+      /Nobody can promise a ranking, and we don't/,
+      /Kabsi runs no local rank scans and makes no ranking claim/,
+    ],
+    forbid: [NOT_PROMISED, YES, /nearby check shows/i],
     reference:
-      "No. Nobody can promise a ranking, and Kabsi doesn't. Kabsi does the parts you control: a reply ready for every review, accurate details and hours, and photos and posts you approve. The nearby check shows where you come up on Google Maps from places around you, and it never promises a position.",
+      "No. Nobody can promise a ranking, and Kabsi doesn't. Kabsi does the parts you control: a reply ready for every review, accurate details and hours, and photos and posts you approve. It runs no local rank scans and makes no ranking claim.",
   },
   {
     id: "o57",
@@ -768,9 +831,9 @@ export const QUESTIONS_OWNERS: Question[] = [
       /Never say Kabsi can remove, hide or bury a review/,
       /Nobody outside Google can remove a review/,
     ],
-    forbid: [YES],
+    forbid: [YES, /\bon Pro\b/i],
     reference:
-      "No. Nobody outside Google can remove a review, and Kabsi cannot either. You can report a review that breaks Google's rules to Google, for free, and on Pro Kabsi has a guide for it. Google decides, and Kabsi helps you answer calmly in the meantime.",
+      "No. Nobody outside Google can remove a review, and Kabsi cannot either. You can report a review that breaks Google's rules to Google, for free, and Report this review in Kabsi guides you through it. Google decides, and Kabsi helps you answer calmly in the meantime.",
   },
   {
     id: "o61",
@@ -811,10 +874,12 @@ export const QUESTIONS_OWNERS: Question[] = [
     lang: "en",
     topic: "cancelling any time",
     ask: "can I cancel anytime? no contract?",
-    kb: [CANCEL_LINE],
+    kb: [CANCEL_LINE, /The plan is monthly\. Monthly plans can be cancelled at any time\./],
     must: [/any time/i],
+    forbid: [/Plan page or on WhatsApp/i, /yearly/i],
+    coming: true,
     reference:
-      "Yes, any time. Cancel on the Plan page or on WhatsApp, and your plan runs to the end of the period you paid for. Card payments are not open yet, so there is nothing to pay today.",
+      "Yes, any time. The plan is monthly. Cancel with one tap in Settings, or tell Kabsi on WhatsApp, and the plan runs to the end of the month you paid for. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "o65",
@@ -826,18 +891,26 @@ export const QUESTIONS_OWNERS: Question[] = [
       /Hand off every refund request/,
     ],
     must: [MAIL],
+    forbid: [/yearly|refundable in full/i],
     reference:
-      "A monthly plan runs to the end of the month paid for and is not refunded for that month. Yearly plans are refundable in full within 14 days of the plan starting. A person approves any refund, so write to hello@kabsi.co.",
+      "A monthly plan runs to the end of the month paid for and is not refunded for that month. Cancel before day 14 of the trial and you pay nothing. A person handles any refund, so write to hello@kabsi.co.",
   },
   {
     id: "o66",
     lang: "en",
     topic: "a yearly refund",
     ask: "paid for the year last week and changed my mind, refund?",
-    kb: [/Yearly plans are refundable in full within 14 days of the plan starting/],
-    must: [MAIL, /14 days/],
+    // SITE-1: there is no yearly plan; the old "refundable in full within 14 days" answer fails.
+    kb: [
+      NO_YEARLY,
+      /A monthly plan runs to the end of the month paid for and is not refunded for that month/,
+      /Hand off every refund request/,
+    ],
+    must: [MAIL, /no yearly/i],
+    forbid: [/refundable in full|within 14 days of the plan starting/i],
+    coming: true,
     reference:
-      "Yearly plans are refundable in full within 14 days of the plan starting. I can explain the policy, but a person approves any refund, so write to hello@kabsi.co from your account address.",
+      "There is no yearly plan: Kabsi is monthly only, and card payments are not open yet, so Kabsi has charged nothing. I can explain the policy, but a person handles every refund question, so write to hello@kabsi.co from your account address and say what you paid.",
   },
   {
     id: "o67",
@@ -855,12 +928,12 @@ export const QUESTIONS_OWNERS: Question[] = [
     topic: "what stops",
     ask: "what stops working when my plan ends",
     kb: [
-      /Reply drafts, Google Protection and the weekly report stop/,
+      /Reply drafts, Google Protection and the weekly report stop, and so does the monthly report/,
       /The review link and QR code keep working, for as long as Kabsi operates/,
     ],
     must: [/review link/i],
     reference:
-      "Reply drafts, Google Protection and the weekly report stop. Your review link and QR code keep working, and so does any NFC card that carries the link. Choose a plan on the Plan page to turn everything back on.",
+      "Reply drafts, Google Protection and the weekly report stop, and so does the monthly report. Your review link and QR code keep working, and so does any NFC card that carries the link. Choose the plan again on the Plan page to turn everything back on.",
   },
   {
     id: "o69",
@@ -868,13 +941,15 @@ export const QUESTIONS_OWNERS: Question[] = [
     topic: "pausing a plan",
     ask: "closing the salon for 2 months in summer, can I pause the plan instead of cancelling?",
     kb: [
-      /There is no pause\. Cancel on the Plan page or on WhatsApp/,
+      /There is no pause\. Cancel with one tap in Settings, or tell Kabsi on WhatsApp/,
       CANCEL_LINE,
       /\*\*Closed for a while\*\*/,
     ],
     must: [/pause/i, /Closed for a while/],
+    forbid: [/launch price/i],
+    coming: true,
     reference:
-      "There is no pause. Cancel on the Plan page or on WhatsApp and your plan runs to the end of the period you paid for, then choose a plan again when you reopen. A launch price is kept only while the subscription stays paid. For the weeks you are closed, set Closed for a while under Hours, and Google shows it after your approval.",
+      "There is no pause. Cancel with one tap in Settings, or tell Kabsi on WhatsApp, and the plan runs to the end of the month you paid for; choose the plan again when you reopen. For the weeks you are closed, set Closed for a while under Hours, and Google shows it after your approval. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     id: "o70",
@@ -885,7 +960,7 @@ export const QUESTIONS_OWNERS: Question[] = [
     must: [/Keep my plan/],
     coming: true,
     reference:
-      "Once plans open, Keep my plan undoes a cancel before it happens, because a cancel ends the plan only at the end of the paid period. Card payments are not open yet, so there is no paid plan to cancel today.",
+      "Once card payments open, Keep my plan undoes a cancel before it happens, because a cancel ends the plan only at the end of the paid month. Card payments are not open yet, so there is no paid plan to cancel today.",
   },
   {
     id: "o71",
@@ -902,11 +977,15 @@ export const QUESTIONS_OWNERS: Question[] = [
     lang: "en",
     topic: "cancelling on WhatsApp",
     ask: "can I cancel just by messaging on whatsapp",
-    kb: [CANCEL_LINE, /"cancel" asks first, then ends the plan at the end of the paid period/],
+    kb: [
+      CANCEL_LINE,
+      /Kabsi asks first, then ends the plan at the end of the paid month, never at once/,
+    ],
     must: [/WhatsApp/],
+    forbid: [/Plan page or on WhatsApp/i],
     coming: true,
     reference:
-      "Cancel on the Plan page or on WhatsApp, and your plan runs to the end of the period you paid for. Only the owner can, and Kabsi asks first. Card payments are not open yet, so there is no paid plan to cancel today.",
+      "Yes. Tell Kabsi on WhatsApp, or cancel with one tap in Settings, and the plan runs to the end of the month you paid for. Only the owner can, and Kabsi asks first. Card payments are not open yet, so there is no paid plan to cancel today.",
   },
   // ── data and deletion ────────────────────────────────────────────────────────────────────────────────────────────
   {
@@ -1025,10 +1104,12 @@ export const QUESTIONS_OWNERS: Question[] = [
     lang: "en",
     topic: "a nail salon",
     ask: "does this work for a nail salon or only hair?",
-    kb: [/\/for\/nail-salon/, /nail and beauty salons "nail salon"/],
+    // SITE-1: the free check no longer searches the map around you; the nail salon notes name its search term.
+    kb: [/\/for\/nail-salon/, /Search term for the free check: "nail salon"/],
     must: [/nail/i],
+    forbid: [/searches[^.]*Google Maps around you/i],
     reference:
-      "Yes, it works for a nail salon. Kabsi prepares a reply for every new review, keeps your hours and details right, and turns your photos into posts for your yes. The free check searches nail salon on Google Maps around you, and there is a page for nail salons at kabsi.co/for/nail-salon.",
+      "Yes, it works for a nail salon. Kabsi prepares a reply for every new review, keeps your hours and details right, and turns a photo of a new set with one line into a post for your yes. There is a page for nail salons at kabsi.co/for/nail-salon.",
   },
   {
     id: "o83",
@@ -1085,10 +1166,12 @@ export const QUESTIONS_OWNERS: Question[] = [
     kb: [
       /Each location is its own business in Kabsi, with its own Google profile, reviews, plan and review link/,
       /"Your businesses", listing each business/,
+      EACH_LOCATION,
     ],
     must: [/Your businesses/],
+    forbid: [OLD_PRICES, /\b15\b/],
     reference:
-      "Yes. Each shop is its own business in Kabsi, with its own Google profile, reviews and review link. Tap the business name at the top to open Your businesses and switch between them, or Add another business. The second shop is an extra location at $15 a month or $150 a year.",
+      "Yes. Each shop is its own business in Kabsi, with its own Google profile, reviews and review link. Tap the business name at the top to open Your businesses and switch between them, or Add another business. Each shop is its own plan at 29 US dollars a month.",
   },
   {
     id: "o88",
@@ -1130,12 +1213,19 @@ export const QUESTIONS_OWNERS: Question[] = [
     lang: "en",
     topic: "is there a founding offer",
     ask: "Is there a founding offer?",
-    kb: [NO_PUBLIC_OFFER, NEVER_DESCRIBE_INVITE, LAUNCH_PRICE],
+    // SITE-1: the launch price it pointed to is retired too.
+    kb: [NO_PUBLIC_OFFER, NEVER_DESCRIBE_INVITE, RETIRED_PRICES],
     must: [/no public/i, /invitation/i],
-    forbid: [/\/founding/i, /three months|3 months/i, /apply at|apply on|apply here/i],
+    forbid: [
+      /\/founding/i,
+      /three months|3 months/i,
+      /apply at|apply on|apply here/i,
+      OLD_PRICES,
+      /(pay|keep) the launch price/i,
+    ],
     coming: true,
     reference:
-      "There is no public founding offer. A business that was invited should open the link in its invitation. What is public is the launch price: the first 30 paying businesses pay Essentials $19 or Pro $39 a month and keep it while they stay subscribed. Card payments are not open yet, so nothing can be bought today.",
+      "No. There is no public offer or discount. A business that was invited should open the link in its invitation. The launch price for the first 30 paying businesses was retired on 24 Nov 2026: Kabsi has one plan, 29 US dollars a month per location. Card payments are not open yet, so nothing can be bought today.",
   },
   {
     id: "o92",
@@ -1144,9 +1234,9 @@ export const QUESTIONS_OWNERS: Question[] = [
     ask: "I got a Founding 25 invite, what now?",
     kb: [NO_PUBLIC_OFFER, NEVER_DESCRIBE_INVITE, NO_DISCOUNTS],
     must: [/invitation/i, MAIL],
-    forbid: [/\/founding/i, /three months|3 months/i, /2 working days/i],
+    forbid: [/\/founding/i, /three months|3 months/i, /2 working days/i, NO_CARD_TRIAL, /\bPro\b/],
     coming: true,
     reference:
-      "Open the link in your invitation. I do not have a link to give you, and I cannot describe the terms of an invitation, because there is no public founding offer. If the link does not work, write to hello@kabsi.co and a person will help. Card payments are not open yet, so nothing can be bought today, and your trial of Pro needs no card.",
+      "Open the link in your invitation. I do not have a link to give you, and I cannot describe the terms of an invitation, because there is no public offer. If the link does not work, write to hello@kabsi.co and a person will help. Card payments are not open yet, so nothing can be bought today.",
   },
 ];
