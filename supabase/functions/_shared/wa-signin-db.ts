@@ -9,6 +9,7 @@
 // spent in the same call. No phone provider, no SMS, no paid message, no custom JWT signing.
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 import { admin, rateLimit, sha256Hex } from "./kabsi.ts";
+import { serviceKey } from "./service-key.ts";
 import { codeHash, type CheckResult, LIMITS, type Session, type StartRow, WHATSAPP_SIGNIN_CONSENT } from "./wa-signin.ts";
 import type { SigninDb } from "./whatsapp/signin.ts";
 
@@ -45,7 +46,7 @@ export async function mintSession(userId: string, from: { ua: string | null; ip:
   const headers: Record<string, string> = {};
   if (from.ua) headers["user-agent"] = from.ua.slice(0, 512);
   if (from.ip && from.ip !== "unknown") headers["sb-forwarded-for"] = from.ip;
-  const auth = createClient(env("SUPABASE_URL")!, env("SUPABASE_ANON_KEY") ?? env("SUPABASE_SERVICE_ROLE_KEY")!, {
+  const auth = createClient(env("SUPABASE_URL")!, env("SUPABASE_ANON_KEY") ?? serviceKey((n) => env(n)), {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
     global: { headers },
   }).auth;

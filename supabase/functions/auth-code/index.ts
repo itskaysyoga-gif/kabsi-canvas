@@ -3,6 +3,7 @@
 // captcha check (when switched on in the dashboard) is skipped for this caller only; the visitor's IP goes along in
 // Sb-Forwarded-For so Auth's own per-IP limits still see the real visitor.
 import { serve } from "../_shared/kabsi.ts";
+import { serviceKey } from "../_shared/service-key.ts";
 import { clientIp } from "../_shared/client-ip.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 import { captureError, CORS, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
@@ -17,7 +18,7 @@ serve(withBodyCap(makeHandler({
   rateLimit,
   verifyTurnstile,
   sendCode: async (email, ip) => {
-    const auth = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+    const auth = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey(), {
       auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
       global: { headers: ip !== "unknown" ? { "sb-forwarded-for": ip } : {} },
     }).auth;

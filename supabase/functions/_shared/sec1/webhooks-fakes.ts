@@ -113,11 +113,11 @@ export async function installFakeDb(): Promise<void> {
       body: text ? JSON.parse(text) : undefined,
     });
   }) as typeof fetch;
-  const was = { url: Deno.env.get("SUPABASE_URL"), key: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") };
+  const was = { url: Deno.env.get("SUPABASE_URL"), key: Deno.env.get("KABSI_SECRET_KEY") };
   Deno.env.set("SUPABASE_URL", FAKE_URL);
-  Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "not-a-real-key");
+  Deno.env.set("KABSI_SECRET_KEY", "sb_secret_FAKEFAKEFAKEFAKEFAKE0001");
   const { admin } = await import("../kabsi.ts");
   admin();
   if (was.url === undefined) Deno.env.delete("SUPABASE_URL"); else Deno.env.set("SUPABASE_URL", was.url);
-  if (was.key === undefined) Deno.env.delete("SUPABASE_SERVICE_ROLE_KEY"); else Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", was.key);
+  if (was.key === undefined) Deno.env.delete("KABSI_SECRET_KEY"); else Deno.env.set("KABSI_SECRET_KEY", was.key);
 }

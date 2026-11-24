@@ -3,6 +3,7 @@
 // the triggers behind public.audit_events read them through PostgREST's request.headers, and only for the service
 // role (private.audit_request). Never put review text, names or tokens in them.
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.57.4";
+import { serviceKey } from "./service-key.ts";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -22,7 +23,7 @@ export function auditHeaders(req: Request, actorId?: string | null): Record<stri
 // A service-role client whose every request carries the audit headers. One per incoming request; the shared
 // admin() client stays header-free so cron work is recorded as the system.
 export function auditedAdmin(headers: Record<string, string>): SupabaseClient {
-  return createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+  return createClient(Deno.env.get("SUPABASE_URL")!, serviceKey(), {
     auth: { persistSession: false },
     global: { headers },
   });

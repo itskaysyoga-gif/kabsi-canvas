@@ -4,7 +4,9 @@
 import { googleMode, invitationSearch, listAccountsOnce, refreshToken, searchText } from "../_shared/google/index.ts";
 import { languageOf, placeFromResults, streetPart } from "../_shared/invitations.ts";
 import { queueResponse, type QueueHealthRow } from "../_shared/queue-health.ts";
+import { HEARTBEAT_MINUTES, heartbeatResponse } from "../_shared/heartbeat-health.ts";
 import { secretMatches } from "../_shared/sec1/guards.ts";
+import { serviceKey } from "../_shared/service-key.ts";
 import { listNumberWebhookIds, readHealth, readTemplateDetails, readWebhookDeliveries } from "../_shared/whatsapp/kapso-admin.ts";
 import { buckets, DELIVERY_EMAIL_KIND, runDeliveryCheck, summarize } from "../_shared/whatsapp/delivery-check.ts";
 import { bestTier, NUMBER_EMAIL_KIND, NUMBER_EMAIL_TO, numberFromHealth, runCheck } from "../_shared/whatsapp/template-check.ts";
@@ -17,7 +19,7 @@ async function isInternal(req: Request) {
   if (!given) return false;
   const res = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/rpc/internal_secret`, {
     method: "POST",
-    headers: { "content-type": "application/json", apikey: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}` },
+    headers: { "content-type": "application/json", apikey: serviceKey(), authorization: `Bearer ${serviceKey()}` },
     body: JSON.stringify({ p_name: "cron_secret" }),
   });
   // Sec 1: constant time, like isInternal in _shared/kabsi.ts.
@@ -29,7 +31,7 @@ async function isInternal(req: Request) {
 // heartbeat every tick). None in 30 minutes raises one alert in #kabsi-alerts per half hour.
 const STALE_MINUTES = 30;
 async function rest(path: string, init: RequestInit = {}) {
-  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const key = serviceKey();
   return await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/${path}`, {
     ...init,
     headers: { "content-type": "application/json", apikey: key, authorization: `Bearer ${key}`, ...(init.headers ?? {}) },
@@ -70,6 +72,24 @@ async function queueCheck(): Promise<Response> {
   } catch { /* an unreadable queue is red */ }
   const { status, body } = queueResponse(row);
   return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
+}
+
+// GET /health (FIX-0): public, for the outside monitor. 200 when jobs_log has any line in the last 15 minutes, 503 when it has
+// none or cannot be read. Any line counts (a failed job is still a scheduler that ran); the 30 minute alert above is stricter.
+let heartbeatCache: { at: number; res: { status: number; body: string } } | null = null;
+async function heartbeatCheck(): Promise<Response> {
+  // A few seconds in the isolate, so a flood of anonymous GETs cannot become a flood of database queries.
+  const headers = { "content-type": "application/json", "cache-control": "public, max-age=5" };
+  if (heartbeatCache && Date.now() - heartbeatCache.at < 5000) return new Response(heartbeatCache.res.body, { status: heartbeatCache.res.status, headers });
+  let last: string | null = null;
+  try {
+    const since = new Date(Date.now() - HEARTBEAT_MINUTES * 60_000).toISOString();
+    const r = await rest(`jobs_log?created_at=gte.${encodeURIComponent(since)}&select=created_at&order=created_at.desc&limit=1`);
+    if (r.ok) last = ((await r.json()) as { created_at?: string }[])[0]?.created_at ?? null;
+  } catch { /* an unreadable heartbeat is red */ }
+  const { status, body } = heartbeatResponse(last);
+  heartbeatCache = { at: Date.now(), res: { status, body: JSON.stringify(body) } };
+  return new Response(heartbeatCache.res.body, { status, headers });
 }
 
 // Access 2: the invitation Places check, live, on Yawmiyati's own invitation text only (fixed cases, no free query). One
@@ -168,7 +188,7 @@ async function deliveriesCheck() {
 async function signinProviderCheck() {
   return await runProviderCheck({
     read: async () => {
-      const key = Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const key = Deno.env.get("SUPABASE_ANON_KEY") ?? serviceKey();
       const r = await fetch(`${Deno.env.get("SUPABASE_URL")}/auth/v1/settings`, { headers: { apikey: key } });
       if (!r.ok) throw new Error(`auth settings ${r.status}`);
       return await r.json();
@@ -218,6 +238,7 @@ async function deliveriesWindow(body: { from?: string; to?: string }) {
 
 Deno.serve(async (req) => {
   if (req.method === "GET" && new URL(req.url).pathname.replace(/\/+$/, "").endsWith("/queue")) return await queueCheck();
+  if (req.method === "GET" && !req.headers.get("x-cron-secret") && /(^|\/)health$|^$/.test(new URL(req.url).pathname.replace(/\/+$/, ""))) return await heartbeatCheck();
   if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
   const body = await req.json().catch(() => ({})) as { only?: string };
   if (body.only === "kapso") return json({ checks: { kapso: await dailyKapsoCheck() } });
