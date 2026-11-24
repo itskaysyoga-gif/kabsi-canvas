@@ -2103,6 +2103,7 @@ async function listingYes(t: Turn, n: string): Promise<string> {
   const r = await t.d.db.applyListing(b.location_id, b.user_id, open.change).catch((e) => ({ ok: false, reason: String((e as Error)?.message ?? e) }));
   await t.d.db.setConv(t.phone, { open_question: null });
   if (r.ok) return answered(tb, SAY.listingApproved, "listing_approved");
+  if (/open_google_change/.test(r.reason ?? "")) return answered(tb, SAY.waitingProblem("phone number", `${t.d.appUrl}/app/shield`), "listing_refused:open_google_change");
   return prepareRefused(tb, r.reason, "hours");
 }
 

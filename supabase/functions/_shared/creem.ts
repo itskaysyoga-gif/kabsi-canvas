@@ -105,7 +105,10 @@ export function setupPlan(existing: CreemProduct[]): SetupPlan {
   const create: ProductKey[] = [];
   for (const key of PRODUCT_KEYS) {
     const live = existing.filter((p) => !taken.has(p.id) && matches(p, key));
-    const hit = live.find((p) => p.name === CATALOGUE[key].name) ?? live[0];
+    // OFFER-2 review: the list plan and the extra location are both 29 a month, so where two keys share a price and a period a
+    // product is taken only by its exact name.
+    const shared = PRODUCT_KEYS.some((k) => k !== key && CATALOGUE[k].price === CATALOGUE[key].price && CATALOGUE[k].period === CATALOGUE[key].period);
+    const hit = live.find((p) => p.name === CATALOGUE[key].name) ?? (shared ? undefined : live[0]);
     if (hit) {
       taken.add(hit.id);
       reuse.push({ key, id: hit.id, rename: hit.name !== CATALOGUE[key].name || (hit.description ?? "") !== descriptionOf(key) });
@@ -321,6 +324,8 @@ export function effectOf(e: CreemEvent, ids: ProductIds): Effect {
     case "dispute.created":
       return { ...none, alert: "dispute" };
     case "subscription.trialing":
+      // A trialing event that arrives late for a subscription already cancelled or expired changes nothing.
+      if (f.status && !["trialing", "scheduled_cancel"].includes(f.status)) return none;
       // OFFER-2: the 14-day trial with a card. The plan works until the trial ends (Creem's period end); Creem charges then and
       // sends subscription.paid, or a cancel before day 14 ends it with nothing paid. Not a payment, so no founding check.
       return { ...none, write: { state: "active", ...plan, units: f.units, periodStart: f.periodStart, periodEnd: f.periodEnd, pastDue: "clear",

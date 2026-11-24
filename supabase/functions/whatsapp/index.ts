@@ -257,15 +257,18 @@ async function tick() {
     const now = new Date();
     const plan = planAlerts(urgent, before, now);
     const lines = [...plan.send, ...plan.clear];
+    // The state is saved before anything is sent: a send that fails never makes the next tick send the same kind again.
+    const { error: se } = await admin().from("app_settings").upsert({ key: "staff_alert_state", value: JSON.stringify(plan.state), updated_at: now.toISOString() }, { onConflict: "key" });
+    if (se) await captureError("whatsapp", se, { step: "staff_alert_state" });
     const phones = lines.length ? await staffAdminPhones() : [];
     const hour = now.toISOString().slice(0, 13);
     for (const a of lines) {
       for (const phone of phones) {
         await notify(deps.out, { phone, userId: null, locationId: null, kind: "staff_alert", urgent: true, body: a.body,
-          template: ref("staff_alert", { summary: a.summary }), dedupe: `ops_kind:${a.kind}:${"count" in a ? "alert" : "clear"}:${hour}:${phone}` });
+          template: ref("staff_alert", { summary: a.summary }), dedupe: `ops_kind:${a.kind}:${"count" in a ? "alert" : "clear"}:${hour}:${phone}` })
+          .catch((x) => captureError("whatsapp", x, { step: "staff_alert_send", kind: a.kind }));
       }
     }
-    await admin().from("app_settings").upsert({ key: "staff_alert_state", value: JSON.stringify(plan.state), updated_at: now.toISOString() }, { onConflict: "key" });
     out.alerts = { taken: events.length, urgent: urgent.length, sent: plan.send.length, cleared: plan.clear.length };
   } catch (e) {
     await captureError("whatsapp", e, { step: "staff_alerts" });

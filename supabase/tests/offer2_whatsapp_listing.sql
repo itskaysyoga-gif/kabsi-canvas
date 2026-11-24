@@ -55,6 +55,17 @@ values ('00000000-0000-4000-8000-00000000f2c1', '00000000-0000-4000-8000-0000000
 select throws_ok($$ select public.approve_publication('listing_revert', '00000000-0000-4000-8000-00000000f2c1', '{}'::jsonb,
   '00000000-0000-4000-8000-0000000000a1', 'whatsapp') $$, 'P0001', 'not_on_whatsapp', 'a phone change Google made is not approved on WhatsApp');
 
+-- And while that Google change is open, the owner's own WhatsApp edit of the phone is refused (it is decided on kabsi.co).
+select throws_ok($$ select pg_temp.apply('phone', '+1 205 555 0123') $$, 'P0001', 'open_google_change', 'an open Google phone change is never settled from WhatsApp');
+update public.profile_changes set status = 'expired' where id = '00000000-0000-4000-8000-00000000f2c1';
+-- The other numbers on the profile are kept with the new main number.
+update public.knowledge_facts set value = jsonb_build_object('display', '+1 205 555 0100', 'raw', jsonb_build_object('primaryPhone', '+1 205 555 0100',
+  'additionalPhones', jsonb_build_array('+1 205 555 0177'))) where location_id = '00000000-0000-4000-8000-0000000000c1' and slot = 'profile.phone' and superseded_by is null;
+select is(pg_temp.apply('phone', '+1 205 555 0124') ->> 'state', 'approved', 'a second phone change once nothing from Google is open');
+select is((select value -> 'raw' from public.knowledge_facts where location_id = '00000000-0000-4000-8000-0000000000c1'
+            and slot = 'profile.phone' and superseded_by is null),
+  '{"primaryPhone": "+1 205 555 0124", "additionalPhones": ["+1 205 555 0177"]}'::jsonb, 'the other numbers are kept');
+
 -- The weekly hours from WhatsApp: the week shown is the week recorded.
 select is((public.apply_regular_hours('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000a1', 'whatsapp',
   'Mon 09:00 to 17:00, Sat 10:00 to 16:00',
@@ -66,6 +77,8 @@ select is((select value ->> 'display' from public.knowledge_facts where location
 
 -- The founding price end (billing.ts sets it 12 months after the first payment).
 select has_column('public', 'subscriptions', 'founding_ends_at', 'subscriptions has founding_ends_at');
+select has_column('public', 'subscriptions', 'first_paid_at', 'subscriptions has first_paid_at');
+select has_table('private', 'offer2_posts_per_month_before', 'the posts a month before OFFER-2 are kept');
 -- The settings OFFER-2 switched off.
 select is((select string_agg(key || '=' || value, ',' order by key) from public.app_settings
             where key in ('request_book', 'ai_visibility_mode', 'ai_visibility_free_scan', 'dataforseo_mode', 'new_pro_signups', 'trial_mode', 'founding_public')),

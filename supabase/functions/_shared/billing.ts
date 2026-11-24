@@ -73,7 +73,7 @@ type SubRow = {
   id: string; organization_id: string; plan: string; state: string; period: string | null; units: number;
   current_period_end: string | null; cancel_at_period_end: boolean | null; provider_customer_id: string | null;
   provider_subscription_id: string | null; past_due_at: string | null; last_event_at: string | null; founding: boolean;
-  mode: string | null; ended_at: string | null; product_id?: string | null; founding_ends_at?: string | null;
+  mode: string | null; ended_at: string | null; product_id?: string | null; founding_ends_at?: string | null; first_paid_at?: string | null;
 };
 
 export async function applyEvent(eventKey: string): Promise<string> {
@@ -105,7 +105,8 @@ export async function applyEvent(eventKey: string): Promise<string> {
     if (older) {
       result = "older_ignored";
     } else {
-      const wasPaying = existing?.state === "active";
+      // OFFER-2 review: a trial with a card is "active" before any payment, so a new paying customer is the first payment.
+      const wasPaying = !!existing?.first_paid_at;
       // The plan row's units are the running extra locations (synced below), never what the plan's own items say.
       existing = await writeSub(org, subId, e, { ...effect, write: { ...effect.write, units: undefined } }, existing, at, ids);
       result = `applied:${existing?.state ?? "?"}`;
@@ -114,9 +115,18 @@ export async function applyEvent(eventKey: string): Promise<string> {
       if (existing && (effect.message === "scheduled_cancel" || effect.message === "ended" || e.eventType === "subscription.expired" || e.eventType === "subscription.paused")) {
         await endExtrasWithPlan(org).catch((x) => captureError("billing", x, { step: "end_extras", event: e.eventType }));
       }
+      if (effect.paid && existing && !existing.first_paid_at) {
+        await db.from("subscriptions").update({ first_paid_at: at.toISOString() }).eq("id", existing.id).is("first_paid_at", null);
+        existing = { ...existing, first_paid_at: at.toISOString() };
+      }
       if (effect.paid && existing) await foundingCheck(existing, facts.family, at);
       // OFFER-2: a trial with a card uses the business's one trial, the same way a Kabsi trial does.
-      if (e.eventType === "subscription.trialing" && existing) await markTrialUsed(org).catch((x) => captureError("billing", x, { step: "trial_used" }));
+      if (e.eventType === "subscription.trialing" && existing) {
+        await markTrialUsed(org).catch((x) => captureError("billing", x, { step: "trial_used" }));
+        const test = existing.mode === "live" ? "" : " (test mode)";
+        await staffAlert(`Trial with a card started: ${await businessName(org)}, first charge on ${existing.current_period_end ? longDate(existing.current_period_end) : "day 14"}${test}`, `trial:${e.id}`)
+          .catch((x) => captureError("billing", x, { step: "staff_alert" }));
+      }
       if (e.eventType === "checkout.completed") {
         const requestId = typeof e.object.request_id === "string" ? e.object.request_id : null;
         if (requestId) await db.from("billing_checkouts").update({ completed_at: new Date().toISOString(), checkout_id: String(e.object.id ?? "") || null }).eq("request_id", requestId);
@@ -278,8 +288,9 @@ async function writeSub(org: string, subId: string, e: CreemEvent, effect: Retur
 // 25 business (30.17) that chooses a plan keeps the founding price too, in either mode.
 async function foundingCheck(s: SubRow, family: PriceFamily | null, at: Date = new Date()) {
   // OFFER-2: the founding price runs 12 months from the first payment; the date is set once and never moved.
+  const first = s.first_paid_at ? new Date(s.first_paid_at) : at;
   if (s.founding) {
-    if (!s.founding_ends_at) await setFoundingEnd(s.id, at);
+    if (!s.founding_ends_at) await setFoundingEnd(s.id, first);
     return;
   }
   let founding = family === "founding";
@@ -290,7 +301,7 @@ async function foundingCheck(s: SubRow, family: PriceFamily | null, at: Date = n
   }
   if (!founding) return;
   await admin().from("subscriptions").update({ founding: true }).eq("id", s.id);
-  await setFoundingEnd(s.id, at);
+  await setFoundingEnd(s.id, first);
   // Review of Price 1: an old founding checkout link paid after its 24-hour hold can make a 31st founding business. The price
   // the owner was shown stands; staff hear about it.
   if (family === "founding" && s.mode === "live") {
@@ -314,12 +325,22 @@ async function markTrialUsed(org: string) {
 }
 
 /** OFFER-2: has this business had its one trial (a Kabsi trial, a trial with a card, or a plan before)? Then no second trial. */
-async function trialUsed(org: string): Promise<boolean> {
+async function trialUsed(org: string, requestId: string): Promise<boolean> {
   const db = admin();
-  const { data: subs } = await db.from("subscriptions").select("id").eq("organization_id", org)
-    .or("trial_started_at.not.is.null,and(provider.eq.creem,state.neq.incomplete)").limit(1);
+  // Any subscription of the business, in any state (a Kabsi trial, a Creem plan, a checkout already completed).
+  const { data: subs } = await db.from("subscriptions").select("id").eq("organization_id", org).limit(1);
   if ((subs ?? []).length) return true;
-  const { data: locs } = await db.from("locations").select("place_id").eq("organization_id", org);
+  // Any plan checkout before this one, open or completed: two checkouts on two days never make two trials.
+  const { data: other } = await db.from("billing_checkouts").select("request_id").eq("organization_id", org).neq("request_id", requestId)
+    .not("product_key", "like", "extra%").limit(1);
+  if ((other ?? []).length) return true;
+  const { data: locs } = await db.from("locations").select("id, place_id").eq("organization_id", org);
+  // A payment before Creem (the earlier plans) counts as the trial used.
+  const ids = (locs ?? []).map((l) => l.id as string);
+  if (ids.length) {
+    const { data: paid } = await db.from("payments").select("id").in("location_id", ids).limit(1);
+    if ((paid ?? []).length) return true;
+  }
   const places = (locs ?? []).map((l) => l.place_id as string | null).filter((x): x is string => !!x);
   if (!places.length) return false;
   const { data: g } = await db.from("trial_grants").select("place_id").in("place_id", places).limit(1);
@@ -477,7 +498,7 @@ export async function startCheckout(org: string, userId: string | null, email: s
   let c: { id: string; checkout_url: string };
   try {
     // OFFER-2: the 14-day trial with a card, on the business's first plan only.
-    const trialDays = (await trialUsed(org)) ? undefined : TRIAL_DAYS;
+    const trialDays = (await trialUsed(org, requestId)) ? undefined : TRIAL_DAYS;
     c = await creem().createCheckout({ productId, units: 1, requestId, successUrl: SUCCESS_URL, email, trialDays,
       metadata: { referenceId: org, business_id: location, price_family: picked.family } });
   } catch (err) {

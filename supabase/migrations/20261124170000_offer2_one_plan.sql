@@ -23,11 +23,23 @@ select cron.unschedule(j.jobname) from cron.job j
                      'kabsi_outbound_inbox', 'kabsi_partner_payout_run', 'kabsi_partner_billing');
 
 -- 3: posts --------------------------------------------------------------------------------------------------------------
+-- The values before this change are kept, so a later migration can put back an owner's own choice.
+create table if not exists private.offer2_posts_per_month_before (
+  location_id uuid primary key references public.locations(id) on delete cascade,
+  posts_per_month smallint not null,
+  saved_at timestamptz not null default now()
+);
+revoke all on private.offer2_posts_per_month_before from public, anon, authenticated;
+insert into private.offer2_posts_per_month_before (location_id, posts_per_month)
+select id, posts_per_month from public.locations where posts_per_month <> 2 on conflict (location_id) do nothing;
 alter table public.locations alter column posts_per_month set default 2;
 update public.locations set posts_per_month = 2 where posts_per_month <> 2;
 
 -- 4a: the founding price ends 12 months after the first payment ---------------------------------------------------------
 alter table public.subscriptions add column if not exists founding_ends_at timestamptz;
+alter table public.subscriptions add column if not exists first_paid_at timestamptz;
+comment on column public.subscriptions.first_paid_at is
+  'OFFER-2: the first payment of the subscription (a trial with a card is active before it). Set once by billing.ts.';
 comment on column public.subscriptions.founding_ends_at is
   'OFFER-2: when the founding price (19 a month) ends and the list price (29) starts: 12 months after the first payment. Set once by billing.ts.';
 
@@ -58,7 +70,9 @@ begin
   select * into r from public.billing_checkouts where request_id = p_request_id;
   v_had := found;
   if v_had and not (r.price_family = 'list' and exists (select 1 from public.founding_applications a
-                     where a.organization_id = p_org and a.status = 'accepted')) then
+                     where a.organization_id = p_org and a.status = 'accepted'))
+     and not (r.price_family = 'founding' and coalesce((select s.value from public.app_settings s where s.key = 'founding_public'), 'on') <> 'on'
+              and not exists (select 1 from public.founding_applications a where a.organization_id = p_org and a.status = 'accepted')) then
     return jsonb_build_object('family', coalesce(r.price_family, case when r.product_key like '%\_list' then 'list' else 'founding' end),
       'checkout_url', r.checkout_url, 'completed', r.completed_at is not null);
   end if;
@@ -69,6 +83,11 @@ begin
      where c.organization_id = p_org and c.mode = p_mode and c.price_family is not null
        and c.completed_at is null and c.created_at > now() - interval '24 hours'
      order by c.created_at desc limit 1;
+  end if;
+  -- OFFER-2: while founding is private, an open founding checkout from before the change is not reused.
+  if v_family = 'founding' and coalesce((select s.value from public.app_settings s where s.key = 'founding_public'), 'on') <> 'on'
+     and not exists (select 1 from public.founding_applications a where a.organization_id = p_org and a.status = 'accepted') then
+    v_family := null;
   end if;
   if v_family is null then
     v_family := case when coalesce((select s.value from public.app_settings s where s.key = 'founding_public'), 'on') = 'on'
@@ -109,7 +128,12 @@ begin
   n := replace(d, $x$if p_field not in ('website', 'main_category') then raise exception 'bad_field'; end if;$x$,
                   $x$if p_field not in ('website', 'main_category') and not (p_field = 'phone' and p_channel = 'whatsapp') then raise exception 'bad_field'; end if;$x$);
   n := replace(n, $x$if p_channel <> 'dashboard' then raise exception 'bad_channel'; end if;$x$,
-                  $x$if p_channel <> 'dashboard' and not (p_channel = 'whatsapp' and p_field in ('website', 'phone')) then raise exception 'bad_channel'; end if;$x$);
+                  $x$if p_channel <> 'dashboard' and not (p_channel = 'whatsapp' and p_field in ('website', 'phone')) then raise exception 'bad_channel'; end if;
+  -- OFFER-2: a phone change Google made is decided on kabsi.co (Google Protection); a WhatsApp edit never settles it.
+  if p_channel = 'whatsapp' and p_field = 'phone' and exists (select 1 from public.profile_changes pc where pc.location_id = p_location
+       and pc.field = 'phone' and pc.status in ('detected', 'awaiting_review') and pc.source <> 'owner_edit') then
+    raise exception 'open_google_change';
+  end if;$x$);
   n := replace(n, $x$    if trim(p_display) !~ '^https?://[^[:space:]]+$' then raise exception 'bad_value'; end if;
   else$x$, $x$    if trim(p_display) !~ '^https?://[^[:space:]]+$' then raise exception 'bad_value'; end if;
   elsif p_field = 'phone' then
@@ -120,12 +144,16 @@ begin
                   $x$and (p_field in ('website', 'phone') or f.value -> 'raw' is not distinct from p_raw) then$x$);
   n := replace(n, $x$jsonb_build_object('display', trim(p_display), 'raw', case when p_field = 'website' then to_jsonb(trim(p_display)) else p_raw end),$x$,
                   $x$jsonb_build_object('display', trim(p_display), 'raw', case when p_field = 'website' then to_jsonb(trim(p_display))
-      when p_field = 'phone' then jsonb_build_object('primaryPhone', trim(p_display)) else p_raw end),$x$);
+      when p_field = 'phone' then jsonb_build_object('primaryPhone', trim(p_display))
+        || case when jsonb_typeof(f.value -> 'raw' -> 'additionalPhones') = 'array'
+                then jsonb_build_object('additionalPhones', f.value -> 'raw' -> 'additionalPhones') else '{}'::jsonb end
+      else p_raw end),$x$);
   n := replace(n, $x$case when p_field = 'website' then 'You changed your website link in Kabsi.' else 'You changed your categories in Kabsi.' end);$x$,
                   $x$case when p_field = 'website' then 'You changed your website link in Kabsi.'
          when p_field = 'phone' then 'You changed your phone number in Kabsi.' else 'You changed your categories in Kabsi.' end);$x$);
   if n = d or n !~ $x$p_field = 'phone' and p_channel = 'whatsapp'\) then raise exception 'bad_field'$x$ or n !~ $x$p_channel = 'whatsapp' and p_field in$x$ or n !~ $x$elsif p_field = 'phone' then$x$
-     or n !~ $x$p_field in \('website', 'phone'\) or f.value$x$ or n !~ 'primaryPhone' or n !~ 'You changed your phone number' then
+     or n !~ $x$p_field in \('website', 'phone'\) or f.value$x$ or n !~ 'primaryPhone' or n !~ 'You changed your phone number'
+     or n !~ 'open_google_change' or n !~ 'additionalPhones' then
     raise exception 'apply_profile_field: the text was not found';
   end if;
   execute n;

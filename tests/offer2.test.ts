@@ -10,6 +10,7 @@ import {
   FOUNDING_MONTHS,
   foundingEndOf,
   OFFER_KEYS,
+  setupPlan,
   TRIAL_DAYS,
 } from "../supabase/functions/_shared/creem";
 
@@ -87,5 +88,39 @@ describe("the plan screen", () => {
     expect(src).toMatch(/TRIAL_LINE/);
     expect(src).toMatch(/FOUNDING_LINE/);
     expect(src).not.toMatch(/choosePro|PLAN_COPY\.yearly|Segmented/);
+  });
+});
+
+describe("review fixes", () => {
+  it("a late trialing event for a cancelled subscription changes nothing", () => {
+    const e = effectOf(
+      {
+        id: "evt_t2",
+        eventType: "subscription.trialing",
+        created_at: Date.now(),
+        object: {
+          id: "sub_1",
+          status: "canceled",
+          product: { id: "prod_eml" },
+        },
+      },
+      { essentials_month_list: "prod_eml" },
+    );
+    expect(e.write).toBeNull();
+  });
+  it("the plan and the extra location, both 29 a month, are matched only by their names", () => {
+    const p = (id: string, name: string) => ({
+      id,
+      name,
+      price: 2900,
+      currency: "USD",
+      billing_type: "recurring",
+      billing_period: "every-month",
+      status: "active",
+    });
+    expect(setupPlan([p("x", "Something at 29")]).reuse).toEqual([]);
+    const r = setupPlan([p("b", "Kabsi, extra location, monthly"), p("a", "Kabsi, monthly")]).reuse;
+    expect(r.find((x) => x.key === "essentials_month_list")?.id).toBe("a");
+    expect(r.find((x) => x.key === "extra_month")?.id).toBe("b");
   });
 });

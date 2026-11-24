@@ -38,6 +38,12 @@ delete from public.billing_checkouts where request_id in ('c-founding', 'c-list'
 -- accepted Founding 25 application checks out at the list price, and the public count shows no places.
 select is(pg_temp.pick('3', 'req-private'), 'list', 'OFFER-2: no founding price without the private invitation');
 select is(public.founding_places_left(), 0, 'OFFER-2: the public count is 0 while founding is private');
+-- An open founding checkout made before the change is not reused while founding is private.
+insert into public.billing_checkouts (request_id, organization_id, product_key, mode, price_family, checkout_url)
+values ('req-old-founding', pg_temp.org('3'), 'essentials_month', 'test', 'founding', 'https://creem.io/old-founding');
+select is(pg_temp.pick('3', 'req-new-day', 'essentials'), 'list', 'OFFER-2: an old open founding checkout gives no founding price');
+select is(pg_temp.pick('3', 'req-old-founding', 'essentials'), 'list', 'OFFER-2: nor does the same old request');
+delete from public.billing_checkouts where request_id in ('req-old-founding', 'req-new-day');
 delete from public.billing_checkouts where request_id = 'req-private';
 -- The counted founding places below are the rule with founding_public 'on', kept for a later switch back.
 update public.app_settings set value = 'on' where key = 'founding_public';

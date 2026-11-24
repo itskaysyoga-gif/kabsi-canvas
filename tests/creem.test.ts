@@ -335,7 +335,7 @@ describe("event to state (10.2.9)", () => {
       write: null,
       alert: "dispute",
     });
-    expect(effectOf(ev("subscription.trialing", sub()), IDS)).toMatchObject({
+    expect(effectOf(ev("subscription.trialing", sub({ status: "trialing" })), IDS)).toMatchObject({
       write: { state: "active", pastDue: "clear" },
       alert: null,
       paid: false,
