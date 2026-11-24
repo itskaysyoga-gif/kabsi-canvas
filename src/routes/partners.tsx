@@ -12,6 +12,8 @@ export const Route = createFileRoute("/partners")({
       title: `Kabsi: ${PARTNERS_HERO.title}`,
       description: PARTNERS_HERO.line,
       path: "/partners",
+      // SITE-1 (blueprint 3.1 section 5): partners are off; the page stays reachable by direct link, not indexed.
+      noindex: true,
       image: "partner",
       crumbs: [{ name: "Partners", path: "/partners" }],
       jsonLd: [import.meta.env.SSR ? faqJsonLd(PARTNER_FAQ) : serverOnlyLd("/partners")],

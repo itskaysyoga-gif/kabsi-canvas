@@ -48,9 +48,10 @@ const cards = {
     art: `<div class="card">${EX}<b class="t">'hair salon' around Rose Lane Salon</b>${place("A", "Near your salon", "You came up 2nd.", "Juniper Hair Studio came first.", "top")}${place("B", "Near the metro station", "You came up 8th.", "Juniper Hair Studio came first.", "mid")}${place("C", "By the park", "You were not in the first 20.", "Lark Salon came first.", "none")}</div>`,
   },
   pricing: {
-    h: "Simple plans. Free for 14 days.",
-    p: "You approve every change.",
-    art: `<div class="stack"><div class="plan"><b>Essentials</b><span>$29</span><i>a month</i></div><div class="plan pro"><b>Pro</b><span>$59</span><i>a month</i></div></div>`,
+    // SITE-1 (blueprint 3.1, R-163): one plan, from src/lib/offer.ts in words.
+    h: "One plan. 14 days free.",
+    p: "Per location. You approve every change.",
+    art: `<div class="stack"><div class="plan pro"><b>Kabsi</b><span>$29</span><i>a month</i></div></div>`,
   },
   tool: {
     h: "Get your Google review link and QR code.",

@@ -39,8 +39,8 @@ describe("docs/marketing/profile.md", () => {
       );
       expect(line).not.toMatch(/[؀-ۿ]/);
     }
-    // The public name of the lower price is "launch price" (30.51 item 3).
-    expect(PROFILE).toContain("launch price");
+    // SITE-1: there is no public launch price (blueprint 3.1); the founding offer is private.
+    expect(PROFILE).not.toMatch(/launch price|founding (offer|price|places?)|Founding 25/i);
     expect(d600!).toContain("not affiliated with Google");
   });
 
@@ -56,14 +56,13 @@ describe("docs/marketing/profile.md", () => {
 
   it("carries the prices of facts 06", () => {
     const facts = readFileSync("knowledge/facts/06-pricing-and-payment.md", "utf8");
-    for (const price of [
-      "$29 a month or $290 a year",
-      "$59 a month or $590 a year",
-      "$15 a month or $150 a year",
-    ]) {
+    // SITE-1 (blueprint 3.1, R-163): one plan at 29 US dollars a month per location; no other plan price is quoted.
+    for (const price of ["29 US dollars a month per location"]) {
       expect(PROFILE).toContain(price);
       expect(facts).toContain(price);
     }
+    for (const old of ["$59", "$290", "$590", "$15 a month", "Essentials", "Pro "])
+      expect(PROFILE, old).not.toContain(old);
   });
 });
 

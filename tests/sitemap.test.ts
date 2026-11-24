@@ -27,8 +27,6 @@ describe("the sitemap", () => {
       "/faq",
       "/privacy",
       "/terms",
-      "/partners",
-      "/partners/terms",
       "/scan",
       "/google-review-link",
       "/for",
@@ -42,7 +40,7 @@ describe("the sitemap", () => {
       expect(paths.includes(`/for/${i.slug}`), i.slug).toBe(industryIndexed(i));
     for (const g of OLD_GROUPS) expect(paths, g).not.toContain(`/for/${g}`);
   });
-  it("leaves out the dental clinic page until it has a claim sheet (Fix 1), and counts 43 pages (44 on 5 Nov 2026, Industries 2; Founding 1 took /founding out)", () => {
+  it("leaves out the dental clinic page until it has a claim sheet (Fix 1), and counts 41 pages (Founding 1 took /founding out, SITE-1 took the two partner pages out)", () => {
     const dental = INDUSTRIES.find((i) => i.slug === "dental-clinic")!;
     let sheet = true;
     try {
@@ -53,8 +51,10 @@ describe("the sitemap", () => {
     // When the sheet lands, drop `indexed: false` from dental-clinic.ts and put the page back in the sitemap.
     expect(industryIndexed(dental)).toBe(sheet);
     expect(paths.includes("/for/dental-clinic")).toBe(sheet);
-    // Site 2 (30.34 item 4): /for/beauty-salon made 45; Founding 1 (R-151) took /founding out, so 44.
-    expect(paths).toHaveLength(sheet ? 44 : 43);
+    // Site 2 (30.34 item 4): /for/beauty-salon made 45; Founding 1 (R-151) took /founding out, so 44; SITE-1 (blueprint
+    // 3.1 section 5) took /partners and /partners/terms out, so 42.
+    expect(paths).toHaveLength(sheet ? 42 : 41);
+    for (const p of ["/partners", "/partners/terms"]) expect(paths, p).not.toContain(p);
   });
   it("leaves out the pages that are noindex or one visitor's", () => {
     for (const p of paths)

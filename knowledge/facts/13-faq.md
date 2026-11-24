@@ -2,14 +2,14 @@
 
 ### About Kabsi
 
-**What is Kabsi?**
-Kabsi looks after your business on Google: a reply is drafted for every new review in the reviewer's language, your hours and details are kept right, and fresh posts are prepared. It also shows what needs attention on your profile and watches your Google profile for changes you did not make (Google Protection). Nothing is posted or changed until you approve it.
+**What does Kabsi do?**
+It answers your reviews, keeps your Google listing right, keeps your profile fresh, and shows you what it did.
 
 **Who is Kabsi for?**
-Any local business with a verified Google Business Profile that meets customers in person or travels to them, in any country: cafés, restaurants, clinics, salons, garages, hotels, shops, florists, plumbers, cleaners and more. Not online-only businesses, rental or for-sale properties, or PO boxes and virtual offices used as an address (section 2.1c).
+Owner-run local businesses in English-speaking countries, the United States and the United Kingdom first, with a verified Google Business Profile, that meet customers in person or travel to them: cafés, restaurants, clinics, salons, garages, hotels, shops, florists, plumbers, cleaners and more. Not online-only businesses, rental or for-sale properties, or PO boxes and virtual offices used as an address (section 2.1c).
 
 **Is Kabsi part of Google?**
-No. Kabsi is independent and not affiliated with Google. It works through Google's official Business Profile access, like a staff member you add as a Manager.
+No. Kabsi is independent.
 
 **How is this different from Gemini in Business Profile?**
 Gemini is Google's free assistant for one verified profile that you open and ask. Kabsi comes to you with a reply already prepared, tells you when Google changes your profile, writes only from facts you confirmed, and has a person behind it. Source: https://support.google.com/business/answer/17142585
@@ -24,7 +24,7 @@ Yes. The team offers a free 20-minute setup call. Working hours: Monday to Frida
 You invite the Kabsi Clients group (ID 5481006796) as a Manager, not as an owner, and you can remove it at any time from People and access. Kabsi only accepts an invitation that matches a business you have set up and only for the Manager role: the profile's exact name and its street must match, and when Google writes the address in another script (for example Greek or Cyrillic) Kabsi checks the profile's place on Google Maps against the place you picked at sign-up. An invitation with no street in its address waits for a person on the Kabsi team. If Kabsi ever finds itself a Manager of a profile nobody set up in Kabsi, it removes itself at once and the team is told. Kabsi's Google account uses Google's Advanced Protection. Nothing is written to Google without your approval, and each approval is recorded with the exact text, who approved it, when, and whether it came from the dashboard or an email link.
 
 **Where is Kabsi based?**
-Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co. Kabsi serves businesses in any country.
+Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co. Kabsi serves English-speaking businesses, the United States and the United Kingdom first.
 
 **Who runs Kabsi?**
 Kabsi is operated by Rashid Abou Hamzy. A person answers at hello@kabsi.co.
@@ -43,17 +43,26 @@ The home page shows pictures of the real screens (a review with its reply ready,
 
 ### How it works
 
+**Do I have to do anything?**
+Tap yes. Kabsi prepares the reply, the fix or the post, and you approve it on WhatsApp or email.
+
+**Can I ask Kabsi to change something?**
+Yes. Message it in plain words or send a voice note: your hours, a photo, a post, a reply. Kabsi shows you exactly what will change before anything goes to Google.
+
+**What if a bad review comes in?**
+Kabsi tells you at once and writes a calm reply for you to approve or change.
+
 **Does Kabsi post replies by itself?**
-No. Kabsi drafts a reply and sends it to you, on WhatsApp if you connected it and chose it for routine messages, otherwise by email. Nothing goes on your Google profile until you tap Approve reply, and you see the exact text first.
+No. Kabsi drafts a reply and sends it to you, on WhatsApp or by email, whichever you chose. Nothing goes on your Google profile until you tap Approve reply, and you see the exact text first. Automatic replies are off.
 
 **What does Kabsi need from me?**
 Add the Kabsi group ID 5481006796 as a Manager on your Google Business Profile, then tell Kabsi a few facts in About your business. Drafts only use the facts you give.
 
 **How long does setup take?**
-A few minutes: find your business, add the Kabsi group ID 5481006796 as a Manager, fill in About your business, choose a plan.
+A few minutes, in three steps: find your business, add Kabsi as a manager on Google (the group ID 5481006796, never a password), and choose WhatsApp or email.
 
 **How long does the free check take?**
-The quick check takes about 30 seconds: your rating, hours and details as customers see them, the three businesses that come up around you, and one ChatGPT answer. It needs no sign-up and no access. The fuller check from 49 places around you takes longer and arrives on WhatsApp.
+About 20 seconds. It shows your rating and review count beside 3 nearby businesses, your listing basics (hours, phone, website, category, photos), whether your website and booking link load now, the reply Kabsi would write for your latest review, and what Kabsi would do each month. There is no score. It needs no sign-up, no access and no card.
 
 **How fast do new reviews reach me?**
 Kabsi checks every few minutes. You choose one place for new reviews, WhatsApp or email, and a review that needs care still also comes by email. Reviews of 3 stars or less, and any review Kabsi marks medium or high risk, are emailed right away; other reviews are emailed at once while your business is open and come together in the daily email, at the hour you choose, outside your opening hours. Nothing is emailed between 22:00 and 08:00; it waits until 08:00.
@@ -80,7 +89,7 @@ Yes. For a health, dental, legal or financial business (from your Google categor
 It marks the review "You replied yourself", and Kabsi won't post anything for it. It is under Other options, next to Skip ("You chose not to reply").
 
 **What about my old reviews?**
-When Kabsi first reads your reviews, it drafts replies for the most recent reviews without a reply: up to 10 during the free trial (the others wait for your plan) and up to 20 on a paid plan. Home then says "We found 23 unanswered reviews. Replies are ready." For the low-risk ones you can see the full list and approve them together: you approve exactly the replies you saw, and Kabsi sends them at most 5 a minute, with a progress line ("14 of 23 published"). Reviews that need a look you read one by one, and reviews that need more care get no draft. Nothing is posted until you approve it. [TIME-SENSITIVE] Drafting every old review on a paid plan is built but switched on with the live Google switch.
+On your first day, every unanswered review from the last 90 days arrives with a reply ready to approve. Home then says, for example, "We found 23 unanswered reviews. Replies are ready." For the low-risk ones you can see the full list and approve them together: you approve exactly the replies you saw, and Kabsi sends them at most 5 a minute, with a progress line ("14 of 23 published"). Reviews that need a look you read one by one, and reviews that need more care get no draft. Nothing is posted until you approve it.
 
 **Does Kabsi reply to reviews with no text?**
 Yes. It drafts a short thank-you for the rating, which you approve like any other.
@@ -92,7 +101,7 @@ Yes. Add up to 3 extra addresses in Settings, Emails. They see new reviews, but 
 Yes. Settings, Emails, Pause for 7 days. Reviews still arrive in your Kabsi inbox.
 
 **What is the weekly report?**
-Every Monday at 08:00 local time: how many things Kabsi took care of that week, your public Google rating and change, new reviews, how many got a reply, how often your review link or QR code was opened, what your profile did for customers that week, what needs you, and an estimate of the time Kabsi saved you (5 minutes a reply, 15 an update, 10 a batch of photos, 10 a profile check that found something; never money). Facts only, with no quotes from customers' reviews.
+A short summary every week, 3 to 5 lines: replies that are live, anything waiting for your yes, anything Kabsi found, and taps on your review links. It is counted from the record of what Kabsi did, with no quotes from customers' reviews. A full report every month is coming: the work done, what Kabsi found and what Google shows, kept apart. Nothing in either says Kabsi caused a review, a ranking or revenue.
 
 ### Replies and AI
 
@@ -152,14 +161,11 @@ We don't promise that, and nobody honest can. Kabsi makes leaving a review one t
 **Will Kabsi improve my rating?**
 No one can promise a rating. Kabsi helps you answer every review calmly and keep your details accurate.
 
-**Will Kabsi improve my Google ranking?**
-Nobody can promise a ranking, and we don't. Kabsi does the parts you control: a reply ready for every review, complete and accurate details, opening hours kept right, photos and posts you approve, and an easy way for every customer to leave a review.
+**Will this raise my ranking?**
+Kabsi does not promise rankings. It does the work that keeps a listing healthy.
 
-**Can Kabsi make my business appear in ChatGPT?**
-No one can promise that. Kabsi checks selected questions on ChatGPT and Perplexity directly, which can differ from what their apps show. It shows whether your business was named and which sources were cited. When an answer states a fact differently from what you confirmed, such as your hours, phone or address, Kabsi opens a task: to fix it on your Google profile, where Kabsi can, or to tell you what to check on your website or another site that lists you, where it cannot. Kabsi never says it can change what an assistant says.
-
-**How is the nearby check different from the AI answer?**
-The nearby check searches Google Maps from places around your business, like a customer standing there, and shows where you came up. The AI answer asks ChatGPT and Perplexity questions a customer might ask, and shows whether they name you and what they say about you.
+**Does Kabsi check what AI assistants say about my business?**
+No. Kabsi does not run AI answer checks, and no one can promise what an assistant says. Kabsi keeps your Google profile accurate and every review answered.
 
 **Is this local SEO?**
 Kabsi takes care of the parts of your profile you control: accurate details, answered reviews, regular posts, correct hours. It doesn't promise search results.
@@ -170,25 +176,25 @@ You can. Kabsi saves the writing, drafts in the customer's language, catches eve
 **Is this allowed by Google?**
 Adding a Manager is Google's own way to give a service access, and Kabsi uses Google's official Business Profile APIs. It posts only what you approve and never filters or rewards reviewers.
 
-**Isn't Pro expensive?**
-Essentials is $29 a month or $290 a year and Pro is $59 a month or $590 a year, and you can cancel a monthly plan any time. The first 30 paying businesses pay the launch price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year. You can start with a 14-day Pro trial with no card, so you see the drafts before you pay. Card payments are coming; until they open there is nothing to pay.
+**Why pay for Kabsi when Google Business Profile is free?**
+Google Business Profile is free from Google. Kabsi is an independent paid service. For 29 US dollars a month per location, Kabsi answers your reviews, protects your listing and shows you the work. "14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing." Card payments are not open yet; until they open nothing is charged.
 
-**What if I pay and Google access takes time?**
-Your plan starts only when access works, so waiting costs you nothing.
+**What if Google access takes time?**
+Your 14 days start only when access works, so waiting costs you nothing.
 
 **Is there a free trial?**
-Yes. 14 days, no card. It starts when Kabsi's access to your Google profile works, and there is one trial per Google business. The review link tool is free, and a yearly plan is refundable in full within 14 days of the plan starting.
+Yes. "14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing." The 14 days start when Kabsi's access to your Google profile works, and there is one trial per Google business. The review link tool is free.
 
 **Can I try it before paying?**
-You can try the example inbox on the home page and finish setup before paying. Your plan starts only when payment is confirmed and Google access works.
+Yes. Run the free check and finish setup first. Then the first 14 days are free, and if you cancel before day 14 you pay nothing.
 
 **Do you have customer reviews or case studies?**
-We don't publish testimonials or numbers we can't back up. Kabsi is new, and we'd rather you judge it yourself with the 14-day refund.
+We don't publish testimonials or numbers we can't back up. Kabsi is new, and we'd rather you judge it yourself in the 14 days free.
 
 ### Access and control
 
-**Do I have to give you my Google password?**
-Never. You add the Kabsi group ID 5481006796 as a Manager. Kabsi never asks for your password.
+**Does Kabsi need my Google password?**
+No. You add Kabsi as a manager and can remove it at any time.
 
 **Why Manager and not Owner?**
 A Manager can reply, post and edit details, which is all Kabsi needs. Only owners can add or remove people or remove the profile, so you stay in control.
@@ -206,27 +212,27 @@ Kabsi stops reading and posting at once and emails you once a day with the steps
 No. Every change needs your approval of the exact content.
 
 **Can Kabsi change my regular opening hours?**
-No. Kabsi sets special hours for holidays and closures. Change regular hours on your Google profile.
+Yes, after your yes. On Hours you set the week and tap Confirm and save to Google. On WhatsApp you can change the hours for one day; a lasting change to the weekly hours is confirmed on kabsi.co. Kabsi also sets special hours for holidays and closures.
 
 ### Posts, photos and hours
 
 **What are Kabsi's posts?**
-Short Google posts of three kinds: an Update, an Offer (with its start and end dates and terms, and an optional code and redeem link) or an Event (with its title, dates and times). Each can have one of your own checked photos and one button. Kabsi plans 2 a month by default (you can choose 1 or 4) and prepares them only from what is true: your confirmed facts and photos you approved. Offers and events are only the ones you type in; Kabsi never invents an offer, price, event, service, policy, staff member or hours. When it has nothing true to say, it asks one question instead: "Anything new this month? A dish, a service, an event?" Nothing is posted until you approve it, and you can switch Kabsi's own posts off.
+Short Google posts of three kinds: an Update, an Offer (with its start and end dates and terms, and an optional code and redeem link) or an Event (with its title, dates and times). Each can have one of your own checked photos and one button. Kabsi prepares up to 2 a month, only from what is true: your confirmed facts and photos you approved. Offers and events are only the ones you type in; Kabsi never invents an offer, price, event, service, policy, staff member or hours. When it has nothing true to say, it asks one question instead: "Anything new this month? A dish, a service, an event?" Nothing is posted until you approve it, and you can switch Kabsi's own posts off.
 
 **When do posts go to Google?**
-Each post has its day and time: shops and restaurants on Thursday at 09:00, clinics and offices on Tuesday at 08:30, local time, in the first and third week (or the first week, or every week). Approve the month or each post; Kabsi keeps the approved post in its own queue and sends it at its time, and you can undo it until then. Kabsi checks once a day what the month still needs. Kabsi does not write the posts itself yet (that is not switched on): it asks you the one question, and you write the post on the Posts page.
+Each post has its day and time: shops and restaurants on Thursday at 09:00, clinics and offices on Tuesday at 08:30, local time, in the first and third week. Approve the month or each post; Kabsi keeps the approved post in its own queue and sends it at its time, and you can undo it until then. Kabsi checks once a day what the month still needs. Kabsi does not write the posts itself yet (that is not switched on): it asks you the one question, and you write the post on the Posts page.
 
 **Can I turn off Kabsi's posts?**
-Yes. On the Posts page, under Kabsi's posts, tap Turn off. Your own posts still work. Kabsi prepares one post a week (4 a month) by default; you can lower it to 2 a month there.
+Yes. On the Posts page, under Kabsi's posts, tap Turn off. Your own posts still work. Kabsi prepares up to 2 posts a month.
 
 **Can I write my own post?**
 Yes. On Posts, under Write a post, choose Update, Offer or Event, write it in your words, add a photo and a button if you like, and tap Save the post. Kabsi checks it, then you approve it in its month.
 
 **Can I send a voice note instead of typing?**
-Yes, on both plans. Type your message or send a voice note, in any language: "We are closed Friday" becomes an hours change for you to approve. Every reply to a voice note starts with a line that says what Kabsi heard, so you can check it; a noisy note, or two languages in one note, can be misheard. A voice note can be up to 3 minutes and 10 MB. If Kabsi cannot hear a note clearly it asks you to send it again or type it. A voice note is never your yes: nothing goes on your Google profile until you tap Yes or type it yourself. Kabsi does not keep the audio, only the words.
+Yes. Type your message or send a voice note, in any language: "We are closed Friday" becomes an hours change for you to approve. Every reply to a voice note starts with a line that says what Kabsi heard, so you can check it; a noisy note, or two languages in one note, can be misheard. A voice note can be up to 3 minutes and 10 MB. If Kabsi cannot hear a note clearly it asks you to send it again or type it. A voice note is never your yes: nothing goes on your Google profile until you tap Yes or type it yourself. Kabsi does not keep the audio, only the words.
 
 **Can I send photos on WhatsApp?**
-Yes, on both plans, once you connect WhatsApp. Send a photo on its own and Kabsi gets it ready and asks you to put it on your Google profile: Yes, Edit or Skip. Send a photo with a line about it and Kabsi turns it into a Google post with that photo, shows you the exact words, and asks for your yes: Approve, Edit on kabsi.co or Skip. A post counts against your plan's posts (2 a month on Essentials, one a week on Pro). Nothing goes on Google until you say yes. Staff can send photos too; the owner or a manager approves.
+Yes, once you connect WhatsApp. Send a photo on its own and Kabsi gets it ready and asks you to put it on your Google profile: Yes, Edit or Skip. Send a photo with a line about it and Kabsi turns it into a Google post with that photo, shows you the exact words, and asks for your yes: Approve, Edit on kabsi.co or Skip. A post counts against the plan's posts (up to 2 a month). Nothing goes on Google until you say yes. Staff can send photos too; the owner or a manager approves.
 
 **Which buttons can a post have?**
 Call now, Book, Order online, Shop, Learn more or Sign up, or no button. These are the buttons Google offers.
@@ -277,6 +283,9 @@ Only details you confirmed yourself in Kabsi, or where you chose "Google is righ
 
 ### Review links and cards
 
+**Does Kabsi contact my customers?**
+No, never. Kabsi gives you a review link, a QR code and a counter card to use yourself.
+
 **Do I need an NFC card?**
 No. Every business gets a review link and a printable QR code. They work with your own QR codes and NFC cards, so a card is optional.
 
@@ -287,7 +296,7 @@ Tapping a card that carries your review link opens your Google review page, the 
 No, not anywhere. Use your free review link and QR code, or a blank NFC card you write yourself (section 5.4).
 
 **Is the price different in some countries?**
-No. The price is the same everywhere, in US dollars. Kabsi Pro is software only.
+No. The price is the same everywhere, in US dollars. Kabsi is software only.
 
 **Which NFC card should I buy?**
 Any blank NFC card or sticker with an NTAG213 or NTAG215 chip works.
@@ -322,40 +331,52 @@ No. NFC doesn't work through metal.
 ### Pricing and payment
 
 **How much is Kabsi?**
-Essentials is $29 a month or $290 a year. Pro is $59 a month or $590 a year. Extra locations are $15 a month or $150 a year. The first 30 paying businesses pay the launch price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year. There is a 14-day Pro trial with no card, and your review link and QR code are free for everyone. Card payments are coming; until they open there is nothing to pay.
+29 US dollars a month per location. "14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing." Your review link and QR code are free for everyone. Card payments are not open yet; until they open nothing is charged.
+
+**What is included?**
+A reply to every review; alerts for bad reviews; your listing checked every day; website and booking link checked every day; holiday hours; up to 2 posts a month and photos from your phone; review link, QR code and counter card tools; a weekly summary and a monthly report.
+
+**What is not included?**
+Kabsi does not message your customers, run ads, build websites or promise rankings.
 
 **Is there a free trial?**
-Yes. 14 days, no card. It starts when Kabsi's access to your Google profile works.
+Yes. "14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing."
 
 **Is there a free plan?**
-No. There are two plans, Essentials and Pro, and a 14-day Pro trial with no card. Without a plan a business keeps, free, its review link, a QR code, a printable counter card from the free review link tool and a message to share. The branded counter card and table tent PDFs come with the plans. The free part keeps working for as long as Kabsi operates.
+No. There is one plan, 29 US dollars a month per location, with 14 days free first. Without a plan a business keeps, free, its review link, a QR code, a printable counter card from the free review link tool and a message to share. The free part keeps working for as long as Kabsi operates.
+
+**Are there other plans?**
+No. There is one plan. There are no yearly prices and no special public offer.
 
 **Are prices the same in every country?**
 Yes, in US dollars.
 
-**Is there a monthly plan?**
-Yes. Essentials is $29 a month and Pro is $59 a month, and you can cancel any time. The yearly plans are $290 and $590 a year, two months free. The first 30 paying businesses pay the launch price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year. Card payments are coming; until they open there is nothing to pay.
-
 **How do I pay?**
-By card, in US dollars. Card payments are coming; until they open there is nothing to pay, and the trial needs no card.
+By card, in US dollars. A card is needed to start the 14 days free. Card payments are not open yet; until they open nothing is charged.
 
 **Can I pay with crypto, cash or a bank transfer?**
 No. Card payments in US dollars are the only way to pay Kabsi.
 
 **Does my plan renew automatically?**
-Not today: card payments are not open yet, so nothing is charged and nothing renews. Once card payments open, a plan is a Creem subscription that renews every month or every year, from the day you paid, until you cancel, and Creem charges the card you gave at checkout. Cancelling on the Plan page stops the next renewal and your plan runs to the end of the period you paid for. Monthly plans can be cancelled at any time.
+Not today: card payments are not open yet, so nothing is charged and nothing renews. Once they open, the plan is a Creem subscription that renews every month until you cancel, and Creem charges the card you gave at the start. Cancelling stops the next renewal and your plan runs to the end of the month you paid for.
 
 **When does my plan start?**
-When payment is confirmed and Kabsi's Google access works. Waiting for access doesn't count.
+The 14 days free start when Kabsi's access to your Google profile works; waiting for access doesn't count. After day 14 the plan continues at 29 US dollars a month unless you cancel.
+
+**How do I cancel?**
+One tap in Settings, or tell Kabsi on WhatsApp.
 
 **What happens when my plan ends?**
-Reviews, Google Profile, Google Protection and the weekly report stop. Get Reviews keeps working: your review link and QR code still open your Google review page.
+Reviews, Google Profile, Google Protection, the weekly summary and the monthly report stop. Get Reviews keeps working: your review link and QR code still open your Google review page.
 
 **Can I get a refund?**
-Yearly plans are refundable in full within 14 days of the plan starting.
+Cancel before day 14 and you pay nothing. A month already paid runs to its end and is not refunded for that month. For anything else, email hello@kabsi.co.
 
 **Do you offer discounts?**
 No discounts are listed. For anything special, email hello@kabsi.co.
+
+**Is Google Business Profile free?**
+Google Business Profile is free from Google. Kabsi is an independent paid service.
 
 ### Businesses, locations and agencies
 
@@ -363,13 +384,13 @@ No discounts are listed. For anything special, email hello@kabsi.co.
 Yes. Each location is its own business in Kabsi, with its own Google profile, reviews, plan and review link. Switch between them in the header.
 
 **Is there a multi-location price?**
-One plan covers one Google profile. Each extra one is $15 a month or $150 a year on the same plan, paid through Creem as its own payment. For volume pricing, email hello@kabsi.co.
+Each location is its own plan at 29 US dollars a month. For many locations, email hello@kabsi.co.
 
 **Can my team use Kabsi?**
 Up to 3 extra addresses can receive review emails. Only the business's members can post. For other access needs, email hello@kabsi.co.
 
 **I'm an agency. Can I use Kabsi for my clients?**
-Yes: each client signs up for their own business and invites you as a Manager in Team. You then work in their Kabsi with the rights they give you. There is no reselling. Kabsi Partners, an affiliate program, is coming and not open yet.
+Yes: each client signs up for their own business and invites you as a Manager in Team. You then work in their Kabsi with the rights they give you. There is no reselling, and there is no partner program.
 
 **Can an agency post replies for its clients?**
 Only as a Manager the owner invited, and only for what the owner allows. Changes to the business name, address, main category or open status, and reviews that need more care, always need the owner.
@@ -377,8 +398,8 @@ Only as a Manager the owner invited, and only for what the owner allows. Changes
 **Is there a white-label version?**
 No. White-label isn't available.
 
-**Does Kabsi work in my country?**
-Yes. Signup is open in every country, prices are the same, and drafts follow each reviewer's language.
+**Which countries?**
+Any English-speaking business with a Google Business Profile.
 
 **Does Kabsi work with Yelp, Tripadvisor, Facebook, booking sites, a till or a CRM?**
 Not available today. Today, Kabsi works only with your Google Business Profile. It does not connect to booking systems, Tripadvisor, Booking.com, Airbnb, Facebook reviews, a till or a CRM, and it does not message your customers. The free Google profile check shows what Kabsi finds on your profile.
@@ -456,8 +477,8 @@ No. Prices are in US dollars only, and Kabsi shows no converted price. A card in
 **Is VAT added in the UAE or the UK?**
 Prices are plus tax where it applies. Creem, the merchant of record, works out any sales tax or VAT at its checkout; Kabsi does not set the rate and does not state one. What the invoice or receipt shows, such as a company name or a VAT number, is shown on Creem's receipt; the detail is confirmed before card payments open. For your company's details, write to hello@kabsi.co before you pay.
 
-**Does the launch price cover my second branch?**
-No. The launch price is for the plan. An extra location has one price for everyone, $15 a month or $150 a year, launch place or not.
+**Does my second branch cost the same?**
+Yes. Each location is its own plan at 29 US dollars a month, the same for everyone.
 
 **Can I pay with Apple Pay, or in instalments with Tabby?**
 Cards work, through Creem's checkout. Creem lists Apple Pay and Google Pay as supported, so one may appear at checkout; what shows depends on the product, your country and your device, so it may appear and may not. Kabsi offers no pay-later plans such as Tabby. Card payments are not open yet.
@@ -469,7 +490,7 @@ Yes. Kabsi messages the phone number you opted in with, so the messages arrive i
 Yes, for what you let managers approve. In Settings, Team, turn a kind on (review replies, for example), and a manager who has opted in their own phone can approve, undo and edit those drafts on WhatsApp. Billing stays with the owner.
 
 **Can I pause my plan while we close for a season?**
-There is no pause. Cancel on the Plan page or on WhatsApp and the plan runs to the end of the period you paid for; choose a plan again when you reopen. A launch price is kept only while the subscription stays paid. For the weeks you are closed, set Closed for a while under Hours.
+There is no pause. Cancel with one tap in Settings, or tell Kabsi on WhatsApp, and the plan runs to the end of the month you paid for; choose a plan again when you reopen. For the weeks you are closed, set Closed for a while under Hours.
 
 **Does Kabsi know UAE National Day and Eid?**
 Yes. Kabsi asks about UAE public holidays from the official UAE list: National Day is 2 and 3 December. Eid and the other Islamic holidays follow the moon, so their dates are estimates until they are announced. Kabsi asks five days before and never assumes your hours.

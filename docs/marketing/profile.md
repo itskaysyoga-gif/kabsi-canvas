@@ -33,9 +33,9 @@ Paste these three blocks as they stand. The counts are of characters, spaces inc
 
 > Kabsi checks your Google profile every day and prepares replies, posts and fixes. You say yes on WhatsApp. Nothing goes live without your yes.
 
-**600 characters (600)**
+**600 characters (557)**
 
-> Kabsi looks after a local business's Google profile. Every new review gets a reply ready in the reviewer's language. Kabsi checks your hours, phone, website and address every day and tells you when Google shows something different. It prepares photos and posts, and sends a weekly report every Monday. You approve each change with a tap on WhatsApp, and nothing goes live without your yes. Needs a verified Google profile. Free for 14 days once Kabsi is connected, no card. Then Essentials is $29 a month and Pro is $59 (card payments are coming). Kabsi is independent and not affiliated with Google.
+> Kabsi looks after a local business's Google profile. Every new review gets a reply ready in the reviewer's language. Kabsi checks your hours, phone, website and address every day and tells you when Google shows something different. It prepares photos and posts, and sends a weekly report every Monday. You approve each change with a tap on WhatsApp, and nothing goes live without your yes. Needs a verified Google profile. 14 days free, a card is needed to start. Then 29 US dollars a month per location. Kabsi is independent and not affiliated with Google.
 
 Where each sentence comes from:
 
@@ -48,8 +48,8 @@ Where each sentence comes from:
 | Weekly report every Monday | 04, 2.1a (Your weekly report) |
 | Approve with a tap on WhatsApp; nothing goes live without your yes | 04, 2.1; 02 (WhatsApp messages) |
 | Needs a verified Google profile | 04, 2.1c |
-| Free for 14 days once Kabsi is connected, no card | 02 (Free trial); the approved trial line (master plan 30.15) |
-| Essentials $29 a month, Pro $59; card payments are coming | 06, 4.1 |
+| 14 days free, a card is needed to start | 06, 4.1; src/lib/offer.ts (blueprint 3.1) |
+| 29 US dollars a month per location | 06, 4.1 |
 | Independent and not affiliated with Google | 04, 2.1d |
 
 ## 3. Three positioning sentences
@@ -76,20 +76,16 @@ Audience in one line: owners of businesses customers visit, and the people who l
 
 ## 5. Prices
 
-US dollars, plus tax where it applies, the same in every country (06, 4.1). The public name of the lower price is "launch price". Never "founding price". Founding 25 is private and is never named (master plan 30.51 item 3).
+US dollars, plus tax where it applies, the same in every country (06, 4.1). One plan since blueprint 3.1 (24 Nov 2026, R-163). There is no public discount or special offer.
 
 | Item | Price | Fact file |
 |---|---|---|
-| Essentials | $29 a month or $290 a year | 06, 4.1 |
-| Pro | $59 a month or $590 a year | 06, 4.1 |
-| Extra location | $15 a month or $150 a year | 06, 4.1 |
-| Launch price, the first 30 paying businesses, kept while they stay subscribed | Essentials $19 a month or $190 a year; Pro $39 a month or $390 a year | 06, 4.1 |
-| Free trial | 14 days, no card, the whole of Pro, starts when Kabsi's access works | 06, 4.1 and 4.3 |
-| Yearly | Two months free; refundable in full within 14 days | 06, 4.1 and 4.5 |
+| The plan | 29 US dollars a month per location | 06, 4.1 |
+| Free trial | 14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing. | 06, 4.1 |
 | Free tools | The free Google profile check, the review link and QR code | 02 (Free tools) |
 | Card payments | Coming. Nothing can be bought today. | 06, 4.1 and 4.2 |
 
-Only quote the launch price with its real count of places left from the Pricing page on the day, and hide it when none are left (06, 4.1). When a form needs one price, give Essentials $29 a month.
+When a form needs one price, give 29 US dollars a month per location.
 
 ## 6. Approved screenshots
 
@@ -97,14 +93,14 @@ No image is committed under docs/ (R-153). A screenshot here is a Playwright bas
 
 | Baseline path | Shows | Example label |
 |---|---|---|
-| `tests/e2e/baseline/d1440/public.spec.ts/home.png` | Home at 1440 px: the brand line, the free check, the Example result of an invented salon, "When Google shows something different, you choose.", the three steps, the Example WhatsApp message | Visible on all three examples |
-| `tests/e2e/baseline/m390/public.spec.ts/home.png` | The same at 390 px | Visible on the comparison card and on the WhatsApp phone |
-| `tests/e2e/baseline/d1440/public.spec.ts/pricing.png` | Pricing: Essentials, Pro and the launch price with its count | No example data on the page |
+| `tests/e2e/baseline/d1440/public.spec.ts/home.png` | Out of date since SITE-1 (24 Nov 2026): shows the earlier Home. Retake before use | Visible on all three examples |
+| `tests/e2e/baseline/m390/public.spec.ts/home.png` | Out of date since SITE-1 (24 Nov 2026): the earlier Home at 390 px. Retake before use | Visible on the comparison card and on the WhatsApp phone |
+| `tests/e2e/baseline/d1440/public.spec.ts/pricing.png` | Out of date since SITE-1 (24 Nov 2026): shows the retired plans. Retake before use | No example data on the page |
 | `tests/e2e/baseline/m390/app.spec.ts/reviews.png` | The Reviews screen of the invented demo business, replies ready with Approve, Edit and Skip | Visible beside the business name |
 
 Not approved, with the reason:
 
-- `tests/e2e/baseline/d1440/public.spec.ts/scan.png`: its footer still shows a Founding 25 link, which is private since Founding 1. The picture is out of date, not the site. Do not use it. Logged in `docs/LATER.md`.
+- `tests/e2e/baseline/d1440/public.spec.ts/scan.png`: its footer still shows a link that is private since Founding 1. The picture is out of date, not the site. Do not use it. Logged in `docs/LATER.md`.
 - `tests/e2e/baseline/d1440/app.spec.ts/home.png`: the sidebar foot shows the QA test address of the demo owner.
 - Every other baseline (the `email.spec.ts` set, `onboarding.spec.ts`, the other app screens, `for-hair-salon.png`, the 390 px `scan.png`): not looked at for this purpose, so not approved. Look first, then add a row here.
 
@@ -124,7 +120,7 @@ Claims:
 - Anything about asking for, gating, rewarding or choosing who reviews. Never "get more 5-star reviews".
 
 Private or not built:
-- Founding 25 and "founding price" (the public name is "launch price"). Any place count other than the live one on Pricing.
+- Any plan name, discount or offer, and any price other than 29 US dollars a month per location (blueprint 3.1).
 - The request book, bookings, customers' requests, a booking assistant, or any link to a booking tool, a till, a CRM, Yelp, Tripadvisor, Booking.com, Facebook reviews or any other platform (04, 2.1b).
 - Kabsi Partners rewards, payout figures or the partner program (not part of the product profile).
 - "Kabsi cards" or any card for sale: Kabsi sells none.
@@ -141,9 +137,9 @@ Style: no em dashes, no en dashes, no exclamation marks. Numbers as digits; rang
 
 Read these on the day. If any differ from this file, change the fact file first (K-104), then this file.
 
-1. `knowledge/facts/06-pricing-and-payment.md` 4.1 and 4.2: prices, the launch price and whether card payments are open. Card payments, partner links and Harvey are planned to open on 10 Dec (master plan 30.50 item 15); until a session records it as done, the line "card payments are coming" stays.
+1. `knowledge/facts/06-pricing-and-payment.md` 4.1 and 4.2: the price, the trial and whether card payments are open. Card payments, partner links and Harvey are planned to open on 10 Dec (master plan 30.50 item 15); until a session records it as done, the line "card payments are coming" stays.
 2. `knowledge/facts/02-facts-that-change.md`: the free trial line, WhatsApp, the contact lines.
-3. The Pricing page on kabsi.co: the live count of launch places.
+3. The Pricing page on kabsi.co: the one price card.
 4. This file's screenshots: the baseline file still exists and still shows what the table says.
 
 ## 9. Lines that are new (lane R to confirm)

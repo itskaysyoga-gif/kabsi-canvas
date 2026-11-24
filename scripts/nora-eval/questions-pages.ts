@@ -4,7 +4,16 @@
 // answer that links a page not in `pages`, links two, or links before it has answered. The 60 questions stay as they are;
 // run-nora-eval.ts --pages asks these five (the stub run is in CI, the live run only by hand, R-45), and --with-28 adds them.
 import type { NoraPage } from "../../supabase/functions/_shared/nora-pages.ts";
-import type { Question } from "./questions.ts";
+import {
+  NO_CARD_TRIAL,
+  OLD_PRICES,
+  ONE_PRICE,
+  PLAN_NAME_PRICED,
+  PRICE,
+  PRICE_ROW,
+  RETIRED_PRICES,
+  type Question,
+} from "./questions.ts";
 
 const MAIL = /hello@kabsi\.co/;
 const CALL = /setup-call/;
@@ -48,22 +57,19 @@ export const QUESTIONS_PAGES: Question[] = [
   },
   {
     // A question no guide covers: no link, and the answer is complete without one.
+    // SITE-1 (blueprint 3.1, R-163): there is no Pro any more; the answer is the one plan, the same as en01.
     id: "pg02",
     lang: "en",
     topic: "a question no page covers",
     ask: "How much is Pro?",
-    kb: [
-      /\$29 a month/,
-      /\$290 a year/,
-      /Pro \| \$59 \| \$590/,
-      /Do not quote Essentials or Pro prices as available/,
-    ],
+    kb: [PRICE, PRICE_ROW, RETIRED_PRICES],
     pages: [],
     link: null,
-    must: [/\$59/, /\$590/],
+    must: [ONE_PRICE, /one plan/i],
+    forbid: [OLD_PRICES, PLAN_NAME_PRICED, NO_CARD_TRIAL],
     coming: true,
     reference:
-      "The website lists Essentials at $29 a month or $290 a year and Pro at $59 a month or $590 a year. The first 30 paying businesses pay the launch price, Essentials $19 or Pro $39 a month, and keep it while they stay subscribed. Those plans cannot be bought yet. Card payments are not open yet either, so there is nothing to pay today.",
+      "There is no Pro plan any more. Kabsi has one plan, 29 US dollars a month per location, in US dollars, plus tax where it applies. 14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing. Card payments are not open yet, so there is nothing to pay today.",
   },
   {
     // A guide dated in the future is not in the list the website serves, so there is nothing to link: she must not name it.

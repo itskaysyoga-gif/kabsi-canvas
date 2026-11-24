@@ -2,6 +2,7 @@
 // Site 3a left (docs/site3/audit.md). One primary action per public page (the free check), the footer's operator and Creem
 // line, the Security short answers first, one reassurance under the search on /for, the guides' contents links at 24 px.
 import { readFileSync } from "node:fs";
+import { TRIAL_LINE as OFFER_TRIAL_LINE } from "../src/lib/offer";
 import { describe, expect, it } from "vitest";
 import { MERCHANT_LINE, OPERATOR_LINE, TRIAL_LINE } from "../src/lib/site";
 
@@ -76,7 +77,7 @@ describe("Site 3b: one reassurance under the search on /for and the industry pag
     expect(d).not.toContain("trialSeparate");
     expect(d.match(/note=\{TRIAL_LINE\}/g)).toHaveLength(3);
     expect(d).toMatch(/keywordHint=\{false\}/);
-    expect(TRIAL_LINE).toBe("Free for 14 days once Kabsi is connected. No card.");
+    expect(TRIAL_LINE).toBe(OFFER_TRIAL_LINE); // SITE-1: blueprint 3.1, src/lib/offer.ts
   });
 });
 
