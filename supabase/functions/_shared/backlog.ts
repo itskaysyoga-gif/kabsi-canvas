@@ -1,27 +1,33 @@
-// Day-one backlog (K-66, K-101, R-18, P0.3-10). When Kabsi first reads a business's reviews, the newest unanswered ones
-// are drafted at once. A free trial gets the 10 most recent (the rest wait for a plan); a paid plan gets all of them once
-// the live switch is on (app_settings.full_backlog, R-18: switched on with P0.7-04); until then every other plan keeps
-// the earlier limit of 20 (D221). Pure rules first, then the two small reads they need.
-import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+// Day-one backlog (K-66, K-101, R-18, P0.3-10; GATE-2). When Kabsi first reads a business's reviews, every unanswered review
+// from the last 90 days is drafted at once and arrives as one numbered list to approve (launch checklist line 5). Older
+// unanswered reviews wait ("archived"); they are never drafted on their own. The trial needs a card since OFFER-2 (30.53), so
+// there is no trial cap any more. Pure rules first, then the small read they need.
 
-export const TRIAL_BACKLOG = 10;
-export const EARLIER_BACKLOG = 20;
+export const FIRST_DAY_DAYS = 90;
+const DAY = 86_400_000;
+
+/** The state of an unanswered review on the first read: drafted now when it is from the last 90 days, else waiting. */
+export function firstDayState(createTime: string | null | undefined, now: Date): "new" | "archived" {
+  const t = Date.parse(createTime ?? "");
+  if (!Number.isFinite(t)) return "archived";
+  return now.getTime() - t <= FIRST_DAY_DAYS * DAY ? "new" : "archived";
+}
+
+/** The earliest review time a reopened backlog review may have (reviews that waited for a plan, from the last 90 days only). */
+export const firstDaySince = (now: Date) => new Date(now.getTime() - FIRST_DAY_DAYS * DAY).toISOString();
 
 export type BacklogPolicy = { trial: boolean; fullBacklog: boolean };
 
-/** How many unanswered reviews are drafted on the first read. */
-export function backlogLimit(p: BacklogPolicy): number {
-  if (p.trial) return TRIAL_BACKLOG;
-  return p.fullBacklog ? Number.POSITIVE_INFINITY : EARLIER_BACKLOG;
-}
-
-/** The state of the nth unanswered review on the first read (1 is the newest): drafted now, or waiting. */
-export function backlogState(position: number, limit: number): "new" | "archived" {
-  return position <= limit ? "new" : "archived";
-}
-
-/** Reviews that waited for a plan are drafted once the business has one (only with the full backlog on). */
+/** Reviews that waited for a plan (the old trial cap) are drafted once the business has one, with the full backlog on. */
 export const reopensOnPlan = (p: BacklogPolicy) => !p.trial && p.fullBacklog;
+
+/** Whether the first-day list should wait: a review of the first read is still being drafted, and the read is under an hour
+ *  old. After an hour the list goes with what is ready, so one failed draft never holds it back. */
+export function holdFirstDayList(stillDrafting: number, firstReadAt: string | null, now: Date): boolean {
+  if (!stillDrafting) return false;
+  const t = Date.parse(firstReadAt ?? "");
+  return Number.isFinite(t) && now.getTime() - t < 3600_000;
+}
 
 // deno-lint-ignore no-explicit-any
 type Db = SupabaseClient<any, "public", any>;

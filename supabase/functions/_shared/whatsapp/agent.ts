@@ -388,7 +388,7 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     if (q.type === "business" && q.options[cmd.n - 1]) return pickedBusiness(t, q.options[cmd.n - 1].id);
     if (q.type === "digest" && q.ids[cmd.n - 1]) return openDigestItem(t, q.ids[cmd.n - 1]);
     if (q.type === "which" && q.options[cmd.n - 1]) return approveToken(t, q.options[cmd.n - 1].token);
-    if (q.type === "waiting" && q.items[cmd.n - 1] && now - Date.parse(q.at) < WAITING_OPEN_MS) return openWaiting(t, q, cmd.n);
+    if (q.type === "waiting" && q.items[cmd.n - 1] && now - Date.parse(q.at) < (q.open_ms ?? WAITING_OPEN_MS)) return openWaiting(t, q, cmd.n);
   }
 
   // The map's buttons and the owner's search for the map (28.5).
@@ -971,7 +971,7 @@ function prepareRefused(t: Turn, reason: string | undefined, what: "hours" | "po
 function lastReview(t: Turn): string | null {
   // OFFER-2: "make 2 more professional" names review 2 of the waiting list that is still open for this business.
   const q = t.who.conversation?.open_question;
-  const n = q?.type === "waiting" && q.location_id === t.business?.location_id && (t.d.now ?? Date.now)() - Date.parse(q.at) < WAITING_OPEN_MS
+  const n = q?.type === "waiting" && q.location_id === t.business?.location_id && (t.d.now ?? Date.now)() - Date.parse(q.at) < (q.open_ms ?? WAITING_OPEN_MS)
     ? numberIn(t.m.text ?? "") : null;
   const named = n && q?.type === "waiting" ? q.items[n - 1] : null;
   if (named?.kind === "review") return named.id;

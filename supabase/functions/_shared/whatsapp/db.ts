@@ -186,6 +186,12 @@ export async function whatsappCtx(): Promise<Ctx> {
   const out: Out = { db: outDb, live, mock, now: () => new Date(), mapPng };
   ctx = {
     db, on: AGENT_ON, phoneNumberId, appUrl: APP_URL, sender: guarded(live, mock), out,
+    openList: async (userId, locationId, reviewIds, openMs) => {
+      const { data } = await admin().from("whatsapp_optins").select("phone").eq("user_id", userId).eq("state", "active").maybeSingle();
+      if (!data?.phone) return;
+      const items = reviewIds.map((id) => ({ kind: "review", id, drafted: true }));
+      await rpc("whatsapp_conversation_set", { p_phone: data.phone, p_patch: { open_question: { type: "waiting", location_id: locationId, items, at: new Date().toISOString(), open_ms: openMs } } });
+    },
     remember: async (userId, reviewId, locationId) => {
       const { data } = await admin().from("whatsapp_optins").select("phone").eq("user_id", userId).eq("state", "active").maybeSingle();
       if (data?.phone) await rpc("whatsapp_conversation_set", { p_phone: data.phone, p_patch: { last_task: { type: "review", review_id: reviewId, location_id: locationId } } });
@@ -550,6 +556,24 @@ export async function whatsappReviewAlert(loc: { id: string; name: string }, r: 
     text: s.regulated ? null : r.comment,
     draft: d?.body ?? null, safeDraft: !!d?.safety_ok, risk: r.risk,
   });
+}
+
+/** GATE-2 (launch checklist line 5): the first-day list. Every drafted review of the first read from the last 90 days, newest
+ *  first, by first name and stars; the ones Kabsi did not draft (high risk, sensitive) are only counted. */
+export async function whatsappBacklogList(loc: { id: string; name: string }) {
+  if (!AGENT_ON) return {};
+  const users = await alertRecipients(loc.id);
+  if (!users.length) return {};
+  const { firstDaySince } = await import("../backlog.ts");
+  const { data, error } = await admin().from("reviews").select("id, reviewer_name, star_rating, state, risk")
+    .eq("location_id", loc.id).eq("is_backlog", true).in("state", ["drafted", "blocked"]).is("existing_reply", null)
+    .gte("review_created_at", firstDaySince(new Date())).order("review_created_at", { ascending: false }).limit(200);
+  if (error) throw error;
+  const rows = (data ?? []) as { id: string; reviewer_name: string | null; star_rating: number | null; state: string; risk: string }[];
+  const ready = rows.filter((r) => r.state === "drafted" && r.risk !== "high");
+  const reviews = ready.map((r) => ({ id: r.id, stars: r.star_rating, first_name: String(r.reviewer_name ?? "").trim().split(/\s+/)[0] || null, drafted: true }));
+  const { sendFirstDayList } = await import("./deliver.ts");
+  return sendFirstDayList(await whatsappCtx(), users, { locationId: loc.id, business: loc.name, reviews, careful: rows.length - ready.length });
 }
 
 /** P0.8-03: a post the care routine prepared, to everyone at the business who opted in, with Approve. */

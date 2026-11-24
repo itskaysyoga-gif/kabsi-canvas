@@ -167,3 +167,26 @@ export function doneLines(d: ReportData): string[] {
     `${taps} ${taps === 1 ? "tap" : "taps"} on your review link and cards`,
   ];
 }
+
+// ─── GATE-2: the first-day list (launch checklist line 5)
+
+/** How long a number answers the first-day list: 48 hours, since it may come while the owner is away. */
+export const FIRST_DAY_OPEN_MS = 48 * 3600_000;
+/** The most reviews named in the message; past that the rest are on kabsi.co (WhatsApp numbers are one or two digits). */
+export const FIRST_DAY_MAX = 30;
+
+/** One message: every reply Kabsi drafted for the unanswered reviews of the last 90 days, numbered. First name and stars only,
+ *  never a review's words. Nothing is approved from this message itself: a number opens one draft with its Approve. */
+export function firstDayBody(business: string, reviews: WaitingReview[], careful: number, appUrl: string): string {
+  const shown = reviews.slice(0, FIRST_DAY_MAX);
+  const more = reviews.length - shown.length;
+  const head = `${business}: Kabsi wrote replies for ${reviews.length === 1 ? "1 review" : `${reviews.length} reviews`} from the last 90 days that had no answer.`;
+  const lines = shown.map((r, i) => `${i + 1}. ${who(r)}`);
+  const tail = [
+    more > 0 ? `And ${more} more in Kabsi.` : "",
+    careful ? `${careful === 1 ? "1 more review needs" : `${careful} more reviews need`} your own words first. They are in Kabsi.` : "",
+    "Send a number to read a reply and approve it. Nothing goes to Google without your yes.",
+    `All of them on one page: ${appUrl}/app/reviews?f=needs`,
+  ].filter(Boolean);
+  return [head, "", ...lines, "", ...tail].join("\n");
+}

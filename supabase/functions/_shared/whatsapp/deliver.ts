@@ -14,6 +14,7 @@ import { notify, type Out } from "./outbox.ts";
 import type { ListMsg } from "./look.ts";
 import { assertSendable, ref, type TemplateRef } from "./templates.ts";
 import { errorText } from "../log-scrub.ts";
+import { FIRST_DAY_MAX, FIRST_DAY_OPEN_MS, firstDayBody, type WaitingReview } from "./google-care.ts";
 
 export type Sent = { id: string };
 export interface Sender {
@@ -48,6 +49,8 @@ export type Db = {
 };
 
 export type Ctx = {
+  /** GATE-2: opens the first-day list on the person's conversation, so a number answers it (ids only, never a name). */
+  openList?: (userId: string, locationId: string, reviewIds: string[], openMs: number) => Promise<void>;
   db: Db; sender: Sender; on: boolean; phoneNumberId: string; appUrl: string; now?: () => number;
   /** The agent's one sender; when present every alert goes through it. */
   out?: Out;
@@ -138,6 +141,24 @@ export async function sendProtectionAlert(ctx: Ctx, userIds: string[], c: { chan
       // Identity-field changes go at once, quiet hours or not (9.5).
       urgent: c.identity,
     });
+  }
+  return out;
+}
+
+/** GATE-2 (launch checklist line 5): the replies for every unanswered review of the last 90 days, as one numbered list. Outside
+ *  the 24-hour window the approved "updates waiting" template goes first, and the list follows the owner's tap. */
+export async function sendFirstDayList(ctx: Ctx, userIds: string[], l: { locationId: string; business: string; reviews: WaitingReview[]; careful: number }) {
+  const out: Record<string, string> = {};
+  if (!l.reviews.length) return out;
+  const ids = l.reviews.slice(0, FIRST_DAY_MAX).map((r) => r.id);
+  for (const userId of userIds) {
+    out[userId] = await deliver(ctx, {
+      userId, locationId: l.locationId, kind: "first_day_list", dedupe: `first_day_list:${l.locationId}:${userId}`, alert: "review",
+      body: firstDayBody(l.business, l.reviews, l.careful, ctx.appUrl).slice(0, 4000),
+      template: ref("updates_waiting", { business: l.business, count: String(l.reviews.length) }),
+    });
+    // Only for someone it reached (or will reach after their tap): a refused or switched-off person gets no open list.
+    if (ctx.openList && !/^(off|refused|off_for_alerts|failed)/.test(out[userId])) await ctx.openList(userId, l.locationId, ids, FIRST_DAY_OPEN_MS).catch(() => undefined);
   }
   return out;
 }

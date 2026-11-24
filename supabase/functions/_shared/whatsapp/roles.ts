@@ -58,7 +58,8 @@ export type OpenQuestion =
   // Cards 2: the place of a card just linked or opened, typed back within 10 minutes (the card code only, never a business).
   | { type: "card_label"; code: string; at: string }
   // OFFER-2: the numbered "waiting" list (ids only), so "2" or "make 2 shorter" names an item; open 30 minutes.
-  | { type: "waiting"; location_id: string; items: WaitingRef[]; at: string }
+  // GATE-2: the first-day list (every unanswered review of the last 90 days) uses the same shape, open 48 hours (open_ms).
+  | { type: "waiting"; location_id: string; items: WaitingRef[]; at: string; open_ms?: number }
   // OFFER-2: a weekly hours change for one day that still needs its times (the one question back).
   | { type: "week_ask"; location_id: string; day: string; at: string }
   // OFFER-2: a weekly hours, phone or website change shown back exactly, waiting for the tap on Approve (its nonce is in the button).

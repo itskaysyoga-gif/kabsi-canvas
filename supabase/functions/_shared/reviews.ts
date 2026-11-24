@@ -10,8 +10,8 @@ import type { FactRow } from "./facts.ts";
 import { recordAiUsage, takeAiBudget } from "./ai-budget.ts";
 import { isConciergeLocationId, matchConciergeReview, type ConciergeCandidate } from "./concierge.ts";
 import { auditedAdmin } from "./audit.ts";
-import { backlogLimit, backlogPolicy, backlogState, reopensOnPlan } from "./backlog.ts";
-import { whatsappReviewAlert } from "./whatsapp/db.ts";
+import { backlogPolicy, firstDaySince, firstDayState, holdFirstDayList, reopensOnPlan } from "./backlog.ts";
+import { whatsappBacklogList, whatsappReviewAlert } from "./whatsapp/db.ts";
 
 
 type Loc = {
@@ -39,13 +39,12 @@ export async function syncLocation(loc: Loc) {
   const db = admin();
   const reviews = await listReviews(loc.google_account_id!, loc.google_location_id!);
   const firstSync = !loc.reviews_synced_at;
-  // K-66, K-101: how many unanswered reviews are drafted on the first read depends on the plan.
+  // GATE-2 (K-66, K-101): on the first read every unanswered review from the last 90 days is drafted; older ones wait.
   const policy = await backlogPolicy(db, loc.id);
-  const limit = backlogLimit(policy);
+  const now = new Date();
   const { data: known } = await db.from("reviews").select("google_review_id").eq("location_id", loc.id);
   const knownIds = new Set((known ?? []).map((r) => r.google_review_id));
   let added = 0;
-  let backlogOpen = 0;
   // After a concierge business gets real access, reviews staff typed in are matched to the Google originals once,
   // so the first real sync does not duplicate them (only a single clear match counts).
   let manual: ConciergeCandidate[] = [];
@@ -76,7 +75,7 @@ export async function syncLocation(loc: Loc) {
       }
     }
     let state = r.reply ? "handled_offline" : "new";
-    if (firstSync && state === "new") state = backlogState(++backlogOpen, limit);
+    if (firstSync && state === "new") state = firstDayState(r.createTime, now);
     const { error } = await db.from("reviews").insert({
       location_id: loc.id, google_review_id: r.reviewId, reviewer_name: r.reviewer, star_rating: r.rating,
       comment: r.comment, existing_reply: r.reply, review_created_at: r.createTime, review_updated_at: r.updateTime,
@@ -88,7 +87,8 @@ export async function syncLocation(loc: Loc) {
   // The reviews that waited for a plan are drafted once the business has one (full backlog on, K-101).
   if (!firstSync && reopensOnPlan(policy)) {
     await db.from("reviews").update({ state: "new" })
-      .eq("location_id", loc.id).eq("is_backlog", true).eq("state", "archived").is("existing_reply", null);
+      .eq("location_id", loc.id).eq("is_backlog", true).eq("state", "archived").is("existing_reply", null)
+      .gte("review_created_at", firstDaySince(now));
   }
   await db.from("locations").update({ reviews_synced_at: new Date().toISOString() }).eq("id", loc.id);
   return added;
@@ -252,8 +252,14 @@ export async function notifyLocation(loc: Loc) {
   let handed = 0;
   const mark = (ids: string[]) => db.from("reviews").update({ notified_at: new Date().toISOString() }).in("id", ids);
 
-  // Day-one backlog: one summary email (D221)
-  const backlog = pending.filter((r) => r.is_backlog);
+  // Day-one backlog: one summary email (D221) and, on WhatsApp, one numbered list to approve (GATE-2, checklist line 5). Both
+  // wait while a review of the first read is still being drafted (an hour at most), so the batch arrives once and whole.
+  let backlog = pending.filter((r) => r.is_backlog);
+  if (backlog.length && !loc.backlog_emailed_at) {
+    const { data: drafting } = await db.from("reviews").select("created_at").eq("location_id", loc.id).eq("is_backlog", true).eq("state", "new")
+      .order("created_at", { ascending: true }).limit(50);
+    if (holdFirstDayList(drafting?.length ?? 0, (drafting?.[0]?.created_at as string | undefined) ?? null, new Date())) backlog = [];
+  }
   if (backlog.length && !loc.backlog_emailed_at) {
     const n = backlog.length;
     await notify({
@@ -262,6 +268,7 @@ export async function notifyLocation(loc: Loc) {
       content: backlogReady(loc.name, n, APP_URL),
     });
     await db.from("locations").update({ backlog_emailed_at: new Date().toISOString() }).eq("id", loc.id);
+    await whatsappBacklogList(loc).catch((e) => captureError("whatsapp", e, { step: "backlog_list" }));
     handed++;
   }
   if (backlog.length) await mark(backlog.map((r) => r.id));

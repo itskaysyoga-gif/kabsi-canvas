@@ -189,3 +189,76 @@ Deno.test("roles: a staff phone gets none of the report tools; a manager gets th
   assert.equal(reads, 0);
   assert.equal((await send(w, PHONES.manager, "competitors")).result, "care_competitors_none");
 });
+
+// ─── First-day list (launch checklist line 5): one numbered list, a number opens one draft with its Approve, for 48 hours.
+import { FIRST_DAY_MAX, FIRST_DAY_OPEN_MS, firstDayBody } from "./google-care.ts";
+import { sendFirstDayList, type Ctx } from "./deliver.ts";
+
+Deno.test("first day: the list names first names and stars only, numbered, with the one-page link", () => {
+  const body = firstDayBody("Harbour Lane Coffee", [
+    { id: "a", first_name: "Maria", stars: 5, drafted: true },
+    { id: "b", first_name: null, stars: 1, drafted: true },
+  ], 1, "https://kabsi.co");
+  assert.equal(body, [
+    "Harbour Lane Coffee: Kabsi wrote replies for 2 reviews from the last 90 days that had no answer.",
+    "",
+    "1. Maria, 5 stars",
+    "2. A customer, 1 star",
+    "",
+    "1 more review needs your own words first. They are in Kabsi.",
+    "Send a number to read a reply and approve it. Nothing goes to Google without your yes.",
+    "All of them on one page: https://kabsi.co/app/reviews?f=needs",
+  ].join("\n"));
+  assert.doesNotMatch(body, /[–—!]/);
+  const many = Array.from({ length: 34 }, (_, i) => ({ id: `r${i}`, first_name: `N${i}`, stars: 5, drafted: true }));
+  const big = firstDayBody("X", many, 0, "https://kabsi.co");
+  assert.match(big, new RegExp(`\n${FIRST_DAY_MAX}\\. N${FIRST_DAY_MAX - 1}, 5 stars\n`));
+  assert.doesNotMatch(big, new RegExp(`\n${FIRST_DAY_MAX + 1}\\. `));
+  assert.match(big, /And 4 more in Kabsi\./);
+});
+
+Deno.test("first day: one message per person, with the template outside the window, and the list opened for numbers", async () => {
+  const sent: { body: string; template: string | null }[] = [];
+  const opened: { user: string; ids: string[]; ms: number }[] = [];
+  const ctx = {
+    db: {
+      maySend: async () => ({ ok: true, phone: "+12125550143", in_window: false, review_alerts: true, digest: true }),
+      record: async () => "rec",
+    },
+    sender: {
+      live: false,
+      text: async (_to: string, body: string) => (sent.push({ body, template: null }), { id: "m1" }),
+      template: async (_to: string, name: string) => (sent.push({ body: "", template: name }), { id: "t1" }),
+      buttons: async (_to: string, body: string) => (sent.push({ body, template: null }), { id: "b1" }),
+    },
+    on: true, phoneNumberId: "x", appUrl: "https://kabsi.co", now: () => Date.UTC(2026, 10, 24, 12),
+    openList: async (user: string, _loc: string, ids: string[], ms: number) => void opened.push({ user, ids, ms }),
+  } as unknown as Ctx;
+  const out = await sendFirstDayList(ctx, ["u1"], {
+    locationId: BIZ.harbour, business: "Harbour Lane Coffee", careful: 0,
+    reviews: [{ id: "r-harbour-1", first_name: "Maria", stars: 5, drafted: true }],
+  });
+  assert.equal(out.u1, "mock_sent");
+  assert.deepEqual(sent, [{ body: "", template: "kabsi_updates_waiting" }], "outside the window: the approved template");
+  assert.deepEqual(opened, [{ user: "u1", ids: ["r-harbour-1"], ms: FIRST_DAY_OPEN_MS }]);
+  // Nothing to list: nothing sent, nothing opened.
+  opened.length = 0;
+  assert.deepEqual(await sendFirstDayList(ctx, ["u1"], { locationId: BIZ.harbour, business: "x", careful: 0, reviews: [] }), {});
+  assert.equal(opened.length, 0);
+});
+
+Deno.test("first day: a number a day later still opens that draft with Approve; after 48 hours it does not", async () => {
+  const w = new World();
+  const list = (hoursAgo: number) => {
+    w.conversation(PHONES.owner).open_question = {
+      type: "waiting", location_id: BIZ.harbour, at: new Date(w.now - hoursAgo * 3600_000).toISOString(), open_ms: FIRST_DAY_OPEN_MS,
+      items: [{ kind: "review", id: "r-harbour-1", drafted: true }],
+    };
+  };
+  list(24);
+  const a = await send(w, PHONES.owner, "1");
+  assert.equal(a.result, "shown_for_yes");
+  assert.equal(w.conversation(PHONES.owner).last_task?.review_id, "r-harbour-1");
+  list(49);
+  assert.notEqual((await send(w, PHONES.owner, "1")).result, "shown_for_yes");
+});
