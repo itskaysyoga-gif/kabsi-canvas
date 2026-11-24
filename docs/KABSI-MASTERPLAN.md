@@ -1565,3 +1565,14 @@ Changed by 30.52 (R-154): 30.50 item 14 (the video scripts): they never name Fou
 ## 30.53 Version 3.1 of the blueprint replaces every earlier product decision (lane R, 24 Nov 2026, R-163)
 
 `docs/kabsi-final/` holds the version 3.1 blueprint, approved by Rashid on 24 Nov 2026: the founder decision, the decision register, the product blueprint (section 11 is the WhatsApp capability matrix), the engineering plan with the session prompts, the compliance register, the website blueprint, the launch checklist, the AUDIT-1 report and the unit economics workbook. Where it differs from any earlier section of this plan, from `docs/COPY.md` or from the facts, it wins. In short: Kabsi is proactive Google care for one location at 29 US dollars a month (14-day trial with a card; a private founding offer of 19 for 12 months), the owner approves and makes changes from WhatsApp or email, Kabsi never contacts a business's customers and stores no customer contact details, and the request book, AI answer checks, the visibility map, DataForSEO, partners and Outbound are switched off with their code kept. The order of work is FIX-0, then OFFER-2, PROOF-2, SITE-1 and SITE-2 in parallel, then GATE-2.
+
+## 30.54 Lane R decisions of 24 Nov 2026, evening (R-164)
+
+1. FIX-0 is verified live: since 16:31 UTC the Edge Functions reach the database with `KABSI_SECRET_KEY` (the legacy service_role key); jobs run, Google sync succeeded at 16:35, the number is connected and green, and an owner "hi" got a reply in 5 seconds. The cause was the platform refusing the secret key with "JWT issued at future"; moving off the legacy key waits until Supabase explains it. 200 duplicate outage alerts were dropped and 57 stored outage warnings closed by lane R; OFFER-2 caps staff alerts at one of a kind an hour.
+2. K-129 narrowed, approved: a phone number the owner types on WhatsApp, sees shown back exactly and taps Approve on may reach Google. A phone change Google makes is still decided on kabsi.co only.
+3. The staff Founding 25 link must go through the card checkout at 19 like the private invitation; the 90-day trial with no card is retired (GATE-2).
+4. Copy tests: "listing", "reply" and "booking" are allowed words. The trial check must match `TRIAL_LINE` from `src/lib/offer.ts` in full, not only "14 days".
+5. The three new guides (Jobber, Calendly, where to put your review link) publish as soon as their sources are re-read from the raw page text, not on the January schedule.
+6. One plan everywhere: an extra location is 29 US dollars a month, the same as the first. Essentials and Pro are internal names only.
+7. The website is redone once more as one design system across every public page (SITE-3); the home page brief is in the SITE-3 prompt and wins over blueprint section 3 where they differ.
+8. `docs/KABSI-PROGRESS.md` is cut back under 10 KB by GATE-2, moving history to `docs/progress/archive/`.
