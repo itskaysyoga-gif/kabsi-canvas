@@ -65,10 +65,10 @@ export type TellChip = { ask: string; photo?: boolean; answer: string[]; approve
 /**
  * The example messages (blueprint 3.3). Only what works on main is shown (blueprint 3, rules for the page): until
  * OFFER-2 ships the "waiting" read and the QR image in the chat, "Send me my review link" takes the place of "What needs
- * my attention?" and "Send me my review QR code" is left out. Flip these two when OFFER-2 is on main.
+ * my attention?" and "Send me my review QR code" is left out. OFFER-2 (PR 593) shipped both on 24 Nov 2026.
  */
-export const OFFER2_ON = false;
-export const QR_IMAGE_ON = false;
+export const OFFER2_ON = true;
+export const QR_IMAGE_ON = true;
 
 const ATTENTION: TellChip = {
   ask: "What needs my attention?",

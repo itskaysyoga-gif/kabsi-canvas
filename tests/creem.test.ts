@@ -326,7 +326,7 @@ describe("event to state (10.2.9)", () => {
       message: "ended",
     });
   });
-  it("refunds, disputes and a trialing event alert staff and change no state", () => {
+  it("refunds and disputes alert staff and change no state; a trial with a card opens the plan until the trial ends (OFFER-2)", () => {
     expect(effectOf(ev("refund.created", { object: "refund" }), IDS)).toMatchObject({
       write: null,
       alert: "refund",
@@ -335,9 +335,10 @@ describe("event to state (10.2.9)", () => {
       write: null,
       alert: "dispute",
     });
-    expect(effectOf(ev("subscription.trialing", sub()), IDS)).toMatchObject({
-      write: null,
-      alert: "trialing",
+    expect(effectOf(ev("subscription.trialing", sub({ status: "trialing" })), IDS)).toMatchObject({
+      write: { state: "active", pastDue: "clear" },
+      alert: null,
+      paid: false,
     });
     expect(effectOf(ev("something.else", {}), IDS)).toMatchObject({
       write: null,
@@ -389,9 +390,12 @@ describe("two events for one payment (QA 1, 25 Oct 2026)", () => {
 describe("the products (10.2.3)", () => {
   it("are the ten Kabsi products in cents, US dollars, with the copy of section 23", () => {
     // Price 1: the founding family keeps the session 10 products (19, 39); the list family is 29 and 59.
+    // OFFER-2: one plan at 29 a month per location (an extra location is 29 too), founding 19.
     expect(PRODUCT_KEYS.map((k) => CATALOGUE[k].price)).toEqual([
-      1900, 19000, 3900, 39000, 2900, 29000, 5900, 59000, 1500, 15000,
+      1900, 19000, 3900, 39000, 2900, 29000, 5900, 59000, 2900, 15000,
     ]);
+    expect(CATALOGUE.essentials_month_list.name).toBe("Kabsi, monthly");
+    expect(CATALOGUE.essentials_month.name).toBe("Kabsi, monthly, founding price");
     expect(CATALOGUE.pro_year_list.name).toBe("Kabsi Pro, yearly");
     expect(CATALOGUE.pro_year.name).toBe("Kabsi Pro, yearly, launch price");
     expect(PRODUCT_DESCRIPTION).toBe("Your Google profile and reviews, managed from WhatsApp.");
@@ -464,15 +468,8 @@ describe("the products (10.2.3)", () => {
       { key: "essentials_year", id: "b", rename: true },
       { key: "pro_month", id: "c", rename: true },
     ]);
-    expect(p.create).toEqual([
-      "pro_year",
-      "essentials_month_list",
-      "essentials_year_list",
-      "pro_month_list",
-      "pro_year_list",
-      "extra_month",
-      "extra_year",
-    ]);
+    // OFFER-2: only the one offer's products are made; old Pro and yearly products are only recognised.
+    expect(p.create).toEqual(["essentials_month_list", "extra_month"]);
     expect(p.unmatched.map((u) => u.id)).toEqual(["d", "e"]);
   });
 });
@@ -590,6 +587,18 @@ describe("the client", () => {
       customer: { email: "o@example.com" },
       metadata: { referenceId: ORG, business_id: "loc" },
     });
+  });
+  it("sends Creem's 14-day trial on the checkout only when asked (OFFER-2)", async () => {
+    const { calls, f } = fake();
+    await creemClient("k", "test", f).createCheckout({
+      productId: "prod_eml",
+      requestId: "r3",
+      successUrl: "https://kabsi.co/billing/done",
+      email: "o@example.com",
+      metadata: { referenceId: ORG, business_id: "loc" },
+      trialDays: 14,
+    });
+    expect(calls[0].body).toMatchObject({ product_id: "prod_eml", trial_period_days: 14 });
   });
   it("the second extra location of the day gets its own request id", () => {
     expect(checkoutRequestId(ORG, "extra_month", 2, NOW)).not.toBe(

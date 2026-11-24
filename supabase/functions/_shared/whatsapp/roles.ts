@@ -56,7 +56,20 @@ export type OpenQuestion =
   // RB-F3: the confirm question of the staff-only "reset test" (its nonce is in the Confirm button; open 10 minutes).
   | { type: "reset_test"; at: string; nonce: string }
   // Cards 2: the place of a card just linked or opened, typed back within 10 minutes (the card code only, never a business).
-  | { type: "card_label"; code: string; at: string };
+  | { type: "card_label"; code: string; at: string }
+  // OFFER-2: the numbered "waiting" list (ids only), so "2" or "make 2 shorter" names an item; open 30 minutes.
+  | { type: "waiting"; location_id: string; items: WaitingRef[]; at: string }
+  // OFFER-2: a weekly hours change for one day that still needs its times (the one question back).
+  | { type: "week_ask"; location_id: string; day: string; at: string }
+  // OFFER-2: a weekly hours, phone or website change shown back exactly, waiting for the tap on Approve (its nonce is in the button).
+  | { type: "listing_yes"; location_id: string; nonce: string; at: string; change: ListingChange };
+
+/** OFFER-2: one line of the "waiting" list: a review (by id), an approval (by its Approve token) or a detected problem. */
+export type WaitingRef = { kind: "review"; id: string; drafted: boolean } | { kind: "approval"; token: string; label: string } | { kind: "problem"; id: string };
+/** OFFER-2: a change to the Google profile from WhatsApp: exactly what was shown, and exactly what is sent. */
+export type ListingChange =
+  | { field: "regular_hours"; day: string; display: string; raw: { periods: unknown[] }; shown: string[] }
+  | { field: "phone" | "website"; value: string };
 
 export type Who = { phone: string; roles: Role[]; conversation: Conversation | null };
 
@@ -68,10 +81,12 @@ export type Domain = "business" | "partner" | "staff";
 export const TOOLS = {
   unknown: ["help", "question", "scan", "prices", "trial", "partner_program", "person"],
   prospect: ["help", "question", "scan", "send_map", "prices", "trial", "partner_program", "person"],
+  // OFFER-2 (blueprint 11): the Google-care tools. waiting, done and hours_now read; week_hours and contact_change are shown
+  // back exactly and wait for a tap; guide_field refuses name, address, category, description and services with the guide.
   owner: ["help", "question", "switch", "stats", "cards", "review_link", "referral_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
-    "hours", "post", "billing", "voice", "ask_customer", "person"],
+    "hours", "post", "billing", "voice", "ask_customer", "person", "waiting", "done", "hours_now", "week_hours", "contact_change", "guide_field"],
   manager: ["help", "question", "switch", "stats", "cards", "review_link", "referral_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
-    "hours", "post", "voice", "ask_customer", "person"],
+    "hours", "post", "voice", "ask_customer", "person", "waiting", "done", "hours_now", "week_hours", "contact_change", "guide_field"],
   staff: ["help", "question", "switch", "photo", "voice", "ask_customer", "person"],
   partner: ["help", "question", "switch", "partner_tool", "person"],
   staff_admin: ["help", "switch", "staff_status", "staff_waiting", "staff_today", "staff_pause", "staff_partners", "staff_payouts", "staff_reset_test", "person"],
@@ -99,7 +114,7 @@ export const isProspect = (who: Who) => who.roles.some((r) => r.kind === "prospe
 export function domainOf(tool: string): Domain | null {
   if (tool.startsWith("staff_")) return "staff";
   if (tool === "partner_tool") return "partner";
-  if (["help", "greet", "show", "switch", "person", "free", "yes", "no", "number", "question"].includes(tool)) return null;
+  if (["help", "greet", "show", "switch", "person", "free", "yes", "no", "number", "question", "off_topic"].includes(tool)) return null;
   if (["scan", "send_map", "prices", "trial", "partner_program"].includes(tool)) return null;
   return "business";
 }

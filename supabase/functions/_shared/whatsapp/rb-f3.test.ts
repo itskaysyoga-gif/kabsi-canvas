@@ -278,7 +278,7 @@ Deno.test("style: switch and help in the new look", async () => {
   await send(w, { text: "3" });
   assert.equal(last(w).body, "*✅ Switched*\n\nYou are now working on Kabsi Test Salon.\n\nSend \"switch\" to change it.");
   assert.equal(await send(w, { text: "help" }), "help");
-  assert.match(last(w).body, /^\*\u{1F4CB} You can send\* · Kabsi Test Salon\n\n"stats"/u);
+  assert.match(last(w).body, /^\*\u{1F4CB} You can send\* · Kabsi Test Salon\n\n"waiting"/u);
 });
 
 // ─── 4. reset test (R-148 item 4).
@@ -328,7 +328,8 @@ Deno.test("off topic: a general assistant ask gets the fixed line and no model c
   assert.equal(await receive(w.deps(), msg(w, PHONES.owner, { text: "write me a poem about the sea" })), "off_topic");
   assert.equal(w.aiCalls, before, "no model call");
   const body = w.repliesTo(PHONES.owner).at(-1)!.body;
-  assert.match(body, /Kabsi looks after your business on Google: review replies, your listing, photos and posts\.\n\nSend "help" to see what you can send\./);
+  // OFFER-2 (Meta's escalation rule): the fixed line ends with the way to a person.
+  assert.match(body, /Kabsi looks after your business on Google: review replies, your hours and details, photos and posts\.\n\nTo talk to a person, send "talk to a person" or email hello@kabsi\.co\./);
   assert.equal(await receive(w.deps(), msg(w, PHONES.owner, { text: "the thing from before" })), "off_topic");
   assert.doesNotMatch(w.repliesTo(PHONES.owner).at(-1)!.body, /Do you mean/);
   assert.equal(isOffTopic("what's the weather tomorrow"), true);
