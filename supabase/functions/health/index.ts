@@ -76,7 +76,11 @@ async function queueCheck(): Promise<Response> {
 
 // GET /health (FIX-0): public, for the outside monitor. 200 when jobs_log has any line in the last 15 minutes, 503 when it has
 // none or cannot be read. Any line counts (a failed job is still a scheduler that ran); the 30 minute alert above is stricter.
+let heartbeatCache: { at: number; res: { status: number; body: string } } | null = null;
 async function heartbeatCheck(): Promise<Response> {
+  // A few seconds in the isolate, so a flood of anonymous GETs cannot become a flood of database queries.
+  const headers = { "content-type": "application/json", "cache-control": "public, max-age=5" };
+  if (heartbeatCache && Date.now() - heartbeatCache.at < 5000) return new Response(heartbeatCache.res.body, { status: heartbeatCache.res.status, headers });
   let last: string | null = null;
   try {
     const since = new Date(Date.now() - HEARTBEAT_MINUTES * 60_000).toISOString();
@@ -84,7 +88,8 @@ async function heartbeatCheck(): Promise<Response> {
     if (r.ok) last = ((await r.json()) as { created_at?: string }[])[0]?.created_at ?? null;
   } catch { /* an unreadable heartbeat is red */ }
   const { status, body } = heartbeatResponse(last);
-  return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
+  heartbeatCache = { at: Date.now(), res: { status, body: JSON.stringify(body) } };
+  return new Response(heartbeatCache.res.body, { status, headers });
 }
 
 // Access 2: the invitation Places check, live, on Yawmiyati's own invitation text only (fixed cases, no free query). One

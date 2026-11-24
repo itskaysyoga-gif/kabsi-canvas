@@ -26,6 +26,8 @@ export function usableServiceKey(value: string | undefined | null, nowSeconds = 
   if (v.startsWith("sb_secret_")) return v.length > 20;
   const payload = jwtPayload(v);
   if (!payload || payload.role !== "service_role") return false;
+  // An issued-at in the future (the 14 Nov 2026 failure was "JWT issued at future") is not usable either.
+  if (typeof payload.iat === "number" && payload.iat > nowSeconds + 60) return false;
   return typeof payload.exp !== "number" || payload.exp > nowSeconds;
 }
 
@@ -36,6 +38,8 @@ export function serviceKey(read: EnvReader = (n) => Deno.env.get(n), nowSeconds?
   for (const name of [SERVICE_KEY_ENV, LEGACY_SERVICE_KEY_ENV]) {
     const v = read(name);
     if (usableServiceKey(v, nowSeconds)) return v!.trim();
+    // A variable that is set but unusable (mistyped, truncated, expired) is named, never shown.
+    if (v) console.warn(JSON.stringify({ fn: "service_key", skipped: name, reason: "set but not usable" }));
   }
   throw new Error(`no usable database key: set ${SERVICE_KEY_ENV} (a secret key) or ${LEGACY_SERVICE_KEY_ENV}`);
 }

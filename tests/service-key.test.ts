@@ -29,6 +29,7 @@ describe("usableServiceKey", () => {
       "nonsense",
       jwt({ role: "anon", exp: NOW + 1000 }),
       jwt({ role: "service_role", exp: NOW - 1 }),
+      jwt({ role: "service_role", iat: NOW + 3600, exp: NOW + 9000 }),
       "a.b.c",
     ]) {
       expect(usableServiceKey(v, NOW)).toBe(false);
