@@ -86,7 +86,13 @@ describe("Nora's kabsi.co links are checked against the public page list", () =>
     );
   });
   it("falls back to the sitemap's own pages when the website's list cannot be read", () => {
-    expect([...FALLBACK_PATHS].sort()).toEqual(SITE.filter((p) => !p.startsWith("/for/")).sort());
+    // SITE-1 (blueprint 3.1 section 5) took /partners and /partners/terms out of the sitemap; they stay reachable by direct
+    // link. FALLBACK_PATHS is function code outside SITE-1's lane, so it still names them until a functions session drops
+    // them (docs/LATER.md). Every other path must match the sitemap exactly.
+    const PARTNER_PAGES = ["/partners", "/partners/terms"];
+    expect([...FALLBACK_PATHS].filter((p) => !PARTNER_PAGES.includes(p)).sort()).toEqual(
+      SITE.filter((p) => !p.startsWith("/for/")).sort(),
+    );
     expect(finalLinks("See [pricing](/pricing) and [x](/nope).", [], [])).toBe(
       "See [pricing](/pricing) and x.",
     );

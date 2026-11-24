@@ -1,21 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteShell } from "@/components/kabsi/site-chrome";
-import { D8Security } from "@/components/kabsi/d8-security";
-import { SECURITY_HERO } from "@/components/kabsi/hero-lines";
+import { V31Security } from "@/components/marketing/v31-pages";
+import { HEADS } from "@/components/marketing/v31-heads";
 import { pageHead } from "@/lib/site";
 
+// Security on blueprint 3.1 (SITE-1): shortened to the same message as Home.
 export const Route = createFileRoute("/security")({
   head: () =>
     pageHead({
-      title: `Kabsi: ${SECURITY_HERO.title}`,
-      description: SECURITY_HERO.line,
+      title: HEADS.security.title,
+      description: HEADS.security.description,
       path: "/security",
       image: "about",
       crumbs: [{ name: "Security", path: "/security" }],
     }),
   component: () => (
     <SiteShell>
-      <D8Security />
+      <V31Security />
     </SiteShell>
   ),
 });

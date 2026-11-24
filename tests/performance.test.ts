@@ -60,33 +60,19 @@ describe("no app code in the first load of a public page", () => {
       /export \{ anonHeaders, anonJwt, supabaseUrl \} from/,
     );
   });
-  it("keep Home in the route's own chunk, with no lazy boundary over the hero (Design 6, Web 3; Design 8, Web 4)", () => {
-    // The router splits every route file into its own chunk, so the Home page (d9-home since Web 5) rides in Home's chunk, not the shared one
-    // (checked in the build on 31 Oct 2026: the Home text is in a 28 KB route chunk, the entry grew 0.6 KB). A React.lazy
+  it("keep Home in the route's own chunk, with no lazy boundary over the hero (Design 6, Web 3; SITE-1)", () => {
+    // The router splits every route file into its own chunk, so Home rides in Home's chunk, not the shared one. A React.lazy
     // boundary around it was thrown away and drawn again when the shell updated first, blanking the hero on slow phones.
+    // SITE-1 (blueprint 3.1): Home is nine short sections of text and small HTML pictures, no photo, imported statically.
     const top = read("src/routes/index.tsx");
-    expect(top).toMatch(/import \{ D9Home, loadHomeLower \} from "@\/components\/kabsi\/d9-home"/);
+    expect(top).toMatch(/import \{ V31Home \} from "@\/components\/marketing\/v31"/);
     expect(top).not.toMatch(/\blazy\(|<Suspense/);
-    // Polish 4 part D: the hero and the steps line are static imports; only the sections below the first screen load
-    // later, through a kept server HTML (no lazy boundary, no Suspense fallback, nothing blanked). The route's loader
-    // awaits them, so the server render and an in-site visit to Home draw them at once.
-    const d9 = read("src/components/kabsi/d9-home.tsx");
-    // Site 3a (30.50 item 10): Home's first screen is the hero alone (Home 2, R-158 item 4: in home2-hero.tsx; the four
-    // jobs' strip is the first of the lower sections).
-    expect(d9).toMatch(/import \{ D9Hero \} from "\.\/home2-hero"/);
-    expect(d9).not.toMatch(/\blazy\(|<Suspense|from "\.\/d9-home-lower"/);
-    // Home 2 (R-158 item 4): the one dynamic import lives in home-lower-loader.ts, shared with the hero's picture.
-    expect(read("src/components/kabsi/home-lower-loader.ts")).toContain(
-      'import("./d9-home-lower")',
+    expect(top).not.toMatch(/from "@\/components\/kabsi\/(d6-demo|whatsapp|d9-home)"/);
+    const v31 = read("src/components/marketing/v31.tsx");
+    expect(v31).not.toMatch(/\blazy\(|<Suspense|import\(/);
+    expect(v31).not.toMatch(
+      /from "@\/components\/kabsi\/(d6-demo|d6-home|d8-home|d9-home|photos)"/,
     );
-    expect(d9).toContain('from "./home-lower-loader"');
-    expect(d9).toContain("dangerouslySetInnerHTML");
-    expect(top).toContain("await loadHomeLower()");
-    expect(top).not.toMatch(/from "@\/components\/kabsi\/(d6-demo|whatsapp)"/);
-    // Web 4: the hero phone is HTML and CSS; the interactive demonstration does not load on Home.
-    expect(
-      read("src/components/kabsi/d9-home.tsx") + read("src/components/kabsi/d9-home-lower.tsx"),
-    ).not.toMatch(/from "\.\/(d6-demo|d6-home|d8-home)"/);
     expect(read("vite.config.ts")).not.toMatch(/autoCodeSplitting:\s*false/);
   });
 });

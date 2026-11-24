@@ -6,3 +6,5 @@ pnpm-lock.yaml
 package-lock.json
 bun.lock
 routeTree.gen.ts
+# SITE-1: the shared offer file is kept byte for byte as lane R wrote it (blueprint 3.1, R-163).
+src/lib/offer.ts

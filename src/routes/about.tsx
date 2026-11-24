@@ -1,21 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteShell } from "@/components/kabsi/site-chrome";
-import { D8About } from "@/components/kabsi/d8-about";
-import { ABOUT_HERO } from "@/components/kabsi/hero-lines";
+import { V31About } from "@/components/marketing/v31-pages";
+import { HEADS } from "@/components/marketing/v31-heads";
 import { pageHead } from "@/lib/site";
 
+// About on blueprint 3.1 (SITE-1): shortened to the same message as Home.
 export const Route = createFileRoute("/about")({
   head: () =>
     pageHead({
-      title: `Kabsi: ${ABOUT_HERO.title}`,
-      description: ABOUT_HERO.line,
+      title: HEADS.about.title,
+      description: HEADS.about.description,
       path: "/about",
       image: "about",
       crumbs: [{ name: "About", path: "/about" }],
     }),
   component: () => (
     <SiteShell>
-      <D8About />
+      <V31About />
     </SiteShell>
   ),
 });

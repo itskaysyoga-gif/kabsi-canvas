@@ -3,6 +3,7 @@
 // kind of business; the plans; five questions; the free check. Lines and sources: docs/site4/home.md.
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { TRIAL_LINE as OFFER_TRIAL_LINE } from "../src/lib/offer";
 import { describe, expect, it } from "vitest";
 import { HOME2_H1, HOME2_HERO_LINE } from "@/components/kabsi/home2-hero-data";
 import {
@@ -63,7 +64,7 @@ describe("Home 2: the hero", () => {
     const hero = read("src/components/kabsi/home2-hero.tsx");
     expect(hero).toContain('<ScanBox id="hero-scan" note={TRIAL_LINE} />');
     expect(hero.match(/<ScanBox /g)).toHaveLength(1);
-    expect(TRIAL_LINE).toBe("Free for 14 days once Kabsi is connected. No card.");
+    expect(TRIAL_LINE).toBe(OFFER_TRIAL_LINE); // SITE-1: blueprint 3.1, src/lib/offer.ts
     // The Example free check result left the hero: the thread is the one picture.
     expect(hero).not.toContain("ResultPreview");
   });

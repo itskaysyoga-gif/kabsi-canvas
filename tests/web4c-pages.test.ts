@@ -27,7 +27,8 @@ describe("/faq on Design 8", () => {
   it("gives the FAQPage data the visible answers word for word", () => {
     const ld = faqJsonLd(FAQ_ALL);
     expect(ld.mainEntity.map((q) => q.acceptedAnswer.text)).toEqual(FAQ_ALL.map((f) => f.a));
-    expect(read("src/routes/faq.tsx")).toContain("faqJsonLd(FAQ_ALL)");
+    // SITE-1: /faq shows blueprint 3.1 section 6 (FAQ_V31); its FAQPage data is built from the same list.
+    expect(read("src/routes/faq.tsx")).toContain("faqJsonLd(FAQ_V31.map(");
   });
   it("says the free check reads only Google's public data (K-82)", () => {
     const a = FAQ_ALL.find((f) => f.q === "What does the free check show?")!.a;
@@ -58,7 +59,7 @@ describe("Founding 25 and Partners on Design 8", () => {
     expect(founding).toContain("With the country code, for example ${example}.");
   });
   it("carries FAQPage data on /partners, and none on the private invite page", () => {
-    expect(FOUNDING_FAQ.length).toBe(4);
+    expect(FOUNDING_FAQ.length).toBe(5); // SITE-1: the founding offer of blueprint 3.1 added the trial question
     expect(PARTNER_FAQ.length).toBe(6); // Partners 1 (R-148) added two questions
     expect(read("src/routes/founding.$slug.tsx")).not.toMatch(
       /faqJsonLd|jsonLd|rel: "canonical"|pageHead\(/,
@@ -68,7 +69,8 @@ describe("Founding 25 and Partners on Design 8", () => {
   it("keeps every page head free of page components (Lean 1)", () => {
     for (const r of ["faq", "about", "security", "partners"]) {
       const head = read(`src/routes/${r}.tsx`);
-      expect(head, r).toMatch(/hero-lines/);
+      // SITE-1: the core pages read their titles from the tiny marketing/v31-heads.ts; partners still from hero-lines.
+      expect(head, r).toMatch(r === "partners" ? /hero-lines/ : /v31-heads/);
       expect(head, r).toMatch(/crumbs:/);
     }
   });

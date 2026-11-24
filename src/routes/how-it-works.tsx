@@ -1,15 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteShell } from "@/components/kabsi/site-chrome";
-import { HOW_HERO } from "@/components/kabsi/hero-lines";
-import { HowItWorksPage } from "@/components/kabsi/how-page";
+import { V31How } from "@/components/marketing/v31-pages";
+import { HEADS } from "@/components/marketing/v31-heads";
 import { pageHead } from "@/lib/site";
 
+// How it works on blueprint 3.1 section 5 (SITE-1): connect Google, choose how you hear from Kabsi, your first day, a
+// normal week, your monthly report.
 export const Route = createFileRoute("/how-it-works")({
   head: () =>
     pageHead({
-      // docs/SEO-PLAN.md: "Kabsi: " and the hero headline, the hero line as description; BreadcrumbList.
-      title: `Kabsi: ${HOW_HERO.title}`,
-      description: HOW_HERO.line,
+      title: HEADS.how.title,
+      description: HEADS.how.description,
       path: "/how-it-works",
       image: "home",
       crumbs: [{ name: "How it works", path: "/how-it-works" }],
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/how-it-works")({
   component: function HowItWorks() {
     return (
       <SiteShell>
-        <HowItWorksPage />
+        <V31How />
       </SiteShell>
     );
   },

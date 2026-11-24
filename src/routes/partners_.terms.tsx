@@ -13,6 +13,8 @@ export const Route = createFileRoute("/partners_/terms")({
       description:
         "The terms for Kabsi Partners: the 25 percent commission, the 30 day hold, payouts, how a referral is credited and the rules every partner follows.",
       path: "/partners/terms",
+      // SITE-1 (blueprint 3.1 section 5): not indexed, reachable by direct link.
+      noindex: true,
       crumbs: [
         { name: "Partners", path: "/partners" },
         { name: "Partner terms", path: "/partners/terms" },

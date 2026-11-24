@@ -3,6 +3,7 @@
 
 import { WHATSAPP_DIGITS, WHATSAPP_ON } from "../../supabase/functions/_shared/whatsapp-setting.ts";
 import { CONSENT_ASK_FIRST } from "./region";
+import { PRIMARY_CTA, TRIAL_LINE as OFFER_TRIAL_LINE } from "./offer";
 import { SOCIAL_LINKS } from "../../supabase/functions/_shared/social-links.ts";
 
 /** Where the consent bar asks first (the one list is CONSENT_ASK_FIRST in src/lib/region.ts). */
@@ -134,15 +135,15 @@ export const MERCHANT_LINE = "Card payments will be processed by Creem, our merc
 export const BRAND_LINE = "Your business on Google. Taken care of.";
 /** Every footer, About and the share text say it (K-112). */
 export const NOT_AFFILIATED = "Kabsi is independent and not affiliated with Google.";
-/** The trial, always apart from the free check (master plan 30.15 section 3.10). */
-export const TRIAL_LINE = "Free for 14 days once Kabsi is connected. No card.";
+/** The trial terms (blueprint 3.1, R-163): the one line lives in src/lib/offer.ts, beside every signup button. */
+export const TRIAL_LINE = OFFER_TRIAL_LINE;
 /** Under every scan box: the free check needs nothing from the owner. */
 export const SCAN_LINE = "Free check. No account and no Google access needed.";
 /** Under the search box on Home, /scan and the /for pages (R-126, COPY-02): the trial is a separate thing. */
 export const TRIAL_SEPARATE_LINE =
   "The 14-day free trial is separate. It starts once Kabsi is a Manager on your profile.";
 /** The main button on every public page (master plan 30.15 section 1). */
-export const MAIN_CTA = "Check my business free";
+export const MAIN_CTA = PRIMARY_CTA;
 /** Google's own page on working with a third party (footer small print, master plan 30.10 point 5). */
 export const GOOGLE_THIRD_PARTY_URL = THIRD_PARTY_HELP_URL;
 
@@ -157,19 +158,16 @@ export { SOCIAL_LINKS };
 export const WHATSAPP_URL = WHATSAPP_ON ? whatsappHref("general") : `mailto:${CONTACT_EMAIL}`;
 
 /**
- * Header links (Site 2, master plan 30.34 item 4): How it works, Businesses (one link to /for, no menu), Pricing, Guides
- * and About, then Log in or Dashboard and "Free check". No dropdowns; the phone menu shows the same rows. Founding 25 has
- * its slim line above the header on Home, Pricing and /for; Partners and the free tools are in the footer.
+ * Header links (SITE-1, blueprint 3.1 section 3.1): How it works and Price, then Log in or Dashboard and "Check my
+ * business free". No dropdowns; the phone menu shows the same rows. Businesses, Guides, About and the free tools are in
+ * the footer; Partners is in neither (its pages are noindex and reachable by direct link only).
  */
 export const NAV_LINKS = [
   { to: "/how-it-works", label: "How it works" },
-  { to: "/for", label: "Businesses" },
-  { to: "/pricing", label: "Pricing" },
-  { to: "/guides", label: "Guides" },
-  { to: "/about", label: "About" },
+  { to: "/pricing", label: "Price" },
 ] as const;
-/** The header's compact action (Design 9): filled charcoal with ivory text, so it never competes with the yellow one. */
-export const HEADER_CTA = "Free check";
+/** The header's action (blueprint 3.1 section 3.1): filled charcoal with ivory text, so it never competes with the yellow one. */
+export const HEADER_CTA = PRIMARY_CTA;
 /** The four finished trades, then every kind of business (the /for hub and its pages). */
 export const BUSINESS_MENU = [
   { to: "/for/hair-salon", label: "Hair salons" },
@@ -222,8 +220,6 @@ export const PLAN_PRICES = {
   extraLocationMonthly: 15,
   extraLocationYearly: 150,
 } as const;
-/** Under the Home hero's lead (R-126, COPY-01), built from the plan price and TRIAL_LINE so no number is typed twice. */
-export const HERO_PRICE_LINE = `Plans from ${PLAN_PRICES.essentialsMonthly} US dollars a month. ${TRIAL_LINE}`;
 /**
  * Price 1 (master plan 30.20 section 6, Rashid's "yes 29/59" of 30 Oct 2026): the list prices above are for new
  * businesses; the first 30 paying businesses, and Founding 25, pay the launch price (the founding price inside the code and the database) and keep it while they stay
