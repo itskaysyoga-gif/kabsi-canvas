@@ -4,9 +4,10 @@ import assert from "node:assert/strict";
 import { SAY } from "./say.ts";
 import { fromText, lookProblems, markFor, toMsg } from "./look.ts";
 
-Deno.test("owner help lists cards and my link, and keeps the look", () => {
+// OFFER-2 (blueprint 11): the help names the Google-care tools only, so "my link" (Kabsi Partners, off) is no longer listed.
+Deno.test("owner help lists cards, not my link, and keeps the look", () => {
   assert.match(SAY.ownerHelp, /\n"cards" for the taps on your Kabsi cards\n/);
-  assert.match(SAY.ownerHelp, /\n"my link" to share Kabsi with another business\n/);
+  assert.doesNotMatch(SAY.ownerHelp, /"my link"/);
   assert.ok(SAY.ownerHelp.indexOf('"cards"') > SAY.ownerHelp.indexOf('"review link"'), "after the review link");
   assert.doesNotMatch(SAY.ownerHelp, /[‒-―!]/);
   const m = toMsg(fromText(SAY.ownerHelp, markFor("help", null), null), { buttons: 0 });

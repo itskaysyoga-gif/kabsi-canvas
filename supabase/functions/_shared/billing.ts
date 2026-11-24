@@ -544,22 +544,17 @@ export function priceOf(key: ProductKey): number {
   return CATALOGUE[key].price / 100;
 }
 
-/** "upgrade" charges the difference now; "downgrade" takes effect at renewal (10.2.10). */
+/** "downgrade" takes effect at renewal (10.2.10). OFFER-2: "upgrade" is refused: there is one plan, and no new Pro plans.
+ *  A business on Pro moves to the one plan (Essentials, shown as "Kabsi") at its renewal and keeps Pro until then. */
 export async function changePlan(org: string, to: Plan): Promise<{ effective: "now" | "renewal"; until: string | null }> {
-  // OFFER-2: no new Pro plans. A business on Pro can still move to the one plan.
   if (to === "pro") throw new BillingError("one_plan", "Kabsi has one plan now. Pro is not offered to new plans.");
   const s = await mustRun(org);
-  if (s.plan === to) throw new BillingError("same_plan", `You are already on ${to === "pro" ? "Pro" : "Essentials"}.`);
+  if (s.plan === "essentials") throw new BillingError("same_plan", "You are already on Kabsi.");
   const period = (s.period === "year" ? "year" : "month") as Period;
   const ids = await productIds();
-  // Price 1: an upgrade or downgrade stays in the price family the business is on.
-  const productId = ids[planKey(to, period, familyOfSub(s, ids))];
+  // Price 1: the change stays in the price family the business is on.
+  const productId = ids[planKey("essentials", period, familyOfSub(s, ids))];
   if (!productId) throw new BillingError("not_configured", "Payments are not set up yet.");
-  if (to === "pro") {
-    await creem().upgrade(s.provider_subscription_id!, productId, "proration-charge-immediately");
-    await admin().from("subscriptions").update({ kept_plan: null, kept_plan_until: null }).eq("id", s.id);
-    return { effective: "now", until: null };
-  }
   // Creem bills the new price from the next renewal (no proration); Kabsi keeps Pro until then.
   await creem().upgrade(s.provider_subscription_id!, productId, "proration-none");
   await admin().from("subscriptions").update({ kept_plan: "pro", kept_plan_until: s.current_period_end }).eq("id", s.id);

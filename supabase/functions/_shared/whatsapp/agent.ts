@@ -53,6 +53,13 @@ import { CATALOGUE, extraKey, type Period, type Plan, planKey, type PriceFamily 
 import type { FirstBack, OnboardingHooks } from "../onboarding/hooks.ts";
 import { monthlyFacts, SAY_ONBOARDING, setupReply } from "../onboarding/stages.ts";
 import { inviteButtons } from "../onboarding/tick.ts";
+import {
+  approvalLabel, DAY_NAME, daysIn, doneLines, hoursLines, isContactChange, isGuideField, isWeekly, numberIn, parseContact, parseWeekDay,
+  type ReportData, type WaitingApproval, type WaitingProblem, type WaitingReview, waitingLine, waitingList, weekChange,
+} from "./google-care.ts";
+import type { DayKey, GRegularHours } from "../hours.ts";
+import type { ListingChange, WaitingRef } from "./roles.ts";
+import { qrPng } from "./qr-png.ts";
 import type { OnboardingAction } from "./router.ts";
 
 export interface AgentDb {
@@ -110,6 +117,17 @@ export interface AgentDb {
   handoff(phone: string, summary: string): Promise<void>;
   outboxGet(phone: string, ids: number[]): Promise<{ id: number; body: string; buttons: Button[]; location_id: string | null }[]>;
   releaseHeld(phone: string): Promise<number>;
+  // OFFER-2 (blueprint 11): the Google-care reads and the one listing write. The business and the person always come from the
+  // phone's own verified BusinessRole; the database checks the member and the approval rights again.
+  /** Unanswered reviews (first name and stars only, no review text) and changes found on Google, for "waiting". */
+  waiting?(locationId: string, userId: string): Promise<{ reviews: WaitingReview[]; problems: WaitingProblem[] }>;
+  /** The latest weekly report (weekly_reports), for "done". */
+  lastReport?(locationId: string): Promise<{ week_of: string; data: ReportData } | null>;
+  /** The weekly hours as Kabsi stores them (the profile.regular_hours fact), for "my hours" and a weekly change. */
+  currentHours?(locationId: string): Promise<GRegularHours | null>;
+  /** The tap on Approve under a weekly hours, phone or website change: the existing listing write and publication pipeline
+   *  (apply_regular_hours, apply_profile_field, channel whatsapp). */
+  applyListing?(locationId: string, userId: string, change: ListingChange): Promise<{ ok: boolean; reason?: string }>;
 }
 
 /** Session 10 (master plan 10.2.10): the owner's billing actions, by business. The server checks the owner again. */
@@ -354,6 +372,7 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     if (q.type === "business" && q.options[cmd.n - 1]) return pickedBusiness(t, q.options[cmd.n - 1].id);
     if (q.type === "digest" && q.ids[cmd.n - 1]) return openDigestItem(t, q.ids[cmd.n - 1]);
     if (q.type === "which" && q.options[cmd.n - 1]) return approveToken(t, q.options[cmd.n - 1].token);
+    if (q.type === "waiting" && q.items[cmd.n - 1] && now - Date.parse(q.at) < WAITING_OPEN_MS) return openWaiting(t, q, cmd.n);
   }
 
   // The map's buttons and the owner's search for the map (28.5).
@@ -369,6 +388,18 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     await d.db.setConv(phone, { open_question: null, active_location_id: q.location_id, active_role: "business" });
     const next: Turn = { ...t, who: { ...who, conversation: { ...conv, open_question: null, active_location_id: q.location_id, active_role: "business" } } };
     return withBusiness(next, "hours", null, (tb) => hours(tb, `${q.pending} ${t.m.text ?? ""}`, true));
+  }
+
+  // OFFER-2: the one question back about a weekly hours change: the answer is read together with the day. Forwarded words
+  // never answer it.
+  if (conv?.open_question?.type === "week_ask" && now - Date.parse(conv.open_question.at) < PICK_OPEN_MS
+    && ((cmd.k === "free" && !fwdAnswer && !t.m.forwarded) || (cmd.k === "tool" && ["hours", "week_hours"].includes(cmd.tool)))) {
+    const q = conv.open_question;
+    await d.db.setConv(phone, { open_question: null });
+    const next: Turn = { ...t, who: { ...who, conversation: { ...conv, open_question: null } } };
+    const day = q.day ? DAY_NAME[q.day as DayKey] ?? "" : "";
+    return withBusiness(next, "week_hours", null, (tb) => tb.business!.location_id === q.location_id
+      ? weekHours(tb, `${day} ${t.m.text ?? ""}`, true) : answered(tb, SAY.alreadyHandled, "week_ask_closed"));
   }
 
   // V3: a photo's Edit, Skip, and the category the owner picks; the monthly question's answer.
@@ -389,7 +420,9 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   if (cmd.k === "facts") return factsButton(t, cmd.action, cmd.locationId, cmd.month);
   if (oq?.type === "setup") {
     // F-1: forwarded words never answer the setup question (setupReply reads more yes words than the router's list).
-    const typed = cmd.k === "yes" ? "yes" : cmd.k === "tool" && cmd.tool === "help" ? "help" : cmd.k === "free" && !t.m.forwarded && !t.m.fromVoice && !t.m.listRow ? setupReply(cmd.text) : null;
+    const typed = cmd.k === "yes" ? "yes" : cmd.k === "tool" && cmd.tool === "help" ? "help"
+      : cmd.k === "tool" && cmd.tool === "done" && !t.m.forwarded && !t.m.fromVoice ? setupReply("done")
+      : cmd.k === "free" && !t.m.forwarded && !t.m.fromVoice && !t.m.listRow ? setupReply(cmd.text) : null;
     if (typed) return onboardingButton(t, typed === "yes" ? "yes" : typed, oq.location_id);
   }
   if (oq?.type === "update" && now - Date.parse(oq.at) < ANSWER_WINDOW_MS) {
@@ -410,6 +443,9 @@ async function run(t: Turn, cmd: Command): Promise<string> {
 
   // Buttons resolve by the task id inside them, with no AI call (9.1 point 2).
   if (cmd.k === "button") return button(t, cmd.action, cmd.token);
+  // OFFER-2: the tap on Approve under a weekly hours, phone or website change. A tap is the person's own; it is never forwarded
+  // or spoken.
+  if (cmd.k === "listing_yes") return listingYes(t, cmd.nonce);
   if (cmd.k === "yes") return yes(t);
   if (cmd.k === "no") {
     if (conv?.open_question) await d.db.setConv(phone, { open_question: null });
@@ -420,6 +456,9 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   if (cmd.k === "photo") {
     // Photo Post 1: words with the photo make it a post with that photo; a photo with no words is a plain photo, as before.
     const caption = (t.m.text ?? "").trim();
+    // OFFER-2: "Post this" under a photo asks for a post with no words of its own: Kabsi's draft when AI drafting is on,
+    // otherwise the photo goes the plain photo way (Yes, Edit or Skip). Never a post of the words "Post this".
+    if (caption && POST_INSTRUCTION.test(caption) && !d.draftPhotoPost) return withBusiness(t, "photo", null, (tb) => photo(tb, cmd.media.id, cmd.media.size));
     if (caption) {
       const media = { id: cmd.media.id, size: cmd.media.size, mime: cmd.media.mime, caption: caption.slice(0, 1000) };
       return withBusiness(t, "photo", null, (tb) => photoPost(tb, cmd.media.id, cmd.media.size, media.caption), { media });
@@ -606,6 +645,8 @@ async function tool(t: Turn, name: string, arg: string | undefined, text: string
   if (name === "review_link" && /my link/i.test(text) && domains(who).includes("partner") && (who.conversation?.active_role === "partner" || !domains(who).includes("business"))) name = "partner_tool";
   // Partners 2 (30.50 item 5): for an owner, "my link" is the referral link (one free month per referred business that pays).
   else if (name === "review_link" && /^\s*my link\W*$/i.test(text) && t.d.partners) name = "referral_link";
+  // OFFER-2: "waiting" is Kabsi staff's list only on a staff phone that is working as staff; for a business it is the owner's list.
+  if (name === "staff_waiting" && domains(who).includes("business") && (!domains(who).includes("staff") || who.conversation?.active_role === "business")) name = "waiting";
   // The staff help names "payouts": from the staff phone it is the staff list, not the partner tool.
   if (name === "partner_tool" && /^\s*payouts?\W*$/i.test(text) && domains(who).includes("staff") && !domains(who).includes("partner")) name = "staff_payouts";
   const dom = domainOf(name);
@@ -728,7 +769,8 @@ const priceText = (plan: Plan | "extra", period: Period, family: PriceFamily) =>
   const cents = CATALOGUE[plan === "extra" ? extraKey(period) : planKey(plan, period, family)].price;
   return `$${cents / 100} ${period === "year" ? "a year" : "a month"}`;
 };
-const planName = (plan: Plan, period: Period) => `Kabsi ${plan === "pro" ? "Pro" : "Essentials"}, ${period === "year" ? "yearly" : "monthly"}`;
+// OFFER-2: the one plan is shown as "Kabsi"; a Pro plan a business already has keeps its name.
+const planName = (plan: Plan, period: Period) => `Kabsi${plan === "pro" ? " Pro" : ""}, ${period === "year" ? "yearly" : "monthly"}`;
 const CONFIRM = (op: string): Button[] => [{ id: `k:${op}`, title: "Confirm" }];
 const KEEP: Button[] = [{ id: "k:keep", title: "Keep my plan" }];
 
@@ -748,12 +790,10 @@ async function billing(t: Turn, arg: string | undefined): Promise<string> {
       switch (w.slice(8)) {
         case "cancel": return answered(t, SAY.billingCancelled(longDay(await bd.cancel(b.location_id))), "billing_cancelled", KEEP);
         case "keep": await bd.keep(b.location_id); return answered(t, SAY.billingKept, "billing_kept");
-        case "upgrade":
-          if (s.plan === "pro") return answered(t, SAY.billingSamePlan("Pro"), "billing_same_plan");
-          await bd.change(b.location_id, "pro");
-          return answered(t, SAY.billingUpgraded, "billing_upgraded");
+        // OFFER-2: one plan. An old Confirm under "Switch to Pro?" changes nothing.
+        case "upgrade": return answered(t, SAY.billingOnePlan, "billing_one_plan");
         case "downgrade": {
-          if (s.plan === "essentials") return answered(t, SAY.billingSamePlan("Essentials"), "billing_same_plan");
+          if (s.plan === "essentials") return answered(t, SAY.billingSamePlan("Kabsi"), "billing_same_plan");
           const r = await bd.change(b.location_id, "essentials");
           return answered(t, SAY.billingDowngraded(longDay(r.until)), "billing_downgraded");
         }
@@ -769,12 +809,9 @@ async function billing(t: Turn, arg: string | undefined): Promise<string> {
       if (s.cancelAtEnd) return answered(t, SAY.billingAlreadyEnds(end), "billing_already_ends", KEEP);
       return answered(t, SAY.billingCancelAsk(end), "billing_cancel_ask", CONFIRM("cancel"));
     }
-    if (w === "upgrade") {
-      if (s.plan === "pro") return answered(t, SAY.billingSamePlan("Pro"), "billing_same_plan");
-      return answered(t, SAY.billingUpgradeAsk(priceText("pro", s.period, s.family)), "billing_upgrade_ask", CONFIRM("upgrade"));
-    }
+    if (w === "upgrade") return answered(t, SAY.billingOnePlan, "billing_one_plan");
     if (w === "downgrade") {
-      if (s.plan === "essentials") return answered(t, SAY.billingSamePlan("Essentials"), "billing_same_plan");
+      if (s.plan === "essentials") return answered(t, SAY.billingSamePlan("Kabsi"), "billing_same_plan");
       return answered(t, SAY.billingDowngradeAsk(priceText("essentials", s.period, s.family), end), "billing_downgrade_ask", CONFIRM("downgrade"));
     }
     if (w === "add a location") return answered(t, SAY.billingAddAsk(priceText("extra", s.period, s.family)), "billing_add_ask", CONFIRM("add_location"));
@@ -816,11 +853,28 @@ async function businessTool(t: Turn, name: string, arg: string | undefined): Pro
       const code = await t.d.db.reviewLink(b.location_id);
       if (!code) return answered(t, SAY.noReviewLink(b.business), "no_review_link");
       const url = `${app}/review/${code}`;
-      return answered(t, name === "qr" ? SAY.qr(b.business, url) : SAY.reviewLink(b.business, url), name);
+      // OFFER-2: the QR code itself as an image in the chat; the link line stays the fallback when the image cannot be made.
+      if (name === "qr") {
+        const png = await qrPng(url).catch(() => null);
+        if (png?.length) {
+          await sendReply(t.d.out, t.s, t.phone, headed(t.head ?? null, SAY.qrImage(b.business)), undefined, { locationId: b.location_id }, { png });
+          return "qr_image";
+        }
+        return answered(t, SAY.qr(b.business, url), name);
+      }
+      return answered(t, SAY.reviewLink(b.business, url), name);
     }
+    case "waiting": return waiting(t);
+    case "done": return done(t);
+    case "hours_now": return hoursNow(t);
+    case "week_hours": return weekHours(t, t.m.text ?? arg ?? "", false);
+    case "contact_change": return contactChange(t, t.m.text ?? arg ?? "");
+    case "guide_field": return answered(t, SAY.guideField(`${app}${GUIDE_PATH}`), "care_guide");
     case "billing": return billing(t, arg);
-    case "hours": return hours(t, t.m.text ?? arg ?? "", false);
-    case "post": return typedPost(t, t.m.text ?? "");
+    // OFFER-2: a lasting change of one day of the week is the weekly hours; a date stays special hours.
+    case "hours": return isWeekly(t.m.text ?? arg ?? "") && daysIn(t.m.text ?? arg ?? "").length ? weekHours(t, t.m.text ?? arg ?? "", false) : hours(t, t.m.text ?? arg ?? "", false);
+    // OFFER-2: the router's "post" is a post in plain words, without "post:" (the words are the owner's own message).
+    case "post": return typedPost(t, t.m.text ?? "", arg !== undefined);
     case "exact_reply": return exactReply(t, arg ?? "");
     case "edit_draft": return editDraft(t, arg ?? "");
     case "switch": return answered(t, SAY.switched(b.business), "switched");
@@ -846,16 +900,25 @@ async function hours(t: Turn, text: string, asked: boolean): Promise<string> {
   return answered(t, SAY.hoursShown(describeHours(p.change)), "hours_shown", [{ id: `a:${r.token}`, title: "Approve" }, { id: `e:${r.token}`, title: "Edit on kabsi.co" }]);
 }
 
-async function typedPost(t: Turn, raw: string): Promise<string> {
+async function typedPost(t: Turn, raw: string, plainWords = false): Promise<string> {
   const b = t.business!;
   // The post is the owner's own words after "post:"; anything else is asked for once, with an example.
-  const m = /^\s*(?:new\s+)?post\s*:?\s+([\s\S]+)$/i.exec(raw);
+  // OFFER-2: when the router says the message is a post, the owner's own message is the post, less a "please post" in front.
+  const m = /^\s*(?:new\s+)?post\s*:?\s+([\s\S]+)$/i.exec(raw) ?? (plainWords ? plainPostWords(raw) : null);
   if (!m) return answered(t, SAY.postAsk(), "post_ask");
   const c = checkTypedPost(m[1]);
   if (!c.ok) return answered(t, SAY.postProblem(b.business, c.problems), "post_problem");
   const r = await t.d.db.postPrepare(b.location_id, b.user_id, c.text);
   if (!r.ok || !r.token) return prepareRefused(t, r.reason, "post");
   return answered(t, SAY.postShown((r.text ?? c.text).trim()), "post_shown", [{ id: `a:${r.token}`, title: "Approve" }, { id: `e:${r.token}`, title: "Edit on kabsi.co" }]);
+}
+
+/** OFFER-2: the words of a post sent without "post:", less a request in front ("can you put up", "please post"). A request
+ *  with too little left to be a post ("can you put up the lunch special") is not a post: the owner is asked for the words. */
+function plainPostWords(raw: string): [string, string] | null {
+  const words = raw.replace(/^\s*(?:(?:can|could|would|will)\s+you\s+)?(?:please\s+)?(?:post|share|put up|put out|announce)(?:\s+(?:this|that|it|about))?(?:\s+(?:on|to)\s+(?:google|my profile|my google profile))?\s*[:,-]?\s*/i, "").trim();
+  if (words.length < 10 || words.split(/\s+/).length < 4 || /\?$/.test(words)) return null;
+  return [raw, words];
 }
 
 function prepareRefused(t: Turn, reason: string | undefined, what: "hours" | "post"): Promise<string> {
@@ -869,6 +932,12 @@ function prepareRefused(t: Turn, reason: string | undefined, what: "hours" | "po
 }
 
 function lastReview(t: Turn): string | null {
+  // OFFER-2: "make 2 more professional" names review 2 of the waiting list that is still open for this business.
+  const q = t.who.conversation?.open_question;
+  const n = q?.type === "waiting" && q.location_id === t.business?.location_id && (t.d.now ?? Date.now)() - Date.parse(q.at) < WAITING_OPEN_MS
+    ? numberIn(t.m.text ?? "") : null;
+  const named = n && q?.type === "waiting" ? q.items[n - 1] : null;
+  if (named?.kind === "review") return named.id;
   const lt = t.who.conversation?.last_task;
   return lt?.type === "review" && lt.location_id === t.business?.location_id ? lt.review_id : null;
 }
@@ -1183,6 +1252,8 @@ async function approveToken(t: Turn, token: string): Promise<string> {
 
 async function yes(t: Turn): Promise<string> {
   if (!businesses(t.who).length) return free(t, t.m.text ?? "yes");
+  // OFFER-2: a change to the Google profile shown on WhatsApp is approved with its button only.
+  if (t.who.conversation?.open_question?.type === "listing_yes") return answered(t, SAY.listingTapApprove, "listing_tap_approve");
   const items = await t.d.db.openItems(t.phone);
   if (!items.length) return answered(t, SAY.nothingWaiting, "yes_nothing");
   if (items.length === 1) return approveToken(t, items[0].token);
@@ -1859,6 +1930,13 @@ async function free(t: Turn, text: string, book?: BookTurn): Promise<string> {
   const tb0 = { ...t, business: b, head: head(who, dom, b) };
   // RB-F3 (R-148 item 5): a general-assistant ask gets the fixed line, before any model is asked.
   if (isOffTopic(text) && !book?.proposal) return answered(plain(tb0), offTopic(t.lang, !!book), "off_topic");
+  // OFFER-2 (blueprint 11): read by code before any model, for a business phone: the fields Kabsi does not change from a chat,
+  // a phone or website change, and a lasting change of the hours of one day of the week.
+  if (dom === "business" && !book?.proposal) {
+    if (isGuideField(text)) return tool(t, "guide_field", undefined, text);
+    if (isContactChange(text)) return tool(t, "contact_change", text, text);
+    if (isWeekly(text) && daysIn(text).length) return tool(t, "week_hours", text, text);
+  }
   // An unknown phone's first words: the greeting of 24.8 (it may have come from the site without the code).
   if (!t.d.ai) return answered(tb0, stranger ? say(t.first ? "greeting" : "unknownHelp", t.lang) : say("unclear", t.lang), "unclear_no_ai");
 
@@ -1910,7 +1988,122 @@ async function free(t: Turn, text: string, book?: BookTurn): Promise<string> {
 
 /** RB-F3: the off-topic line; Spanish and Arabic keep their unclear line, which also says "help". RB-F4: the request book
  *  is named where it is on. */
-const offTopic = (lang: string, book = false) => (lang === "es" || lang === "ar" ? say("unclear", lang) : book ? SAY.offTopicBook : SAY.offTopic);
+// OFFER-2: one fixed line in every language, ending with the way to a person (hello@kabsi.co), never a model answer.
+const offTopic = (_lang: string, book = false) => (book ? SAY.offTopicBook : SAY.offTopic);
+
+// ─── OFFER-2 (blueprint 11): the owner's Google-care tools.
+
+const WAITING_OPEN_MS = 30 * 60_000;
+/** A photo caption that only asks for a post ("Post this", "please post it on Google"). */
+const POST_INSTRUCTION = /^(?:please\s+)?(?:post|share|put up)\s+(?:this|it|that)(?:\s+(?:on|to)\s+(?:google|my profile|my google profile))?(?:\s+please)?\W*$/i;
+/** The guide for the fields Kabsi does not change from a chat (a public kabsi.co page). */
+const GUIDE_PATH = "/guides/keep-your-hours-and-details-the-same-everywhere";
+
+/** "waiting": one numbered list of unanswered reviews, approvals waiting for this phone, and changes found on Google. */
+async function waiting(t: Turn): Promise<string> {
+  const b = t.business!;
+  const [w, open] = await Promise.all([
+    t.d.db.waiting ? t.d.db.waiting(b.location_id, b.user_id).catch(() => ({ reviews: [], problems: [] })) : Promise.resolve({ reviews: [], problems: [] }),
+    t.d.db.openItems(t.phone).catch(() => []),
+  ]);
+  // A reply waiting for a yes is already in the list as its review, so only the other approvals are added.
+  const approvals: WaitingApproval[] = open.filter((i) => i.location_id === b.location_id && (i.target_type ?? i.kind) !== "review_reply")
+    .map((i) => ({ token: i.token, label: approvalLabel(i.kind, i.target_type) }));
+  const items = waitingList(w.reviews, approvals, w.problems);
+  if (!items.length) return answered(t, SAY.waitingNone, "care_waiting_none");
+  const refs: WaitingRef[] = items.map((i) => i.kind === "review" ? { kind: "review", id: i.id, drafted: i.drafted }
+    : i.kind === "approval" ? { kind: "approval", token: i.token, label: i.label } : { kind: "problem", id: i.id });
+  // Only ids and tokens are kept, never a name or a review's words.
+  await t.d.db.setConv(t.phone, { open_question: { type: "waiting", location_id: b.location_id, items: refs, at: nowIso(t) } satisfies OpenQuestion });
+  return answered(t, SAY.waitingList(items.map(waitingLine)), "care_waiting");
+}
+
+/** A number sent after "waiting": that item, for the business the list was made for. */
+async function openWaiting(t: Turn, q: Extract<OpenQuestion, { type: "waiting" }>, n: number): Promise<string> {
+  const b = businesses(t.who).find((x) => x.location_id === q.location_id);
+  if (!b) return answered(t, SAY.notYours, "waiting_not_yours");
+  const tb = { ...t, business: b, head: head(t.who, "business", b) };
+  const item = q.items[n - 1]!;
+  if (item.kind === "review") {
+    if (!item.drafted) return answered(tb, SAY.waitingNotDrafted, "care_waiting_not_drafted");
+    // The review becomes the one an edit or "reply:" acts on, as if its alert had just come.
+    await t.d.db.setConv(t.phone, { last_task: { type: "review", review_id: item.id, location_id: b.location_id } });
+    return showForYes(tb, item.id, null, null);
+  }
+  if (item.kind === "approval") return answered(tb, SAY.waitingApproval(item.label, `${t.d.appUrl}/app`), "care_waiting_approval");
+  return answered(tb, SAY.waitingProblem("details", `${t.d.appUrl}/app/shield`), "care_waiting_problem");
+}
+
+/** "done": the latest weekly summary and the report link. */
+async function done(t: Turn): Promise<string> {
+  const b = t.business!;
+  const r = t.d.db.lastReport ? await t.d.db.lastReport(b.location_id).catch(() => null) : null;
+  if (!r) return answered(t, SAY.doneNone(`${t.d.appUrl}/app`), "care_done_none");
+  const from = r.data.period?.from ?? r.week_of ?? null;
+  const day = from ? new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${from.slice(0, 10)}T00:00:00Z`)) : null;
+  return answered(t, SAY.done(day, doneLines(r.data), `${t.d.appUrl}/app/report`), "care_done");
+}
+
+/** "my hours": the weekly hours as Kabsi stores them for the business. */
+async function hoursNow(t: Turn): Promise<string> {
+  const b = t.business!;
+  const raw = t.d.db.currentHours ? await t.d.db.currentHours(b.location_id).catch(() => null) : null;
+  const lines = hoursLines(raw);
+  if (!lines.length) return answered(t, SAY.hoursNowNone(`${t.d.appUrl}/app/hours`), "care_hours_none");
+  return answered(t, SAY.hoursNow(lines), "care_hours_now");
+}
+
+/** A lasting change of one day of the week: shown back exactly (the whole week after it), then Approve. At most one question. */
+async function weekHours(t: Turn, text: string, asked: boolean): Promise<string> {
+  const b = t.business!;
+  const p = parseWeekDay(text);
+  if (!p.ok) {
+    if (p.why === "two_days") return answered(t, SAY.weekOneDay, "care_week_two_days");
+    if (p.why === "bad_time") return answered(t, SAY.weekBadTime, "care_week_bad_time");
+    if (asked) return answered(t, p.why === "no_day" ? SAY.weekWhichDay : SAY.weekAskTimes(DAY_NAME[p.day!]), `care_week_${p.why}_again`);
+    await t.d.db.setConv(t.phone, { open_question: { type: "week_ask", location_id: b.location_id, day: p.day ?? "", at: nowIso(t) } satisfies OpenQuestion });
+    return answered(t, p.why === "no_day" ? SAY.weekWhichDay : SAY.weekAskTimes(DAY_NAME[p.day!]), `care_week_${p.why}`);
+  }
+  const current = t.d.db.currentHours ? await t.d.db.currentHours(b.location_id).catch(() => null) : null;
+  const c = weekChange(current, p.day, p.periods);
+  if (!c.ok) {
+    if (c.why === "no_hours") return answered(t, SAY.hoursNowNone(`${t.d.appUrl}/app/hours`), "care_week_no_hours");
+    if (c.why === "same") return answered(t, SAY.weekSame(DAY_NAME[p.day]), "care_week_same");
+    return answered(t, SAY.weekBadTime, "care_week_bad_time");
+  }
+  const change: ListingChange = { field: "regular_hours", day: p.day, display: c.display, raw: c.raw, shown: c.shown };
+  return askListingYes(t, change, SAY.weekShown(c.dayLine, c.shown), "care_week_shown");
+}
+
+/** A new phone number or website: shown back exactly, then Approve. */
+async function contactChange(t: Turn, text: string): Promise<string> {
+  const p = parseContact(text);
+  if (!p.ok) return answered(t, SAY.contactAsk, "care_contact_ask");
+  return askListingYes(t, { field: p.field, value: p.value }, SAY.contactShown(p.field, p.value), "care_contact_shown");
+}
+
+async function askListingYes(t: Turn, change: ListingChange, body: string, result: string): Promise<string> {
+  const b = t.business!;
+  const n = nonce();
+  await t.d.db.setConv(t.phone, { open_question: { type: "listing_yes", location_id: b.location_id, nonce: n, at: nowIso(t), change } satisfies OpenQuestion });
+  return answered(t, body, result, [{ id: `wy:${n}`, title: "Approve" }]);
+}
+
+/** The tap on Approve: only for the change still open with this nonce, only by an owner or manager of that business. */
+async function listingYes(t: Turn, n: string): Promise<string> {
+  const q = t.who.conversation?.open_question;
+  const open = q?.type === "listing_yes" && q.nonce === n && (t.d.now ?? Date.now)() - Date.parse(q.at) < WAITING_OPEN_MS ? q : null;
+  if (!open) return answered(t, SAY.alreadyHandled, "listing_closed");
+  const b = businesses(t.who).find((x) => x.location_id === open.location_id);
+  if (!b) return answered(t, SAY.notYours, "listing_not_yours");
+  const tb = { ...t, business: b, head: head(t.who, "business", b) };
+  // Staff send photos and words; only owners and managers approve (the database checks the approval rights again).
+  if (b.role === "staff" || !t.d.db.applyListing) return answered(tb, SAY.approverOnly(b.business), "listing_refused:role");
+  const r = await t.d.db.applyListing(b.location_id, b.user_id, open.change).catch((e) => ({ ok: false, reason: String((e as Error)?.message ?? e) }));
+  await t.d.db.setConv(t.phone, { open_question: null });
+  if (r.ok) return answered(tb, SAY.listingApproved, "listing_approved");
+  return prepareRefused(tb, r.reason, "hours");
+}
 
 /** Nora answers from the public facts. Without a model, or when it fails, the plain unclear line. */
 async function askNora(t: Turn, question: string): Promise<string> {
