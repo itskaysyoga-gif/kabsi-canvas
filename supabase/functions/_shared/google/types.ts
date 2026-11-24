@@ -104,6 +104,13 @@ export type Place = {
   // The free Profile Check fields (P0.4-01): public data only.
   businessStatus?: string; nationalPhoneNumber?: string; websiteUri?: string; photos?: { name?: string }[];
   regularOpeningHours?: { weekdayDescriptions?: string[] }; currentOpeningHours?: { openNow?: boolean };
+  // SITE-3: the free check's latest review (shown once in the answer, never stored). Places returns at most 5.
+  reviews?: PlaceReview[];
+};
+// https://developers.google.com/maps/documentation/places/web-service/reference/rest/v1/places#Review
+export type PlaceReview = {
+  name?: string; relativePublishTimeDescription?: string; rating?: number; text?: LocalizedText; originalText?: LocalizedText;
+  authorAttribution?: { displayName?: string; uri?: string; photoUri?: string }; publishTime?: string; googleMapsUri?: string;
 };
 export type SearchTextResponse = { places?: Place[] };
 export type PlacePrediction = {

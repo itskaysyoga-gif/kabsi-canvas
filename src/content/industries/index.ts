@@ -24,6 +24,7 @@ import { florist } from "./florist";
 import { optician } from "./optician";
 import { yogaAndPilatesStudio } from "./yoga-and-pilates-studio";
 import { beautySalon } from "./beauty-salon";
+import { cleaner } from "./cleaner";
 
 export type { Card, ChatLine, D9Trade, Industry, Task, TradeCard, TradePage } from "./types";
 
@@ -51,6 +52,8 @@ export const INDUSTRIES: Industry[] = [
   yogaAndPilatesStudio,
   // Site 2 (5 Nov 2026, master plan 30.34 item 4): the 21st industry.
   beautySalon,
+  // SITE-2 (blueprint 3.1): cleaners, one of the first four industry groups.
+  cleaner,
 ];
 
 export const industry = (slug: string) => INDUSTRIES.find((i) => i.slug === slug);

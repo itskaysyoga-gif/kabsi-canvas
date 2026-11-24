@@ -70,6 +70,31 @@ export async function checkLink(kind: LinkKind, url: string, deps: SafeFetchDeps
   }
 }
 
+// ── SITE-3: the free check's "Do your links work now?". One look, now, with a short limit: a HEAD first (cheap for the
+// site), then a GET when the HEAD does not say the page loads (many sites refuse HEAD). Same safe fetch and the same rules
+// as the daily watch (checkLink: public addresses only, redirects on the same site, a robot refused still counts as up).
+// Anything that has not answered inside the limit is "fails". Nothing is stored.
+export const NOW_MS = 4_000;
+export async function linkNow(kind: LinkKind, url: string, deps: SafeFetchDeps, limitMs = NOW_MS): Promise<"loads" | "fails"> {
+  const started = Date.now();
+  const left = () => Math.max(0, limitMs - (Date.now() - started));
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const late = new Promise<"fails">((res) => { timer = setTimeout(() => res("fails"), limitMs); });
+  const look = async (): Promise<"loads" | "fails"> => {
+    const head = await checkLink(kind, url, { ...deps, timeoutMs: left(), fetch: (u, init) => deps.fetch(u, { ...init, method: "HEAD" }) });
+    if (head.ok) return "loads";
+    // A bad address or a private one is not tried again with a GET.
+    if (head.reason === "bad_address" || left() <= 0) return "fails";
+    const get = await checkLink(kind, url, { ...deps, timeoutMs: left() });
+    return get.ok ? "loads" : "fails";
+  };
+  try {
+    return await Promise.race([look().catch(() => "fails" as const), late]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // ── What is remembered about one link: counts and times, never the address.
 export type LinkState = {
   failures: number;

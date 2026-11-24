@@ -1586,6 +1586,9 @@ Every guide's words are in its own content file, src/content/guides/<slug>.tsx; 
 | reply-to-reviews-about-no-shows-and-cancellation-fees | nail-technician | Reviews | cancellation fee? |
 | where-to-put-your-google-review-link-salon | barber-shave | Reviews | review link? |
 | why-google-shows-wrong-details-for-your-salon | spa-facial | Problems and fixes | wrong details |
+| where-to-put-your-google-review-link | cafe-barista | Reviews | review link |
+| ask-for-google-reviews-from-jobber | auto-garage | Reviews | from Jobber |
+| ask-for-google-reviews-from-calendly | physio-stretch | Reviews | from Calendly |
 
 ## 56. Industries 3: the industry pages short and scannable (5 Nov 2026, master plan 30.33 item 2)
 
@@ -2414,4 +2417,99 @@ Source: docs/kabsi-final/KABSI-WEBSITE-AND-CONVERSION-BLUEPRINT.md (sections 3 t
 **Payment done (/billing/done)**: "You are all set." "You can see your plan, and cancel any time, in Settings." "Back to Kabsi".
 
 **Titles and descriptions**: in v31-heads.ts (new).
+
+## 91. SITE-3: one design system and the home page redone (24 Nov 2026, lane R R-164 item 7)
+
+The words are in `src/components/marketing/v31-data.ts` (Home, Pricing, How it works, About, Security), `src/components/kabsi/d9-industry.tsx` (industry pages) and `src/components/kabsi/scan-result.tsx` (the free check result). Section 90 still holds every SITE-1 line that did not change.
+
+**Home, in order**
+- Hero: H1 "Your business on Google. Taken care of." ("Taken care of." on the yellow bar), the line, the search box, "Check my business free", "Free check. No card. 20 seconds.", then three marks: "No Google password", "Nothing goes live without your yes", "Cancel any time".
+- The phone (Example, Maple Street Salon), three scenes, each ending on Kabsi's card with its Approve button and the done line: "A review reply approved" (ends "Your reply is live on Google."), "Saturday's hours approved" (ends "Your new hours are live on Google."), "A photo posted" (ends "Your post is live on Google."). Buttons: "Pause the example" and "Play the example".
+- The problem (charcoal band): "Your Google profile is working for you, or against you." Points: "Reviews and replies shape the choice." "Google says positive reviews and helpful replies can help your business stand out, and that a reply shows customers you value their feedback." (support.google.com/business/answer/7091); "Your details can change without you." "Google updates profiles from what users suggest and from other sources. If you do not answer a suggested edit within 4 days, Google may publish it." (answer/3480441); "Wrong hours cost visits." "Google says your hours tell customers when they can visit, and that a profile with wrong details may not show up for searches near you." (answer/7091). Link: "Read it on Google's help page". All three read as raw page text on 24 Nov 2026.
+- "A week with Kabsi." ("with Kabsi." on the bar, the page's one other bar) "What a normal week looks like. You spend a few taps on it." Monday "A new review arrives." "The reply is ready. You approve it with one tap." Wednesday "Google changed your hours." "Kabsi caught it and set them back after your yes." Friday "A photo from your phone is live." "You sent it with two words. Kabsi wrote the post." Next Monday "Your weekly summary arrives." "What was done, what waits for you, and one next step." (The prompt said Sunday; the weekly summary is sent on Monday, facts 04, so the page says Next Monday.)
+- "Just tell Kabsi." The six chips of section 90, then "Or send a voice note." "Say it out loud. Kabsi shows you the change in writing before anything goes to Google."
+- "How it starts." the three steps and the first-day line of section 90, beside the photo heroHow.
+- "See exactly what was done." (the report card is titled "November report", the business under it) "A short summary every week. A full report every month. Work done, what Kabsi found and what Google shows, kept apart." The monthly report Example and the weekly summary Example: "Your week, Maple Street Salon", "3 replies live on Google.", "1 change caught on Google and set back.", "1 post live on Google.", "Your review link was tapped 6 times.", "Nothing waits for you. Next: holiday hours for December."
+- "One price." the full-width card: "29 US dollars", "a month per location.", the button, TRIAL_LINE, "Included" and the eight lines of blueprint section 4, the not included line.
+- "You stay in charge." the four trust lines as a quiet row. "Questions." six. Closing band: "Start with a free check."
+
+**Pricing**: H1 "One plan. Everything Kabsi does." ("Everything Kabsi does." on the bar; the independent review found the price said twice in the first screen), line "One price for one location, with nothing extra to unlock. You approve every change.", the three hero marks, the same price card, then "Google Business Profile is free from Google. Kabsi is an independent paid service.", "You stay in charge.", "Questions about the plan." (five questions of the FAQ, word for word: Do I have to do anything?, Does Kabsi need my Google password?, Which countries?, How do I cancel?, Is Kabsi part of Google?), the closing band.
+
+**How it works**: the box under the H1; the five steps and "Or just tell Kabsi."; "See what was done." "A short summary every week and a full report every month: work done, what Kabsi found and what Google shows, kept apart."; the closing band.
+
+**Industry pages**: the example review now sits beside the hero, its headline "A review at <business>, and the reply Kabsi writes", caption "Kabsi writes the reply from the facts you gave it. It waits for your yes before anything reaches Google."; "What Kabsi does without being asked."; "One thing Google says about <plural>."; the three hero marks under the box; "One price." with the shared price card; "What to know first"; "Questions." (Home's six); the closing band "Check your business, free." /for: "Pick your business." and the closing band "Not on the list?".
+
+**Free check result**: headlines without the yellow bar. The latest review shows "<reviewer>, <n> stars" and the line "Your latest review on Google, with a first reply. Once Kabsi is connected, each reply is written in your voice from your business facts, and nothing reaches Google until you say yes." The first reply (server, `_shared/free-reply.ts`): 4 or 5 stars "Thank you, <Name>. We are glad you took the time to write this, and we hope to see you again."; 1 to 3 stars "Thank you for writing this, <Name>. We are sorry it was not better, and we would like to hear more. Please contact us through the details on our profile."
+
+## 92. OFFER-2 and PROOF-2: owner-facing lines (recorded by SITE-3, 24 Nov 2026)
+
+OFFER-2 and PROOF-2 (both 24 Nov 2026) shipped these lines in code; this section records them word for word, as the code has them. How to read it: ` / ` is a new line in the message, ` // ` is an empty line between parts, and `<...>` is a value Kabsi fills in. The code is the source; a change to a line changes the code and this section together.
+
+**WhatsApp, the owner's Google-care tools** (`supabase/functions/_shared/whatsapp/say.ts` unless named)
+
+- Help (`ownerHelp`): `You can send / "waiting" for what needs your yes / "done" for what Kabsi did this week / "stats" or "this month" / "my hours" for your hours on Google / a new usual time for one day, for example "Saturdays 10am to 4pm" / a new phone number or website / a photo, or a few words for a post / "review link" or "QR" / "cards" for the taps on your Kabsi cards / "reply:" and your exact reply, or a change to a draft / "switch" to change business / "talk to a person"`
+- Waiting, nothing open (`waitingNone`): `Nothing is waiting / No review to answer, nothing to approve and no change found on Google.`
+- Waiting, the list (`waitingList`): `Waiting for you / 1. <item> / 2. <item> // Send a number to open one.`
+- Waiting, one item each (`supabase/functions/_shared/whatsapp/google-care.ts`, `waitingLine`): `Reply ready: <first name>, <n> stars`; `New review: <first name>, <n> stars, reply being written`; `<label> waiting for your yes`; `Found on Google: your <label> changed`. With no first name: `A customer`; one star: `1 star`. Labels: `Post`, `Hours`, `Photo`, `Change`, `Reply`.
+- Waiting, a reply not drafted yet (`waitingNotDrafted`): `The reply is being written // Kabsi sends it here when it is ready.`
+- Waiting, an approval (`waitingApproval`): `<label> waiting for your yes / Tap Approve on the message Kabsi sent about it, or open it here: <url>`
+- Waiting, a change found on Google (`waitingProblem`): `Your <label> changed on Google / See what changed and choose what to keep: <url>`
+- Waiting, gone (`waitingGone`): `That one is no longer waiting // Send "waiting" for the list as it is now.`
+- Done, no summary yet (`doneNone`): `No weekly summary yet / Your first weekly summary comes on Monday. // Your account: <url>`
+- Done (`done`): `Your week from <date> / <lines> // The full report: <url>`. The lines (`google-care.ts`, `doneLines`): `<n> new reviews, <n> answered through Kabsi`; `<n> waiting for your yes`; `<n> taps on your review link and cards` (`review` and `tap` for 1).
+- My hours (`hoursNow`): `Your hours on Google / <one line a day> // To change one day, send for example "Saturdays 10am to 4pm".`
+- My hours, none known (`hoursNowNone`): `Kabsi does not have your hours yet / Set your weekly hours here: <url>`
+- Weekly hours, which day (`weekWhichDay`): `Which day, and what hours? / For example "Saturdays 10am to 4pm" or "closed on Sundays".`
+- Weekly hours, two days sent (`weekOneDay`): `One day at a time / Send the new hours for one day, for example "Saturdays 10am to 4pm".`
+- Weekly hours, the one question back (`weekAskTimes`): `What are your new hours on <day>s? / For example "10am to 4pm", or "closed".`
+- Weekly hours, bad times (`weekBadTime`): `Those times do not work / The closing time must come after the opening time. / For example "Saturdays 10am to 4pm".`
+- Weekly hours, no change (`weekSame`): `<day> already says that / Nothing was changed.`
+- Weekly hours, shown back for the yes (`weekShown`): `New weekly hours for Google / <day>: <open> to <close> // Your week on Google after this change: / <one line a day> // Kabsi sets them on Google after you tap Approve.` A closed day reads `Closed`; a close at 00:00 reads `midnight` (`google-care.ts`).
+- Phone or website, ask (`contactAsk`): `What is the new number or website? / Send it as you want customers to see it, for example "new phone +1 205 555 0100".`
+- Phone or website, shown back exactly for the yes (`contactShown`): `New phone number for Google / <value> // Kabsi sets it on Google after you tap Approve.` and `New website for Google / <value> // Kabsi sets it on Google after you tap Approve.`
+- After the tap (`listingApproved`): `Approved / Kabsi sends it to Google now and checks that Google shows it.`
+- A typed yes to a profile change (`listingTapApprove`): `Tap Approve / A change to your Google profile is approved with the Approve button on the message above.`
+- The refused fields, with the guide link (`guideField`): `Kabsi does not change that from a chat / Your business name, address, category, description and services are changed on Google itself: a wrong change can make Google check your business again. // How to do it: <url>`. The link is `kabsi.co/guides/keep-your-hours-and-details-the-same-everywhere` (`supabase/functions/_shared/whatsapp/agent.ts`, `GUIDE_PATH`).
+- The QR code image's caption (`qrImage`): `<Business>: your review QR code / Print it or show it at the counter. It opens your review link, the same for every customer.`
+- The off-topic line (`offTopic`): `Kabsi cannot help with that / Kabsi looks after your business on Google: review replies, your hours and details, photos and posts. // To talk to a person, send "talk to a person" or email hello@kabsi.co.` With the request book on (`offTopicBook`): `Kabsi cannot help with that / Kabsi looks after your business on Google and keeps your request book: review replies, your hours and details, photos, posts and your customers' requests. // To talk to a person, send "talk to a person" or email hello@kabsi.co.`
+- One plan (`billingOnePlan`): `One plan / Kabsi has one plan: 29 US dollars a month per location. There is nothing to upgrade to.`
+- The plan status line's end (`billingStatus`): `Reply "card", "invoice", "add a location" or "cancel".`
+- A Pro plan moving to Kabsi (`billingDowngradeAsk`, `billingDowngraded`): `Move to Kabsi? / Price: <price> / From your next renewal, <date> / You keep Pro until then.` and `Done. Kabsi at 29 US dollars a month starts on <date>.` (or `at your next renewal.`).
+
+**Plan screen** (`/app/plan`: `src/routes/_authenticated/app/plan.tsx`, with `PLAN_COPY` in `src/lib/plans.ts` and the lines in `src/lib/offer.ts`)
+
+- Card name: `Kabsi`. Pill: `Your trial` or `Your plan`.
+- Price: `$29` with ` a month per location` (`$19` on a founding plan).
+- Under the price: `14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing.` (`TRIAL_LINE`); on a founding plan `19 US dollars a month for your first 12 months. From month 13 the price is 29 US dollars a month. We email you 14 days before the change.` (`FOUNDING_LINE`).
+- The four lines of work: `Reply to every review`, `Keep your details right`, `Post when something changes`, `See the work, every Monday`; then `Nothing goes live without your yes` and `Working hours: Monday to Friday, 9:00 to 18:00, UAE time.`
+- Button: `Start 14 days free` (`Plans open soon` while checkout is closed).
+- A Pro plan: button `Move to Kabsi`, confirm line `Move to Kabsi at your next renewal, $29 a month.`
+- Price panel: the `TRIAL_LINE` above.
+
+**Get reviews: placement links** (`src/components/review-link/placement-links.tsx`, on `/app/cards`)
+
+- Panel title: `Where to put your link`
+- Intro: `Paste a link once into a message your own system already sends to every customer. Each place gets its own link, so you can see which places get tapped.`
+- Under it: `Kabsi sends nothing to your customers and never sees who taps. The same link goes to everyone, with no reward and no question about how their visit went.`
+- The four places and their hints: `Booking confirmation` / `In the confirmation your booking tool already sends.`; `Receipt` / `On the receipt or invoice you already give or send.`; `Email signature` / `At the end of the emails you already send.`; `Social bio` / `In the bio of your social media page.`
+- Buttons: `Make this link`; once made, `Copy link`, the link itself and `<n> taps in the last 30 days` (`tap` for 1).
+- Last line: `A tap is not a review.`
+
+**Monthly report and email** (`supabase/functions/_shared/monthly-report/compose.ts`, `supabase/functions/_shared/email/monthly-body.ts`, `supabase/functions/_shared/email/copy.ts`, the page `src/components/report/monthly-report.tsx`)
+
+- Email subject (`monthSubject`): `Your Kabsi month: <n> things sent to Google in <Month>` (`thing` for 1); with nothing sent: `Your Kabsi month: <Month>`.
+- Email title: `Your monthly report, <Month Year>`. Preheader: `<Month Year>: Kabsi did <n> things for your Google profile. One next step inside.` or `... Nothing needs you.`; a quiet month: `<Month Year>: a quiet month. One next step inside.` or `... Nothing needs you.` Button: `Open your report`. Notice in Kabsi: `Your <Month Year> report is ready`.
+- Plain text title: `Your monthly report: <Business>, <Month Year>`.
+- Headings, in order: `Work done`, `Results`, `What customers mention`, `Nearby businesses`, `What is next`. The page also labels Results with `From your Google Business Profile` and `From your Kabsi links and cards`.
+- Work done: `<label>: <n>` with the labels `Replies sent to Google`, `Posts sent to Google`, `Photos sent to Google`, `Hours updated`, `Profile details updated`, `Changes put back`, `Replies prepared`; a quiet month `A quiet month. Nothing needed to go to Google.` and `Kabsi kept watching your Google profile.`; link watch `Your <website link|booking link|menu link> stopped loading on <day> and loaded again on <day>.` or `... and was not loading at the end of the month.`
+- Results: `Your rating is <4.6> from <n> reviews, <up 0.1 from a month ago|down 0.1 from a month ago|the same as a month ago>.`; `New reviews: <n>. With a reply: <n>.` (`at least <n>` when Google's count is a floor); `Calls from your Google profile: <n> (<23% more> than last month).`, `Direction requests: <n> ...`, `Website clicks: <n> ...` (or ` (no change from last month)`, and ` (example figures)` on the demo business); `Review link and card taps: <n>. A tap is not a review.` and one line a place, `<place>: <n> taps`. With nothing yet: `Nothing to show yet. The numbers fill in once Google shares them.`
+- What customers mention (`supabase/functions/_shared/monthly-report/feedback.ts`): `<n> reviews in the last 90 days mention <theme>, mostly in 4 and 5 star reviews.` (or `mostly in 1 to 3 star reviews`, or neither).
+- Nearby businesses (email only): `<Name>: <4.5> stars from <n> reviews.` (`no rating shown`), then `Read live from Google when this report was made. Kabsi does not keep these figures.`
+- What is next: up to 2 next steps by their titles; none: `Nothing needs you right now.`
+- The short summary for WhatsApp (`monthlySummary`, built for GATE-2, not sent yet): title `Your monthly report`, end `Next step: <title>.` or `Nothing needs you right now.`
+
+**Weekly summary, short** (`supabase/functions/_shared/results-report/receipt.ts`, `receiptText`)
+
+- Title `Your weekly report` with the business, then 3 to 5 lines: `<dates>`; up to 3 of `<label>: <n>` (the Work done labels above); with no work `A quiet week. Kabsi kept watching your Google profile.`; `Found on your profile: <n> changes.` (`change` for 1); `Review link taps: <n>.`
+- The end: `Waiting for your yes: <n>.` or `Nothing is waiting for your yes.`, then ` Next step: <next>.` when there is one.
 

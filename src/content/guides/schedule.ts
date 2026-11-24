@@ -24,6 +24,10 @@ export function weeklyAt(n: number): string {
   return new Date(WEEKLY_START + n * WEEK_MS).toISOString().replace(".000Z", "Z");
 }
 
+/** SITE-3 (R-164 item 5): the three new guides (Jobber, Calendly, where to put your review link) publish now, once their
+ * sources were read again from the raw page text, not on the January schedule. */
+export const SITE3_PUBLISH_AT = "2026-11-24T18:00:00Z";
+
 export const isPublic = (g: Pick<GuideDoc, "publishAt">, now: Date) =>
   Date.parse(g.publishAt) <= now.getTime();
 
@@ -32,7 +36,21 @@ export const isPublic = (g: Pick<GuideDoc, "publishAt">, now: Date) =>
  * first, newest first. The rest keep the order of the array passed in: the Guides 3 order, then the earlier guides
  * (src/content/guides/index.ts), so the order of Guides 3 stays.
  */
-export function publicGuides<T extends Pick<GuideDoc, "publishAt">>(all: T[], now: Date): T[] {
+export function publicGuides<T extends Pick<GuideDoc, "publishAt"> & { noindex?: true }>(
+  all: T[],
+  now: Date,
+): T[] {
+  return publicGuidesWithHidden(
+    all.filter((g) => !g.noindex),
+    now,
+  );
+}
+
+/** SITE-2: every guide whose page answers, including the noindex ones. Only guides-server's page lookup uses it. */
+export function publicGuidesWithHidden<T extends Pick<GuideDoc, "publishAt">>(
+  all: T[],
+  now: Date,
+): T[] {
   const open = all.filter((g) => isPublic(g, now));
   const newer = open
     .filter((g) => Date.parse(g.publishAt) > PUBLISH_ALL_MS)
@@ -68,6 +86,7 @@ export function metaOf(g: GuideDoc, words: number): GuideMeta {
     industries: g.industries,
     related: g.related,
     summary: g.summary,
+    ...(g.noindex ? { noindex: true as const } : {}),
     ...(g.faqs?.length ? { faqs: g.faqs } : {}),
     minutes: minutesFor(words),
   };

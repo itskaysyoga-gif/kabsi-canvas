@@ -6,23 +6,25 @@ import { describe, expect, it } from "vitest";
 const read = (p: string) => readFileSync(p, "utf8");
 
 describe("the free check on Design 8", () => {
-  it("names only what Google's public data holds (K-82) and the ChatGPT answer, with no At launch label (Go live 1)", () => {
+  it("names only what Google's public data holds (K-82), with no AI answer and no At launch label (SITE-2, Go live 1)", () => {
     const start = read("src/components/kabsi/d4-free-check.tsx");
     const rows = start.slice(
       start.indexOf("const LOOKS_AT"),
       start.indexOf("function CheckLooksAtVisual"),
     );
-    expect(rows).not.toMatch(/reply|repl(y|ies) from you|special hours|bank holiday|post|booking/i);
-    expect(rows).toContain("What ChatGPT says");
+    // SITE-2 (blueprint 3.1 section 3): the check reads the public booking link and shows the reply Kabsi would write, so
+    // "reply" and "booking" alone are no longer claims; a read of the owner's own replies, special hours or posts still is.
+    expect(rows).not.toMatch(
+      /replies|repl(y|ies) from you|your replies|special hours|bank holiday|\bposts?\b/i,
+    );
+    expect(rows).not.toMatch(/ChatGPT/);
     expect(start).not.toMatch(/atLaunch|At launch/);
   });
   it("shows the words Google Maps under the result's Places data, exactly and not translated", () => {
     const live = read("src/components/kabsi/scan-live.tsx");
     expect(live).toContain('<span translate="no">Google Maps</span>');
-    const result = live.slice(
-      live.indexOf("export function LiveResult"),
-      live.indexOf("function Waitlist"),
-    );
+    // SITE-2: LiveResult and SavedFreeCheck each carry it; the shared result parts (scan-result.tsx) sit under them.
+    const result = live.slice(live.indexOf("export function LiveResult"));
     expect(result.match(/<PlacesAttribution/g)?.length).toBeGreaterThanOrEqual(2);
   });
   it("keeps the route heads free of page components (Lean 1)", () => {

@@ -8,7 +8,7 @@ export const Route = createFileRoute("/scan/$code")({
   head: ({ params }) =>
     pageHead({
       title: "Kabsi: Your free check",
-      description: "Your free check: where you come up nearby, and who came first around you.",
+      description: "Your free check: your rating and reviews beside 3 nearby businesses.",
       path: `/scan/${params.code}`,
       image: "scan",
       noindex: true,

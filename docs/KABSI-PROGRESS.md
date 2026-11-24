@@ -42,6 +42,8 @@ The long list as it stood before GATE-2 is word for word in `2026-11-24-progress
 ## Recent entries (newest first)
 
 - 24 Nov 2026, GATE-2 (R-164): WhatsApp report answers on PROOF-2's functions, onboarding in three steps then the card trial, Founding 25 to the 19 checkout, the month-13 switch and its email, the first-day 90-day list, the pilot kit, Creem test products set up. Launch tests mostly not run (see the file). `2026-11-24-gate2.md`.
+- 24 Nov 2026, SITE-3 (R-164 item 7): one section system on every public page, Home redone (phone scenes, Google-sourced problem band, a week with Kabsi, full-width price), SITE-2 finished, free check without rank or AI, three guides public. `2026-11-24-site3.md`.
+- 24 Nov 2026, SITE-2 (blueprint 3.1): industry pages on one template, guides cleaned and 3 added, free check result and tool pages brought to 3.1; `2026-11-24-site2.md`.
 - 24 Nov 2026, SITE-1 (R-163, PR 594): Home in nine sections, one price card at 29, src/lib/offer.ts. `2026-11-24-site1.md`.
 - 24 Nov 2026, OFFER-2 (R-163): one plan at 29 with a 14-day card trial, founding 19 private, costly jobs off, 2 posts a month, WhatsApp Google-care tools. `2026-11-24-offer2.md`.
 - 24 Nov 2026, PROOF-2: link watch, short weekly summary, monthly report, placement links. `2026-11-24-proof2.md`.

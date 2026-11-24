@@ -208,9 +208,9 @@ export const guide: GuideDoc = {
           tells you what Google is asking. Only you, as the owner, can act with Google.
         </p>
         <p>
-          If you are not sure which result is yours, write to hello@kabsi.co or ask for the free
-          20-minute setup call. The free check needs no Google access and shows what Google shows
-          about your business today. <SiteRef to="/scan">Run the free check</SiteRef>.
+          If you are not sure which result is yours, write to hello@kabsi.co. The free check needs
+          no Google access and shows what Google shows about your business today.{" "}
+          <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>
     ),

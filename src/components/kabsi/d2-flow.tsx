@@ -131,7 +131,7 @@ export function ManagerSteps() {
       <section id="how" className="container-kb mt-14 scroll-mt-24 pb-20 lg:pb-28">
         <h2 className="sr-only">How to add Kabsi</h2>
         <AccessSteps state={s} headingLevel="h3" />
-        <p className="mt-10 text-small text-text-2">
+        <p className="mt-10 text-body text-text-2">
           Google Business Profile is free from Google. Kabsi is an independent paid service.
         </p>
       </section>

@@ -11,7 +11,7 @@ export const HOME_LINE =
 /** The free check's hero. */
 export const CHECK_HERO = {
   title: "Check your business on Google, free.",
-  line: "See what customers see on your Google profile and what to do first. About 30 seconds, and no access needed.",
+  line: "See your rating and reviews beside 3 nearby businesses, and what your Google profile shows. About 20 seconds, and no access needed.",
 } as const;
 
 /** Pricing's hero (approved, COPY 34 and 38). */

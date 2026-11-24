@@ -76,12 +76,13 @@ describe("the free check result on Design 8", () => {
       live.indexOf("function Competitors"),
     );
     expect(result).not.toMatch(/At launch/);
-    // Both parts show only with a check, or the mock mode's waiting list; "unavailable" shows neither.
-    // Scan 3: the nearby detail shows with a check, the waiting list in mock mode, else nothing; the AI detail only with an answer.
-    expect(result).toContain("{check ? (");
-    expect(result).toContain(") : waitlist ? (");
-    expect(result).toContain("{ai ? (");
-    expect(result).toContain('started.state === "waitlist"');
-    expect(result).toContain("Kabsi will search Google Maps from places around you");
+    // SITE-2 (blueprint 3.1 section 3): the result has no AI answer part at all, and the nearby part takes the check's
+    // competitors when there is a check, else null, so an unavailable check shows a plain line and nothing is invented.
+    expect(result).not.toContain("{ai ? (");
+    expect(result).not.toContain('id="ai"');
+    expect(result).toContain("nearby={check?.fast.competitors ?? null}");
+    const parts = readFileSync("src/components/kabsi/scan-result.tsx", "utf8");
+    expect(parts).toContain("Nearby businesses could not be read for this check.");
+    expect(parts).not.toMatch(/At launch/);
   });
 });

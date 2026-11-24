@@ -51,10 +51,11 @@ describe("Site 3a: the free check result", () => {
     expect(SAVED_NOT_KEPT).toContain("Kabsi could not check it here");
   });
   it("lists what Kabsi could not check apart from what is missing", () => {
-    const s = read("src/components/kabsi/scan-live.tsx");
-    expect(s).toContain('s.flags.filter((f) => f.tone === "neutral")');
-    expect(s).toContain("Could not check");
-    expect(s).toContain('{r.value ?? "Missing"}');
+    // SITE-2 (blueprint 3.1 section 3): the result lists the basics Google shows and says "Not shown" for the rest,
+    // with no alarm; the old "Could not check" block (neutral flags) is gone with the main finding.
+    const s = read("src/components/kabsi/scan-result.tsx");
+    expect(s).toContain('{r.value ?? "Not shown"}');
+    expect(read("src/components/kabsi/scan-live.tsx")).not.toContain("Could not check");
   });
 });
 

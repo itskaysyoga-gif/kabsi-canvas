@@ -37,7 +37,7 @@ for (const f of ["src/components/kabsi/photos.tsx", "src/components/kabsi/photos
 
 const dir = "src/content/industries";
 export const pages = readdirSync(dir)
-  .filter((f) => f.endsWith(".ts") && !["index.ts", "types.ts"].includes(f))
+  .filter((f) => f.endsWith(".ts") && !["index.ts", "types.ts", "blueprint.ts"].includes(f))
   .map((f) => {
     const src = readFileSync(`${dir}/${f}`, "utf8");
     const photo = src.match(/\n {2}photos: \[(?:MORE_)?PHOTOS\.(\w+),/)?.[1];

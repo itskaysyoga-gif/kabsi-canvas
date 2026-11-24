@@ -7,7 +7,8 @@
 //   POST /visibility/ai-calibrate  x-cron-secret: one live answer per provider for named businesses, saved to app_settings for the calibration check (30.9 item 3).
 //   GET  /visibility/image    the signed-in member, staff or x-cron-secret: one finished grid as the nearby places image (PNG),
 //                             or its 7 by 7 dots with view=dots; with the header x-kabsi-check: CODE (x-cron-secret) a free check's nearby places.
-//   POST /visibility/check    public (Turnstile, rate limits, daily cap): the free check (V4, 28.1). POST /check/result { code } its result.
+//   POST /visibility/check    public (Turnstile, rate limits, daily cap): the free check (V4, 28.1; since SITE-3 only the 3 nearby
+//                             businesses from one Places Text Search, no rank and no AI answer). POST /check/result { code } its result.
 //   POST /visibility/waitlist public (Turnstile, 5 an hour): "Save my place" while the free check is closed (UX 1).
 //   GET  /visibility/terms    public: the search an industry page prefills (?industry=&market=). POST: staff op, DataForSEO keyword data.
 // Ranks and competitors come only from DataForSEO public results (30.10.2); mock mode unless app_settings
@@ -27,16 +28,14 @@ import { mapDate, renderMap } from "../_shared/visibility/map-image.ts";
 import { baseMap, placeNamer } from "../_shared/visibility/geoapify.ts";
 import { renderNearby } from "../_shared/visibility/nearby-image.ts";
 import type { Nearby } from "../_shared/visibility/nearby.ts";
-import { type CheckRow, cleanTerm, collectCheck, newCode, publicView, safeNearby, startCheck } from "../_shared/visibility/free-check.ts";
+import { type CheckRow, cleanTerm, collectCheck, newCode, publicView, safeNearby, startNearbyCheck } from "../_shared/visibility/free-check.ts";
 import { businessType } from "../_shared/visibility/scan.ts";
-import { freeScanCheck } from "../_shared/visibility/ai/run.ts";
 import { MARKETS, pickTerms, searchVolumes } from "../_shared/visibility/terms.ts";
 import { latinName, ownName, townOf } from "../_shared/visibility/area.ts";
 import { checkWaitlist } from "../_shared/visibility/waitlist.ts";
 import { WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
-import { accuracyDeps, aiDeps, doneRuns, enabledProviders, realProvider, setting as aiSetting, syncPrompts } from "../_shared/visibility/ai/deps.ts";
-import { recordFromPlace } from "../_shared/visibility/ai/accuracy.ts";
-import { getSnapshotPlace } from "../_shared/google/index.ts";
+import { aiDeps, doneRuns, enabledProviders, realProvider, syncPrompts } from "../_shared/visibility/ai/deps.ts";
+import { searchText } from "../_shared/google/index.ts";
 import { tickAi } from "../_shared/visibility/ai/run.ts";
 import { analyze } from "../_shared/visibility/ai/analyze.ts";
 import { numbers, reportBlock } from "../_shared/visibility/ai/numbers.ts";
@@ -44,7 +43,7 @@ import { PROVIDERS, type AiProviderName } from "../_shared/visibility/ai/provide
 import { sourceActions } from "../_shared/insights/ai-visibility.ts";
 import { type KeywordRow, type RunDb, type RunDeps, type ScanRow, tick } from "../_shared/visibility/run.ts";
 import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
-import { type Refusal, refusalAlert, refusalOf } from "../_shared/visibility/refusal.ts";
+import { type Refusal, refusalAlert } from "../_shared/visibility/refusal.ts";
 
 const db = () => admin();
 const fn = "visibility";
@@ -384,14 +383,6 @@ async function refreshCheck(c: CheckRow): Promise<CheckRow | null> {
   return next;
 }
 
-/** The public Google profile of a place, read live and never stored (master plan 30.10.3). Null when it cannot be read. */
-async function liveProfile(placeId: string | null) {
-  const key = Deno.env.get("PLACES_API_KEY");
-  if (!placeId || !key) return null;
-  const r = await getSnapshotPlace(key, placeId).catch(() => null);
-  return r?.ok && !r.backSoon ? recordFromPlace(r.data) : null;
-}
-
 async function startFreeCheck(req: Request): Promise<Response> {
   const body = await req.json().catch(() => ({})) as {
     name?: string; address?: string; country?: string; city?: string; place_id?: string; term?: string; industry?: string; turnstile?: string;
@@ -400,7 +391,7 @@ async function startFreeCheck(req: Request): Promise<Response> {
   const ip = clientIp(req);
   const name = String(body.name ?? "").replace(/\s+/g, " ").trim().slice(0, 120);
   const country = String(body.country ?? "").toUpperCase();
-  // Scan 2 (30.29): the town the page sends (from the profile check), else from the address; the AI question needs one.
+  // Scan 2 (30.29): the town the page sends (from the profile check), else from the address.
   const sent = body.city ? String(body.city).replace(/[^\p{L}\p{N}\s'&.-]/gu, " ").replace(/\s+/g, " ").trim().slice(0, 80) : "";
   const city = sent && latinName(sent) ? sent : townOf(body.address ? String(body.address).slice(0, 200) : null, String(body.country ?? ""));
   const industry = body.industry && /^[a-z0-9-]{2,40}$/.test(body.industry) ? body.industry : null;
@@ -412,84 +403,50 @@ async function startFreeCheck(req: Request): Promise<Response> {
     industryTerm = (data?.term as string | undefined) ?? null;
     if (!term) term = industryTerm;
   }
-  if (name.length < 2 || !/^[A-Z]{2}$/.test(country) || !term) return json({ error: "bad_request" }, 400);
+  const placeId = typeof body.place_id === "string" && /^[A-Za-z0-9_-]{10,200}$/.test(body.place_id) ? body.place_id : null;
+  if (name.length < 2 || !/^[A-Z]{2}$/.test(country) || !term || !placeId) return json({ error: "bad_request" }, 400);
   if (!internal) {
     if (!(await verifyTurnstile(body.turnstile, ip))) return json({ error: "challenge_failed" }, 400);
     const who = await sha256Hex(`free_check:${ip}`);
     if (!(await rateLimit(`free_check:${who}`, 5, 3600, { failClosed: true }))) return json({ error: "rate_limited" }, 429);
   }
-  // Public results only, and only real ones: in mock mode a visitor sees the waiting list (COPY 0). Go live 1 (30.28):
-  // past the day's cap, past the month's cap or when DataForSEO refuses, the check is "unavailable": the page shows the
-  // Google part in full and leaves the nearby and AI parts out, with no error and no promise.
-  const mode = (await setting("dataforseo_mode")) === "live" ? "live" : "mock";
-  if (!internal && mode !== "live") return json({ state: "waitlist" }, 200);
-  // Scan 2 (30.29): a reused check costs nothing, so it is looked up before the day's cap (and again inside startCheck).
-  const placeId = typeof body.place_id === "string" && /^[A-Za-z0-9_-]{10,200}$/.test(body.place_id) ? body.place_id : null;
-  const again = placeId ? await recentCheck(placeId, term).catch(() => null) : null;
-  if (again) return reused(again);
+  // SITE-3 (free check step 4): the check reads only the 3 nearby businesses the page shows (rating and reviews), with one
+  // Places Text Search inside the Places daily cap. No DataForSEO call (no rank, no 7 by 7 search, so dataforseo_mode no
+  // longer opens or closes it) and no AI answer: the Visibility Map and the AI jobs keep their code, switched off from here.
+  // The day's own cap (free_check_daily_cap) still holds; past it, or past the Places cap, the check is "unavailable" and
+  // the page shows the Google part in full.
+  const key = Deno.env.get("PLACES_API_KEY");
+  if (!key) return unavailable(null, "places_not_configured");
   const cap = Number((await setting("free_check_daily_cap")) ?? 0);
   if (!internal && (cap <= 0 || !(await rateLimit(`free_check_day:${new Date().toISOString().slice(0, 10)}`, cap, 86400, { failClosed: true })))) {
     return unavailable(null);
   }
-  const aiLive = (await aiSetting("ai_visibility_mode")) === "live";
-  const aiRefused = async (e: unknown) => {
-    const r = refusalOf(e);
-    if (r && r !== "provider_error") await alertRefusal(r, "AI answer");
-    return null;
-  };
-  let started: Awaited<ReturnType<typeof startCheck>>;
+  let started: Awaited<ReturnType<typeof startNearbyCheck>>;
   try {
-    started = await startCheck({
-    // Scan 2 (30.29): the same place and search checked in the last 7 days is shown again, and nothing is paid.
-    reuse: placeId ? () => recentCheck(placeId, term!) : undefined,
-    provider: provider(mode, { title: name, place_id: placeId }), source: mode, code: () => newCode(),
-    room: deps.room, spend: async (calls, micros) => void (await deps.spend(calls, micros)),
-    // The one AI answer: never a made-up answer for a visitor (mock answers only on staff calls).
-    ai: (o) => (aiLive || internal) ? freeScanCheck({
-      ...aiDeps, on: async () => (await aiSetting("ai_visibility_free_scan")) === "on",
-      // AI Answers 1: the Google profile is read live through the Places guard (field mask, daily cap) and compared in
-      // memory; only the fact that differs and ChatGPT's sentence are kept (30.10.3).
-      accuracy: { extractor: accuracyDeps.extractor, profile: () => liveProfile(o.place_id) },
-    }, o).catch(aiRefused) : Promise.resolve(null),
-  }, { name, address: body.address ? String(body.address).slice(0, 200) : null, country, city, place_id: placeId, term, industry_term: industryTerm });
+    started = await startNearbyCheck({
+      code: () => newCode(),
+      search: async (q) => {
+        // The place ID (to leave the business itself out), the name, the rating and the review count; nothing is stored.
+        const r = await searchText(key, q, 8, "places.id,places.displayName,places.rating,places.userRatingCount");
+        if (r.backSoon) return "back_soon";
+        return r.ok ? r.data.places ?? [] : null;
+      },
+    }, { name, address: body.address ? String(body.address).slice(0, 200) : null, country, city, place_id: placeId, term, industry_term: industryTerm });
   } catch (e) {
-    // Any failure of the paid part leaves the nearby and AI parts out quietly; only a refusal alerts staff (once a day),
-    // anything else is reported as an error for the team, never shown to the visitor.
-    const r = refusalOf(e);
-    if (!r || r === "provider_error") await captureError(fn, e, { route: "/check" });
-    return unavailable(r && r !== "provider_error" ? r : null);
+    await captureError(fn, e, { route: "/check" });
+    return unavailable(null, "places_error");
   }
-  if (started.ok === "reused") return reused(started.check);
-  if (!started.ok && started.reason === "paused") return unavailable("cap");
   // 30.30 item 3: no term in Latin letters to search or show, so the existing unavailable state, with nothing to say about it.
-  if (!started.ok && started.reason === "term") return unavailable(null, "no_latin_term");
-  if (!started.ok) return json({ error: started.reason }, 404);
+  if (!started.ok) return unavailable(null, started.reason === "term" ? "no_latin_term" : started.reason);
   const r = started.row;
   const saved = must(await db().from("free_checks").insert({
     code: r.code, business: r.business, term: r.term, industry, country: r.country, city: r.city, self: r.self, center: r.center,
-    radius_km: r.radius_km, category: r.category, source: r.source, state: r.state, fast: r.fast, ai: r.ai, points: r.points,
-    cost_micros: r.source === "live" ? 2 * 2000 + 49 * 600 : 0,
+    radius_km: r.radius_km, category: r.category, source: r.source, state: r.state, fast: r.fast, ai: r.ai, points: r.points, cost_micros: 0,
   }).select(CHECK_COLS).single()) as CheckRow;
-  log(fn, { action: "free_check", source: r.source, state: r.state });
-  return json({ ...publicView(saved), whatsapp_text: `Hi Kabsi, my scan code is KAB-${saved.code}` });
-}
-
-function reused(c: CheckRow): Response {
-  log(fn, { action: "free_check", state: c.state, reused: true });
-  return json({ ...publicView(c), reused: true, whatsapp_text: `Hi Kabsi, my scan code is KAB-${c.code}` });
-}
-
-/** A live check of this place and search from the last 7 days, still mapping or done, asked with the Scan 2 question. */
-async function recentCheck(placeId: string, term: string): Promise<CheckRow | null> {
-  const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
-  // Copy 3 (30.30 item 3): a term typed in another script is stored as the Google category or the industry term, so the
-  // lookup cannot key on it; the place alone finds the check (the page says what was searched).
-  let q = db().from("free_checks").select(CHECK_COLS).eq("self->>place_id", placeId);
-  if (latinName(term)) q = q.eq("term", term);
-  const { data } = await q
-    .eq("source", "live").in("state", ["mapping", "done"]).gte("created_at", since).not("ai->>question", "is", null)
-    .order("created_at", { ascending: false }).limit(1).maybeSingle();
-  return (data as CheckRow | null) ?? null;
+  log(fn, { action: "free_check", source: "places", state: "nearby", rivals: started.competitors.length });
+  // The 3 nearby businesses are in this answer only; the saved row has none of them (30.10).
+  const view = publicView(saved);
+  return json({ ...view, fast: { ...view.fast, competitors: started.competitors }, whatsapp_text: `Hi Kabsi, my scan code is KAB-${saved.code}` });
 }
 
 /** One staff alert a day when the provider refuses, whatever the reason (30.28). */

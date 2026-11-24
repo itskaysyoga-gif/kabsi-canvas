@@ -63,15 +63,16 @@ describe("SITE-1: the offer in one place", () => {
 });
 
 describe("SITE-1: Home is the nine sections of blueprint section 3", () => {
-  it("draws them in order with one H1, the brand line", () => {
+  it("draws them in order with one H1, the brand line (SITE-3 order, R-164 item 7)", () => {
     const home = read("src/components/marketing/v31.tsx");
     const body = home.slice(home.indexOf("export function V31Home"));
     const order = [
       "<HomeHero />",
+      "<Problem />",
+      "<Week />",
       "<TellKabsi />",
-      'id="does"',
-      'id="starts"',
-      'id="proof"',
+      "<Starts />",
+      "<Proof />",
       'id="price"',
       'id="trust"',
       'id="questions"',

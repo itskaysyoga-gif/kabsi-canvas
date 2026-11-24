@@ -2,11 +2,11 @@ import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import { SiteShell } from "@/components/kabsi/site-chrome";
 import { IndustryPage } from "@/components/kabsi/d9-industry";
 import { ORG_LD, SITE_URL, pageHead } from "@/lib/site";
-import { faqJsonLd } from "@/lib/faq";
 import { LEGACY_INDUSTRY_MOVES } from "@/lib/industry-redirects";
 
 // /for/<industry> (brief section 16, item 3; Industries 2: every page on Design 9, no group pages). The old addresses move
 // to the new ones; an old group address goes to /for (vercel.json answers those first with a 301).
+// SITE-2: the page is one template (blueprint 3.1 section 5); only the example and the fact change per industry.
 // Lean 1 (speed): the route's loader and head stay in the shared bundle on every page, so the industry texts load here, on
 // demand, and the head reads what the loader returns, never the content module itself.
 export const Route = createFileRoute("/for/$trade")({
@@ -24,14 +24,6 @@ export const Route = createFileRoute("/for/$trade")({
       // crumbsFor gives Businesses and the page; pageHead adds Home itself.
       crumbs: crumbsFor(i).map((x) => ({ name: x.name, path: x.to })),
       indexed: industryIndexed(i),
-      related: i.page.related
-        .map((s) => industry(s))
-        .filter((r) => r && industryIndexed(r))
-        .map((r) => r!),
-      // Guides 3: the public guides that link to this page link back from it (decided on the server).
-      guides: await import("@/lib/guides-server")
-        .then((m) => m.getIndustryGuides({ data: i.slug }))
-        .catch(() => []),
     };
   },
   head: ({ loaderData: d }) => {
@@ -61,7 +53,6 @@ export const Route = createFileRoute("/for/$trade")({
           provider: { "@id": ORG_LD["@id"] },
           audience: { "@type": "BusinessAudience", name: i.plural },
         },
-        ...(i.faqs ? [faqJsonLd(i.faqs)] : []),
       ],
     });
   },
@@ -69,7 +60,7 @@ export const Route = createFileRoute("/for/$trade")({
     const d = Route.useLoaderData();
     return (
       <SiteShell>
-        <IndustryPage industry={d.industry} related={d.related} guides={d.guides} />
+        <IndustryPage industry={d.industry} />
       </SiteShell>
     );
   },

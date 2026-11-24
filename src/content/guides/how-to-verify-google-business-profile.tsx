@@ -225,8 +225,7 @@ export const guide: GuideDoc = {
           Kabsi cannot verify a profile for you, and it never asks for your verification code or
           your password: only you can verify, on Google, for free. Kabsi works with a verified
           profile that you own or manage, so setup asks you first. If yours is not verified yet,
-          setup shows what Google may ask, including what to film for a video, and waits; the free
-          trial starts only once Kabsi has working access, so waiting costs no trial days.
+          setup shows what Google may ask, including what to film for a video, and waits.
         </p>
         <p>
           Once connected, Kabsi reads Google's state for your profile once a day. If Google asks you

@@ -53,11 +53,131 @@ export const HERO_EMAIL = {
   reply: "Thank you, Jess. We are glad Sam took care of you. See you next time.",
 } as const;
 
+/* ---------- SITE-3 (R-164 item 7): the home page redone to convert ---------- */
+
+/** One row of three short marks under the hero button. */
+export const HERO_MARKS = [
+  "No Google password",
+  "Nothing goes live without your yes",
+  "Cancel any time",
+] as const;
+
+/** The hero phone plays three short scenes in turn, each ending with the owner's yes. All Example. */
+export const HERO_SCENES: { name: string; turns: ChatTurn[]; done: string }[] = [
+  {
+    name: "A review reply approved",
+    turns: [
+      {
+        from: "kabsi",
+        title: "New 5-star review",
+        quote: "Lovely cut and a warm welcome. Sam took real care.",
+        lines: ["Reply ready:", "Thank you, Jess. We are glad Sam took care of you."],
+        approve: true,
+      },
+    ],
+    done: "Your reply is live on Google.",
+  },
+  {
+    name: "Saturday's hours approved",
+    turns: [
+      { from: "owner", text: "Close at 3 this Saturday" },
+      {
+        from: "kabsi",
+        title: "Saturday hours",
+        lines: ["Saturday 29 November: 9:00 to 15:00.", "Every other day stays the same."],
+        approve: true,
+      },
+    ],
+    done: "Your new hours are live on Google.",
+  },
+  {
+    name: "A photo posted",
+    turns: [
+      { from: "owner", text: "Post this", photo: true },
+      {
+        from: "kabsi",
+        title: "Post ready",
+        lines: ["Fresh colour, done in the salon this week. Book a visit any day."],
+        approve: true,
+      },
+    ],
+    done: "Your post is live on Google.",
+  },
+];
+
+/**
+ * The problem, on the page's charcoal band. Each point is what Google's own help pages say, with the link; read as raw
+ * page text on 24 Nov 2026. No numbers. A point with no Google source is left out.
+ */
+export const PROBLEM = {
+  title: "Your Google profile is working for you, or against you.",
+  points: [
+    {
+      title: "Reviews and replies shape the choice.",
+      text: "Google says positive reviews and helpful replies can help your business stand out, and that a reply shows customers you value their feedback.",
+      source: "https://support.google.com/business/answer/7091?hl=en",
+    },
+    {
+      title: "Your details can change without you.",
+      text: "Google updates profiles from what users suggest and from other sources. If you do not answer a suggested edit within 4 days, Google may publish it.",
+      source: "https://support.google.com/business/answer/3480441?hl=en",
+    },
+    {
+      title: "Wrong hours cost visits.",
+      text: "Google says your hours tell customers when they can visit, and that a profile with wrong details may not show up for searches near you.",
+      source: "https://support.google.com/business/answer/7091?hl=en",
+    },
+  ],
+  sourceLabel: "Read it on Google's help page",
+} as const;
+
+/** A week with Kabsi: four days, each a small drawn card. Example. The weekly summary arrives on Monday (facts 04). */
+export const WEEK = {
+  title: "A week with Kabsi.",
+  line: "What a normal week looks like. You spend a few taps on it.",
+  days: [
+    {
+      day: "Monday",
+      title: "A new review arrives.",
+      text: "The reply is ready. You approve it with one tap.",
+    },
+    {
+      day: "Wednesday",
+      title: "Google changed your hours.",
+      text: "Kabsi caught it and set them back after your yes.",
+    },
+    {
+      day: "Friday",
+      title: "A photo from your phone is live.",
+      text: "You sent it with two words. Kabsi wrote the post.",
+    },
+    {
+      day: "Next Monday",
+      title: "Your weekly summary arrives.",
+      text: "What was done, what waits for you, and one next step.",
+    },
+  ],
+} as const;
+
+/** The short weekly summary beside the monthly report (PROOF-2: 3 to 5 fact lines, then what waits and one next step). */
+export const WEEKLY_SUMMARY = {
+  title: "Your week, Maple Street Salon",
+  lines: [
+    "3 replies live on Google.",
+    "1 change caught on Google and set back.",
+    "1 post live on Google.",
+    "Your review link was tapped 6 times.",
+  ],
+  next: "Nothing waits for you. Next: holiday hours for December.",
+} as const;
+
 export const TELL = {
   title: "Just tell Kabsi.",
   mark: "Just tell",
   line: "No app to learn. Message Kabsi like you would message a manager.",
   voice: "Or send a voice note.",
+  voiceLine:
+    "Say it out loud. Kabsi shows you the change in writing before anything goes to Google.",
 } as const;
 
 export type TellChip = { ask: string; photo?: boolean; answer: string[]; approve?: boolean };
@@ -154,7 +274,7 @@ export const START = {
 export const PROOF = {
   title: "See exactly what was done.",
   mark: "exactly",
-  month: "Monthly report, November",
+  month: "November report",
   bands: [
     {
       name: "Work done",
@@ -247,6 +367,9 @@ export const FAQ_V31 = [
   },
 ] as const;
 
+/** Pricing's questions: the ones about paying, doing and leaving (SITE-3). */
+export const PRICING_FAQ = [1, 4, 7, 8, 9].map((i) => FAQ_V31[i]!);
+
 /** Home shows six at most (blueprint 3.9). */
 export const HOME_FAQ = [0, 1, 2, 3, 4, 6].map((i) => FAQ_V31[i]!);
 
@@ -255,9 +378,9 @@ export const CLOSING = { title: "Start with a free check.", mark: "free check." 
 /* ---------- Pricing (blueprint section 4) ---------- */
 
 export const PRICING = {
-  title: "One plan. 29 US dollars a month.",
-  mark: "29 US dollars a month.",
-  line: "Everything Kabsi does, for one location. You approve every change.",
+  title: "One plan. Everything Kabsi does.",
+  mark: "Everything Kabsi does.",
+  line: "One price for one location, with nothing extra to unlock. You approve every change.",
   included: [
     "A reply to every review",
     "Alerts for bad reviews",

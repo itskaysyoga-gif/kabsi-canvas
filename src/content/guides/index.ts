@@ -15,6 +15,9 @@ export const WEEKLY = [
   "reply-to-reviews-about-no-shows-and-cancellation-fees",
   "where-to-put-your-google-review-link-salon",
   "why-google-shows-wrong-details-for-your-salon",
+  "where-to-put-your-google-review-link",
+  "ask-for-google-reviews-from-jobber",
+  "ask-for-google-reviews-from-calendly",
 ] as const;
 
 export const ORDER = [

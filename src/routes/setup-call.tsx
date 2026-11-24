@@ -92,7 +92,7 @@ function SetupCallPage() {
               </a>
             </div>
           </div>
-          <aside className="space-y-4 rounded-card border border-line bg-surface-2 p-5 text-small text-text-2">
+          <aside className="space-y-4 rounded-card border border-line bg-surface-2 p-5 text-body text-text-2">
             <p>
               We never ask for your Google password, and we never sign in to your Google account:
               you send the Manager invitation yourself.
