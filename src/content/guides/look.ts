@@ -53,6 +53,9 @@ export const GUIDE_LOOK: Record<string, GuideLook> = {
   "reply-to-reviews-about-no-shows-and-cancellation-fees": { photo: "nail-technician", group: "Reviews", mark: "cancellation fee?" },
   "where-to-put-your-google-review-link-salon": { photo: "barber-shave", group: "Reviews", mark: "review link?" },
   "why-google-shows-wrong-details-for-your-salon": { photo: "spa-facial", group: "Problems and fixes", mark: "wrong details" },
+  "where-to-put-your-google-review-link": { photo: "cafe-barista", group: "Reviews", mark: "review link" },
+  "ask-for-google-reviews-from-jobber": { photo: "auto-garage", group: "Reviews", mark: "from Jobber" },
+  "ask-for-google-reviews-from-calendly": { photo: "physio-stretch", group: "Reviews", mark: "from Calendly" },
 };
 
 /** The look of a guide, with a safe default for a new guide that has no entry yet (the test fails before it ships). */

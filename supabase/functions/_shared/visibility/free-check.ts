@@ -239,6 +239,62 @@ export async function startCheck(d: StartDeps, i: StartInput): Promise<Started> 
   };
 }
 
+// ─── SITE-3 (free check step 4): the free check without the rank and AI work ───────────────────────────────────────────
+// The page shows the business's own rating and reviews beside 3 nearby businesses. Those 3 come from one Places Text Search
+// ("<term> near <address>"; the mask is id, name, rating and review count), inside the Places daily cap. No DataForSEO
+// call (no locate, no rank at the address, no 7 by 7 search) and no AI answer: startCheck above, collectCheck and the AI
+// jobs stay for the Visibility Map and the AI answers, switched off from this path. The 3 businesses are shown once and never
+// stored (master plan 30.10): the saved row keeps the code, the search and the place ID only, with no map ("failed": there is
+// no 7 by 7 search to wait for, so the page does not ask again).
+
+/** One business of the free check's Places Text Search answer (id, name, rating, review count). */
+export type NearbyPlace = { id?: string; displayName?: { text?: string }; rating?: number; userRatingCount?: number };
+export type NearbyDeps = {
+  /** One Places Text Search; "back_soon" past today's Places cap, null when Places did not answer. */
+  search: (query: string) => Promise<NearbyPlace[] | "back_soon" | null>;
+  code: () => string;
+};
+export type NearbyStarted =
+  | { ok: true; row: Omit<CheckRow, "id" | "created_at">; competitors: Rival[] }
+  | { ok: false; reason: "term" | "no_place" | "back_soon" | "no_answer" };
+
+/** The Text Search words: the term near the business's own address, else in its town. */
+export function nearbyQuery(term: string, i: Pick<StartInput, "address" | "city" | "name">): string {
+  const where = (i.address ?? "").trim() || (i.city ?? "").trim();
+  return where ? `${term} near ${where}` : `${term} near ${i.name}`;
+}
+
+/** Up to 3 other businesses in Latin letters (R-61), the business itself left out by place ID and by name. */
+export function nearbyRivals(places: NearbyPlace[], self: { place_id: string; name: string }): Rival[] {
+  return places
+    .filter((p) => p.id !== self.place_id)
+    .map((p) => ({ name: (p.displayName?.text ?? "").trim(), rating: typeof p.rating === "number" ? p.rating : null, reviews: typeof p.userRatingCount === "number" ? p.userRatingCount : null }))
+    .filter((r) => r.name && latinName(r.name) && !sameBusiness(r.name, self.name))
+    .slice(0, 3);
+}
+
+export async function startNearbyCheck(d: NearbyDeps, i: StartInput): Promise<NearbyStarted> {
+  if (!i.place_id) return { ok: false, reason: "no_place" };
+  // Copy 3 (30.30 item 3): the Latin rule for the visitor's own term, else the industry page's term.
+  const t = shownTerm(i.term, null, i.industry_term ?? null);
+  if (!t) return { ok: false, reason: "term" };
+  const found = await d.search(nearbyQuery(t.term, i));
+  if (found === "back_soon") return { ok: false, reason: "back_soon" };
+  if (!found) return { ok: false, reason: "no_answer" };
+  const competitors = nearbyRivals(found, { place_id: i.place_id, name: i.name });
+  return {
+    ok: true,
+    competitors,
+    row: {
+      code: d.code(), business: i.name, term: t.term, country: i.country, city: i.city,
+      self: { title: i.name, cid: null, place_id: i.place_id },
+      // No coordinates: nothing from Places but the place ID is stored, and there is no map to draw.
+      center: {} as LatLng, radius_km: 0, category: null, source: "live", state: "failed",
+      fast: { rank: null, line: "", competitors: [] }, ai: null, points: [], nearby: null,
+    },
+  };
+}
+
 export type CollectDeps = { provider: MapsProvider; name?: PlaceName; now: () => Date };
 
 /** Collect what DataForSEO has finished; when every point is in, the nearby places. Returns the changed row, or null. */

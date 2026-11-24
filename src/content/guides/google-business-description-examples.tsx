@@ -231,16 +231,13 @@ export const guide: GuideDoc = {
     body: (
       <>
         <p>
-          Profile Coach, on Essentials and Pro, lists the description among the things a complete
-          Google profile has, and shows what yours is missing. On Pro, Kabsi will write a draft
-          description of up to 750 characters from the facts you confirmed, with no links, offers or
-          contact details, once that writer is switched on. It is not switched on yet, so the screen
-          says so and nothing is written.
+          Kabsi does not write or change your business description on Google. You write it with the
+          steps above. Kabsi checks your listing every day and tells you when something on Google
+          changes.
         </p>
         <p>
           Nothing reaches Google without your approval, and Kabsi never suggests keywords for your
-          business name. Until Kabsi is connected to Google, these profile items show as not checked
-          yet. <SiteRef to="/scan">Run the free check</SiteRef>.
+          business name. <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>
     ),

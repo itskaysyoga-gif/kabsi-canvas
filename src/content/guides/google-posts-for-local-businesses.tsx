@@ -205,15 +205,13 @@ export const guide: GuideDoc = {
     body: (
       <>
         <p>
-          Kabsi prepares Google posts for you to approve: 2 a month on Essentials and one every week
-          on Pro. Each is an Update, an Offer or an Event that can have one of your own checked
-          photos and one button, and Kabsi writes it only from facts you confirmed and photos you
-          approved. An offer or an event is only one you typed in: Kabsi never invents a price, an
-          offer or a date. When it has nothing true to say, it asks you one question instead,
-          "Anything new this month? A dish, a service, an event?", and until Kabsi's own AI writing
-          is switched on you write the post in your words on Posts. You can also send a photo with a
-          line about it on WhatsApp, and Kabsi turns it into a post and shows you the exact words
-          first.
+          Kabsi prepares up to 2 Google posts a month for you to approve. Each is an Update, an
+          Offer or an Event that can have one of your own checked photos and one button, and Kabsi
+          writes it only from facts you confirmed and photos you approved. An offer or an event is
+          only one you typed in: Kabsi never invents a price, an offer or a date. When it has
+          nothing true to say, it asks you one question instead, "Anything new this month? A dish, a
+          service, an event?" You can also send a photo with a line about it on WhatsApp, and Kabsi
+          turns it into a post and shows you the exact words first.
         </p>
         <p>
           Before you see a post, and again when you approve it, Kabsi checks it: no phone numbers,
@@ -227,8 +225,8 @@ export const guide: GuideDoc = {
   },
   faqs: [
     {
-      q: "Do Google posts help my ranking?",
-      a: "Google's help pages on posts do not say they change where you come up. They describe posts as a way to keep customers informed and help them decide to visit. Post for your customers, not for a ranking.",
+      q: "Do Google posts change where my business comes up?",
+      a: "Google's help pages on posts do not say they change where you come up. They describe posts as a way to keep customers informed and help them decide to visit. Post for your customers, not to move up the results.",
     },
     {
       q: "Can I post from my phone?",

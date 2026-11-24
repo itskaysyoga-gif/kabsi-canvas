@@ -41,8 +41,10 @@ describe("Polish 2, Pricing and the free check's next step", () => {
         "signup_started",
       ].sort(),
     );
-    expect(src).toContain(
-      "Add Kabsi as a Manager on your Google profile. It takes about two minutes",
-    );
+    // SITE-2 (blueprint 3.1 section 3): the result ends with "Start 14 days free" and the trial line (scan-result.tsx),
+    // not the old Manager explanation; the events above are the same.
+    const result = readFileSync("src/components/kabsi/scan-result.tsx", "utf8");
+    expect(result).toContain("Start 14 days free");
+    expect(result).toContain("{TRIAL_LINE}");
   });
 });

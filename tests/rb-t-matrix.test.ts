@@ -1,5 +1,5 @@
 // RB-T (master plan 30.50 item 8): the scenario matrix document is written from the rows the fake-world test runs, and the
-// industry table names each of the 21 industries exactly once.
+// industry table names each of the 22 industries exactly once.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { matrixMarkdown, ROWS } from "../supabase/functions/_shared/whatsapp/rb-t.matrix";
@@ -24,9 +24,9 @@ describe("RB-T scenario matrix", () => {
 });
 
 describe("RB-T industry table", () => {
-  it("maps each of the 21 industries once, and nothing else", () => {
+  it("maps each of the 22 industries once, and nothing else", () => {
     expect(Object.keys(INDUSTRY_PACKS).sort()).toEqual(INDUSTRIES.map((i) => i.slug).sort());
-    expect(INDUSTRIES.length).toBe(21);
+    expect(INDUSTRIES.length).toBe(22);
   });
   it("clinics and health map to none", () => {
     for (const s of NO_PACK_EVER) expect(INDUSTRY_PACKS[s]).toBeNull();

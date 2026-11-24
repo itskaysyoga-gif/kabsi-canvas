@@ -4,7 +4,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { ALL_GUIDES } from "../src/content/guides";
+import { ALL_GUIDES, WEEKLY } from "../src/content/guides";
 import { PUBLISH_ALL_AT, publicGuides, weeklyAt } from "../src/content/guides/schedule";
 import { LASTMOD, SITEMAP_PAGES, sitemapXml } from "../src/lib/sitemap";
 
@@ -40,8 +40,9 @@ describe("the sitemap's lastmod", () => {
   it("gives each guide its content file's updated date, and the guides list the newest of them", () => {
     for (const g of OPEN) expect(lastmodOf(`/guides/${g.slug}`), g.slug).toBe(g.updated);
     // A weekly guide is in the sitemap, with its own updated date, only from its day.
-    const later = sitemapXml(publicGuides(ALL_GUIDES, new Date(weeklyAt(7))));
-    for (const g of ALL_GUIDES)
+    const later = sitemapXml(publicGuides(ALL_GUIDES, new Date(weeklyAt(WEEKLY.length - 1))));
+    // SITE-2: a noindex guide (the ChatGPT one) is never in the sitemap.
+    for (const g of ALL_GUIDES.filter((x) => !x.noindex))
       expect(lastmodIn(later, `/guides/${g.slug}`), g.slug).toBe(g.updated);
     const newest = OPEN.map((g) => g.updated)
       .sort()

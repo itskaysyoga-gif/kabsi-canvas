@@ -205,17 +205,14 @@ export const guide: GuideDoc = {
     body: (
       <>
         <p>
-          Profile Coach lists what your Google profile is missing, including more categories, with a
-          plain reason for each. On Pro, Kabsi can suggest up to three extra categories that belong
-          with your main one; you choose them and approve before anything reaches Google, and Google
-          gets one such change a week. Kabsi never changes your main category, and only the
-          signed-in owner can change categories at all.
+          Kabsi never changes your main category, and only the signed-in owner can change categories
+          at all. Nothing reaches Google without your yes.
         </p>
         <p>
-          Google Protection watches your main category and tells you if Google shows something
-          different from what you confirmed, and Kabsi warns that changing it can make Google ask
-          you to verify again. A check that compares your categories with nearby businesses is
-          coming, not live yet. <SiteRef to="/scan">Run the free check</SiteRef>.
+          Kabsi checks your listing every day, main category included, and tells you if Google shows
+          something different from what you confirmed. It also warns that changing your main
+          category can make Google ask you to verify again.{" "}
+          <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>
     ),

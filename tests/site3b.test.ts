@@ -66,17 +66,27 @@ describe("Site 3b: the footer, the contents links and the headings (audit E1, E2
     );
   });
   it("an industry page's cards are h3 straight under their section headline", () => {
+    // SITE-2: the page is one template (blueprint 3.1 section 5); its cards are the three benefits and the price card,
+    // each an h3 straight under an h2 section headline, and the old profile card grid is gone.
     const d = read("src/components/kabsi/d9-industry.tsx");
-    expect(d).toMatch(/<CardGrid items=\{i\.profile\} className="mt-8" level="h3" \/>/);
+    expect(d).not.toContain("i.profile");
+    // SITE-3: the band and its headline come from marketing/kit.tsx (Band id="benefits", Head id "benefits-h").
+    expect(d).toMatch(/<Band id="benefits"/);
+    expect(d).toMatch(/<Head id="benefits"/);
+    expect(d).toContain('<h3 className="text-h3">{x.title}</h3>');
   });
 });
 
 describe("Site 3b: one reassurance under the search on /for and the industry pages (audit E8, E9)", () => {
   const d = read("src/components/kabsi/d9-industry.tsx");
-  it("the hero boxes and the closing say the trial line only", () => {
+  it("the hero boxes and the closing say the free check line only, and the price card says the trial line (SITE-2)", () => {
     expect(d).not.toContain("trialSeparate");
-    expect(d.match(/note=\{TRIAL_LINE\}/g)).toHaveLength(3);
+    // The industry page's two boxes and /for's two boxes (blueprint 3.1 section 3).
+    expect(d.match(/note=\{FREE_CHECK_NOTE\}/g)).toHaveLength(4);
     expect(d).toMatch(/keywordHint=\{false\}/);
+    // SITE-3: the price card is Home's and Pricing's PriceCard, which shows TRIAL_LINE beside its button.
+    expect(d).toContain("<PriceCard");
+    expect(read("src/components/marketing/v31-data.ts")).toContain("terms: TRIAL_LINE");
     expect(TRIAL_LINE).toBe(OFFER_TRIAL_LINE); // SITE-1: blueprint 3.1, src/lib/offer.ts
   });
 });

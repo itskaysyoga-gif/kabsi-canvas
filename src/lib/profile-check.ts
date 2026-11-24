@@ -44,6 +44,12 @@ export type Snapshot = {
   cached: boolean;
   /** Scan 2 (master plan 30.29): the town, which the free check's AI question names. Missing from older answers. */
   area?: string | null;
+  /** SITE-3: only on a fresh check. Whether the website opened when Kabsi looked just now; booking is null (public
+   * data has no booking link). */
+  links?: { website: "loads" | "fails" | null; booking: "loads" | "fails" | null };
+  /** SITE-3: only on a fresh check. The newest review with words (cut to about 280 characters) and the reply Kabsi
+   * would write for it (a fixed template, not the AI reply). `author` is Google's name for the reviewer, for attribution. */
+  latest_review?: { stars: number; text: string; reply: string; author: string | null };
 };
 
 export const TONE_LABEL: Record<Tone, string> = {

@@ -202,15 +202,12 @@ export const guide: GuideDoc = {
       <>
         <p>
           Kabsi cannot remove a review, does not report one for you and never promises that Google
-          will remove it. On Pro, Report this review on a review in Kabsi opens a guide: Google's
-          content categories in plain words, an evidence checklist, the steps and a link to Google's
-          Reviews Management Tool, and a place to record what happened, with one appeal. Kabsi
-          reminds you a week after your last update.
+          will remove it. Only you can report a review, on Google.
         </p>
         <p>
-          On every plan, Kabsi drafts a calm reply for each new review, except a high-risk review,
-          which gets no draft and a short checklist instead. Nothing goes on Google until you
-          approve it. <SiteRef to="/scan">Run the free check</SiteRef>.
+          Kabsi drafts a calm reply for each new review, except a high-risk review, which gets no
+          draft and a short checklist instead. Nothing goes on Google until you approve it.{" "}
+          <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>
     ),

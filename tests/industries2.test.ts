@@ -3,6 +3,7 @@
 // trade cannot ship without them. The long reading blocks are exempt (30.29 item 2, B-014).
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { BLUEPRINT } from "../src/content/industries/blueprint";
 import { INDUSTRIES, industriesAtoZ, industry, industryIndexed } from "../src/content/industries";
 
 const words = (s: string) => s.split(/\s+/).filter(Boolean).length;
@@ -60,16 +61,26 @@ describe("every industry page on Design 9 (Industries 2)", () => {
     }
   });
 
-  it("has five trade questions, three jobs, an Example watch, post and AI answer, and six related trades (Industries 3)", () => {
-    for (const i of pages) {
-      expect(i.faqs, i.slug).toHaveLength(5);
-      expect(i.page.jobs, i.slug).toHaveLength(3);
-      expect(i.page.watch.fields.length, i.slug).toBeGreaterThanOrEqual(4);
-      expect(i.page.post.quote, i.slug).toBeTruthy();
-      expect(i.page.ai.question.endsWith("?"), i.slug).toBe(true);
-      for (const r of i.page.related) {
-        expect(industry(r), `${i.slug} related ${r}`).toBeDefined();
-        expect(r, i.slug).not.toBe(i.slug);
+  // SITE-2 (blueprint 3.1 section 5): the page is one template; the example review, Kabsi's reply and the one sourced
+  // Google fact are the only trade parts, and they live in BLUEPRINT. The five questions, the three jobs, the watch, the
+  // post, the AI answer and the six related trades of Industries 3 are gone from the page.
+  it("has a blueprint entry for every industry: a 1 to 5 star review, a reply and a sourced Google fact", () => {
+    expect(Object.keys(BLUEPRINT).sort()).toEqual(INDUSTRIES.map((i) => i.slug).sort());
+    const NO_DASH_BANG_ARABIC = /[\u2012-\u2015\u2212!\u0600-\u06FF]/;
+    for (const i of INDUSTRIES) {
+      const b = BLUEPRINT[i.slug]!;
+      expect([1, 2, 3, 4, 5], i.slug).toContain(b.review.stars);
+      expect(b.review.name.length, i.slug).toBeGreaterThan(1);
+      expect(b.review.text.length, i.slug).toBeGreaterThan(20);
+      expect(b.reply.length, i.slug).toBeGreaterThan(20);
+      expect(b.fact.text.length, i.slug).toBeGreaterThan(20);
+      expect(b.fact.source.title.length, i.slug).toBeGreaterThan(5);
+      expect(b.fact.source.url, i.slug).toMatch(
+        /^https:\/\/(support\.google\.com|business\.google\.com)\//,
+      );
+      for (const t of [b.review.name, b.review.text, b.reply, b.fact.text, b.fact.source.title]) {
+        expect(NO_DASH_BANG_ARABIC.test(t), `${i.slug}: ${t}`).toBe(false);
+        for (const n of NEVER) expect(t, `${i.slug}: ${n}`).not.toMatch(n);
       }
     }
   });
@@ -133,7 +144,7 @@ describe("every industry page on Design 9 (Industries 2)", () => {
   it("puts the highlight in one shared component, used by the hero title, the industry pages and /for", () => {
     expect(readFileSync("src/components/kabsi/d9-title.tsx", "utf8")).toContain("<Highlight>");
     const page = readFileSync("src/components/kabsi/d9-industry.tsx", "utf8");
-    expect(page).toContain("<Marked text={p.h1} mark={p.mark} />");
+    expect(page).toContain('<Marked text={h1} mark="Taken care of." />');
     expect(page).toContain("<Marked text={FOR_HERO.h1} mark={FOR_HERO.mark} />");
     expect(readFileSync("DESIGN.md", "utf8")).toContain("The highlight bar");
   });

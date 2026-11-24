@@ -203,12 +203,12 @@ export const guide: GuideDoc = {
     body: (
       <>
         <p>
-          Get Reviews is free for every business, with or without a plan: a short review link and a
-          QR code that open your own Google review page, and a Send review link button so staff can
-          send one ready message from their own WhatsApp after a visit. On both plans you also get a
-          counter card and a table card ready to print. Every customer sees the same page: no rating
-          question, no filtering of unhappy customers, no reward, and Kabsi records nothing about
-          who sent a link to whom, so there are no targets or league tables.
+          Get Reviews gives you a short review link and a QR code that open your own Google review
+          page, and a Send review link button so staff can send one ready message from their own
+          WhatsApp after a visit. You also get a counter card and a table card ready to print. Every
+          customer sees the same page: no rating question, no filtering of unhappy customers, no
+          reward, and Kabsi records nothing about who sent a link to whom, so there are no targets
+          or league tables.
         </p>
         <p>
           Kabsi counts how often your link was opened, never who opened it, and an open is not a

@@ -55,6 +55,11 @@ export type GuideDoc = {
   related: string[];
   /** One line for llms.txt. */
   summary: string;
+  /**
+   * SITE-2: a guide about a feature that is switched off (AI answers, the visibility map, partners). The page still
+   * answers, with noindex, and it leaves the sitemap, llms.txt, Nora's page list and the guides list.
+   */
+  noindex?: true;
 };
 
 /** What every page that is not the guide itself needs: no body, so it can travel from the server as data. */
@@ -71,4 +76,5 @@ export type GuideMeta = Pick<
   | "related"
   | "summary"
   | "faqs"
+  | "noindex"
 > & { minutes: number };

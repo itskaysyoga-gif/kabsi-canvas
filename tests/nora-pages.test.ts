@@ -27,7 +27,7 @@ const slugOf = (p: NoraPage) => p.path.split("/").pop();
 
 describe("the list of public pages", () => {
   it("holds every public guide and every indexed industry page with its title, address, summary and question", () => {
-    expect(live.filter((p) => p.kind === "guide")).toHaveLength(27);
+    expect(live.filter((p) => p.kind === "guide")).toHaveLength(26);
     expect(live.filter((p) => p.kind === "industry")).toHaveLength(
       INDUSTRIES.filter(industryIndexed).length,
     );
@@ -52,8 +52,8 @@ describe("the list of public pages", () => {
     expect(before.map(slugOf)).not.toContain("a-future-guide");
     const day = publicPagesOf([...ALL_GUIDES, future], [], new Date("2026-11-16T06:00:00Z"));
     expect(day.map(slugOf)).toContain("a-future-guide");
-    // Before the one publish moment only guide 1 and the earlier guides are public: eight guides.
-    expect(publicPagesOf(ALL_GUIDES, [], new Date("2026-11-05T12:00:00Z"))).toHaveLength(8);
+    // Before the one publish moment only guide 1 and the earlier guides are public: seven guides (the ChatGPT guide is noindex and unlisted, SITE-2).
+    expect(publicPagesOf(ALL_GUIDES, [], new Date("2026-11-05T12:00:00Z"))).toHaveLength(7);
   });
 
   it("is the same set as the sitemap: its own route, built from publicGuides and the indexed industry pages", () => {

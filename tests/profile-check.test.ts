@@ -31,12 +31,12 @@ describe("Free Profile Check, status flags and WhatsApp (lane R sync, item D)", 
     const route = read("src/routes/google-profile-check.tsx");
     expect(route).toContain("<FreeCheckStart />");
     expect(route).toContain("${SITE_URL}/scan");
-    // The free check result shows the profile check's first red flag, else its first amber one, as the main finding
-    // (Scan 3: the shared scan-words.ts mainFinding, used by scan-live.tsx).
+    // The shared scan-words.ts still picks the profile check's first red flag, else its first amber one (the saved report
+    // and the email use it). SITE-2 (blueprint 3.1 section 3): the free check result no longer has a main finding.
     expect(read("supabase/functions/_shared/visibility/scan-words.ts")).toMatch(
       /x\.tone === "danger"/,
     );
-    expect(read("src/components/kabsi/scan-live.tsx")).toContain("mainFinding(s.flags)");
+    expect(read("src/components/kabsi/scan-live.tsx")).not.toContain("mainFinding(");
   });
 
   it("no fear claim, statistic or score wording on the check screens", () => {
@@ -93,6 +93,9 @@ describe("Free Profile Check (P0.4-01)", () => {
       ]),
     );
     expect(mask.toLowerCase()).not.toContain("review");
+    // SITE-3 (free check step 4), changed on purpose: only the check's own details call adds the reviews field, for the
+    // reply Kabsi would write for the latest review (shown once, never stored). The email and WhatsApp copies keep the mask above.
+    expect(live).toMatch(/SNAPSHOT_CHECK_FIELD_MASK = `\$\{SNAPSHOT_FIELD_MASK\},reviews`;/);
     const fn =
       read("supabase/functions/_shared/profile-snapshot.ts") +
       read("supabase/functions/profile-snapshot/index.ts");

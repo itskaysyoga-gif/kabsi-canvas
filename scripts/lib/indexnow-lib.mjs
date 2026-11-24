@@ -26,6 +26,7 @@ export async function guidePublishTimes(dir = "src/content/guides") {
     let at;
     if (expr === "FIRST_PUBLISH") at = sched.FIRST_PUBLISH;
     else if (expr === "PUBLISH_ALL_AT") at = sched.PUBLISH_ALL_AT;
+    else if (expr === "SITE3_PUBLISH_AT") at = sched.SITE3_PUBLISH_AT;
     else if (/^weeklyAt\((\d+)\)$/.test(expr))
       at = sched.weeklyAt(Number(/\((\d+)\)/.exec(expr)[1]));
     else if (/^"[0-9T:Z-]+"$/.test(expr)) at = expr.slice(1, -1);

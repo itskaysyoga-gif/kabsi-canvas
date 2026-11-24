@@ -29,7 +29,11 @@ describe("Fix 6: the industry pages' photo to post Example is the Look 2 message
     expect(visual).not.toContain("PictureButtons");
     expect(visual).not.toContain("p.ready");
     expect(visual).not.toContain("Where the post is");
-    expect(read("src/components/kabsi/d9-industry.tsx")).toContain("business: i.example.business");
+    // SITE-2: the industry pages are one template with one example review and reply (blueprint 3.1 section 5), so they
+    // no longer draw the photo to post Example; the example still names the page's own invented business.
+    const industryPage = read("src/components/kabsi/d9-industry.tsx");
+    expect(industryPage).not.toContain("PhotoToPost");
+    expect(industryPage).toContain("i.example.business");
   });
 });
 

@@ -24,7 +24,11 @@
 // fourth is refused); 20 searches an hour per visitor; the Places kill switch (the daily cap, "Back soon") lives in the
 // Google layer. Nothing from Places is stored but the place ID (master plan 30.10): the check, its email and its
 // WhatsApp copy each read Google live. A visitor is a salted hash of the IP, never the IP itself.
-// Every Places request carries a field mask and none asks for reviews (tests hold that).
+// Every Places request carries a field mask. Only the "check" action's details call asks for reviews (SITE-3: the reply
+// Kabsi would write for the latest review, free-reply.ts); the review is shown once in the answer and never stored. The
+// email, WhatsApp, search and suggestion calls never ask for them (tests hold that).
+// SITE-3: the "check" answer also says whether the website opens now (links.website, one look with a 4 second limit through
+// the link watch's safe fetch); booking stays null, as the public Places data has no booking link.
 import type { AutocompleteResponse, Place } from "./google/types.ts";
 import type { PlacesResult } from "./google/places/live.ts";
 import type { EmailContent } from "./email/template.ts";
@@ -32,6 +36,7 @@ import { type CoachRow, freeChecklist } from "./coach/catalog.ts";
 import { FREE_TOOL_BUSY } from "./free-tool-busy.ts";
 import { areaOfPlace, ownName } from "./visibility/area.ts";
 import { CODE_RE, NOT_PART, type ReportParts } from "./visibility/report.ts";
+import { type LatestReview, latestReview } from "./free-reply.ts";
 
 export const TIPS_CONSENT_TEXT = "Send me tips on managing my Google profile";
 /** The words next to the WhatsApp tick. Keep equal to WHATSAPP_CONSENT_TEXT in src/lib/profile-check.ts (a test checks it). */
@@ -65,7 +70,12 @@ export type Snapshot = {
   has_photos: boolean; photo_count: number; flags: Flag[]; checklist: CoachRow[]; cached: boolean;
   /** Scan 2 (30.29): the town, for the free check's AI question; from the address, inside the same field mask. */
   area?: string | null;
+  /** SITE-3: only on the "check" answer. Whether the website opens now; booking is null (public data has no booking link). */
+  links?: { website: LinkNow; booking: LinkNow };
+  /** SITE-3: only on the "check" answer. The newest review with words and the reply Kabsi would write (a template, no AI). */
+  latest_review?: LatestReview;
 };
+export type LinkNow = "loads" | "fails" | null;
 
 const ORDER: Record<Tone, number> = { danger: 0, warning: 1, neutral: 2 };
 
@@ -74,7 +84,7 @@ const ORDER: Record<Tone, number> = { danger: 0, warning: 1, neutral: 2 };
 // connects. Nothing here widens the Places field mask (tests hold the mask). Polish 2 (lane R, 3 Nov 2026): each finding's
 // next step is one Kabsi can do today; a phone, website, category or open status Kabsi cannot set for the owner names
 // the owner's own step and what Kabsi then does (the daily check, the Profile Coach).
-export function flags(s: Omit<Snapshot, "flags" | "checklist" | "cached" | "area">): Flag[] {
+export function flags(s: Omit<Snapshot, "flags" | "checklist" | "cached" | "area" | "links" | "latest_review">): Flag[] {
   const out: Flag[] = [];
   if (s.business_status === "CLOSED_PERMANENTLY") {
     out.push({ tone: "danger", fact: "Google shows this business as permanently closed.", action: "If that is wrong, Kabsi shows you the steps to ask Google to correct it." });
@@ -133,7 +143,10 @@ export type Deps = {
   searchText: (key: string, q: string, max: number, mask: string) => Promise<PlacesResult<{ places?: Place[] }>>;
   /** Check 2: Places Autocomplete (New), counted by its own daily cap (places_take 'autocomplete'). */
   autocomplete: (key: string, input: string, sessionToken: string) => Promise<PlacesResult<AutocompleteResponse>>;
-  getSnapshotPlace: (key: string, placeId: string, sessionToken?: string) => Promise<PlacesResult<Place>>;
+  /** `reviews`: only the "check" action asks for them (SITE-3). */
+  getSnapshotPlace: (key: string, placeId: string, sessionToken?: string, o?: { reviews?: boolean }) => Promise<PlacesResult<Place>>;
+  /** SITE-3: does this website open now (link-watch.ts linkNow)? Left out, the answer has no links part. */
+  linkNow?: (url: string) => Promise<"loads" | "fails">;
   /** The clock in milliseconds (tests move it); the default is Date.now. */
   nowMs?: () => number;
   saveEmail: (row: { email: string; place_id: string; tips_opt_in: boolean; consent_text: string; page: string }) => Promise<void>;
@@ -235,6 +248,17 @@ export function whatsappParams(s: Snapshot, extra?: Extra | "none"): [string, st
   return [ownName(s.name).slice(0, 120), (tail ? `${head} ${tail}` : head).slice(0, 900)];
 }
 
+/**
+ * SITE-3: the check's two extra parts. The latest review and its reply come from the same Places answer (nothing is
+ * stored); the website is looked at now. A link look that throws is "fails", never an error for the visitor.
+ */
+export async function withExtras(d: Pick<Deps, "linkNow">, s: Snapshot, p: Place): Promise<Snapshot> {
+  const latest = latestReview(p);
+  const site = s.website && /^https?:\/\//i.test(s.website) ? s.website : null;
+  const links = d.linkNow ? { website: site ? await d.linkNow(site).catch(() => "fails" as const) : null, booking: null } : undefined;
+  return { ...s, ...(links ? { links } : {}), ...(latest ? { latest_review: latest } : {}) };
+}
+
 export function makeHandler(d: Deps) {
   const reply = (body: unknown, status = 200) =>
     new Response(JSON.stringify(body), { status, headers: { ...d.cors, "content-type": "application/json" } });
@@ -308,7 +332,7 @@ export function makeHandler(d: Deps) {
         }
         // Check 2: the suggestions' session token, if the page has one, ends the Autocomplete session with this call.
         const sessionToken = str(b.session_token);
-        const r = await d.getSnapshotPlace(key, placeId, SESSION_RE.test(sessionToken) ? sessionToken : undefined);
+        const r = await d.getSnapshotPlace(key, placeId, SESSION_RE.test(sessionToken) ? sessionToken : undefined, { reviews: true });
         if (r.backSoon) {
           await d.giveBack(quotaKey).catch(() => {});
           return fail("back_soon", FREE_TOOL_BUSY, 503);
@@ -318,7 +342,7 @@ export function makeHandler(d: Deps) {
           if (r.status === 404) return fail("not_found", "We could not find that business. Search again.", 404);
           throw new Error(`places ${r.status}`);
         }
-        return reply({ snapshot: buildSnapshot(placeId, r.data, false) });
+        return reply({ snapshot: await withExtras(d, buildSnapshot(placeId, r.data, false), r.data) });
       }
 
       // Scan 2 (30.29 item B): "Send me this report" may carry the free check's code. It is read only by that exact code,

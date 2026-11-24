@@ -5,7 +5,8 @@
 // https://developers.google.com/maps/documentation/places/web-service/place-autocomplete
 //
 // Cost guard (K-100, migration 20261012100000_places_cost_guard.sql):
-//   * every request but Autocomplete carries a field mask (callers pass it; never the reviews field);
+//   * every request but Autocomplete carries a field mask (callers pass it); the reviews field only in the free check's
+//     one details call (SITE-3, SNAPSHOT_CHECK_FIELD_MASK below), never anywhere else;
 //   * nothing from Places is stored except the place ID (master plan 30.10, Maps Platform Terms 3.2.3(b)): every
 //     Place Details read goes to Google, and nothing is cached;
 //   * every request that reaches Google is first counted by places_take(); past the day's cap it is not sent and the
@@ -56,7 +57,7 @@ export async function getPlace(key: string, placeId: string, fieldMask: string, 
 
 // The free Profile Check (P0.4-01, K-100): the one field mask the snapshot ever sends. Rating, review count, hours,
 // open status, phone, website, category and photo presence, plus the name and address to show. The reviews field is
-// never in it (it moves the whole call to the 30 dollar per 1,000 tier); tests hold that.
+// never in it (it moves the whole call to a higher tier); only the free check's own call adds it (SITE-3, below).
 //
 // Copy 3 (master plan 30.30 item 4): addressComponents joins the mask so the town comes from Google's own address parts. It is
 // a Place Details Essentials field (developers.google.com/maps/documentation/places/web-service/data-fields, read 5 Nov 2026)
@@ -65,7 +66,13 @@ export async function getPlace(key: string, placeId: string, fieldMask: string, 
 export const SNAPSHOT_FIELD_MASK =
   "id,displayName,formattedAddress,addressComponents,primaryTypeDisplayName,businessStatus,rating,userRatingCount,regularOpeningHours,currentOpeningHours,nationalPhoneNumber,websiteUri,photos";
 
+// SITE-3 (free check step 4): the result page shows the reply Kabsi would write for the business's latest review, so the
+// check's own details call (and only that one) adds the reviews field. It moves that one call from Place Details Enterprise
+// to Enterprise + Atmosphere; it is still one call per check, inside the same daily cap. The reviews are read to pick the
+// newest one with text, shown once in the answer and never stored. The email and WhatsApp copies keep SNAPSHOT_FIELD_MASK.
+export const SNAPSHOT_CHECK_FIELD_MASK = `${SNAPSHOT_FIELD_MASK},reviews`;
+
 // Check 2: with the session token of the suggestions the call ends the Autocomplete session.
-export const getSnapshotPlace = (key: string, placeId: string, sessionToken?: string): Promise<PlacesResult<Place>> =>
-  getPlace(key, placeId, SNAPSHOT_FIELD_MASK, sessionToken);
+export const getSnapshotPlace = (key: string, placeId: string, sessionToken?: string, o: { reviews?: boolean } = {}): Promise<PlacesResult<Place>> =>
+  getPlace(key, placeId, o.reviews ? SNAPSHOT_CHECK_FIELD_MASK : SNAPSHOT_FIELD_MASK, sessionToken);
 

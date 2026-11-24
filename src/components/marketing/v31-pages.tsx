@@ -1,26 +1,49 @@
-// How it works, FAQ, About and Security on blueprint 3.1 (SITE-1, R-163): short pages that say the same thing as Home,
-// each ending with the free check. Words in v31-data.ts.
+// How it works, FAQ, About and Security on blueprint 3.1, on SITE-3's one section system (./kit.tsx): the H1 is the
+// only yellow bar, the body is the reading size, three backgrounds at most, and each page ends on the charcoal band with
+// the free check. Words in v31-data.ts.
 import { YellowNumber } from "@/components/kabsi/highlight";
 import { Faq } from "@/components/kabsi/ui";
 import { HOME_HERO, ABOUT, FAQ_V31, HOW, SECURITY, TRUST } from "./v31-data";
-import { CheckBox, ClosingBand, PageTop, Sec, Ticks, TrustLines } from "./v31";
+import { Band, CheckBox, Head, Lead, PageTop, Ticks } from "./kit";
+import { ClosingBand, ReportSample, TrustLines } from "./v31";
 
 export function V31How() {
   return (
     <>
-      <PageTop title={HOW.title} mark={HOW.mark} line={HOW.line} />
-      <section aria-label="The five steps" className="border-t border-line bg-surface-1">
-        <ol className="container-kb grid gap-6 py-12 sm:grid-cols-2 sm:py-20 lg:grid-cols-5 lg:gap-8">
+      <PageTop title={HOW.title} mark={HOW.mark} line={HOW.line}>
+        <CheckBox id="how-scan" under={HOME_HERO.under} className="mt-8 max-w-[36rem]" />
+      </PageTop>
+      <Band id="steps" tone="white" label="The five steps">
+        <ol className="grid gap-x-12 gap-y-10 md:grid-cols-2 xl:grid-cols-3">
           {HOW.steps.map((s, i) => (
-            <li key={s.title}>
+            <li key={s.title} className="flex gap-4">
               <YellowNumber n={i + 1} />
-              <h2 className="mt-3 text-title">{s.title}</h2>
-              <p className="mt-1 text-small text-text-2">{s.text}</p>
+              <div>
+                <h2 className="text-h3">{s.title}</h2>
+                <p className="mt-2 text-read text-text-2">{s.text}</p>
+              </div>
             </li>
           ))}
+          <li className="flex gap-4 md:col-span-2 xl:col-span-1">
+            <div className="border-s-4 border-kb-yellow ps-4">
+              <h2 className="text-h3">Or just tell Kabsi.</h2>
+              <p className="mt-2 text-read text-text-2">{HOW.ask}</p>
+            </div>
+          </li>
         </ol>
-      </section>
-      <Sec id="ask" title="Or just tell Kabsi." mark="just tell" line={HOW.ask} />
+      </Band>
+      <Band
+        id="report"
+        tone="ivory"
+        inner="lg:grid lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center lg:gap-16"
+      >
+        <Head
+          id="report"
+          title="See what was done."
+          line="A short summary every week and a full report every month: work done, what Kabsi found and what Google shows, kept apart."
+        />
+        <ReportSample className="mt-8 lg:mt-0" />
+      </Band>
       <ClosingBand under={HOME_HERO.under} />
     </>
   );
@@ -33,9 +56,10 @@ export function V31Faq() {
         title="Questions owners ask."
         mark="owners ask."
         line="Short answers. If yours is not here, write to hello@kabsi.co and a person answers."
-      >
-        <Faq items={FAQ_V31.map((f) => ({ q: f.q, a: f.a }))} className="mt-8 max-w-[44rem]" />
-      </PageTop>
+      />
+      <Band id="answers" tone="white" label="Questions and answers">
+        <Faq items={FAQ_V31.map((f) => ({ q: f.q, a: f.a }))} />
+      </Band>
       <ClosingBand under={HOME_HERO.under} />
     </>
   );
@@ -45,19 +69,30 @@ export function V31About() {
   return (
     <>
       <PageTop title={ABOUT.title} mark={ABOUT.mark} line={ABOUT.line}>
-        <CheckBox id="about-scan" under={HOME_HERO.under} className="mt-6 max-w-[36rem]" />
+        <CheckBox id="about-scan" under={HOME_HERO.under} className="mt-8 max-w-[36rem]" />
       </PageTop>
-      <Sec split id="why" title="Why Kabsi exists." mark="exists." tone="card">
-        <ul className="mt-5 max-w-[38rem] space-y-2 text-body text-text-1">
-          {ABOUT.why.map((l) => (
-            <li key={l}>{l}</li>
-          ))}
-        </ul>
-        <p className="mt-5 max-w-[38rem] text-body text-text-2">{ABOUT.who}</p>
-      </Sec>
-      <Sec split id="promise" title={TRUST.title} mark={TRUST.mark}>
+      <Band
+        id="why"
+        tone="white"
+        inner="lg:grid lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16"
+      >
+        <Head id="why" title="Why Kabsi exists." />
+        <div className="mt-6 lg:mt-0">
+          <ul className="space-y-3">
+            {ABOUT.why.map((l) => (
+              <li key={l} className="max-w-[60ch] text-read text-text-1">
+                {l}
+              </li>
+            ))}
+          </ul>
+          <Lead className="mt-6">{ABOUT.who}</Lead>
+        </div>
+      </Band>
+      <Band id="promise" tone="ivory">
+        <Head id="promise" title={TRUST.title} />
         <TrustLines />
-      </Sec>
+      </Band>
+      <ClosingBand under={HOME_HERO.under} />
     </>
   );
 }
@@ -66,21 +101,28 @@ export function V31Security() {
   return (
     <>
       <PageTop title={SECURITY.title} mark={SECURITY.mark} line={SECURITY.line}>
-        <CheckBox id="security-scan" under={HOME_HERO.under} className="mt-6 max-w-[36rem]" />
+        <CheckBox id="security-scan" under={HOME_HERO.under} className="mt-8 max-w-[36rem]" />
       </PageTop>
-      <Sec split id="answers" title="In plain words." mark="plain words." tone="card">
-        <dl className="mt-6 grid gap-4 sm:grid-cols-2">
+      <Band id="answers" tone="white">
+        <Head id="answers" title="In plain words." />
+        <dl className="mt-8 grid gap-x-12 gap-y-8 md:grid-cols-2">
           {SECURITY.answers.map((x) => (
-            <div key={x.q} className="rounded-card border border-line bg-surface-0 p-4">
-              <dt className="text-title font-bold">{x.q}</dt>
-              <dd className="mt-1 text-small text-text-2">{x.a}</dd>
+            <div key={x.q} className="border-t border-line pt-5">
+              <dt className="text-h3">{x.q}</dt>
+              <dd className="mt-2 text-read text-text-2">{x.a}</dd>
             </div>
           ))}
         </dl>
-      </Sec>
-      <Sec split id="kept" title={SECURITY.stored.title + "."} mark="keeps.">
-        <Ticks items={SECURITY.stored.items} className="mt-5 max-w-[38rem]" />
-      </Sec>
+      </Band>
+      <Band
+        id="kept"
+        tone="ivory"
+        inner="lg:grid lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16"
+      >
+        <Head id="kept" title={SECURITY.stored.title + "."} />
+        <Ticks items={SECURITY.stored.items} className="mt-6 lg:mt-0" />
+      </Band>
+      <ClosingBand under={HOME_HERO.under} />
     </>
   );
 }

@@ -220,19 +220,16 @@ export const guide: GuideDoc = {
     body: (
       <>
         <p>
-          Once Kabsi is a Manager on your profile, Profile Coach lists what a complete Google
-          profile has and what yours is missing, services and profile details included, with a
-          reason for each. Kabsi does not edit services, attributes or the booking link on Google
-          today: you add those yourself, and Kabsi checks your details every day and tells you when
-          something on Google changes.
+          Once Kabsi is a Manager on your profile, Kabsi does not edit services, attributes or the
+          booking link on Google today: you add those yourself, and Kabsi checks your details every
+          day and tells you when something on Google changes.
         </p>
         <p>
           Five days before a public holiday Kabsi asks what you will do, normal hours, closed or
-          custom, and sets special hours once you say yes. It drafts posts (2 a month on Essentials,
-          every week on Pro), checks each photo for light, focus and size before it goes up, and
-          prepares a reply for every new review that thanks a stylist only when the review names
-          someone on your team list. Nothing goes on Google until you approve it.{" "}
-          <SiteRef to="/scan">Run the free check</SiteRef>.
+          custom, and sets special hours once you say yes. It prepares up to 2 posts a month, checks
+          each photo for light, focus and size before it goes up, and prepares a reply for every new
+          review that thanks a stylist only when the review names someone on your team list. Nothing
+          goes on Google until you approve it. <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>
     ),

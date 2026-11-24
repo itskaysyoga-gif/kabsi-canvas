@@ -11,7 +11,8 @@ import {
 } from "./link-watch.ts";
 
 // A name's addresses over DNS over HTTPS: the Edge runtime has no resolver of its own to rely on (the same as the website check).
-async function resolveHost(host: string): Promise<string[]> {
+// SITE-3: the free check's link look uses it too (profile-snapshot/index.ts).
+export async function resolveHost(host: string): Promise<string[]> {
   const out: string[] = [];
   for (const type of ["A", "AAAA"]) {
     const r = await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(host)}&type=${type}`, { headers: { accept: "application/dns-json" } });

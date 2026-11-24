@@ -6,25 +6,23 @@
 import { useMemo, useState } from "react";
 import { ArrowRight, Check, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { MAIN_CTA, TRIAL_LINE } from "@/lib/site";
-import { industriesAtoZ, type Card, type Industry } from "@/content/industries";
-import { GuideImage, TopicPill } from "@/components/marketing/guide-photo";
-import { guideLook } from "@/content/guides/look";
+import { NOT_AFFILIATED } from "@/lib/site";
+import { industriesAtoZ, type Industry } from "@/content/industries";
+import { BLUEPRINT, READ } from "@/content/industries/blueprint";
 import { ExampleBadge, Faq, KabsiMark } from "./ui";
+import { Band, Head, Lead, MarkRow } from "@/components/marketing/kit";
+import { HERO_MARKS, HOME_FAQ } from "@/components/marketing/v31-data";
+import { PriceCard, TrustLines } from "@/components/marketing/v31";
 import { Img } from "./photos";
 import { ScanBox } from "./scan-box";
 import { SiteLink } from "./site-link";
-import { Closing } from "./closing";
 import { Marked } from "./highlight";
 import { YellowLabel, YellowNumber } from "./d9-hero";
-import { AiAnswer, PhotoToPost } from "./d9-home-lower";
 
 const linkCls =
   "press inline-flex min-h-11 items-center gap-1.5 font-semibold text-text-1 underline decoration-text-3 decoration-1 underline-offset-4 hover:decoration-text-1";
 /** Design 9's section rhythm (as Home). */
 const sectionY = "py-12 sm:py-18 lg:py-24";
-/** "a salon", "an optician": the article that goes before a trade name. */
-const withArticle = (name: string) => `${/^[aeiou]/i.test(name) ? "an" : "a"} ${name}`;
 
 function Arrow() {
   return <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />;
@@ -54,130 +52,182 @@ function Headline({
   );
 }
 
-/* ---------- One trade ---------- */
+/** The line under the free check box (blueprint 3.1 section 3). */
+export const FREE_CHECK_NOTE = "Free check. No card. 20 seconds.";
 
-export function IndustryPage({
-  industry: i,
-  related,
-  guides = [],
-}: {
-  industry: Industry;
-  related: Industry[];
-  /** Industries 3: three public guides chosen by the page's jobs, decided on the server (getIndustryGuides). */
-  guides?: ReadGuide[];
-}) {
-  const p = i.page;
-  return (
-    <>
-      <TradeHero industry={i} />
-      <HowItWorks industry={i} />
-      <Watch industry={i} />
-      <PhotoToPost
-        example={{
-          photo: i.photos[1],
-          owner: p.post.owner,
-          quote: p.post.quote,
-          business: i.example.business,
-        }}
-        intro={<PhotoCards industry={i} />}
-      />
-      <Jobs industry={i} />
-      <ShowUp industry={i} />
-      <Reading industry={i} />
-      <PlanLine industry={i} />
-      {i.faqs && (
-        <section aria-labelledby="tfaq-h" className="border-t border-line">
-          <div
-            className={cn("container-kb grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16", sectionY)}
-          >
-            <Headline id="tfaq-h" text={`Questions ${i.name} owners ask`} mark="Questions" />
-            <div>
-              <Faq items={i.faqs} />
-              {/* Industry 1 (R-144): price, trial, cancelling, approvals and data are answered once, on /faq. */}
-              <SiteLink to="/faq" className={cn(linkCls, "mt-4 text-body")}>
-                More questions
-                <Arrow />
-              </SiteLink>
-            </div>
-          </div>
-        </section>
-      )}
-      <ReadNext guides={guides} related={related} plural={i.plural} />
-      <Closing keyword={i.keyword} industry={i.slug} marked />
-    </>
-  );
-}
+/** The three benefits, the same on every page (blueprint 3.1 section 2). */
+const BENEFITS = [
+  {
+    title: "Every review answered",
+    text: "A reply written in your voice for every review, and an alert the moment a bad one arrives.",
+  },
+  {
+    title: "Your listing protected",
+    text: "Hours, phone, website and booking link checked every day. One tap to fix what changed.",
+  },
+  {
+    title: "Proof of the work",
+    text: "A short summary every week and a full report every month.",
+  },
+] as const;
+
+const TRUST = [
+  "No Google password.",
+  "Nothing is published without your yes.",
+  "Kabsi never contacts your customers.",
+  NOT_AFFILIATED,
+] as const;
+
+/* ---------- One trade: the one template (SITE-2, blueprint 3.1 section 5) ---------- */
 
 /**
- * Industry 1 (R-144): How Kabsi works, in three short lines and a link, in place of the five steps every page repeated.
- * The first line names the trade.
+ * Every industry page is this page. Only three things change: the headline noun (`industry.name`), the example review
+ * with Kabsi's reply, and one sourced fact (src/content/industries/blueprint.ts).
  */
-function HowItWorks({ industry: i }: { industry: Industry }) {
-  const lines = [
-    `Kabsi checks your ${i.name}'s Google profile every day.`,
-    `It prepares the replies, posts and fixes ${withArticle(i.name)} needs, and asks you on WhatsApp.`,
-    `Nothing reaches your ${i.name}'s Google profile until you say yes.`,
-  ];
+export function IndustryPage({ industry: i }: { industry: Industry }) {
+  const b = BLUEPRINT[i.slug];
+  const h1 = `Your ${i.name} on Google. Taken care of.`;
+  // SITE-3 (R-164 item 7): the page is built from the same sections as Home and Pricing (marketing/kit.tsx). The H1 is
+  // the only yellow bar; the example review sits beside the hero on a computer, so no section leaves half the width empty.
   return (
-    <section aria-labelledby="thow-h" className="border-y border-line bg-surface-1">
-      <div className="container-kb flex flex-col gap-4 py-7 sm:py-10 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
-        <h2 id="thow-h" className="sr-only">
-          {`How Kabsi works for ${withArticle(i.name)}`}
-        </h2>
-        <ol className="grid gap-3 md:grid-cols-3 md:gap-6">
-          {lines.map((t, n) => (
-            <li key={t} className="flex items-start gap-3 text-body font-semibold">
-              <YellowNumber n={n + 1} className="shrink-0" />
-              {t}
+    <>
+      <section
+        aria-labelledby="hero-title"
+        data-hero
+        className="relative isolate z-10 bg-surface-0"
+      >
+        <div className="container-kb grid gap-10 pt-6 pb-14 md:pt-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:gap-16 lg:pt-14 lg:pb-20">
+          <div className="max-w-[40rem]">
+            <Breadcrumb current={i.plural} />
+            <h1 id="hero-title" className="mt-4 text-display text-balance">
+              <Marked text={h1} mark="Taken care of." />
+            </h1>
+            <Lead className="mt-4 sm:mt-5">
+              Kabsi answers your reviews, protects your listing and keeps your profile fresh. You
+              approve and make changes from WhatsApp or email.
+            </Lead>
+            <div className="relative z-10 mt-6 max-w-[34rem] sm:mt-8">
+              <ScanBox
+                id="hero-scan"
+                keyword={i.keyword}
+                keywordHint={false}
+                industry={i.slug}
+                note={FREE_CHECK_NOTE}
+              />
+              <MarkRow items={HERO_MARKS} className="mt-4" />
+            </div>
+          </div>
+          {b && (
+            <figure aria-labelledby="review-h">
+              <h2 id="review-h" className="mb-3 text-title text-text-1">
+                {`A review at ${i.example.business}, and the reply Kabsi writes`}
+              </h2>
+              <div className="rounded-panel border border-line bg-surface-1 p-4 shadow-lift sm:p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-small font-bold">{`${b.review.name}, ${b.review.stars} stars`}</p>
+                  <ExampleBadge />
+                </div>
+                <p className="mt-2 text-read">{b.review.text}</p>
+                <div className="mt-4 rounded-inner bg-surface-2 p-3 sm:p-4">
+                  <div className="flex items-start gap-2">
+                    <KabsiMark ring={false} className="mt-0.5 size-7 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-label font-semibold text-text-2">Kabsi's reply, ready</p>
+                      <p className="mt-1 text-read">{b.reply}</p>
+                      <div className="mt-3 grid grid-cols-2 gap-2" aria-hidden>
+                        <span className="grid min-h-10 place-items-center rounded-pill bg-kb-ink px-2 text-center text-label font-bold text-kb-white">
+                          Approve
+                        </span>
+                        <span className="grid min-h-10 place-items-center rounded-pill border border-line-strong bg-surface-0 px-2 text-center text-label font-bold">
+                          Change it
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <figcaption className="mt-3 text-small text-text-2">
+                Kabsi writes the reply from the facts you gave it. It waits for your yes before
+                anything reaches Google.
+              </figcaption>
+            </figure>
+          )}
+        </div>
+      </section>
+
+      <Band id="benefits" tone="white">
+        <Head id="benefits" title="What Kabsi does without being asked." />
+        <ol className="mt-8 grid gap-8 md:grid-cols-3 md:gap-10">
+          {BENEFITS.map((x, n) => (
+            <li key={x.title} className="flex gap-4 md:block">
+              <YellowNumber n={n + 1} />
+              <div className="md:mt-4">
+                <h3 className="text-h3">{x.title}</h3>
+                <p className="mt-2 text-read text-text-2">{x.text}</p>
+              </div>
             </li>
           ))}
         </ol>
-        <SiteLink to="/how-it-works" className={cn(linkCls, "shrink-0 text-body")}>
-          See how it works
+      </Band>
+
+      {b && (
+        <Band
+          id="fact"
+          tone="ivory"
+          inner="lg:grid lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16"
+        >
+          <Head id="fact" title={`One thing Google says about ${i.plural.toLowerCase()}.`} />
+          <div className="mt-6 lg:mt-0">
+            <p className="max-w-[60ch] text-lead text-text-1">{b.fact.text}</p>
+            <p className="mt-4 max-w-[60ch] text-read text-text-2">
+              {"Source: "}
+              <a href={b.fact.source.url} rel="noreferrer" className="underline underline-offset-4">
+                {b.fact.source.title}
+              </a>
+              {`, read on ${READ}.`}
+            </p>
+          </div>
+        </Band>
+      )}
+
+      <Band id="price" tone="white">
+        <Head id="price" title="One price." />
+        {/* The price card of Home and Pricing: TRIAL_LINE beside the button, the included list, the not included line. */}
+        <PriceCard className="mt-8" />
+      </Band>
+
+      <Band id="trust" tone="ivory" inner="py-10 sm:py-14 lg:py-16">
+        <h2 id="trust-h" className="text-title text-text-2">
+          What to know first
+        </h2>
+        <TrustLines />
+        <SiteLink to="/for" className={cn(linkCls, "mt-6 text-read")}>
+          See every business
           <Arrow />
         </SiteLink>
-      </div>
-    </section>
-  );
-}
+      </Band>
 
-/** The left column of the photo band: the trade's own photos and posts (Industry 1, R-144). */
-function PhotoCards({ industry: i }: { industry: Industry }) {
-  return (
-    <div>
-      <YellowLabel>{`For ${i.plural.toLowerCase()}`}</YellowLabel>
-      <h2 id="photo-h" className="mt-4 text-h2 text-balance">
-        Photos <span className="text-phrase">{`that work for ${withArticle(i.name)}.`}</span>
-      </h2>
-      <ol className="mt-6 space-y-4">
-        {(i.photoCards ?? []).map((c, n) => (
-          <li key={c.title} className="flex gap-3">
-            <YellowNumber n={n + 1} className="shrink-0" />
-            <div>
-              <h3 className="text-title">{c.title}</h3>
-              <p className="mt-1 text-body text-text-2" data-line>
-                {c.text}
-              </p>
-            </div>
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
-}
+      <Band id="questions" tone="white">
+        <Head id="questions" title="Questions." />
+        <Faq items={HOME_FAQ.map((f) => ({ q: f.q, a: f.a }))} className="mt-8" />
+      </Band>
 
-/** Industry 1 (R-144): the plans in one line and a link, in place of the plan cards. */
-function PlanLine({ industry: i }: { industry: Industry }) {
-  return (
-    <section aria-label="Plans" className="border-t border-line">
-      <div className="container-kb flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-8 sm:py-10">
-        <p className="text-body">{`Two plans for your ${i.name}, Essentials and Pro. ${TRIAL_LINE}`}</p>
-        <SiteLink to="/pricing" className={cn(linkCls, "text-body")}>
-          See the plans
-          <Arrow />
-        </SiteLink>
-      </div>
-    </section>
+      <Band id="closing" tone="dark">
+        <div className="mx-auto max-w-[44rem] text-center">
+          <h2 id="closing-h" className="text-h2 text-balance">
+            Check your business, free.
+          </h2>
+          <ScanBox
+            id="closing-scan"
+            keyword={i.keyword}
+            keywordHint={false}
+            industry={i.slug}
+            className="mt-8 text-start"
+            note={FREE_CHECK_NOTE}
+          />
+        </div>
+      </Band>
+    </>
   );
 }
 
@@ -202,411 +252,6 @@ function Breadcrumb({ current }: { current: string }) {
       </ol>
     </nav>
   );
-}
-
-/** The hero: H1 with its phrase on the bar, the line, the free check with the trade's search, and the wide photo. */
-function TradeHero({ industry: i }: { industry: Industry }) {
-  const p = i.page;
-  return (
-    <section aria-labelledby="hero-title" data-hero className="relative isolate z-10">
-      <div className="container-kb grid gap-6 pt-6 pb-10 sm:gap-8 md:pt-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-12 lg:pt-14 lg:pb-16">
-        <div className="max-w-[38rem]">
-          <Breadcrumb current={i.plural} />
-          <h1 id="hero-title" className="mt-4 text-display text-balance">
-            <Marked text={p.h1} mark={p.mark} />
-          </h1>
-          <p className="mt-4 max-w-[34rem] text-lead text-text-2 sm:mt-5">{p.line}</p>
-          <div className="relative z-10 mt-5 max-w-[34rem] sm:mt-7">
-            <ScanBox
-              id="hero-scan"
-              keyword={i.keyword}
-              keywordHint={false}
-              industry={i.slug}
-              note={TRIAL_LINE}
-            />
-          </div>
-        </div>
-        <figure className="relative">
-          <div className="relative aspect-[3/2] overflow-hidden rounded-panel bg-surface-3">
-            <Img
-              photo={i.photos[0]}
-              sizes="(min-width: 1280px) 37rem, (min-width: 1024px) 46vw, calc(100vw - 2rem)"
-              priority
-              style={{ objectPosition: i.focus ?? "50% 50%" }}
-              className="absolute inset-0 size-full object-cover"
-            />
-          </div>
-        </figure>
-      </div>
-    </section>
-  );
-}
-
-/** "What Kabsi watches for a <trade>": the trade's own details, and one Example where Google shows something else. */
-function Watch({ industry: i }: { industry: Industry }) {
-  const w = i.page.watch;
-  return (
-    <section aria-labelledby="watch-h">
-      <div
-        className={cn("container-kb grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-16", sectionY)}
-      >
-        <div>
-          <Headline
-            id="watch-h"
-            label="Profile watch"
-            text={`What Kabsi watches for ${withArticle(i.name)}`}
-            mark={`watches for ${withArticle(i.name)}`}
-          />
-          <p className="mt-4 max-w-[34rem] text-body text-text-2 sm:text-lead">{w.line}</p>
-          <ul className="mt-6 flex flex-wrap gap-1.5" aria-label="Details Kabsi checks every day">
-            {w.fields.map((d) => (
-              <li
-                key={d}
-                className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1.5 text-small font-semibold"
-              >
-                <Check className="size-4 text-ok" aria-hidden />
-                {d}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <figure>
-          <div className="rounded-panel border border-line bg-surface-1 p-4 shadow-lift sm:p-6">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-small font-bold">{w.business}</p>
-              <ExampleBadge />
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-2 sm:gap-3">
-              <div className="rounded-inner border-2 border-dashed border-line-strong p-3 sm:p-4">
-                {/* Industry 1 (R-144): the label and the detail in one line. */}
-                <p className="text-label font-semibold text-text-2">{`On Google: ${w.what}`}</p>
-                <p className="font-display text-title font-bold break-words sm:text-h3">
-                  {w.google}
-                </p>
-              </div>
-              <div className="rounded-inner border-2 border-text-1 p-3 sm:p-4">
-                <p className="text-label font-semibold text-text-2">{`You told Kabsi: ${w.what}`}</p>
-                <p className="font-display text-title font-bold break-words sm:text-h3">
-                  {w.owner}
-                </p>
-              </div>
-            </div>
-            {/* The independent check of 5 Nov: Keep my information and Google is right are the choice on kabsi.co (facts 04,
-                Google Protection); WhatsApp's Put it back covers hours and website only, so the Example is not a chat. */}
-            <div className="mt-3 rounded-inner bg-surface-2 p-3 sm:p-4">
-              <div className="flex items-start gap-2">
-                <KabsiMark ring={false} className="mt-0.5 size-7 shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-label font-semibold text-text-2">
-                    {`${i.example.business}'s Google profile, on kabsi.co`}
-                  </p>
-                  <p className="mt-1 text-small">{w.message}</p>
-                  <div className="mt-3 grid grid-cols-2 gap-2" aria-hidden>
-                    <span className="grid min-h-10 place-items-center rounded-pill bg-kb-ink px-2 text-center text-label font-bold text-kb-white">
-                      Keep my information
-                    </span>
-                    <span className="grid min-h-10 place-items-center rounded-pill border border-line-strong bg-surface-0 px-2 text-center text-label font-bold">
-                      Google is right
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <figcaption className="sr-only">
-            {`Example: for an invented ${i.name}, Google shows ${w.what.toLowerCase()} as ${w.google}, the owner told Kabsi ${w.owner}, and Kabsi asks the owner to choose Keep my information or Google is right, so nothing changes without the owner's yes.`}
-          </figcaption>
-        </figure>
-      </div>
-    </section>
-  );
-}
-
-/** Three jobs that come back for this trade. */
-function Jobs({ industry: i }: { industry: Industry }) {
-  return (
-    <section aria-labelledby="tjobs-h" className="border-b border-line bg-surface-1">
-      <div className={cn("container-kb", sectionY)}>
-        <Headline
-          id="tjobs-h"
-          label={`For ${i.plural.toLowerCase()}`}
-          text={`Google jobs that come back for ${withArticle(i.name)}.`}
-          mark={`come back for ${withArticle(i.name)}.`}
-        />
-        <ol className="mt-8 grid gap-6 md:grid-cols-3 md:gap-8">
-          {i.page.jobs.map((j, n) => (
-            <li key={j.title} className="flex gap-3 md:block">
-              <YellowNumber n={n + 1} />
-              <div className="md:mt-4">
-                <h3 className="text-title">{j.title}</h3>
-                <p className="mt-1 text-body text-text-2">{j.text}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
-  );
-}
-
-/**
- * Industry 1 (R-144): where the trade shows up, in one section: the first answer, what people search for and the AI
- * answer Example. The nearby map every page repeated is on Home and How it works.
- */
-function ShowUp({ industry: i }: { industry: Industry }) {
-  const p = i.page;
-  return (
-    <section aria-labelledby="tshow-h">
-      <div className={cn("container-kb grid gap-8 lg:grid-cols-2 lg:gap-16", sectionY)}>
-        <div>
-          <Headline
-            id="tshow-h"
-            text={`How people find ${withArticle(i.name)}`}
-            mark={`find ${withArticle(i.name)}`}
-          />
-          <p className="mt-4 max-w-[34rem] text-body sm:text-lead">{p.answer}</p>
-          <Chips items={i.searches} label="Searches like these" icon="search" className="mt-6" />
-          <p className="mt-4 text-small text-text-2">
-            {`Searches like these for ${withArticle(i.name)}: on Pro, Kabsi shows the words people searched on Google to find you.`}
-          </p>
-          <SiteLink to="/scan" className={cn(linkCls, "mt-3 text-body")}>
-            {MAIN_CTA}
-            <Arrow />
-          </SiteLink>
-        </div>
-        <AiAnswer
-          example={{
-            ...p.ai,
-            title: `What AI says about ${i.example.business}.`,
-            date: `2 Nov 2026, about ${i.example.business}`,
-          }}
-          compact
-        />
-      </div>
-    </section>
-  );
-}
-
-/**
- * Industries 3 (master plan 30.33 item 2): no reading block on a public page. Each group is a headline, at most one line
- * of up to 25 words, then chips or cards with a short title and one line of at most 15 words
- * (tests/industries3.test.ts and the public e2e suite count them). Industry 1 (R-144): each group's headline names the
- * trade, and the posts group is new.
- */
-function Reading({ industry: i }: { industry: Industry }) {
-  const a = withArticle(i.name);
-  return (
-    <section aria-labelledby="guide-h" className="border-t border-line bg-surface-1">
-      <div className={cn("container-kb space-y-12 sm:space-y-16", sectionY)}>
-        <div>
-          <Headline
-            id="guide-h"
-            text={`Your Google profile, as ${a} owner`}
-            mark="Your Google profile"
-          />
-          <CardGrid items={i.profile} className="mt-8" level="h3" />
-        </div>
-        <div>
-          {i.categories && (
-            <>
-              <h3 id="tcats-h" className="text-h3">
-                {`Google categories for ${a}`}
-              </h3>
-              <Chips
-                items={[i.categories.primary, ...i.categories.more]}
-                label={`Google categories, ${i.categories.primary} first`}
-                first="First category"
-                className="mt-4"
-              />
-              <p className="mt-4 max-w-[40rem] text-body text-text-2">{i.categories.line}</p>
-            </>
-          )}
-          {/* Industry 1 (R-144): the services the trade lists, as chips. */}
-          <h3 id="tservices-h" className={cn("text-h3", i.categories && "mt-10")}>
-            {`What ${a} can list`}
-          </h3>
-          <Chips items={i.services} label="Services" className="mt-4" />
-        </div>
-        {i.reviews && (
-          <CardGroup id="treviews-h" title={`What customers write about ${a}`} items={i.reviews} />
-        )}
-        {i.posts && <CardGroup id="tposts-h" title={`Posts ${a} can make`} items={i.posts} />}
-        {i.holidays && (
-          <CardGroup id="tdays-h" title={`Hours and holidays at ${a}`} items={i.holidays} />
-        )}
-      </div>
-    </section>
-  );
-}
-
-/** Chips: the searches (with a search icon) or the categories (the first one marked). */
-function Chips({
-  items,
-  label,
-  icon,
-  first,
-  className,
-}: {
-  items: string[];
-  label: string;
-  icon?: "search";
-  first?: string;
-  className?: string;
-}) {
-  return (
-    <ul className={cn("flex flex-wrap gap-2", className)} aria-label={label}>
-      {items.map((s, n) => (
-        <li
-          key={s}
-          className={cn(
-            "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-small font-semibold",
-            first && n === 0 ? "border-text-1 bg-surface-0" : "border-line-strong bg-surface-0",
-          )}
-        >
-          {icon === "search" ? (
-            <Search className="size-4 text-text-3" aria-hidden />
-          ) : first && n === 0 ? (
-            <Check className="size-4 text-ok" aria-hidden />
-          ) : null}
-          {s}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-/**
- * The no-lone-card rule (30.33 item 2): a count that fills its rows gets the columns that divide it, and a count that
- * does not (a filtered /for list) centres its last row, because the rows wrap and are centred.
- */
-function gridCols(n: number): string {
-  if (n % 4 === 0) return "sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]";
-  if (n % 3 === 0) return "md:w-[calc((100%-2rem)/3)]";
-  return "sm:w-[calc((100%-1rem)/2)]";
-}
-
-function CardGrid({
-  items,
-  className,
-  level = "h4",
-}: {
-  items: Card[];
-  className?: string;
-  /** The heading level of each card: h3 straight under a section headline, h4 under a group heading. */
-  level?: "h3" | "h4";
-}) {
-  const Head = level;
-  const w = gridCols(items.length);
-  return (
-    <ul className={cn("flex flex-wrap justify-center gap-4", className)} data-cards={items.length}>
-      {items.map((c) => (
-        <li
-          key={c.title}
-          className={cn(
-            "w-full rounded-card border border-line bg-surface-0 p-4 shadow-rest sm:p-5",
-            w,
-          )}
-        >
-          <Head className="text-title">{c.title}</Head>
-          <p className="mt-1 text-body text-text-2" data-line>
-            {c.text}
-          </p>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function CardGroup({ id, title, items }: { id: string; title: string; items: Card[] }) {
-  return (
-    <div>
-      <h3 id={id} className="text-h3">
-        {title}
-      </h3>
-      <CardGrid items={items} className="mt-4" />
-    </div>
-  );
-}
-
-export type ReadGuide = { slug: string; title: string; topic: string };
-
-/**
- * Read next (30.33 item 2): three guides as photo cards (the guide's photo and group, Style 1), then six
- * related businesses as photo cards, 3 by 2 (2 by 3 on a phone), and "See every business".
- */
-function ReadNext({
-  guides,
-  related,
-  plural,
-}: {
-  guides: ReadGuide[];
-  related: Industry[];
-  plural: string;
-}) {
-  if (!guides.length && !related.length) return null;
-  return (
-    <section aria-labelledby="tnext-h" className="border-t border-line bg-surface-1">
-      <div className={cn("container-kb space-y-12 sm:space-y-16", sectionY)}>
-        <Headline id="tnext-h" text={`More for ${plural.toLowerCase()}`} mark="More" />
-        {guides.length > 0 && (
-          <div>
-            <h3 className="text-h3">{`Guides for ${plural.toLowerCase()}`}</h3>
-            <ul className="mt-4 flex flex-wrap justify-center gap-4" data-cards={guides.length}>
-              {guides.map((g) => (
-                <li key={g.slug} className={cn("w-full", gridCols(guides.length))}>
-                  <SiteLink
-                    to={`/guides/${g.slug}`}
-                    className="press group flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface-0 shadow-rest"
-                  >
-                    <GuideImage
-                      slug={g.slug}
-                      ratio="3/2"
-                      sizes="(min-width: 768px) 24rem, calc(100vw - 2rem)"
-                    />
-                    <span className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
-                      <TopicPill>{guideLook(g.slug).group}</TopicPill>
-                      <span className="flex items-start justify-between gap-3 text-body font-bold">
-                        {g.title}
-                        <Arrow />
-                      </span>
-                    </span>
-                  </SiteLink>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {related.length > 0 && (
-          <div>
-            <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
-              <h3 className="text-h3">{`Businesses like ${plural.toLowerCase()}`}</h3>
-              <SiteLink to="/for" className={cn(linkCls, "text-body")}>
-                See every business
-                <Arrow />
-              </SiteLink>
-            </div>
-            <ul
-              className="mt-4 flex flex-wrap justify-center gap-3 sm:gap-4"
-              data-cards={related.length}
-            >
-              {related.map((r) => (
-                <li key={r.slug} className={relatedCols(related.length)}>
-                  <TradeCard industry={r} sizes="(min-width: 768px) 24rem, 45vw" line={false} />
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
-
-/** Six related businesses: 2 by 3 on a phone, 3 by 2 from 768 px (a count that does not divide centres its last row). */
-function relatedCols(n: number) {
-  return n % 3 === 0
-    ? "w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1rem)/2)] md:w-[calc((100%-2rem)/3)]"
-    : "w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1rem)/2)]";
 }
 
 /** One trade as a photo card: the wide photo, its name and one line. */
@@ -639,7 +284,7 @@ function TradeCard({
       </span>
       <span className="flex flex-1 flex-col p-3 sm:p-4">
         <span className="text-body font-bold sm:text-title">{i.plural}</span>
-        {line && <span className="mt-1 text-small text-text-2">{i.page.card}</span>}
+        {line && <span className="mt-1 text-body text-text-2">{i.page.card}</span>}
       </span>
     </SiteLink>
   );
@@ -710,9 +355,9 @@ export function ForIndex() {
             <h1 id="hero-title" className="text-display text-balance">
               <Marked text={FOR_HERO.h1} mark={FOR_HERO.mark} />
             </h1>
-            <p className="mt-4 text-lead text-text-2 sm:mt-5">{FOR_HERO.line}</p>
+            <Lead className="mt-4 sm:mt-5">{FOR_HERO.line}</Lead>
             <div className="relative z-10 mt-5 sm:mt-7">
-              <ScanBox id="hero-scan" note={TRIAL_LINE} />
+              <ScanBox id="hero-scan" note={FREE_CHECK_NOTE} />
             </div>
           </div>
           <ForCollage all={all} />
@@ -721,12 +366,9 @@ export function ForIndex() {
       <section aria-labelledby="list-h" className="border-t border-line bg-surface-1">
         <div className={cn("container-kb", sectionY)}>
           <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
-            <Headline
-              id="list-h"
-              label="Businesses"
-              text="Pick your business"
-              mark="your business"
-            />
+            <h2 id="list-h" className="text-h2 text-balance">
+              Pick your business.
+            </h2>
             <div className="w-full sm:w-[20rem]">
               <label htmlFor="for-filter" className="text-label font-semibold text-text-2">
                 Find your kind of business
@@ -788,19 +430,17 @@ export function ForIndex() {
           )}
         </div>
       </section>
-      <section aria-labelledby="any-h">
-        <div className={cn("container-kb", sectionY)}>
-          <div className="mx-auto max-w-[44rem]">
-            <h2 id="any-h" className="text-h2 text-balance">
-              <Marked text="Not on the list?" mark="the list?" />
-            </h2>
-            <p className="mt-3 text-lead text-text-2">
-              Kabsi works for any local business with a Google profile.
-            </p>
-            <ScanBox id="closing-scan" className="mt-6" note={TRIAL_LINE} />
-          </div>
+      <Band id="any" tone="dark">
+        <div className="mx-auto max-w-[44rem] text-center">
+          <h2 id="any-h" className="text-h2 text-balance">
+            Not on the list?
+          </h2>
+          <Lead className="mx-auto mt-4">
+            Kabsi works for any local business with a Google profile.
+          </Lead>
+          <ScanBox id="closing-scan" className="mt-8 text-start" note={FREE_CHECK_NOTE} />
         </div>
-      </section>
+      </Band>
     </>
   );
 }

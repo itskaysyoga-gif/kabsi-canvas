@@ -16,7 +16,7 @@ export const guide: GuideDoc = {
   checked: READ,
   topic: "Local results",
   answer:
-    'Google\'s help says "Local results are mainly based on relevance, distance, and popularity." It explains these as how well your profile matches the search, how far you are from the person searching, and how well known your business is. Google also says there is no way to request or pay for a better local ranking, and that it keeps the details of its search algorithm confidential.',
+    'Google\'s help says "Local results are mainly based on relevance, distance, and popularity." It explains these as how well your profile matches the search, how far you are from the person searching, and how well known your business is. Google also says there is no way to request or pay for a better place in local results, and that it keeps the details of its search algorithm confidential.',
   inShort: [
     "Relevance: how well your Business Profile matches what someone is searching for.",
     "Distance: how far each business is from the customer who is searching.",
@@ -28,7 +28,7 @@ export const guide: GuideDoc = {
       id: "three-factors",
       heading: "What does Google say decides local results?",
       answer:
-        "Google's page on local ranking says, in its own words: \"Local results are mainly based on relevance, distance, and popularity. Together, these factors help Google find the best match for customers' searches.\" It then explains relevance, distance and popularity one by one.",
+        "Google's page on improving local results says, in its own words: \"Local results are mainly based on relevance, distance, and popularity. Together, these factors help Google find the best match for customers' searches.\" It then explains relevance, distance and popularity one by one.",
       body: (
         <>
           <p>
@@ -39,9 +39,9 @@ export const guide: GuideDoc = {
           </p>
           <Callout kind="warn" title="No one can sell you a position">
             Google says: "There's no way to request or pay for a better local ranking on Google." It
-            also says it keeps the search algorithm details confidential to make the ranking system
-            as fair as possible for everyone. Anyone who promises you first place is promising
-            something Google says is not for sale.
+            also says it keeps the search algorithm details confidential to make the way results are
+            ordered as fair as possible for everyone. Anyone who promises you first place is
+            promising something Google says is not for sale.
           </Callout>
         </>
       ),
@@ -162,7 +162,7 @@ export const guide: GuideDoc = {
       id: "uk-uae",
       heading: "Is it different in the UK or the UAE?",
       answer:
-        "Google's pages here name no separate rule for the UK or the UAE: its page on local ranking gives one set of factors and advice. The one exception on the page is in-store products, which Google says are only for retail businesses in eligible countries or regions.",
+        "Google's pages here name no separate rule for the UK or the UAE: its page on improving local results gives one set of factors and advice. The one exception on the page is in-store products, which Google says are only for retail businesses in eligible countries or regions.",
       body: (
         <p>
           What can differ is how customers word a search: in the UK some add a town or a postcode,
@@ -177,16 +177,15 @@ export const guide: GuideDoc = {
     body: (
       <>
         <p>
-          Kabsi promises no rankings, and does not claim to know what Google's ranking rewards
-          beyond what Google's own page says. It takes care of the parts you control: a reply ready
-          for every review, complete and accurate details, opening hours kept right, photos and
-          posts you approve, and an easy way for every customer to leave a review. Nothing goes to
-          Google without your yes.
+          Kabsi does not change how Google orders local results, promises no position, and does not
+          claim to know more than Google's own page says. It takes care of the parts you control: a
+          reply ready for every review, complete and accurate details, opening hours kept right,
+          photos and posts you approve, and an easy way for every customer to leave a review.
+          Nothing goes to Google without your yes.
         </p>
         <p>
-          The free check needs no Google access. Its nearby part searches Google Maps from places
-          around your business, like a customer standing there, and shows where you came up,
-          labelled "Sample Google Maps results, not customer counts."{" "}
+          The free check needs no Google access. It shows your rating and reviews beside 3 nearby
+          businesses, as Google Maps shows them today.{" "}
           <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>
@@ -232,5 +231,5 @@ export const guide: GuideDoc = {
     "how-to-ask-for-google-reviews",
   ],
   summary:
-    "How Google picks local results, from Google's own help: relevance, distance and popularity, no paid ranking, and the profile details an owner controls.",
+    "How Google picks local results, from Google's own help: relevance, distance and popularity, no paid placement, and the profile details an owner controls.",
 };

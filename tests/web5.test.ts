@@ -147,11 +147,14 @@ describe("every public page on Design 9 (Web 5 part D)", () => {
   it("gives every PageHero the yellow bar on its title's last sentence", () => {
     expect(read("src/components/kabsi/page-hero.tsx")).toContain("marked = true");
   });
-  it("puts the steps line under Pricing's hero, and the photo story on every industry page (Industries 2)", () => {
+  it("puts the steps line under Pricing's hero, and the example review and reply on every industry page (SITE-2)", () => {
     expect(read("src/components/kabsi/d8-pricing.tsx")).toContain(
       '<StepsLine id="pricing-steps-h" />',
     );
-    // Industry 1 (R-144): the band also takes the trade's own photo cards, so the props sit on their own lines.
-    expect(read("src/components/kabsi/d9-industry.tsx")).toMatch(/<PhotoToPost\s+example=/);
+    // SITE-2 (blueprint 3.1 section 5): the photo story is replaced by one example review and Kabsi's reply.
+    const page = read("src/components/kabsi/d9-industry.tsx");
+    expect(page).not.toMatch(/<PhotoToPost\s+example=/);
+    expect(page).toContain("b.review.text");
+    expect(page).toContain("b.reply");
   });
 });

@@ -42,6 +42,8 @@
   --kb-sand: #f6f4ef;
   --kb-ink: #111111;
   --kb-stone: #5e5b55;
+  /* SITE-3: the reading grey of the public site, 10.5:1 on ivory and 11.3:1 on white (WCAG AA and AAA). */
+  --kb-slate: #3d3b37;
   --kb-hairline: #e4e0d7;
   --kb-pressed-light: #ece9e1;
   --kb-line-strong-light: #d5d0c4;
@@ -244,6 +246,10 @@ body:not(:has(.page-light)):has(.theme-dark),
   --text-title--line-height: 1.35;
   --text-lead: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
   --text-lead--line-height: 1.6;
+  /* SITE-3: body text on the public site, 17 px on a phone to 18 px on a computer. */
+  --text-read: clamp(1.0625rem, 1.02rem + 0.18vw, 1.125rem);
+  --text-read--line-height: 1.6;
+  --text-read--font-weight: 450;
   --text-body: 1rem;
   --text-body--line-height: 1.6;
   --text-small: 0.9375rem;
@@ -575,6 +581,43 @@ body:not(:has(.page-light)):has(.theme-dark),
   background-color: var(--wa-chat-bg);
   background-image: radial-gradient(rgb(17 27 33 / 0.05) 1px, transparent 1.2px);
   background-size: 14px 14px;
+}
+
+/* SITE-3 (R-164 item 7): the public site reads darker and larger. Inside the main area of a public page the second text
+   colour is the reading grey, and body text is the reading size. A charcoal band (.theme-dark) keeps its own greys. */
+.page-light main {
+  --text-2: var(--kb-slate);
+}
+.page-light main .text-body {
+  font-size: var(--text-read);
+  line-height: 1.6;
+  font-weight: 450;
+}
+.page-light main .theme-dark {
+  --text-2: var(--kb-mute);
+}
+/* The hero phone's scenes: each message rises in turn. Reduced motion shows them all at once (the rule below). */
+@keyframes kb-msg {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.kb-scene > * {
+  animation: kb-msg 420ms cubic-bezier(0.2, 0.6, 0.3, 1) both;
+}
+.kb-scene > *:nth-child(2) {
+  animation-delay: 900ms;
+}
+.kb-scene > *:nth-child(3) {
+  animation-delay: 1900ms;
+}
+.kb-scene > *:nth-child(4) {
+  animation-delay: 2800ms;
 }
 
 @keyframes kb-enter {

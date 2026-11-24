@@ -152,3 +152,14 @@ Rewritten by Web 3 on 30 Oct 2026 to the light-led system of Design 6 and Design
 
 ## Right-to-left readiness (for the later Saudi step)
 - Logical properties only (ms-, me-, ps-, pe-, start-, end-, text-start). Mirror directional icons; never the mark, ticks, stars or media controls. Numbers, prices and phones stay left to right inside Arabic text.
+
+## SITE-3: one section system for every public page (24 Nov 2026, R-164 item 7)
+
+The parts are in `src/components/marketing/kit.tsx`; Home, Pricing, How it works, the FAQ, About, Security, the industry pages and the free check use them, so they read as one product.
+- Backgrounds: three only. Ivory (`bg-surface-0`), white (`bg-surface-1`) and one charcoal band (`tone="dark"`, the `.theme-dark` ground). Home has the problem band and the closing band in charcoal; every other page has the closing band only.
+- The yellow bar: on the H1, and on at most one other headline a page. `Head` draws it only when given `mark`.
+- Reading text: `text-read` (17 px on a phone to 18 px on a computer, weight 450, line height 1.6), lines under about 70 characters (`max-w-[60ch]`). Inside `main` on a public page the second text colour is `--kb-slate` (#3d3b37, 10.5:1 on ivory) and `text-body` is the reading size; a charcoal band keeps its own greys.
+- One primary action, "Check my business free": the header, the page's own box or price card, and the closing band.
+- Width: from 1024 px a section puts its headline beside its content (`split`, or the hero's `aside`), so no section leaves half the screen empty.
+- Motion: the one moving thing is Home's phone, three short scenes; it is still under reduced motion and has a pause button.
+- The price card is one full-width card on Home, Pricing and every industry page.

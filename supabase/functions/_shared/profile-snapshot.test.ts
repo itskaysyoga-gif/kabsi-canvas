@@ -4,13 +4,14 @@
 // call. The real Google layer code (field masks, kill switch) runs unchanged on top of the stubs. Nothing from Places is
 // cached (master plan 30.10): every check, email and WhatsApp copy reads Google live.
 import assert from "node:assert/strict";
-import { autocomplete, getSnapshotPlace, guard, SNAPSHOT_FIELD_MASK, searchText } from "./google/places/live.ts";
+import { autocomplete, getSnapshotPlace, guard, SNAPSHOT_CHECK_FIELD_MASK, SNAPSHOT_FIELD_MASK, searchText } from "./google/places/live.ts";
 import type { Place } from "./google/types.ts";
 import { buildSnapshot, CHECK_PAGES, checkEmail, type Deps, flags, LIMITS, makeHandler, normalizePhone, TIPS_CONSENT_TEXT, WHATSAPP_CONSENT_TEXT, whatsappParams } from "./profile-snapshot.ts";
 import { esc } from "./email-layout.ts";
 import { FREE_TOOL_BUSY } from "./free-tool-busy.ts";
 import { visibleText, type EmailContent, renderEmail } from "./email/template.ts";
 import { type CheckRow, reportParts } from "./visibility/free-check.ts";
+import fxReviews from "../../../tests/fixtures/google/places.get.reviews.json" with { type: "json" };
 
 const CTX = { appUrl: "https://kabsi.test", defaultWhy: "You asked for this email." };
 const real = { ...guard };
@@ -46,7 +47,7 @@ const SESSION = "6f1c2c2e-9a0b-4f0e-8d57-0a4e0d1f3b21";
 type Seen = { url: string; method: string; mask: string | null; body: string }[];
 
 // A world with the Places day cap, an in-memory limiter and every outbound effect recorded. PLACE_B is not on Google.
-function world(opts: { checks?: Record<string, CheckRow>; cap?: number; place?: Place; turnstile?: boolean; whatsapp?: boolean; waState?: "sent" | "mock_sent" | "held" | "failed"; autoStatus?: number; noSecret?: boolean } = {}) {
+function world(opts: { linkNow?: Deps["linkNow"]; checks?: Record<string, CheckRow>; cap?: number; place?: Place; turnstile?: boolean; whatsapp?: boolean; waState?: "sent" | "mock_sent" | "held" | "failed"; autoStatus?: number; noSecret?: boolean } = {}) {
   const clock = { ms: Date.parse("2026-11-01T10:00:00Z") };
   const cap = opts.cap ?? 100;
   const requests: Seen = [];
@@ -92,6 +93,7 @@ function world(opts: { checks?: Record<string, CheckRow>; cap?: number; place?: 
     searchText,
     autocomplete,
     getSnapshotPlace,
+    ...(opts.linkNow ? { linkNow: opts.linkNow } : {}),
     whatsappOn: opts.whatsapp === true,
     saveWhatsapp: (row) => (wa.saved.push(row), Promise.resolve(`row-${wa.saved.length}`)),
     sendWhatsapp: (o) => (wa.sent.push(o), Promise.resolve({ state: opts.waState ?? "sent", id: "wamid.1" })),
@@ -121,7 +123,10 @@ function restore() {
   globalThis.fetch = realFetch;
 }
 
-Deno.test("every Places request sends the field mask, and none asks for reviews", async () => {
+// SITE-3 (free check step 4): changed on purpose. The "check" action's one details call now asks for reviews too
+// (SNAPSHOT_CHECK_FIELD_MASK), for the reply Kabsi would write for the latest review; nothing from them is stored. Search,
+// suggestions, the email and the WhatsApp copy still never ask for reviews.
+Deno.test("every Places request sends the field mask; only the check's details call asks for reviews", async () => {
   const w = world();
   try {
     assert.equal((await w.call({ action: "search", query: "Harbour Lane Coffee Example Town" })).status, 200);
@@ -130,13 +135,14 @@ Deno.test("every Places request sends the field mask, and none asks for reviews"
     assert.equal(w.requests.length, 3);
     for (const r of w.requests) {
       assert.ok(r.mask && r.mask.length > 0, `no field mask on ${r.url}`);
-      assert.doesNotMatch(r.mask!, /review/i, `reviews field in ${r.url}`);
+      if (!r.url.includes("/places/")) assert.doesNotMatch(r.mask!, /review/i, `reviews field in ${r.url}`);
       assert.doesNotMatch(r.url, /review/i);
       assert.doesNotMatch(r.body, /review/i);
     }
     const details = w.requests.filter((r) => r.url.includes("/places/"));
     assert.equal(details.length, 2);
-    for (const r of details) assert.equal(r.mask, SNAPSHOT_FIELD_MASK);
+    for (const r of details) assert.equal(r.mask, SNAPSHOT_CHECK_FIELD_MASK);
+    assert.equal(SNAPSHOT_CHECK_FIELD_MASK, `${SNAPSHOT_FIELD_MASK},reviews`);
     assert.deepEqual(
       SNAPSHOT_FIELD_MASK.split(","),
       ["id", "displayName", "formattedAddress", "addressComponents", "primaryTypeDisplayName", "businessStatus", "rating", "userRatingCount", "regularOpeningHours", "currentOpeningHours", "nationalPhoneNumber", "websiteUri", "photos"],
@@ -676,7 +682,8 @@ Deno.test("check: the suggestions' session token goes to Place Details and ends 
     assert.match(details[0]!.url, new RegExp(`\\?sessionToken=${SESSION}$`));
     assert.doesNotMatch(details[1]!.url, /sessionToken/);
     assert.doesNotMatch(details[2]!.url, /sessionToken/);
-    for (const r of details) assert.equal(r.mask, SNAPSHOT_FIELD_MASK);
+    // SITE-3: the check's own call carries the reviews field (the latest review and the reply Kabsi would write).
+    for (const r of details) assert.equal(r.mask, SNAPSHOT_CHECK_FIELD_MASK);
   } finally {
     restore();
   }
@@ -880,6 +887,67 @@ Deno.test("launch4: the warm-up answers at once, with no limit, no bot check, no
     assert.equal(w.hits.size, 0);
     assert.equal(w.saved.length, 0);
     assert.equal(w.errors.length, 0);
+  } finally {
+    restore();
+  }
+});
+
+// ─── SITE-3 (free check step 4): the latest review with the reply Kabsi would write, and whether the website opens now.
+const WITH_REVIEWS: Place = { ...FULL, reviews: fxReviews.reviews as Place["reviews"] };
+
+Deno.test("check: the answer carries the latest review with words and its reply, and whether the website opens now", async () => {
+  const looked: string[] = [];
+  const w = world({ place: WITH_REVIEWS, linkNow: (u) => (looked.push(u), Promise.resolve("loads")) });
+  try {
+    const r = await w.call({ action: "check", place_id: PLACE_A });
+    assert.equal(r.status, 200);
+    const s = r.body.snapshot;
+    assert.deepEqual(s.links, { website: "loads", booking: null });
+    assert.deepEqual(looked, ["https://example.com"]);
+    // The fixture's newest review has no words, so the one before it is shown, with Kabsi's template reply.
+    assert.equal(s.latest_review.stars, 2);
+    assert.match(s.latest_review.text, /^Waited 25 minutes/);
+    assert.match(s.latest_review.reply, /^Thank you for writing this, Maya\./);
+    assert.equal(s.latest_review.author, "Maya Haddad");
+    // Nothing from the reviews is kept: the email reads Google again without the reviews field.
+    await w.call({ action: "email", place_id: PLACE_A, email: "a@example-cafe.com", tips: false, consent_text: TIPS_CONSENT_TEXT, page: "/google-profile-check" });
+    const details = w.requests.filter((x) => x.url.includes("/places/"));
+    assert.deepEqual(details.map((x) => x.mask), [SNAPSHOT_CHECK_FIELD_MASK, SNAPSHOT_FIELD_MASK]);
+    assert.doesNotMatch(w.sent[0]!.text, /Waited 25 minutes|Thank you for writing this/);
+  } finally {
+    restore();
+  }
+});
+
+Deno.test("check: a link look that fails or throws is fails; no website is null; no reviews leaves latest_review out", async () => {
+  for (const [look, want] of [[() => Promise.resolve("fails" as const), "fails"], [() => Promise.reject(new Error("dns")), "fails"]] as const) {
+    const w = world({ place: WITH_REVIEWS, linkNow: look });
+    try {
+      const r = await w.call({ action: "check", place_id: PLACE_A });
+      assert.equal(r.body.snapshot.links.website, want);
+      assert.equal(w.errors.length, 0);
+    } finally {
+      restore();
+    }
+  }
+  let called = 0;
+  const w = world({ place: { ...FULL, websiteUri: undefined }, linkNow: () => (called++, Promise.resolve("loads")) });
+  try {
+    const s = (await w.call({ action: "check", place_id: PLACE_A })).body.snapshot;
+    assert.deepEqual(s.links, { website: null, booking: null });
+    assert.equal(called, 0);
+    assert.equal("latest_review" in s, false);
+  } finally {
+    restore();
+  }
+});
+
+Deno.test("email and WhatsApp copies never carry the review or the links", async () => {
+  const w = world({ place: WITH_REVIEWS, whatsapp: true, linkNow: () => Promise.resolve("loads") });
+  try {
+    assert.equal((await w.call({ action: "whatsapp", place_id: PLACE_A, phone: "+12015550100", consent: true, consent_text: WHATSAPP_CONSENT_TEXT, page: "/" })).status, 200);
+    assert.doesNotMatch(w.wa.sent[0]!.params.join(" "), /Waited|Thank you for writing/);
+    for (const r of w.requests) assert.equal(r.mask, SNAPSHOT_FIELD_MASK);
   } finally {
     restore();
   }

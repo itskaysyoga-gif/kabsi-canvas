@@ -1,7 +1,8 @@
 // Mock of Places API (New) for the Deno tests: Places has no mock switch at run time (it needs only
 // PLACES_API_KEY), and demo businesses have no place id, so no live path reaches this module.
 import type { PlacesResult } from "./live.ts";
-import type { AutocompleteResponse, Place, SearchTextResponse } from "../types.ts";
+import type { AutocompleteResponse, Place, PlaceReview, SearchTextResponse } from "../types.ts";
+import fxReviews from "../../../../../tests/fixtures/google/places.get.reviews.json" with { type: "json" };
 
 const MOCK_PLACE: Place = {
   id: "ChIJmockPlace0000000000000", name: "places/ChIJmockPlace0000000000000",
@@ -12,6 +13,8 @@ const MOCK_PLACE: Place = {
   ],
   primaryType: "coffee_shop", primaryTypeDisplayName: { text: "Coffee Shop", languageCode: "en-US" },
   types: ["coffee_shop", "cafe", "food", "point_of_interest", "establishment"], rating: 4.6, userRatingCount: 128,
+  // SITE-3: only a mask that names "reviews" gets them, as with Google.
+  reviews: fxReviews.reviews as PlaceReview[],
 };
 
 // Field masks name fields as "places.x" in a search and "x" in details; keep only those, as Google does.

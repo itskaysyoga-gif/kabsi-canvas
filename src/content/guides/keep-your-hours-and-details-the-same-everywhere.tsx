@@ -36,13 +36,6 @@ export const guide: GuideDoc = {
             supported by other public information, such as your business website. An old opening
             time on your own website can therefore end up on your Google profile.
           </p>
-          <p>
-            Old details can also reach answers from AI assistants, as explained in{" "}
-            <GuideLink slug="why-chatgpt-describes-your-business-wrongly">
-              why ChatGPT describes your business wrongly
-            </GuideLink>
-            .
-          </p>
         </>
       ),
     },
@@ -203,10 +196,8 @@ export const guide: GuideDoc = {
           sends special hours to Google only after you confirm.
         </p>
         <p>
-          On Pro, Kabsi can read your public website and compare its name, phone, address and
-          opening times with your Google profile, and each difference becomes a task. Your website
-          and the other sites stay yours to change. <SiteRef to="/scan">Run the free check</SiteRef>
-          .
+          Your website and the other sites stay yours to change.{" "}
+          <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>
     ),
@@ -255,11 +246,7 @@ export const guide: GuideDoc = {
     },
   ],
   industries: ["restaurant", "cafe", "hair-salon", "gym-and-fitness"],
-  related: [
-    "how-to-set-holiday-hours-on-google",
-    "someone-changed-my-hours-on-google",
-    "why-chatgpt-describes-your-business-wrongly",
-  ],
+  related: ["how-to-set-holiday-hours-on-google", "someone-changed-my-hours-on-google"],
   summary:
     "How to keep your name, address, phone, website and hours the same on Google, your website and other sites, what to change first, and special hours for holidays.",
 };

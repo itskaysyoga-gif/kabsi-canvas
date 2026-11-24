@@ -210,12 +210,10 @@ export const guide: GuideDoc = {
     body: (
       <>
         <p>
-          Kabsi prepares Google posts for you to approve: 2 a month on Essentials and one every week
-          on Pro. Send a photo of a fresh cut with a line about it on WhatsApp, and Kabsi turns it
-          into a post with that photo, shows you the exact words and asks for your yes. Kabsi writes
-          only from facts you confirmed and photos you approved, and never invents a price, an offer
-          or a date. Until Kabsi's own AI writing is switched on, you write the post in your words
-          on Posts.
+          Kabsi prepares up to 2 Google posts a month for you to approve. Send a photo of a fresh
+          cut with a line about it on WhatsApp, and Kabsi turns it into a post with that photo,
+          shows you the exact words and asks for your yes. Kabsi writes only from facts you
+          confirmed and photos you approved, and never invents a price, an offer or a date.
         </p>
         <p>
           Before a photo goes up, Kabsi checks it for light, focus, size, a repeat of one you
