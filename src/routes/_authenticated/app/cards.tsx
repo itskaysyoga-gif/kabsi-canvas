@@ -27,6 +27,7 @@ import {
   buttonClass,
 } from "@/components/kabsi/ui";
 import { QrCode } from "@/components/kabsi/d2-parts";
+import { PlacementLinks } from "@/components/review-link/placement-links";
 import { ReviewCounts } from "@/components/reviews/review-counts";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
@@ -54,6 +55,8 @@ type Card = {
   label: string | null;
   activated_at: string | null;
   page_mode: "direct" | "page";
+  /** PROOF-2: where a placement link is pasted (booking, receipt, email_signature, social_bio); null for any other link. */
+  placement: string | null;
 };
 type Tap = { code: string; source: string; created_at: string };
 const DAY = 86400_000;
@@ -64,7 +67,7 @@ async function loadCards(locationId: string) {
   const [cards, taps] = await Promise.all([
     supabase
       .from("cards")
-      .select("code, kind, status, label, activated_at, page_mode")
+      .select("code, kind, status, label, activated_at, page_mode, placement")
       .eq("location_id", locationId)
       .order("activated_at"),
     supabase
@@ -88,7 +91,9 @@ function CardsPage() {
     enabled: !!loc,
   });
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["cards"] });
-  const links = data.data?.cards.filter((c) => c.kind === "link") ?? [];
+  // Placement links (PROOF-2) are review links too, shown in their own panel; the review link and the QR code use the others.
+  const links = data.data?.cards.filter((c) => c.kind === "link" && !c.placement) ?? [];
+  const placements = data.data?.cards.filter((c) => c.kind === "link" && !!c.placement) ?? [];
   const shareLink = links.find((l) => l.status === "active") ?? links[0];
   const nfc = (data.data?.cards ?? []).filter((c) => c.kind !== "link");
 
@@ -138,6 +143,14 @@ function CardsPage() {
             <ReviewLinks
               locationId={loc.id}
               links={links}
+              taps={data.data?.taps ?? []}
+              onChanged={refresh}
+            />
+          ) : null}
+          {shareLink ? (
+            <PlacementLinks
+              locationId={loc.id}
+              cards={placements}
               taps={data.data?.taps ?? []}
               onChanged={refresh}
             />

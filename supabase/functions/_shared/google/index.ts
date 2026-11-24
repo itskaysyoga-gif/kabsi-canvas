@@ -34,6 +34,8 @@ import * as notificationsMock from "./notifications/mock.ts";
 import * as performanceLive from "./performance/live.ts";
 import * as performanceMock from "./performance/mock.ts";
 import * as placesLive from "./places/live.ts";
+import * as placeActionsLive from "./placeActions/live.ts";
+import * as placeActionsMock from "./placeActions/mock.ts";
 import * as verificationsLive from "./verifications/live.ts";
 import * as verificationsMock from "./verifications/mock.ts";
 import type { VoiceOfMerchantState } from "./types.ts";
@@ -532,6 +534,37 @@ export async function searchTermsFor(locationId: string, month: { year: number; 
   const api = by(modeFor(locationId), performanceLive, performanceMock);
   const data = await api.searchKeywordsMonthly(locationId, month, month);
   return data.searchKeywordsCounts ?? [];
+}
+
+// ─── PROOF-2, read only, nothing kept: the links on the listing for the link watch, and one place's rating and review count
+// for the monthly competitor totals. Both are read when asked and shown or checked, never stored (K-40, master plan 30.10).
+export type ListingLinks = {
+  websiteUri: string | null;
+  placeActionLinks: { uri?: string; placeActionType?: string }[];
+  attributes: { name?: string; uriValues?: { uri?: string }[] }[];
+};
+export async function listingLinks(locationId: string): Promise<ListingLinks> {
+  assertNotConcierge(locationId);
+  if (modeFor(locationId) === "mock") {
+    const actions = await placeActionsMock.listPlaceActionLinks(locationId);
+    return { websiteUri: null, placeActionLinks: actions.placeActionLinks ?? [], attributes: [] };
+  }
+  const [l, actions, attrs] = await Promise.all([
+    locationsLive.getLocation(locationId, "websiteUri"), placeActionsLive.listPlaceActionLinks(locationId), attributesLive.getAttributes(locationId),
+  ]);
+  return { websiteUri: l.websiteUri ?? null, placeActionLinks: actions.placeActionLinks ?? [], attributes: attrs.attributes ?? [] };
+}
+
+/** One nearby business's current rating and review count from a live Places read (three fields, nothing else). null when Places
+ *  cannot answer; "back_soon" when today's Places cap is spent. Google in mock mode answers null: no example competitors. */
+export async function placeTotals(placeId: string): Promise<{ name: string | null; rating: number | null; count: number | null } | null | "back_soon"> {
+  if (googleMode() === "mock") return null;
+  const key = Deno.env.get("PLACES_API_KEY");
+  if (!key) return null;
+  const r = await placesLive.getPlace(key, placeId, "id,displayName,rating,userRatingCount");
+  if (r.backSoon) return "back_soon";
+  if (!r.ok) return null;
+  return { name: r.data.displayName?.text ?? null, rating: typeof r.data.rating === "number" ? r.data.rating : null, count: typeof r.data.userRatingCount === "number" ? r.data.userRatingCount : null };
 }
 
 // ─── Places API (New), on PLACES_API_KEY (works before the Business Profile grant).

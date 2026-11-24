@@ -15,6 +15,7 @@ import { AccountTop, Panel } from "@/components/kabsi/d3-account";
 import { EmptyState, ErrorState, Skeleton, buttonClass } from "@/components/kabsi/ui";
 import { CareBottom, CareTop, type CareData } from "@/components/report/care-blocks";
 import { WorkReceipt, type ReceiptData } from "@/components/report/work-receipt";
+import { MonthlyReport, type MonthlyRow } from "@/components/report/monthly-report";
 
 // Reports (UX 1, Design 3): the Monday weekly report as a work receipt (V4's data.receipt), then the earlier ones, the last
 // 12 weeks. Reports from before V4 have no receipt and keep their older blocks. Read through RLS (members only).
@@ -50,6 +51,18 @@ async function loadReports(locationId: string): Promise<Row[]> {
     .limit(12);
   if (error) throw new Error(error.message);
   return (data ?? []) as Row[];
+}
+
+// PROOF-2: the monthly reports, the last 12 months. Google's own lines in them are removed by the database after 30 days.
+async function loadMonthly(locationId: string): Promise<MonthlyRow[]> {
+  const { data, error } = await supabase
+    .from("monthly_reports")
+    .select("id, month_of, data")
+    .eq("location_id", locationId)
+    .order("month_of", { ascending: false })
+    .limit(12);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as MonthlyRow[];
 }
 
 const dates = (r: ReportData) => dateRange(r.period);
@@ -104,6 +117,11 @@ function ReportPage() {
     queryFn: () => loadReports(loc!.id),
     enabled: !!loc,
   });
+  const monthly = useQuery({
+    queryKey: ["monthly-reports", loc?.id],
+    queryFn: () => loadMonthly(loc!.id),
+    enabled: !!loc,
+  });
   const nearby = useQuery({
     queryKey: ["nearby", loc?.id],
     queryFn: () => loadNearby(loc!.id, loc!.name),
@@ -120,6 +138,7 @@ function ReportPage() {
       ? { keyword: n.check.keyword, line: n.countLine }
       : null;
   const [latest, ...earlier] = reports.data ?? [];
+  const [latestMonth, ...earlierMonths] = monthly.data ?? [];
 
   return (
     <>
@@ -147,8 +166,14 @@ function ReportPage() {
       ) : null}
       {reports.data?.length === 0 ? (
         <EmptyState icon={FileText} title="Your first report comes on Monday.">
-          It shows what Kabsi did, what waits for your yes and one next step.
+          It shows what Kabsi did, what waits for your yes and one next step. A monthly report
+          follows on the 1st of each month.
         </EmptyState>
+      ) : null}
+      {latestMonth ? (
+        <div className="mb-4">
+          <MonthlyReport r={latestMonth.data} />
+        </div>
       ) : null}
       {latest && loc ? (
         latest.data.receipt ? (
@@ -163,6 +188,28 @@ function ReportPage() {
             <OlderBody r={latest.data} latest />
           </Panel>
         )
+      ) : null}
+      {earlierMonths.length ? (
+        <Panel title="Earlier monthly reports" id="earlier-months" className="mt-4">
+          <ul className="divide-y divide-line">
+            {earlierMonths.map(({ id, data: m }) => (
+              <li key={id}>
+                <details className="group">
+                  <summary className="press flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 py-2 text-body font-semibold [&::-webkit-details-marker]:hidden">
+                    Your monthly report, {m.label}
+                    <ChevronDown
+                      className="size-5 shrink-0 text-text-2 transition-transform group-open:rotate-180"
+                      aria-hidden
+                    />
+                  </summary>
+                  <div className="pb-4">
+                    <MonthlyReport r={m} headingLevel="h3" />
+                  </div>
+                </details>
+              </li>
+            ))}
+          </ul>
+        </Panel>
       ) : null}
       {earlier.length && loc ? (
         <Panel title="Earlier reports" id="earlier" className="mt-4">

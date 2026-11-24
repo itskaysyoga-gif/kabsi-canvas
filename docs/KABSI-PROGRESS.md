@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 12 Nov 2026. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 24 Nov 2026. History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -65,9 +65,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 ## Recent entries (newest first)
 
 - 24 Nov 2026, FIX-0: Edge Functions refused by the database API since 14 Nov 05:37 UTC; stale work cancelled; key resolver and public /health built; waiting for Rashid's new secret key. `2026-11-24-fix0.md`.
-- 12 Nov 2026, Fix 6 (R-162): records 30.52 and four small fixes. `2026-11-12-fix6.md`.
+- 24 Nov 2026, PROOF-2: link watch, short weekly summary, monthly report, placement links, pure functions for GATE-2. Migration applied; nothing run live (FIX-0's key). `2026-11-24-proof2.md`.
 - 12 Nov 2026, Site 3b (R-161): sign-in code on intent (PR 584), the rest of the site (19 of 25 findings closed). `2026-11-12-site3b.md`.
-- Older entries (Home 2, Fix 5, Cards 2, Growth 1 and Partners 3 `2026-11-11-<name>.md`; Partners 2, Outbound 2, Site 3a, Clean 4, Look 2 and 2b, Founding 1, RB-T, Safe 1, Signup 1, Plan 1, RB-F4, Ops 1 `2026-11-10-<name>.md`; Partners 1, RB-F3 and Tidy 2 in `2026-11-10-tidy2.md`; earlier ones in `2026-11-09-progress-moved.md`).
+- Older entries (Fix 6 `2026-11-12-fix6.md`; Home 2, Fix 5, Cards 2, Growth 1 and Partners 3 `2026-11-11-<name>.md`; Partners 2, Outbound 2, Site 3a, Clean 4, Look 2 and 2b, Founding 1, RB-T, Safe 1, Signup 1, Plan 1, RB-F4, Ops 1 `2026-11-10-<name>.md`; Partners 1, RB-F3 and Tidy 2 in `2026-11-10-tidy2.md`; earlier ones in `2026-11-09-progress-moved.md`).
 
 ## How a session updates this page
 

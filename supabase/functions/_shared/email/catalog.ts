@@ -14,6 +14,9 @@ import * as copy from "./copy.ts";
 import { reviewEmail, type ReviewInput } from "./review.ts";
 import { renderReport } from "./report-body.ts";
 import { receipt } from "../results-report/receipt.ts";
+import { renderMonthly } from "./monthly-body.ts";
+import { composeMonthly } from "../monthly-report/compose.ts";
+import { FULL as MONTHLY_FULL, FULL_NEARBY } from "../monthly-report/sample.ts";
 import * as account from "./account-copy.ts";
 import { lifecycleEmail } from "./lifecycle-copy.ts";
 import { partnerFirstPaymentEmail, partnerJoinedEmail, partnerPayoutEmail, partnerTrialEmail } from "./partner-copy.ts";
@@ -71,6 +74,7 @@ const REPORT = {
 /** The same week with no Google figures read live (a real owner before Google's numbers are in): the cards hide. */
 export const REPORT_NO_GOOGLE = { ...REPORT, receipt: { ...REPORT.receipt, google: null } };
 const report = renderReport({ name: BIZ }, REPORT);
+const monthly = renderMonthly(composeMonthly(MONTHLY_FULL), FULL_NEARBY);
 const stored = (category: string, title: string, link: string, content: EmailContent, tag = "") => [{
   id: `n${category}${tag}`, location_id: "loc", user_id: "u", to_address: "owner@example.test", category, kind: category, dedupe_key: `k${category}${tag}`, title, link,
   email_state: "digest" as const, email_due_at: "2026-10-21T16:00:00Z", email_content: content,
@@ -134,6 +138,7 @@ export function catalog(): CatalogEntry[] {
     e("deletion_scheduled", "account", true, copy.deletionScheduled(BIZ, "28 October 2026", APP)),
     e("deletion_done", "account", true, copy.deletionDone(BIZ, APP)),
     e("weekly_report", "weekly_report", true, copy.weeklyReport(BIZ, report, report.html, report.text, APP)),
+    e("monthly_report", "weekly_report", true, copy.monthlyReport(BIZ, "October 2026", monthly, monthly.html, monthly.text, APP)),
     e("holiday_hours", "approval_needed", true, copy.holidayHoursAsk({
       business: BIZ, holiday: "Christmas Day", when: "Friday 25 December", estimated: false, ramadan: false,
       links: { choose: `${APP}/h/HOLIDAYTOKEN`, normal: `${APP}/h/HOLIDAYTOKEN?a=normal`, closed: `${APP}/h/HOLIDAYTOKEN?a=closed`, custom: `${APP}/h/HOLIDAYTOKEN?a=custom` },

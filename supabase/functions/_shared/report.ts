@@ -1,23 +1,16 @@
-// Weekly Care Report (D222, K-28): Monday from 08:00 local time, one email per active location, kept in Insights. Facts only:
-// what Kabsi did this week (counted from the audit log, P0.5-04), Google rating and its change, reviews received, replies
-// posted, card taps (bots excluded), the week's customer activity (Google's numbers; examples while Google is in mock mode),
-// what needs the owner, the Profile Coach's plan, the time saved (an estimate with its formula) and, on Pro, how people found
-// the profile. No review text and no quotes (K-113.3, R-19). No advice, no claims about causes.
-import { dailyFigures, performanceSource, profileRating, searchTermsFor } from "./google/index.ts";
+// The weekly report (D222, K-28; short since PROOF-2): Monday from 08:00 local time, one email per active location, kept in
+// Reports. Facts only: what Kabsi did this week (counted from the audit log, P0.5-04), what waits for the owner, one next step,
+// and the taps on review links and cards by place (bots excluded). Google's own figures, nearby totals and recurring feedback
+// are in the monthly report (_shared/monthly-report/), which reads them fresh. No review text and no quotes (K-113.3, R-19). No
+// advice, no claims about causes, and no line that counts a check as work.
+import { profileRating } from "./google/index.ts";
 import { isConciergeLocationId } from "./concierge.ts";
-import { ALL_METRICS } from "./insights/summary.ts";
-import { termsMonth } from "./insights/periods.ts";
-import { exampleTermsFor } from "./insights/example.ts";
-import { normaliseTerms, termCountText } from "./insights/terms.ts";
-import { type Counts, composeCare, exampleWeekSeries, type Inputs, type ReportTerms, type WeekActivity, weekActivity, weekPeriods } from "./care-report/compose.ts";
+import { type Counts, composeCare, type Inputs } from "./care-report/compose.ts";
 import { admin, APP_URL, captureError, esc } from "./kabsi.ts";
 import { notify } from "./notify.ts";
 import * as copy from "./email/copy.ts";
 import { dateRange, renderReport } from "./email/report-body.ts";
-import { type AiAnswer, type GrowthStats, monthlyWeek, receipt, type RivalChange } from "./results-report/receipt.ts";
-import { sourceActions } from "./insights/ai-visibility.ts";
-import type { DoneRun } from "./visibility/ai/numbers.ts";
-import type { Finding } from "./visibility/ai/accuracy.ts";
+import { type GrowthStats, receipt } from "./results-report/receipt.ts";
 
 type Loc = { id: string; name: string; place_id: string | null; time_zone: string; emails_paused_until: string | null; google_location_id?: string | null; google_account_id?: string | null; is_demo?: boolean | null };
 const DAY = 86400_000;
@@ -54,40 +47,15 @@ export async function snapshotRatings(locs: Loc[]) {
   return taken;
 }
 
-// The new blocks (P0.5-04). The counts come from one database function over the audit log; Google's numbers are read here and
-// kept in the report copy for 30 days at most (K-40). A failed Google read leaves its block out, never the report.
+// The blocks from Kabsi's own records (P0.5-04). The counts come from one database function over the audit log. Since PROOF-2
+// the weekly report asks Google for nothing: its figures are in the monthly report.
 async function careBlocks(loc: Loc, now: Date) {
   const db = admin();
   const since = new Date(now.getTime() - 7 * DAY);
   const { data, error } = await db.rpc("care_report_inputs", { p_location: loc.id, p_from: since.toISOString(), p_to: now.toISOString(), p_tz: loc.time_zone });
   if (error) throw error;
   const inputs = data as Inputs & { counts: Counts };
-
-  let activity: WeekActivity | null = null;
-  let terms: ReportTerms | null = null;
-  const source = performanceSource(loc.google_location_id);
-  if (source !== "none") {
-    const access = await db.rpc("feature_access", { p_location: loc.id });
-    const pro = !access.error && (access.data as { pro?: boolean } | null)?.pro === true;
-    try {
-      if (source === "mock") {
-        // 30.18 section 3: a real owner's report never shows example figures; only the demo business keeps its labelled examples.
-        if (loc.is_demo) activity = weekActivity(exampleWeekSeries(now), now, "mock");
-      } else {
-        const p = weekPeriods(now);
-        activity = weekActivity(await dailyFigures(loc.google_location_id!, ALL_METRICS, p.previous.start, p.current.end), now, "live");
-      }
-      if (pro && (source === "live" || loc.is_demo)) {
-        const month = termsMonth(now);
-        const raw = source === "mock" ? exampleTermsFor({ name: loc.name }) : await searchTermsFor(loc.google_location_id!, month);
-        terms = {
-          source, example: source === "mock", month_label: month.label, fetched_at: now.toISOString(),
-          items: normaliseTerms(raw).slice(0, 5).map((t) => ({ term: t.term, count: termCountText(t) })),
-        };
-      }
-    } catch { /* Google's numbers are left out this week; Kabsi's own counts are not */ }
-  }
-  return composeCare(inputs, { activity, terms });
+  return composeCare(inputs, { activity: null, terms: null });
 }
 
 export async function buildReport(loc: Loc, now = new Date()) {
@@ -117,18 +85,19 @@ export async function buildReport(loc: Loc, now = new Date()) {
   const nfc = growth.opens_tag, qr = growth.opens_qr, message = growth.opens_message;
 
   const care = await careBlocks(loc, now);
+  // Taps by place: each card and each placement link (booking confirmation, receipt, email signature, social bio) with its taps
+  // this week, bots left out, this business's taps only. Only the ones that were tapped. Taps, never reviews.
+  const { data: tapRows, error: tapError } = await db.rpc("link_taps", { p_location: loc.id, p_from: since, p_to: now.toISOString() });
+  if (tapError) throw tapError;
+  const PLACE: Record<string, string> = { booking: "Booking confirmation", receipt: "Receipt", email_signature: "Email signature", social_bio: "Social bio" };
+  const cards = ((tapRows ?? []) as { code: string; label: string | null; placement: string | null; taps: number }[])
+    .filter((t) => t.taps > 0).map((t) => ({ code: t.code, label: t.placement ? PLACE[t.placement] ?? t.label : t.label, this_week: t.taps }));
   // The 7 days before the Monday it is sent: Monday to Sunday.
   const period = { from: isoDay(new Date(now.getTime() - 7 * DAY), loc.time_zone), to: isoDay(new Date(now.getTime() - DAY), loc.time_zone) };
-  // Cards 2: each active card's taps in that week (bots left out, this business's taps only). A business with no card has none.
-  const { data: cardWeeks } = await db.rpc("card_taps_weeks", { p_location: loc.id, p_week: period.from });
   const work = receipt({
     dates: dateRange(period),
     business: loc.name, counts: care.care.counts, needs: care.needs, needsTotal: care.needs_total, plan: care.plan,
-    activity: care.activity ?? null, demo: !!loc.is_demo, growth, tz: loc.time_zone,
-    ai: await latestAiAnswer(loc.id, now).catch(() => null), aiThisWeek: monthlyWeek(today),
-    accuracy: await latestFinding(loc.id, now).catch(() => null),
-    rivals: await rivalChanges(loc.id, now).catch(() => []),
-    cards: (cardWeeks as { code: string; label: string | null; this_week: number }[] | null) ?? null,
+    activity: null, demo: !!loc.is_demo, growth, tz: loc.time_zone, cards,
   });
 
   return {
@@ -142,53 +111,6 @@ export async function buildReport(loc: Loc, now = new Date()) {
   };
 }
 
-// 30.15 3.8: the month's latest AI answer for the business: the exact question, which assistant and when, named or not, the sources.
-async function latestAiAnswer(locationId: string, now: Date): Promise<AiAnswer | null> {
-  const since = new Date(now.getTime() - 31 * DAY).toISOString();
-  const { data } = await admin().from("ai_visibility_runs").select("provider, run_at, named, position, competitors, sources, ai_visibility_prompts(text)")
-    .eq("location_id", locationId).eq("state", "done").eq("source", "live").gte("run_at", since).order("run_at", { ascending: false }).limit(20);
-  const runs = (data ?? []) as (DoneRun & { ai_visibility_prompts: { text: string } | { text: string }[] | null })[];
-  const r = runs[0];
-  if (!r) return null;
-  const p = Array.isArray(r.ai_visibility_prompts) ? r.ai_visibility_prompts[0] : r.ai_visibility_prompts;
-  if (!p?.text) return null;
-  return {
-    question: p.text, provider: r.provider, asked_at: r.run_at, named: r.named,
-    sources: (r.sources ?? []).slice(0, 3).map((x) => ({ domain: x.domain, title: x.title })),
-    noticed: sourceActions(runs)[0]?.text ?? null,
-  };
-}
-
-// AI Answers 1: the week's latest clear difference between a real AI answer and the facts Kabsi has (live runs only).
-async function latestFinding(locationId: string, now: Date): Promise<Finding | null> {
-  const since = new Date(now.getTime() - 7 * DAY).toISOString();
-  const { data } = await admin().from("ai_visibility_runs").select("accuracy").eq("location_id", locationId).eq("state", "done")
-    .eq("source", "live").gte("run_at", since).not("accuracy->>finding", "is", null).order("run_at", { ascending: false }).limit(1);
-  const f = (data?.[0]?.accuracy as { finding?: Finding | null } | null)?.finding;
-  return f?.fact && f.sentence ? f : null;
-}
-
-// 30.15 3.9: review gains over about a month for the business and the competitors it watches, from Kabsi's own public snapshots.
-async function rivalChanges(locationId: string, now: Date): Promise<RivalChange[]> {
-  const since = new Date(now.getTime() - 35 * DAY).toISOString().slice(0, 10);
-  const { data } = await admin().from("competitor_snapshots").select("key, is_self, name, reviews, taken_on")
-    .eq("location_id", locationId).gte("taken_on", since).order("taken_on");
-  const by = new Map<string, { name: string; self: boolean; first: number | null; last: number | null; days: number }>();
-  const first = new Map<string, string>();
-  for (const s of (data ?? []) as { key: string; is_self: boolean; name: string; reviews: number | null; taken_on: string }[]) {
-    const cur = by.get(s.key) ?? { name: s.name, self: s.is_self, first: s.reviews, last: s.reviews, days: 0 };
-    if (!first.has(s.key)) first.set(s.key, s.taken_on);
-    cur.last = s.reviews ?? cur.last;
-    cur.days = (Date.parse(s.taken_on) - Date.parse(first.get(s.key)!)) / DAY;
-    by.set(s.key, cur);
-  }
-  const gain = (x: { first: number | null; last: number | null }) => (x.first == null || x.last == null ? null : Math.max(0, x.last - x.first));
-  const me = [...by.values()].find((x) => x.self);
-  const mine = me ? gain(me) : null;
-  // Two snapshots at least three weeks apart, or it is not "this month".
-  if (!me || mine == null || me.days < 21) return [];
-  return [...by.values()].filter((x) => !x.self && x.days >= 21 && gain(x) != null).map((x) => ({ name: x.name, theirs: gain(x)!, mine }));
-}
 export type Report = Awaited<ReturnType<typeof buildReport>>;
 
 // Cron: every tick, but only acts on Monday from 08:00 local, once per location per week (unique row).
