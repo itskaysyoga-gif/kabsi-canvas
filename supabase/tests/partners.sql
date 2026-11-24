@@ -110,7 +110,7 @@ select is(public.billing_checkout_family(pg_temp.org('00000000-0000-4000-8000-00
 
 -- The day-60, 85 and 90 messages belong to the old trial: a place linked now gets none; one linked before GATE-2 still does.
 select is(private.founding_tick(), 0, 'a place linked after GATE-2 gets no day-60 message');
-update public.founding_applications set linked_at = timestamptz '2026-11-01 00:00:00+00' where whatsapp = '+971500000001';
+update public.founding_applications set card_checkout = false where whatsapp = '+971500000001';
 select is(private.founding_days(pg_temp.org('00000000-0000-4000-8000-0000000020c1')), 90, 'a place linked before GATE-2 keeps its 90 days and no caps');
 select is(private.founding_tick(), 1, 'day 60 queues the message for a place linked before');
 select is((select count(*)::int from public.jobs where kind = 'founding_message'), 1, 'one founding_message job');

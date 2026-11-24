@@ -9,9 +9,13 @@
 --   4. private.offer_founding_switch(), offered daily by pg_cron kabsi_founding_switch: a founding_switch job for each running
 --      monthly founding plan whose notice (14 days before founding_ends_at) or switch (3 days before) is due. The job decides
 --      again with the row in hand (billing.ts foundingSwitch), so a late or repeated offer does nothing twice.
---   5. private.founding_tick: the day-60, 85 and 90 messages only for a place linked before this change (the old trial).
+--   5. private.founding_tick: the day-60, 85 and 90 messages only for a place on the old trial (card_checkout false).
+--   founding_applications.card_checkout marks a place linked by the new staff_founding_link.
 -- Additive: two columns, four function bodies, one cron job. Nothing is dropped or deleted.
 
+alter table public.founding_applications add column if not exists card_checkout boolean not null default false;
+comment on column public.founding_applications.card_checkout is
+  'GATE-2: true when staff linked the place after the 90-day trial was retired; it checks out at 19 with a card. False: the old 90 days.';
 alter table public.subscriptions add column if not exists founding_notice_at timestamptz;
 alter table public.subscriptions add column if not exists founding_switched_at timestamptz;
 comment on column public.subscriptions.founding_notice_at is
@@ -25,7 +29,7 @@ create or replace function private.founding_days(p_org uuid) returns integer
 language sql stable security definer set search_path = '' as $$
   select case when exists (select 1 from public.founding_applications a
                             where a.organization_id = p_org and a.status = 'accepted'
-                              and a.linked_at < timestamptz '2026-11-24 20:00:00+00') then 90 end
+                              and not a.card_checkout) then 90 end
 $$;
 revoke all on function private.founding_days(uuid) from public, anon, authenticated;
 
@@ -44,7 +48,7 @@ begin
               and x.state in ('active', 'past_due')) then
     raise exception 'already_paying' using hint = 'This business already pays; the founding price is set at its first checkout.';
   end if;
-  update public.founding_applications set organization_id = l.organization_id, linked_at = now() where id = p_id;
+  update public.founding_applications set organization_id = l.organization_id, linked_at = now(), card_checkout = true where id = p_id;
   perform private.audit('staff', auth.uid(), 'founding_linked', l.id, 'founding_application', p_id::text, null,
     jsonb_build_object('checkout', 'founding'), 'staff', 'linked', l.organization_id);
   return jsonb_build_object('linked', true, 'trial_started', false, 'ends_at', null, 'checkout', 'founding');
@@ -64,7 +68,7 @@ begin
                      where s.organization_id = a.organization_id and s.trial_started_at is not null
                      order by s.trial_started_at desc limit 1) t on true
      where a.status = 'accepted' and a.organization_id is not null
-       and a.linked_at < timestamptz '2026-11-24 20:00:00+00'
+       and not a.card_checkout
        and not exists (select 1 from public.subscriptions p where p.organization_id = a.organization_id
                         and p.provider = 'creem' and p.state in ('active', 'past_due'))
   loop
