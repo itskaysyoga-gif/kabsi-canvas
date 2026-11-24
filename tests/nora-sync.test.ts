@@ -1,6 +1,7 @@
 // P0.6-06 (K-104, K-58, K-111, K-114.3): Nora is in sync with the system. The facts file is the one list of what she may
 // state, so these tests hold it to what is built on main today, run her 60-question evaluation with stub models only (no
-// Anthropic call, R-43) and fail when a price changes in the file without the evaluation changing with it.
+// Anthropic call, R-43) and fail when a price changes in the file without the evaluation changing with it. SITE-1
+// (blueprint 3.1, R-163): the price is one plan at 29 US dollars a month per location.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
@@ -96,10 +97,21 @@ describe("the evaluation set", () => {
   });
 
   it("fails when a price in the facts file changes and the evaluation does not", () => {
-    const changed = facts.replace("| Pro | $59 | $590 |", "| Pro | $49 | $490 |");
+    // SITE-1 (blueprint 3.1, R-163): the price line is now the one plan's row, "29 US dollars a month".
+    const changed = facts.replace(
+      "| Kabsi, one location | 29 US dollars a month |",
+      "| Kabsi, one location | 39 US dollars a month |",
+    );
     expect(changed).not.toBe(facts);
     const broken = QUESTIONS.flatMap((q) => support(q, changed));
     expect(broken.length).toBeGreaterThan(0);
+    // and the trial line, word for word, is held the same way
+    const trial = facts.replaceAll(
+      "Then 29 US dollars a month until you cancel",
+      "Then 39 US dollars a month until you cancel",
+    );
+    expect(trial).not.toBe(facts);
+    expect(QUESTIONS.flatMap((q) => support(q, trial)).length).toBeGreaterThan(0);
     // and a brand new amount is refused until it is listed in AMOUNTS
     const added = facts + "\nA new add-on costs $77 a month.\n";
     expect(dollarsIn(added).filter((d) => !(d in AMOUNTS))).toEqual(["$77"]);
@@ -133,7 +145,11 @@ describe("what Nora knows, against what is built on main", () => {
       ["Manager guide (P0.4-03)", /Kabsi group ID 5481006796/],
       ["situation screens (P0.4-04)", /Something not working\?/],
       ["five questions (P0.4-05)", /Five quick questions/],
-      ["plan choice from day 11 (P0.4-05)", /Your Pro trial ends in/],
+      // SITE-1 (blueprint 3.1, R-163): the day 11 choice between Essentials and Pro became one notice before the trial ends.
+      [
+        "plan choice before the trial ends (P0.4-05)",
+        /Before the trial ends, Home and one email say what happens next and the price/,
+      ],
       ["Need a hand (P0.4-11)", /\*\*Need a hand\?\*\*/],
     ];
     for (const [name, re] of features) expect(facts, name).toMatch(re);
@@ -141,19 +157,38 @@ describe("what Nora knows, against what is built on main", () => {
 
   it("marks the five coming items [COMING], not available yet, with no date", () => {
     const coming = section("**[COMING] Features.**", "**[CHANGING] Being replaced.**");
+    // SITE-1 (blueprint 3.1, R-163): What customers say (Pro), the order and booking button (Pro) and Kabsi Partners were
+    // retired, not built. The coming list now marks each one [RETIRED] and carries what replaced it.
     for (const [name, re] of [
-      ["What customers say", /\*\*What customers say \(Pro\):\*\*/],
-      ["own order button", /\*\*Order and booking button \(Pro\):\*\*/],
-      ["Kabsi Partners", /\*\*Kabsi Partners:\*\*/],
+      ["What customers say", /\*\*\[RETIRED\]\*\* \*\*What customers say \(Pro\)\.\*\*/],
+      [
+        "What customers say, replaced by the monthly report",
+        /\*\*\[COMING\]\*\* Instead, the monthly report shows a complaint or a praised service only when it is mentioned 3 or more times in 90 days/,
+      ],
+      ["own order button", /\*\*\[RETIRED\]\*\* \*\*Order and booking button \(Pro\)\.\*\*/],
+      [
+        "own order button, replaced by the daily link check",
+        /Kabsi checks the website and booking link every day and tells the owner when one stops loading/,
+      ],
+      ["Kabsi Partners", /\*\*\[RETIRED\]\*\* \*\*Kabsi Partners\.\*\*/],
     ] as const)
       expect(coming, name).toMatch(re);
-    expect(facts).toMatch(/\*\*\[COMING\] Plans and prices/);
+    // SITE-1: the plans and prices block is no longer [COMING]; it is a dated [RETIRED] record of what the one plan replaced.
+    expect(facts).not.toMatch(/\*\*\[COMING\] Plans and prices/);
+    expect(facts).toMatch(
+      /\*\*\[RETIRED\]\*\* \*\*Plans and prices of 22 Oct to 23 Nov 2026\.\*\*/,
+    );
     expect(facts).toMatch(/Card checkout through Creem is not open yet/);
     expect(facts).toMatch(/Never give a date/);
-    const ledger = section("**Where each feature stands", "**[COMING] Plans and prices");
+    const ledger = section("**Where each feature stands", "**[RETIRED]** **Plans and prices");
     expect(ledger).toMatch(/Card payments \(Creem\)/);
+    // SITE-1: the coming row now holds card payments for the one plan, the full monthly report and its recurring mentions;
+    // the retired items are named as never offered.
     expect(ledger).toMatch(
-      /Kabsi Partners; What customers say \(Pro\); the order and booking button \(Pro\); Competitor Watch/,
+      /\*\*\[COMING\]\*\*, not available yet, no date \| Card payments \(Creem\) for the one plan of 29 US dollars a month per location \(section 4\.1\); the full monthly report; recurring complaints and praised services in the monthly report/,
+    );
+    expect(ledger).toMatch(
+      /Retired on 24 Nov 2026, never offered: the Essentials and Pro plans, yearly prices, the launch price, Kabsi Partners as a public offer, What customers say \(Pro\), the order and booking button \(Pro\), Competitor Watch/,
     );
     // no date or time frame next to a coming item in the ledger or the coming list
     for (const block of [ledger, coming]) {

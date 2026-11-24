@@ -233,7 +233,9 @@ describe("no public surface names Founding 25 or links /founding", () => {
     expect(facts).not.toMatch(/founding/i);
     // "launch price" stays only on lines that say it is retired.
     for (const line of facts.split("\n").filter((l) => /launch price/i.test(l)))
-      expect(line, line.slice(0, 80)).toMatch(/retired|RETIRED|replaces?d?|switched off|never quote|no longer/i);
+      expect(line, line.slice(0, 80)).toMatch(
+        /retired|RETIRED|replaces?d?|switched off|never quote|no longer/i,
+      );
     expect(facts).toContain("There is no public offer or discount.");
     expect(facts).toContain("A business that was invited should open the link in its invitation.");
   });

@@ -135,7 +135,9 @@ describe("no retired price (lane R, 22 Oct 2026)", () => {
       expect(text).not.toContain("An extra location is $15 a month or $150 a year");
       // The no-card trial is named only on lines that say it was replaced.
       for (const line of text.split("\n").filter((l) => /trial,? (with )?no card/i.test(l)))
-        expect(line, line.slice(0, 80)).toMatch(/retired|RETIRED|replaces?d?|switched off|never quote|no longer/i);
+        expect(line, line.slice(0, 80)).toMatch(
+          /retired|RETIRED|replaces?d?|switched off|never quote|no longer/i,
+        );
     }
   });
 });

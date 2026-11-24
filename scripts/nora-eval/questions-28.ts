@@ -1,83 +1,107 @@
 // The 20 questions of master plan 28.7: Nora on the new position (maps, AI answers, competitors, review requests, what
 // the free check shows, what each plan holds). Same shape and rules as questions.ts (60 questions, which stay as they
 // are, so the "Nora gate (60 questions)" job keeps its name and its count). The live run asks all 80.
-// Everything about the new product was [COMING] when this was written; the Visibility Map and AI Visibility are live
-// since 5 Nov 2026 (Go live 1), so n62, n63, n66 and n67 no longer expect "not available yet" (credit sprint C).
-import type { Question } from "./questions.ts";
+// Everything about the new product was [COMING] when this was written; the Visibility Map and AI Visibility were live
+// from 5 Nov 2026 (Go live 1). SITE-1 (blueprint 3.1 of 24 Nov 2026, R-163) switched off the map, the nearby rank checks,
+// the AI answer checks and Competitor Watch, and replaced Essentials and Pro with one plan: the asks stay as owners write
+// them, and the reference answers now say what Kabsi does instead. An answer that still describes a retired feature as
+// available (a 7 by 7 grid, keywords or prompts per plan, ChatGPT checks, 5 competitors on Pro, a launch price) fails.
+import {
+  INCLUDED,
+  OLD_PRICES,
+  ONE_PLAN_ONLY,
+  ONE_PRICE,
+  PLAN_NAME_PRICED,
+  PRICE,
+  RETIRED_PRICES,
+  TRIAL,
+  type Question,
+} from "./questions.ts";
 
 // "Kabsi doesn't guarantee any ranking" is the honest answer: a guarantee only counts when nothing negates it just before.
 const NOT_PROMISED =
   /(?<!n['’]t\s)(?<!\bnot\s)(?<!\bnever\s)(?<!\bno\s)(?<!\bcannot\s)\bguarantee[sd]?\b|\b(we will get you|you will rank|top of google|#1|number one)\b/i;
 
+// The retired features, as the facts mark them now.
+const MAP_OFF =
+  /\*\*\[RETIRED\]\*\* \*\*Visibility Map\*\*[^\n]*Kabsi runs no local rank scans and makes no ranking claim\./;
+const AI_OFF = /\*\*\[RETIRED\]\*\* \*\*AI Visibility\*\*[^\n]*Kabsi checks no AI answers\./;
+const SWITCHED_OFF =
+  /\*\*Never offer what is switched off\.\*\* The visibility map, nearby rank checks, AI answer checks \(ChatGPT, Perplexity, Gemini\)/;
+const COMPETITORS =
+  /Once a month, a live read of 3 nearby businesses' current rating and review count from Google\. No history is kept/;
+const OLD_WATCH =
+  /The older Competitor Watch plan \(more competitors, alerts, history\) is \*\*\[RETIRED\]\*\*/;
+const SAYS_OFF = /switched off|not available|no longer/i;
+
 export const QUESTIONS_28: Question[] = [
-  // ── the Visibility Map ───────────────────────────────────────────────────────────────────────────────────────────
+  // ── the Visibility Map (retired 24 Nov 2026, SITE-1) ─────────────────────────────────────────────────────────────
   {
     id: "n61",
     lang: "en",
     topic: "the Visibility Map",
     ask: "Can Kabsi show me where my shop appears on Google Maps around my street?",
-    kb: [
-      /\*\*Visibility Map \(built 25 Oct 2026, V1; live from 5 Nov 2026, Go live 1, master plan 30\.28\):\*\* a 7 by 7 grid around the business/,
-    ],
-    // Eval 1: owners never read "grid" (30.15 section 1), so the 49 checked places say it as well.
-    must: [/grid|49 (places|points)|7 by 7/i],
-    forbid: [NOT_PROMISED],
+    kb: [MAP_OFF, COMPETITORS],
+    // SITE-1: the honest answer is no, and what Kabsi does instead; a grid answer fails.
+    must: [SAYS_OFF, /3 nearby/],
+    forbid: [NOT_PROMISED, /\b(7 by 7|49 (places|points)|grid)\b/i, /^\s*(yes|sure)\b/i],
     reference:
-      "Yes, that is the Visibility Map. Kabsi searches Google Maps from 49 places in a 7 by 7 grid around your business, like a customer standing there, for a keyword you confirm. It shows the average position, the share of the grid where you are in the top 3, and who appears above you. Kabsi shows what it measured and never promises a position.",
+      "No. The visibility map was switched off on 24 Nov 2026 and is not available: Kabsi runs no local rank scans and makes no ranking claim. What Kabsi does instead is a monthly live read of 3 nearby businesses' current rating and review count, beside your own, with no history kept.",
   },
   {
     id: "n62",
     lang: "en",
     topic: "map keywords per plan",
     ask: "How many keywords can I track on the map with Essentials and with Pro?",
-    kb: [/\| Visibility Map \| 1 keyword, monthly \| 5 keywords, weekly \|/],
-    // Eval 1: "search term" is the owner's word for a keyword since 30.15.
-    must: [/\b1 (keyword|search term)/i, /\b5 (keywords|search terms)/i],
+    kb: [MAP_OFF, RETIRED_PRICES],
+    must: [SAYS_OFF],
+    forbid: [/\b(1|5) (keywords?|search terms?)\b/i, PLAN_NAME_PRICED],
     reference:
-      "The Visibility Map checks 1 keyword a month on Essentials and 5 keywords every week on Pro.",
+      "None. The visibility map and its keyword checks were switched off on 24 Nov 2026 and are not available, and Kabsi runs no local rank scans. There is no Essentials or Pro any more. Kabsi has one plan, 29 US dollars a month per location.",
   },
   {
     id: "n63",
     lang: "en",
     topic: "map grid size",
     ask: "How far out does the map check go for a dental clinic?",
-    kb: [/about 1 km for a cafe, 3 km for a salon, 5 km for a clinic or auto repair/],
-    must: [/5 km/],
+    kb: [MAP_OFF, COMPETITORS],
+    must: [SAYS_OFF],
+    forbid: [/\b\d+ ?km\b/i],
     reference:
-      "The Visibility Map's grid is wider for a trade where customers travel further: about 5 km for a clinic, 3 km for a salon and 1 km for a cafe.",
+      "Kabsi no longer runs a map check: the visibility map was switched off on 24 Nov 2026 and is not available. For a dental clinic Kabsi looks after the Google profile itself: a reply to every review, the listing checked every day, and a monthly live read of 3 nearby businesses' current rating and review count.",
   },
   {
     id: "n64",
     lang: "en",
     topic: "a promised map position",
     ask: "If I pay for Pro, will you get me into the top 3 on Google Maps?",
-    kb: [/it never promises a position, reviews, calls or customers/],
-    forbid: [/\b(yes|we will|you will)\b[^.]*\btop 3\b/i, NOT_PROMISED],
+    kb: [/it never promises a position, reviews, calls or customers/, RETIRED_PRICES],
+    forbid: [/\b(yes|we will|you will)\b[^.]*\btop 3\b/i, NOT_PROMISED, /nearby check shows/i],
     reference:
-      "No. Kabsi never promises a position, reviews, calls or customers. It looks after your reviews and your Google profile, and the nearby check shows what it measured and what changed, without saying a change happened because of Kabsi.",
+      "No. Kabsi never promises a position, reviews, calls or customers, and there is no Pro any more, only one plan. Kabsi looks after your reviews and your Google profile and shows you what it did, without saying a change happened because of Kabsi.",
   },
-  // ── AI answers ───────────────────────────────────────────────────────────────────────────────────────────────────
+  // ── AI answers (retired 24 Nov 2026, SITE-1) ─────────────────────────────────────────────────────────────────────
   {
     id: "n65",
     lang: "en",
     topic: "AI Visibility",
     ask: "Do you check whether ChatGPT recommends my restaurant?",
-    kb: [
-      /\*\*AI Visibility \(built 26 Oct 2026, V2; live from 5 Nov 2026, Go live 1\):\*\* questions written in customers' words are run on ChatGPT and Perplexity/,
-    ],
-    must: [/ChatGPT/],
+    kb: [AI_OFF, SWITCHED_OFF],
+    must: [/ChatGPT/, /switched off|not available|checks no/i],
+    forbid: [/^\s*(yes|sure)\b/i, /\bKabsi (asks|runs|checks) ChatGPT\b/i],
     reference:
-      "Yes, that is AI Visibility. Kabsi asks ChatGPT and Perplexity questions in your customers' words and records whether your business is named, where, which competitors are named and which sources are cited. It is shown as a sample, because AI answers change from one run to the next.",
+      "No. Kabsi checks no AI answers: the checks on ChatGPT, Perplexity and Gemini were switched off on 24 Nov 2026 and are not available. Kabsi looks after your Google profile itself: every review answered, the listing protected and proof of the work.",
   },
   {
     id: "n66",
     lang: "en",
     topic: "AI prompts per plan",
     ask: "How many AI questions are checked on each plan?",
-    kb: [/\| AI Visibility \| 3 prompts, monthly \| 10 prompts, every 2 weeks \|/],
-    must: [/\b3\b/, /\b10\b/],
+    kb: [AI_OFF, PRICE],
+    must: [/switched off|not available|none/i],
+    forbid: [/\b(3|10) prompts\b/i, PLAN_NAME_PRICED],
     reference:
-      "AI Visibility checks 3 prompts a month on Essentials and 10 prompts every 2 weeks on Pro.",
+      "None. There is one plan, and Kabsi checks no AI answers: the AI answer checks were switched off on 24 Nov 2026 and are not available.",
   },
   {
     id: "n67",
@@ -85,35 +109,35 @@ export const QUESTIONS_28: Question[] = [
     topic: "AI Visibility in Spanish",
     ask: "¿Kabsi revisa si Perplexity menciona mi negocio?",
     gloss: "Does Kabsi check whether Perplexity mentions my business?",
-    kb: [/run on ChatGPT and Perplexity/],
-    must: [/Perplexity/],
+    kb: [SWITCHED_OFF, AI_OFF],
+    must: [/Perplexity/, /no está disponible|desactiv/i],
+    forbid: [/^\s*s[ií]\b/i],
     reference:
-      "Sí, eso es AI Visibility. Kabsi hace preguntas con las palabras de sus clientes en ChatGPT y Perplexity, y anota si su negocio aparece, en qué lugar y qué competidores y fuentes se citan.",
+      "No. Kabsi ya no revisa respuestas de asistentes de IA: la revisión en ChatGPT, Perplexity y Gemini se desactivó el 24 de noviembre de 2026 y no está disponible. Kabsi cuida tu perfil de Google: responde cada reseña, protege tu ficha y te muestra el trabajo hecho.",
   },
-  // ── competitors ──────────────────────────────────────────────────────────────────────────────────────────────────
+  // ── competitors (changed 24 Nov 2026, SITE-1: a monthly live read of 3 nearby businesses) ────────────────────────
   {
     id: "n68",
     lang: "en",
     topic: "Competitor Watch",
     ask: "Can I keep an eye on the salon across the road?",
-    kb: [
-      /\*\*\[COMING\] Competitor Watch:\*\* 3 competitors on Essentials and 5 on Pro, picked by the owner from the map results/,
-    ],
-    must: [/\b3\b/, /\b5\b/],
+    kb: [COMPETITORS, OLD_WATCH],
+    must: [/\b3\b/, /rating/i, /review count/i],
+    forbid: [/\b5\b/, /\bEssentials\b|\bon Pro\b/i, /picked? (by you )?from the map/i],
     coming: true,
     reference:
-      "That will be Competitor Watch, and it is not available yet. You will pick 3 competitors on Essentials or 5 on Pro from the map results, and Kabsi will follow their rating, review count, new reviews a month, reply rate, posts, photos and main category, with an alert when one moves.",
+      "In part. Once a month Kabsi reads 3 nearby businesses' current rating and review count from Google, and keeps no history. The older Competitor Watch, with more competitors, alerts and history, is retired and not available. The read is shown in the full monthly report, which is not available yet.",
   },
   {
     id: "n69",
     lang: "en",
     topic: "competitor data source",
     ask: "Where does the competitor information come from, and do you share my data with them?",
-    kb: [/picked by the owner from the map results/],
-    forbid: [/\bwe share\b/i],
+    kb: [COMPETITORS, /Nobody outside your team sees your business in Kabsi/],
+    forbid: [/\bwe share\b/i, /map results/i],
     coming: true,
     reference:
-      "Competitor Watch is not available yet. It will use the public map results, and the competitors are the ones you pick from those results. Kabsi never shows your own Google data to anyone else.",
+      "It comes from Google: once a month Kabsi reads 3 nearby businesses' current rating and review count, live, and keeps no history. Nobody outside your team sees your business in Kabsi. That read is shown in the full monthly report, which is not available yet.",
   },
   {
     id: "n70",
@@ -121,11 +145,12 @@ export const QUESTIONS_28: Question[] = [
     topic: "Competitor Watch in French",
     ask: "Est-ce que je peux suivre mes concurrents avec Kabsi ?",
     gloss: "Can I follow my competitors with Kabsi?",
-    kb: [/3 competitors on Essentials and 5 on Pro/],
-    must: [/\b3\b/, /\b5\b/],
+    kb: [COMPETITORS, OLD_WATCH],
+    must: [/\b3\b/],
+    forbid: [/\b5\b/, /\bEssentials\b|\bPro\b/],
     coming: true,
     reference:
-      "Ce sera Competitor Watch, qui n'est pas encore disponible. Vous choisirez 3 concurrents avec Essentials ou 5 avec Pro dans les résultats de la carte, et Kabsi suivra leur note, leur nombre d'avis, leurs nouveaux avis par mois et leur taux de réponse.",
+      "En partie. Une fois par mois, Kabsi lit sur Google la note et le nombre d'avis actuels de 3 entreprises proches, sans garder d'historique. Ce relevé figure dans le rapport mensuel complet, qui n'est pas encore disponible. L'ancien suivi des concurrents, avec plus de concurrents, des alertes et un historique, n'est pas disponible.",
   },
   // ── review requests ──────────────────────────────────────────────────────────────────────────────────────────────
   {
@@ -169,8 +194,9 @@ export const QUESTIONS_28: Question[] = [
     ask: "What can I use today to get more reviews?",
     kb: [/the review link, the QR card and the staff Send review link \(live today\)/],
     must: [/review link/i, /QR/],
+    forbid: [/review goal/i],
     reference:
-      "Today you have your review link, the QR card, the staff Send review link and, once WhatsApp is connected, Ask a customer. Only the monthly review goal is not available yet.",
+      "Today you have your review link, the QR card, the staff Send review link and, once WhatsApp is connected, Ask a customer.",
   },
   // ── the free check ───────────────────────────────────────────────────────────────────────────────────────────────
   {
@@ -178,12 +204,13 @@ export const QUESTIONS_28: Question[] = [
     lang: "en",
     topic: "what the free check shows",
     ask: "What does the free Google Profile Check show me?",
+    // SITE-1: what the free check shows from 24 Nov 2026.
     kb: [
-      /rating, number of reviews, opening hours and whether it is open now, phone, website, category and whether the profile has photos/,
+      /the free check shows: your rating and review count beside 3 nearby businesses; listing basics \(hours, phone, website, category, photos\); whether your website and booking link load now/,
     ],
-    must: [/rating/i, /opening hours/i],
+    must: [/rating/i, /opening hours/i, /3 nearby/],
     reference:
-      "It shows what customers see on Google, from public information only: your rating, number of reviews, opening hours and whether you are open now, phone, website, category and whether the profile has photos. Each item is a plain flag: Needs fixing, Worth fixing or After you connect. It changes nothing on your profile.",
+      "It shows your rating and review count beside 3 nearby businesses, the listing basics (opening hours, phone, website, category and photos), whether your website and booking link load now, the reply Kabsi would write for your latest review, and what Kabsi would do each month. It uses public information only, has no score and changes nothing on your profile.",
   },
   {
     id: "n76",
@@ -204,19 +231,17 @@ export const QUESTIONS_28: Question[] = [
     must: [/\b3\b/],
     reference: "You can run 3 free checks a day. It is free and needs no sign-up.",
   },
-  // ── prices per plan ──────────────────────────────────────────────────────────────────────────────────────────────
+  // ── the one plan (SITE-1: Essentials and Pro, the yearly and launch prices and the no-card trial are retired) ────
   {
     id: "n78",
     lang: "en",
     topic: "what each plan holds",
     ask: "What do I get with Essentials compared with Pro?",
-    kb: [
-      /\| Posts and photos \| Holiday hours, 2 posts a month, photos from WhatsApp \| Weekly posts, photos from WhatsApp \|/,
-      /\| Team roles and approval rules \| No \| Yes \|/,
-    ],
-    must: [/Essentials/, /Pro/],
+    kb: [ONE_PLAN_ONLY, INCLUDED],
+    must: [/one plan/i, /2 posts a month/],
+    forbid: [OLD_PRICES, PLAN_NAME_PRICED, /a post every week|weekly posts/i],
     reference:
-      "Both plans have a reply ready for every new review, your details checked every day, your photos, your review link and QR card, Profile Coach suggestions and your weekly report every Monday. Essentials has holiday hours and 2 posts a month. Pro has a post every week, team roles and approval rules, review graphics, the words people searched on Google to find you every month, and a guide to report a review that breaks Google's rules.",
+      "There is no Essentials or Pro any more: Kabsi has one plan. It includes a reply to every review, alerts for bad reviews, your listing checked every day, your website and booking link checked every day, holiday hours, up to 2 posts a month and photos from your phone, the review link, QR code and counter card tools, and a weekly summary and a monthly report.",
   },
   {
     id: "n79",
@@ -224,12 +249,14 @@ export const QUESTIONS_28: Question[] = [
     topic: "do prices change",
     ask: "With all these new features, are the prices going up?",
     kb: [
-      /The first 30 paying businesses pay the launch price and keep it while they stay subscribed: Essentials \$19 a month/,
+      PRICE,
+      /Kabsi may change prices for future purchases\. A plan already paid for keeps its price\./,
     ],
-    must: [/\$29/, /\$19/],
+    must: [ONE_PRICE],
+    forbid: [OLD_PRICES, /launch price/i],
     coming: true,
     reference:
-      "The list prices are Essentials $29 a month or $290 a year and Pro $59 a month or $590 a year. The first 30 paying businesses pay the launch price, Essentials $19 or Pro $39 a month, and keep it while they stay subscribed. The plans cannot be bought yet, because card payments are not open yet.",
+      "There is one plan, 29 US dollars a month per location, and there is no public discount or special offer. Kabsi may change prices for future purchases, and a plan already paid for keeps its price. Card payments are not open yet, so nothing can be bought today.",
   },
   {
     id: "n80",
@@ -237,9 +264,10 @@ export const QUESTIONS_28: Question[] = [
     topic: "the trial on the new plans",
     ask: "هل توجد فترة تجربة مجانية للخطط الجديدة؟",
     gloss: "Is there a free trial for the new plans?",
-    kb: [/The trial stays \*\*14 days of Pro, no card\*\*/],
-    must: [/14/],
+    kb: [TRIAL],
+    must: [/14/, /بطاقة/],
+    forbid: [/بدون بطاقة|دون بطاقة|لا تحتاج بطاقة|\bPro\b/],
     reference:
-      "نعم، التجربة 14 يوما من خطة Pro بدون بطاقة، وتبدأ عندما يعمل وصول كابسي إلى ملفك على Google.",
+      "نعم، أول 14 يوما مجانا، ثم 29 دولارا أمريكيا في الشهر حتى تلغي. يلزم إدخال بطاقة للبدء، وإذا ألغيت قبل اليوم الرابع عشر لا تدفع شيئا. تبدأ التجربة عندما يعمل وصول كابسي إلى ملفك على Google.",
   },
 ];
