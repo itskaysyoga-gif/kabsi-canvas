@@ -32,7 +32,18 @@ export const isPublic = (g: Pick<GuideDoc, "publishAt">, now: Date) =>
  * first, newest first. The rest keep the order of the array passed in: the Guides 3 order, then the earlier guides
  * (src/content/guides/index.ts), so the order of Guides 3 stays.
  */
-export function publicGuides<T extends Pick<GuideDoc, "publishAt">>(all: T[], now: Date): T[] {
+export function publicGuides<T extends Pick<GuideDoc, "publishAt"> & { noindex?: true }>(
+  all: T[],
+  now: Date,
+): T[] {
+  return publicGuidesWithHidden(all.filter((g) => !g.noindex), now);
+}
+
+/** SITE-2: every guide whose page answers, including the noindex ones. Only guides-server's page lookup uses it. */
+export function publicGuidesWithHidden<T extends Pick<GuideDoc, "publishAt">>(
+  all: T[],
+  now: Date,
+): T[] {
   const open = all.filter((g) => isPublic(g, now));
   const newer = open
     .filter((g) => Date.parse(g.publishAt) > PUBLISH_ALL_MS)
@@ -68,6 +79,7 @@ export function metaOf(g: GuideDoc, words: number): GuideMeta {
     industries: g.industries,
     related: g.related,
     summary: g.summary,
+    ...(g.noindex ? { noindex: true as const } : {}),
     ...(g.faqs?.length ? { faqs: g.faqs } : {}),
     minutes: minutesFor(words),
   };

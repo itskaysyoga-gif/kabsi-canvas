@@ -12,13 +12,13 @@ export type GuidePageData = {
   publicSlugs: string[];
 };
 
-async function publicNow() {
-  const [{ ALL_GUIDES }, { metaOf, publicGuides }, { guideText, wordCount }] = await Promise.all([
+async function publicNow(withHidden = false) {
+  const [{ ALL_GUIDES }, { metaOf, publicGuides, publicGuidesWithHidden }, { guideText, wordCount }] = await Promise.all([
     import("@/content/guides"),
     import("@/content/guides/schedule"),
     import("@/content/guides/text"),
   ]);
-  const open = publicGuides(ALL_GUIDES, new Date());
+  const open = (withHidden ? publicGuidesWithHidden : publicGuides)(ALL_GUIDES, new Date());
   return open.map((g) => metaOf(g, wordCount(guideText(g)) || 600));
 }
 
@@ -37,9 +37,11 @@ export const getGuidePage = createServerFn({ method: "GET" })
     return slug;
   })
   .handler(async ({ data: slug }): Promise<GuidePageData | null> => {
-    const guides = await publicNow();
-    const guide = guides.find((g) => g.slug === slug);
+    // SITE-2: a noindex guide still answers at its own address; it is never listed or linked.
+    const all = await publicNow(true);
+    const guide = all.find((g) => g.slug === slug);
     if (!guide) return null;
+    const guides = all.filter((g) => !g.noindex);
     const { industry: industryBySlug, industryIndexed } = await import("@/content/industries");
     const bySlug = new Map(guides.map((g) => [g.slug, g]));
     const related = guide.related

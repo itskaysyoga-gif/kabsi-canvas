@@ -28,6 +28,7 @@ export const Route = createFileRoute("/guides/$slug")({
       path: `/guides/${params.slug}`,
       type: "article",
       image,
+      noindex: g.noindex === true,
       crumbs: [
         { name: "Guides", path: "/guides" },
         { name: g.title, path: `/guides/${g.slug}` },
