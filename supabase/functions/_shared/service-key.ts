@@ -39,7 +39,7 @@ export function serviceKey(read: EnvReader = (n) => Deno.env.get(n), nowSeconds?
     const v = read(name);
     if (usableServiceKey(v, nowSeconds)) return v!.trim();
     // A variable that is set but unusable (mistyped, truncated, expired) is named, never shown.
-    if (v) console.warn(JSON.stringify({ fn: "service_key", skipped: name, reason: "set but not usable" }));
+    if (v) console.warn(`service_key: ${name} is set but not usable`);
   }
   throw new Error(`no usable database key: set ${SERVICE_KEY_ENV} (a secret key) or ${LEGACY_SERVICE_KEY_ENV}`);
 }
