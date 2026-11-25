@@ -17,15 +17,14 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
-import {
-  newSessionToken,
-  suggestBusinesses,
-  wakeSuggestions,
-  type FoundBusiness,
-} from "@/lib/profile-check";
+import type { FoundBusiness } from "@/lib/profile-check";
 
-// Scan 3: the pass's code and the bot check's widget load on the box's first touch, not with the page.
+// Scan 3: the pass's code and the bot check's widget load on the box's first touch, not with the page. SITE-7: so does
+// the suggestions client (profile-check), so Home's first load does not carry it.
 const passStore = () => import("@/lib/suggest-pass");
+const profileCheck = () => import("@/lib/profile-check");
+/** A new Autocomplete session token, as `newSessionToken` in profile-check makes it (a version 4 UUID). */
+const newSessionToken = () => crypto.randomUUID();
 const Turnstile = lazy(() =>
   import("@/components/turnstile").then((m) => ({ default: m.Turnstile })),
 );
@@ -132,7 +131,7 @@ export function BusinessCombobox({
   // (another box, an earlier page) is used as it is. If the pass cannot be had, the first suggestion asks as before.
   const warm = useCallback(() => {
     // Launch 4 part D: wake the function now (once per page), while the bot check below is still being solved.
-    if (available) wakeSuggestions();
+    if (available) void profileCheck().then((m) => m.wakeSuggestions());
     if (!available || warming.current || warmed.current || asking.current) return;
     warmed.current = true;
     warming.current = (async () => {
@@ -206,7 +205,9 @@ export function BusinessCombobox({
           try {
             // A call that carries a Turnstile token is not aborted: the server has spent the token and its answer holds
             // the pass the next calls need.
-            r = await suggestBusinesses(
+            r = await (
+              await profileCheck()
+            ).suggestBusinesses(
               { query: q, sessionToken: session.current, turnstile, pass: sentPass },
               turnstile ? undefined : ctrl.signal,
             );

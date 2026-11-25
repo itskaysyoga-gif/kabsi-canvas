@@ -1,5 +1,4 @@
 import { Mail } from "lucide-react";
-import { siFacebook, siInstagram } from "simple-icons";
 import { cn } from "@/lib/utils";
 import {
   BRAND_LINE,
@@ -61,12 +60,16 @@ const footLink =
 const quietLink =
   "inline-flex min-h-11 items-center text-label text-text-2 underline underline-offset-4 hover:text-text-1";
 
+/** SITE-7: the Facebook and Instagram marks (Simple Icons, CC0) are static files in public/icons drawn in the text colour
+ * through a CSS mask, so their long paths do not ride in every public page's script. */
 function SocialIcon({ name }: { name: string }) {
-  const icon = name === "Facebook" ? siFacebook : siInstagram;
+  const url = `url(/icons/${name === "Facebook" ? "facebook" : "instagram"}.svg)`;
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-5 fill-current">
-      <path d={icon.path} />
-    </svg>
+    <span
+      aria-hidden="true"
+      className="size-5 bg-current [mask-position:center] [mask-repeat:no-repeat] [mask-size:contain]"
+      style={{ maskImage: url, WebkitMaskImage: url }}
+    />
   );
 }
 

@@ -171,8 +171,43 @@ async function app(path, name) {
   await page.goto(BASE + path, { waitUntil: "load" });
   await page.waitForSelector("main h1, h1", { timeout: 20_000 });
   await page.waitForTimeout(1500);
+  await fitFrame(page);
   await save(page, name);
   await ctx.close();
+}
+
+/**
+ * SITE-7: the public pages show each screen inside a drawn phone with round corners, which cut whatever touches the
+ * screen's edge. So the capture gives the app's bars a phone's safe area (as a real phone's home bar and corners do), and
+ * a row of tabs wider than the screen wraps onto a second line instead of running off the edge. Only this capture
+ * changes; the app itself does not.
+ */
+async function fitFrame(page) {
+  await page.addStyleTag({
+    content: `
+      nav.fixed.bottom-0 { padding: 0 14px 22px !important; }
+      header.sticky.top-0 { padding-inline: 22px !important; }
+    `,
+  });
+  await page.evaluate(() => {
+    for (const el of document.querySelectorAll("main *")) {
+      if (el.scrollWidth <= el.clientWidth + 1) continue;
+      const cs = getComputedStyle(el);
+      if (!/auto|scroll/.test(cs.overflowX)) continue;
+      el.scrollLeft = 0;
+      el.style.overflowX = "visible";
+      for (const row of [el, ...el.querySelectorAll("*")])
+        if (
+          getComputedStyle(row).display.includes("flex") &&
+          row.scrollWidth > el.clientWidth + 1
+        ) {
+          row.style.flexWrap = "wrap";
+          row.style.width = "auto";
+          row.style.rowGap = "4px";
+        }
+    }
+  });
+  await page.waitForTimeout(300);
 }
 
 const one = process.argv.indexOf("--one");

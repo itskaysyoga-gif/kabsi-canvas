@@ -5,12 +5,13 @@
 import { X } from "lucide-react";
 import { PRIMARY_CTA } from "@/lib/offer";
 import { ButtonLink, Faq } from "@/components/kabsi/ui";
-import { HOME_HERO, PRICE, PRICING } from "./v31-data";
-import { Band, Head, PageTop, Ticks } from "./kit";
+import { HOME_HERO, PRICE } from "./v31-data";
+import { Band, Head } from "./kit";
+import { PageTop, Ticks } from "./kit-pages";
 import { ClosingBand } from "./v31";
 import { DeviceShot, PubImg } from "./life";
 import { PUB } from "./public-photos";
-import { BILLING_QUESTIONS, FIRST_DAYS, LEAVING, PLAN_LISTS } from "./v31-more";
+import { BILLING_QUESTIONS, FIRST_DAYS, LEAVING, PLAN_LISTS, PRICING } from "./v31-more";
 import { MORE_SCREENS } from "./screens-section";
 
 const PHOTO_SIZES = "(min-width: 1280px) 500px, (min-width: 1024px) 40vw, 100vw";

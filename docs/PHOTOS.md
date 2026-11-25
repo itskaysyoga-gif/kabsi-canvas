@@ -156,3 +156,26 @@ reader on the counter has no visible screen text. The evening dining room (resta
 | File             | What it shows                                                   | Best use              | Alt text                                                                  |
 | ---------------- | --------------------------------------------------------------- | --------------------- | ------------------------------------------------------------------------- |
 | restaurant-owner | A smiling chef owner greeting two guests at a bright pizzeria counter | Restaurants page hero | A smiling chef owner greeting two guests at the counter of his small restaurant |
+
+## SITE-7 (25 Nov 2026): trade photos that show the trade
+
+SITE-6's review found /for cards whose photo did not show the trade at card size. SITE-7 replaced them, and also the
+lash and brow photo (an eye only) and the cleaners' photos (they used the phone photos, not cleaning). All seven are from
+Pexels; each page showed the "Free" licence label linking to https://www.pexels.com/license/ when read on 25 Nov 2026
+(the Pexels License: free for commercial use, attribution not required but given here). Downloaded at 2400 px, cropped
+from the centre to 3:2 (wide) or 2:3 (tall), 1600 and 800 px WebP at quality 72, metadata stripped, the same sizes and
+format as the rest of this folder. The cleaner's name badge (readable) was blurred with a soft-edged Gaussian blur before
+cropping; nothing else readable shows. vet-wide, car-wash-wide and lash-brow-wide keep their file names with the new photo.
+
+| File | What it shows | Photo page | Photographer | Best use | Alt text |
+| --- | --- | --- | --- | --- | --- |
+| bakery-baker | A smiling baker in an apron reaching into a bright pastry display | https://www.pexels.com/photo/7447275/ | Gustavo Fring (@gustavo-fring) | Bakery page first photo, /for card, share image | A smiling baker reaching for pastries in a bright bakery display |
+| vet-wide (replaced) | A smiling vet sitting on the exam table beside a calm black dog, bright clinic | https://www.pexels.com/photo/6234618/ | Tima Miroshnichenko (@tima-miroshnichenko) | Vet page hero, /for card, share image | A smiling vet sitting beside a calm black dog on the exam table |
+| physio-treatment | A therapist working on a patient's leg on a treatment table in a bright room | https://www.pexels.com/photo/5473177/ | Ryutaro Tsukata (@ryutaro) | Physiotherapy page first photo, /for card, share image | A therapist working on a patient's leg on a treatment table |
+| car-wash-wide (replaced) | Hands machine polishing a red car door, sharp | https://www.pexels.com/photo/5233262/ | Khunkorn Laowisit (@khunkorn-laowisit-1359149) | Car wash page hero, /for card, share image | A detailer machine polishing the side of a red car |
+| lash-brow-wide (replaced) | A lash technician placing extensions with tweezers, the client lying down | https://www.pexels.com/photo/7755531/ | RDNE Stock project (@rdne) | Lash and brow page hero, /for card, share image | A lash technician placing lash extensions on a client lying down |
+| cleaner-team | Three cleaners in overalls mopping and wiping a bright kitchen | https://www.pexels.com/photo/6197108/ | Tima Miroshnichenko (@tima-miroshnichenko) | Cleaners' share image (the page hero keeps the SITE-4 photo) | A team of cleaners in overalls cleaning a bright kitchen |
+| cleaner-table | A cleaner in black gloves wiping a wooden table (portrait; name badge blurred) | https://www.pexels.com/photo/9462732/ | Liliana Drew (@liliana-drew) | Cleaners' "Send a photo" band | A cleaner in gloves wiping a wooden table |
+
+Every other trade photo was checked at card and page size on 25 Nov 2026 and shows its trade. The old physio-stretch,
+bakery-counter and bakery-window photos stay where they are used (a guide, About, the bakery's tall slot).

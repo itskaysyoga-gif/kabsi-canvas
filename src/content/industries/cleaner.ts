@@ -1,4 +1,4 @@
-import { PHOTOS } from "@/components/kabsi/photos";
+import { MORE_PHOTOS } from "@/components/kabsi/photos-more";
 import type { Industry } from "./types";
 
 // SITE-2 (blueprint 3.1 section 5): the cleaning business page. The industry pages are one template now, so this file holds
@@ -19,7 +19,7 @@ export const cleaner: Industry = {
     rival2: "Tidy Team",
     near: ["Near the centre", "By the park"],
   },
-  photos: [PHOTOS.phoneShop, PHOTOS.phoneReading],
+  photos: [MORE_PHOTOS.cleanerTeam, MORE_PHOTOS.cleanerTable],
   searches: [
     "house cleaner near me",
     "domestic cleaning",

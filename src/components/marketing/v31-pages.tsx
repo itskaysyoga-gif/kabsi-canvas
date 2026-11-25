@@ -4,14 +4,15 @@
 import { Clock, Link2, Phone } from "lucide-react";
 import { YellowNumber } from "@/components/kabsi/highlight";
 import { Faq } from "@/components/kabsi/ui";
-import { HOME_HERO, ABOUT, FAQ_V31, HOW, PRICE, SECURITY, TRUST } from "./v31-data";
+import { HOME_HERO, FAQ_V31, PRICE, TRUST } from "./v31-data";
 import { TRIAL_LINE } from "@/lib/offer";
 import { SiteLink } from "@/components/kabsi/site-link";
-import { Band, CheckBox, Head, Lead, PageTop, Ticks } from "./kit";
-import { ChatCard, ClosingBand, ReportSample, TrustLines } from "./v31";
-import { DeviceShot, PubImg } from "./life";
+import { Band, CheckBox, Head, Lead } from "./kit";
+import { PageTop, Ticks } from "./kit-pages";
+import { ChatCard, ClosingBand, TrustLines } from "./v31";
+import { DeviceShot, PubImg, ScreenRow } from "./life";
 import { PUB } from "./public-photos";
-import { HOW_CHAT, WATCHED } from "./v31-more";
+import { ABOUT, HOW, HOW_CHAT, SECURITY, WATCHED } from "./v31-more";
 import { MORE_SCREENS } from "./screens-section";
 
 /** The icons of WATCHED, in its order: hours, phone, website and booking link. */
@@ -119,20 +120,27 @@ export function V31How() {
           </ul>
         </div>
       </Band>
-      <Band id="report" tone="warm">
-        <Head
-          id="report"
-          title="See what was done."
-          line="A short summary every week and a full report every month: work done, what Kabsi found and what Google shows, kept apart."
-        />
-        <ReportSample className="mt-8" />
-        {/* SITE-5: the price in one line, with the way to Pricing. */}
-        <p className="mt-10 max-w-[60ch] border-s-4 border-kb-yellow ps-4 text-read text-text-1">
-          <strong>{PRICE.card}</strong> {TRIAL_LINE}{" "}
-          <SiteLink to="/pricing" className="font-semibold underline underline-offset-4">
-            See what the plan includes
-          </SiteLink>
-        </p>
+      {/* SITE-7: Kabsi's own weekly email and weekly report beside the words (was the monthly report sample Home shows). */}
+      <Band
+        id="report"
+        tone="warm"
+        inner="lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-16"
+      >
+        <div>
+          <Head
+            id="report"
+            title="See what was done."
+            line="A short summary every week and a full report every month: work done, what Kabsi found and what Google shows, kept apart."
+          />
+          {/* SITE-5: the price in one line, with the way to Pricing. */}
+          <p className="mt-8 max-w-[60ch] border-s-4 border-kb-yellow ps-4 text-read text-text-1">
+            <strong>{PRICE.card}</strong> {TRIAL_LINE}{" "}
+            <SiteLink to="/pricing" className="font-semibold underline underline-offset-4">
+              See what the plan includes
+            </SiteLink>
+          </p>
+        </div>
+        <ScreenRow ids={["email", "report"]} className="mt-4 lg:mt-0 lg:pt-0" />
       </Band>
       <ClosingBand under={HOME_HERO.under} />
     </>

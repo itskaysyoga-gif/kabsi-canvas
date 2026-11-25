@@ -34,7 +34,8 @@ export const MORE_SCREENS = {
   // SITE-6: How it works' hero: what waits for the owner's yes (was the weekly report, under its Settings title).
   home: {
     src: "/screens/app-home-560.webp",
-    alt: "Kabsi's Home screen for an example business: a change on Google to decide, and a reply and a post waiting for a yes",
+    // SITE-7: redrawn on APP-1's Home: three things waiting, a review reply first, then a post.
+    alt: "Kabsi's Home screen for an example business: three things waiting for a yes, a review reply first, then a post",
     title: "Everything waits for your yes",
     line: "Replies, posts and fixes wait on one screen until you approve them.",
   },

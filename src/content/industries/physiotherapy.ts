@@ -1,4 +1,5 @@
 import { PHOTOS } from "@/components/kabsi/photos";
+import { MORE_PHOTOS } from "@/components/kabsi/photos-more";
 import type { Industry } from "./types";
 
 // Content 1: finished from docs/claims/physiotherapy.md, approved by lane R on 27 Oct 2026 (brief section 18). Motion Works Physio is
@@ -19,7 +20,7 @@ export const physiotherapy: Industry = {
     rival2: "Back in Balance",
     near: ["Near the sports centre", "By the tram stop"],
   },
-  photos: [PHOTOS.physioStretch, PHOTOS.physioBack],
+  photos: [MORE_PHOTOS.physioTreatment, PHOTOS.physioBack],
   focus: "50% 45%",
   searches: [
     "physio",

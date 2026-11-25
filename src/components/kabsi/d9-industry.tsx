@@ -180,7 +180,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
       <Band id="price" tone="ivory" inner="pb-8 sm:pb-10 lg:pb-12">
         <Head id="price" title="One price." />
         {/* The price card of Home and Pricing: TRIAL_LINE beside the button, the included list, the not included line. */}
-        <PriceCard compact className="mt-8" />
+        <PriceCard className="mt-8" />
         {/* SITE-5: what to know first sits under the price, not on a band of its own. */}
         <TrustLines />
       </Band>
@@ -382,10 +382,13 @@ function TradeCard({
   priority,
   line = true,
   row = false,
+  wide = false,
 }: {
   industry: Industry;
   sizes: string;
   priority?: boolean;
+  /** SITE-7: a card of /for's last row at 4 columns that takes two columns, its photo beside the words. */
+  wide?: boolean;
   /** SITE-6: on a phone the /for cards are one column, the photo beside the words. */
   row?: boolean;
   /** Industry 1 (R-144): the related cards on an industry page show the name only; /for shows the line. */
@@ -397,12 +400,14 @@ function TradeCard({
       className={cn(
         "press kb-lift group flex h-full overflow-hidden rounded-card border border-line bg-surface-0 shadow-rest",
         row ? "min-h-24 flex-row sm:flex-col" : "flex-col",
+        wide && "lg:flex-row",
       )}
     >
       <span
         className={cn(
           "relative block overflow-hidden bg-surface-3",
           row ? "w-28 shrink-0 sm:aspect-[3/2] sm:w-auto" : "aspect-[3/2]",
+          wide && "lg:aspect-auto lg:w-1/2",
         )}
       >
         {TRADE_WIDE[i.slug] ? (
@@ -424,7 +429,7 @@ function TradeCard({
           />
         )}
       </span>
-      <span className="flex flex-1 flex-col p-3 sm:p-4">
+      <span className={cn("flex flex-1 flex-col p-3 sm:p-4", wide && "lg:justify-center lg:p-6")}>
         <span className="font-display text-body font-semibold sm:text-title">{i.plural}</span>
         {line && <span className="mt-1 text-small text-text-2 sm:text-body">{i.page.card}</span>}
       </span>
@@ -530,7 +535,7 @@ export function ForIndex() {
                   placeholder="For example, florist"
                   autoComplete="off"
                   aria-controls="for-list"
-                  className="h-12 w-full rounded-input border border-line-strong bg-surface-0 ps-9 pe-3 text-body placeholder:text-text-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                  className="h-11 w-full rounded-full border border-line bg-surface-1 ps-9 pe-4 text-body shadow-rest placeholder:text-text-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                 />
               </div>
             </div>
@@ -545,19 +550,28 @@ export function ForIndex() {
             id="for-list"
             className="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4 lg:justify-start"
           >
-            {all.map((i) => (
-              <li
-                key={i.slug}
-                hidden={!shown.includes(i)}
-                className="w-full sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]"
-              >
-                <TradeCard
-                  industry={i}
-                  sizes="(min-width: 1024px) 18rem, (min-width: 640px) 45vw, 8rem"
-                  row
-                />
-              </li>
-            ))}
+            {all.map((i, n) => {
+              // SITE-7: with the whole list shown, a last row of two at 4 columns takes the full width (two wide
+              // cards), so the page does not end on a half-empty row.
+              const wide = !q && all.length % 4 === 2 && n >= all.length - 2;
+              return (
+                <li
+                  key={i.slug}
+                  hidden={!shown.includes(i)}
+                  className={cn(
+                    "w-full sm:w-[calc((100%-1rem)/2)]",
+                    wide ? "lg:w-[calc((100%-1rem)/2)]" : "lg:w-[calc((100%-3rem)/4)]",
+                  )}
+                >
+                  <TradeCard
+                    industry={i}
+                    sizes="(min-width: 1024px) 18rem, (min-width: 640px) 45vw, 8rem"
+                    row
+                    wide={wide}
+                  />
+                </li>
+              );
+            })}
           </ul>
           {shown.length === 0 && (
             <p className="mt-8 text-body text-text-2">

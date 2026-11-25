@@ -10,10 +10,10 @@ import {
   HOME_HERO,
   OFFER2_ON,
   PRICE,
-  PRICING,
   QR_IMAGE_ON,
   TELL_CHIPS,
 } from "../src/components/marketing/v31-data";
+import { PRICING } from "../src/components/marketing/v31-more";
 import { FOUNDING25_UNDER, FOUNDING_HERO } from "../src/components/kabsi/founding-private";
 import { SITEMAP_PAGES } from "../src/lib/sitemap";
 
@@ -28,6 +28,7 @@ const PAGES = [
   "src/components/marketing/v31-pricing.tsx",
   "src/components/marketing/v31-pages.tsx",
   "src/components/marketing/v31-data.ts",
+  "src/components/marketing/v31-more.ts",
   "src/components/marketing/v31-heads.ts",
 ];
 const ALL = PAGES.map(code).join("\n");

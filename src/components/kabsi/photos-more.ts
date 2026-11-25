@@ -67,6 +67,14 @@ import autoMechanicTall1067 from "@/assets/photos/auto-mechanic-tall-1067.webp";
 import autoMechanicTall600 from "@/assets/photos/auto-mechanic-tall-600.webp";
 import gymTrainingTall1067 from "@/assets/photos/gym-training-tall-1067.webp";
 import gymTrainingTall600 from "@/assets/photos/gym-training-tall-600.webp";
+import bakeryBaker1600 from "@/assets/photos/bakery-baker-1600.webp";
+import bakeryBaker800 from "@/assets/photos/bakery-baker-800.webp";
+import physioTreatment1600 from "@/assets/photos/physio-treatment-1600.webp";
+import physioTreatment800 from "@/assets/photos/physio-treatment-800.webp";
+import cleanerTeam1600 from "@/assets/photos/cleaner-team-1600.webp";
+import cleanerTeam800 from "@/assets/photos/cleaner-team-800.webp";
+import cleanerTable1600 from "@/assets/photos/cleaner-table-1600.webp";
+import cleanerTable800 from "@/assets/photos/cleaner-table-800.webp";
 import { land, port, type Photo } from "./photos";
 
 /** Industries 2 (B-006): a 4:5 crop of a landscape photo, 853 by 1067 and 512 by 640, for portrait cards. */
@@ -89,10 +97,31 @@ const p23 = (large: string, small: string, alt: string): Photo => ({
 });
 
 export const MORE_PHOTOS = {
+  // SITE-7 (25 Nov 2026): Pexels License photos that show their trade at work (docs/PHOTOS.md, SITE-7).
+  bakeryBaker: land(
+    bakeryBaker1600,
+    bakeryBaker800,
+    "A smiling baker reaching for pastries in a bright bakery display",
+  ),
+  physioTreatment: land(
+    physioTreatment1600,
+    physioTreatment800,
+    "A therapist working on a patient's leg on a treatment table",
+  ),
+  cleanerTeam: land(
+    cleanerTeam1600,
+    cleanerTeam800,
+    "A team of cleaners in overalls cleaning a bright kitchen",
+  ),
+  cleanerTable: port(
+    cleanerTable1600,
+    cleanerTable800,
+    "A cleaner in gloves wiping a wooden table",
+  ),
   carWashWide: land(
     carWashWide1600,
     carWashWide800,
-    "A car washer soaping a car door with a sponge",
+    "A detailer machine polishing the side of a red car",
   ),
   carWashTall: port(carWashTall1600, carWashTall800, "A blue car covered in soap at a car wash"),
   dentalClinicWide: land(
@@ -123,7 +152,7 @@ export const MORE_PHOTOS = {
   lashBrowWide: land(
     lashBrowWide1600,
     lashBrowWide800,
-    "An eye with lash extensions and shaped brows, close up",
+    "A lash technician placing lash extensions on a client lying down",
   ),
   lashBrowTall: port(
     lashBrowTall1600,
@@ -152,7 +181,11 @@ export const MORE_PHOTOS = {
   ),
   tattooWide: land(tattooWide1600, tattooWide800, "A tattoo artist in black gloves inking an arm"),
   tattooTall: port(tattooTall1600, tattooTall800, "A tattoo artist working on a client's forearm"),
-  vetWide: land(vetWide1600, vetWide800, "A vet in scrubs treating an animal in surgery"),
+  vetWide: land(
+    vetWide1600,
+    vetWide800,
+    "A smiling vet sitting beside a calm black dog on the exam table",
+  ),
   vetTall: port(vetTall1600, vetTall800, "A vet checking a white cat on the table"),
   yogaPilatesWide: land(
     yogaPilatesWide1600,
