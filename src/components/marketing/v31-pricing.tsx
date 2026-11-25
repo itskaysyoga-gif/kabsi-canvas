@@ -30,12 +30,11 @@ export function V31Pricing() {
         mark={PRICING.mark}
         line={PRICING.line}
         aside={
-          // From 1024 px the photo stands beside the H1; on a phone the price card comes first and the photo waits
-          // for the month below.
           <PubImg
             photo={PUB.barista}
             sizes={PHOTO_SIZES}
-            className="hidden aspect-[3/2] w-full rounded-panel bg-surface-3 object-cover shadow-lift lg:block"
+            priority
+            className="aspect-[3/2] w-full rounded-panel bg-surface-3 object-cover shadow-lift"
           />
         }
       >
@@ -64,12 +63,7 @@ export function V31Pricing() {
           <Head
             id="month"
             title="What one month looks like."
-            line="An Example month: the work Kabsi did, what it found and what Google shows."
-          />
-          <PubImg
-            photo={PUB.salon}
-            sizes={PHOTO_SIZES}
-            className="mt-8 aspect-[3/2] w-full rounded-panel bg-surface-3 object-cover shadow-lift lg:hidden"
+            line="One month at an example salon: the work Kabsi did, what it found and what Google shows."
           />
         </div>
         <ReportSample className="mt-8 lg:mt-10" />
@@ -79,7 +73,7 @@ export function V31Pricing() {
         <Head id="trust" title={TRUST.title} />
         <TrustLines />
       </Band>
-      <Band id="questions" tone="ivory" inner="pt-0 sm:pt-0 lg:pt-0">
+      <Band id="questions" tone="ivory">
         <Head id="questions" title="Questions about the plan." />
         <Faq items={PRICING_FAQ.map((f) => ({ q: f.q, a: f.a }))} className="mt-8" />
       </Band>

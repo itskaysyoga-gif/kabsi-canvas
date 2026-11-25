@@ -101,14 +101,7 @@ function OwnerSays({ text, photo, d }: { text: string; photo?: boolean | undefin
           className="mb-2 aspect-[3/2] w-32 rounded-input object-cover"
         />
       ) : null}
-      {text === "Approve" ? (
-        <span className="inline-flex items-center gap-1.5 font-bold">
-          <Check className="size-4" aria-hidden />
-          Approve
-        </span>
-      ) : (
-        text
-      )}
+      {text}
     </li>
   );
 }
@@ -484,7 +477,7 @@ function TellKabsi() {
           </div>
         </div>
       </div>
-      <div aria-live="polite" className="mt-8 lg:mt-0">
+      <div aria-live="polite" className="mt-8 lg:mt-0 lg:self-start">
         <ChatCard
           turns={[
             { from: "owner", text: chip.ask, photo: chip.photo },
@@ -493,7 +486,7 @@ function TellKabsi() {
             ...(chip.approve ? [{ from: "owner" as const, text: "Approve" }] : []),
           ]}
           label={`Example: you send "${chip.ask}" and Kabsi answers`}
-          className="flex flex-col lg:min-h-[21rem]"
+          className="flex flex-col"
           replay={at}
         />
       </div>

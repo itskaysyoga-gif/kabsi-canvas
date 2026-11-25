@@ -177,7 +177,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
         </div>
       </section>
 
-      <Band id="benefits" tone="soft">
+      <Band id="benefits" tone="warm">
         <Head id="benefits" title="What Kabsi does without being asked." />
         <ol className="mt-8 grid gap-8 md:grid-cols-3 md:gap-10">
           {BENEFITS.map((x, n) => (
@@ -195,7 +195,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
       <PhotoPost industry={i} />
 
       {b && (
-        <Band id="fact" tone="soft" inner="py-12 sm:py-16 lg:py-20">
+        <Band id="fact" tone="warm" inner="py-12 sm:py-16 lg:py-20">
           {/* SITE-4: the sourced fact as a quiet note, not a full headline over one sentence. */}
           <div className="max-w-[48rem] border-s-4 border-kb-yellow ps-5 sm:ps-7">
             <h2 id="fact-h" className="text-title text-text-2">
@@ -219,7 +219,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
         <PriceCard className="mt-8" />
       </Band>
 
-      <Band id="trust" tone="soft" inner="py-10 sm:py-14 lg:py-16">
+      <Band id="trust" tone="warm" inner="py-10 sm:py-14 lg:py-16">
         <h2 id="trust-h" className="text-h2 text-balance">
           What to know first.
         </h2>
@@ -480,7 +480,7 @@ export function ForIndex() {
           <ForCollage all={all} />
         </div>
       </section>
-      <section aria-labelledby="list-h" className="border-t border-line bg-surface-1">
+      <section aria-labelledby="list-h" className="border-t border-line bg-tint-soft">
         <div className={cn("container-kb", sectionY)}>
           <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
             <h2 id="list-h" className="text-h2 text-balance">

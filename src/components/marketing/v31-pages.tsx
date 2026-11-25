@@ -19,7 +19,7 @@ export function V31How() {
         line={HOW.line}
         aside={
           <PubImg
-            photo={PUB.salonWash}
+            photo={PUB.howHero}
             sizes="(min-width: 1280px) 500px, (min-width: 1024px) 40vw, 100vw"
             priority
             className="aspect-[4/3] w-full rounded-panel bg-surface-3 object-cover shadow-lift"

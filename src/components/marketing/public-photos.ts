@@ -49,11 +49,9 @@ export const PUB = {
   } satisfies PubPhoto,
   florist: wide("florist-phone", "A florist checking her phone at the workbench of her shop", 900),
   barista: wide("barista", "A smiling barista at the espresso machine behind her café counter"),
-  salonWash: wide("salon-wash", "A stylist washing a client's hair at the basin"),
-  /** Pricing's Example month at a salon, on a phone. */
-  salon: wide("hair-salon", "A stylist blow-drying a client's hair in a bright salon"),
+  howHero: wide("barbershop", "A barber shaping a client's hair in his shop"),
   /** Home's week, Friday: the photo the owner sent, live as a post. */
-  dayPost: wide("salon-wash", "A stylist washing a client's hair, the photo sent as a post"),
+  dayPost: wide("nail-salon", "A nail technician at work, the photo sent as a post"),
 } as const;
 
 export const pubSrc = (p: PubPhoto, width: number) => `/photos/${p.stem}-${width}.webp`;

@@ -54,7 +54,11 @@ describe("SITE-3: the home page", () => {
   });
   it("shows the voice note line and keeps the answer panel tall enough not to jump", () => {
     expect(TELL.voice).toBe("Or send a voice note.");
-    expect(read("src/components/marketing/v31.tsx")).toContain("min-h-[21rem]");
+    // SITE-4: the answer card sits at the top of its column (lg:self-start) and hugs its exchange, so it neither jumps
+    // the chips (they are in the other column) nor leaves an empty top.
+    expect(read("src/components/marketing/v31.tsx")).toContain(
+      'className="mt-8 lg:mt-0 lg:self-start"',
+    );
   });
   it("puts TRIAL_LINE beside the price card's button, in full", () => {
     expect(PRICE.terms).toBe(TRIAL_LINE);
