@@ -238,5 +238,29 @@ select is((select array_agg(review_id || ':' || reply_calls || ':' || coalesce(r
   array['m-ok:1:Thanks.:-', 'm-pending:1:-:Thanks.', 'm-reject:1:-:-', 'm-timeout:1:Thanks.:-'],
   'each call is counted; pending is held out of sight, timeout is stored, reject stores nothing');
 
+-- FIX-3: the idempotency key takes the highest stored suffix plus one, so retention removing an older publication of a review
+-- never makes the next approval collide (the old key counted the rows).
+insert into public.reviews (id, location_id, google_review_id, star_rating, review_created_at, state)
+values ('00000000-0000-4000-8000-000000000107', '00000000-0000-4000-8000-0000000000c1', 'pipe-review-keys', 5, now(), 'drafted');
+create temp table keyrun (step int primary key, id uuid);
+insert into keyrun select 1, (pg_temp.approve('k1', '00000000-0000-4000-8000-000000000107', '00000000-0000-4000-8000-0000000000a1', 'dashboard') ->> 'publication_id')::uuid;
+select public.undo_publication((select id from keyrun where step = 1), '00000000-0000-4000-8000-0000000000a1');
+insert into keyrun select 2, (pg_temp.approve('k2', '00000000-0000-4000-8000-000000000107', '00000000-0000-4000-8000-0000000000a1', 'dashboard') ->> 'publication_id')::uuid;
+select public.undo_publication((select id from keyrun where step = 2), '00000000-0000-4000-8000-0000000000a1');
+select is((select idempotency_key from public.publications where id = (select id from keyrun where step = 2)),
+  'review_reply:00000000-0000-4000-8000-000000000107:2', 'the second approval of a review is suffix 2');
+-- Retention removes the oldest publication. One row is left (suffix 2): the old rule counted 1 and built suffix 2 again, a collision.
+delete from public.publications where id = (select id from keyrun where step = 1);
+insert into keyrun select 3, (pg_temp.approve('k3', '00000000-0000-4000-8000-000000000107', '00000000-0000-4000-8000-0000000000a1', 'dashboard') ->> 'publication_id')::uuid;
+select is((select idempotency_key from public.publications where id = (select id from keyrun where step = 3)),
+  'review_reply:00000000-0000-4000-8000-000000000107:3', 'after the oldest publication is deleted the next key is the highest suffix plus one, not the count plus one');
+select public.undo_publication((select id from keyrun where step = 3), '00000000-0000-4000-8000-0000000000a1');
+delete from public.publications where id = (select id from keyrun where step = 2);
+insert into keyrun select 4, (pg_temp.approve('k4', '00000000-0000-4000-8000-000000000107', '00000000-0000-4000-8000-0000000000a1', 'dashboard') ->> 'publication_id')::uuid;
+select is((select idempotency_key from public.publications where id = (select id from keyrun where step = 4)),
+  'review_reply:00000000-0000-4000-8000-000000000107:4', 'with only suffix 3 left (count 1) the next approval is 4 and does not collide');
+select is((select count(distinct idempotency_key) from public.publications where target_id = '00000000-0000-4000-8000-000000000107'), 2::bigint,
+  'two distinct keys remain, no collision');
+
 select * from finish();
 rollback;

@@ -533,3 +533,62 @@ Deno.test("test mode: the fictional US business is drafted only once the postal 
   assert.equal(us.prospect.time_zone, "America/Chicago");
   assert.ok(us.first.body.includes("looking at auto repair shops in Exampleville. Your site lists your hours,"));
 });
+
+// FIX-3: Harvey's US rows carry metro, priority_score and us_eligible (all fictional here).
+const { state: _state, ...US_NO_STATE } = US;
+
+Deno.test("US metro sets the time zone: Houston, Dallas, Nashville Chicago; Atlanta, Miami, Tampa, Charlotte New York; Phoenix, Denver, San Diego each their own", () => {
+  const want: Record<string, string> = {
+    Houston: "America/Chicago", Dallas: "America/Chicago", Nashville: "America/Chicago",
+    Atlanta: "America/New_York", Miami: "America/New_York", Tampa: "America/New_York", Charlotte: "America/New_York",
+    Phoenix: "America/Phoenix", Denver: "America/Denver", "San Diego": "America/Los_Angeles",
+  };
+  for (const [metro, zone] of Object.entries(want)) {
+    assert.equal(timeZoneOf({ ...US_NO_STATE, metro }), zone, metro);
+    assert.equal(rowRefusal({ ...US_NO_STATE, metro }, ["US"], "2026-11-06"), null, `${metro} needs no state or time_zone`);
+    assert.equal(toCandidate({ ...US_NO_STATE, metro }).time_zone, zone);
+  }
+  assert.equal(timeZoneOf({ country: "US", metro: "  san diego, CA " }), "America/Los_Angeles", "case, spaces and a state after a comma");
+  assert.equal(timeZoneOf({ country: "US", metro: "Houston", state: "TX" }), "America/Chicago", "Texas is split, the metro settles it");
+  assert.equal(timeZoneOf({ country: "US", metro: "Miami", time_zone: "America/Chicago" }), "America/Chicago", "the register's own time_zone still comes first");
+  assert.equal(timeZoneOf({ country: "US", metro: "Exampleville", state: "IL" }), "America/Chicago", "an unknown metro falls back to the state");
+  assert.equal(rowRefusal({ ...US_NO_STATE, metro: "Exampleville" }, ["US"], "2026-11-06"), "no_time_zone", "an unknown metro with no state or zone is refused");
+});
+
+Deno.test("us_eligible: an explicit no keeps a US row out; a yes or no column does not", () => {
+  const day = "2026-11-06";
+  for (const v of ["false", "FALSE", "0", "no", "n"]) assert.equal(rowRefusal({ ...US, us_eligible: v }, ["US"], day), "not_us_eligible", v);
+  for (const v of ["true", "TRUE", "1", "yes", ""]) assert.equal(rowRefusal({ ...US, us_eligible: v }, ["US"], day), null, `"${v}"`);
+  assert.equal(rowRefusal(US, ["US"], day), null, "a register without the column reads as before");
+});
+
+Deno.test("the week is ordered by priority_score, highest first, then the industry order", () => {
+  const csv = ["company_id,industry,metro,priority_score,quality_score", "a,hair salon,Dallas,10,9", "b,hair salon,Dallas,90,1", "c,barbershop,Dallas,50,1", "d,hair salon,Dallas,,1", "e,hair salon,Dallas,abc,1"].join("\n");
+  assert.deepEqual(ordered(parseCsv(csv)).map((r) => r.company_id), ["b", "c", "a", "d", "e"], "90, 50, 10, then blanks and junk as 0 in the old order");
+  const mixed = ["company_id,industry,priority_score", "s1,auto repair,5", "b1,hair salon,5", "f1,cafe,5", "s2,cleaners,80", "b2,nail salon,1"].join("\n");
+  assert.deepEqual(ordered(parseCsv(mixed)).map((r) => r.company_id), ["b1", "f1", "s2", "b2", "s1"], "groups still alternate; inside a group the higher score goes first");
+});
+
+Deno.test("prepare drafts a Harvey US row from its metro and skips us_eligible false", async () => {
+  const cols = ["company_id", "business_name", "industry", "country", "city", "website", "email", "email_page_url", "metro", "priority_score", "us_eligible"];
+  const row = (id: string, metro: string, score: string, elig: string) => ({ ...US_NO_STATE, company_id: id, business_name: `Oak Street Auto ${id}`, email: `hello@${id}.example.com`, website: `https://${id}.example.com`, email_page_url: `https://${id}.example.com/contact`, metro, priority_score: score, us_eligible: elig }) as Record<string, string>;
+  const rows = [row("lo", "Phoenix", "10", "true"), row("hi", "San Diego", "90", "true"), row("no", "Denver", "99", "false")];
+  const csv = [cols.join(","), ...rows.map((r) => cols.map((k) => `"${r[k]}"`).join(","))].join("\n");
+  const { deps, inserted } = fakeDeps({
+    settings: async () => ({ sending_open: true, test_mode: true, open_countries: ["US"], ...RAMP, started_on: "2026-11-09", stopped_reason: null }),
+    register: async () => csv, page: async (u) => ({ html: `<a href="mailto:${u.replace("https://", "hello@").replace("/contact", "")}">mail</a><p>Monday 8:00 to 17:00</p>` }), postal: POSTAL,
+  });
+  const r = await prepare(deps);
+  assert.equal(r.refused.not_us_eligible, 1);
+  const got = (inserted as { prospect: { harvey_company_id: string; time_zone: string } }[]).map((d) => [d.prospect.harvey_company_id, d.prospect.time_zone]);
+  assert.deepEqual(got.filter(([id]) => ["hi", "lo", "no"].includes(id)), [["hi", "America/Los_Angeles"], ["lo", "America/Phoenix"]]);
+});
+
+Deno.test("FIX-3: one plan and no price in Email 1, and no plan name anywhere in rules.ts", async () => {
+  for (const country of ["GB", "US"]) {
+    const one = emailOne({ business: "Rose Lane Salon", kind: "hair salons", city: "Exampleton", detail: "Your site lists your hours.", country, postal: country === "US" ? POSTAL : null });
+    assert.ok(!/\bPro\b|Essentials|three months|founding|\$|dollar|price|\b(19|29|39)\b/i.test(one.body + one.subject), `${country} Email 1 carries no plan and no price`);
+  }
+  const src = await Deno.readTextFile(new URL("./rules.ts", import.meta.url));
+  assert.ok(!/Kabsi Pro|\bEssentials\b|three months of/.test(src), "rules.ts names no retired plan");
+});

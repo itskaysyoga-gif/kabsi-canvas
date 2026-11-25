@@ -27,20 +27,20 @@ describe("the contact list notice (30.37 item 6)", () => {
   it("section 3's marketing line covers users and visitors, with the Outbound exception (R-142 4d)", () => {
     const flat = privacy.replace(/\s+/g, " ");
     expect(flat).toContain(
-      "we don't send marketing emails to Kabsi users or visitors without asking first. Kabsi may send one plain email, and one follow-up, to a UK registered company at the address it publishes, as section 15 explains.",
+      "we don't send marketing emails to Kabsi users or visitors without asking first. Kabsi may send one plain email, and one follow-up, to a US business or a UK registered company at the address it publishes, as section 15 explains.",
     );
     expect(flat).not.toMatch(/marketing emails without asking you first/);
     for (const text of [facts, llms]) {
       expect(text).toContain(
-        "Kabsi may send one plain email, and one follow-up, to a UK registered company at the address it publishes",
+        "Kabsi may send one plain email, and one follow-up, to a US business or a UK registered company at the address it publishes",
       );
     }
   });
 
-  it("is on /privacy, under 320 words (the cap lane R approved, R-143), and has no dashes or exclamation marks", () => {
+  it("is on /privacy, under 340 words (FIX-3 raised the cap of 320 for the US and opt-out paragraph; lane R to confirm), and has no dashes or exclamation marks", () => {
     expect(start).toBeGreaterThan(-1);
     expect(end).toBeGreaterThan(start);
-    expect(section.split(" ").length).toBeLessThan(320);
+    expect(section.split(" ").length).toBeLessThan(340);
     expect(section).not.toMatch(/[–—!]/);
     expect(section).not.toMatch(/[؀-ۿ]/);
   });
@@ -60,8 +60,9 @@ describe("the contact list notice (30.37 item 6)", () => {
     expect(section).toMatch(/at least every six months and marks one that has closed/); // retention
     expect(section).toMatch(/never sold or shared/);
     expect(section).toMatch(
-      /Kabsi writes only to UK registered companies that are active on Companies House: one plain email, and one follow-up, to the address the business publishes\./,
-    ); // 30.45 item 5
+      /Kabsi emails businesses in the US, and UK registered companies that are active on Companies House\. Rashid Abou Hamzy writes from rashid@getkabsi\.com to the email address the business publishes on its own website: one plain email, and one follow-up if there is no reply\./,
+    ); // FIX-3 (30.45 item 5, widened for the US by OUTBOUND-3)
+    expect(section).toMatch(/A reply of "no thanks", or any other opt-out, stops it for good\./); // FIX-3
     expect(section).toMatch(/The United Arab Emirates and every other country are off\./);
     expect(section).toMatch(
       /Nothing is sent before Rashid Abou Hamzy decides to start, and no message has been sent yet\./,

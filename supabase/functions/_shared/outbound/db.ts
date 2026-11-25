@@ -307,6 +307,12 @@ export async function freeCheck(p: Matched["prospect"]): Promise<string | null> 
   return typeof code === "string" ? code : null;
 }
 
+/** FIX-3: the free check ran for this business. The database keeps its code and counts the business once for the kill gate. */
+export async function noteLed(prospectId: string, code: string) {
+  const { error } = await admin().rpc("outbound_note_led", { p_prospect: prospectId, p_by: "check", p_code: code });
+  if (error) throw new Error(`noteLed: ${error.message}`);
+}
+
 export async function draftReply(r: { prospect_id: string; to_address: string; subject: string; body: string; in_reply_to: string; references_ids: string }) {
   const have = await admin().from("outbound_messages").select("id").eq("prospect_id", r.prospect_id).eq("kind", "reply").eq("status", "draft").limit(1);
   if ((have.data ?? []).length) return;

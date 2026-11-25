@@ -183,6 +183,7 @@ function run(raw: string | string[], over: Partial<InboxDeps> = {}, prospect = P
     checkStops: async (why) => void log.push(`stops:${why}`),
     alert: async (key) => void log.push(`alert${/^[0-9a-f]{64}$/.test(key) ? "" : ":badkey"}`),
     freeCheck: async () => "ABC123",
+    noteLed: async (_p, code) => void log.push(`led:${code}`),
     draftReply: async (d) => void log.push(`draft:${d.to_address}:${linksOk(d.body, "reply")}`),
     harveyHashes: async (h) => void log.push(`harvey:${h.length}`),
     ...over,
@@ -196,7 +197,7 @@ const reply = (body: string, extra = "") =>
 Deno.test("a person's yes: follow-up cancelled, needs Rashid, alert, the free check, a drafted reply; nothing is sent", async () => {
   const { r, log } = await run(reply(`Yes please\n\nOn Mon Rashid wrote:\n> ${SENT.split("\n\n")[0]}`));
   assert.equal(r.yes, 1);
-  assert.deepEqual(log, ["cancel:follow_up", "status:needs_you", "draft:amy@rose.example.com:true", "alert", "event:reply:yes"]);
+  assert.deepEqual(log, ["cancel:follow_up", "status:needs_you", "led:ABC123", "draft:amy@rose.example.com:true", "alert", "event:reply:yes"]);
   const body = yesReply("Rose Lane Salon", "ABC123");
   assert.equal(body.replace(/Facebook: .*\nInstagram: .*$/, "Facebook: F\nInstagram: I"), [
     "Hi Rose Lane Salon team,",
@@ -209,6 +210,14 @@ Deno.test("a person's yes: follow-up cancelled, needs Rashid, alert, the free ch
   assert.match(body, /Facebook: www\.facebook\.com\/profile\.php\?id=\d+\nInstagram: www\.instagram\.com\/kabsi\.co$/);
   assert.ok(linksOk(body, "reply"));
   assert.ok(!/[–—!]/.test(body));
+});
+
+Deno.test("FIX-3: the kill gate's count is the check that ran, not the yes: no check, nothing noted and no draft", async () => {
+  const { r, log } = await run(reply("Yes please"), { freeCheck: async () => null });
+  assert.equal(r.yes, 1, "the yes is still reported for the staff page");
+  assert.deepEqual(log, ["cancel:follow_up", "status:needs_you", "alert", "event:reply:yes"], "no led:, no draft");
+  const other = await run(reply("What does it cost?"));
+  assert.ok(!other.log.some((l) => l.startsWith("led:")), "another reply never counts");
 });
 
 Deno.test("a person's other reply: needs Rashid, alert, no draft; the free check is not run", async () => {
