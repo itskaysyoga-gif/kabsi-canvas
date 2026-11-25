@@ -11,6 +11,10 @@ export type TodayInput = {
   followupsDue?: number | undefined;
   conciergeTasks?: number | undefined;
   stuckApprovals?: number | undefined;
+  /** APP-1: sends that did not go through in the last 7 days (staff_operations). */
+  failedSends7d?: number | undefined;
+  /** APP-1: free trials that end in the next 3 days (staff_today). */
+  trialsEnding3d?: number | undefined;
   accessStopped?: number | undefined;
   failedJobs24h?: number | undefined;
   deadJobs?: number | undefined;
@@ -36,7 +40,10 @@ export type TodayRow = {
 const n = (v: number | undefined) => (typeof v === "number" && v > 0 ? v : 0);
 const s = (k: number, one: string, many: string) => `${k} ${k === 1 ? one : many}`;
 
-/** The rows that need a person, most urgent first. Nothing to do gives an empty list (the all-clear). */
+/**
+ * The rows that need a person, most urgent first (APP-1: approvals waiting, failed sends, trials ending, stopped jobs, then
+ * the rest). Nothing to do gives an empty list (the all-clear).
+ */
 export function todayRows(i: TodayInput): TodayRow[] {
   const out: TodayRow[] = [];
   const add = (r: TodayRow) => {
@@ -52,13 +59,21 @@ export function todayRows(i: TodayInput): TodayRow[] {
     level: "red",
   });
   add({
-    id: "jobs",
-    count: n(i.failedJobs24h),
-    text: `${s(n(i.failedJobs24h), "job run", "job runs")} failed in the last 24 hours`,
+    id: "failed-sends",
+    count: n(i.failedSends7d),
+    text: `${s(n(i.failedSends7d), "send", "sends")} to Google did not go through in the last 7 days`,
     page: "system",
-    show: "jobs",
-    button: "Open job health",
+    show: "operations",
+    button: "Open operations",
     level: "red",
+  });
+  add({
+    id: "trials",
+    count: n(i.trialsEnding3d),
+    text: `${s(n(i.trialsEnding3d), "free trial ends", "free trials end")} in the next 3 days`,
+    page: "businesses",
+    button: "Open businesses",
+    level: "amber",
   });
   add({
     id: "dead",
@@ -67,6 +82,15 @@ export function todayRows(i: TodayInput): TodayRow[] {
     page: "system",
     show: "health",
     button: "Open system health",
+    level: "red",
+  });
+  add({
+    id: "jobs",
+    count: n(i.failedJobs24h),
+    text: `${s(n(i.failedJobs24h), "job run", "job runs")} failed in the last 24 hours`,
+    page: "system",
+    show: "jobs",
+    button: "Open job health",
     level: "red",
   });
   add({

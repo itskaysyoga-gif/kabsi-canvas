@@ -169,14 +169,14 @@ describe("the trial banner (P0.4-05, step 6)", () => {
     },
   });
   it("says the trial has started, no card, for the first days", () => {
-    expect(trialBannerLine(t(14, 1))).toBe("Your 14-day Pro trial has started. No card needed.");
+    expect(trialBannerLine(t(14, 1))).toBe("Your 14-day free trial has started.");
     expect(trialBannerLine(t(14, BANNER_DAYS))).not.toBeNull();
   });
   it("says 30 days through a partner link", () => {
     expect(
       trialLength({ started_at: "2026-10-22T10:00:00Z", ends_at: "2026-11-21T10:00:00Z" }),
     ).toBe(30);
-    expect(trialBannerLine(t(30, 1))).toBe("Your 30-day Pro trial has started. No card needed.");
+    expect(trialBannerLine(t(30, 1))).toBe("Your 30-day free trial has started.");
   });
   it("is gone after the first days, and never for a business that is not on a trial", () => {
     expect(trialBannerLine(t(14, BANNER_DAYS + 1))).toBeNull();

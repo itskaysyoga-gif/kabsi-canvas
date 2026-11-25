@@ -3,7 +3,7 @@
 // scripts/app-shots/fixtures.mjs and the area files next to it (an invented business, Maple Street Salon). Nothing reaches Supabase.
 // Start the site first (npx vite dev --port 5173 --host 127.0.0.1), then:
 //   BASE=http://127.0.0.1:5173 node scripts/app-shots.mjs              every route in scripts/app-shots/routes/*.json
-//   ONLY=/app/reviews node scripts/app-shots.mjs                        one route (every state of it)
+//   ONLY=/app/reviews node scripts/app-shots.mjs                        one route (every state of it); a comma list for several
 //   WIDTHS=390 node scripts/app-shots.mjs                               one width
 // A route can name a fixture "state" (read by the area fixture files) to draw the same screen in another state, and a
 // "click" (a button's name) to press before the shot.
@@ -22,7 +22,7 @@ const routes = readdirSync("scripts/app-shots/routes")
   .filter((f) => f.endsWith(".json"))
   .sort()
   .flatMap((f) => JSON.parse(readFileSync(`scripts/app-shots/routes/${f}`, "utf8")))
-  .filter((r) => !process.env.ONLY || r.path.split("?")[0] === process.env.ONLY);
+  .filter((r) => !process.env.ONLY || process.env.ONLY.split(",").includes(r.path.split("?")[0]));
 const widths = (process.env.WIDTHS ?? "390,768,1440").split(",").map(Number);
 mkdirSync("shots/app", { recursive: true });
 const browser = await chromium

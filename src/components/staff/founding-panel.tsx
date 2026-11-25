@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { RetryLine } from "@/components/kabsi/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fmtDate } from "@/lib/format";
 import { SITE_URL } from "@/lib/site";
@@ -101,9 +102,9 @@ export function FoundingPanel({ businesses }: { businesses: Business[] }) {
   if (q.isLoading) return null;
   if (q.error)
     return (
-      <p className={cn(STAFF_CARD, "text-small text-text-2")}>
-        Founding 25 did not load: {String(q.error.message)}
-      </p>
+      <div className={STAFF_CARD}>
+        <RetryLine what="Founding 25 did not load." onRetry={() => void q.refetch()} />
+      </div>
     );
   const o = q.data;
   if (!o) return null;

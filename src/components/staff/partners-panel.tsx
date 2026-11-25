@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { RetryLine } from "@/components/kabsi/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { fmtDate } from "@/lib/format";
@@ -29,9 +30,9 @@ export function PartnersPanel() {
   if (q.isLoading) return null;
   if (q.error)
     return (
-      <p className={cn(STAFF_CARD, "text-small text-text-2")}>
-        Partners did not load: {String(q.error.message)}
-      </p>
+      <div className={STAFF_CARD}>
+        <RetryLine what="Partners did not load." onRetry={() => void q.refetch()} />
+      </div>
     );
   const o = q.data;
   if (!o) return null;

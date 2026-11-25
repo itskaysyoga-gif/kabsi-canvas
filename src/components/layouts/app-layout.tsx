@@ -274,7 +274,7 @@ function BusinessMenu({ compact = false }: { compact?: boolean }) {
   );
 }
 
-/** "Pro trial, [n] days left." with its end date (COPY.md 19), for the owner while the trial runs. */
+/** "Free trial, [n] days left." with its end date (APP-1), for the owner while the trial runs. */
 function useTrial(loc: Location | null | undefined, role: Role | undefined) {
   const ent = useQuery({
     queryKey: ["entitlements", loc?.id],
@@ -295,7 +295,7 @@ function TrialWords({ endsAt }: { endsAt: string }) {
       <CircleUser className="size-5 shrink-0 text-text-2" aria-hidden />
       <span className="min-w-0 flex-1">
         <span className="block font-bold">
-          Pro trial, {left} {left === 1 ? "day" : "days"} left.
+          Free trial, {left} {left === 1 ? "day" : "days"} left.
         </span>
         <span className="block text-label text-text-2">Ends {fmtDate(endsAt, false)}</span>
       </span>

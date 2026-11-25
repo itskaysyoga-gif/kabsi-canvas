@@ -4,7 +4,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Headline } from "@/components/kabsi/highlight";
 import { Check, ExternalLink, Undo2 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { sectionFor, tabOn, tabsFor } from "@/lib/app-nav";
@@ -55,6 +55,16 @@ export function AccountTop({
   const list = section && tabs ? tabsFor(section, role) : [];
   // App 2: one title per screen. Inside a place with tabs the title is the place, and the tab says which page is open.
   const heading = list.length > 1 && section ? section.label : title;
+  // APP-1: on a phone the tabs scroll sideways; the open one is brought into view, so "Plan" is never cut off.
+  const nav = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = nav.current;
+    const on = el?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!el || !on || el.scrollWidth <= el.clientWidth) return;
+    const a = on.getBoundingClientRect();
+    const b = el.getBoundingClientRect();
+    el.scrollLeft += a.left - b.left - (b.width - a.width) / 2;
+  }, [path, f, list.length]);
   return (
     <div className={cn("mb-6", className)}>
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -72,6 +82,7 @@ export function AccountTop({
       </div>
       {list.length > 1 && (
         <nav
+          ref={nav}
           aria-label="Pages in this section"
           className="-mx-4 mt-6 overflow-x-auto px-4 sm:mx-0 sm:px-0"
         >

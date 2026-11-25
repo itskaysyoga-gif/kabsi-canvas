@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { RetryLine } from "@/components/kabsi/ui";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { fmtDate } from "@/lib/format";
@@ -43,7 +44,11 @@ export function FollowupsPanel() {
     <section className={STAFF_CARD}>
       <h2 className={STAFF_H2}>Follow-ups</h2>
       {rows.isError ? (
-        <p className="mt-1 text-small text-bad">Couldn't load follow-ups. Refresh the page.</p>
+        <RetryLine
+          className="mt-1"
+          what="Follow-ups did not load."
+          onRetry={() => void rows.refetch()}
+        />
       ) : !rows.data?.length ? (
         <p className="mt-1 text-small text-text-2">Nothing to finish by hand.</p>
       ) : (

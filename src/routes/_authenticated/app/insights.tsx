@@ -234,11 +234,7 @@ function GoogleNumbers({ locationId }: { locationId: string }) {
           <Panel>
             <div role="alert">
               <p className="text-body font-bold">Your figures could not be read just now.</p>
-              <p className="mt-1 text-small text-text-2">
-                {insights.error instanceof Error
-                  ? insights.error.message
-                  : "Try again in a moment."}
-              </p>
+              <p className="mt-1 text-small text-text-2">Nothing changed. Try again in a moment.</p>
               <Button
                 variant="secondary"
                 size="md"
@@ -404,13 +400,7 @@ function Figures({ a }: { a: InsightsAnswer }) {
           </>
         ) : (
           <div className="rounded-inner bg-surface-2 p-4 text-small" role="status">
-            <p className="font-bold">The search terms report is part of Pro.</p>
-            <Link
-              to="/app/plan"
-              className="mt-1 inline-flex min-h-11 items-center font-bold underline underline-offset-4"
-            >
-              See your plan
-            </Link>
+            <p>The search terms report is not part of your plan.</p>
           </div>
         )}
       </Panel>

@@ -2,15 +2,15 @@ import { useCallback, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
-import { EmptyState, ErrorState, Skeleton, buttonClass } from "@/components/kabsi/ui";
-import { shortParas, TaskPill } from "@/components/kabsi/d3-account";
+import { RetryLine, Skeleton, buttonClass } from "@/components/kabsi/ui";
+import { shortParas } from "@/components/kabsi/d3-account";
+import { ProfileHealth, ThisWeek } from "@/components/home/home-week";
 import { BacklogCard } from "@/components/home/backlog-card";
 import { YesItem, type Approved } from "@/components/home/yes-item";
 import {
   NEEDS_YES,
   REPLY_NOTE,
   attentionLines,
-  doneThisWeek,
   emptyHomeLine,
   homeState,
   isBacklogSummary,
@@ -20,17 +20,14 @@ import {
 } from "@/lib/home-state";
 import { loadCardDetails } from "@/lib/home";
 import { loadTasks, type Task } from "@/lib/tasks";
-import { recentTasks } from "@/lib/task-feed";
-import { reviewGrowth } from "@/lib/reviews";
 import { loadEntitlements } from "@/lib/entitlements";
 import { planChoice } from "@/lib/plan-choice";
 import type { Access } from "@/lib/team";
 import type { Location } from "@/lib/onboarding";
 
-// Home (App 2, master plan 30.22 item 5): an owner who opens Kabsi on a phone knows in five seconds what needs them and
-// can approve it in one tap. In this order: Needs attention (real problems only, one line and one button each), Needs
-// your yes (compact items, "Nothing goes on Google until you approve it." said once), Done by Kabsi this week (at most
-// three, no duplicates), Your business on Google (at most three real numbers, or nothing). Nothing else.
+// Home (App 2, master plan 30.22 item 5; APP-1): an owner who opens Kabsi on a phone knows in five seconds what needs them
+// and can approve it in one tap. In this order: Waiting for your yes (the count, the next item, the rest), Needs attention
+// (real problems only, one line and one button each), This week (the receipt), Your Google profile (the health strip).
 export function ActionCenter({ loc, access }: { loc: Location; access: Access }) {
   const qc = useQueryClient();
   const role = access.role;
@@ -100,9 +97,7 @@ export function ActionCenter({ loc, access }: { loc: Location; access: Access })
 
   if (list.isError)
     return (
-      <ErrorState title="This page did not load." onRetry={() => void list.refetch()}>
-        Nothing you did, and nothing changed on Google. Try again in a minute.
-      </ErrorState>
+      <RetryLine what="What waits for you did not load." onRetry={() => void list.refetch()} />
     );
   if (!list.data)
     return (
@@ -113,115 +108,113 @@ export function ActionCenter({ loc, access }: { loc: Location; access: Access })
     );
 
   return (
-    // App 3: on a computer, what needs the owner on the left and what Kabsi did on the right, so the page uses the width.
-    // The right column only takes room when it has something to show; otherwise the left one uses the full width.
-    <div className="grid items-start gap-8 lg:has-[>[data-side]>*]:grid-cols-[minmax(0,1fr)_22rem] xl:has-[>[data-side]>*]:grid-cols-[minmax(0,1fr)_25rem]">
+    // APP-1: Home in three parts. What needs the owner's yes comes first (the count, the next item approvable in one tap,
+    // the rest below it), then anything that stopped, then "This week" (the receipt) and "Your Google profile" (the
+    // health strip). On a computer the receipt and the strip sit in the right column.
+    <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_24rem]">
       <div className="min-w-0 space-y-8">
-        <HomeCounts locationId={loc.id} yes={waiting.length} urgent={view.urgent} />
-        <NeedsAttention lines={attention} />
         {yes.length > 0 ? (
-          <HomeSection id="yes-h" title="Needs your yes" count={waiting.length} note={REPLY_NOTE}>
-            <ul className="divide-y divide-line">
-              {yes.map((t, i) =>
-                isBacklogSummary(t) ? (
-                  <li key={t.id} className="py-4 first:pt-0 last:pb-0">
-                    <BacklogCard task={t} locationId={loc.id} lead={i === 0} />
-                  </li>
-                ) : (
-                  <YesItem
-                    key={t.id}
-                    task={t}
-                    detail={details.data?.[t.id]}
-                    access={access}
-                    locationId={loc.id}
-                    lead={i === 0}
-                    approved={held.get(t.id)?.a}
-                    onApproved={(a) => setHeld((m) => new Map(m).set(t.id, { task: t, a }))}
-                    onSettled={() => void settle(t.id)}
-                  />
-                ),
-              )}
-            </ul>
-            {view.folded ? (
-              <button
-                type="button"
-                className={buttonClass("tertiary") + " mt-3"}
-                aria-expanded={expanded}
-                aria-controls="yes-h"
-                data-testid="yes-see-all"
-                onClick={() => setExpanded((v) => !v)}
+          <section
+            aria-labelledby="yes-h"
+            className="overflow-hidden rounded-card border border-line bg-surface-1 shadow-rest"
+            data-testid="yes-hero"
+          >
+            <div className="flex items-center gap-4 border-b border-line bg-surface-2 px-5 py-5 sm:px-6">
+              <span
+                aria-hidden
+                className="grid size-14 shrink-0 place-items-center rounded-full bg-kb-yellow font-display text-h2 font-bold text-kb-black"
               >
-                {expanded ? "Show fewer" : `See all ${view.total}`}
-              </button>
-            ) : null}
-          </HomeSection>
+                {waiting.length || yes.length}
+              </span>
+              <div className="min-w-0">
+                <h2 id="yes-h" className="font-display text-h3 font-bold">
+                  <span className="sr-only">{waiting.length || yes.length} </span>
+                  Waiting for your yes
+                </h2>
+                <p className="text-small text-text-2">{REPLY_NOTE}</p>
+              </div>
+            </div>
+            <div className="px-5 pt-4 pb-5 sm:px-6">
+              <p className="mb-2 text-label font-bold text-text-2">Next</p>
+              {[yes.slice(0, 1), yes.slice(1)].map((group, g) =>
+                group.length ? (
+                  <div key={g} className={g ? "mt-5 border-t border-line pt-4" : undefined}>
+                    {g ? (
+                      <p className="mb-1 text-label font-bold text-text-2">Also waiting</p>
+                    ) : null}
+                    <ul className="divide-y divide-line">
+                      {group.map((t, j) => {
+                        const i = g ? j + 1 : 0;
+                        return isBacklogSummary(t) ? (
+                          <li key={t.id} className="py-4 first:pt-0 last:pb-0">
+                            <BacklogCard task={t} locationId={loc.id} lead={i === 0} />
+                          </li>
+                        ) : (
+                          <YesItem
+                            key={t.id}
+                            task={t}
+                            detail={details.data?.[t.id]}
+                            access={access}
+                            locationId={loc.id}
+                            lead={i === 0}
+                            approved={held.get(t.id)?.a}
+                            onApproved={(a) => setHeld((m) => new Map(m).set(t.id, { task: t, a }))}
+                            onSettled={() => void settle(t.id)}
+                          />
+                        );
+                      })}
+                    </ul>
+                  </div>
+                ) : null,
+              )}
+              {view.folded ? (
+                <button
+                  type="button"
+                  className={buttonClass("tertiary") + " mt-3"}
+                  aria-expanded={expanded}
+                  aria-controls="yes-h"
+                  data-testid="yes-see-all"
+                  onClick={() => setExpanded((v) => !v)}
+                >
+                  {expanded ? "Show fewer" : `See all ${view.total}`}
+                </button>
+              ) : null}
+            </div>
+          </section>
+        ) : attention.length === 0 ? (
+          <AllClear />
         ) : null}
-        {attention.length === 0 && yes.length === 0 ? (
-          <EmptyState icon={Check} title="Nothing needs you right now.">
-            {emptyHomeLine(nextMonday())}
-          </EmptyState>
-        ) : null}
+        <NeedsAttention lines={attention} />
       </div>
-      <div data-side className="min-w-0 space-y-8 empty:hidden">
-        <DoneThisWeek locationId={loc.id} />
-        <BusinessNumbers locationId={loc.id} />
+      <div className="min-w-0 space-y-8">
+        <ThisWeek locationId={loc.id} />
+        <ProfileHealth locationId={loc.id} tasks={all} />
       </div>
     </div>
   );
 }
 
-// Fixes B (DSH-05, DSH-08): three small counts at the top. "Done this week" opens the latest report. Nothing here approves
-// anything; it only says how much is waiting, how much is urgent and how much Kabsi did.
-function HomeCounts({
-  locationId,
-  yes,
-  urgent,
-}: {
-  locationId: string;
-  yes: number;
-  urgent: number;
-}) {
-  const q = useQuery({
-    queryKey: ["done-lately", locationId],
-    queryFn: () => recentTasks(locationId, { limit: 20, days: 7 }),
-    refetchInterval: 60_000,
-  });
-  const done = doneThisWeek(q.data ?? [], Number.POSITIVE_INFINITY).length;
-  const tile = "block min-h-11 rounded-card border border-line bg-surface-1 px-3 py-2 shadow-rest";
+/** Nothing waits: what Kabsi is doing and when the owner hears from it, in the place the yes card would be. */
+function AllClear() {
   return (
-    <div
-      role="group"
-      className="grid grid-cols-3 gap-2"
-      aria-label="Where things stand"
-      data-testid="home-counts"
+    <section
+      aria-labelledby="clear-h"
+      className="flex items-start gap-4 rounded-card border border-line bg-surface-1 p-5 shadow-rest sm:p-6"
+      data-testid="all-clear"
     >
-      <div className={tile}>
-        <span className="block font-display text-h3 font-bold">{yes}</span>
-        <span className="block text-small text-text-2">Needs your yes</span>
-      </div>
-      <div className={tile}>
-        <span className={"block font-display text-h3 font-bold" + (urgent > 0 ? " text-bad" : "")}>
-          {urgent}
-        </span>
-        <span className="block text-small text-text-2">Urgent</span>
-      </div>
-      <Link
-        to="/app/report"
-        className={
-          tile + " hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2"
-        }
-        aria-label={
-          q.isLoading || q.isError
-            ? "Done this week, open the latest report"
-            : `Done this week ${done}, open the latest report`
-        }
+      <span
+        aria-hidden
+        className="grid size-12 shrink-0 place-items-center rounded-full bg-ok-soft text-ok"
       >
-        <span className="block font-display text-h3 font-bold">
-          {q.isLoading || q.isError ? "" : done}
-        </span>
-        <span className="block text-small text-text-2">Done this week</span>
-      </Link>
-    </div>
+        <Check className="size-6" strokeWidth={2.5} />
+      </span>
+      <div className="min-w-0">
+        <h2 id="clear-h" className="font-display text-h3 font-bold">
+          Nothing needs your yes
+        </h2>
+        <p className="mt-1 text-body text-text-2">{emptyHomeLine(nextMonday())}</p>
+      </div>
+    </section>
   );
 }
 
@@ -268,83 +261,6 @@ export function NeedsAttention({ lines }: { lines: AttentionLine[] }) {
         ))}
       </ul>
     </HomeSection>
-  );
-}
-
-const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
-// "Done by Kabsi this week": the latest state of what the owner approved in the last 7 days, each item once, at most
-// three, read from the publications so it never claims a task that did not happen. "See all" opens the reports.
-function DoneThisWeek({ locationId }: { locationId: string }) {
-  const q = useQuery({
-    queryKey: ["done-lately", locationId],
-    queryFn: () => recentTasks(locationId, { limit: 20, days: 7 }),
-    refetchInterval: 60_000,
-  });
-  const items = doneThisWeek(q.data ?? []);
-  if (!items.length) return null;
-  return (
-    <HomeSection
-      id="done-h"
-      title="Done by Kabsi this week"
-      action={
-        <Link to="/app/report" className={buttonClass("tertiary")}>
-          See all
-        </Link>
-      }
-    >
-      <ul className="divide-y divide-line">
-        {items.map((t) => (
-          <li
-            key={t.id}
-            className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2 py-3 first:pt-0 last:pb-0"
-          >
-            <p className="line-clamp-2 min-w-0 flex-1 basis-56 text-body break-words">
-              <span className="font-semibold">{cap(t.noun)}</span>
-              {t.text ? (
-                <span dir="auto" className="text-text-2">
-                  : {t.text}
-                </span>
-              ) : null}
-            </p>
-            <TaskPill state={t.owner} className="shrink-0" />
-          </li>
-        ))}
-      </ul>
-    </HomeSection>
-  );
-}
-
-// "Your business on Google": one strip of real numbers (new reviews from the Google Business Profile this month, opens of
-// the Kabsi review link this month; never added together), or nothing when there is nothing to show.
-function BusinessNumbers({ locationId }: { locationId: string }) {
-  const q = useQuery({
-    queryKey: ["review-growth", locationId],
-    queryFn: () => reviewGrowth(locationId),
-    staleTime: 60_000,
-  });
-  const nums = [
-    { n: q.data?.reviews ?? 0, label: "New reviews this month" },
-    { n: q.data?.opens ?? 0, label: "Review link opens this month" },
-  ].filter((x) => x.n > 0);
-  if (!nums.length) return null;
-  return (
-    <section aria-labelledby="numbers-h">
-      <h2 id="numbers-h" className="mb-3 font-display text-h3 font-bold">
-        Your business on Google
-      </h2>
-      <dl className="grid grid-cols-2 gap-3">
-        {nums.map((x) => (
-          <div
-            key={x.label}
-            className="rounded-card border border-line bg-surface-1 p-5 shadow-rest"
-          >
-            <dd className="font-display text-h2 font-bold">{x.n}</dd>
-            <dt className="text-small text-text-2">{x.label}</dt>
-          </div>
-        ))}
-      </dl>
-    </section>
   );
 }
 

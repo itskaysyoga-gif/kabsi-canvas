@@ -35,8 +35,8 @@ export function planChoice(
     const left = daysUntil(e.trial.ends_at, now);
     return {
       tone: "info",
-      title: left === 0 ? "Your Pro trial ends today" : `Your Pro trial ends in ${dayWord(left)}`,
-      body: `${PRICES_SENTENCE} You choose Essentials or Pro, monthly or yearly, on the Plan page. ${CARD_PAYMENTS_COMING} Your review link and QR code stay free either way.`,
+      title: left === 0 ? "Your free trial ends today" : `Your free trial ends in ${dayWord(left)}`,
+      body: `${PRICES_SENTENCE} Your plan and how to cancel are on the Plan page. ${CARD_PAYMENTS_COMING} Your review link and QR code stay free either way.`,
       cta,
     };
   }
