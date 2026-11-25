@@ -34,6 +34,8 @@ export function replayIo(o: { phoneNumberId: string; deliver: ReplayIo["deliver"
       // PILOT-READY: the people are made again when someone has removed them (every step answered needs_account on 25 Nov 2026).
       const { error } = await db.rpc("qa_ensure_whatsapp_personas");
       if (error) throw new Error(`the fictional phones could not be bound: ${error.message}`);
+      // The review the card scenarios approve is waiting again with its draft (it was "posted" by an earlier run).
+      await db.rpc("qa_reset_replay_fixtures");
       await db.from("whatsapp_conversations").delete().in("phone", p);
       await db.from("whatsapp_optins").update({ state: "active", stopped_at: null }).in("phone", p);
     },
