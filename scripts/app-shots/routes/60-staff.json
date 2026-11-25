@@ -15,9 +15,20 @@
     "name": "staff-conversations"
   },
   {
+    "path": "/staff/conversations",
+    "state": "staff-admin",
+    "name": "staff-conversations-thread",
+    "click": "Harbour Smiles Dental"
+  },
+  {
     "path": "/staff/programs",
     "state": "staff-admin",
     "name": "staff-programs"
+  },
+  {
+    "path": "/staff/outbound",
+    "state": "staff-admin",
+    "name": "staff-outbound"
   },
   {
     "path": "/staff/system",

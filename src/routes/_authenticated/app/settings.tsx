@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { fmtDate } from "@/lib/format";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -123,9 +124,7 @@ function SettingsPage() {
         </>
       ) : null}
       {settings.isError ? (
-        <p className="text-body text-bad" role="alert">
-          Couldn&apos;t load your settings. Refresh the page.
-        </p>
+        <RetryLine what="Your settings did not load." onRetry={() => void settings.refetch()} />
       ) : null}
       {loc && ready ? (
         <div className="space-y-4">

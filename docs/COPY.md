@@ -2616,7 +2616,48 @@ Every line below is in the code word for word; this section names where. Lane R 
 - **Screens:** "A reply for every review" / "Each new review arrives with a reply in your voice, waiting for your yes."; "Your details watched" / "When something changes on Google, you see what changed and fix it with one tap."; "Your report" became "Your weekly report".
 - **faq-data.ts (decision 4):** the plan answers now quote one plan at 29 US dollars a month, a card to start the 14 days, cancel before day 14 and pay nothing, a paid month runs to its end; no Pro, no yearly price, no 15 dollar location; "Card payments are not open yet". The partner answer reads "30 days free instead of 14."
 
-## 96. SITE-6: the header, trade screens and How it works (25 Nov 2026, the SITE-6 prompt)
+## 96. APP-1: the signed-in Home, Plan and the staff pages (25 Nov 2026, lane R, the APP-1 prompt)
+
+New and changed lines on the owner's screens and the staff pages. Every other line on these screens is unchanged.
+
+**Home** (`src/components/home/action-center.tsx`, `home-week.tsx`, `src/lib/home-state.ts`)
+
+- The first card: the number waiting on a yellow mark, the title `Waiting for your yes`, the line `Nothing goes on Google until you approve it.`, the label `Next` over the first item, and `Also waiting` over the rest. Nothing waiting: `Nothing needs your yes` with the line `Kabsi checks your Google profile every day and tells you on WhatsApp when something needs your yes. Your next report comes on <Monday>.` (email instead of WhatsApp while WhatsApp is off).
+- The receipt: `This week`, `What Kabsi did in the last 7 days.`, the link `Your reports`, the lines `Review replies sent to Google`, `Posts sent to Google`, `Photos sent to Google`, `Profile fixes sent to Google`, and only when there is one `Did not go through`. Under them: `Kabsi checks your Google profile every day. Nothing went to Google without your yes.`, or with nothing sent yet `Kabsi checks your Google profile every day. Work you approve shows here.` A failed read: `This week's work did not load. Nothing changed.` with `Try again`.
+- The health strip: `Your Google profile`, then `Details`, `Hours`, `Photos`, `Posts`, `Reviews`, each with a state and one action. States: `Watched every day`, `<n> thing to check` / `<n> things to check`, `Waiting for your yes`, `Ready for your yes`, `Sent this week`, `Nothing new this week`, `Next post being prepared`, `<n> reply waiting` / `<n> replies waiting`, `Every review answered`. Actions: `Check`, `See details`, `Check hours`, `See hours`, `See photos`, `Add photos`, `See the post`, `See posts`, `See replies`, `Get reviews`.
+- A failed list: `What waits for you did not load. Nothing changed.` with `Try again`.
+
+**The short retry line** (`RetryLine` in `src/components/kabsi/ui.tsx`), everywhere a read fails inside a card: `<What> did not load. Nothing changed.` with `Try again`. Used for your plan, your settings, your facts and, on the staff pages, follow-ups, partners, Founding 25, the checklist, Outbound, costs, job health, system health, the diagnostics and the chats.
+
+**Plan** (`src/routes/_authenticated/app/plan.tsx`, `src/lib/plans.ts`)
+
+- During the trial: `Free trial, ends <date>. <n> days left.` / `Everything Kabsi does is on during your trial.` / `When the trial ends without a plan, reply drafts, Google Protection and your weekly report pause. Your review link and QR code keep working.` (unchanged) The lines `Pro trial` and `No card, and no charge unless you choose a plan.` are gone.
+- The panel under the card is `More locations` (the price line is in the card already). Receipts, none yet: `No payments yet. Your receipts show here after your first payment.`
+- Plan names: `Free trial`, `Kabsi, monthly`, `Kabsi, yearly`, `Kabsi (earlier plan)`; the fallback name is `Kabsi`.
+- The side bar: `Free trial, <n> days left.` The Home card from day 11: `Your free trial ends in <n> days` / `Your free trial ends today`, and its line `Your plan and how to cancel are on the Plan page.`
+
+**Other owner screens**
+
+- Posts: `Kabsi prepares up to 2 posts a month. Each one waits for your yes.`
+- Photos: the phone tip ends at `...before it goes on Google.` (no plan names).
+- Profile Coach: `The Profile Coach comes with your Kabsi plan.`; the Pro upsell panel is gone.
+- Insights: `The search terms report is not part of your plan.`
+- Google profile, details not read yet: `Kabsi has not read your details from Google yet. It checks every day, and your name, phone, hours and the rest show here after the next check.`
+
+**Staff, Today** (`src/routes/_authenticated/staff/index.tsx`, `src/lib/staff-today.ts`)
+
+- The health strip: `Google`, `Sending`, `Jobs`, `Reading profiles`, `Data providers`, each with a state from counts only: `Working`, `Working, mock mode`, `Paused by the safety stop`, `<n> errors today`, `Nothing stuck`, `<n> sends need a look`, `Running`, `<n> stopped jobs`, `<n> failed runs`, `Up to date`, `<n> businesses late`, `No refusals`, `<n> refusals today`, `Checking`, `Not read`.
+- New queue rows: `<n> sends did not go through in the last 7 days` (Open operations) and `<n> free trials end in the next 3 days` (Open businesses). The count line: `<n> to look at, most urgent first`.
+
+**Staff, Conversations** (`src/components/staff/chats-panel.tsx`)
+
+- `Tap a chat to read it. Each one is labelled and emailed as a report about 10 minutes after it goes quiet.`; `<n> waiting for a person` / `Nobody is waiting for a person`.
+- Each row: the business (or the person), the time, `Them: ` or `Nora: ` and the last message, the state chip `Needs a person`, `Open` or `Done`, and `<hot|warm|cold> lead`. A chat with no name is `Website visitor`.
+- Empty: `Nobody is waiting for a person. Nora answers on the website and in Kabsi, and a chat shows here when she hands one over.` and `No chats match. Nora's chats show here as they happen.`
+- The fold: `Filters, figures and export`. The thread: `Next step: <...>`, `No messages are kept for this chat any more. The summary above stays.`, `No contact details given`.
+
+
+## 97. SITE-6: the header, trade screens and How it works (25 Nov 2026, the SITE-6 prompt)
 
 Every line below is in the code word for word; this section names where. It replaces the header lines of sections 59 and 90.
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { fmtDateTime } from "@/lib/format";
@@ -77,7 +78,13 @@ export function SystemHealthPanel() {
           <RefreshCw /> {q.isFetching ? "Checking" : "Refresh"}
         </Button>
       </div>
-      {q.isError ? <p className="mt-2 text-bad">{q.error.message}</p> : null}
+      {q.isError ? (
+        <RetryLine
+          className="mt-2"
+          what="System health did not load."
+          onRetry={() => void q.refetch()}
+        />
+      ) : null}
       {h ? (
         <>
           <p className="mt-1 text-small text-text-2">
@@ -327,7 +334,14 @@ export function BusinessDiagnostics({ location }: { location: string }) {
   });
   const d = q.data;
   if (q.isLoading) return <p className="mt-3 text-small text-text-2">Reading</p>;
-  if (q.isError) return <p className="mt-3 text-small text-bad">{q.error.message}</p>;
+  if (q.isError)
+    return (
+      <RetryLine
+        className="mt-3"
+        what="The diagnostics did not load."
+        onRetry={() => void q.refetch()}
+      />
+    );
   if (!d || !d.business) return <p className="mt-3 text-small text-text-2">No such business.</p>;
   const g = d.google;
   const counts = (o: Record<string, number>) =>

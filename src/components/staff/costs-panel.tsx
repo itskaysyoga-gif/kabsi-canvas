@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { useQuery } from "@tanstack/react-query";
 import { Segmented } from "@/components/kabsi/ui";
 import { supabase } from "@/lib/supabase";
@@ -91,7 +92,11 @@ export function CostsPanel() {
             Data providers{thisMonth ? `, ${monthName(thisMonth)}` : ""}
           </h3>
           {months.isError ? (
-            <p className="mt-2 text-small text-bad">{months.error.message}</p>
+            <RetryLine
+              className="mt-2"
+              what="The provider costs did not load."
+              onRetry={() => void months.refetch()}
+            />
           ) : months.isLoading ? (
             <p className="mt-2 text-small text-text-2">Loading</p>
           ) : current.length ? (
@@ -132,7 +137,11 @@ export function CostsPanel() {
             />
           </div>
           {ai.isError ? (
-            <p className="mt-2 text-small text-bad">{ai.error.message}</p>
+            <RetryLine
+              className="mt-2"
+              what="The AI costs did not load."
+              onRetry={() => void ai.refetch()}
+            />
           ) : ai.isLoading ? (
             <p className="mt-2 text-small text-text-2">Loading</p>
           ) : aiRows.length ? (

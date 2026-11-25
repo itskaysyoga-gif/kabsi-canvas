@@ -13,5 +13,5 @@ export function trialLength(t: { started_at: string; ends_at: string }): 14 | 30
 export function trialBannerLine(e: Pick<Entitlements, "state" | "trial">): string | null {
   if (e.state !== "trial" || !e.trial) return null;
   if (e.trial.day > BANNER_DAYS) return null;
-  return `Your ${trialLength(e.trial)}-day Pro trial has started. No card needed.`;
+  return `Your ${trialLength(e.trial)}-day free trial has started.`;
 }

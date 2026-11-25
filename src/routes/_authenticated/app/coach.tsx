@@ -73,7 +73,7 @@ function CoachPage() {
       ) : null}
       {live && c?.locked ? (
         <Panel>
-          <p className="text-body font-bold">The Profile Coach comes with Essentials and Pro.</p>
+          <p className="text-body font-bold">The Profile Coach comes with your Kabsi plan.</p>
           <p className="mt-1 text-small text-text-2">
             Choose a plan and Kabsi shows what your profile is missing, one step at a time.
           </p>
@@ -99,21 +99,8 @@ function CoachPage() {
           >
             <CoachList rows={rows} checked={checked} />
           </Panel>
-          {c.pro && loc ? (
-            <CoachActions locationId={loc.id} onChanged={changed} />
-          ) : (
-            <section data-testid="coach-pro-note">
-              <Panel title="With Pro, Kabsi does these for you" id="pro">
-                <p className="text-body text-text-2">
-                  Pro prepares the website tag, more categories, a website check and a snippet for
-                  your website. You approve each one before anything reaches Google.
-                </p>
-                <ButtonLink to="/app/plan" size="md" variant="secondary" className="mt-4">
-                  See plans
-                </ButtonLink>
-              </Panel>
-            </section>
-          )}
+          {/* APP-1: one plan, so no upsell. The actions show where the plan has them. */}
+          {c.pro && loc ? <CoachActions locationId={loc.id} onChanged={changed} /> : null}
         </div>
       ) : null}
     </>

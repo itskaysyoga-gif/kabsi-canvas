@@ -106,9 +106,9 @@ export const PLAN_COPY = {
 } as const;
 export const PAID_NAMES: Record<string, string> = {
   essentials_month: "Kabsi, monthly",
-  essentials_year: "Kabsi Essentials, yearly",
-  pro_month: "Kabsi Pro, monthly",
-  pro_year: "Kabsi Pro, yearly",
+  essentials_year: "Kabsi, yearly",
+  pro_month: "Kabsi, monthly",
+  pro_year: "Kabsi, yearly",
 };
 
 export async function loadPlanSummary(locationId: string): Promise<PlanSummary> {
@@ -118,10 +118,10 @@ export async function loadPlanSummary(locationId: string): Promise<PlanSummary> 
 }
 
 export const PLAN_NAMES: Record<string, string> = {
-  trial: "Pro trial",
-  pro_monthly: "Kabsi Pro · monthly",
-  pro_yearly: "Kabsi Pro · yearly",
-  pro_6m: "Kabsi Pro (earlier plan)",
+  trial: "Free trial",
+  pro_monthly: "Kabsi, monthly",
+  pro_yearly: "Kabsi, yearly",
+  pro_6m: "Kabsi (earlier plan)",
 };
 
 /** The one line shown wherever a paid plan would be bought, until Creem (P0.4-07) opens card payments. */

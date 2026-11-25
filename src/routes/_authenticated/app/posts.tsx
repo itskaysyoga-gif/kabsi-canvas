@@ -105,7 +105,7 @@ function PostsPage() {
     <>
       <AccountTop
         title="Posts"
-        lead="On Pro, Kabsi writes a post every week. On Essentials, 2 a month."
+        lead="Kabsi prepares up to 2 posts a month. Each one waits for your yes."
       />
       {!location.isLoading && !loc ? <ButtonLink to="/start">Add your business</ButtonLink> : null}
       {loc?.concierge ? <EarlyAccessNotice what="Posts" /> : null}

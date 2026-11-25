@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { StatusPill, Switch } from "@/components/kabsi/ui";
 import { fmtDate } from "@/lib/format";
@@ -55,11 +56,7 @@ export function FoundingChecklist({ location }: { location: string }) {
   });
   if (q.isLoading) return <p className="text-small text-text-2">Loading the checklist</p>;
   if (q.error)
-    return (
-      <p className="text-small text-bad" role="alert">
-        The checklist did not load: {q.error.message}
-      </p>
-    );
+    return <RetryLine what="The checklist did not load." onRetry={() => void q.refetch()} />;
   const c = q.data;
   if (!c) return null;
   const open = c.items.filter((i) => i.applies !== false && !c.done[i.item]?.done_at).length;
