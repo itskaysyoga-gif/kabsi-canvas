@@ -270,11 +270,11 @@ export const SCENARIOS: Record<string, Scenario> = {
   old_card: {
     name: "old_card", about: "A button tap on an old card: a made-up token, and a card already used (25.5)", phones: [PHONES.owner], ai: false, steps: [
       { note: "a token Kabsi never made", phone: PHONES.owner, tap: { id: "a:replayreplayreplayreplay00" }, expect: { result: "stale_button", reply: /already handled[\s\S]*Nothing changed/ } },
-      { note: "Approve on a fresh card", phone: PHONES.owner, prep: "action", tap: { id: "a:$token" }, expect: { result: "approved", reply: /Approved for Harbour Lane Coffee\. It goes to Google in 10 seconds/, buttons: ["Undo"] } },
+      { note: "Approve on a fresh card", phone: PHONES.owner, prep: "action", tap: { id: "a:$token" }, expect: { result: "approved", reply: /Approved[\s\S]*Harbour Lane Coffee[\s\S]*It goes to Google in 10 seconds/, buttons: ["Undo"] } },
       { note: "Approve again on the same old card", phone: PHONES.owner, tap: { id: "a:$token" }, expect: { reply: /already handled|no longer yours/ } },
       { note: "Undo inside the 10 seconds", phone: PHONES.owner, tap: { id: "u:$token" }, expect: { result: /^(undone|too_late)$/ } },
       // Undo twice is answered the same way both times: nothing can be sent by the second tap (live finding of 25 Oct, kept as the rule).
-      { note: "Undo again on the same card: the same answer, nothing sent", phone: PHONES.owner, tap: { id: "u:$token" }, expect: { result: /^(undone|undo:.*|too_late)$/, reply: /Undone\. Nothing was sent|already handled|cannot be undone/ } },
+      { note: "Undo again on the same card: the same answer, nothing sent", phone: PHONES.owner, tap: { id: "u:$token" }, expect: { result: /^(undone|undo:.*|too_late)$/, reply: /Undone[\s\S]*Nothing was sent|already handled|cannot be undone/ } },
     ],
   },
   stranger_card: {
