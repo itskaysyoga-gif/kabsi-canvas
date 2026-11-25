@@ -115,20 +115,18 @@ export function V31Pricing() {
           {LEAVING.points.map((x, n) => {
             const Icon = LEAVING_ICONS[n] ?? ShieldCheck;
             return (
-              <div
-                key={x.title}
-                className="flex gap-4 rounded-card border border-line bg-surface-1 p-5 shadow-rest"
-              >
-                <span
-                  aria-hidden
-                  className="grid size-10 shrink-0 place-items-center rounded-inner bg-surface-2 text-text-1"
-                >
-                  <Icon className="size-5" strokeWidth={1.75} />
-                </span>
-                <div>
-                  <dt className="text-title font-bold">{x.title}</dt>
-                  <dd className="mt-1 text-read text-text-2">{x.text}</dd>
-                </div>
+              // A <dl> may hold only <div> groups of <dt> and <dd>, so the icon sits inside the <dt> (QA-FIX-3).
+              <div key={x.title} className="rounded-card border border-line bg-surface-1 p-5 shadow-rest">
+                <dt className="flex items-center gap-4 text-title font-bold">
+                  <span
+                    aria-hidden
+                    className="grid size-10 shrink-0 place-items-center rounded-inner bg-surface-2 text-text-1"
+                  >
+                    <Icon className="size-5" strokeWidth={1.75} />
+                  </span>
+                  {x.title}
+                </dt>
+                <dd className="mt-1 pl-14 text-read text-text-2">{x.text}</dd>
               </div>
             );
           })}
