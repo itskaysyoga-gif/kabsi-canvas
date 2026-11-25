@@ -381,19 +381,30 @@ function TradeCard({
   sizes,
   priority,
   line = true,
+  row = false,
 }: {
   industry: Industry;
   sizes: string;
   priority?: boolean;
+  /** SITE-6: on a phone the /for cards are one column, the photo beside the words. */
+  row?: boolean;
   /** Industry 1 (R-144): the related cards on an industry page show the name only; /for shows the line. */
   line?: boolean;
 }) {
   return (
     <SiteLink
       to={`/for/${i.slug}`}
-      className="press kb-lift group flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface-0 shadow-rest"
+      className={cn(
+        "press kb-lift group flex h-full overflow-hidden rounded-card border border-line bg-surface-0 shadow-rest",
+        row ? "min-h-24 flex-row sm:flex-col" : "flex-col",
+      )}
     >
-      <span className="relative block aspect-[3/2] overflow-hidden bg-surface-3">
+      <span
+        className={cn(
+          "relative block overflow-hidden bg-surface-3",
+          row ? "w-28 shrink-0 sm:aspect-[3/2] sm:w-auto" : "aspect-[3/2]",
+        )}
+      >
         {TRADE_WIDE[i.slug] ? (
           <PubImg
             photo={TRADE_WIDE[i.slug]!}
@@ -414,8 +425,8 @@ function TradeCard({
         )}
       </span>
       <span className="flex flex-1 flex-col p-3 sm:p-4">
-        <span className="text-body font-bold sm:text-title">{i.plural}</span>
-        {line && <span className="mt-1 text-body text-text-2">{i.page.card}</span>}
+        <span className="font-display text-body font-semibold sm:text-title">{i.plural}</span>
+        {line && <span className="mt-1 text-small text-text-2 sm:text-body">{i.page.card}</span>}
       </span>
     </SiteLink>
   );
@@ -448,7 +459,7 @@ function ForCollage({ all }: { all: Industry[] }) {
   return (
     <ul className="grid grid-cols-2 gap-3 pb-6 sm:gap-4">
       {picks.map((i, n) => (
-        <li key={i.slug} className={cn(n % 2 === 1 && "translate-y-6")}>
+        <li key={i.slug} className={cn(n % 2 === 1 && "sm:translate-y-6")}>
           <SiteLink
             to={`/for/${i.slug}`}
             className="press group relative block overflow-hidden rounded-panel bg-surface-3 shadow-float"
@@ -530,14 +541,21 @@ export function ForIndex() {
           {/* Industries 3: 4 columns from 1024 px, 2 below (no 3 column step); a filtered count that does not fill
               its last row centres it (the no-lone-card rule, 30.33 item 2). SITE-6: 22 kinds fill 11 rows of 2 on a
               phone, so the "Any other local business" card is gone (the band under the list says it). */}
-          <ul id="for-list" className="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4">
+          <ul
+            id="for-list"
+            className="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4 lg:justify-start"
+          >
             {all.map((i) => (
               <li
                 key={i.slug}
                 hidden={!shown.includes(i)}
-                className="w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]"
+                className="w-full sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]"
               >
-                <TradeCard industry={i} sizes="(min-width: 1024px) 18rem, 45vw" />
+                <TradeCard
+                  industry={i}
+                  sizes="(min-width: 1024px) 18rem, (min-width: 640px) 45vw, 8rem"
+                  row
+                />
               </li>
             ))}
           </ul>

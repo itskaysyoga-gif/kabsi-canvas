@@ -27,14 +27,15 @@ export function V31How() {
         aside={
           /* SITE-5: the photo with one of Kabsi's screens in front, as on Pricing. SITE-6: the Home screen, where
              everything waits for the owner's yes (it was the weekly report, titled Settings in the app). */
-          <div data-nora-avoid className="relative pb-24 sm:pb-28 lg:pb-0">
+          <div data-nora-avoid className="relative sm:pb-28 lg:pb-0">
             <PubImg
               photo={PUB.howHero}
               sizes="(min-width: 1280px) 500px, (min-width: 1024px) 40vw, 100vw"
               priority
-              className="aspect-[4/3] w-[88%] rounded-panel bg-surface-3 object-cover shadow-lift lg:aspect-[4/5] lg:w-[78%]"
+              className="hidden aspect-[4/3] w-[88%] rounded-panel bg-surface-3 object-cover shadow-lift sm:block lg:aspect-[4/5] lg:w-[78%]"
             />
-            <div className="absolute end-0 bottom-0 w-[44%] max-w-[13rem] lg:top-1/2 lg:bottom-auto lg:w-[46%] lg:max-w-[14.5rem] lg:-translate-y-1/2">
+            {/* SITE-6: on a phone the screen stands alone at a size people can read (the photo shows from 640 px). */}
+            <div className="mx-auto w-full max-w-[16rem] pt-8 sm:absolute sm:end-0 sm:bottom-0 sm:mx-0 sm:w-[44%] sm:max-w-[13rem] sm:pt-0 lg:top-1/2 lg:bottom-auto lg:w-[46%] lg:max-w-[14.5rem] lg:-translate-y-1/2">
               <DeviceShot
                 shot={MORE_SCREENS.home}
                 className="max-w-none sm:max-w-none lg:max-w-none"
