@@ -77,7 +77,7 @@ export const STAFF_PAGES: Record<StaffPageId, StaffPage> = {
     title: "Emails waiting for your yes",
     mark: "your yes",
     purpose:
-      "The day's drafts with their sources, the replies that need you, and whether sending is locked.",
+      "The coming week's emails with their sources, the replies that need you, and whether sending is locked.",
     tab: "Outbound",
   },
   system: {

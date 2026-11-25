@@ -6,8 +6,8 @@ import { fmtDate, fmtDateTime } from "@/lib/format";
 import { supabase } from "@/lib/supabase";
 import { Button, STAFF_CARD, STAFF_H2, STAFF_ITEM, StaffLoading } from "./staff-ui";
 
-// kabsi.co/staff/outbound (Harvey 4A part C, master plan 30.39 item 5): phone first. The day's drafts, each with where it
-// came from; Approve, Edit, Skip per email and Approve all after reading; the follow-up shown under its Email 1 and
+// kabsi.co/staff/outbound (Harvey 4A part C, master plan 30.39 item 5; OUTBOUND-3: approval once a week): phone first.
+// The coming week's emails, grouped by the day they send, each with where it came from; Approve, Edit, Skip per email and Approve all after reading; the follow-up shown under its Email 1 and
 // approved with it; the replies that need Rashid with their prepared answer; the lock and any stop, read only. There is
 // no control that opens sending: the table's trigger refuses it to anyone but lane R.
 
@@ -15,6 +15,7 @@ type Prospect = {
   business_name: string;
   city: string;
   country: string;
+  time_zone: string;
   source_page: string;
   source_date: string;
   detail_used: string;
@@ -50,16 +51,23 @@ type Lock = {
   stopped_reason: string | null;
   stopped_at: string | null;
   started_on: string | null;
+  dns_ok: boolean | null;
+  dns_problem: string | null;
+  dns_checked_at: string | null;
+  mail_tester_score: number | null;
+  mail_tester_at: string | null;
 };
 
 const PROSPECT =
-  "prospect:outbound_prospects(business_name, city, country, source_page, source_date, detail_used, company_number, company_status, company_status_date, test)";
+  "prospect:outbound_prospects(business_name, city, country, time_zone, source_page, source_date, detail_used, company_number, company_status, company_status_date, test)";
 
 export async function outboundData() {
   const [lock, msgs, replies] = await Promise.all([
     supabase
       .from("outbound_settings")
-      .select("sending_open, test_mode, stopped_reason, stopped_at, started_on")
+      .select(
+        "sending_open, test_mode, stopped_reason, stopped_at, started_on, dns_ok, dns_problem, dns_checked_at, mail_tester_score, mail_tester_at",
+      )
       .maybeSingle(),
     supabase
       .from("outbound_messages")
@@ -107,22 +115,29 @@ export function OutboundPanel() {
       <LockState lock={d.lock} queued={d.queued} />
       <section className={STAFF_CARD} aria-labelledby="ob-drafts">
         <h2 id="ob-drafts" className={STAFF_H2}>
-          Today's drafts
+          This week's emails
         </h2>
         {!d.drafts.length ? (
           <p className="mt-1 text-small text-text-2">
-            No drafts waiting. New ones are prepared on weekdays at 05:00 UTC.
+            No emails waiting. The coming week's are prepared on Sundays, ready for Monday.
           </p>
         ) : (
           <>
             <p className="mt-1 text-small text-text-2">
               {d.drafts.length} to read. Approving Email 1 also approves its follow-up.
             </p>
-            <div className="mt-4 space-y-4">
-              {d.drafts.map((m) => (
-                <DraftCard key={m.id} m={m} follow={d.followUps.get(m.id) ?? null} />
-              ))}
-            </div>
+            {byDay(d.drafts).map(([day, list]) => (
+              <div key={day} className="mt-4">
+                <h3 className="text-small font-bold">
+                  {day ? `Sends ${fmtDate(day)}` : "No day set"}
+                </h3>
+                <div className="mt-2 space-y-4">
+                  {list.map((m) => (
+                    <DraftCard key={m.id} m={m} follow={d.followUps.get(m.id) ?? null} />
+                  ))}
+                </div>
+              </div>
+            ))}
             <ApproveAll ids={d.drafts.map((m) => m.id)} />
           </>
         )}
@@ -143,6 +158,19 @@ export function OutboundPanel() {
       </section>
     </div>
   );
+}
+
+/** The drafts grouped by the date they send in the recipient's own time zone, in order. */
+function byDay(list: Message[]): [string, Message[]][] {
+  const out = new Map<string, Message[]>();
+  for (const m of list) {
+    const tz = m.prospect?.time_zone || "Europe/London";
+    const day = m.send_after
+      ? new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date(m.send_after))
+      : "";
+    out.set(day, [...(out.get(day) ?? []), m]);
+  }
+  return [...out.entries()].sort(([a], [b]) => (a || "9").localeCompare(b || "9"));
 }
 
 function LockState({ lock, queued }: { lock: Lock | null; queued: number }) {
@@ -170,8 +198,38 @@ function LockState({ lock, queued }: { lock: Lock | null; queued: number }) {
         {line}
       </p>
       <p className="mt-1 text-small text-text-2">Approved and waiting to send: {queued}.</p>
+      <p
+        className={
+          lock?.dns_ok === false ? "mt-1 text-small text-bad" : "mt-1 text-small text-text-2"
+        }
+      >
+        {dnsLine(lock)}
+      </p>
+      <p className="mt-1 text-small text-text-2">{testerLine(lock)}</p>
     </section>
   );
+}
+
+const DNS_PROBLEMS: Record<string, string> = {
+  spf: "the SPF record",
+  dkim_missing: "no DKIM key at zmail",
+  dkim_too_short: "the DKIM key is under 2048 bits",
+  dmarc: "the DMARC record",
+  dns_unreadable: "DNS could not be read",
+};
+
+function dnsLine(lock: Lock | null): string {
+  if (!lock?.dns_checked_at) return "Mail checks have not run yet. They run before every send.";
+  return lock.dns_ok
+    ? `Mail checks: SPF, DKIM and DMARC read correctly on ${fmtDateTime(lock.dns_checked_at)}.`
+    : `Mail checks failed on ${fmtDateTime(lock.dns_checked_at)}: ${DNS_PROBLEMS[lock.dns_problem ?? ""] ?? "unknown"}. Nothing sends until they pass.`;
+}
+
+function testerLine(lock: Lock | null): string {
+  if (lock?.mail_tester_score == null) {
+    return "mail-tester has not scored Email 1 yet. 10 of 10 is needed before sending opens.";
+  }
+  return `mail-tester scored Email 1 ${lock.mail_tester_score} of 10${lock.mail_tester_at ? ` on ${fmtDate(lock.mail_tester_at)}` : ""}. 10 of 10 is needed before sending opens.`;
 }
 
 function Source({ p }: { p: Prospect | null }) {
