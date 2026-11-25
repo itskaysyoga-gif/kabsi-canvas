@@ -2,7 +2,7 @@
 // master plan 30.39). Pure: the caller fetches the file and the pages. Companies House comes from the register itself
 // (30.39 item 12): Harvey reads Companies House's free monthly Basic Company Data file (Open Government Licence) and
 // writes company_status and company_status_date (the file's date); there is no Companies House API key.
-import { industryGroup, industryOpen, INDUSTRY_ORDER, knownIndustry, nameOk, OPEN_COUNTRIES, ownDomain, timeZoneOf } from "./rules.ts";
+import { industryGroup, industryOpen, INDUSTRY_ORDER, knownIndustry, nameOk, OPEN_COUNTRIES, ownDomain, timeZoneOf, usEligible } from "./rules.ts";
 
 /** RFC 4180 CSV: quoted fields, doubled quotes, newlines inside quotes. */
 export function parseCsv(text: string): Record<string, string>[] {
@@ -81,7 +81,7 @@ export function rowRefusal(r: Record<string, string>, openCountries: readonly st
   if (!/^https?:\/\//i.test(r.email_page_url)) return "no_source_page";
   if (!timeZoneOf(r)) return "no_time_zone";
   // The US: any open business with an email on its own website's domain; CAN-SPAM needs no company check.
-  if (r.country === "US") return null;
+  if (r.country === "US") return usEligible(r.us_eligible) ? null : "not_us_eligible";
   // The UK: the registered company and Companies House checks always apply (PECR).
   if (r.company_type !== "registered company") return "not_registered_company";
   if (!/^[A-Z0-9]{8}$/i.test(r.company_number)) return "no_company_number";
@@ -94,17 +94,21 @@ export function rowRefusal(r: Record<string, string>, openCountries: readonly st
 }
 
 /** The queue (Outbound 2, R-151 item 5; OUTBOUND-3 adds the US service group): one beauty, one food, one service, and
- *  so on. Inside each group the order stays as before: the industry order, then Harvey's quality score, then the
- *  register's order. When a group runs out the others continue. Rows outside the open industries come last, where
+ *  so on. Inside each group the order is Harvey's priority_score first (higher first, FIX-3; a blank or missing score
+ *  counts as 0), then the industry order, then Harvey's quality score, then the register's order. When a group runs out the others continue. Rows outside the open industries come last, where
  *  rowRefusal counts them as "industry". */
 export function ordered(rows: Record<string, string>[]): Record<string, string>[] {
   const rank = (i: string) => {
     const k = INDUSTRY_ORDER.indexOf(i);
     return k < 0 ? 99 : k;
   };
+  const score = (v: string | undefined) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  };
   const sorted = rows
     .map((r, i) => ({ r, i }))
-    .sort((a, b) => rank(a.r.industry) - rank(b.r.industry) || Number(b.r.quality_score || 0) - Number(a.r.quality_score || 0) || a.i - b.i)
+    .sort((a, b) => score(b.r.priority_score) - score(a.r.priority_score) || rank(a.r.industry) - rank(b.r.industry) || Number(b.r.quality_score || 0) - Number(a.r.quality_score || 0) || a.i - b.i)
     .map((x) => x.r);
   const groups = (["beauty", "food", "service"] as const).map((g) => sorted.filter((r) => industryGroup(r.industry) === g));
   const rest = sorted.filter((r) => industryGroup(r.industry) === null);

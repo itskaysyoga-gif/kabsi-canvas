@@ -40,7 +40,7 @@ serve(async (req) => {
     }
     const r = await handleInbox({
       seen: db.seen, match: db.match, matchBySender: db.matchBySender, self: db.SENDER.address, record: db.record, suppress: db.suppress, cancelQueue: db.cancelQueue, setStatus: db.setStatus,
-      checkStops: db.checkStops, alert: db.alert, freeCheck: db.freeCheck, draftReply: db.draftReply, harveyHashes: db.harveyHashes,
+      checkStops: db.checkStops, alert: db.alert, freeCheck: db.freeCheck, noteLed: db.noteLed, draftReply: db.draftReply, harveyHashes: db.harveyHashes,
       postal: db.postal(),
     }, got.messages.map((m) => ({ uid: m.uid, parsed: parseMessage(m.raw), validity: got.validity })));
     // Only as far as the last message fully handled: one that failed is read again next time, with those after it.

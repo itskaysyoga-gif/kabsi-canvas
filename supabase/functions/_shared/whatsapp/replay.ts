@@ -225,8 +225,8 @@ export const SCENARIOS: Record<string, Scenario> = {
       // The rewrite is read by the intent model, which the replay does not run (no paid call): the replay answers the off-topic line. Rashid's phone tests it.
       { note: "16.2 Make this reply more professional (needs the intent model: not tested here)", phone: PHONES.owner, text: "Make this reply more professional", expect: { reply: /./ } },
       { note: "16.3 Change my opening hours on Saturday", phone: PHONES.owner, text: "Change my opening hours on Saturday", expect: { result: "care_week_no_times", reply: /What are your new hours on Saturdays\?/ } },
-      // The demo business has no weekly hours on file, so the week cannot be shown back; a business with hours gets the week and Approve.
-      { note: "16.3 the times", phone: PHONES.owner, text: "10am to 4pm", expect: { result: /^care_week_(no_hours|shown)/, reply: /Saturday|does not have your hours yet/ } },
+      // FIX-3: the fixtures reset gives the demo business a weekly regular_hours fact, so the whole week is shown back with Approve.
+      { note: "16.3 the times", phone: PHONES.owner, text: "10am to 4pm", expect: { result: "care_week_shown", reply: /New weekly hours for Google[\s\S]*Saturday[\s\S]*Your week on Google after this change[\s\S]*after you tap Approve/, buttons: ["Approve"] } },
       { note: "16.4 A photo with Post this", phone: PHONES.owner, media: { kind: "image", id: "replay-photo", mime: "image/jpeg", size: 7000 }, text: "Post this", expect: { result: "photo_post_shown", reply: /Post with your photo/ } },
       { note: "16.5 How many reviews did I receive this month?", phone: PHONES.owner, text: "How many reviews did I receive this month?", expect: { result: /^stats/, reply: /the last 30 days: \d+ new reviews/ } },
       { note: "16.6 Show me everything you did this week", phone: PHONES.owner, text: "Show me everything you did this week", expect: { result: "care_done", reply: /Your week from/ } },

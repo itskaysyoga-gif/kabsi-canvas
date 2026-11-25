@@ -239,8 +239,8 @@ function Page() {
         <p>
           We don't sell or rent personal data, we don't use it for advertising, and we don't send
           marketing emails to Kabsi users or visitors without asking first. Kabsi may send one plain
-          email, and one follow-up, to a UK registered company at the address it publishes, as
-          section 15 explains.
+          email, and one follow-up, to a US business or a UK registered company at the address it
+          publishes, as section 15 explains.
         </p>
       </section>
 
@@ -770,8 +770,10 @@ function Page() {
         </p>
         <p>
           The lawful basis is legitimate interests: telling businesses about a service that may help
-          them. Kabsi writes only to UK registered companies that are active on Companies House: one
-          plain email, and one follow-up, to the address the business publishes. The United Arab
+          them. Kabsi emails businesses in the US, and UK registered companies that are active on
+          Companies House. {OPERATOR_NAME} writes from rashid@getkabsi.com to the email address the
+          business publishes on its own website: one plain email, and one follow-up if there is no
+          reply. A reply of "no thanks", or any other opt-out, stops it for good. The United Arab
           Emirates and every other country are off. Nothing is sent before {OPERATOR_NAME} decides
           to start, and no message has been sent yet.
         </p>

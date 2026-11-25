@@ -129,7 +129,12 @@ describe("the copy rules on every public line (kabsi-copy, K-112, K-144, 30.15)"
   it("uses hello@kabsi.co as the only email address", () => {
     for (const f of PUBLIC_FILES)
       for (const e of read(f).match(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g) ?? [])
-        expect(e, f).toMatch(/^(hello@kabsi\.co|name@shop\.com)$/);
+        // FIX-3: the privacy page names the address Outbound writes from, as the notice must, and only there.
+        expect(e, f).toMatch(
+          /privacy\.tsx$/.test(f)
+            ? /^(hello@kabsi\.co|rashid@getkabsi\.com)$/
+            : /^(hello@kabsi\.co|name@shop\.com)$/,
+        );
   });
   it("shows no Arabic on the public website (R-61)", () => {
     for (const f of PUBLIC_FILES) expect(read(f), f).not.toMatch(/[؀-ۿ]/);

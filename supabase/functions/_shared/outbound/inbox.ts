@@ -42,6 +42,8 @@ export type InboxDeps = {
   alert(key: string): Promise<void>;
   /** The free check of this business inside places_daily_cap: the scan code, or null when it cannot run now. */
   freeCheck(p: Matched["prospect"]): Promise<string | null>;
+  /** FIX-3: the check ran and returned its code. The kill gate counts the business once, here, never a yes reply. */
+  noteLed(prospectId: string, code: string): Promise<void>;
   draftReply(r: { prospect_id: string; to_address: string; subject: string; body: string; in_reply_to: string; references_ids: string }): Promise<void>;
   /** Hashes queued for kabsi-harvey's kabsi/suppression.txt (real businesses only); the queue is sent after the run. */
   harveyHashes(hashes: string[]): Promise<void>;
@@ -158,6 +160,7 @@ async function handleOne(deps: InboxDeps, item: { uid: number; parsed: Parsed; v
   await deps.setStatus(p.id, "needs_you", yes);
   if (yes) {
     const code = await deps.freeCheck(p);
+    if (code) await deps.noteLed(p.id, code);
     const canFooter = p.country !== "US" || postalAddressOk(deps.postal);
     if (code && /^[A-Za-z0-9_-]{4,40}$/.test(code) && houseStyleOk(p.business_name) && canFooter) {
       await deps.draftReply({

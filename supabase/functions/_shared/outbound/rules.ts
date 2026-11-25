@@ -112,13 +112,37 @@ export const US_STATE_ZONES: Record<string, string> = Object.fromEntries([
   ["Pacific/Honolulu", "HI"],
 ].flatMap(([zone, states]) => states.split(" ").map((s) => [s, zone])));
 
-/** The recipient's time zone, or null when it cannot be known (the row is then refused). */
-export function timeZoneOf(r: { country?: string; time_zone?: string; state?: string; region?: string }): string | null {
+/** The time zone of each metro in Harvey's US rows (the `metro` column, FIX-3). Lower-case city names; a row's metro may also
+ *  carry the state after a comma ("Houston, TX"), which is ignored. A metro lies in one zone only, so it settles the 9:00 to
+ *  17:00 window even where its state is split across zones (Texas, Tennessee, Florida). */
+export const US_METRO_ZONES: Record<string, string> = {
+  houston: "America/Chicago", dallas: "America/Chicago", nashville: "America/Chicago",
+  atlanta: "America/New_York", miami: "America/New_York", tampa: "America/New_York", charlotte: "America/New_York",
+  phoenix: "America/Phoenix", denver: "America/Denver", "san diego": "America/Los_Angeles",
+};
+
+/** The zone of a metro name, or null when the metro is not one of Harvey's. */
+export function metroZone(metro: unknown): string | null {
+  const key = String(metro ?? "").split(",")[0].trim().toLowerCase().replace(/\s+/g, " ");
+  return Object.hasOwn(US_METRO_ZONES, key) ? US_METRO_ZONES[key] : null;
+}
+
+/** Harvey's `us_eligible` column: an explicit no ("false", "0", "no", "n") keeps a US row out; a yes or a blank cell does not
+ *  (a register without the column still reads as before). */
+export function usEligible(value: unknown): boolean {
+  return !/^(false|0|no|n|f)$/i.test(String(value ?? "").trim());
+}
+
+/** The recipient's time zone, or null when it cannot be known (the row is then refused). The register's own time_zone comes
+ *  first, then the metro (Harvey's US rows), then a state that lies in one zone only. */
+export function timeZoneOf(r: { country?: string; time_zone?: string; metro?: string; state?: string; region?: string }): string | null {
   const country = String(r.country ?? "");
   if (country === "GB") return TIME_ZONES.GB;
   if (country !== "US") return null;
   const tz = String(r.time_zone ?? "").trim();
   if ((US_TIME_ZONES as readonly string[]).includes(tz)) return tz;
+  const metro = metroZone(r.metro);
+  if (metro) return metro;
   const st = String(r.state ?? r.region ?? "").trim().toUpperCase();
   return Object.hasOwn(US_STATE_ZONES, st) ? US_STATE_ZONES[st] : null;
 }
