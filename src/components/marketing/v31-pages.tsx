@@ -28,15 +28,15 @@ export function V31How() {
         aside={
           /* SITE-5: the photo with one of Kabsi's screens in front, as on Pricing. SITE-6: the Home screen, where
              everything waits for the owner's yes (it was the weekly report, titled Settings in the app). */
-          <div data-nora-avoid className="relative sm:pb-28 lg:pb-0">
+          <div data-nora-avoid className="relative sm:pb-28 lg:pb-16">
             <PubImg
               photo={PUB.howHero}
               sizes="(min-width: 1280px) 500px, (min-width: 1024px) 40vw, 100vw"
               priority
-              className="hidden aspect-[4/3] w-[88%] rounded-panel bg-surface-3 object-cover shadow-lift sm:block lg:aspect-[4/5] lg:w-[78%]"
+              className="hidden aspect-[4/3] w-[88%] rounded-panel bg-surface-3 object-cover shadow-lift sm:block lg:aspect-[3/5] lg:w-[64%]"
             />
             {/* SITE-6: on a phone the screen stands alone at a size people can read (the photo shows from 640 px). */}
-            <div className="mx-auto w-full max-w-[16rem] pt-8 sm:absolute sm:end-0 sm:bottom-0 sm:mx-0 sm:w-[44%] sm:max-w-[13rem] sm:pt-0 lg:top-1/2 lg:bottom-auto lg:w-[46%] lg:max-w-[14.5rem] lg:-translate-y-1/2">
+            <div className="mx-auto w-full max-w-[16rem] pt-8 sm:absolute sm:end-0 sm:bottom-0 sm:mx-0 sm:w-[44%] sm:max-w-[13rem] sm:pt-0 lg:top-[16%] lg:bottom-auto lg:w-[46%] lg:max-w-[15rem]">
               <DeviceShot
                 shot={MORE_SCREENS.home}
                 className="max-w-none sm:max-w-none lg:max-w-none"
@@ -120,21 +120,27 @@ export function V31How() {
           </ul>
         </div>
       </Band>
-      {/* SITE-7: Kabsi's own weekly email and weekly report under the words (was the monthly report sample Home shows). */}
-      <Band id="report" tone="warm">
-        <Head
-          id="report"
-          title="See what was done."
-          line="A short summary every week and a full report every month: work done, what Kabsi found and what Google shows, kept apart."
-        />
-        <ScreenRow ids={["email", "report"]} className="mt-2" />
-        {/* SITE-5: the price in one line, with the way to Pricing. */}
-        <p className="mx-auto mt-12 max-w-[60ch] border-s-4 border-kb-yellow ps-4 text-read text-text-1">
-          <strong>{PRICE.card}</strong> {TRIAL_LINE}{" "}
-          <SiteLink to="/pricing" className="font-semibold underline underline-offset-4">
-            See what the plan includes
-          </SiteLink>
-        </p>
+      {/* SITE-7: Kabsi's own weekly email and weekly report beside the words (was the monthly report sample Home shows). */}
+      <Band
+        id="report"
+        tone="warm"
+        inner="lg:grid lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-start lg:gap-12"
+      >
+        <div>
+          <Head
+            id="report"
+            title="See what was done."
+            line="A short summary every week and a full report every month: work done, what Kabsi found and what Google shows, kept apart."
+          />
+          {/* SITE-5: the price in one line, with the way to Pricing. */}
+          <p className="mt-8 max-w-[60ch] border-s-4 border-kb-yellow ps-4 text-read text-text-1">
+            <strong>{PRICE.card}</strong> {TRIAL_LINE}{" "}
+            <SiteLink to="/pricing" className="font-semibold underline underline-offset-4">
+              See what the plan includes
+            </SiteLink>
+          </p>
+        </div>
+        <ScreenRow ids={["email", "report"]} className="mt-4 lg:mt-0 lg:pt-0" />
       </Band>
       <ClosingBand under={HOME_HERO.under} />
     </>

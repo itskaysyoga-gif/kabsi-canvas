@@ -17,6 +17,7 @@ import { PriceCard, TrustLines } from "@/components/marketing/v31";
 import { Img, PHOTOS } from "./photos";
 import { PubImg } from "@/components/marketing/life";
 import { HERO_LIBRARY, TRADE_SECOND, TRADE_WIDE } from "@/components/marketing/industry-photos";
+import type { PubPhoto } from "@/components/marketing/public-photos";
 import { ScanBox } from "./scan-box";
 import { SiteLink } from "./site-link";
 import { Marked } from "./highlight";
@@ -76,7 +77,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
         data-hero
         className="relative isolate z-10 bg-surface-0"
       >
-        <div className="container-kb grid gap-10 pt-6 pb-14 md:pt-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:gap-16 lg:pt-14 lg:pb-20">
+        <div className="container-kb grid gap-10 pt-6 pb-14 md:pt-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:gap-16 lg:pt-14 lg:pb-12">
           <div className="max-w-[40rem]">
             <Breadcrumb current={i.plural} />
             {/* SITE-7: "Taken care of." stays on one line, so the bar never splits into two blocks. */}
@@ -122,7 +123,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
                   />
                 )}
               </div>
-              <div className="relative mx-3 -mt-16 rounded-panel border border-line bg-surface-1 p-4 shadow-float sm:mx-6 sm:-mt-20 sm:p-6 lg:-mt-10">
+              <div className="relative mx-3 -mt-8 rounded-panel border border-line bg-surface-1 p-4 shadow-float sm:mx-6 sm:-mt-20 sm:p-6 lg:-mt-10">
                 <h2 id="review-h" className="text-small font-bold text-text-2">
                   {`A review at ${i.example.business}, and the reply Kabsi writes`}
                 </h2>
@@ -239,7 +240,7 @@ function TradeWorkBand({ industry: i }: { industry: Industry }) {
     <Band
       id="trade"
       tone="ivory"
-      inner="lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:gap-16"
+      inner="lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:gap-16 lg:pt-16"
     >
       <div>
         <Head id="trade" title={`What Kabsi does for a ${i.name}.`} />
@@ -294,9 +295,7 @@ const POST_STEPS = [
  * card over it. Every word is the same on every page apart from the example business.
  */
 /** SITE-5: a library photo that fits the trade's Example post better than its second photo (cooks for a special). */
-const POST_LIBRARY: Record<string, (typeof PHOTOS)[keyof typeof PHOTOS]> = {
-  restaurant: PHOTOS.restaurantCooks,
-};
+const POST_LIBRARY: Record<string, (typeof PHOTOS)[keyof typeof PHOTOS]> = {};
 
 function PhotoPost({ industry: i }: { industry: Industry }) {
   return (
@@ -336,7 +335,7 @@ function PhotoPost({ industry: i }: { industry: Industry }) {
             className="aspect-[4/5] w-full rounded-panel object-cover shadow-float sm:aspect-[4/3]"
           />
         )}
-        <figcaption className="theme-light relative mx-3 -mt-20 max-w-[24rem] rounded-panel border border-line bg-surface-1 p-4 text-text-1 shadow-float sm:mx-6 sm:p-5">
+        <figcaption className="theme-light relative mx-3 -mt-20 max-w-[24rem] rounded-panel border border-line bg-surface-1 p-4 text-text-1 shadow-float sm:mx-6 sm:p-5 lg:mx-0">
           <span className="flex items-center gap-2">
             <KabsiMark ring={false} className="size-7" />
             <span className="flex-1 text-small font-bold">Post ready</span>
@@ -465,6 +464,14 @@ export const FOR_HERO = {
  */
 const COLLAGE = ["hair-salon", "restaurant", "barbershop", "auto-repair"] as const;
 
+/** SITE-7: the collage tile where the usual pick does not read as the trade at tile size: a stylist washing hair for
+ * the hair salon, a mechanic's hands at work for auto repair (each page's own second photo). The /for card shows a
+ * different photo, so the two still do not repeat. */
+const COLLAGE_PUB: Partial<Record<string, PubPhoto>> = {
+  "hair-salon": TRADE_SECOND["hair-salon"],
+  "auto-repair": TRADE_SECOND["auto-repair"],
+};
+
 function ForCollage({ all }: { all: Industry[] }) {
   const picks = COLLAGE.map((s) => all.find((i) => i.slug === s)).filter((i): i is Industry => !!i);
   return (
@@ -477,13 +484,22 @@ function ForCollage({ all }: { all: Industry[] }) {
           >
             {/* SITE-6: never the photo the card below shows for the same trade (the card takes TRADE_WIDE, else
                 the trade's first photo), so the collage and the list do not repeat each other. */}
-            <Img
-              photo={TRADE_WIDE[i.slug] ? i.photos[0] : i.photos[1]}
-              sizes="(min-width: 1024px) 15rem, 45vw"
-              priority={n < 2}
-              style={{ objectPosition: TRADE_WIDE[i.slug] ? (i.focus ?? "50% 50%") : "50% 40%" }}
-              className="aspect-[4/3] w-full object-cover transition-transform duration-400 ease-kb group-hover:scale-[1.04] motion-reduce:group-hover:scale-100 lg:aspect-[4/5]"
-            />
+            {COLLAGE_PUB[i.slug] ? (
+              <PubImg
+                photo={COLLAGE_PUB[i.slug]!}
+                sizes="(min-width: 1024px) 15rem, 45vw"
+                priority={n < 2}
+                className="aspect-[4/5] w-full object-cover transition-transform duration-400 ease-kb group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
+              />
+            ) : (
+              <Img
+                photo={TRADE_WIDE[i.slug] ? i.photos[0] : i.photos[1]}
+                sizes="(min-width: 1024px) 15rem, 45vw"
+                priority={n < 2}
+                style={{ objectPosition: TRADE_WIDE[i.slug] ? (i.focus ?? "50% 50%") : "50% 40%" }}
+                className="aspect-[4/5] w-full object-cover transition-transform duration-400 ease-kb group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
+              />
+            )}
             <span className="absolute start-2 bottom-2 rounded-full bg-surface-0 px-3 py-1 text-label font-semibold text-text-1 shadow-rest">
               {i.plural}
             </span>
@@ -552,7 +568,10 @@ export function ForIndex() {
           {/* Industries 3: 4 columns from 1024 px, 2 below (no 3 column step); a filtered count that does not fill
               its last row centres it (the no-lone-card rule, 30.33 item 2). SITE-6: 22 kinds fill 11 rows of 2 on a
               phone, so the "Any other local business" card is gone (the band under the list says it). */}
-          <ul id="for-list" className="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4">
+          <ul
+            id="for-list"
+            className="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4 lg:justify-start"
+          >
             {all.map((i) => (
               <li
                 key={i.slug}

@@ -25,14 +25,16 @@ export function V31Pricing() {
         line={PRICING.line}
         aside={
           /* SITE-5: the photo with Kabsi's own Reviews screen in front, the work the price pays for. */
-          <div data-nora-avoid className="relative pb-40 sm:pb-28 lg:pb-0">
+          <div data-nora-avoid className="relative sm:pb-28 lg:pb-16">
             <PubImg
               photo={PUB.pricingHero}
               sizes={PHOTO_SIZES}
               priority
-              className="aspect-[4/3] w-[88%] rounded-panel bg-surface-3 object-cover shadow-lift lg:aspect-[4/5] lg:w-[78%]"
+              className="hidden aspect-[4/3] w-[88%] rounded-panel bg-surface-3 object-cover shadow-lift sm:block lg:aspect-[3/5] lg:w-[64%]"
             />
-            <div className="absolute end-0 bottom-0 w-[54%] max-w-[14rem] sm:w-[44%] sm:max-w-[13rem] lg:top-1/2 lg:bottom-auto lg:w-[46%] lg:max-w-[14.5rem] lg:-translate-y-1/2">
+            {/* SITE-7: on a phone the screen stands alone at a size people can read (the photo shows from 640 px), as on
+                How it works. */}
+            <div className="mx-auto w-full max-w-[16rem] pt-8 sm:absolute sm:end-0 sm:bottom-0 sm:mx-0 sm:w-[44%] sm:max-w-[13rem] sm:pt-0 lg:top-[16%] lg:bottom-auto lg:w-[46%] lg:max-w-[15rem]">
               <DeviceShot
                 shot={MORE_SCREENS.reviews}
                 className="max-w-none sm:max-w-none lg:max-w-none"
@@ -69,7 +71,7 @@ export function V31Pricing() {
             </li>
           ))}
         </ol>
-        <p className="mt-10 max-w-[60ch] border-s-4 border-kb-yellow ps-4 text-read font-semibold text-text-1">
+        <p className="mt-10 max-w-[60ch] border-s-4 lg:max-w-none border-kb-yellow ps-4 text-read font-semibold text-text-1">
           {FIRST_DAYS.starts}
         </p>
       </Band>

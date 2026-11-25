@@ -185,7 +185,7 @@ async function app(path, name) {
 async function fitFrame(page) {
   await page.addStyleTag({
     content: `
-      nav.fixed.bottom-0 { padding: 0 14px 22px !important; }
+      nav.fixed.bottom-0 { padding: 0 14px 22px !important; background-color: var(--surface-1) !important; backdrop-filter: none !important; }
       header.sticky.top-0 { padding-inline: 22px !important; }
     `,
   });

@@ -184,5 +184,10 @@ India, "Free" licence label linking to https://www.pexels.com/license/ on 25 Nov
 tried first and dropped: its page is gone, so its licence could not be read.) The /for cards of the restaurant, nail
 salon and spa now show restaurant-dining, nail-technician and spa-facial (public/photos/CREDITS.md, SITE-7).
 
+Later review rounds: restaurant-owner (Pexels 6605254, SITE-6) was re-cropped from the original to the chef and his
+pizza oven (no guests at the edges), so the restaurant page's hero and share image stay the chef owner; the restaurant's
+"Send a photo" band shows its own second photo, restaurant-tables (was restaurant-cooks, dim with no food); the /for
+hero tiles of the hair salon and auto repair show salon-wash and garage-hands (public/photos, SITE-4).
+
 Every other trade photo was checked at card and page size on 25 Nov 2026 and shows its trade. The old physio-stretch,
 bakery-counter and bakery-window photos stay where they are used (a guide, About, the bakery's tall slot).
