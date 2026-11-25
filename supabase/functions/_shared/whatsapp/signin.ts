@@ -1,7 +1,7 @@
 // Signup 1 (master plan 30.50 item 3, R-150): the WhatsApp side of Continue with WhatsApp and of the new sign-in notice.
 // One seam in agent.ts calls signinSeam after STOP and before every other route. It reads exactly three things and nothing
 // else: the message "Kabsi sign in CODE" (the whole message, nothing around it), the "Yes, it's me" button (si:y:<id>) and
-// the "Sign me out everywhere" button (so:<id>). Anything else returns null and the agent goes on as before.
+// the "Sign me out" button (so:<id>). Anything else returns null and the agent goes on as before.
 //   - A forwarded message is ignored (F-1): it is never the owner's own sign-in.
 //   - Kabsi never sends a code. The owner sends it; Kabsi answers with the device that started the sign-in and one button.
 //   - Every check that matters (the code's hash, its 10 minutes, one use, the same phone for the tap, the user) is made in
@@ -18,7 +18,7 @@ export interface SigninDb {
   claim(code: string, phone: string): Promise<{ result: "asked"; id: string; device: Device; city: string | null } | { result: "unknown" }>;
   /** "Yes, it's me" from the phone that claimed it: the phone's own user, or a new one, is attached and the browser may collect. */
   confirm(id: string, phone: string): Promise<{ result: "confirmed" | "unknown" }>;
-  /** "Sign me out everywhere" under a notice sent to this phone: every session of that user ends. */
+  /** "Sign me out" under a notice sent to this phone: every session of that user ends. */
   signOut(noticeId: string, phone: string): Promise<{ result: "done" | "unknown" }>;
 }
 

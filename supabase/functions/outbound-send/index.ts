@@ -6,6 +6,8 @@
 // Two internal actions for the mail-tester.com check (test mode only, never a real business):
 //   {"action": "mail_tester", "address": "<id>@srvN.mail-tester.com"} sends the fictional US Email 1 there;
 //   {"action": "mail_tester_score"} reads the score of the last address sent to and records it.
+// One more, read only: {"action": "preview"} renders the same fictional Email 1 in test mode and returns its subject and
+// body, so the footer can be read. It opens no SMTP connection and writes nothing.
 import { captureError, isInternal, json, log, serve } from "../_shared/kabsi.ts";
 import * as db from "../_shared/outbound/db.ts";
 import { checkDns } from "../_shared/outbound/dns.ts";
@@ -47,6 +49,16 @@ async function mailTester(address: unknown) {
   return json({ state: "sent" });
 }
 
+/** Test mode only: the fictional US Email 1 as it would be sent, never sent. */
+async function preview() {
+  const s = await db.settings();
+  if (s.sending_open || !s.test_mode) return json({ state: "test_mode_only" }, 409);
+  const postal = db.postal();
+  if (!postal) return json({ state: "no_postal_address" }, 409);
+  const mail = mailTesterEmail(postal, new Date());
+  return json({ state: "preview", subject: mail.subject, body: mail.body, house_style_ok: houseStyleOk(mail.body), links_ok: linksOk(mail.body, "first") });
+}
+
 async function mailTesterScore() {
   const s = await db.settings() as Awaited<ReturnType<typeof db.settings>> & { mail_tester_address?: string | null };
   if (!s.mail_tester_address || !mailTesterAddressOk(s.mail_tester_address)) return json({ state: "nothing_sent" }, 409);
@@ -66,6 +78,11 @@ serve(async (req) => {
     if (body.action === "mail_tester") {
       const r = await mailTester(body.address);
       log(fn, { action: "mail_tester", status: r.status });
+      return r;
+    }
+    if (body.action === "preview") {
+      const r = await preview();
+      log(fn, { action: "preview", status: r.status });
       return r;
     }
     if (body.action === "mail_tester_score") {
