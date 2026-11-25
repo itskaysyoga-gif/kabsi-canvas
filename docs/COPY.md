@@ -2680,3 +2680,11 @@ Every line below is in the code word for word; this section names where. No line
 - **More alt text:** the bakery's post photo "A baker shaping dough on a floured table"; Pricing's hero photo "A stylist blow-drying a client's hair in a bright salon" (was the barista); Home's Friday post picture "A stylist blow-drying a client's hair, the photo sent as a post" (was "A nail technician at work, the photo sent as a post").
 - **Vet clinic example** (`src/content/industries/blueprint.ts`, matching the page's dog photo): the review reads "Kind with my nervous dog and clear about the treatment plan. Thank you for fitting us in." and the reply "Thank you, Sam. We are glad we could fit you in and that your dog was looked after kindly. Please get in touch if you have any questions." (was "cat").
 - **Pricing:** the day labels of "Your first 14 days" ("Day 1", "Days 2 to 13", "Before the end", "Day 14") are in sentence case (they were drawn in capitals).
+
+## 94. APP-2: the lines it changed (25 Nov 2026, lane R R-166)
+
+- Posts: "Kabsi prepares up to 2 posts a month." under "Kabsi's posts", with no month choice.
+- Home, Needs attention, after the trial: button "Add a card to keep Kabsi". If checkout cannot open: "Checkout did not open. Nothing changed." and the link "Open your plan". The line "Card payments in US dollars are coming" is gone from this card (the emails keep it, see LATER).
+- Staff, Businesses: the button "Start trial" and the note "Trial started."
+- Old-reviews card: "The replies did not load. Nothing changed. Try again" and "These replies did not go through. Nothing changed. Try again".
+- Google profile: the tab "Where you show up" is off until the map and AI answers are switched back on.

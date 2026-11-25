@@ -18,7 +18,6 @@ const ROUTES = [
   "/app/shield",
   "/app/hours",
   "/app/coach",
-  "/app/insights",
   "/app/knowledge",
   "/app/settings",
   "/app/team",

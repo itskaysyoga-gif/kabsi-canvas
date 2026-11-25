@@ -228,12 +228,6 @@ export function WorkReceipt({
               <p className="mt-3 text-body">
                 For &lsquo;{maps.keyword}&rsquo;: {maps.line}
               </p>
-              <Link
-                to="/app/insights"
-                className="mt-1 inline-flex min-h-11 items-center text-small font-bold underline underline-offset-4"
-              >
-                See the places
-              </Link>
             </>
           ) : null}
           {r.competitor ? (

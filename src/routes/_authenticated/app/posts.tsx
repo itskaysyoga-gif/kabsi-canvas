@@ -31,6 +31,7 @@ import {
   approveMonth,
   CTA_LABEL,
   loadPosts,
+  effectiveCadence,
   loadSettings,
   monthName,
   monthOf,
@@ -41,7 +42,6 @@ import {
   removePost,
   savePost,
   setAutoPosts,
-  setCadence,
   TYPE_LABEL,
   type Post,
   type PostType,
@@ -94,7 +94,7 @@ function PostsPage() {
   const inMonth = all.filter((p) => monthOf(p) === month);
   const prepared = inMonth.filter((p) => p.state === "draft");
   const planned = inMonth.filter((p) => p.state !== "skipped");
-  const cadence = settings.data?.posts_per_month ?? 4;
+  const cadence = effectiveCadence(settings.data?.posts_per_month);
   const items = feed.data ?? [];
   const tasks: Tasks = {
     post: latestByTarget(items.filter((t) => t.kind === "local_post")),
@@ -893,7 +893,7 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
   );
 }
 
-// Kabsi's own posts: on or off, and how many a month (4 by default, one a week, or 2).
+// Kabsi's own posts: on or off. How many is not a choice: up to 2 a month (the facts).
 function Settings({ locationId }: { locationId: string }) {
   const queryClient = useQueryClient();
   const settings = useQuery({
@@ -928,18 +928,7 @@ function Settings({ locationId }: { locationId: string }) {
         onChange={(v) => void change(() => setAutoPosts(locationId, v))}
       />
       {on ? (
-        <ChoiceChips
-          className="mt-4"
-          name="posts-a-month"
-          legend="Posts a month"
-          options={[
-            { value: "4", label: "4" },
-            { value: "2", label: "2" },
-          ]}
-          value={settings.data ? String(settings.data.posts_per_month) : null}
-          disabled={busy}
-          onChange={(v) => void change(() => setCadence(locationId, Number(v) as 4 | 2))}
-        />
+        <p className="mt-3 text-small text-text-2">Kabsi prepares up to 2 posts a month.</p>
       ) : null}
       {err ? (
         <p className="mt-2 text-small font-semibold text-bad" role="alert">

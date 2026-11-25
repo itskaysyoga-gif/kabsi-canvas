@@ -31,7 +31,8 @@ const OWNER_ONLY: Role[] = ["owner"];
 // App 2 (1 Nov 2026): five places, the same on a computer and in the phone's bottom bar, with no More. No "listing" and no
 // "visibility" in a line an owner reads (COPY.md 0.1).
 export const SECTIONS: Record<SectionId, Section> = {
-  home: { id: "home", label: "Home", short: "Home", to: "/app", paths: ["/app"] },
+  // APP-2 (R-163): /app/insights is only a redirect to Home now, so it belongs to Home.
+  home: { id: "home", label: "Home", short: "Home", to: "/app", paths: ["/app", "/app/insights"] },
   reviews: {
     id: "reviews",
     label: "Reviews",
@@ -67,12 +68,11 @@ export const SECTIONS: Record<SectionId, Section> = {
     label: "Google profile",
     short: "Profile",
     to: "/app/shield",
-    paths: ["/app/shield", "/app/hours", "/app/coach", "/app/insights"],
+    paths: ["/app/shield", "/app/hours", "/app/coach"],
     tabs: [
       { label: "Profile watch", to: "/app/shield" },
       { label: "Hours", to: "/app/hours" },
       { label: "Profile Coach", to: "/app/coach" },
-      { label: "Where you show up", to: "/app/insights" },
     ],
   },
   settings: {
@@ -147,7 +147,7 @@ export const OLD_APP_ADDRESSES: Record<string, SectionId> = {
   "/app/shield": "google-profile",
   "/app/hours": "google-profile",
   "/app/coach": "google-profile",
-  "/app/insights": "google-profile",
+  "/app/insights": "home", // APP-2 (R-163): the page is off, the address goes to Home
   "/app/posts": "content",
   "/app/photos": "content",
   "/app/report": "settings",

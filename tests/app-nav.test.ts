@@ -51,13 +51,16 @@ describe("navigation", () => {
       "Profile watch",
       "Hours",
       "Profile Coach",
-      "Where you show up",
     ]);
+    // APP-2 (R-163): "Where you show up" is off the owner's navigation until the map and AI answers are switched back on.
+    expect(JSON.stringify(SECTIONS)).not.toContain("Where you show up");
     expect(SECTIONS.content.tabs?.map((t) => t.label)).toEqual(["Posts", "Photos"]);
     const tabbed = new Set(
       desktopSections("owner").flatMap((s) => [s.to, ...(s.tabs ?? []).map((t) => t.to)]),
     );
-    for (const p of Object.keys(OLD_APP_ADDRESSES).filter((p) => p !== "/app/inbox"))
+    for (const p of Object.keys(OLD_APP_ADDRESSES).filter(
+      (p) => p !== "/app/inbox" && p !== "/app/insights",
+    ))
       expect(tabbed.has(p), p).toBe(true);
   });
 

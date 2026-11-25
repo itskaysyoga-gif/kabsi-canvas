@@ -68,3 +68,12 @@ Deno.test("RetryLater postpones the job without a failed try or an error report"
   assert.deepEqual(r.postponed[0].until, until);
   assert.match(r.postponed[0].reason, /google paused/);
 });
+
+Deno.test("a database error object is stored with its real message, never [object Object]", async () => {
+  const r = recorder();
+  const pg = { message: 'insert or update on table "subscriptions" violates foreign key constraint', code: "23503", details: "Key is not present" };
+  await runJob(job("db"), { db: () => Promise.reject(pg) }, r.deps);
+  assert.match(r.calls[0].error ?? "", /violates foreign key constraint/);
+  assert.match(r.calls[0].error ?? "", /23503/);
+  assert.ok(!(r.calls[0].error ?? "").includes("[object Object]"));
+});

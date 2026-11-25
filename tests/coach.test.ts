@@ -69,7 +69,6 @@ describe("the owner's checklist", () => {
       "Profile watch",
       "Hours",
       "Profile Coach",
-      "Where you show up",
     ]);
     expect(SECTIONS["google-profile"].paths).toContain("/app/coach");
   });

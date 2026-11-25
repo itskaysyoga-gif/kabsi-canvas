@@ -25,6 +25,30 @@ export class RetryLater extends Error {
   }
 }
 
+/** The text stored for a failed job (APP-2): an Error's message, or the JSON of a plain object such as a Postgres error
+ * ({ message, details, hint, code }), never "[object Object]". */
+export function errorText(e: unknown): string {
+  if (e instanceof Error) return String(e);
+  if (typeof e === "string") return e;
+  if (e && typeof e === "object") {
+    const o = e as { message?: unknown };
+    if (typeof o.message === "string" && o.message) {
+      try {
+        const { message: _m, ...rest } = o as Record<string, unknown>;
+        return Object.keys(rest).length ? `${o.message} ${JSON.stringify(rest)}` : o.message;
+      } catch {
+        return o.message;
+      }
+    }
+    try {
+      return JSON.stringify(e);
+    } catch {
+      return Object.prototype.toString.call(e);
+    }
+  }
+  return String(e);
+}
+
 export type RunDeps = {
   finish: (job: Job, ok: boolean, error?: string, retry?: boolean) => Promise<JobState | null>;
   postpone: (job: Job, until: Date, reason: string) => Promise<JobState | null>;
@@ -46,7 +70,7 @@ export async function runJob(job: Job, handlers: Record<string, JobHandler>, dep
     error = e;
   }
   if (ok) return await deps.finish(job, true);
-  if (error instanceof RetryLater) return await deps.postpone(job, error.until, String(error).slice(0, 1000));
+  if (error instanceof RetryLater) return await deps.postpone(job, error.until, errorText(error).slice(0, 1000));
   await deps.report(job, error);
-  return await deps.finish(job, false, String(error).slice(0, 1000), !(error instanceof PermanentJobError));
+  return await deps.finish(job, false, errorText(error).slice(0, 1000), !(error instanceof PermanentJobError));
 }

@@ -3,7 +3,7 @@ import { RetryLine } from "@/components/kabsi/retry-line";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
-import { Skeleton, buttonClass } from "@/components/kabsi/ui";
+import { Button, Skeleton, buttonClass } from "@/components/kabsi/ui";
 import { shortParas } from "@/components/kabsi/d3-account";
 import { ProfileHealth, ThisWeek } from "@/components/home/home-week";
 import { BacklogCard } from "@/components/home/backlog-card";
@@ -23,6 +23,7 @@ import { loadCardDetails } from "@/lib/home";
 import { loadTasks, type Task } from "@/lib/tasks";
 import { loadEntitlements } from "@/lib/entitlements";
 import { planChoice } from "@/lib/plan-choice";
+import { billingAction } from "@/lib/plans";
 import type { Access } from "@/lib/team";
 import type { Location } from "@/lib/onboarding";
 
@@ -76,7 +77,12 @@ export function ActionCenter({ loc, access }: { loc: Location; access: Access })
     owner: role === "owner",
     plan:
       choice && choice.tone === "attention"
-        ? { title: choice.title, to: choice.cta.to, label: choice.cta.label }
+        ? {
+            title: choice.title,
+            to: choice.cta.to,
+            label: choice.cta.label,
+            checkout: !!choice.cta.checkout,
+          }
         : null,
   });
   const settle = useCallback(
@@ -185,7 +191,7 @@ export function ActionCenter({ loc, access }: { loc: Location; access: Access })
         ) : attention.length === 0 ? (
           <AllClear />
         ) : null}
-        <NeedsAttention lines={attention} />
+        <NeedsAttention lines={attention} locationId={loc.id} />
       </div>
       <div className="min-w-0 space-y-8">
         <ThisWeek locationId={loc.id} />
@@ -220,7 +226,35 @@ function AllClear() {
 }
 
 /** Needs attention: one line and one button each. Shown only when something is wrong. */
-export function NeedsAttention({ lines }: { lines: AttentionLine[] }) {
+export function NeedsAttention({
+  lines,
+  locationId,
+}: {
+  lines: AttentionLine[];
+  /** Needed only for a line whose button opens the checkout. */
+  locationId?: string;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
+  async function checkout() {
+    if (!locationId) return;
+    setBusy(true);
+    setFailed(false);
+    try {
+      const r = await billingAction("checkout", locationId, {
+        plan: "essentials",
+        period: "month",
+      });
+      if (r.url) {
+        window.location.assign(r.url);
+        return;
+      }
+      setFailed(true);
+    } catch {
+      setFailed(true);
+    }
+    setBusy(false);
+  }
   if (!lines.length) return null;
   return (
     <HomeSection id="attention-h" title="Needs attention" count={lines.length}>
@@ -253,7 +287,21 @@ export function NeedsAttention({ lines }: { lines: AttentionLine[] }) {
                 )),
               )}
             </div>
-            {l.action ? (
+            {l.action?.checkout && locationId ? (
+              <div className="flex flex-col items-start gap-1">
+                <Button size="md" variant="primary" disabled={busy} onClick={() => void checkout()}>
+                  {l.action.label}
+                </Button>
+                {failed ? (
+                  <p className="text-small text-text-2" role="alert">
+                    Checkout did not open. Nothing changed.{" "}
+                    <Link to={l.action.to as "/"} className="underline">
+                      Open your plan
+                    </Link>
+                  </p>
+                ) : null}
+              </div>
+            ) : l.action ? (
               <Link to={l.action.to as "/"} className={buttonClass("secondary", "md")}>
                 {l.action.label}
               </Link>
