@@ -29,15 +29,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "A colour review answered.",
-        text: "A client thanks her stylist by name. The reply thanks the right person, because you told Kabsi who works with you.",
+        text: "The reply thanks the stylist by name, from your team list.",
       },
       {
         title: "Late night Thursday.",
-        text: "Message Kabsi that you stay open until 8 on Thursday. It shows the new hours and sends them to Google after your yes.",
+        text: "Message Kabsi. The new hours go to Google after your yes.",
       },
       {
         title: "A balayage photo posted.",
-        text: "Send a photo of this week's colour. Kabsi writes a short post and it goes live after your yes.",
+        text: "Send this week's colour. Kabsi writes the post for your yes.",
       },
     ],
     faq: [
@@ -61,15 +61,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "Walk-in hours changed.",
-        text: "Taking walk-ins until 7 this Friday? Tell Kabsi. It shows Friday's new hours and sends them to Google after your yes.",
+        text: "Tell Kabsi. Friday's new hours go to Google after your yes.",
       },
       {
         title: "A new fade photo posted.",
-        text: "Send a photo of a fresh fade from the chair. Kabsi writes the post and it goes live after your yes.",
+        text: "Send a fresh fade. Kabsi writes the post for your yes.",
       },
       {
         title: "A wait complaint answered calmly.",
-        text: "Someone waited longer than they hoped. The reply thanks them, says sorry for the wait and stays short.",
+        text: "The reply thanks them, says sorry for the wait, stays short.",
       },
     ],
     faq: [
@@ -93,15 +93,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "A nail art photo posted.",
-        text: "Send a photo of a set you are proud of. Kabsi writes the post and it goes live after your yes.",
+        text: "Send a set you are proud of. Kabsi writes the post.",
       },
       {
         title: "A chipped polish review answered.",
-        text: "A client says her polish chipped early. The reply is calm, says sorry and asks her to get in touch.",
+        text: "A calm reply that says sorry and asks her to call.",
       },
       {
         title: "Holiday hours before the rush.",
-        text: "Open later before Christmas? Tell Kabsi the days. It shows the holiday hours and sends them after your yes.",
+        text: "Tell Kabsi the days. Holiday hours go live after your yes.",
       },
     ],
     faq: [
@@ -125,15 +125,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "A facial review answered.",
-        text: "A client loved her treatment. The reply thanks her warmly and mentions only what she said.",
+        text: "The reply thanks her warmly and mentions only what she said.",
       },
       {
         title: "A training day closure set.",
-        text: "Closing early for a training day? Tell Kabsi. It shows the new hours and sends them after your yes.",
+        text: "Tell Kabsi. The new hours go live after your yes.",
       },
       {
         title: "Treatment bookings kept open.",
-        text: "The booking link on your Google profile is checked every day. If it breaks, Kabsi tells you.",
+        text: "Your booking link is checked daily. If it breaks, you hear.",
       },
     ],
     faq: [
@@ -157,15 +157,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "A calm reply to a calm review.",
-        text: "A guest writes about a quiet, unhurried massage. The reply matches the tone and thanks the therapist you named.",
+        text: "The reply matches the tone and thanks the therapist you named.",
       },
       {
         title: "Holiday hours set in time.",
-        text: "Open the day after Christmas? Tell Kabsi. It shows the holiday hours and sends them to Google after your yes.",
+        text: "Tell Kabsi. Holiday hours go to Google after your yes.",
       },
       {
         title: "A treatment room photo posted.",
-        text: "Send a photo of the room before the first guest. Kabsi writes the post and waits for your yes.",
+        text: "Send the room before the first guest. Kabsi writes the post.",
       },
     ],
     faq: [
@@ -189,15 +189,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "A reply that keeps privacy.",
-        text: "A patient thanks you for a calm visit. The reply thanks them and never confirms they are a patient or names a treatment.",
+        text: "The reply never confirms they are a patient or names a treatment.",
       },
       {
         title: "Emergency hours over the holidays.",
-        text: "Open two mornings between Christmas and New Year? Tell Kabsi. It sets the holiday hours after your yes.",
+        text: "Tell Kabsi the mornings. Holiday hours go live after your yes.",
       },
       {
         title: "The practice phone number watched.",
-        text: "If your phone number changes on Google, Kabsi shows you what changed and the fix waits for your yes.",
+        text: "Changed on Google? You see it. The fix waits for your yes.",
       },
     ],
     faq: [
@@ -221,15 +221,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "A private, general reply.",
-        text: "A client thanks the team. The reply thanks them and never names a treatment or confirms they visited.",
+        text: "The reply never names a treatment or confirms they visited.",
       },
       {
         title: "A clinic photo posted.",
-        text: "Send a photo of your reception or a treatment room. Kabsi writes the post and waits for your yes.",
+        text: "Send your reception or a room. Kabsi writes the post.",
       },
       {
         title: "Your website link checked daily.",
-        text: "If the website on your Google profile goes down or sends people elsewhere, Kabsi tells you.",
+        text: "If it goes down or points elsewhere, Kabsi tells you.",
       },
     ],
     faq: [
@@ -253,15 +253,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "A thank you that stays private.",
-        text: "A patient thanks their physio after a long recovery. The reply is warm and says nothing about their care.",
+        text: "The reply is warm and says nothing about their care.",
       },
       {
         title: "Evening hours added.",
-        text: "Seeing patients until 8 on Tuesdays now? Tell Kabsi. It shows the new hours and sends them after your yes.",
+        text: "Tell Kabsi. The new hours go to Google after your yes.",
       },
       {
         title: "Your appointment link checked.",
-        text: "The booking link on your Google profile is checked every day. If it breaks, Kabsi tells you.",
+        text: "Your booking link is checked daily. If it breaks, you hear.",
       },
     ],
     faq: [
@@ -285,15 +285,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "Holiday hours before the holiday.",
-        text: "Closed on Christmas Day and open late on New Year's Eve? Tell Kabsi once. It sets both after your yes.",
+        text: "Christmas closed, New Year late? Tell Kabsi once. Both after your yes.",
       },
       {
         title: "Your menu link checked.",
-        text: "The menu link on your Google profile is checked every day. If it stops working, Kabsi tells you.",
+        text: "Checked every day. If it stops working, Kabsi tells you.",
       },
       {
         title: "A dish photo posted.",
-        text: "Send a photo of tonight's special. Kabsi writes the post with what you told it and waits for your yes.",
+        text: "Send tonight's special. Kabsi writes the post for your yes.",
       },
     ],
     faq: [
@@ -317,15 +317,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "Early hours kept exact.",
-        text: "Opening at 6:30 instead of 7? Tell Kabsi. It shows the new hours and sends them to Google after your yes.",
+        text: "Opening at 6:30? Tell Kabsi. New hours go live after your yes.",
       },
       {
         title: "A new pastry posted.",
-        text: "Send a photo of the seasonal bake. Kabsi writes a short post and it goes live after your yes.",
+        text: "Send the seasonal bake. Kabsi writes a short post.",
       },
       {
         title: "A slow service review answered.",
-        text: "Someone waited too long at the morning rush. The reply says sorry, thanks them and stays short.",
+        text: "The reply says sorry, thanks them and stays short.",
       },
     ],
     faq: [
@@ -349,15 +349,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "Today's bake posted.",
-        text: "Send a photo of the first tray out of the oven. Kabsi writes the post and waits for your yes.",
+        text: "Send the first tray out. Kabsi writes the post for your yes.",
       },
       {
         title: "Closed early when you sell out.",
-        text: "Closing at 2 this Saturday? Tell Kabsi. It shows the hours for that day and sends them after your yes.",
+        text: "Closing at 2 on Saturday? Tell Kabsi. Live after your yes.",
       },
       {
         title: "A sold out complaint answered.",
-        text: "Someone came for sourdough and it was gone. The reply thanks them and keeps it friendly.",
+        text: "The reply thanks them and keeps it friendly.",
       },
     ],
     faq: [
@@ -381,15 +381,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "A 1-star review handled carefully.",
-        text: "A customer disputes a bill. The reply is calm, does not argue or admit fault, and asks them to get in touch.",
+        text: "Calm. No arguing, no admitting fault. It asks them to call.",
       },
       {
         title: "The number customers call, watched.",
-        text: "Customers call before they come. If your number changes on Google, Kabsi shows you and the fix waits for your yes.",
+        text: "Changed on Google? You see it. The fix waits for your yes.",
       },
       {
         title: "Saturday mornings added.",
-        text: "Open Saturday mornings now? Tell Kabsi. It shows the new hours and sends them after your yes.",
+        text: "Tell Kabsi. The new hours go to Google after your yes.",
       },
     ],
     faq: [
@@ -413,15 +413,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "Holiday class hours set.",
-        text: "Shorter hours between Christmas and New Year? Tell Kabsi the days. It sets them after your yes.",
+        text: "Tell Kabsi the days. Holiday hours go live after your yes.",
       },
       {
         title: "A new spin class posted.",
-        text: "Send a photo from the first session. Kabsi writes the post from what you told it and waits for your yes.",
+        text: "Send a photo from the first session. Kabsi writes the post.",
       },
       {
         title: "A crowded gym review answered.",
-        text: "A member says the evenings are busy. The reply thanks them and stays honest, with no promises you did not make.",
+        text: "The reply thanks them and stays honest, with no new promises.",
       },
     ],
     faq: [
@@ -445,15 +445,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "A fresh set posted.",
-        text: "Send a close photo of today's lashes. Kabsi writes the post and it goes live after your yes.",
+        text: "Send today's lashes. Kabsi writes the post for your yes.",
       },
       {
         title: "A retention review answered.",
-        text: "A client says her lashes fell early. The reply is calm, says sorry and asks her to get in touch.",
+        text: "A calm reply that says sorry and asks her to call.",
       },
       {
         title: "Your booking page checked daily.",
-        text: "The booking link on your Google profile is checked every day. If it breaks, Kabsi tells you.",
+        text: "Your booking link is checked daily. If it breaks, you hear.",
       },
     ],
     faq: [
@@ -477,15 +477,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "Healed work posted.",
-        text: "Send a photo of a healed piece. Kabsi writes the post and waits for your yes.",
+        text: "Send a healed piece. Kabsi writes the post for your yes.",
       },
       {
         title: "Guest artist hours added.",
-        text: "Open on Sunday for a guest spot? Tell Kabsi. It shows that day's hours and sends them after your yes.",
+        text: "Open Sunday for a guest spot? Tell Kabsi. Live after your yes.",
       },
       {
         title: "A pricing complaint answered.",
-        text: "Someone thought the quote was high. The reply thanks them and never argues or names a price.",
+        text: "The reply thanks them and never argues or names a price.",
       },
     ],
     faq: [
@@ -509,15 +509,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "A fresh groom posted.",
-        text: "Send a photo of a happy dog after the trim. Kabsi writes the post and waits for your yes.",
+        text: "Send a happy dog after the trim. Kabsi writes the post.",
       },
       {
         title: "A nervous dog review answered.",
-        text: "An owner thanks you for patience with a nervous dog. The reply is warm and mentions only what they said.",
+        text: "The reply is warm and mentions only what the owner said.",
       },
       {
         title: "A closed week set in advance.",
-        text: "Closed for the week after Christmas? Tell Kabsi. It sets the holiday hours after your yes.",
+        text: "Closed the week after Christmas? Tell Kabsi. Set after your yes.",
       },
     ],
     faq: [
@@ -541,15 +541,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "A grateful owner answered.",
-        text: "A pet owner thanks the team after a hard visit. The reply is kind, short and says nothing about the case.",
+        text: "The reply is kind, short and says nothing about the case.",
       },
       {
         title: "The clinic number kept right.",
-        text: "Owners call in a hurry. If your number changes on Google, Kabsi shows you and the fix waits for your yes.",
+        text: "Changed on Google? You see it. The fix waits for your yes.",
       },
       {
         title: "Holiday hours set early.",
-        text: "Different hours over the holidays? Tell Kabsi the days. It sets them after your yes.",
+        text: "Tell Kabsi the days. Holiday hours go live after your yes.",
       },
     ],
     faq: [
@@ -573,15 +573,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "A detailing photo posted.",
-        text: "Send a photo of a finished interior. Kabsi writes the post and waits for your yes.",
+        text: "Send a finished interior. Kabsi writes the post for your yes.",
       },
       {
         title: "Weather closure hours set.",
-        text: "Closed for a storm on Thursday? Tell Kabsi. It shows that day's hours and sends them after your yes.",
+        text: "Closed for a storm? Tell Kabsi. That day's hours after your yes.",
       },
       {
         title: "A missed spot review answered.",
-        text: "A driver says the wash missed a spot. The reply says sorry and asks them to come back and get in touch.",
+        text: "The reply says sorry and asks them to get in touch.",
       },
     ],
     faq: [
@@ -605,15 +605,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "Valentine's hours set.",
-        text: "Opening early for Valentine's week? Tell Kabsi the days. It sets the holiday hours after your yes.",
+        text: "Tell Kabsi the days. Holiday hours go live after your yes.",
       },
       {
         title: "A bouquet photo posted.",
-        text: "Send a photo of this week's arrangement. Kabsi writes the post and waits for your yes.",
+        text: "Send this week's arrangement. Kabsi writes the post for your yes.",
       },
       {
         title: "A gentle reply for a sympathy order.",
-        text: "A customer thanks you for funeral flowers. The reply is gentle and adds nothing they did not share.",
+        text: "The reply is gentle and adds nothing they did not share.",
       },
     ],
     faq: [
@@ -637,15 +637,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "New frames posted.",
-        text: "Send a photo of the new frames on the shelf. Kabsi writes the post and waits for your yes.",
+        text: "Send the new frames on the shelf. Kabsi writes the post.",
       },
       {
         title: "A wait for glasses answered.",
-        text: "A customer waited longer than promised for lenses. The reply says sorry and asks them to get in touch.",
+        text: "The reply says sorry and asks them to get in touch.",
       },
       {
         title: "Eye test bookings kept open.",
-        text: "The booking link on your Google profile is checked every day. If it breaks, Kabsi tells you.",
+        text: "Your booking link is checked daily. If it breaks, you hear.",
       },
     ],
     faq: [
@@ -669,15 +669,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "A Sunday flow posted.",
-        text: "Starting a Sunday morning flow? Send a photo of the studio. Kabsi writes the post from what you told it.",
+        text: "Send a studio photo. Kabsi writes the post for your yes.",
       },
       {
         title: "Fewer classes over the holidays.",
-        text: "Fewer classes over the holidays? Tell Kabsi the days. It sets the holiday hours after your yes.",
+        text: "Tell Kabsi the days. Holiday hours go live after your yes.",
       },
       {
         title: "A warm reply to a first class.",
-        text: "A new student says they felt welcome. The reply thanks them and names the teacher you listed.",
+        text: "The reply thanks them and names the teacher you listed.",
       },
     ],
     faq: [
@@ -701,15 +701,15 @@ export const TRADE_WORK: Record<string, TradeWork> = {
     does: [
       {
         title: "A reply after a home clean.",
-        text: "A customer thanks the team for a spotless apartment. The reply thanks them and mentions only what they said.",
+        text: "The reply thanks the team's work and mentions only what they said.",
       },
       {
         title: "The number for quotes, watched.",
-        text: "Most jobs start with a call. If your number changes on Google, Kabsi shows you and the fix waits for your yes.",
+        text: "Changed on Google? You see it. The fix waits for your yes.",
       },
       {
         title: "A before and after posted.",
-        text: "Send a photo from today's job, with the customer's permission. Kabsi writes the post and waits for your yes.",
+        text: "Send today's job, with the customer's permission. Kabsi writes the post.",
       },
     ],
     faq: [

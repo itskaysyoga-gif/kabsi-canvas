@@ -96,11 +96,7 @@ export function TradeStrip({ id = "trades", className }: { id?: string; classNam
     <section id={id} aria-labelledby={`${id}-h`} className={className}>
       <div className="container-kb py-14 sm:py-20 lg:py-24" data-rise>
         <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
-          <Head
-            id={id}
-            title="Built for your kind of business."
-            line="Salons, barbers, cafés, garages and more. Each kind of business has its own Google work, and its own page."
-          />
+          <Head id={id} title="Built for your kind of business." />
           <SiteLink to="/for" className="press kb-more">
             See every business
             <ArrowRight aria-hidden />
@@ -134,19 +130,19 @@ export const SCREENS = {
     src: "/screens/app-report-560.webp",
     alt: "Kabsi's weekly report in the account, for an example business",
     title: "Your weekly report",
-    line: "In your account: what Kabsi did, what waits for your yes, one next step.",
+    line: "What was done, what waits.",
   },
   cards: {
     src: "/screens/app-cards-560.webp",
     alt: "Kabsi's review link message and QR code, for an example business",
     title: "Your review link and QR code",
-    line: "A ready message to send after a real visit, and a QR code to print.",
+    line: "To share after a real visit.",
   },
   email: {
     src: "/screens/email-weekly-560.webp",
     alt: "Kabsi's weekly report email, for an example business",
     title: "Your week, by email",
-    line: "Every Monday: the work done and anything waiting for you.",
+    line: "Every Monday, in your inbox.",
   },
 } as const;
 

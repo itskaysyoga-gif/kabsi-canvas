@@ -12,8 +12,8 @@ import { BLUEPRINT, READ } from "@/content/industries/blueprint";
 import { TRADE_WORK } from "@/content/industries/trade-work";
 import { ExampleBadge, Faq, KabsiMark } from "./ui";
 import { Band, Head, Lead, MarkRow } from "@/components/marketing/kit";
-import { HERO_MARKS, HOME_FAQ } from "@/components/marketing/v31-data";
-import { PriceCard, TrustLines } from "@/components/marketing/v31";
+import { HERO_MARKS, TRADE_GENERAL_FAQ } from "@/components/marketing/v31-data";
+import { PriceCard } from "@/components/marketing/v31";
 import { Img, PHOTOS } from "./photos";
 import { PubImg } from "@/components/marketing/life";
 import { HERO_LIBRARY, TRADE_SECOND, TRADE_WIDE } from "@/components/marketing/industry-photos";
@@ -61,13 +61,30 @@ export const FREE_CHECK_NOTE = "Free check. No card. 20 seconds.";
 
 /* ---------- One trade: the one template (SITE-2, blueprint 3.1 section 5) ---------- */
 
+const APPROVES = /approve|your yes|sign off/i;
+
+/**
+ * SITE-8 (R-167 rule 6): the hero's support line is the trade's own, from its page line (src/content/industries), never
+ * Home's. "Kabsi looks after your <trade> Google Business Profile: a, b and c." becomes "On Google: a, b and c.", with
+ * "You approve each one." when the line does not say so already. At most 18 words (tests/site8.test.ts).
+ */
+export function tradeHeroLine(i: Industry): string {
+  const line = i.page.line;
+  const at = line.indexOf(": ");
+  const body = at < 0 ? line : `On Google: ${line.slice(at + 2)}`;
+  return APPROVES.test(body) ? body : `${body} You approve each one.`;
+}
+
+/** SITE-8: the trade H1, at most 7 words: "Your <trade>. Taken care of." */
+export const tradeH1 = (i: Industry) => `Your ${i.name}. Taken care of.`;
+
 /**
  * Every industry page is this page. Only three things change: the headline noun (`industry.name`), the example review
  * with Kabsi's reply, and one sourced fact (src/content/industries/blueprint.ts).
  */
 export function IndustryPage({ industry: i }: { industry: Industry }) {
   const b = BLUEPRINT[i.slug];
-  const h1 = `Your ${i.name} on Google. Taken care of.`;
+  const h1 = tradeH1(i);
   // SITE-3 (R-164 item 7): the page is built from the same sections as Home and Pricing (marketing/kit.tsx). The H1 is
   // the only yellow bar; the example review sits beside the hero on a computer, so no section leaves half the width empty.
   return (
@@ -87,10 +104,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
             >
               <Marked text={h1} mark="Taken care of." />
             </h1>
-            <Lead className="mt-4 sm:mt-5">
-              Kabsi answers your reviews, protects your listing and keeps your profile fresh. You
-              approve and make changes from WhatsApp or email.
-            </Lead>
+            <Lead className="mt-4 sm:mt-5">{tradeHeroLine(i)}</Lead>
             <div className="relative z-10 mt-6 max-w-[34rem] sm:mt-8">
               <ScanBox
                 id="hero-scan"
@@ -125,7 +139,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
               </div>
               <div className="relative mx-3 -mt-8 rounded-panel border border-line bg-surface-1 p-4 shadow-float sm:mx-6 sm:-mt-20 sm:p-6 lg:-mt-10">
                 <h2 id="review-h" className="text-small font-bold text-text-2">
-                  {`A review at ${i.example.business}, and the reply Kabsi writes`}
+                  {`A review at ${i.example.business}`}
                 </h2>
                 <div className="mt-2 flex items-center justify-between gap-3">
                   <p className="text-small font-bold">{`${b.review.name}, ${b.review.stars} stars`}</p>
@@ -150,10 +164,6 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
                   </div>
                 </div>
               </div>
-              <figcaption className="mt-3 text-small text-text-2">
-                Kabsi writes the reply from the facts you gave it. It waits for your yes before
-                anything reaches Google.
-              </figcaption>
             </figure>
           )}
         </div>
@@ -171,12 +181,16 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
               From Google's own help pages
             </h2>
             <p className="mt-3 text-h3 text-text-1">{b.fact.text}</p>
-            <p className="mt-4 text-read text-text-2">
+            <p className="mt-4 text-small text-text-2">
               {"Source: "}
-              <a href={b.fact.source.url} rel="noreferrer" className="underline underline-offset-4">
-                {b.fact.source.title}
+              <a
+                href={b.fact.source.url}
+                rel="noreferrer"
+                title={`${b.fact.source.title}, read on ${READ_US}`}
+                className="underline underline-offset-4"
+              >
+                Google Business Profile Help
               </a>
-              {`, read on ${READ_US}.`}
             </p>
           </div>
         </Band>
@@ -184,10 +198,9 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
 
       <Band id="price" tone="ivory" inner="pt-10 pb-8 sm:pt-12 sm:pb-10 lg:pt-16 lg:pb-12">
         <Head id="price" title="One price." />
-        {/* The price card of Home and Pricing: TRIAL_LINE beside the button, the included list, the not included line. */}
-        <PriceCard className="mt-8" />
-        {/* SITE-5: what to know first sits under the price, not on a band of its own. */}
-        <TrustLines />
+        {/* The price card of Home and Pricing: TRIAL_LINE beside the button, a line each. SITE-8: the trust list is
+            under the hero only (R-167 rule 4). */}
+        <PriceCard className="mt-8" chips={false} />
       </Band>
 
       <Band id="questions" tone="ivory" inner="pt-8 sm:pt-10 lg:pt-12">
@@ -225,8 +238,8 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
   );
 }
 
-/** SITE-5: the questions every owner asks, after the trade's own three (Do I have to do anything, customers, password). */
-const GENERAL_FAQ = [HOME_FAQ[1]!, HOME_FAQ[3]!, HOME_FAQ[4]!];
+/** SITE-5: the questions every owner asks, after the trade's own three. SITE-8: one, and none repeats the hero. */
+const GENERAL_FAQ = TRADE_GENERAL_FAQ;
 
 /**
  * SITE-5 (lane R decision 2): "What Kabsi does for a <trade>": three examples true for this trade, beside Kabsi's own
@@ -250,7 +263,7 @@ function TradeWorkBand({ industry: i }: { industry: Industry }) {
               <YellowNumber n={n + 1} />
               <div>
                 <h3 className="text-h3">{x.title}</h3>
-                <p className="mt-1.5 max-w-[56ch] text-read text-text-2">{x.text}</p>
+                <p className="mt-1 max-w-[40ch] text-read text-text-2">{x.text}</p>
               </div>
             </li>
           ))}
@@ -268,9 +281,6 @@ function TradeWorkBand({ industry: i }: { industry: Industry }) {
           />
           <ExampleBadge />
         </div>
-        <figcaption className="mt-3 text-center text-small text-balance text-text-2">
-          {`${i.example.business} this week: new hours, a post and a reply, each waiting for one tap.`}
-        </figcaption>
       </figure>
     </Band>
   );
@@ -284,11 +294,7 @@ const READ_US = new Date(`${READ}T12:00:00Z`).toLocaleDateString("en-US", {
   timeZone: "UTC",
 });
 
-const POST_STEPS = [
-  "You send a photo from your phone.",
-  "Kabsi writes the post for it.",
-  "You tap yes. It goes live on Google.",
-] as const;
+const POST_STEPS = ["You send a photo.", "Kabsi writes the post.", "You tap yes."] as const;
 
 /**
  * SITE-4: "Send a photo. Get a Google post." on the charcoal band, with the trade's own second photo and an Example post
@@ -308,13 +314,10 @@ function PhotoPost({ industry: i }: { industry: Industry }) {
         <h2 id="post-h" className="max-w-[22ch] text-h2 text-balance">
           Send a photo. <span className="text-phrase">Get a Google post.</span>
         </h2>
-        <p className="mt-4 max-w-[52ch] text-read text-text-2">
-          Take a photo at work and send it to Kabsi with a few words. Kabsi writes the post and
-          waits for your yes.
-        </p>
+        {/* SITE-8 (R-167 rule 3): three short steps; the post card beside them shows the rest. */}
         <ol className="mt-8 grid gap-5">
           {POST_STEPS.map((t, n) => (
-            <li key={t} className="flex items-center gap-4 text-read text-text-1">
+            <li key={t} className="flex items-center gap-4 text-title font-bold text-text-1">
               <YellowNumber n={n + 1} />
               {t}
             </li>
@@ -347,7 +350,7 @@ function PhotoPost({ industry: i }: { industry: Industry }) {
           </span>
           <span className="mt-3 inline-flex h-8 items-center gap-1.5 rounded-pill bg-ok-soft px-3 text-label font-bold text-ok">
             <Check className="size-3.5" aria-hidden />
-            Live on Google after your yes
+            Live after your yes
           </span>
         </figcaption>
       </figure>
@@ -434,7 +437,7 @@ function TradeCard({
           />
         )}
       </span>
-      <span className="flex flex-1 flex-col p-3 sm:p-4">
+      <span className="flex flex-1 flex-col justify-center p-3 sm:p-4">
         <span className="font-display text-body font-semibold sm:text-title">{i.plural}</span>
         {line && <span className="mt-1 text-small text-text-2 sm:text-body">{i.page.card}</span>}
       </span>
@@ -455,7 +458,7 @@ const fold = (s: string) =>
 export const FOR_HERO = {
   h1: "Your kind of business, taken care of.",
   mark: "taken care of.",
-  line: "Each kind of local business has its own Google work. Find yours, or start with the free check.",
+  line: "Each kind of business has its own Google work. Find yours.",
 } as const;
 
 /**
@@ -578,10 +581,12 @@ export function ForIndex() {
                 hidden={!shown.includes(i)}
                 className="w-full sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]"
               >
+                {/* SITE-8 (R-167): the photo and the name say it; the card lines read as one grey blur. */}
                 <TradeCard
                   industry={i}
                   sizes="(min-width: 1024px) 18rem, (min-width: 640px) 45vw, 8rem"
                   row
+                  line={false}
                 />
               </li>
             ))}

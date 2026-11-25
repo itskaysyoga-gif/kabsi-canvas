@@ -7,11 +7,11 @@
 /** No token and no click asked for within this long means the check is not going to finish on its own. */
 export const BOT_CHECK_WAIT_MS = 15_000;
 
-/** The label of a button that is waiting for the check (COPY.md 41). */
+/** The label of a button that is waiting for the check (COPY.md 100). */
 export const CHECKING_LINE = "Checking your connection";
-/** One line above Cloudflare's box when it needs a tap (COPY.md 41). */
+/** One line above Cloudflare's box when it needs a tap (COPY.md 100). */
 export const INTERACTIVE_HINT = "Tap the box to confirm you are a person";
-/** When no token arrived in 15 seconds; "Try again" is the button after it (COPY.md 41). */
+/** When no token arrived in 15 seconds; "Try again" is the button after it (COPY.md 100). */
 export const SLOW_LINE = "This is taking longer than usual.";
 /** When Cloudflare reported an error (the older line, COPY.md 39). */
 export const ERROR_LINE = "We could not check your browser.";
