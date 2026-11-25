@@ -249,9 +249,10 @@ function Page() {
         <h2>9. Trial and when your plan runs</h2>
         <ul>
           <li>
-            The free trial lasts 14 days and starts with a card. It starts when Kabsi's access to your
-            Google profile works, so waiting for access costs you nothing. There is one trial per
-            Google business. If you have not cancelled by day 14, the first month is charged to your card.
+            The free trial lasts 14 days and starts with a card. It starts when Kabsi's access to
+            your Google profile works, so waiting for access costs you nothing. There is one trial
+            per Google business. If you have not cancelled by day 14, the first month is charged to
+            your card.
           </li>
           <li>
             Card payments are not open yet, so nothing is charged today. The rules below apply from

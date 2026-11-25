@@ -17,7 +17,12 @@ import { readText } from "./helpers/facts";
 // starts with a card (TRIAL_LINE in src/lib/offer.ts), and a private founding price of 19 for the first 12 months.
 describe("the one plan", () => {
   it("is 29 a month per location, the extra location is 29 and the founding price is 19", () => {
-    expect(ONE_PLAN).toEqual({ name: "Kabsi", monthly: 29, extraLocationMonthly: 29, founding: 19 });
+    expect(ONE_PLAN).toEqual({
+      name: "Kabsi",
+      monthly: 29,
+      extraLocationMonthly: 29,
+      founding: 19,
+    });
     expect(ONE_PLAN.extraLocationMonthly).toBe(ONE_PLAN.monthly);
   });
   it("reads the same in the sentence, the Plan page rows and the founding line", () => {
@@ -80,7 +85,9 @@ describe("no retired price (lane R, 22 Oct 2026)", () => {
     }
   });
   it("every dollar amount a reader can see is one of the list or founding prices", () => {
-    const allowed = new Set([ONE_PLAN.monthly, ONE_PLAN.extraLocationMonthly, ONE_PLAN.founding].map((n) => `$${n}`));
+    const allowed = new Set(
+      [ONE_PLAN.monthly, ONE_PLAN.extraLocationMonthly, ONE_PLAN.founding].map((n) => `$${n}`),
+    );
     for (const f of READABLE.filter((p) => !/kabsi-facts|llms-full/.test(p))) {
       const text = readText(f).replace(/\$\{[^}]*\}/g, "");
       for (const m of text.matchAll(/\$(\d{2,}[\d,]*)/g)) {
@@ -129,7 +136,8 @@ describe("one plan on the owner's own surfaces", () => {
     "src/lib/site.ts",
     "src/routes/terms.tsx",
   ].filter((f) => !/test-helpers|replay/.test(f));
-  const RETIRED_WORDS = /\bEssentials\b|\bPro\b|\bno card\b|\bNo card\b|Start free|\b15 days\b|\b15-day\b|\$15\b|15 US dollars/;
+  const RETIRED_WORDS =
+    /\bEssentials\b|\bPro\b|\bno card\b|\bNo card\b|Start free|\b15 days\b|\b15-day\b|\$15\b|15 US dollars/;
   it("no Essentials, Pro, no card, 15 days or 15 dollars in a line a reader sees", () => {
     const found: string[] = [];
     for (const f of PILOT)

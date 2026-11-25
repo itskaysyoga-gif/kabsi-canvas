@@ -14,7 +14,10 @@ import { FOUNDING_SENTENCE, ONE_PLAN, PRICES_SENTENCE } from "../src/lib/site";
 // supabase/functions/_shared/lifecycle.test.ts (Deno).
 describe("lifecycle emails", () => {
   it("quote the same prices as the site (K-106, G-30)", () => {
-    expect(EMAIL_PRICES).toEqual({ monthly: ONE_PLAN.monthly, extraLocationMonthly: ONE_PLAN.extraLocationMonthly });
+    expect(EMAIL_PRICES).toEqual({
+      monthly: ONE_PLAN.monthly,
+      extraLocationMonthly: ONE_PLAN.extraLocationMonthly,
+    });
     expect(EMAIL_SENTENCE).toBe(PRICES_SENTENCE);
     expect(EMAIL_FOUNDING).toBe(FOUNDING_SENTENCE);
     expect(EMAIL_FOUNDING).toBe(FOUNDING_LINE);

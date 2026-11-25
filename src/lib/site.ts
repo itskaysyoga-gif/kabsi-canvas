@@ -3,7 +3,13 @@
 
 import { WHATSAPP_DIGITS, WHATSAPP_ON } from "../../supabase/functions/_shared/whatsapp-setting.ts";
 import { CONSENT_ASK_FIRST } from "./region";
-import { FOUNDING_LINE as OFFER_FOUNDING_LINE, FOUNDING_MONTHLY_USD, PRICE_MONTHLY_USD, PRIMARY_CTA, TRIAL_LINE as OFFER_TRIAL_LINE } from "./offer";
+import {
+  FOUNDING_LINE as OFFER_FOUNDING_LINE,
+  FOUNDING_MONTHLY_USD,
+  PRICE_MONTHLY_USD,
+  PRIMARY_CTA,
+  TRIAL_LINE as OFFER_TRIAL_LINE,
+} from "./offer";
 import { SOCIAL_LINKS } from "../../supabase/functions/_shared/social-links.ts";
 
 /** Where the consent bar asks first (the one list is CONSENT_ASK_FIRST in src/lib/region.ts). */
@@ -213,7 +219,12 @@ export const GOOGLE_NOTICE =
  * `PRICES_SENTENCE`. The earlier single Pro price is retired, and tests/prices.test.ts fails if it comes back.
  */
 /** PILOT-READY (R-165): there is one plan, called Kabsi. 29 US dollars a month per location; an extra location is 29. */
-export const ONE_PLAN = { name: "Kabsi", monthly: PRICE_MONTHLY_USD, extraLocationMonthly: PRICE_MONTHLY_USD, founding: FOUNDING_MONTHLY_USD } as const;
+export const ONE_PLAN = {
+  name: "Kabsi",
+  monthly: PRICE_MONTHLY_USD,
+  extraLocationMonthly: PRICE_MONTHLY_USD,
+  founding: FOUNDING_MONTHLY_USD,
+} as const;
 /**
  * @deprecated Two-plan numbers of the old site. Kept only so the public components SITE-4 owns still compile; no reader
  * sees them any more through site.ts (every visible sentence below reads ONE_PLAN). SITE-4 deletes this and FOUNDING_PRICES.

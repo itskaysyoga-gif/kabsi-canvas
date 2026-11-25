@@ -57,7 +57,8 @@ describe("a Kabsi plan costs what src/lib/site.ts says, on every surface", () =>
   it("facts, COPY.md, auth and product emails, WhatsApp, Outbound, billing, Nora, server copy and share images", () => {
     // docs/COPY.md keeps its older sections as history ("later sections win"): from PILOT-READY (R-165) only section 90 and
     // later are read for a plan price, because every earlier price line is replaced by section 93.
-    const current = (f: string, t: string) => (f === "docs/COPY.md" ? t.slice(Math.max(0, t.indexOf("\n## 90."))) : t);
+    const current = (f: string, t: string) =>
+      f === "docs/COPY.md" ? t.slice(Math.max(0, t.indexOf("\n## 90."))) : t;
     expect(each((_s, f, t) => priceProblems(current(f, t)))).toEqual([]);
   });
   it("the Creem catalogue holds the same amounts, in cents", () => {
