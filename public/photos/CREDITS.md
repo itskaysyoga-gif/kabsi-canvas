@@ -19,6 +19,7 @@ text is `src/components/marketing/public-photos.ts`.
 | spa | A massage therapist's hands on a client's back | https://unsplash.com/photos/massage-therapist-giving-a-back-massage-7yeqemd-p90 | Jakub Klucký (@jakubklucky) | Not given | Unsplash License |
 | cafe | A barista at work behind a sunlit café counter | https://unsplash.com/photos/barista-working-behind-counter-in-sunlit-cafe-N76Cadq2wQs | Oksana Demenko (@_kseniademenko) | Berlin, Germany | Unsplash License |
 | restaurant | An older cook at the pass of his restaurant kitchen | https://unsplash.com/photos/an-older-man-working-in-a-restaurant-kitchen-Me7hK7DISyE | Willian Justen de Vasconcellos (@willianjusten) | Not given | Unsplash License |
+
 | auto-repair | A mechanic working under the hood of a car | https://unsplash.com/photos/mechanic-working-on-car-engine-UZUzvJEvKnI | Sten Rademaker (@stenrademaker) | Amsterdam, Netherlands | Unsplash License |
 | cleaner | A cleaner vacuuming an office floor | https://unsplash.com/photos/a-man-in-yellow-gloves-vacuums-a-carpeted-office-floor-CVcIMnH_7so | web seo (@webseoweb) | Chicago, Illinois, USA | Unsplash License |
 | florist-phone | A florist checking her phone at the workbench of her shop | https://unsplash.com/photos/woman-standing-beside-the-table-24HcJhf0u6M | Ellicia (@ellicia_) | Not given | Unsplash License |
@@ -41,3 +42,17 @@ Unsplash) is no longer used and its files were removed.
 | File name | What it shows | Photo page | Photographer | Location given | Licence |
 | --- | --- | --- | --- | --- | --- |
 | salon-owner | A salon owner cutting a smiling client's hair in her bright studio | https://www.pexels.com/photo/a-woman-giving-a-haircut-to-a-bearded-man-6599030/ | Antoni Shkraba (@shkrabaanthony) | Not given | Pexels License |
+
+## SITE-7 (25 Nov 2026): the restaurant tile
+
+The restaurant photo above (a cook at the pass) read as a shop counter at card size. Its wide files were removed and
+`restaurant-tile-400|800.webp` (Home's trade strip) is now a 4:5 crop of the library photo restaurant-tables (warmly lit
+tables, docs/PHOTOS.md: chosen by Rashid from Pexels or Unsplash on 26 Oct 2026, free for commercial use), WebP quality
+70. The row above stays as the record of the earlier file.
+
+
+SITE-7 also remade `nail-salon-tile-400|800.webp` from the library photo nail-technician (a technician painting nails;
+its 4:5 crop) and `spa-tile-400|800.webp` from the library photo spa-facial (a face massage on a towelled table, 4:5 from
+the centre), both docs/PHOTOS.md photos Rashid chose from Pexels or Unsplash on 26 Oct 2026, because the earlier tiles
+read as a bench and a hand on skin at tile size. The /for cards of those trades show the same library photos. The
+nail-salon wide file stays for the nail salon page's hero; Home's Friday post picture now uses the hair-salon wide photo.

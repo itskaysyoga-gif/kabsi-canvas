@@ -17,6 +17,7 @@ import { PriceCard, TrustLines } from "@/components/marketing/v31";
 import { Img, PHOTOS } from "./photos";
 import { PubImg } from "@/components/marketing/life";
 import { HERO_LIBRARY, TRADE_SECOND, TRADE_WIDE } from "@/components/marketing/industry-photos";
+import type { PubPhoto } from "@/components/marketing/public-photos";
 import { ScanBox } from "./scan-box";
 import { SiteLink } from "./site-link";
 import { Marked } from "./highlight";
@@ -76,10 +77,14 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
         data-hero
         className="relative isolate z-10 bg-surface-0"
       >
-        <div className="container-kb grid gap-10 pt-6 pb-14 md:pt-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:gap-16 lg:pt-14 lg:pb-20">
+        <div className="container-kb grid gap-10 pt-6 pb-14 md:pt-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:gap-16 lg:pt-14 lg:pb-12">
           <div className="max-w-[40rem]">
             <Breadcrumb current={i.plural} />
-            <h1 id="hero-title" className="mt-4 text-display text-balance">
+            {/* SITE-7: "Taken care of." stays on one line, so the bar never splits into two blocks. */}
+            <h1
+              id="hero-title"
+              className="mt-4 text-display text-balance [&_.d9-mark]:whitespace-nowrap"
+            >
               <Marked text={h1} mark="Taken care of." />
             </h1>
             <Lead className="mt-4 sm:mt-5">
@@ -118,7 +123,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
                   />
                 )}
               </div>
-              <div className="relative mx-3 -mt-16 rounded-panel border border-line bg-surface-1 p-4 shadow-float sm:mx-6 sm:-mt-20 sm:p-6">
+              <div className="relative mx-3 -mt-8 rounded-panel border border-line bg-surface-1 p-4 shadow-float sm:mx-6 sm:-mt-20 sm:p-6 lg:-mt-10">
                 <h2 id="review-h" className="text-small font-bold text-text-2">
                   {`A review at ${i.example.business}, and the reply Kabsi writes`}
                 </h2>
@@ -177,10 +182,10 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
         </Band>
       )}
 
-      <Band id="price" tone="ivory" inner="pb-8 sm:pb-10 lg:pb-12">
+      <Band id="price" tone="ivory" inner="pt-10 pb-8 sm:pt-12 sm:pb-10 lg:pt-16 lg:pb-12">
         <Head id="price" title="One price." />
         {/* The price card of Home and Pricing: TRIAL_LINE beside the button, the included list, the not included line. */}
-        <PriceCard compact className="mt-8" />
+        <PriceCard className="mt-8" />
         {/* SITE-5: what to know first sits under the price, not on a band of its own. */}
         <TrustLines />
       </Band>
@@ -235,7 +240,7 @@ function TradeWorkBand({ industry: i }: { industry: Industry }) {
     <Band
       id="trade"
       tone="ivory"
-      inner="lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start lg:gap-16"
+      inner="lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:gap-16 lg:pt-16"
     >
       <div>
         <Head id="trade" title={`What Kabsi does for a ${i.name}.`} />
@@ -251,8 +256,8 @@ function TradeWorkBand({ industry: i }: { industry: Industry }) {
           ))}
         </ol>
       </div>
-      <figure className="mx-auto mt-10 w-full max-w-[18rem] lg:mt-0 lg:max-w-[21rem]">
-        <div className="kb-shot lg:max-w-[21rem]">
+      <figure className="mx-auto mt-10 w-full max-w-[18rem] lg:mt-0 lg:max-w-[18rem]">
+        <div className="kb-shot lg:max-w-[18rem]">
           <img
             src={`/screens/trade-${i.slug}-560.webp`}
             alt={`Kabsi's Home screen for ${i.example.business}, an example business: ${w.hours}, this week's post and a review reply, each waiting for a yes`}
@@ -290,9 +295,7 @@ const POST_STEPS = [
  * card over it. Every word is the same on every page apart from the example business.
  */
 /** SITE-5: a library photo that fits the trade's Example post better than its second photo (cooks for a special). */
-const POST_LIBRARY: Record<string, (typeof PHOTOS)[keyof typeof PHOTOS]> = {
-  restaurant: PHOTOS.restaurantCooks,
-};
+const POST_LIBRARY: Record<string, (typeof PHOTOS)[keyof typeof PHOTOS]> = {};
 
 function PhotoPost({ industry: i }: { industry: Industry }) {
   return (
@@ -332,7 +335,7 @@ function PhotoPost({ industry: i }: { industry: Industry }) {
             className="aspect-[4/5] w-full rounded-panel object-cover shadow-float sm:aspect-[4/3]"
           />
         )}
-        <figcaption className="theme-light relative mx-3 -mt-20 max-w-[24rem] rounded-panel border border-line bg-surface-1 p-4 text-text-1 shadow-float sm:mx-6 sm:p-5">
+        <figcaption className="theme-light relative mx-3 -mt-20 max-w-[24rem] rounded-panel border border-line bg-surface-1 p-4 text-text-1 shadow-float sm:mx-6 sm:p-5 lg:mx-0">
           <span className="flex items-center gap-2">
             <KabsiMark ring={false} className="size-7" />
             <span className="flex-1 text-small font-bold">Post ready</span>
@@ -375,6 +378,13 @@ function Breadcrumb({ current }: { current: string }) {
   );
 }
 
+/** SITE-7: a card photo other than the trade's first photo, where the first does not read as the trade at card size. */
+const CARD_LIBRARY: Record<string, (typeof PHOTOS)[keyof typeof PHOTOS]> = {
+  restaurant: PHOTOS.restaurantDining,
+  "nail-salon": PHOTOS.nailTechnician,
+  "spa-and-massage": PHOTOS.spaFacial,
+};
+
 /** One trade as a photo card: the wide photo, its name and one line. */
 function TradeCard({
   industry: i,
@@ -405,7 +415,7 @@ function TradeCard({
           row ? "w-28 shrink-0 sm:aspect-[3/2] sm:w-auto" : "aspect-[3/2]",
         )}
       >
-        {TRADE_WIDE[i.slug] ? (
+        {TRADE_WIDE[i.slug] && !CARD_LIBRARY[i.slug] ? (
           <PubImg
             photo={TRADE_WIDE[i.slug]!}
             sizes={sizes}
@@ -415,11 +425,11 @@ function TradeCard({
           />
         ) : (
           <Img
-            photo={i.photos[0]}
+            photo={CARD_LIBRARY[i.slug] ?? i.photos[0]}
             sizes={sizes}
             decorative
             priority={priority}
-            style={{ objectPosition: i.focus ?? "50% 50%" }}
+            style={{ objectPosition: CARD_LIBRARY[i.slug] ? "50% 50%" : (i.focus ?? "50% 50%") }}
             className="absolute inset-0 size-full object-cover transition-transform duration-400 ease-kb group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
           />
         )}
@@ -454,6 +464,14 @@ export const FOR_HERO = {
  */
 const COLLAGE = ["hair-salon", "restaurant", "barbershop", "auto-repair"] as const;
 
+/** SITE-7: the collage tile where the usual pick does not read as the trade at tile size: a stylist washing hair for
+ * the hair salon, a mechanic's hands at work for auto repair (each page's own second photo). The /for card shows a
+ * different photo, so the two still do not repeat. */
+const COLLAGE_PUB: Partial<Record<string, PubPhoto>> = {
+  "hair-salon": TRADE_SECOND["hair-salon"],
+  "auto-repair": TRADE_SECOND["auto-repair"],
+};
+
 function ForCollage({ all }: { all: Industry[] }) {
   const picks = COLLAGE.map((s) => all.find((i) => i.slug === s)).filter((i): i is Industry => !!i);
   return (
@@ -466,13 +484,22 @@ function ForCollage({ all }: { all: Industry[] }) {
           >
             {/* SITE-6: never the photo the card below shows for the same trade (the card takes TRADE_WIDE, else
                 the trade's first photo), so the collage and the list do not repeat each other. */}
-            <Img
-              photo={TRADE_WIDE[i.slug] ? i.photos[0] : i.photos[1]}
-              sizes="(min-width: 1024px) 15rem, 45vw"
-              priority={n < 2}
-              style={{ objectPosition: TRADE_WIDE[i.slug] ? (i.focus ?? "50% 50%") : "50% 40%" }}
-              className="aspect-[4/3] w-full object-cover transition-transform duration-400 ease-kb group-hover:scale-[1.04] motion-reduce:group-hover:scale-100 lg:aspect-[4/5]"
-            />
+            {COLLAGE_PUB[i.slug] ? (
+              <PubImg
+                photo={COLLAGE_PUB[i.slug]!}
+                sizes="(min-width: 1024px) 15rem, 45vw"
+                priority={n < 2}
+                className="aspect-[4/5] w-full object-cover transition-transform duration-400 ease-kb group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
+              />
+            ) : (
+              <Img
+                photo={TRADE_WIDE[i.slug] ? i.photos[0] : i.photos[1]}
+                sizes="(min-width: 1024px) 15rem, 45vw"
+                priority={n < 2}
+                style={{ objectPosition: TRADE_WIDE[i.slug] ? (i.focus ?? "50% 50%") : "50% 40%" }}
+                className="aspect-[4/5] w-full object-cover transition-transform duration-400 ease-kb group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
+              />
+            )}
             <span className="absolute start-2 bottom-2 rounded-full bg-surface-0 px-3 py-1 text-label font-semibold text-text-1 shadow-rest">
               {i.plural}
             </span>
@@ -530,7 +557,7 @@ export function ForIndex() {
                   placeholder="For example, florist"
                   autoComplete="off"
                   aria-controls="for-list"
-                  className="h-12 w-full rounded-input border border-line-strong bg-surface-0 ps-9 pe-3 text-body placeholder:text-text-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                  className="h-11 w-full rounded-full border border-line bg-surface-1 ps-9 pe-4 text-body shadow-rest placeholder:text-text-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                 />
               </div>
             </div>

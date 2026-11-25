@@ -21,7 +21,7 @@ import { ButtonLink, ExampleBadge, Faq, KabsiMark } from "@/components/kabsi/ui"
 import { Num, PubImg, ScreenRow, TradeStrip, useCountOnce, useReducedMotion } from "./life";
 import { PUB } from "./public-photos";
 import { SiteLink } from "@/components/kabsi/site-link";
-import { Band, CheckBox, ClosingDark, Head, Lead, MarkRow, PageTop, Sec, Ticks } from "./kit";
+import { Band, CheckBox, ClosingDark, Head, Lead, MarkRow } from "./kit";
 import {
   CLOSING,
   EXAMPLE_BUSINESS,
@@ -30,8 +30,6 @@ import {
   HOME_FAQ,
   HOME_HERO,
   PRICE,
-  PRICING,
-  PRICING_FAQ,
   PROBLEM,
   PROOF,
   START,
@@ -42,7 +40,7 @@ import {
   type ChatTurn,
 } from "./v31-data";
 
-export { CheckBox, PageTop, Sec, Ticks } from "./kit";
+export { CheckBox, Sec } from "./kit";
 
 /* ---------- The chat, in Kabsi's own look ---------- */
 
@@ -418,7 +416,7 @@ function Week() {
         {WEEK.days.map((d, i) => (
           <li
             key={d.day}
-            className="relative border-s-2 border-line ps-5 lg:border-s-0 lg:border-t-2 lg:ps-0 lg:pt-5"
+            className="relative flex flex-col border-s-2 border-line ps-5 lg:border-s-0 lg:border-t-2 lg:ps-0 lg:pt-5"
           >
             <span
               aria-hidden
@@ -427,7 +425,8 @@ function Week() {
             <p className="text-small font-bold text-text-2">{d.day}</p>
             <h3 className="mt-1 text-title">{d.title}</h3>
             <p className="mt-1 text-read text-text-2">{d.text}</p>
-            <div className="mt-4 max-w-[18rem]">
+            {/* SITE-7: the pictures sit at the foot of each day on a computer, so the row ends on one line. */}
+            <div className="mt-4 max-w-[18rem] lg:mt-auto lg:pt-4">
               <DayPicture n={i} />
             </div>
           </li>
@@ -592,22 +591,15 @@ function Proof() {
 }
 
 /**
- * The one price card, full width: the price and the button on the left, what is included on the right. SITE-5: Home
- * and the industry pages show it `compact` (the price, the terms, the button and a link to Pricing), so the plan's full
- * lists live on Pricing only.
+ * The one price card, full width: the price and the button on the left; the terms, one line about the plan and a link to
+ * Pricing on the right. SITE-5: Home and the industry pages show it this way, so the plan's full lists live on Pricing
+ * only. SITE-7: the full variant (with the lists) was never shown and is gone.
  */
-export function PriceCard({
-  className,
-  compact = false,
-}: {
-  className?: string;
-  compact?: boolean;
-}) {
+export function PriceCard({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "grid gap-8 rounded-panel border border-line bg-surface-1 p-6 shadow-lift sm:p-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16",
-        compact && "lg:items-center",
+        "grid gap-8 rounded-panel border border-line bg-surface-1 p-6 shadow-lift sm:p-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16 lg:items-center",
         className,
       )}
     >
@@ -619,28 +611,17 @@ export function PriceCard({
             {PRIMARY_CTA}
           </ButtonLink>
         </div>
-        {!compact && <p className="mt-4 max-w-[44ch] text-read text-text-2">{PRICE.terms}</p>}
       </div>
-      {compact ? (
-        <div>
-          <p className="max-w-[44ch] text-read text-text-1">{PRICE.terms}</p>
-          <p className="mt-4 max-w-[44ch] text-read text-text-2">{ALSO_PLAN}</p>
-          <SiteLink
-            to="/pricing"
-            className="press mt-4 inline-flex min-h-11 items-center gap-1.5 text-read font-semibold text-text-1 underline decoration-text-3 underline-offset-4 hover:decoration-text-1"
-          >
-            Your first 14 days, day by day
-          </SiteLink>
-        </div>
-      ) : (
-        <div>
-          <p className="text-small font-bold text-text-2">Included</p>
-          <Ticks items={PRICING.included} cols className="mt-3" />
-          <p className="mt-6 border-t border-line pt-4 text-read text-text-2">
-            {PRICING.notIncluded}
-          </p>
-        </div>
-      )}
+      <div>
+        <p className="max-w-[44ch] text-read text-text-1">{PRICE.terms}</p>
+        <p className="mt-4 max-w-[44ch] text-read text-text-2">{ALSO_PLAN}</p>
+        <SiteLink
+          to="/pricing"
+          className="press mt-4 inline-flex min-h-11 items-center gap-1.5 text-read font-semibold text-text-1 underline decoration-text-3 underline-offset-4 hover:decoration-text-1"
+        >
+          Your first 14 days, day by day
+        </SiteLink>
+      </div>
     </div>
   );
 }
@@ -680,7 +661,7 @@ export function V31Home() {
       <Proof />
       <Band id="price" tone="warm">
         <Head id="price" title={PRICE.title} />
-        <PriceCard compact className="mt-8" />
+        <PriceCard className="mt-8" />
       </Band>
       <Band id="trust" tone="ivory" inner="py-10 sm:py-14 lg:py-16">
         <h2 id="trust-h" className="text-h2 text-balance">

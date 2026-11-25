@@ -133,3 +133,99 @@ export const WATCHED = [
   { title: "Phone", text: "The number customers call." },
   { title: "Website and booking link", text: "Checked every day, so a broken link is caught." },
 ] as const;
+
+/* SITE-7: moved here from v31-data.ts, so Home's script does not carry the words only these pages show. */
+
+/* ---------- How it works (blueprint section 5) ---------- */
+
+export const HOW = {
+  title: "How Kabsi works.",
+  mark: "works.",
+  line: "Kabsi prepares the work. You approve it on WhatsApp or email. Nothing goes to Google without your yes.",
+  steps: [
+    {
+      title: "Connect Google.",
+      text: "Add Kabsi as a manager on your Google Business Profile. Kabsi never asks for your password, and you can remove it any time.",
+    },
+    {
+      title: "Choose how you hear from Kabsi.",
+      text: "WhatsApp or email. That is where replies, fixes and posts arrive for your yes.",
+    },
+    {
+      title: "Your first day.",
+      text: "Every unanswered review from the last 90 days arrives with a reply ready, plus the first check of your listing and links.",
+    },
+    {
+      title: "A normal week.",
+      text: "A reply for each new review, an alert if a bad one comes in, and a fix ready if something on your listing changed. A short summary every week.",
+    },
+    {
+      title: "Your monthly report.",
+      text: "What Kabsi did, what it found, and what Google shows for your profile, kept apart so you can see each.",
+    },
+  ],
+  ask: "You can also message Kabsi any time: change your hours, send a photo to post, or ask for a shorter reply.",
+} as const;
+
+/* ---------- About and Security (shortened to the same message) ---------- */
+
+export const ABOUT = {
+  title: "Built for owners who have no time for Google.",
+  mark: "no time for Google.",
+  line: "Kabsi looks after your Google business profile and asks for your yes on WhatsApp or email.",
+  why: [
+    "Owners run the business all day. The Google profile waits.",
+    "Reviews go unanswered and details on Google go out of date.",
+    "Kabsi does that work and brings each piece to the owner for a yes.",
+  ],
+  who: "Kabsi is run by Rashid Abou Hamzy, who works in digital marketing and saw the same gap at every local business: unanswered reviews and Google details out of date.",
+} as const;
+
+export const SECURITY = {
+  title: "Your Google profile stays yours.",
+  mark: "stays yours.",
+  line: "Kabsi works as a manager you add. It never sees your password and publishes nothing without your yes.",
+  answers: [
+    {
+      q: "Does Kabsi need my password?",
+      a: "No. You add Kabsi as a manager in your Google profile.",
+    },
+    { q: "What can Kabsi change?", a: "Only what you approve: a reply, a fix, a post or a photo." },
+    {
+      q: "Does Kabsi contact my customers?",
+      a: "No, never. It stores no customer contact details.",
+    },
+    {
+      q: "How do I remove Kabsi?",
+      a: "Remove it as a manager in your Google profile. Access ends at once.",
+    },
+  ],
+  stored: {
+    title: "What Kabsi keeps",
+    items: [
+      "Your business details, your settings and the work Kabsi did.",
+      "Kabsi's database is in Frankfurt, Germany.",
+      "Card payments will be processed by Creem, our merchant of record.",
+      "No Google password and no customer contact list.",
+    ],
+  },
+} as const;
+
+export const PRICING = {
+  title: "One plan. Everything Kabsi does.",
+  mark: "Everything Kabsi does.",
+  line: "One price for one location, with nothing extra to unlock. You approve every change.",
+  included: [
+    "A reply to every review",
+    "Alerts for bad reviews",
+    "Your listing checked every day",
+    "Website and booking link checked every day",
+    "Holiday hours",
+    "Up to 2 posts a month and photos from your phone",
+    "Review link, QR code and counter card tools",
+    "A weekly summary and a monthly report",
+  ],
+  notIncluded:
+    "Kabsi does not message your customers, run ads, build websites or promise rankings.",
+  free: "Google Business Profile is free from Google. Kabsi is an independent paid service.",
+} as const;
