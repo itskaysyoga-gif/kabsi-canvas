@@ -456,7 +456,7 @@ function JobExample({ id }: { id: JobId }) {
   if (id === "reviews")
     return (
       <div className="space-y-2 text-small">
-        <p className="flex items-center gap-1" aria-label={`${e.review.stars} stars`}>
+        <p className="flex items-center gap-1" role="img" aria-label={`${e.review.stars} stars`}>
           {Array.from({ length: 5 }, (_, i) => (
             <Star
               key={i}
