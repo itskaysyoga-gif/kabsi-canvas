@@ -183,8 +183,8 @@ function ProfilePage() {
           <Panel title="Details" id="details">
             {rows.length && rows.every((r) => r.status === "Not read yet") ? (
               <p className="text-body text-text-2">
-                Kabsi has not read your details from Google yet. It checks every day, and your
-                name, phone, hours and the rest show here after the next check.
+                Kabsi has not read your details from Google yet. It checks every day, and your name,
+                phone, hours and the rest show here after the next check.
               </p>
             ) : (
               <Details rows={rows} />
