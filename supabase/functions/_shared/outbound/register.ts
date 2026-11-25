@@ -2,7 +2,7 @@
 // master plan 30.39). Pure: the caller fetches the file and the pages. Companies House comes from the register itself
 // (30.39 item 12): Harvey reads Companies House's free monthly Basic Company Data file (Open Government Licence) and
 // writes company_status and company_status_date (the file's date); there is no Companies House API key.
-import { industryGroup, INDUSTRY_ORDER, knownIndustry, nameOk, OPEN_COUNTRIES, ownDomain } from "./rules.ts";
+import { industryGroup, industryOpen, INDUSTRY_ORDER, knownIndustry, nameOk, OPEN_COUNTRIES, ownDomain, timeZoneOf } from "./rules.ts";
 
 /** RFC 4180 CSV: quoted fields, doubled quotes, newlines inside quotes. */
 export function parseCsv(text: string): Record<string, string>[] {
@@ -36,7 +36,7 @@ export function parseCsv(text: string): Record<string, string>[] {
 export type Candidate = {
   company_id: string; business_name: string; industry: string; country: string; city: string; website: string;
   email: string; email_page_url: string; company_type: string; company_number: string;
-  company_status: string; company_status_date: string;
+  company_status: string; company_status_date: string; time_zone: string;
 };
 
 /** The Basic Company Data file a UK status is read from may be at most this many days old (30.39 item 12). */
@@ -65,17 +65,24 @@ export function companyRefusal(r: Record<string, string>, today: string): string
   return null;
 }
 
+/** A register row whose business_status says it is not open (Harvey marks closed businesses). Empty means open. */
+const NOT_OPEN = /^(closed|permanently[ _]closed|temporarily[ _]closed|dissolved|inactive)$/i;
+
 /** Why a register row cannot be a candidate, or null. Suppression and the page are checked later. */
 export function rowRefusal(r: Record<string, string>, openCountries: readonly string[], today: string): string | null {
-  // Only the UK can ever open (30.45 item 5): a country outside OPEN_COUNTRIES is closed whatever the settings hold.
+  // Only the US and the UK can ever open (OUTBOUND-3): any other country is closed whatever the settings hold.
   if (!(OPEN_COUNTRIES as readonly string[]).includes(r.country) || !openCountries.includes(r.country)) return "country_closed";
-  if (!knownIndustry(r.industry)) return "industry";
+  if (!knownIndustry(r.industry) || !industryOpen(r.industry, r.country)) return "industry";
+  if (NOT_OPEN.test(String(r.business_status ?? "").trim())) return "not_open";
   if (!nameOk(r.business_name)) return "name";
   if (!r.city || r.city.length > 60) return "city";
   if (!/^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/.test(r.email)) return "email";
   if (!ownDomain(r.email, r.website)) return "not_own_domain";
   if (!/^https?:\/\//i.test(r.email_page_url)) return "no_source_page";
-  // Every row is a UK row from here: the registered company and Companies House checks always apply.
+  if (!timeZoneOf(r)) return "no_time_zone";
+  // The US: any open business with an email on its own website's domain; CAN-SPAM needs no company check.
+  if (r.country === "US") return null;
+  // The UK: the registered company and Companies House checks always apply (PECR).
   if (r.company_type !== "registered company") return "not_registered_company";
   if (!/^[A-Z0-9]{8}$/i.test(r.company_number)) return "no_company_number";
   // Limited partnerships (LP England and Wales, SL Scotland, NL Northern Ireland) are partnerships, not companies:
@@ -86,9 +93,10 @@ export function rowRefusal(r: Record<string, string>, openCountries: readonly st
   return null;
 }
 
-/** The queue (Outbound 2, R-151 item 5): one beauty, one food, and so on. Inside each group the order stays as before:
- *  the industry order, then Harvey's quality score, then the register's order. When one group runs out the other
- *  continues. Rows outside the first tier come last, where rowRefusal counts them as "industry". */
+/** The queue (Outbound 2, R-151 item 5; OUTBOUND-3 adds the US service group): one beauty, one food, one service, and
+ *  so on. Inside each group the order stays as before: the industry order, then Harvey's quality score, then the
+ *  register's order. When a group runs out the others continue. Rows outside the open industries come last, where
+ *  rowRefusal counts them as "industry". */
 export function ordered(rows: Record<string, string>[]): Record<string, string>[] {
   const rank = (i: string) => {
     const k = INDUSTRY_ORDER.indexOf(i);
@@ -98,13 +106,11 @@ export function ordered(rows: Record<string, string>[]): Record<string, string>[
     .map((r, i) => ({ r, i }))
     .sort((a, b) => rank(a.r.industry) - rank(b.r.industry) || Number(b.r.quality_score || 0) - Number(a.r.quality_score || 0) || a.i - b.i)
     .map((x) => x.r);
-  const beauty = sorted.filter((r) => industryGroup(r.industry) === "beauty");
-  const food = sorted.filter((r) => industryGroup(r.industry) === "food");
+  const groups = (["beauty", "food", "service"] as const).map((g) => sorted.filter((r) => industryGroup(r.industry) === g));
   const rest = sorted.filter((r) => industryGroup(r.industry) === null);
   const out: Record<string, string>[] = [];
-  for (let i = 0; i < Math.max(beauty.length, food.length); i++) {
-    if (i < beauty.length) out.push(beauty[i]);
-    if (i < food.length) out.push(food[i]);
+  for (let i = 0; i < Math.max(...groups.map((g) => g.length)); i++) {
+    for (const g of groups) if (i < g.length) out.push(g[i]);
   }
   return [...out, ...rest];
 }
@@ -112,8 +118,8 @@ export function ordered(rows: Record<string, string>[]): Record<string, string>[
 export function toCandidate(r: Record<string, string>): Candidate {
   return {
     company_id: r.company_id, business_name: r.business_name.trim(), industry: r.industry, country: r.country, city: r.city.trim(),
-    website: r.website, email: r.email.trim().toLowerCase(), email_page_url: r.email_page_url, company_type: r.company_type,
-    company_number: r.company_number.toUpperCase(), company_status: String(r.company_status ?? "").trim().toLowerCase(),
-    company_status_date: String(r.company_status_date ?? "").trim(),
+    website: r.website, email: r.email.trim().toLowerCase(), email_page_url: r.email_page_url, company_type: String(r.company_type ?? ""),
+    company_number: String(r.company_number ?? "").toUpperCase(), company_status: String(r.company_status ?? "").trim().toLowerCase(),
+    company_status_date: String(r.company_status_date ?? "").trim(), time_zone: timeZoneOf(r) ?? "",
   };
 }

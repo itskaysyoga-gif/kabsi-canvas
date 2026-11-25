@@ -5,6 +5,8 @@ import { admin, internalSecret } from "../kabsi.ts";
 import type { EventRow, Matched } from "./inbox.ts";
 import type { NewDraft, Settings } from "./prepare.ts";
 import type { DueMessage } from "./send.ts";
+import type { DnsResult } from "./dns.ts";
+import { postalAddress } from "./rules.ts";
 
 export const HARVEY_REPO = "itskaysyoga-gif/kabsi-harvey";
 export const SENDER = { name: "Rashid Abou Hamzy", address: "rashid@getkabsi.com" };
@@ -12,6 +14,32 @@ export const SENDER = { name: "Rashid Abou Hamzy", address: "rashid@getkabsi.com
 export function testRecipients(): string[] {
   return String(Deno.env.get("OUTBOUND_TEST_RECIPIENTS") ?? "").split(/[,\s]+/).map((x) => x.trim().toLowerCase())
     .filter((x) => /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/.test(x));
+}
+
+/** The sender's postal address for US footers (CAN-SPAM), from the Supabase secret OUTBOUND_POSTAL_ADDRESS that Rashid
+ *  sets; null when missing or not a valid address, and then nothing sends. */
+export function postal(): string | null {
+  return postalAddress(Deno.env.get("OUTBOUND_POSTAL_ADDRESS") ?? "");
+}
+
+/** The last DNS reading, for the staff page. Never blocks a send by failing. */
+export async function saveDns(r: DnsResult) {
+  const { error } = await admin().from("outbound_settings")
+    .update({ dns_ok: r.ok, dns_problem: r.problem, dns_checked_at: new Date().toISOString() }).eq("id", true);
+  if (error) throw new Error(`saveDns: ${error.message}`);
+}
+
+/** The kill gate (30.19 section 5): ends Outbound and alerts Rashid when the first 300 emails led to fewer than 3 checks
+ *  or trials. True when Outbound is (now) ended. */
+export async function killGate(): Promise<boolean> {
+  const { data, error } = await admin().rpc("outbound_check_kill_gate");
+  if (error) throw new Error(`killGate: ${error.message}`);
+  return data === "ended";
+}
+
+export async function saveMailTester(fields: { mail_tester_address?: string | null; mail_tester_sent_at?: string | null; mail_tester_score?: number | null; mail_tester_at?: string | null }) {
+  const { error } = await admin().from("outbound_settings").update(fields).eq("id", true);
+  if (error) throw new Error(`saveMailTester: ${error.message}`);
 }
 
 export async function settings(): Promise<Settings & { next_send_at: string | null }> {
@@ -104,7 +132,7 @@ export async function foundingInvite(): Promise<{ slug: string | null; left: num
 /** Approved messages that are due, replies first, oldest first, with their business and their Email 1. */
 export async function due(now: Date, testOnly: boolean): Promise<DueMessage[]> {
   let q = admin().from("outbound_messages")
-    .select("id, prospect_id, parent_id, kind, to_address, subject, body, send_after, in_reply_to, references_ids, prospect:outbound_prospects!inner(email, email_domain, time_zone, test, status), parent:outbound_messages!parent_id(status, message_id, sent_at)")
+    .select("id, prospect_id, parent_id, kind, to_address, subject, body, send_after, in_reply_to, references_ids, prospect:outbound_prospects!inner(email, email_domain, time_zone, test, status, country), parent:outbound_messages!parent_id(status, message_id, sent_at)")
     .eq("status", "approved").is("claimed_at", null).lte("send_after", now.toISOString());
   if (testOnly) q = q.eq("prospect.test", true);
   const { data, error } = await q.order("send_after").limit(20);

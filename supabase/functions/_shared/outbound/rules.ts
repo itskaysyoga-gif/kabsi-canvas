@@ -53,30 +53,92 @@ export function ownDomain(email: string, website: string): boolean {
 }
 
 // ─── industries, countries, time zones
-/** The eight first tier industries (lane R, R-151 item 5, master plan 30.51), Harvey's codes as an owner would say them,
- *  plural, for "looking at <kind> in <city>". Every other industry is refused (register.ts rowRefusal "industry"). */
+/** The eight first tier industries (lane R, R-151 item 5, master plan 30.51) and, for the US only, auto repair and
+ *  cleaners (OUTBOUND-3). Harvey's codes as an owner would say them, plural, for "looking at <kind> in <city>". Every
+ *  other industry is refused (register.ts rowRefusal "industry"). */
 export const KIND_WORDS: Record<string, string> = {
   "hair salon": "hair salons", "barbershop": "barbers", "beauty salon": "beauty salons", "nail salon": "nail salons",
   "lash and brow studio": "lash and brow studios", "spa and massage": "spas and massage studios",
-  "restaurant": "restaurants", "cafe": "cafes",
+  "restaurant": "restaurants", "cafe": "cafes", "auto repair": "auto repair shops", "cleaners": "cleaners",
 };
+/** US wording where it differs (US spelling for US recipients). */
+const KIND_WORDS_US: Record<string, string> = { "barbershop": "barbershops" };
+export function kindWords(industry: string, country: string): string {
+  return (country === "US" && Object.hasOwn(KIND_WORDS_US, industry) ? KIND_WORDS_US[industry] : KIND_WORDS[industry]) ?? "";
+}
 /** The six salon industries, in lane R's order (R-142 decision 4c): the beauty group. */
 export const SALON_INDUSTRIES = ["hair salon", "barbershop", "beauty salon", "nail salon", "lash and brow studio", "spa and massage"] as const;
 /** The food group (30.50 item 13: food joins the first tier), in the order the queue used before. */
 export const FOOD_INDUSTRIES = ["cafe", "restaurant"] as const;
-/** The order inside each group. The queue alternates the groups, one beauty then one food (register.ts ordered). */
-export const INDUSTRY_ORDER: string[] = [...SALON_INDUSTRIES, ...FOOD_INDUSTRIES];
-export type IndustryGroup = "beauty" | "food";
+/** The service group, US only (OUTBOUND-3). */
+export const SERVICE_INDUSTRIES = ["auto repair", "cleaners"] as const;
+/** The order inside each group. The queue takes the groups in turn, one beauty, one food, one service (register.ts ordered). */
+export const INDUSTRY_ORDER: string[] = [...SALON_INDUSTRIES, ...FOOD_INDUSTRIES, ...SERVICE_INDUSTRIES];
+export type IndustryGroup = "beauty" | "food" | "service";
 export function industryGroup(industry: string): IndustryGroup | null {
   if ((SALON_INDUSTRIES as readonly string[]).includes(industry)) return "beauty";
   if ((FOOD_INDUSTRIES as readonly string[]).includes(industry)) return "food";
+  if ((SERVICE_INDUSTRIES as readonly string[]).includes(industry)) return "service";
   return null;
 }
 
-/** The only country Outbound may ever write to: UK registered companies active on Companies House (30.45 item 5). The
- *  UAE and every other country stay off; the database's check on outbound_settings.open_countries says the same. */
-export const OPEN_COUNTRIES = ["GB"] as const;
+/** The only countries Outbound may ever write to (OUTBOUND-3, the pilot, the US first): the US (any open business with an
+ *  email on its own website's domain, CAN-SPAM) and the UK (registered companies active on Companies House, PECR).
+ *  Every other country stays off; the database's check on outbound_settings.open_countries says the same. */
+export const OPEN_COUNTRIES = ["US", "GB"] as const;
+/** The industries each open country takes. */
+export const COUNTRY_INDUSTRIES: Record<string, readonly string[]> = {
+  GB: [...SALON_INDUSTRIES, ...FOOD_INDUSTRIES],
+  US: [...SALON_INDUSTRIES, ...FOOD_INDUSTRIES, ...SERVICE_INDUSTRIES],
+};
+export const industryOpen = (industry: string, country: string) =>
+  knownIndustry(industry) && (COUNTRY_INDUSTRIES[country] ?? []).includes(industry);
 export const TIME_ZONES: Record<string, string> = { GB: "Europe/London" };
+
+/** The time zones a US business may be in (the register's own time_zone column, when Harvey writes one). */
+export const US_TIME_ZONES = [
+  "America/New_York", "America/Detroit", "America/Indiana/Indianapolis", "America/Kentucky/Louisville", "America/Chicago",
+  "America/Denver", "America/Boise", "America/Phoenix", "America/Los_Angeles", "America/Anchorage", "Pacific/Honolulu",
+] as const;
+/** Each state's main time zone, for a register row with a state and no time zone. A state split across zones takes the
+ *  zone most of its people live in; a business near the line may get its window an hour off, still inside the day. */
+export const US_STATE_ZONES: Record<string, string> = Object.fromEntries([
+  ["America/New_York", "CT DE DC FL GA IN KY ME MD MA MI NH NJ NY NC OH PA RI SC VT VA WV"],
+  ["America/Chicago", "AL AR IL IA KS LA MN MS MO NE ND OK SD TN TX WI"],
+  ["America/Denver", "CO ID MT NM UT WY"],
+  ["America/Phoenix", "AZ"],
+  ["America/Los_Angeles", "CA NV OR WA"],
+  ["America/Anchorage", "AK"],
+  ["Pacific/Honolulu", "HI"],
+].flatMap(([zone, states]) => states.split(" ").map((s) => [s, zone])));
+
+/** The recipient's time zone, or null when it cannot be known (the row is then refused). */
+export function timeZoneOf(r: { country?: string; time_zone?: string; state?: string; region?: string }): string | null {
+  const country = String(r.country ?? "");
+  if (country === "GB") return TIME_ZONES.GB;
+  if (country !== "US") return null;
+  const tz = String(r.time_zone ?? "").trim();
+  if ((US_TIME_ZONES as readonly string[]).includes(tz)) return tz;
+  const st = String(r.state ?? r.region ?? "").trim().toUpperCase();
+  return Object.hasOwn(US_STATE_ZONES, st) ? US_STATE_ZONES[st] : null;
+}
+
+// ─── CAN-SPAM (OUTBOUND-3): the sender's valid postal address in every US footer
+/** A postal address Kabsi may print in a footer: one line, 10 to 200 characters, with a number, no house style break and
+ *  nothing that reads as a link (write "PO Box", not "P.O. Box"). Read from the Supabase secret OUTBOUND_POSTAL_ADDRESS,
+ *  which Rashid sets; with none set, no US email is drafted and nothing is sent. */
+export function postalAddressOk(address: unknown): address is string {
+  if (typeof address !== "string") return false;
+  const a = address.trim();
+  return a.length >= 10 && a.length <= 200 && !/[\r\n]/.test(a) && /\d/.test(a) && houseStyleOk(a) && linksIn(a).length === 0 &&
+    /^[\p{Script=Latin}\p{N}\s#&'.,()\/-]+$/u.test(a);
+}
+/** The secret's value, trimmed, or null when it is not a valid address. */
+export function postalAddress(raw: unknown): string | null {
+  if (typeof raw !== "string" || /[\r\n]/.test(raw.trim())) return null;
+  const a = raw.trim().replace(/[ \t]+/g, " ");
+  return postalAddressOk(a) ? a : null;
+}
 
 // ─── house style
 /** No em or en dashes and no exclamation marks (CLAUDE.md). */
@@ -123,6 +185,8 @@ const BOOKING_SYSTEMS: [string[], string][] = [
   [["opentable.com", "opentable.co.uk"], "OpenTable"], [["resdiary.com"], "ResDiary"], [["sevenrooms.com"], "SevenRooms"],
   [["designmynight.com"], "DesignMyNight"], [["tablein.com"], "Tablein"], [["quandoo."], "Quandoo"], [["thefork."], "TheFork"],
   [["dentally.co", "dentally.com"], "Dentally"], [["cliniko.com"], "Cliniko"], [["jane.app"], "Jane"],
+  [["getjobber.com", "clienthub.getjobber"], "Jobber"], [["housecallpro.com"], "Housecall Pro"], [["bookingkoala.com"], "BookingKoala"],
+  [["launch27.com"], "Launch27"], [["tekmetric.com"], "Tekmetric"], [["shopmonkey.io"], "Shopmonkey"],
 ];
 
 /** The values of href and src attributes, found by scanning, not by a pattern over the whole page. */
@@ -231,15 +295,16 @@ export function updatedRecently(html: string, today: Date): boolean {
 }
 
 /** The detail sentences of docs/COPY.md 65. A restaurant or cafe takes table bookings and its Instagram shows its food
- *  (Outbound 2); the other sentences read right for both groups. */
-export function pickDetail(html: string, today: Date, group: IndustryGroup = "beauty"): Detail | null {
+ *  (Outbound 2); a US recipient reads "your hours" (OUTBOUND-3, US wording); the other sentences read right for every group. */
+export function pickDetail(html: string, today: Date, group: IndustryGroup = "beauty", country = "GB"): Detail | null {
   const system = bookingSystem(html);
   if (system && houseStyleOk(system)) {
     const what = group === "food" ? "table bookings" : "bookings";
     return { kind: "booking", sentence: `I saw you take ${what} through ${system}, so customers find you online already.` };
   }
   if (hasHours(html)) {
-    return { kind: "hours", sentence: "Your site lists your opening hours, and keeping Google's hours the same saves wasted trips." };
+    const hours = country === "US" ? "your hours" : "your opening hours";
+    return { kind: "hours", sentence: `Your site lists ${hours}, and keeping Google's hours the same saves wasted trips.` };
   }
   if (instagramLinked(html)) {
     const shows = group === "food" ? "your food" : "the work";
@@ -260,49 +325,68 @@ export function emailOnPage(html: string, email: string): boolean {
   return textOf(raw).toLowerCase().includes(e);
 }
 
-// ─── the templates (docs/COPY.md, "Outbound emails"), word for word
+// ─── the templates (docs/COPY.md section 65, changed by OUTBOUND-3), word for word
 export const SIGNATURE = "Rashid Abou Hamzy, founder of Kabsi\nkabsi.co";
 export const FOOTER =
   "Why you got this: your business email is on your website. Reply 'no thanks' and I will not write again. How Kabsi handles data: kabsi.co/privacy";
+/** The footer for a recipient: a US one adds the sender's postal address (CAN-SPAM). Throws for a US recipient with no
+ *  valid address, so no US email is ever built without one. */
+export function footerFor(country: string, postal: string | null | undefined): string {
+  if (country !== "US") return FOOTER;
+  if (!postalAddressOk(postal)) throw new Error("outbound: no postal address for a US footer");
+  return `${FOOTER}\nKabsi, ${postal.trim()}`;
+}
+/** Does this body carry the postal address line a US email needs? */
+export const hasPostalLine = (body: string, postal: string | null | undefined) =>
+  postalAddressOk(postal) && String(body ?? "").includes(`\nKabsi, ${postal.trim()}`);
+
+/** What Kabsi does for the business's Google profile, in two lines (blueprint 3.1). No price, no claim of results. */
+export const WHAT_KABSI_DOES = [
+  "I run Kabsi. It looks after your Google profile: a reply ready for every new review, your hours and details kept right, and photos and posts prepared.",
+  "Nothing goes live until you approve it on WhatsApp or by email.",
+].join("\n");
 
 export type Draft = { subject: string; body: string };
 
-export function emailOne(p: { business: string; kind: string; city: string; detail: string }): Draft {
+export function emailOne(p: { business: string; kind: string; city: string; detail: string; country?: string; postal?: string | null }): Draft {
   const b = p.business;
   return {
     subject: `${possessive(b)} Google profile`,
     body: [
       `Hi ${b} team,`,
       `I came across ${b} looking at ${p.kind} in ${p.city}. ${p.detail}`,
-      "I run Kabsi. It prepares your Google review replies, posts and opening hours, and you approve each one on WhatsApp before anything goes live.",
+      WHAT_KABSI_DOES,
       `Want me to run a free check of ${possessive(b)} Google profile and send you what I find?`,
       SIGNATURE,
-      FOOTER,
+      footerFor(p.country ?? "GB", p.postal),
     ].join("\n\n"),
   };
 }
 
-/** The private Founding 25 invite link (R-151, master plan 30.51), built server side from app_settings
- *  founding_invite_slug, only while places remain (founding_places().left, the count the private page uses). A missing
- *  or malformed slug, or no places left, gives null and the follow-up leaves the line out. Never log the result. */
+/** The private founding invite link (R-151), built server side from app_settings founding_invite_slug, only while places
+ *  remain (founding_places().left, the count the private page uses). A missing or malformed slug, or no places left,
+ *  gives null and the follow-up leaves the line out. Never log the result. */
 export function foundingInviteUrl(slug: unknown, left: unknown): string | null {
   if (typeof slug !== "string" || !/^[A-Za-z0-9]{24}$/.test(slug)) return null;
   if (typeof left !== "number" || !Number.isFinite(left) || left <= 0) return null;
   return `kabsi.co/founding/${slug}`;
 }
 
-/** The one short invite line of the follow-up (Outbound 2). No price, no count. */
-export const inviteLine = (url: string) =>
-  `I also have founding places open: three months of Kabsi Pro free, and you tell me what to make better. Details: ${url}`;
+/** The founding line of the follow-up (OUTBOUND-3, blueprint 3.1 founding offer): 19 US dollars a month for the first
+ *  12 months, then 29, with the private link. US recipients read dollars the US way. Email 1 never carries a price. */
+export const inviteLine = (url: string, country = "GB") =>
+  country === "US"
+    ? `I also have a few founding places: Kabsi for $19 a month for your first 12 months, then $29. Details: ${url}`
+    : `I also have a few founding places: Kabsi for 19 US dollars a month for your first 12 months, then 29. Details: ${url}`;
 
-export function followUp(p: { business: string; invite?: string | null }): Draft {
+export function followUp(p: { business: string; invite?: string | null; country?: string; postal?: string | null }): Draft {
   return {
     subject: `Re: ${possessive(p.business)} Google profile`,
     body: [
       `Hi again. Happy to run that free check of ${possessive(p.business)} Google profile if useful. A yes is enough, and if not, no worries.`,
-      ...(p.invite ? [inviteLine(p.invite)] : []),
+      ...(p.invite ? [inviteLine(p.invite, p.country)] : []),
       SIGNATURE,
-      FOOTER,
+      footerFor(p.country ?? "GB", p.postal),
     ].join("\n\n"),
   };
 }
@@ -365,6 +449,14 @@ export function nextWeekday(from: string): string {
   const d = new Date(`${from}T12:00:00Z`);
   do d.setUTCDate(d.getUTCDate() + 1); while ([0, 6].includes(d.getUTCDay()));
   return d.toISOString().slice(0, 10);
+}
+
+/** The weekdays of the coming week (OUTBOUND-3, approval once a week): on a Monday, this week from today; on any
+ *  other day, next Monday to Friday. `from` is a YYYY-MM-DD date. */
+export function comingWeek(from: string): string[] {
+  const d = new Date(`${from}T12:00:00Z`);
+  while (d.getUTCDay() !== 1) d.setUTCDate(d.getUTCDate() + 1);
+  return [0, 1, 2, 3, 4].map((i) => new Date(d.getTime() + i * 86_400_000).toISOString().slice(0, 10));
 }
 
 /** 09:00 on a local date in a time zone, as an instant (good to the minute, across summer time). */

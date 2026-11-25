@@ -6,7 +6,7 @@ import { prepare, type PrepareDeps, type Settings } from "./prepare.ts";
 import { robotsAllows } from "./page.ts";
 import { COMPANY_FILE_MAX_DAYS, companyRefusal, ordered, parseCsv, rowRefusal, toCandidate } from "./register.ts";
 import {
-  dailyCap, emailOne, FOOD_INDUSTRIES, foundingInviteUrl, INDUSTRY_ORDER, inviteLine, KIND_WORDS, RAMP, withoutStaleInvite, OPEN_COUNTRIES, SALON_INDUSTRIES, TIME_ZONES, emailOnPage, followUp, followUpDate, houseStyleOk, inWindow, isSuppressed, keysOf, linksOk, localParts,
+  comingWeek, dailyCap, emailOne, FOOD_INDUSTRIES, kindWords, timeZoneOf, foundingInviteUrl, INDUSTRY_ORDER, inviteLine, KIND_WORDS, RAMP, withoutStaleInvite, OPEN_COUNTRIES, SALON_INDUSTRIES, TIME_ZONES, emailOnPage, followUp, followUpDate, houseStyleOk, inWindow, isSuppressed, keysOf, linksOk, localParts,
   nameOk, ownDomain, pickDetail, sha,
 } from "./rules.ts";
 import { possessive } from "../possessive.ts";
@@ -19,7 +19,7 @@ Deno.test("Email 1 and the follow-up are the templates of COPY.md, word for word
   assert.equal(one.body, [
     "Hi Rose Lane Salon team,",
     "I came across Rose Lane Salon looking at hair salons in Exampleton. Your site lists your opening hours, and keeping Google's hours the same saves wasted trips.",
-    "I run Kabsi. It prepares your Google review replies, posts and opening hours, and you approve each one on WhatsApp before anything goes live.",
+    "I run Kabsi. It looks after your Google profile: a reply ready for every new review, your hours and details kept right, and photos and posts prepared.\nNothing goes live until you approve it on WhatsApp or by email.",
     "Want me to run a free check of Rose Lane Salon's Google profile and send you what I find?",
     "Rashid Abou Hamzy, founder of Kabsi\nkabsi.co",
     "Why you got this: your business email is on your website. Reply 'no thanks' and I will not write again. How Kabsi handles data: kabsi.co/privacy",
@@ -43,17 +43,19 @@ Deno.test("Email 1, and the follow-up without the invite, offer only the free Go
   assert.match(one.body, /Want me to run a free check of Rose Lane Salon's Google profile and send you what I find\?/);
 });
 
-Deno.test("only the UK can open: a non GB country is closed whatever open_countries holds (R-142 4b)", () => {
-  assert.deepEqual([...OPEN_COUNTRIES], ["GB"]);
+Deno.test("only the US and the UK can open: every other country is closed whatever open_countries holds (OUTBOUND-3)", () => {
+  assert.deepEqual([...OPEN_COUNTRIES], ["US", "GB"]);
   assert.deepEqual(Object.keys(TIME_ZONES), ["GB"]);
   const ok = { company_id: "1", business_name: "Rose Lane Salon", industry: "hair salon", country: "GB", city: "Exampleton",
     website: "https://www.rose.example.com", email: "hello@rose.example.com", email_page_url: "https://rose.example.com/contact",
-    company_type: "registered company", company_number: "01234567", company_status: "Active", company_status_date: "2026-11-01" };
+    company_type: "registered company", company_number: "01234567", company_status: "Active", company_status_date: "2026-11-01", state: "TX" };
   const all = ["GB", "IE", "AE", "SA", "QA", "KW", "BH", "OM", "AU", "NZ", "SG", "CA", "US"];
-  for (const c of all.filter((x) => x !== "GB")) {
+  for (const c of all.filter((x) => x !== "GB" && x !== "US")) {
     assert.equal(rowRefusal({ ...ok, country: c }, all, "2026-11-06"), "country_closed", c);
   }
   assert.equal(rowRefusal(ok, all, "2026-11-06"), null);
+  assert.equal(rowRefusal({ ...ok, country: "US" }, all, "2026-11-06"), null);
+  assert.equal(rowRefusal({ ...ok, country: "US" }, ["GB"], "2026-11-06"), "country_closed", "the US opens only when lane R adds it");
 });
 
 Deno.test("the six salon industries come first, in lane R's order, each with its own words (R-142 4c)", () => {
@@ -150,7 +152,7 @@ Deno.test("Companies House from Harvey's register: Active on a Basic Company Dat
   assert.equal(companyRefusal({ ...ok, company_status_date: "2026-02-30" }, day), "no_company_status", "not a real date");
   assert.equal(companyRefusal({ ok: "x" }, day), "no_company_status", "an older register without the columns");
   assert.equal(companyRefusal({ ...ok, company_status_date: "2026-11-07" }, day), "company_status_date_ahead");
-  assert.equal(rowRefusal({ ...ok, country: "US", company_status: "" }, ["US"], day), "country_closed", "only the UK can open (R-142)");
+  assert.equal(rowRefusal({ ...ok, country: "US", company_status: "", company_type: "", company_number: "", state: "TX" }, ["US"], day), null, "the US needs no company check (CAN-SPAM)");
   for (const n of ["LP012345", "SL012345", "NL012345"]) assert.equal(rowRefusal({ ...ok, company_number: n }, ["GB"], day), "limited_partnership", n);
   for (const n of ["OC412345", "SO301234", "NC001234", "SC123456", "NI012345"]) assert.equal(rowRefusal({ ...ok, company_number: n }, ["GB"], day), null, n);
   assert.equal(toCandidate(ok).company_status, "active");
@@ -186,7 +188,7 @@ function fakeDeps(over: Partial<PrepareDeps> & { settings?: () => Promise<Settin
     refreshSuppression: async () => {}, register: async () => { throw new Error("test mode never reads the register"); },
     page: async () => { throw new Error("test mode never reads a real page"); },
     eligible: async () => true, queuedFor: async () => 0, sentThisMonth: async () => 0,
-    insert: async (d) => void inserted.push(d), founding: async () => null, testRecipients: ["inbox@test.example.com"], now: NOW,
+    insert: async (d) => void inserted.push(d), founding: async () => null, testRecipients: ["inbox@test.example.com"], postal: null, now: NOW,
   };
   return { deps: { ...base, ...over }, inserted };
 }
@@ -217,7 +219,7 @@ Deno.test("locked, stopped, full, or no test recipients: nothing is drafted", as
 });
 
 Deno.test("open: only active registered companies whose page still shows the address and has a detail", async () => {
-  const base = fixtureRows("x");
+  const base = fixtureRows("x").filter((r) => r.country === "GB");
   // Five fictional companies: Active on a fresh file (two, one page no longer shows the address), dissolved, Active on
   // a stale file, Active - Proposal to Strike off.
   const rows = [
@@ -306,7 +308,8 @@ Deno.test("all eight first tier industries pass, each with plain plural words; a
     "hair salon": "hair salons", "barbershop": "barbers", "beauty salon": "beauty salons", "nail salon": "nail salons",
     "lash and brow studio": "lash and brow studios", "spa and massage": "spas and massage studios", "restaurant": "restaurants", "cafe": "cafes",
   };
-  assert.deepEqual(KIND_WORDS, eight, "exactly the eight, nothing legacy");
+  assert.deepEqual(KIND_WORDS, { ...eight, "auto repair": "auto repair shops", "cleaners": "cleaners" }, "the eight, and the two US only, nothing legacy");
+  for (const k of ["auto repair", "cleaners"]) assert.equal(rowRefusal({ ...ok, industry: k }, ["GB"], "2026-11-06"), "industry", `${k}: US only`);
   assert.deepEqual([...FOOD_INDUSTRIES].sort(), ["cafe", "restaurant"]);
   for (const k of Object.keys(eight)) assert.equal(rowRefusal({ ...ok, industry: k }, ["GB"], "2026-11-06"), null, k);
   for (const k of ["clinic", "dentist", "gym", "vet", "car repair garage", "physiotherapist", "unknown", ""]) {
@@ -357,12 +360,12 @@ Deno.test("the follow-up invite: built from the setting while places remain, lef
   const paras = withPlaces.body.split("\n\n");
   assert.equal(paras[0], "Hi again. Happy to run that free check of Rose Lane Salon's Google profile if useful. A yes is enough, and if not, no worries.");
   assert.equal(paras[1], inviteLine(url!));
-  assert.equal(paras[1], `I also have founding places open: three months of Kabsi Pro free, and you tell me what to make better. Details: kabsi.co/founding/${FAKE_SLUG}`);
+  assert.equal(paras[1], `I also have a few founding places: Kabsi for 19 US dollars a month for your first 12 months, then 29. Details: kabsi.co/founding/${FAKE_SLUG}`);
   assert.equal(paras[2], "Rashid Abou Hamzy, founder of Kabsi\nkabsi.co");
   assert.ok(linksOk(withPlaces.body, "follow_up"), "the invite link is allowed in the follow-up");
   assert.ok(!linksOk(withPlaces.body, "first"), "never in Email 1");
   assert.ok(houseStyleOk(withPlaces.body));
-  assert.ok(!/\$|US dollars|price|\b25\b|\b19\b|\b39\b/i.test(withPlaces.body), "no price and no count");
+  assert.ok(!/\$|\b25\b|\b39\b|\bPro\b|three months/i.test(withPlaces.body), "the one founding price only, no retired offer");
   const plain = followUp({ business: "Rose Lane Salon" }).body;
   for (const [slug, left, why] of [[FAKE_SLUG, 0, "no places left"], [FAKE_SLUG, -1, "below zero"], [null, 5, "setting missing"], ["", 5, "empty"], ["short", 5, "bad shape"], [FAKE_SLUG, Number.NaN, "count unreadable"]] as const) {
     const u = foundingInviteUrl(slug, left);
@@ -422,4 +425,107 @@ Deno.test("an industry name that every object has is still refused", () => {
     website: "https://rose.example.com", email: "hello@rose.example.com", email_page_url: "https://rose.example.com/contact",
     company_type: "registered company", company_number: "01234567", company_status: "Active", company_status_date: "2026-11-01" };
   for (const k of ["constructor", "toString", "hasOwnProperty", "__proto__"]) assert.equal(rowRefusal({ ...ok, industry: k }, ["GB"], "2026-11-06"), "industry", k);
+});
+
+// ─── OUTBOUND-3: the US first, approval once a week
+
+const US = { company_id: "u1", business_name: "Oak Street Auto", industry: "auto repair", country: "US", city: "Exampleville",
+  website: "https://oak.example.com", email: "hello@oak.example.com", email_page_url: "https://oak.example.com/contact", state: "TX" };
+const POSTAL = "100 Example Street, Exampleville, TX 75001"; // invented
+
+Deno.test("US: any open business with an own-domain email, in the first tier plus auto repair and cleaners; no company check", () => {
+  const day = "2026-11-06";
+  assert.equal(rowRefusal(US, ["US"], day), null);
+  for (const k of [...SALON_INDUSTRIES, ...FOOD_INDUSTRIES, "auto repair", "cleaners"]) assert.equal(rowRefusal({ ...US, industry: k }, ["US"], day), null, k);
+  for (const k of ["gym", "dentist", "vet", ""]) assert.equal(rowRefusal({ ...US, industry: k }, ["US"], day), "industry", k);
+  assert.equal(rowRefusal({ ...US, email: "oakauto@gmail.com" }, ["US"], day), "not_own_domain");
+  for (const st of ["closed", "Permanently Closed", "temporarily_closed"]) assert.equal(rowRefusal({ ...US, business_status: st }, ["US"], day), "not_open", st);
+  assert.equal(rowRefusal({ ...US, business_status: "open" }, ["US"], day), null);
+  assert.equal(rowRefusal({ ...US, state: "" }, ["US"], day), "no_time_zone", "no window can be known");
+  assert.equal(toCandidate(US).company_number, "", "no company number needed or stored");
+});
+
+Deno.test("US: the recipient's time zone from the register's own zone or the state", () => {
+  assert.equal(timeZoneOf(US), "America/Chicago");
+  assert.equal(timeZoneOf({ ...US, state: "ca" }), "America/Los_Angeles");
+  assert.equal(timeZoneOf({ ...US, state: "AZ" }), "America/Phoenix");
+  assert.equal(timeZoneOf({ ...US, state: "TX", time_zone: "America/Denver" }), "America/Denver", "the register's own zone wins");
+  assert.equal(timeZoneOf({ ...US, state: "", time_zone: "Europe/London" }), null, "only US zones");
+  assert.equal(timeZoneOf({ ...US, state: "ZZ" }), null);
+  assert.equal(timeZoneOf({ country: "GB" }), "Europe/London");
+  assert.ok(inWindow(new Date("2026-11-09T15:30:00Z"), "America/Chicago"), "9:30 in Chicago");
+  assert.ok(!inWindow(new Date("2026-11-09T14:30:00Z"), "America/Chicago"), "8:30 in Chicago");
+});
+
+Deno.test("US wording: US spelling for US recipients, the founding line in dollars, the postal address in the footer", () => {
+  assert.equal(kindWords("barbershop", "US"), "barbershops");
+  assert.equal(kindWords("barbershop", "GB"), "barbers");
+  assert.equal(pickDetail("<p>Monday 9am to 5pm</p>", NOW, "service", "US")?.sentence,
+    "Your site lists your hours, and keeping Google's hours the same saves wasted trips.");
+  assert.equal(pickDetail("<p>Monday 9am to 5pm</p>", NOW, "beauty", "GB")?.sentence,
+    "Your site lists your opening hours, and keeping Google's hours the same saves wasted trips.");
+  assert.equal(pickDetail(`<a href="https://www.getjobber.com/x">Book</a>`, NOW, "service", "US")?.sentence,
+    "I saw you take bookings through Jobber, so customers find you online already.");
+  const one = emailOne({ business: "Oak Street Auto", kind: kindWords("auto repair", "US"), city: "Exampleville", detail: "x.", country: "US", postal: POSTAL });
+  assert.equal(one.body.split("\n\n").at(-1), `Why you got this: your business email is on your website. Reply 'no thanks' and I will not write again. How Kabsi handles data: kabsi.co/privacy\nKabsi, ${POSTAL}`);
+  assert.ok(!/\$|dollar|price|\b19\b|\b29\b|founding/i.test(one.body), "Email 1 never carries a price");
+  const two = followUp({ business: "Oak Street Auto", invite: `kabsi.co/founding/${FAKE_SLUG}`, country: "US", postal: POSTAL });
+  assert.equal(two.body.split("\n\n")[1], `I also have a few founding places: Kabsi for $19 a month for your first 12 months, then $29. Details: kabsi.co/founding/${FAKE_SLUG}`);
+  for (const t of [one.subject, one.body, two.subject, two.body]) {
+    assert.ok(houseStyleOk(t), t);
+    assert.ok(!/colour|favour|organis|centre|licence|\b\d{1,2}\/\d{1,2}\/\d{2,4}\b|\b\d{1,2} (January|February|March|April|May|June|July|August|September|October|November|December)\b/.test(t),
+      "US spelling, and no date written the UK way");
+  }
+  assert.ok(linksOk(one.body, "first") && linksOk(two.body, "follow_up"), "only kabsi.co, kabsi.co/privacy and the private link");
+});
+
+Deno.test("the queue takes one beauty, one food, one service in turn", () => {
+  const csv = ["company_id,industry,quality_score", "s1,auto repair,1", "b1,hair salon,1", "s2,cleaners,1", "f1,cafe,1", "b2,nail salon,1"].join("\n");
+  assert.deepEqual(ordered(parseCsv(csv)).map((r) => r.company_id), ["b1", "f1", "s1", "b2", "s2"]);
+});
+
+Deno.test("the coming week: on Monday this week from today, on any other day next Monday to Friday", () => {
+  assert.deepEqual(comingWeek("2026-11-09"), ["2026-11-09", "2026-11-10", "2026-11-11", "2026-11-12", "2026-11-13"], "Monday");
+  assert.deepEqual(comingWeek("2026-11-08"), ["2026-11-09", "2026-11-10", "2026-11-11", "2026-11-12", "2026-11-13"], "Sunday");
+  assert.deepEqual(comingWeek("2026-11-06")[0], "2026-11-09", "Friday");
+});
+
+Deno.test("prepare fills the whole coming week, day by day up to each day's cap, for one Approve all on Monday", async () => {
+  const rows = Array.from({ length: 30 }, (_, i) => ({ ...US, company_id: `u${i}`, email: `hello@oak${i}.example.com`, website: `https://oak${i}.example.com`, email_page_url: `https://oak${i}.example.com/contact`, business_name: `Oak Street Auto ${i}` }));
+  const cols = Object.keys(US);
+  const csv = [cols.join(","), ...rows.map((r) => cols.map((k) => `"${(r as Record<string, string>)[k]}"`).join(","))].join("\n");
+  const page = (u: string) => `<a href="mailto:${u.replace("https://", "hello@").replace("/contact", "")}">mail</a><p>Monday 8:00 to 17:00</p>`;
+  const SUN = new Date("2026-11-08T10:00:00Z");
+  const queued: Record<string, number> = { "2026-11-10": 3 };
+  const { deps, inserted } = fakeDeps({
+    // Week 1 of the ramp starts that Monday: 5 a day.
+    settings: async () => ({ sending_open: true, test_mode: true, open_countries: ["US"], ...RAMP, started_on: "2026-11-09", stopped_reason: null }),
+    register: async () => csv, page: async (u) => ({ html: page(u) }), queuedFor: async (d) => queued[d] ?? 0, postal: POSTAL, now: SUN,
+  });
+  const r = await prepare(deps);
+  assert.equal(r.drafted, 20, "Monday 5, Tuesday 2 (3 already queued), Wednesday 5, Thursday 5, then Friday until the 20 page reads of a run");
+  const perDay: Record<string, number> = {};
+  for (const d of inserted as { prospect: { time_zone: string; company_number: string | null; country: string }; first: { send_after: string; body: string } }[]) {
+    const local = localParts(new Date(d.first.send_after), "America/Chicago");
+    assert.equal(local.minutes, 9 * 60, "9:00 in the recipient's own time zone");
+    perDay[local.date] = (perDay[local.date] ?? 0) + 1;
+    assert.equal(d.prospect.time_zone, "America/Chicago");
+    assert.equal(d.prospect.company_number, null);
+    assert.ok(d.first.body.endsWith(`Kabsi, ${POSTAL}`));
+  }
+  assert.deepEqual(perDay, { "2026-11-09": 5, "2026-11-10": 2, "2026-11-11": 5, "2026-11-12": 5, "2026-11-13": 3 });
+  const noPostal = fakeDeps({ settings: deps.settings, register: deps.register, page: deps.page, now: SUN });
+  const r2 = await prepare(noPostal.deps);
+  assert.equal(r2.drafted, 0);
+  assert.equal(r2.refused.no_postal_address, 30, "CAN-SPAM: no US draft without the postal address");
+});
+
+Deno.test("test mode: the fictional US business is drafted only once the postal address is set", async () => {
+  const without = await prepare(fakeDeps().deps);
+  assert.equal(without.refused.no_postal_address, 1);
+  const { deps, inserted } = fakeDeps({ postal: POSTAL });
+  assert.equal((await prepare(deps)).drafted, 4);
+  const us = (inserted as { prospect: { country: string; time_zone: string; business_name: string }; first: { body: string } }[]).find((d) => d.prospect.country === "US")!;
+  assert.equal(us.prospect.time_zone, "America/Chicago");
+  assert.ok(us.first.body.includes("looking at auto repair shops in Exampleville. Your site lists your hours,"));
 });

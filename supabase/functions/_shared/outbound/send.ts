@@ -3,10 +3,14 @@
 // business. Weekdays 9:00 to 17:00 in the recipient's time zone, at least 20 minutes apart with jitter, the day's cap
 // from the ramp and started_on, the monthly cap. Suppression is checked again right before sending. The follow-up goes in
 // the same thread on day 4 or 5 and is cancelled by any reply, bounce or suppression at that business.
+// OUTBOUND-3: nothing sends without the sender's postal address (OUTBOUND_POSTAL_ADDRESS, CAN-SPAM) and every US email
+// must carry it in its footer; nothing sends until SPF, DKIM (selector zmail, 2048 bits) and DMARC for getkabsi.com read
+// correctly; the kill gate is checked before every send.
 import { buildMessage, newMessageId } from "./smtp.ts";
 import {
-  dailyCap, followUpDate, foundingInviteUrl, houseStyleOk, inWindow, linksOk, localParts, nextGap, withoutStaleInvite,
+  dailyCap, followUpDate, foundingInviteUrl, hasPostalLine, houseStyleOk, inWindow, linksOk, localParts, nextGap, withoutStaleInvite,
 } from "./rules.ts";
+import type { DnsResult } from "./dns.ts";
 
 export type SendSettings = {
   sending_open: boolean; test_mode: boolean; ramp_week1: number; ramp_week2: number; ramp_after: number; monthly_cap: number;
@@ -24,7 +28,7 @@ export function testFast(s: SendSettings, now: Date): boolean {
 export type DueMessage = {
   id: string; prospect_id: string; parent_id: string | null; kind: "first" | "follow_up" | "reply"; to_address: string;
   subject: string; body: string; send_after: string | null; in_reply_to: string | null; references_ids: string | null;
-  prospect: { email: string; email_domain: string; time_zone: string; test: boolean; status: string };
+  prospect: { email: string; email_domain: string; time_zone: string; test: boolean; status: string; country: string };
   parent: { status: string; message_id: string | null; sent_at: string | null } | null;
 };
 
@@ -53,6 +57,13 @@ export type SendDeps = {
   founding(): Promise<{ slug: string | null; left: number } | null>;
   testRecipients: string[];
   sender: { name: string; address: string };
+  /** The sender's postal address (postalAddress of OUTBOUND_POSTAL_ADDRESS), or null: then nothing sends. */
+  postal: string | null;
+  /** SPF, DKIM and DMARC for getkabsi.com, read now (dns.ts checkDns); the result is recorded for the staff page. */
+  dns(): Promise<DnsResult>;
+  saveDns(r: DnsResult): Promise<void>;
+  /** The kill gate (30.19 section 5): true when it has ended Outbound (sending is then stopped). */
+  killGate(): Promise<boolean>;
   now: Date;
   random?: () => number;
 };
@@ -77,6 +88,9 @@ export async function sendTick(deps: SendDeps): Promise<SendResult> {
   const s = await deps.settings();
   if (s.stopped_reason) return { ...r, state: "stopped" };
   if (!s.sending_open && !s.test_mode) return { ...r, state: "locked" };
+  // CAN-SPAM: with no valid postal address set, nothing sends at all.
+  if (!deps.postal) return { ...r, state: "no_postal_address" };
+  if (await deps.killGate()) return { ...r, state: "stopped" };
   if (s.next_send_at && Date.parse(s.next_send_at) > deps.now.getTime()) return { ...r, state: "spacing" };
   await deps.failStale(deps.now);
   await deps.refreshSuppression();
@@ -124,12 +138,22 @@ export async function sendTick(deps: SendDeps): Promise<SendResult> {
       r.failed++;
       continue;
     }
+    // CAN-SPAM: a US email goes only with the current postal address in its footer.
+    if (m.prospect.country === "US" && !hasPostalLine(body, deps.postal)) {
+      await deps.markFailed(m.id, "no_postal_address_in_footer");
+      r.failed++;
+      continue;
+    }
     const tz = m.prospect.time_zone;
     if (!fast && !inWindow(deps.now, tz)) continue;
     const local = localParts(deps.now, tz).date;
     if ((await deps.sentOn(local, tz)) >= dailyCap(s, local)) return { ...r, state: "day_full" };
     if ((await deps.sentThisMonth()) >= s.monthly_cap) return { ...r, state: "month_full" };
 
+    // Deliverability: SPF, DKIM and DMARC must read correctly right before a send; otherwise nothing goes.
+    const dns = await deps.dns();
+    await deps.saveDns(dns).catch(() => undefined);
+    if (!dns.ok) return { ...r, state: "dns_not_ready" };
     if (!(await deps.reserveSlot(fast ? 60_000 : nextGap(deps.random)))) return { ...r, state: "spacing" };
     if (!(await deps.claim(m.id))) continue;
     const messageId = newMessageId();
