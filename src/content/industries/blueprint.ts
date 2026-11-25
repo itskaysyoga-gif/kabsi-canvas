@@ -88,7 +88,7 @@ export const BLUEPRINT: Record<string, TradeBlueprint> = {
     },
     reply:
       "Thank you, Marcus. Glad the fade was just right and the wait was short. See you for the next one.",
-    fact: F.special,
+    fact: F.photos,
   },
   "nail-salon": {
     review: {

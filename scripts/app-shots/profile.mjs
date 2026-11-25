@@ -1,6 +1,6 @@
 // scripts/app-shots fixtures for this area (see fixtures.mjs). Values or (ctx) => value; ctx.state is the route's state.
 // Google profile: Profile watch (/app/shield), Hours (/app/hours) and Profile Coach (/app/coach), for the invented
-// Rose Lane Salon. States: "profile-none" (nothing changed, nothing to fix, no warning), "profile-reading" (Kabsi has
+// Maple Street Salon. States: "profile-none" (nothing changed, nothing to fix, no warning), "profile-reading" (Kabsi has
 // read nothing yet). Every number and name here is made up.
 import * as home from "./home.mjs";
 import { contentPublications } from "./content.mjs";
@@ -37,11 +37,11 @@ const fact = (key, display, status = "verified", raw) => ({
   status,
 });
 const FACTS = [
-  fact("name", "Rose Lane Salon"),
+  fact("name", "Maple Street Salon"),
   fact("main_category", "Hair salon"),
-  fact("phone", "+971 4 555 0142"),
-  fact("website", "https://roselanesalon.example"),
-  fact("address", "12 Al Wasl Road, Dubai"),
+  fact("phone", "(503) 555 0142"),
+  fact("website", "https://maplestreetsalon.example"),
+  fact("address", "12 Maple Street, Portland"),
   fact("regular_hours", WEEK_TEXT, "verified", WEEK),
   fact("description", ""),
   fact("open_status", "Open"),
@@ -64,16 +64,16 @@ const CHANGES = [
   change({
     id: "chg-phone",
     field: "phone",
-    previous_value: v("+971 4 555 0142"),
-    google_value: v("+971 4 555 0199"),
+    previous_value: v("(503) 555 0142"),
+    google_value: v("(503) 555 0199"),
     status: "detected",
     detected_at: ago(1),
   }),
   change({
     id: "chg-website",
     field: "website",
-    previous_value: v("https://roselanesalon.example"),
-    google_value: v("https://roselane-salon.example"),
+    previous_value: v("https://maplestreetsalon.example"),
+    google_value: v("https://maplestreet-salon.example"),
     status: "rejected",
     detected_at: ago(6),
   }),

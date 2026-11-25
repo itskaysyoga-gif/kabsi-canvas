@@ -58,7 +58,7 @@ export const guide: GuideDoc = {
             <b>Example review, 5 stars:</b> "Maya fixed a colour another salon ruined and actually
             listened to what I wanted." <b>Reply:</b> "Thank you, Leila. Maya will be so pleased to
             read this, and we know how much it matters to be listened to after a bad experience. See
-            you next time. Rose Lane Salon"
+            you next time. Maple Street Salon"
           </p>
           <p>
             <b>Example review, 5 stars:</b> "Best fade I have had in years, Sami takes his time."{" "}
@@ -98,7 +98,7 @@ export const guide: GuideDoc = {
             <b>Example review, 1 star:</b> "Emma was rude and rushed my cut. Would not go back."{" "}
             <b>Reply:</b> "We are sorry your visit felt rushed, and thank you for telling us. That
             is not how we want anyone to feel here. Please get in touch through the details on our
-            profile so the owner can hear what happened. Rose Lane Salon"
+            profile so the owner can hear what happened. Maple Street Salon"
           </p>
           <DoDont
             yesTitle="Do"

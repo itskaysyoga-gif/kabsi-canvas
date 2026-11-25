@@ -24,7 +24,7 @@ export const functions = {
         ? {
             status: "used",
             action: "post",
-            business: "Rose Lane Salon",
+            business: "Maple Street Salon",
             mode: "mock",
             review: {
               ...review,
@@ -36,7 +36,7 @@ export const functions = {
         : {
             status: "ok",
             action: "post",
-            business: "Rose Lane Salon",
+            business: "Maple Street Salon",
             mode: "mock",
             review,
             draft: "Thank you, Maya. We will pass this on to Hana. See you at your next visit.",
@@ -55,7 +55,7 @@ export const functions = {
       ? { status: "expired" }
       : {
           status: "ok",
-          business: "Rose Lane Salon",
+          business: "Maple Street Salon",
           holiday: {
             name: "National Day",
             starts_on: "2026-12-02",
@@ -74,7 +74,7 @@ export const functions = {
           __status: 410,
           body: { message: "The owner turned this link off. Ask them for a new one." },
         }
-      : { name: "Rose Lane Salon" },
+      : { name: "Maple Street Salon" },
   // /unsubscribe?t=TOKEN
   "email/unsubscribe": { label: "Your weekly report" },
   // /review/CODE: the review link page.
@@ -82,8 +82,9 @@ export const functions = {
     c.state === "inactive"
       ? { __status: 404, body: {} }
       : {
-          name: "Rose Lane Salon",
-          review_url: "https://search.google.com/local/writereview?placeid=ChIJroselanesalon000001",
+          name: "Maple Street Salon",
+          review_url:
+            "https://search.google.com/local/writereview?placeid=ChIJmaplestreetsalon000001",
           whatsapp: "971500000102",
         },
 };

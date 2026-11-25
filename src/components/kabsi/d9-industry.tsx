@@ -9,14 +9,15 @@ import { cn } from "@/lib/utils";
 import { NOT_AFFILIATED } from "@/lib/site";
 import { industriesAtoZ, type Industry } from "@/content/industries";
 import { BLUEPRINT, READ } from "@/content/industries/blueprint";
+import { TRADE_WORK } from "@/content/industries/trade-work";
 import { ExampleBadge, Faq, KabsiMark } from "./ui";
 import { Band, Head, Lead, MarkRow } from "@/components/marketing/kit";
 import { HERO_MARKS, HOME_FAQ } from "@/components/marketing/v31-data";
 import { PriceCard, TrustLines } from "@/components/marketing/v31";
-import { Img } from "./photos";
+import { Img, PHOTOS } from "./photos";
 import { PubImg } from "@/components/marketing/life";
 import { TRADE_TILES } from "@/components/marketing/public-photos";
-import { TRADE_SECOND, TRADE_WIDE } from "@/components/marketing/industry-photos";
+import { HERO_LIBRARY, TRADE_SECOND, TRADE_WIDE } from "@/components/marketing/industry-photos";
 import { ScanBox } from "./scan-box";
 import { SiteLink } from "./site-link";
 import { Marked } from "./highlight";
@@ -57,29 +58,6 @@ function Headline({
 
 /** The line under the free check box (blueprint 3.1 section 3). */
 export const FREE_CHECK_NOTE = "Free check. No card. 20 seconds.";
-
-/** The three benefits, the same on every page (blueprint 3.1 section 2). */
-const BENEFITS = [
-  {
-    title: "Every review answered",
-    text: "A reply written in your voice for every review, and an alert the moment a bad one arrives.",
-  },
-  {
-    title: "Your listing protected",
-    text: "Hours, phone, website and booking link checked every day. One tap to fix what changed.",
-  },
-  {
-    title: "Proof of the work",
-    text: "A short summary every week and a full report every month.",
-  },
-] as const;
-
-const TRUST = [
-  "No Google password.",
-  "Nothing is published without your yes.",
-  "Kabsi never contacts your customers.",
-  NOT_AFFILIATED,
-] as const;
 
 /* ---------- One trade: the one template (SITE-2, blueprint 3.1 section 5) ---------- */
 
@@ -124,7 +102,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
             <figure aria-labelledby="review-h" data-nora-avoid>
               {/* SITE-4: a real photo of the trade, with the example review card over its lower edge. */}
               <div className="overflow-hidden rounded-panel bg-surface-3 shadow-lift">
-                {TRADE_WIDE[i.slug] ? (
+                {HERO_LIBRARY[i.slug] === undefined && TRADE_WIDE[i.slug] ? (
                   <PubImg
                     photo={TRADE_WIDE[i.slug]!}
                     sizes="(min-width: 1280px) 520px, (min-width: 1024px) 42vw, 100vw"
@@ -133,7 +111,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
                   />
                 ) : (
                   <Img
-                    photo={i.photos[0]}
+                    photo={i.photos[HERO_LIBRARY[i.slug] ?? 0]!}
                     sizes="(min-width: 1280px) 520px, (min-width: 1024px) 42vw, 100vw"
                     priority
                     style={{ objectPosition: i.focus ?? "50% 50%" }}
@@ -177,27 +155,14 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
         </div>
       </section>
 
-      <Band id="benefits" tone="warm">
-        <Head id="benefits" title="What Kabsi does without being asked." />
-        <ol className="mt-8 grid gap-8 md:grid-cols-3 md:gap-10">
-          {BENEFITS.map((x, n) => (
-            <li key={x.title} className="flex gap-4 md:block">
-              <YellowNumber n={n + 1} />
-              <div className="md:mt-4">
-                <h3 className="text-h3">{x.title}</h3>
-                <p className="mt-2 text-read text-text-2">{x.text}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </Band>
+      <TradeWorkBand industry={i} />
 
       <PhotoPost industry={i} />
 
       {b && (
         <Band id="fact" tone="warm" inner="py-12 sm:py-16 lg:py-20">
           {/* SITE-4: the sourced fact as a quiet note, not a full headline over one sentence. */}
-          <div className="max-w-[48rem] border-s-4 border-kb-yellow ps-5 sm:ps-7">
+          <div className="mx-auto max-w-[52rem] border-s-4 border-kb-yellow ps-5 sm:ps-7">
             <h2 id="fact-h" className="text-title text-text-2">
               From Google's own help pages
             </h2>
@@ -213,32 +178,34 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
         </Band>
       )}
 
-      <Band id="price" tone="ivory">
+      <Band id="price" tone="ivory" inner="pb-8 sm:pb-10 lg:pb-12">
         <Head id="price" title="One price." />
         {/* The price card of Home and Pricing: TRIAL_LINE beside the button, the included list, the not included line. */}
-        <PriceCard className="mt-8" />
+        <PriceCard compact className="mt-8" />
+        {/* SITE-5: what to know first sits under the price, not on a band of its own. */}
+        <TrustLines />
       </Band>
 
-      <Band id="trust" tone="warm" inner="py-10 sm:py-14 lg:py-16">
-        <h2 id="trust-h" className="text-h2 text-balance">
-          What to know first.
-        </h2>
-        <TrustLines />
-        <SiteLink to="/for" className={cn(linkCls, "mt-6 text-read")}>
+      <Band id="questions" tone="ivory" inner="pt-8 sm:pt-10 lg:pt-12">
+        <Head id="questions" title="Questions." />
+        {/* SITE-5: three questions of this trade first, then three that every owner asks. */}
+        <Faq
+          items={[...(TRADE_WORK[i.slug]?.faq ?? []), ...GENERAL_FAQ].map((f) => ({
+            q: f.q,
+            a: f.a,
+          }))}
+          className="mt-8"
+        />
+        <SiteLink to="/for" className={cn(linkCls, "mt-8 text-read")}>
           See every business
           <Arrow />
         </SiteLink>
       </Band>
 
-      <Band id="questions" tone="ivory">
-        <Head id="questions" title="Questions." />
-        <Faq items={HOME_FAQ.map((f) => ({ q: f.q, a: f.a }))} className="mt-8" />
-      </Band>
-
       <Band id="closing" tone="dark">
         <div className="mx-auto max-w-[44rem] text-center">
           <h2 id="closing-h" className="text-h2 text-balance">
-            Check your business, free.
+            Start with a free check.
           </h2>
           <ScanBox
             id="closing-scan"
@@ -251,6 +218,56 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
         </div>
       </Band>
     </>
+  );
+}
+
+/** SITE-5: the questions every owner asks, after the trade's own three (Do I have to do anything, customers, password). */
+const GENERAL_FAQ = [HOME_FAQ[1]!, HOME_FAQ[3]!, HOME_FAQ[4]!];
+
+/**
+ * SITE-5 (lane R decision 2): "What Kabsi does for a <trade>": three examples true for this trade, beside Kabsi's own
+ * Reviews screen drawn from a fixture of the same trade (public/screens/trade-<slug>-560.webp, scripts/site-screens.mjs).
+ */
+function TradeWorkBand({ industry: i }: { industry: Industry }) {
+  const w = TRADE_WORK[i.slug];
+  if (!w) return null;
+  return (
+    <Band
+      id="trade"
+      tone="ivory"
+      inner="lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start lg:gap-16"
+    >
+      <div>
+        <Head id="trade" title={`What Kabsi does for a ${i.name}.`} />
+        <ol className="mt-8 grid gap-6 sm:gap-8">
+          {w.does.map((x, n) => (
+            <li key={x.title} className="flex gap-4">
+              <YellowNumber n={n + 1} />
+              <div>
+                <h3 className="text-h3">{x.title}</h3>
+                <p className="mt-1.5 max-w-[56ch] text-read text-text-2">{x.text}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <figure className="mx-auto mt-10 w-full max-w-[18rem] lg:mt-0 lg:max-w-[21rem]">
+        <div className="kb-shot lg:max-w-[21rem]">
+          <img
+            src={`/screens/trade-${i.slug}-560.webp`}
+            alt={`Kabsi's Google profile screen showing a phone number changed on Google for ${i.example.business}, an example business`}
+            width={560}
+            height={1212}
+            loading="lazy"
+            decoding="async"
+          />
+          <ExampleBadge />
+        </div>
+        <figcaption className="mt-3 text-center text-small text-balance text-text-2">
+          {`A change caught on Google for ${i.example.business}, waiting for one tap.`}
+        </figcaption>
+      </figure>
+    </Band>
   );
 }
 
@@ -272,6 +289,11 @@ const POST_STEPS = [
  * SITE-4: "Send a photo. Get a Google post." on the charcoal band, with the trade's own second photo and an Example post
  * card over it. Every word is the same on every page apart from the example business.
  */
+/** SITE-5: a library photo that fits the trade's Example post better than its second photo (cooks for a special). */
+const POST_LIBRARY: Record<string, (typeof PHOTOS)[keyof typeof PHOTOS]> = {
+  restaurant: PHOTOS.restaurantCooks,
+};
+
 function PhotoPost({ industry: i }: { industry: Industry }) {
   return (
     <Band
@@ -305,7 +327,7 @@ function PhotoPost({ industry: i }: { industry: Industry }) {
           />
         ) : (
           <Img
-            photo={i.photos[1]}
+            photo={POST_LIBRARY[i.slug] ?? i.photos[1]}
             sizes="(min-width: 1280px) 560px, (min-width: 1024px) 45vw, 100vw"
             className="aspect-[4/5] w-full rounded-panel object-cover shadow-float sm:aspect-[4/3]"
           />
@@ -316,7 +338,10 @@ function PhotoPost({ industry: i }: { industry: Industry }) {
             <span className="flex-1 text-small font-bold">Post ready</span>
             <ExampleBadge className="text-text-2" />
           </span>
-          <span className="mt-2 block text-read">{`A new photo from this week at ${i.example.business}. Book your next visit with us.`}</span>
+          <span className="mt-2 block text-read">
+            {TRADE_WORK[i.slug]?.post ??
+              `A new photo from this week at ${i.example.business}. Book your next visit with us.`}
+          </span>
           <span className="mt-3 inline-flex h-8 items-center gap-1.5 rounded-pill bg-ok-soft px-3 text-label font-bold text-ok">
             <Check className="size-3.5" aria-hidden />
             Live on Google after your yes

@@ -20,6 +20,7 @@ import { Marked, YellowNumber } from "@/components/kabsi/highlight";
 import { ButtonLink, ExampleBadge, Faq, KabsiMark } from "@/components/kabsi/ui";
 import { Num, PubImg, ScreenRow, TradeStrip, useCountOnce, useReducedMotion } from "./life";
 import { PUB } from "./public-photos";
+import { SiteLink } from "@/components/kabsi/site-link";
 import { Band, CheckBox, ClosingDark, Head, Lead, MarkRow, PageTop, Sec, Ticks } from "./kit";
 import {
   CLOSING,
@@ -398,7 +399,7 @@ function DayPicture({ n }: { n: number }) {
         Your week
       </p>
       <ul className="mt-1.5 space-y-1 text-text-2">
-        <li>3 replies live</li>
+        <li>4 replies live</li>
         <li>1 change set back</li>
         <li>1 post live</li>
       </ul>
@@ -590,12 +591,23 @@ function Proof() {
   );
 }
 
-/** The one price card, full width: the price and the button on the left, what is included on the right. */
-export function PriceCard({ className }: { className?: string }) {
+/**
+ * The one price card, full width: the price and the button on the left, what is included on the right. SITE-5: Home
+ * and the industry pages show it `compact` (the price, the terms, the button and a link to Pricing), so the plan's full
+ * lists live on Pricing only.
+ */
+export function PriceCard({
+  className,
+  compact = false,
+}: {
+  className?: string;
+  compact?: boolean;
+}) {
   return (
     <div
       className={cn(
         "grid gap-8 rounded-panel border border-line bg-surface-1 p-6 shadow-lift sm:p-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16",
+        compact && "lg:items-center",
         className,
       )}
     >
@@ -607,18 +619,35 @@ export function PriceCard({ className }: { className?: string }) {
             {PRIMARY_CTA}
           </ButtonLink>
         </div>
-        <p className="mt-4 max-w-[44ch] text-read text-text-2">{PRICE.terms}</p>
+        {!compact && <p className="mt-4 max-w-[44ch] text-read text-text-2">{PRICE.terms}</p>}
       </div>
-      <div>
-        <p className="text-small font-bold text-text-2">Included</p>
-        <Ticks items={PRICING.included} cols className="mt-3" />
-        <p className="mt-6 border-t border-line pt-4 text-read text-text-2">
-          {PRICING.notIncluded}
-        </p>
-      </div>
+      {compact ? (
+        <div>
+          <p className="max-w-[44ch] text-read text-text-1">{PRICE.terms}</p>
+          <p className="mt-4 max-w-[44ch] text-read text-text-2">{ALSO_PLAN}</p>
+          <SiteLink
+            to="/pricing"
+            className="press mt-4 inline-flex min-h-11 items-center gap-1.5 text-read font-semibold text-text-1 underline decoration-text-3 underline-offset-4 hover:decoration-text-1"
+          >
+            Your first 14 days, day by day
+          </SiteLink>
+        </div>
+      ) : (
+        <div>
+          <p className="text-small font-bold text-text-2">Included</p>
+          <Ticks items={PRICING.included} cols className="mt-3" />
+          <p className="mt-6 border-t border-line pt-4 text-read text-text-2">
+            {PRICING.notIncluded}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
+
+/** SITE-5: the compact card's one line about the plan (every part of it is on Pricing's list). */
+const ALSO_PLAN =
+  "Everything Kabsi does is in the one plan: replies, alerts, daily checks, holiday hours, posts and your reports.";
 
 /** Trust: the four lines as a quiet row, not cards. */
 export function TrustLines() {
@@ -651,7 +680,7 @@ export function V31Home() {
       <Proof />
       <Band id="price" tone="warm">
         <Head id="price" title={PRICE.title} />
-        <PriceCard className="mt-8" />
+        <PriceCard compact className="mt-8" />
       </Band>
       <Band id="trust" tone="ivory" inner="py-10 sm:py-14 lg:py-16">
         <h2 id="trust-h" className="text-h2 text-balance">

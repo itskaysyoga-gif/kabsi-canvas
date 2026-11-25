@@ -29,9 +29,9 @@ export const Route = createFileRoute("/")({
         {
           rel: "preload",
           as: "image",
-          href: "/photos/owner-phone-tall-480.webp",
+          href: "/photos/salon-owner-tall-480.webp",
           imageSrcSet:
-            "/photos/owner-phone-tall-480.webp 480w, /photos/owner-phone-tall-960.webp 960w",
+            "/photos/salon-owner-tall-480.webp 480w, /photos/salon-owner-tall-960.webp 960w",
           imageSizes:
             "(min-width: 1280px) 330px, (min-width: 1024px) 290px, (min-width: 640px) 480px, 92vw",
           fetchPriority: "high",

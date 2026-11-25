@@ -99,11 +99,30 @@ const REVIEWS = [
     id: R.priya,
     reviewer_name: "Priya N.",
     star_rating: 5,
-    comment: "Best balayage I have had in Dubai.",
+    comment: "Best balayage I have had in years.",
     state: "posted",
     review_created_at: ago(6),
   }),
 ];
+
+// SITE-5: an industry page's screen shows only that trade's own Example review and reply (scripts/site-screens.mjs).
+const TRADE = process.env.SHOT_TRADE ? JSON.parse(process.env.SHOT_TRADE) : null;
+if (TRADE) {
+  REVIEWS.splice(
+    0,
+    REVIEWS.length,
+    review({
+      id: R.maya,
+      reviewer_name: TRADE.review.name,
+      star_rating: TRADE.review.stars,
+      comment: TRADE.review.text,
+      state: "drafted",
+      risk: TRADE.review.stars <= 2 ? "medium" : "low",
+      review_created_at: ago(0.2),
+      reply_drafts: [{ body: TRADE.reply, safety_ok: true, version: 1 }],
+    }),
+  );
+}
 
 const pub = (n, target_type, target_id, state, text, days) => ({
   id: id(200 + n),
@@ -192,7 +211,7 @@ const TASKS = [
   task(2, {
     kind: "profile_change",
     priority: "urgent",
-    title: "Google shows a new phone number for Rose Lane Salon.",
+    title: "Google shows a new phone number for Maple Street Salon.",
     why: "Someone suggested a new number on Google yesterday. Kabsi changed nothing.",
     path: "/app/shield",
     evidence: { profile_change_id: id(501) },
@@ -251,15 +270,15 @@ export const tables = {
     {
       id: id(501),
       field: "phone",
-      previous_value: { display: "+971 4 555 0142" },
+      previous_value: { display: "(503) 555 0142" },
       previous_fact_id: id(502),
-      google_value: { display: "+971 4 555 0199" },
+      google_value: { display: "(503) 555 0199" },
     },
   ],
   gbp_posts: [
     {
       id: id(601),
-      body: "This week at Rose Lane Salon: gloss treatments that take 45 minutes. Book on WhatsApp or call us.",
+      body: "This week at Maple Street Salon: gloss treatments that take 45 minutes. Book on WhatsApp or call us.",
     },
   ],
   taps: (c) => (empty(c) ? [] : TAPS),
@@ -273,7 +292,7 @@ const AI_ANSWER = task(9, {
   kind: "ai_answer",
   priority: "recommended",
   title: "ChatGPT's answer gives a different closing time for your business",
-  why: 'ChatGPT was asked "best hair salon in williamsburg" on 2 November. It said: "Rose Lane Salon is open Monday to Saturday from 9 am to 8 pm." Kabsi has: Monday 09:00 to 18:00.',
+  why: 'ChatGPT was asked "best hair salon in williamsburg" on 2 November. It said: "Maple Street Salon is open Monday to Saturday from 9 am to 8 pm." Kabsi has: Monday 09:00 to 18:00.',
   recommendation: "Make sure your Google profile and website say this. AI assistants read them.",
   path: "/app/hours",
   evidence: {

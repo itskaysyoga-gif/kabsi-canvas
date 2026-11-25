@@ -1,5 +1,5 @@
 // scripts/app-shots fixtures for Where you show up, Reports, Settings, Business Knowledge, Team and Plan (see fixtures.mjs).
-// Values or (ctx) => value; ctx.state is the route's state. Everything here is invented (Rose Lane Salon, Dubai).
+// Values or (ctx) => value; ctx.state is the route's state. Everything here is invented (Maple Street Salon, Portland).
 // States read here: "first-task" (base: the held back parts), "first-check" (no finished scan yet), "empty" (no report),
 // "manager" (base), and for the plan "paid", "failed", "cancelled".
 // Only `location` comes from fixtures.mjs, and only inside a function: fixtures.mjs imports this file, so its constants are
@@ -100,8 +100,8 @@ const AI_RUN = {
   run_at: ago(6),
   named: true,
   sources: [
-    { domain: "google.com", title: "Rose Lane Salon on Google Maps" },
-    { domain: "roselanesalon.example", title: "Rose Lane Salon" },
+    { domain: "google.com", title: "Maple Street Salon on Google Maps" },
+    { domain: "maplestreetsalon.example", title: "Maple Street Salon" },
   ],
   ai_visibility_prompts: {
     text: "where can i get a good blow dry in jumeirah",
@@ -111,10 +111,10 @@ const AI_RUN = {
 
 // Two snapshots 25 days apart: Juniper Hair Studio gained 14 reviews, the salon 6 (Competitor Watch speaks).
 const SNAPSHOTS = [
-  { key: "self", is_self: true, name: "Rose Lane Salon", reviews: 112, taken_on: day(26) },
+  { key: "self", is_self: true, name: "Maple Street Salon", reviews: 112, taken_on: day(26) },
   { key: "cid:1", is_self: false, name: "Juniper Hair Studio", reviews: 203, taken_on: day(26) },
   { key: "cid:2", is_self: false, name: "Lark Salon", reviews: 88, taken_on: day(26) },
-  { key: "self", is_self: true, name: "Rose Lane Salon", reviews: 118, taken_on: day(1) },
+  { key: "self", is_self: true, name: "Maple Street Salon", reviews: 118, taken_on: day(1) },
   { key: "cid:1", is_self: false, name: "Juniper Hair Studio", reviews: 217, taken_on: day(1) },
   { key: "cid:2", is_self: false, name: "Lark Salon", reviews: 90, taken_on: day(1) },
 ];
@@ -177,7 +177,7 @@ const reports = (c) =>
         report(
           "r3",
           "19 Oct",
-          "26 Oct",
+          "25 Oct",
           day(1),
           receipt({ competitor: "Juniper Hair Studio got 14 reviews this month. You got 6." }),
         ),
@@ -233,7 +233,7 @@ export const tables = {
           {
             ...location("setup"),
             id: "00000000-0000-4000-8000-0000000000b2",
-            name: "Rose Lane Barbers",
+            name: "Maple Street Barbers",
             created_at: ago(2),
           },
         ]
@@ -246,7 +246,7 @@ export const tables = {
   ai_visibility_answers: [
     {
       answer:
-        "Rose Lane Salon on Al Wasl Road is known for blow dries and takes walk-ins on weekdays. Juniper Hair Studio is also nearby and is often booked a few days ahead.",
+        "Maple Street Salon on Maple Street is known for blow dries and takes walk-ins on weekdays. Juniper Hair Studio is also nearby and is often booked a few days ahead.",
     },
   ],
   ai_visibility_prompts: [
@@ -259,7 +259,7 @@ export const tables = {
     { id: "p2", text: "best hair salon in jumeirah", kind: "suggested", cadence: "monthly" },
     {
       id: "p3",
-      text: "hair salon near al wasl road open late",
+      text: "hair salon near maple street open late",
       kind: "suggested",
       cadence: "monthly",
     },
@@ -271,7 +271,7 @@ export const tables = {
       id: "f1",
       slot: "card.signature",
       key: "signature",
-      value: { text: "Nadia, Rose Lane Salon" },
+      value: { text: "Nadia, Maple Street Salon" },
       status: "verified",
       source: "owner",
       review_after: ahead(150),
@@ -291,7 +291,7 @@ export const tables = {
       id: "f3",
       slot: "card.about",
       key: "about",
-      value: { text: "A small salon on Al Wasl Road for cuts, colour and blow dries." },
+      value: { text: "A small salon on Maple Street for cuts, colour and blow dries." },
       status: "verified",
       source: "owner",
       review_after: ahead(150),
@@ -414,7 +414,7 @@ export const functions = {
       items: [
         { term: "hair salon jumeirah", count: 64, fewer_than: null },
         { term: "blow dry near me", count: 31, fewer_than: null },
-        { term: "rose lane salon", count: null, fewer_than: 15 },
+        { term: "maple street salon", count: null, fewer_than: 15 },
       ],
     },
   },

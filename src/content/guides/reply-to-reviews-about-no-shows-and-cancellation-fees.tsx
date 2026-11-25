@@ -92,9 +92,9 @@ export const guide: GuideDoc = {
           <b>Example review, 1 star:</b> "Cancelled my bridal trial the night before." <b>Reply:</b>{" "}
           "You are right to be upset, Grace, and we are sorry. Your stylist was ill and we should
           have found you another time straight away. Please get in touch through our profile and we
-          will put that right. Rose Lane Salon" Google says a constructive reply and following up on
-          concerns can show you care, and may even encourage the client to update their review. It
-          is their choice whether they do.
+          will put that right. Maple Street Salon" Google says a constructive reply and following up
+          on concerns can show you care, and may even encourage the client to update their review.
+          It is their choice whether they do.
         </p>
       ),
     },
