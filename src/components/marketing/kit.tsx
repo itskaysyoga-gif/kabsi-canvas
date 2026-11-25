@@ -139,7 +139,8 @@ export function CheckBox({
 /** Quiet marks in one row: a small tick and a few words each. */
 export function MarkRow({ items, className }: { items: readonly string[]; className?: string }) {
   return (
-    <ul className={cn("flex flex-wrap gap-x-5 gap-y-2", className)}>
+    // SITE-8: Nora's button steps aside rather than cover the trust list (it is the page's one list, R-167 rule 4).
+    <ul data-nora-avoid className={cn("flex flex-wrap gap-x-5 gap-y-2", className)}>
       {items.map((m) => (
         <li
           key={m}

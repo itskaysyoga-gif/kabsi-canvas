@@ -16,7 +16,7 @@ import { describe, expect, it } from "vitest";
 import { INDUSTRIES, industry, industryIndexed } from "../src/content/industries";
 import { BLUEPRINT } from "../src/content/industries/blueprint";
 import { TRADE_WORK } from "../src/content/industries/trade-work";
-import { IndustryPage } from "../src/components/kabsi/d9-industry";
+import { IndustryPage, tradeHeroLine } from "../src/components/kabsi/d9-industry";
 import { OWN_MIN, PAIR_MAX, failures, measure, pct, sentences } from "../scripts/lib/page-dup.mjs";
 
 const pages = INDUSTRIES.filter(industryIndexed);
@@ -52,6 +52,8 @@ function shell(slug: string, html: string) {
   const vary = [
     ...w.does.flatMap((x) => [x.title, x.text]),
     ...w.faq.flatMap((x) => [x.q, x.a]),
+    // SITE-8 (R-167 rule 6): the hero line is the trade's own.
+    tradeHeroLine(i),
     w.post,
     b.review.text,
     b.reply,

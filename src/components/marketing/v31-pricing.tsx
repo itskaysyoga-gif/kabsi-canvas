@@ -2,7 +2,7 @@
 // script does not carry it. SITE-5 (lane R decision 3): Pricing has content of its own and repeats nothing from Home:
 // the price with its terms, "Your first 14 days" day by day, the included and not included lists, cancel and refunds in
 // plain words, and six billing questions. Words in v31-data.ts.
-import { X } from "lucide-react";
+import { CalendarCheck, CalendarX2, Check, ShieldCheck, Undo2, X } from "lucide-react";
 import { PRIMARY_CTA } from "@/lib/offer";
 import { ButtonLink, Faq } from "@/components/kabsi/ui";
 import { HOME_HERO, PRICE } from "./v31-data";
@@ -13,6 +13,9 @@ import { DeviceShot, PubImg } from "./life";
 import { PUB } from "./public-photos";
 import { BILLING_QUESTIONS, FIRST_DAYS, LEAVING, PLAN_LISTS, PRICING } from "./v31-more";
 import { MORE_SCREENS } from "./screens-section";
+
+/** SITE-8: the icons of LEAVING, in its order: one tap, the 14 days, the paid month, your profile. */
+const LEAVING_ICONS = [Undo2, CalendarX2, CalendarCheck, ShieldCheck];
 
 const PHOTO_SIZES = "(min-width: 1280px) 500px, (min-width: 1024px) 40vw, 100vw";
 
@@ -47,18 +50,25 @@ export function V31Pricing() {
         <div className="mt-8 max-w-[34rem] rounded-panel border border-line bg-surface-1 p-5 shadow-rest sm:p-6">
           <p className="font-display text-h2 font-bold text-text-1">{PRICE.amount}</p>
           <p className="text-read text-text-2">{PRICE.per}</p>
-          <p className="mt-3 text-read text-text-2">{PRICE.terms}</p>
+          {/* SITE-8 (R-167 rule 2): the trial terms in full, a short bold line each. */}
+          <ul className="mt-4 grid gap-1.5">
+            {PRICE.termLines.map((l) => (
+              <li key={l} className="flex gap-2 text-read font-semibold text-text-1">
+                <Check className="mt-1 size-5 shrink-0 text-ok" aria-hidden />
+                {l}
+              </li>
+            ))}
+          </ul>
           <div data-main-cta className="mt-5 max-w-[22rem]">
             <ButtonLink to="/scan" full>
               {PRIMARY_CTA}
             </ButtonLink>
           </div>
-          <p className="mt-3 text-small text-text-2">{FIRST_DAYS.cta}</p>
         </div>
       </PageTop>
 
       <Band id="days" tone="warm">
-        <Head id="days" title={FIRST_DAYS.title} line={FIRST_DAYS.line} />
+        <Head id="days" title={FIRST_DAYS.title} />
         <ol className="kb-days mt-10">
           {FIRST_DAYS.steps.map((s, n) => (
             <li key={s.when} data-last={n === FIRST_DAYS.steps.length - 1 || undefined}>
@@ -100,15 +110,32 @@ export function V31Pricing() {
 
       <Band id="leaving" tone="warm">
         <Head id="leaving" title={LEAVING.title} />
-        <dl className="mt-8 grid gap-x-12 gap-y-8 md:grid-cols-2">
-          {LEAVING.points.map((x) => (
-            <div key={x.title} className="border-t border-line pt-5">
-              <dt className="text-title font-bold">{x.title}</dt>
-              <dd className="mt-2 text-read text-text-2">{x.text}</dd>
-            </div>
-          ))}
+        <dl className="mt-8 grid gap-4 md:grid-cols-2">
+          {/* SITE-8: an icon per point, as cards in a 2x2 grid. */}
+          {LEAVING.points.map((x, n) => {
+            const Icon = LEAVING_ICONS[n] ?? ShieldCheck;
+            return (
+              <div
+                key={x.title}
+                className="flex gap-4 rounded-card border border-line bg-surface-1 p-5 shadow-rest"
+              >
+                <span
+                  aria-hidden
+                  className="grid size-10 shrink-0 place-items-center rounded-inner bg-surface-2 text-text-1"
+                >
+                  <Icon className="size-5" strokeWidth={1.75} />
+                </span>
+                <div>
+                  <dt className="text-title font-bold">{x.title}</dt>
+                  <dd className="mt-1 text-read text-text-2">{x.text}</dd>
+                </div>
+              </div>
+            );
+          })}
         </dl>
-        <p className="mt-8 border-t border-line pt-5 text-small text-text-2">{LEAVING.law}</p>
+        <p className="mt-8 border-t border-line pt-5 text-read font-semibold text-text-1">
+          {LEAVING.law}
+        </p>
       </Band>
 
       <Band id="questions" tone="ivory">
