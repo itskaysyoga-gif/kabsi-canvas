@@ -358,6 +358,8 @@ export function BusinessCombobox({
           autoFocus={autoFocus}
           value={value}
           onChange={(e) => {
+            // FIX-5: typing starts the bot check too, for a box that was filled without a focus or press.
+            warm();
             setTyped(e.target.value);
             onChange(e.target.value);
           }}
@@ -426,7 +428,7 @@ export function BusinessCombobox({
       {needToken && (
         <div className="mt-2">
           <Suspense fallback={null}>
-            <Turnstile key={round} onToken={onToken} />
+            <Turnstile key={round} surface="search_box" onToken={onToken} />
           </Suspense>
         </div>
       )}

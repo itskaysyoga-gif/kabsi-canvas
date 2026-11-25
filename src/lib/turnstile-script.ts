@@ -6,12 +6,27 @@ export const TURNSTILE_SRC =
   "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
 
 let loading: Promise<void> | null = null;
+// FIX-5: when the script was first asked for (a clock reading in ms), so "start to token" counts from the real start even
+// when /login asked for the script at page load, long before the box was drawn.
+let askedAt: number | null = null;
+const clock = () => (typeof performance !== "undefined" ? performance.now() : Date.now());
+
+/** The clock reading of the first request for the script, or now if it has not been asked for yet. */
+export function turnstileAskedAt(): number {
+  return askedAt ?? clock();
+}
+
+/** Starts loading the script now and says nothing if it fails (the widget asks again and shows its own line). */
+export function preloadTurnstile(): void {
+  void loadTurnstileScript().catch(() => undefined);
+}
 
 /** Adds the script once; a failed load can be tried again. */
 export function loadTurnstileScript(): Promise<void> {
   if (typeof window === "undefined" || typeof document === "undefined") return Promise.resolve();
   if ((window as { turnstile?: unknown }).turnstile) return Promise.resolve();
   loading ??= new Promise<void>((resolve, reject) => {
+    askedAt ??= clock();
     const s = document.createElement("script");
     s.src = TURNSTILE_SRC;
     s.async = true;
@@ -51,4 +66,5 @@ export function startOnFirstTouch(target: EventTarget, start: () => void): () =>
 /** For tests only: forget a load in progress. */
 export function resetTurnstileScriptForTest() {
   loading = null;
+  askedAt = null;
 }
