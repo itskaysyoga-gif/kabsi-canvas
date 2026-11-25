@@ -4,7 +4,7 @@
 // COPY.md 25's; the body lines are the design studio's /emails (d3-emails.tsx), written to the kabsi-copy rules. Pure
 // functions over data the caller already read: no number, date or name is invented here.
 import { card, esc, KABSI_GROUP_ID, label, para, ticks, WHATSAPP_URL } from "../email-layout.ts";
-import { CARD_PAYMENTS_COMING, FOUNDING_SENTENCE, PLAN_PRICES } from "./lifecycle-copy.ts";
+import { CARD_PAYMENTS_COMING, PLAN_PRICES } from "./lifecycle-copy.ts";
 import type { EmailContent } from "./template.ts";
 import { possessive, possessiveSuffix } from "../possessive.ts";
 import { TOKENS } from "./tokens.ts";
@@ -68,7 +68,7 @@ export function setupIncomplete(o: { business: string; resumeCode?: string | nul
 export function accessWorks(o: { business: string; when?: string; nextStep?: string | null; trialStart?: string | null; trialEnd?: string | null; tz?: string; removeSteps: string; freeLine: string; helpUrl: string }, appUrl: string): EmailContent {
   const tz = o.tz ?? "UTC";
   const trial = o.trialEnd
-    ? `${o.trialStart ? `Started ${dayMonth(o.trialStart, tz)}, ends ${dayMonth(o.trialEnd, tz)}` : `Ends ${dayMonth(o.trialEnd, tz)}`}. No card, and no charge unless you choose a plan.`
+    ? `${o.trialStart ? `Started ${dayMonth(o.trialStart, tz)}, ends ${dayMonth(o.trialEnd, tz)}` : `Ends ${dayMonth(o.trialEnd, tz)}`}. Cancel before it ends and you pay nothing.`
     : null;
   // The caller's next step wins (no plan yet, early access): only a business on its way gets "your first task".
   const task = o.nextStep || "Kabsi is preparing your first task. It comes to you for a yes.";
@@ -141,8 +141,8 @@ export function trialEnding(o: { business: string; ends: Date | string; tz?: str
     w.postsSent ? `${plural(w.postsSent, "post", "posts")} sent to Google` : "",
     w.changesCaught ? `${plural(w.changesCaught, "change to your Google profile", "changes to your Google profile")} caught` : "",
   ].filter(Boolean);
-  // Price 1: built features only, and the founding price beside the list price.
-  const choice = `Pro is $${PLAN_PRICES.proMonthly} a month: a post every week, team roles, review graphics and the words people searched to find you. Essentials is $${PLAN_PRICES.essentialsMonthly} a month: every reply and 2 posts a month. ${FOUNDING_SENTENCE} Prices are in US dollars, plus tax where it applies.`;
+  // PILOT-READY (R-165): one plan. The trial started with a card, so the choice is to keep it or cancel.
+  const choice = `Kabsi is $${PLAN_PRICES.monthly} a month per location: every reply, posts from your photos, your Google profile kept right and your weekly report. ${CARD_PAYMENTS_COMING} Prices are in US dollars, plus tax where it applies.`;
   const letEnd = `Or let it end. Nothing is charged, and from ${end} Kabsi publishes nothing. For 7 more days it keeps watching your reviews and drafting replies, in case you choose a plan. You keep your review link and QR code.`;
   const doneText = done.length ? done : ["Kabsi watched your reviews and your Google profile every day"];
   return {

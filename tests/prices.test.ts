@@ -2,58 +2,33 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { TRIAL_LINE as OFFER_TRIAL_LINE } from "../src/lib/offer";
 import { describe, expect, it } from "vitest";
+import { FOUNDING_LINE } from "../src/lib/offer";
 import {
-  FOUNDING_PRICES,
   FOUNDING_SENTENCE,
-  PLAN_PRICES,
+  ONE_PLAN,
   PLAN_PRICE_ROWS,
   PRICES_SENTENCE,
   foundingLine,
 } from "../src/lib/site";
+import { readerLines } from "./helpers/house-rules";
 import { readText } from "./helpers/facts";
 
-// The prices of lane R (22 Oct 2026), in US dollars: Essentials 19 a month or 190 a year, Pro 39 or 390, an extra
-// location 15 or 150. The earlier single Pro price (19 a month or 190 a year) is retired: it is now the Essentials price,
-// and nothing may call it the Pro price. Card payments are marked coming until Creem opens.
-describe("PLAN_PRICES", () => {
-  it("are the three prices, in whole dollars, and yearly is ten months", () => {
-    // Price 1 (30 Oct 2026, Rashid's "yes 29/59"): the list prices; the founding price is 19 and 39.
-    expect(PLAN_PRICES).toEqual({
-      essentialsMonthly: 29,
-      essentialsYearly: 290,
-      proMonthly: 59,
-      proYearly: 590,
-      extraLocationMonthly: 15,
-      extraLocationYearly: 150,
-    });
-    expect(FOUNDING_PRICES).toEqual({
-      essentialsMonthly: 19,
-      essentialsYearly: 190,
-      proMonthly: 39,
-      proYearly: 390,
-    });
-    expect(PLAN_PRICES.essentialsYearly).toBe(PLAN_PRICES.essentialsMonthly * 10);
-    expect(PLAN_PRICES.proYearly).toBe(PLAN_PRICES.proMonthly * 10);
-    expect(PLAN_PRICES.extraLocationYearly).toBe(PLAN_PRICES.extraLocationMonthly * 10);
+// PILOT-READY (R-165): one plan called Kabsi, 29 US dollars a month per location, an extra location 29, a 14 day trial that
+// starts with a card (TRIAL_LINE in src/lib/offer.ts), and a private founding price of 19 for the first 12 months.
+describe("the one plan", () => {
+  it("is 29 a month per location, the extra location is 29 and the founding price is 19", () => {
+    expect(ONE_PLAN).toEqual({ name: "Kabsi", monthly: 29, extraLocationMonthly: 29, founding: 19 });
+    expect(ONE_PLAN.extraLocationMonthly).toBe(ONE_PLAN.monthly);
   });
-  it("read the same in the sentence and in the Plan page rows", () => {
+  it("reads the same in the sentence, the Plan page rows and the founding line", () => {
     expect(PRICES_SENTENCE).toBe(
-      "Essentials is $29 a month or $290 a year. Pro is $59 a month or $590 a year. An extra location is $15 a month or $150 a year. Prices are in US dollars, plus tax where it applies.",
+      "Kabsi is $29 a month per location. An extra location is $29 a month. Prices are in US dollars, plus tax where it applies.",
     );
-    expect(FOUNDING_SENTENCE).toBe(
-      "The first 30 paying businesses pay the launch price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year.",
-    );
-    // No crossed-out price: the launch price line says what is true and what follows.
-    expect(foundingLine("essentials", false)).toBe(
-      "Launch price for the first 30 paying businesses: 19 US dollars a month, kept while you stay subscribed. Then 29.",
-    );
-    expect(foundingLine("pro", true)).toBe(
-      "Launch price for the first 30 paying businesses: 390 US dollars a year, kept while you stay subscribed. Then 590.",
-    );
+    expect(FOUNDING_SENTENCE).toBe(FOUNDING_LINE);
+    expect(foundingLine()).toBe(FOUNDING_LINE);
     expect(PLAN_PRICE_ROWS.map((r) => `${r.name}: ${r.price}`)).toEqual([
-      "Kabsi Essentials: $29 a month or $290 a year",
-      "Kabsi Pro: $59 a month or $590 a year",
-      "Extra location: $15 a month or $150 a year",
+      "Kabsi: $29 a month per location",
+      "Extra location: $29 a month",
     ]);
   });
 });
@@ -88,6 +63,8 @@ const OTHER_AMOUNTS: Record<string, string[]> = {
     "src/routes/partners_.terms.tsx",
   ], // the partner payout minimum (30.15 section 5)
   $0: ["knowledge/kabsi-facts.md", "public/llms-full.txt"],
+  $15: ["src/components/kabsi/faq-data.ts"], // SITE-4 rewrites the FAQ price lines (PILOT-READY left them to it, see LATER)
+  $150: ["src/components/kabsi/faq-data.ts"],
 };
 
 describe("no retired price (lane R, 22 Oct 2026)", () => {
@@ -103,9 +80,7 @@ describe("no retired price (lane R, 22 Oct 2026)", () => {
     }
   });
   it("every dollar amount a reader can see is one of the list or founding prices", () => {
-    const allowed = new Set(
-      [...Object.values(PLAN_PRICES), ...Object.values(FOUNDING_PRICES)].map((n) => `$${n}`),
-    );
+    const allowed = new Set([ONE_PLAN.monthly, ONE_PLAN.extraLocationMonthly, ONE_PLAN.founding].map((n) => `$${n}`));
     for (const f of READABLE.filter((p) => !/kabsi-facts|llms-full/.test(p))) {
       const text = readText(f).replace(/\$\{[^}]*\}/g, "");
       for (const m of text.matchAll(/\$(\d{2,}[\d,]*)/g)) {
@@ -139,5 +114,32 @@ describe("no retired price (lane R, 22 Oct 2026)", () => {
           /retired|RETIRED|replaces?d?|switched off|never quote|no longer/i,
         );
     }
+  });
+});
+
+// PILOT-READY (R-165): what a person can read on the surfaces this task owns says one plan. SITE-4 widens this list to the
+// public pages and components it rewrites (LATER).
+describe("one plan on the owner's own surfaces", () => {
+  const PILOT = [
+    ...files("supabase/functions/_shared/email", /\.ts$/),
+    ...files("supabase/functions/_shared/whatsapp", /\.ts$/),
+    "supabase/functions/_shared/billing-lines.ts",
+    "supabase/functions/_shared/billing-words.ts",
+    "supabase/functions/_shared/programs.ts",
+    "src/lib/site.ts",
+    "src/routes/terms.tsx",
+  ].filter((f) => !/test-helpers|replay/.test(f));
+  const RETIRED_WORDS = /\bEssentials\b|\bPro\b|\bno card\b|\bNo card\b|Start free|\b15 days\b|\b15-day\b|\$15\b|15 US dollars/;
+  it("no Essentials, Pro, no card, 15 days or 15 dollars in a line a reader sees", () => {
+    const found: string[] = [];
+    for (const f of PILOT)
+      for (const line of readerLines(readText(f)))
+        if (RETIRED_WORDS.test(line)) found.push(`${f}: ${line.slice(0, 100)}`);
+    expect(found).toEqual([]);
+  });
+  it("the WhatsApp prices answer and the trial lines carry TRIAL_LINE", () => {
+    const say = readText("supabase/functions/_shared/whatsapp/say.ts");
+    expect(say).toContain("TRIAL_LINE");
+    expect(readText("supabase/functions/_shared/offer.ts")).toContain(OFFER_TRIAL_LINE);
   });
 });

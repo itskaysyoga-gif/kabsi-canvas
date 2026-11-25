@@ -7,9 +7,9 @@ import {
   OPERATOR_NAME,
   OPERATOR_LINE,
   MERCHANT_LINE,
-  FOUNDING_SENTENCE,
-  HELP_LINES,
-  PLAN_PRICES,
+  ONE_PLAN,
+  HELP_LINE,
+  TRIAL_LINE,
   WHATSAPP_NUMBER,
   WORKING_HOURS,
   WHATSAPP_ON,
@@ -221,15 +221,10 @@ function Page() {
         <h2>8. Prices and payment</h2>
         <ul>
           <li>
-            Kabsi Essentials is ${PLAN_PRICES.essentialsMonthly} a month or $
-            {PLAN_PRICES.essentialsYearly} a year, Kabsi Pro is ${PLAN_PRICES.proMonthly} a month or
-            ${PLAN_PRICES.proYearly} a year, and an extra location is $
-            {PLAN_PRICES.extraLocationMonthly} a month or ${PLAN_PRICES.extraLocationYearly} a year.
-            Prices are in US dollars, plus tax where it applies, and the same in every country.{" "}
-            {FOUNDING_SENTENCE} A business that joins by Kabsi's invitation and chooses a plan after
-            its free months pays the launch price too. You can start with a 14-day free trial of
-            Pro, no card. Monthly plans can be cancelled at any time and run to the end of the month
-            you paid for. Yearly plans are refundable within 14 days (section 10).
+            Kabsi is one plan: ${ONE_PLAN.monthly} a month per location, and an extra location is $
+            {ONE_PLAN.extraLocationMonthly} a month. Prices are in US dollars, plus tax where it
+            applies, and the same in every country. {TRIAL_LINE} Kabsi can be cancelled at any time
+            and runs to the end of the period you paid for.
           </li>
           <li>
             Cancelling on the Plan page or by asking Kabsi ends your plan at the end of the period
@@ -254,9 +249,9 @@ function Page() {
         <h2>9. Trial and when your plan runs</h2>
         <ul>
           <li>
-            The free trial lasts 14 days and needs no card. It starts when Kabsi's access to your
+            The free trial lasts 14 days and starts with a card. It starts when Kabsi's access to your
             Google profile works, so waiting for access costs you nothing. There is one trial per
-            Google business. Nothing is charged by itself when it ends.
+            Google business. If you have not cancelled by day 14, the first month is charged to your card.
           </li>
           <li>
             Card payments are not open yet, so nothing is charged today. The rules below apply from
@@ -268,9 +263,8 @@ function Page() {
             at each renewal. Your paid period starts the day you pay, including during your trial.
           </li>
           <li>
-            Moving to Pro applies at once, and Creem charges the difference for the rest of the
-            period that day. Moving to Essentials applies from your next renewal. An extra location
-            is its own subscription that renews every month or year from the day you add it.
+            An extra location is its own subscription that renews every month from the day you add
+            it.
           </li>
           <li>
             Cancelling on the Plan page stops the next renewal: your plan runs to the end of the
@@ -366,7 +360,7 @@ function Page() {
       <section>
         <h2>14. Availability and help</h2>
         <p>
-          Essentials: {HELP_LINES.essentials} Pro: {HELP_LINES.pro} {WORKING_HOURS}
+          {HELP_LINE} {WORKING_HOURS}
         </p>
         <p>
           We work to keep Kabsi running and your emails arriving, but we can't guarantee it will

@@ -3,7 +3,7 @@
 
 import { WHATSAPP_DIGITS, WHATSAPP_ON } from "../../supabase/functions/_shared/whatsapp-setting.ts";
 import { CONSENT_ASK_FIRST } from "./region";
-import { PRIMARY_CTA, TRIAL_LINE as OFFER_TRIAL_LINE } from "./offer";
+import { FOUNDING_LINE as OFFER_FOUNDING_LINE, FOUNDING_MONTHLY_USD, PRICE_MONTHLY_USD, PRIMARY_CTA, TRIAL_LINE as OFFER_TRIAL_LINE } from "./offer";
 import { SOCIAL_LINKS } from "../../supabase/functions/_shared/social-links.ts";
 
 /** Where the consent bar asks first (the one list is CONSENT_ASK_FIRST in src/lib/region.ts). */
@@ -212,6 +212,12 @@ export const GOOGLE_NOTICE =
  * in the product: the Plan page, the Home card, the trial emails, the FAQ and the terms all read them or repeat
  * `PRICES_SENTENCE`. The earlier single Pro price is retired, and tests/prices.test.ts fails if it comes back.
  */
+/** PILOT-READY (R-165): there is one plan, called Kabsi. 29 US dollars a month per location; an extra location is 29. */
+export const ONE_PLAN = { name: "Kabsi", monthly: PRICE_MONTHLY_USD, extraLocationMonthly: PRICE_MONTHLY_USD, founding: FOUNDING_MONTHLY_USD } as const;
+/**
+ * @deprecated Two-plan numbers of the old site. Kept only so the public components SITE-4 owns still compile; no reader
+ * sees them any more through site.ts (every visible sentence below reads ONE_PLAN). SITE-4 deletes this and FOUNDING_PRICES.
+ */
 export const PLAN_PRICES = {
   essentialsMonthly: 29,
   essentialsYearly: 290,
@@ -233,13 +239,9 @@ export const FOUNDING_PRICES = {
   proYearly: 390,
 } as const;
 export const FOUNDING_TOTAL = 30;
-/** The launch price line on a plan card: "Launch price for the first 30 paying businesses: 19 US dollars a month, kept while
- * you stay subscribed. Then 29." */
-export function foundingLine(plan: "essentials" | "pro", yearly: boolean): string {
-  const k = `${plan}${yearly ? "Yearly" : "Monthly"}` as const;
-  return `Launch price for the first ${FOUNDING_TOTAL} paying businesses: ${FOUNDING_PRICES[k]} US dollars ${
-    yearly ? "a year" : "a month"
-  }, kept while you stay subscribed. Then ${PLAN_PRICES[k]}.`;
+/** The founding line of the one plan (private, invited owners only): the same words as FOUNDING_LINE in offer.ts. */
+export function foundingLine(_plan?: "essentials" | "pro", _yearly?: boolean): string {
+  return OFFER_FOUNDING_LINE;
 }
 /** The places left, under the plan cards while any remain. */
 export const foundingPlacesLine = (left: number) =>
@@ -251,31 +253,23 @@ export const PAY_TODAY_LINE = "Nothing to pay today. Card payments in US dollars
 export const ACCOUNT_STAYS_LINE =
   "Your account and its history stay. Ask us any time to delete them.";
 export const REFUND_LINE =
-  "Monthly plans can be cancelled at any time. Yearly plans are refundable within 14 days.";
+  "Kabsi can be cancelled at any time. Your plan runs to the end of the period you paid for.";
 /** The help lines, exactly as master plan 30.21 section 2 words them, with the working hours beside them. */
 export const HELP_LINES = {
   essentials: "A person answers on WhatsApp the same working day.",
-  pro: "Priority help: a person answers on WhatsApp within 4 working hours, and a call when you need one.",
+  /** @deprecated One plan: the same line as essentials. */
+  pro: "A person answers on WhatsApp the same working day.",
 } as const;
+export const HELP_LINE = HELP_LINES.essentials;
 export const WORKING_HOURS = "Working hours: Monday to Friday, 9:00 to 18:00, UAE time.";
-/** The three prices in one sentence, worded once, for the Plan page, the Home card, the FAQ and the trial emails. */
-export const PRICES_SENTENCE = `Essentials is $${PLAN_PRICES.essentialsMonthly} a month or $${PLAN_PRICES.essentialsYearly} a year. Pro is $${PLAN_PRICES.proMonthly} a month or $${PLAN_PRICES.proYearly} a year. An extra location is $${PLAN_PRICES.extraLocationMonthly} a month or $${PLAN_PRICES.extraLocationYearly} a year. Prices are in US dollars, plus tax where it applies.`;
-/** The launch price in one sentence, for the Plan page, the FAQ, the terms and the emails. */
-export const FOUNDING_SENTENCE = `The first ${FOUNDING_TOTAL} paying businesses pay the launch price and keep it while they stay subscribed: Essentials $${FOUNDING_PRICES.essentialsMonthly} a month or $${FOUNDING_PRICES.essentialsYearly} a year, Pro $${FOUNDING_PRICES.proMonthly} a month or $${FOUNDING_PRICES.proYearly} a year.`;
-/** The three rows the Plan page lists, worded from the same numbers. */
+/** The price in one sentence, worded once, for the Plan page, the Home card, the FAQ and the trial emails. */
+export const PRICES_SENTENCE = `Kabsi is $${ONE_PLAN.monthly} a month per location. An extra location is $${ONE_PLAN.extraLocationMonthly} a month. Prices are in US dollars, plus tax where it applies.`;
+/** The founding price in one sentence: private, for an invited business only (30.51). Never on a public page. */
+export const FOUNDING_SENTENCE = OFFER_FOUNDING_LINE;
+/** The rows the Plan page lists, worded from the same numbers. */
 export const PLAN_PRICE_ROWS = [
-  {
-    name: "Kabsi Essentials",
-    price: `$${PLAN_PRICES.essentialsMonthly} a month or $${PLAN_PRICES.essentialsYearly} a year`,
-  },
-  {
-    name: "Kabsi Pro",
-    price: `$${PLAN_PRICES.proMonthly} a month or $${PLAN_PRICES.proYearly} a year`,
-  },
-  {
-    name: "Extra location",
-    price: `$${PLAN_PRICES.extraLocationMonthly} a month or $${PLAN_PRICES.extraLocationYearly} a year`,
-  },
+  { name: "Kabsi", price: `$${ONE_PLAN.monthly} a month per location` },
+  { name: "Extra location", price: `$${ONE_PLAN.extraLocationMonthly} a month` },
 ] as const;
 /** The marker on a feature or payment that is decided and not open. No date, ever. */
 export const COMING_SOON = "Coming soon";

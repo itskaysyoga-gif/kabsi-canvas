@@ -192,7 +192,7 @@ describe("Founding 25 messages", () => {
       expect(all).toContain("Al Noor Salon");
       if (d !== 60)
         expect(all).toContain(
-          "$19 a month or Pro $39 a month, kept while your subscription stays paid",
+          "19 US dollars a month for your first 12 months, then 29 US dollars a month",
         );
       expect(all).toMatch(/[Nn]othing is charged/);
     }

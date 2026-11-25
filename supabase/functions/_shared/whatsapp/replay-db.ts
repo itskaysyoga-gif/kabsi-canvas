@@ -31,6 +31,9 @@ export function replayIo(o: { phoneNumberId: string; deliver: ReplayIo["deliver"
     async reset(phones) {
       const p = only(phones).filter((x) => PERSONA_PHONES.includes(x));
       if (!p.length) return;
+      // PILOT-READY: the people are made again when someone has removed them (every step answered needs_account on 25 Nov 2026).
+      const { error } = await db.rpc("qa_ensure_whatsapp_personas");
+      if (error) throw new Error(`the fictional phones could not be bound: ${error.message}`);
       await db.from("whatsapp_conversations").delete().in("phone", p);
       await db.from("whatsapp_optins").update({ state: "active", stopped_at: null }).in("phone", p);
     },
@@ -44,6 +47,14 @@ export function replayIo(o: { phoneNumberId: string; deliver: ReplayIo["deliver"
       const { data, error } = await db.rpc("whatsapp_action_create", { p_user: role.user_id, p_target_type: "review_reply", p_target_id: QA_REVIEW_ID });
       const r = data as { ok?: boolean; token?: string } | null;
       return error || !r?.ok ? null : r.token ?? null;
+    },
+    async lock(scenario, phones) {
+      const { data, error } = await db.rpc("qa_replay_lock", { p_phones: only(phones), p_scenario: scenario, p_seconds: 300 });
+      if (error) throw new Error(`could not take the phones: ${error.message}`);
+      return (data as string | null) ?? null;
+    },
+    async unlock(scenario, phones) {
+      await db.rpc("qa_replay_unlock", { p_phones: only(phones), p_scenario: scenario });
     },
     deliver: o.deliver,
     async observe(phone, messageId, since): Promise<Observed> {

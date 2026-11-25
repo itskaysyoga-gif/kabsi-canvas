@@ -57,9 +57,9 @@ describe("Sync 2a part 1", () => {
   it("item 7: the hand-off times in say.ts are the help lines and the working hours of site.ts", () => {
     const say = read("supabase/functions/_shared/whatsapp/say.ts");
     expect(HELP_LINES.essentials).toContain("the same working day");
-    expect(HELP_LINES.pro).toContain("within 4 working hours");
+    expect(HELP_LINES.pro).toContain("the same working day");
     expect(say).toContain('essentials: "the same working day"');
-    expect(say).toContain('pro: "within 4 working hours"');
+    expect(say).toContain('pro: "the same working day"');
     expect(say).toContain('other: "within one working day"');
     expect(say).toContain(`HANDOFF_HOURS = "${WORKING_HOURS}"`);
     const nora = read("supabase/functions/_shared/whatsapp/nora.ts");

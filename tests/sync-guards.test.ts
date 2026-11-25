@@ -55,7 +55,10 @@ describe("the surface list", () => {
 
 describe("a Kabsi plan costs what src/lib/site.ts says, on every surface", () => {
   it("facts, COPY.md, auth and product emails, WhatsApp, Outbound, billing, Nora, server copy and share images", () => {
-    expect(each((_s, _f, t) => priceProblems(t))).toEqual([]);
+    // docs/COPY.md keeps its older sections as history ("later sections win"): from PILOT-READY (R-165) only section 90 and
+    // later are read for a plan price, because every earlier price line is replaced by section 93.
+    const current = (f: string, t: string) => (f === "docs/COPY.md" ? t.slice(Math.max(0, t.indexOf("\n## 90."))) : t);
+    expect(each((_s, f, t) => priceProblems(current(f, t)))).toEqual([]);
   });
   it("the Creem catalogue holds the same amounts, in cents", () => {
     const want: Record<string, number> = {
@@ -79,10 +82,13 @@ describe("a Kabsi plan costs what src/lib/site.ts says, on every surface", () =>
     expect(each((_s, _f, t) => placeCountProblems(t))).toEqual([]);
   });
   it("catches a different amount for a plan, a wrong period and a wrong count", () => {
-    expect(priceProblems("Essentials is $39 a month.")).toHaveLength(1);
-    expect(priceProblems("Pro is $59 a month or $390 a year.")).toEqual([]);
-    expect(priceProblems("Pro is $590 a month.")).toHaveLength(1);
-    expect(priceProblems("An extra location is $15 a month or 150 US dollars a year.")).toEqual([]);
+    // PILOT-READY (R-165): one plan, 29 a month per location, an extra location 29, a private 19.
+    expect(priceProblems("Kabsi Essentials is $39 a month.")).toHaveLength(1);
+    expect(priceProblems("Kabsi is $29 a month per location.")).toEqual([]);
+    expect(priceProblems("Pro is $59 a month.")).toHaveLength(1);
+    expect(priceProblems("Kabsi is $290 a year.")).toHaveLength(1);
+    expect(priceProblems("An extra location is $29 a month.")).toEqual([]);
+    expect(priceProblems("An extra location is $15 a month.")).toHaveLength(1);
     expect(priceProblems("The extra location is $25 a month.")).toHaveLength(1);
     expect(priceProblems("Plans start at $9 a month.")).toHaveLength(1);
     expect(

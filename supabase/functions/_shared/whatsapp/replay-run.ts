@@ -16,6 +16,9 @@ export interface ReplayIo {
   /** Signs the payload, feeds it to the inbound path and waits until the background work has finished. */
   deliver(p: { event: string; body: unknown }): Promise<void>;
   observe(phone: string, messageId: string, sinceOutbox: number): Promise<Observed>;
+  /** PILOT-READY: takes the scenario's phones for a few minutes. null when taken, else the phone another scenario still holds. */
+  lock(scenario: string, phones: string[]): Promise<string | null>;
+  unlock(scenario: string, phones: string[]): Promise<void>;
 }
 
 export type StepReport = {
@@ -31,9 +34,22 @@ export async function runScenario(io: ReplayIo, name: string, runId: string): Pr
   const sc: Scenario | undefined = SCENARIOS[name];
   if (!sc) return { scenario: name, ok: false, refused: "unknown scenario", steps: [], ms: 0 };
   const phones = [...new Set(sc.steps.map((s) => s.phone).concat(sc.phones))];
+  // Two scenarios on one phone spoiled each other (25 Nov 2026): the second is refused until the first has finished.
+  const busy = await io.lock(name, phones);
+  if (busy) return { scenario: name, ok: false, refused: `another scenario is running on ${busy.slice(0, -4)}xxxx; run one at a time`, steps: [], ms: 0 };
+  try {
+    return await runLocked(io, sc, phones, runId, t0);
+  } finally {
+    await io.unlock(name, phones);
+  }
+}
+
+async function runLocked(io: ReplayIo, sc: Scenario, phones: string[], runId: string, t0: number): Promise<Report> {
+  const name = sc.name;
+  // The reset binds the fictional phones to the demo businesses again first, so the check below reads the real bindings.
+  await io.reset(phones);
   const why = await io.problem(phones);
   if (why) return { scenario: name, ok: false, refused: why, steps: [], ms: 0 };
-  await io.reset(phones);
   const steps: StepReport[] = [];
   const lastButtons = new Map<string, { id: string; title: string }[]>();
   let token: string | null = null;

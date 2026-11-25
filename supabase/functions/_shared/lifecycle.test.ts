@@ -178,14 +178,13 @@ Deno.test("the day-7 recap says exactly the numbers of the snapshot, which come 
   assert.doesNotMatch(one.text, /posts? you approved/);
 });
 
-Deno.test("prices and offer: Essentials, Pro and an extra location, card payments marked coming, no end-of-trial discount", () => {
+Deno.test("prices and offer: one plan called Kabsi, an extra location, card payments marked coming, no end-of-trial discount", () => {
   const ctx = { appUrl: "https://kabsi.co", removalOn: true };
-  assert.deepEqual(Object.values(PLAN_PRICES), [29, 290, 59, 590, 15, 150]);
-  // Email 1: the trial-ending email (day 11) gives the explicit choice with the monthly prices instead (30.15 section 6).
+  assert.deepEqual(Object.values(PLAN_PRICES), [29, 29]);
+  // The trial-ending email (day 11) gives the one price and the choice to cancel (R-165).
   const ending = lifecycleEmail("trial_day11", LIFE_SAMPLE, ctx);
-  assert.match(ending.text, /Pro is \$59 a month/);
-  assert.match(ending.text, /Essentials is \$29 a month/);
-  assert.match(ending.text, /launch price and keep it while they stay subscribed: Essentials \$19 a month/);
+  assert.match(ending.text, /Kabsi is \$29 a month per location/);
+  assert.doesNotMatch(ending.text, /Essentials|\bPro\b|launch price/);
   assert.doesNotMatch(ending.text, /search(es)? checked/);
   assert.match(ending.text, /plus tax where it applies/);
   assert.ok(ending.text.includes(CARD_PAYMENTS_COMING));
@@ -193,16 +192,15 @@ Deno.test("prices and offer: Essentials, Pro and an extra location, card payment
   for (const step of ["trial_day7", "trial_day14", "winback_17", "winback_30"] as const) {
     const m = lifecycleEmail(step, LIFE_SAMPLE, ctx);
     for (const t of [m.text, m.bodyHtml]) {
-      assert.match(t, /Essentials is \$29 a month or \$290 a year/, step);
-      assert.match(t, /Pro is \$59 a month or \$590 a year/, step);
-      assert.match(t, /Pro \$39 a month or \$390 a year/, step);
-      assert.match(t, /An extra location is \$15 a month or \$150 a year/, step);
+      assert.match(t, /Kabsi is \$29 a month per location/, step);
+      assert.match(t, /An extra location is \$29 a month/, step);
       assert.match(t, /plus tax where it applies/, step);
+      assert.doesNotMatch(t, /Essentials|\bPro\b|\$290|\$15/, step);
     }
     assert.ok(m.text.includes(PRICES_SENTENCE), step);
     assert.ok(m.text.includes(CARD_PAYMENTS_COMING), step);
     assert.equal(m.button?.label, "See your plan", step);
-    assert.doesNotMatch(m.text, /Kabsi Pro is \$19|Choose a plan:|checkout/i, step);
+    assert.doesNotMatch(m.text, /Choose a plan:|checkout/i, step);
   }
   for (const step of Object.keys({ welcome: 1, no_access_1h: 1, no_access_24h: 1, no_access_72h: 1, first_reply_approved: 1, trial_day2: 1, trial_day7: 1, trial_day11: 1, trial_day14: 1, winback_17: 1, winback_30: 1 }) as StepId[]) {
     const m = lifecycleEmail(step, LIFE_SAMPLE, ctx);

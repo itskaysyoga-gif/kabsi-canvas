@@ -785,8 +785,8 @@ const priceText = (plan: Plan | "extra", period: Period, family: PriceFamily) =>
   const cents = CATALOGUE[plan === "extra" ? extraKey(period) : planKey(plan, period, family)].price;
   return `$${cents / 100} ${period === "year" ? "a year" : "a month"}`;
 };
-// OFFER-2: the one plan is shown as "Kabsi"; a Pro plan a business already has keeps its name.
-const planName = (plan: Plan, period: Period) => `Kabsi${plan === "pro" ? " Pro" : ""}, ${period === "year" ? "yearly" : "monthly"}`;
+// OFFER-2: the one plan is shown as "Kabsi"; PILOT-READY (R-165): a plan a business already has is shown as Kabsi too.
+const planName = (_plan: Plan, period: Period) => `Kabsi, ${period === "year" ? "yearly" : "monthly"}`;
 const CONFIRM = (op: string): Button[] => [{ id: `k:${op}`, title: "Confirm" }];
 const KEEP: Button[] = [{ id: "k:keep", title: "Keep my plan" }];
 
