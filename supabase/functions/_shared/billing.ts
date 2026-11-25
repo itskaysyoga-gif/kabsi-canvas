@@ -97,6 +97,16 @@ export async function applyEvent(eventKey: string): Promise<string> {
   const org = existing?.organization_id ?? knownExtra?.organization_id ?? (row.organization_id as string | null) ?? orgOf(e);
   let result = "recorded";
 
+  // APP-2: an event for a business that no longer exists can never be applied (the subscription's foreign key would fail
+  // five times and end dead). Close it at once as "business_deleted", and tell nobody: no owner message, no staff alert.
+  if (org && !(await orgExists(org))) {
+    const { error: de } = await db.from("billing_events").update({ processed_at: new Date().toISOString(), outcome: "business_deleted", organization_id: null })
+      .eq("id", row.id);
+    if (de) throw de;
+    log("billing", { ok: true, event: e.eventType, result: "business_deleted" });
+    return "business_deleted";
+  }
+
   if (extra && effect.write && subId && org) {
     result = await applyExtra(org, subId, e, effect, facts, at);
   } else if (effect.write && subId && org) {
@@ -156,6 +166,12 @@ export async function applyEvent(eventKey: string): Promise<string> {
   if (pe) throw pe;
   log("billing", { ok: true, event: e.eventType, result });
   return result;
+}
+
+async function orgExists(org: string): Promise<boolean> {
+  const { data, error } = await admin().from("organizations").select("id").eq("id", org).maybeSingle();
+  if (error) throw error;
+  return !!data;
 }
 
 async function subRow(subscriptionId: string): Promise<SubRow | null> {

@@ -4,7 +4,7 @@
 // public.entitlements (loadEntitlements). It states the three prices of the website (PRICES_SENTENCE, lane R, 22 Oct 2026)
 // and marks card payments as coming.
 import type { Entitlements } from "@/lib/entitlements";
-import { CARD_PAYMENTS_COMING } from "@/lib/plans";
+import { ADD_CARD_LABEL } from "@/lib/plans";
 import { PRICES_SENTENCE } from "@/lib/site";
 
 export const CHOICE_FROM_DAY = 11;
@@ -13,8 +13,9 @@ export type PlanChoice = {
   tone: "info" | "attention";
   title: string;
   body: string;
-  /** The Plan page link. Never a checkout: there is none until card payments open. */
-  cta: { to: "/app/plan"; label: string };
+  /** The Plan page link. After the trial (grace, ended) `checkout` is true: the button opens the Creem checkout the Plan
+   * page uses, and `to` is where the owner goes if it cannot open. */
+  cta: { to: "/app/plan"; label: string; checkout?: true };
 };
 
 const dayWord = (n: number) => (n === 1 ? "1 day" : `${n} days`);
@@ -31,12 +32,13 @@ export function planChoice(
 ): PlanChoice | null {
   if (!e) return null;
   const cta = { to: "/app/plan", label: "See your plan" } as const;
+  const addCard = { to: "/app/plan", label: ADD_CARD_LABEL, checkout: true } as const;
   if (e.state === "trial" && e.trial && e.trial.day >= CHOICE_FROM_DAY) {
     const left = daysUntil(e.trial.ends_at, now);
     return {
       tone: "info",
       title: left === 0 ? "Your free trial ends today" : `Your free trial ends in ${dayWord(left)}`,
-      body: `${PRICES_SENTENCE} Your plan and how to cancel are on the Plan page. ${CARD_PAYMENTS_COMING} Your review link and QR code stay free either way.`,
+      body: `${PRICES_SENTENCE} Your plan and how to cancel are on the Plan page. Your review link and QR code stay free either way.`,
       cta,
     };
   }
@@ -45,16 +47,16 @@ export function planChoice(
     return {
       tone: "attention",
       title: "Your trial has ended",
-      body: `Kabsi keeps watching your profile and preparing replies for ${dayWord(left)} more, but publishes nothing until you choose a plan. Whatever is waiting stays waiting. ${PRICES_SENTENCE} ${CARD_PAYMENTS_COMING}`,
-      cta,
+      body: `Kabsi keeps watching your profile and preparing replies for ${dayWord(left)} more, but publishes nothing until you add a card. Whatever is waiting stays waiting. ${PRICES_SENTENCE}`,
+      cta: addCard,
     };
   }
   if (e.state === "ended") {
     return {
       tone: "attention",
       title: "Your plan has ended",
-      body: `Drafts, Google Protection and the weekly report are paused. ${PRICES_SENTENCE} ${CARD_PAYMENTS_COMING} Your review link and QR code keep working.`,
-      cta,
+      body: `Drafts, Google Protection and the weekly report are paused until you add a card. ${PRICES_SENTENCE} Your review link and QR code keep working.`,
+      cta: addCard,
     };
   }
   return null;

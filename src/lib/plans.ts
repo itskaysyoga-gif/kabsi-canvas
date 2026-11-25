@@ -124,6 +124,9 @@ export const PLAN_NAMES: Record<string, string> = {
   pro_6m: "Kabsi (earlier plan)",
 };
 
+/** The plan card's button after the trial: it opens the same Creem checkout the Plan page uses (APP-2). */
+export const ADD_CARD_LABEL = "Add a card to keep Kabsi";
+
 /** The one line shown wherever a paid plan would be bought, until Creem (P0.4-07) opens card payments. */
 export const CARD_PAYMENTS_COMING =
   "Card payments in US dollars are coming. Until they open there is nothing to pay.";

@@ -327,7 +327,7 @@ export const nextReportLine = (monday: string) =>
 export type AttentionLine = {
   key: string;
   text: string;
-  action?: { label: string; to: string };
+  action?: { label: string; to: string; checkout?: boolean };
   /** AI Answers 1: the lines under the title (what the assistant said, what to do, the label). */
   detail?: string[];
 };
@@ -358,7 +358,7 @@ export function attentionLines(i: {
     Partial<Pick<Task, "why" | "recommendation">>)[];
   accessLost: boolean;
   setup: { text: string; owner: boolean } | null;
-  plan: { title: string; to: string; label: string } | null;
+  plan: { title: string; to: string; label: string; checkout?: boolean } | null;
   /** Billing is the owner's (K-16): a manager never sees a billing line. */
   owner?: boolean;
 }): AttentionLine[] {
@@ -378,7 +378,15 @@ export function attentionLines(i: {
       ...(i.setup.owner ? { action: { label: "Continue setup", to: "/start" } } : {}),
     });
   if (i.plan)
-    out.push({ key: "plan", text: i.plan.title, action: { label: i.plan.label, to: i.plan.to } });
+    out.push({
+      key: "plan",
+      text: i.plan.title,
+      action: {
+        label: i.plan.label,
+        to: i.plan.to,
+        ...(i.plan.checkout ? { checkout: true } : {}),
+      },
+    });
   for (const t of i.tasks) {
     if (NEEDS_YES.includes(t.kind) || t.kind === "profile_gap") continue;
     // The plan line already says it, and only the owner handles billing.

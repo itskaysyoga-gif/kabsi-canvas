@@ -86,6 +86,11 @@ export function nextMonths(n: number, from = new Date()): string[] {
   return out;
 }
 
+/** The facts (file 04): Kabsi prepares up to 2 posts a month. A stored wish of 4 never raises it. */
+export const MAX_POSTS_PER_MONTH = 2;
+export const effectiveCadence = (n: number | null | undefined): 1 | 2 =>
+  n === 1 ? 1 : MAX_POSTS_PER_MONTH;
+
 export type Settings = { auto_posts: boolean; posts_per_month: 1 | 2 | 4 };
 export async function loadSettings(locationId: string): Promise<Settings> {
   const { data, error } = await supabase
@@ -98,13 +103,6 @@ export async function loadSettings(locationId: string): Promise<Settings> {
 }
 export async function setAutoPosts(locationId: string, on: boolean) {
   const { error } = await supabase.rpc("set_auto_posts", { p_location: locationId, p_enabled: on });
-  if (error) throw new Error("Couldn't change the setting. Try again.");
-}
-export async function setCadence(locationId: string, n: 2 | 4) {
-  const { error } = await supabase.rpc("set_post_cadence", {
-    p_location: locationId,
-    p_per_month: n,
-  });
   if (error) throw new Error("Couldn't change the setting. Try again.");
 }
 

@@ -177,13 +177,13 @@ export const LATER = [
     key: "competitors",
     title: "Your competitors",
     line: "Pick the 3 businesses Kabsi watches for you (5 on Pro).",
-    to: "/app/insights",
+    to: "/app",
   },
   {
     key: "searches",
     title: "More search terms",
     line: "Add the searches your customers use.",
-    to: "/app/insights",
+    to: "/app/settings",
   },
   {
     key: "tone",
@@ -195,7 +195,7 @@ export const LATER = [
     key: "ai",
     title: "Questions for AI answers",
     line: "The questions Kabsi asks ChatGPT and Perplexity each month.",
-    to: "/app/insights",
+    to: "/app/settings",
   },
   {
     key: "team",

@@ -2668,3 +2668,11 @@ Every line below is in the code word for word; this section names where. It repl
 - **How it works:** the chat beside the steps adds "Close at 3 this Saturday" and Kabsi's "Saturday hours" answer (the same lines as Home's hero).
 - **How it works hero (review round 1):** the screen in front of the photo is Kabsi's Home for Maple Street Salon (`MORE_SCREENS.home`, alt "Kabsi's Home screen for an example business: a change on Google to decide, and a reply and a post waiting for a yes"); it was the weekly report. The watched details ("Hours", "Phone", "Website and booking link") each carry an icon; their words are unchanged.
 - **/for (review round 1):** the card "Any other local business" / "Kabsi works for any business with a Google profile. Check yours free." is retired; the band "Not on the list?" under the list says the same. The hero collage shows each trade's other photo, so it does not repeat the list.
+
+## 94. APP-2: the lines it changed (25 Nov 2026, lane R R-166)
+
+- Posts: "Kabsi prepares up to 2 posts a month." under "Kabsi's posts", with no month choice.
+- Home, Needs attention, after the trial: button "Add a card to keep Kabsi". If checkout cannot open: "Checkout did not open. Nothing changed." and the link "Open your plan". The line "Card payments in US dollars are coming" is gone from this card (the emails keep it, see LATER).
+- Staff, Businesses: the button "Start trial" and the note "Trial started."
+- Old-reviews card: "The replies did not load. Nothing changed. Try again" and "These replies did not go through. Nothing changed. Try again".
+- Google profile: the tab "Where you show up" is off until the map and AI answers are switched back on.
