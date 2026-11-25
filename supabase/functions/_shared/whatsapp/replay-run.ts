@@ -35,12 +35,16 @@ export async function runScenario(io: ReplayIo, name: string, runId: string): Pr
   if (!sc) return { scenario: name, ok: false, refused: "unknown scenario", steps: [], ms: 0 };
   const phones = [...new Set(sc.steps.map((s) => s.phone).concat(sc.phones))];
   // Two scenarios on one phone spoiled each other (25 Nov 2026): the second is refused until the first has finished.
-  const busy = await io.lock(name, phones);
-  if (busy) return { scenario: name, ok: false, refused: `another scenario is running on ${busy.slice(0, -4)}xxxx; run one at a time`, steps: [], ms: 0 };
+  // The lock belongs to this run (name and run id), so a second run of the same scenario is refused too.
+  const owner = `${name}:${runId}`;
+  const early = await io.problem(phones);
+  if (early) return { scenario: name, ok: false, refused: early, steps: [], ms: 0 };
+  const busy = await io.lock(owner, phones);
+  if (busy) return { scenario: name, ok: false, refused: /^\+/.test(busy) ? `another scenario is running on ${busy.slice(0, -4)}xxxx; run one at a time` : busy, steps: [], ms: 0 };
   try {
     return await runLocked(io, sc, phones, runId, t0);
   } finally {
-    await io.unlock(name, phones);
+    await io.unlock(owner, phones);
   }
 }
 

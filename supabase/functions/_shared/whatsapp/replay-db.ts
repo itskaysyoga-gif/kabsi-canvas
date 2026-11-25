@@ -49,12 +49,13 @@ export function replayIo(o: { phoneNumberId: string; deliver: ReplayIo["deliver"
       return error || !r?.ok ? null : r.token ?? null;
     },
     async lock(scenario, phones) {
-      const { data, error } = await db.rpc("qa_replay_lock", { p_phones: only(phones), p_scenario: scenario, p_seconds: 300 });
+      const { data, error } = await db.rpc("qa_replay_lock", { p_phones: only(phones), p_scenario: scenario, p_seconds: 900 });
       if (error) throw new Error(`could not take the phones: ${error.message}`);
       return (data as string | null) ?? null;
     },
     async unlock(scenario, phones) {
-      await db.rpc("qa_replay_unlock", { p_phones: only(phones), p_scenario: scenario });
+      const { error } = await db.rpc("qa_replay_unlock", { p_phones: only(phones), p_scenario: scenario });
+      if (error) await db.rpc("qa_replay_unlock", { p_phones: only(phones), p_scenario: scenario });
     },
     deliver: o.deliver,
     async observe(phone, messageId, since): Promise<Observed> {

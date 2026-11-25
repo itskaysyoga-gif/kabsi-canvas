@@ -249,10 +249,10 @@ function Page() {
         <h2>9. Trial and when your plan runs</h2>
         <ul>
           <li>
-            The free trial lasts 14 days and starts with a card. It starts when Kabsi's access to
-            your Google profile works, so waiting for access costs you nothing. There is one trial
-            per Google business. If you have not cancelled by day 14, the first month is charged to
-            your card.
+            Once card payments open, the free trial lasts 14 days and starts with a card. It starts
+            when Kabsi's access to your Google profile works, so waiting for access costs you
+            nothing. There is one trial per Google business. If you have not cancelled by day 14,
+            the first month is charged to your card.
           </li>
           <li>
             Card payments are not open yet, so nothing is charged today. The rules below apply from
@@ -288,12 +288,12 @@ function Page() {
         <h2>10. Refunds</h2>
         <ul>
           <li>
-            Yearly plans are refundable in full within 14 days of the plan starting. Email{" "}
-            {CONTACT_EMAIL}; we refund by the method you paid with where possible.
+            Kabsi is billed monthly. Email {CONTACT_EMAIL} if you think a payment was wrong; we
+            refund by the method you paid with where possible.
           </li>
           <li>
-            Monthly plans are not refunded for a month already paid; cancel and the plan runs to the
-            end of that month.
+            A month already paid is not refunded for a month already paid; cancel and the plan runs
+            to the end of that month.
           </li>
           <li>
             We refund the unused part of your plan if a paid feature stops for good because Google

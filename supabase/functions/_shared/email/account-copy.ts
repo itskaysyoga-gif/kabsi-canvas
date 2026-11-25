@@ -143,7 +143,7 @@ export function trialEnding(o: { business: string; ends: Date | string; tz?: str
   ].filter(Boolean);
   // PILOT-READY (R-165): one plan. The trial started with a card, so the choice is to keep it or cancel.
   const choice = `Kabsi is $${PLAN_PRICES.monthly} a month per location: every reply, posts from your photos, your Google profile kept right and your weekly report. ${CARD_PAYMENTS_COMING} Prices are in US dollars, plus tax where it applies.`;
-  const letEnd = `Or let it end. Nothing is charged, and from ${end} Kabsi publishes nothing. For 7 more days it keeps watching your reviews and drafting replies, in case you choose a plan. You keep your review link and QR code.`;
+  const letEnd = `Or let it end. Cancel before the trial ends and nothing is charged, and from ${end} Kabsi publishes nothing. For 7 more days it keeps watching your reviews and drafting replies, in case you choose a plan. You keep your review link and QR code.`;
   const doneText = done.length ? done : ["Kabsi watched your reviews and your Google profile every day"];
   return {
     subject: `Your Kabsi trial ends on ${end}`, title: `Your trial ends on ${end}.`, preheader: "What Kabsi did in your trial, the price, and your choice.",
