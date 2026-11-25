@@ -26,7 +26,7 @@ export function fixtureRows(stamp: string): FixtureRow[] {
     };
   };
   return [
-    row("oakstreetauto", "Oak Street Auto", "auto repair", "<p>Monday to Friday 8:00 to 17:00</p>", { state: "TX" }),
+    row("oakstreetauto", "Oak Street Auto", "auto repair", "<p>Monday to Friday 8:00 to 17:00</p>", { state: "IL" }),
     row("roselanesalon", "Rose Lane Salon", "hair salon", `<a href="https://www.fresha.com/book-now/rose-lane">Book now</a>`),
     row("harborbarbers", "Harbor Barbers", "barbershop", "<p>Monday to Friday 9:00 to 18:00, Saturday 9am to 4pm</p>"),
     row("maplenails", "Maple Nails", "nail salon", `<a href="https://www.instagram.com/maplenails.example">Instagram</a>`),

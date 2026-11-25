@@ -25,6 +25,7 @@ function password(): string {
 async function mailTester(address: unknown) {
   const s = await db.settings();
   if (s.sending_open || !s.test_mode) return json({ state: "test_mode_only" }, 409);
+  if (s.stopped_reason) return json({ state: "stopped" }, 409);
   if (!mailTesterAddressOk(address)) return json({ state: "bad_address" }, 400);
   const postal = db.postal();
   if (!postal) return json({ state: "no_postal_address" }, 409);

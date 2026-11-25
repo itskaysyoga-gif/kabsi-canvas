@@ -5,7 +5,8 @@
 -- 3. The lock gets two more conditions, for everyone (lane R too): sending opens only while SPF, DKIM and DMARC read
 --    correctly and the last mail-tester score is 10 of 10.
 -- 4. The kill gate (30.19 section 5): fewer than 3 replies that lead to a check or a trial in the first 300 emails ends
---    Outbound and alerts Rashid. Counted from the daily tallies: the first 300 Email 1s, then 14 days for replies.
+--    Outbound and alerts Rashid. Counted from the daily tallies: the first 300 Email 1s, then 14 days for replies, while
+--    outbound-send holds every new Email 1 ('waiting'), so only replies to the first 300 can count.
 -- 5. Approve all takes a whole week (up to 100 Email 1s).
 -- 6. The three jobs are scheduled again: prepare every 2 hours on Sundays (the coming week, ready for Monday), send every
 --    10 minutes, inbox every 10 minutes between the sends.
@@ -43,7 +44,9 @@ begin
     if current_user <> 'postgres' then
       raise exception 'outbound: sending opens only by lane R' using errcode = '42501';
     end if;
-    if not coalesce(new.dns_ok, false) or coalesce(new.mail_tester_score, 0) < 10 then
+    -- The readings must already be recorded before the statement that opens (old values), not set in the same one.
+    if not coalesce(old.dns_ok, false) or coalesce(old.mail_tester_score, 0) < 10
+       or not coalesce(new.dns_ok, false) or coalesce(new.mail_tester_score, 0) < 10 then
       raise exception 'outbound: sending opens only when SPF, DKIM and DMARC read correctly and mail-tester scores 10 of 10'
         using errcode = '42501';
     end if;

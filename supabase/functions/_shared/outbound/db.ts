@@ -30,11 +30,11 @@ export async function saveDns(r: DnsResult) {
 }
 
 /** The kill gate (30.19 section 5): ends Outbound and alerts Rashid when the first 300 emails led to fewer than 3 checks
- *  or trials. True when Outbound is (now) ended. */
-export async function killGate(): Promise<boolean> {
+ *  or trials. "ended", "waiting", "passed" or "open". */
+export async function killGate(): Promise<string> {
   const { data, error } = await admin().rpc("outbound_check_kill_gate");
   if (error) throw new Error(`killGate: ${error.message}`);
-  return data === "ended";
+  return String(data ?? "");
 }
 
 export async function saveMailTester(fields: { mail_tester_address?: string | null; mail_tester_sent_at?: string | null; mail_tester_score?: number | null; mail_tester_at?: string | null }) {

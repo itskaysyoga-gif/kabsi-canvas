@@ -62,8 +62,9 @@ export type SendDeps = {
   /** SPF, DKIM and DMARC for getkabsi.com, read now (dns.ts checkDns); the result is recorded for the staff page. */
   dns(): Promise<DnsResult>;
   saveDns(r: DnsResult): Promise<void>;
-  /** The kill gate (30.19 section 5): true when it has ended Outbound (sending is then stopped). */
-  killGate(): Promise<boolean>;
+  /** The kill gate (30.19 section 5): "ended" (sending is then stopped), "waiting" (the 300th Email 1 has gone and its
+   *  replies have 14 days: no new Email 1 goes, so only the first 300 are judged), or "open" / "passed". */
+  killGate(): Promise<string>;
   now: Date;
   random?: () => number;
 };
@@ -90,7 +91,8 @@ export async function sendTick(deps: SendDeps): Promise<SendResult> {
   if (!s.sending_open && !s.test_mode) return { ...r, state: "locked" };
   // CAN-SPAM: with no valid postal address set, nothing sends at all.
   if (!deps.postal) return { ...r, state: "no_postal_address" };
-  if (await deps.killGate()) return { ...r, state: "stopped" };
+  const gate = await deps.killGate();
+  if (gate === "ended") return { ...r, state: "stopped" };
   if (s.next_send_at && Date.parse(s.next_send_at) > deps.now.getTime()) return { ...r, state: "spacing" };
   await deps.failStale(deps.now);
   await deps.refreshSuppression();
@@ -99,6 +101,7 @@ export async function sendTick(deps: SendDeps): Promise<SendResult> {
   for (const m of due) {
     const why = modeRefusal(s, m, deps.testRecipients);
     if (why === "real_business_in_test_mode") continue; // waits, approved, until lane R opens sending
+    if (gate === "waiting" && m.kind === "first" && !m.prospect.test) continue; // the first 300 are being judged
     if (why) {
       await deps.markFailed(m.id, why);
       r.failed++;

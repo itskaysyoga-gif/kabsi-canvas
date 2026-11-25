@@ -16,6 +16,8 @@ update public.outbound_settings set dns_ok = true, mail_tester_score = 9.9;
 select throws_ok($$update public.outbound_settings set sending_open = true$$, '42501', null, '9.9 of 10 is refused');
 update public.outbound_settings set dns_ok = false, mail_tester_score = 10;
 select throws_ok($$update public.outbound_settings set sending_open = true$$, '42501', null, 'DNS not right is refused');
+select throws_ok($$update public.outbound_settings set dns_ok = true, mail_tester_score = 10, sending_open = true$$, '42501', null,
+  'the readings cannot be set in the same statement that opens');
 update public.outbound_settings set dns_ok = true, mail_tester_score = 10;
 set local role service_role;
 select throws_ok($$update public.outbound_settings set sending_open = true$$, '42501', 'outbound: sending opens only by lane R',

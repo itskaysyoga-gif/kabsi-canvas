@@ -100,15 +100,15 @@ export const US_TIME_ZONES = [
   "America/New_York", "America/Detroit", "America/Indiana/Indianapolis", "America/Kentucky/Louisville", "America/Chicago",
   "America/Denver", "America/Boise", "America/Phoenix", "America/Los_Angeles", "America/Anchorage", "Pacific/Honolulu",
 ] as const;
-/** Each state's main time zone, for a register row with a state and no time zone. A state split across zones takes the
- *  zone most of its people live in; a business near the line may get its window an hour off, still inside the day. */
+/** The time zone of each state that lies in one zone only, for a register row with a state and no time zone. A state
+ *  split across zones (FL, IN, KY, MI, TN, TX, KS, NE, ND, SD, ID, OR, AK) is left out: its row needs the register's
+ *  own time_zone, or it is refused, so the 9:00 to 17:00 window is always the recipient's own. */
 export const US_STATE_ZONES: Record<string, string> = Object.fromEntries([
-  ["America/New_York", "CT DE DC FL GA IN KY ME MD MA MI NH NJ NY NC OH PA RI SC VT VA WV"],
-  ["America/Chicago", "AL AR IL IA KS LA MN MS MO NE ND OK SD TN TX WI"],
-  ["America/Denver", "CO ID MT NM UT WY"],
+  ["America/New_York", "CT DE DC GA ME MD MA NH NJ NY NC OH PA RI SC VT VA WV"],
+  ["America/Chicago", "AL AR IL IA LA MN MS MO OK WI"],
+  ["America/Denver", "CO MT NM UT WY"],
   ["America/Phoenix", "AZ"],
-  ["America/Los_Angeles", "CA NV OR WA"],
-  ["America/Anchorage", "AK"],
+  ["America/Los_Angeles", "CA NV WA"],
   ["Pacific/Honolulu", "HI"],
 ].flatMap(([zone, states]) => states.split(" ").map((s) => [s, zone])));
 

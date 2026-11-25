@@ -30,7 +30,7 @@ export function spfOk(records: string[]): boolean {
   const spf = records.filter((r) => /^v=spf1(\s|$)/i.test(r.trim()));
   if (spf.length !== 1) return false;
   const r = spf[0].toLowerCase();
-  return /\binclude:zoho\.(com|eu|in|com\.au|jp|com\.cn|sa|ca)\b/.test(r) && /\s[-~]all\s*$/.test(r);
+  return /\binclude:(zoho|zohomail)\.(com|eu|in|com\.au|jp|com\.cn|sa|ca)\b/.test(r) && /\s[-~]all\s*$/.test(r);
 }
 
 /** DMARC: exactly one v=DMARC1 record with a policy of none, quarantine or reject. */

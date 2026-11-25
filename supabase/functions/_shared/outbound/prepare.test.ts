@@ -48,7 +48,7 @@ Deno.test("only the US and the UK can open: every other country is closed whatev
   assert.deepEqual(Object.keys(TIME_ZONES), ["GB"]);
   const ok = { company_id: "1", business_name: "Rose Lane Salon", industry: "hair salon", country: "GB", city: "Exampleton",
     website: "https://www.rose.example.com", email: "hello@rose.example.com", email_page_url: "https://rose.example.com/contact",
-    company_type: "registered company", company_number: "01234567", company_status: "Active", company_status_date: "2026-11-01", state: "TX" };
+    company_type: "registered company", company_number: "01234567", company_status: "Active", company_status_date: "2026-11-01", state: "IL" };
   const all = ["GB", "IE", "AE", "SA", "QA", "KW", "BH", "OM", "AU", "NZ", "SG", "CA", "US"];
   for (const c of all.filter((x) => x !== "GB" && x !== "US")) {
     assert.equal(rowRefusal({ ...ok, country: c }, all, "2026-11-06"), "country_closed", c);
@@ -152,7 +152,7 @@ Deno.test("Companies House from Harvey's register: Active on a Basic Company Dat
   assert.equal(companyRefusal({ ...ok, company_status_date: "2026-02-30" }, day), "no_company_status", "not a real date");
   assert.equal(companyRefusal({ ok: "x" }, day), "no_company_status", "an older register without the columns");
   assert.equal(companyRefusal({ ...ok, company_status_date: "2026-11-07" }, day), "company_status_date_ahead");
-  assert.equal(rowRefusal({ ...ok, country: "US", company_status: "", company_type: "", company_number: "", state: "TX" }, ["US"], day), null, "the US needs no company check (CAN-SPAM)");
+  assert.equal(rowRefusal({ ...ok, country: "US", company_status: "", company_type: "", company_number: "", state: "IL" }, ["US"], day), null, "the US needs no company check (CAN-SPAM)");
   for (const n of ["LP012345", "SL012345", "NL012345"]) assert.equal(rowRefusal({ ...ok, company_number: n }, ["GB"], day), "limited_partnership", n);
   for (const n of ["OC412345", "SO301234", "NC001234", "SC123456", "NI012345"]) assert.equal(rowRefusal({ ...ok, company_number: n }, ["GB"], day), null, n);
   assert.equal(toCandidate(ok).company_status, "active");
@@ -430,7 +430,7 @@ Deno.test("an industry name that every object has is still refused", () => {
 // ─── OUTBOUND-3: the US first, approval once a week
 
 const US = { company_id: "u1", business_name: "Oak Street Auto", industry: "auto repair", country: "US", city: "Exampleville",
-  website: "https://oak.example.com", email: "hello@oak.example.com", email_page_url: "https://oak.example.com/contact", state: "TX" };
+  website: "https://oak.example.com", email: "hello@oak.example.com", email_page_url: "https://oak.example.com/contact", state: "IL" };
 const POSTAL = "100 Example Street, Exampleville, TX 75001"; // invented
 
 Deno.test("US: any open business with an own-domain email, in the first tier plus auto repair and cleaners; no company check", () => {
@@ -449,9 +449,13 @@ Deno.test("US: the recipient's time zone from the register's own zone or the sta
   assert.equal(timeZoneOf(US), "America/Chicago");
   assert.equal(timeZoneOf({ ...US, state: "ca" }), "America/Los_Angeles");
   assert.equal(timeZoneOf({ ...US, state: "AZ" }), "America/Phoenix");
-  assert.equal(timeZoneOf({ ...US, state: "TX", time_zone: "America/Denver" }), "America/Denver", "the register's own zone wins");
+  assert.equal(timeZoneOf({ ...US, state: "IL", time_zone: "America/Denver" }), "America/Denver", "the register's own zone wins");
   assert.equal(timeZoneOf({ ...US, state: "", time_zone: "Europe/London" }), null, "only US zones");
   assert.equal(timeZoneOf({ ...US, state: "ZZ" }), null);
+  for (const split of ["TX", "FL", "TN", "MI", "IN", "KY", "ID", "OR"]) {
+    assert.equal(timeZoneOf({ ...US, state: split }), null, `${split} spans two zones: the register's own time_zone is needed`);
+  }
+  assert.equal(timeZoneOf({ ...US, state: "TX", time_zone: "America/Chicago" }), "America/Chicago");
   assert.equal(timeZoneOf({ country: "GB" }), "Europe/London");
   assert.ok(inWindow(new Date("2026-11-09T15:30:00Z"), "America/Chicago"), "9:30 in Chicago");
   assert.ok(!inWindow(new Date("2026-11-09T14:30:00Z"), "America/Chicago"), "8:30 in Chicago");

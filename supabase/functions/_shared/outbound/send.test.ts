@@ -82,7 +82,7 @@ function deps(over: Partial<SendDeps> = {}, settings = OPEN, due: DueMessage[] =
     markFailed: async (id, why) => void log.push(`failed:${id}:${why}`), founding: async () => null,
     testRecipients: ["inbox@test.example.com"], sender: { name: "Rashid Abou Hamzy", address: "rashid@getkabsi.com" },
     postal: POSTAL, dns: async () => (log.push("dns"), DNS_OK), saveDns: async () => void log.push("dns_saved"),
-    killGate: async () => false, now: MON_10, random: () => 0, ...over,
+    killGate: async () => "open", now: MON_10, random: () => 0, ...over,
   };
   return { d, log };
 }
@@ -328,6 +328,7 @@ Deno.test("deliverability: the three records parsed (SPF with Zoho, DKIM zmail a
   assert.ok(!spfOk(["v=spf1 include:_spf.google.com ~all"]), "no Zoho");
   assert.ok(!spfOk(["v=spf1 include:zoho.com +all"]), "+all lets anyone send");
   assert.ok(!dmarcOk(["v=DMARC1; rua=mailto:x@getkabsi.com"]), "no policy");
+  assert.ok(spfOk(["v=spf1 include:zohomail.com ~all"]), "Zoho's newer include");
   const noDkim = await checkDns(doh({ ...LIVE, "zmail._domainkey.getkabsi.com": [] }));
   assert.deepEqual([noDkim.ok, noDkim.problem], [false, "dkim_missing"]);
   const noDmarc = await checkDns(doh({ ...LIVE, "_dmarc.getkabsi.com": [] }));
@@ -337,9 +338,13 @@ Deno.test("deliverability: the three records parsed (SPF with Zoho, DKIM zmail a
 });
 
 Deno.test("the kill gate: once it ends Outbound, nothing is read or sent", async () => {
-  const t = deps({ killGate: async () => true });
+  const t = deps({ killGate: async () => "ended" });
   assert.equal((await sendTick(t.d)).state, "stopped");
   assert.ok(!t.log.some((l) => l.startsWith("deliver") || l === "refresh"));
+  const w = deps({ killGate: async () => "waiting" });
+  assert.equal((await sendTick(w.d)).sent, 0, "while the first 300 are judged, no new Email 1 goes");
+  const f = msg({ id: "m2", kind: "follow_up", parent_id: "m1", parent: { status: "sent", message_id: "<ob.0@getkabsi.com>", sent_at: "2026-11-05T10:00:00Z" } });
+  assert.equal((await sendTick(deps({ killGate: async () => "waiting" }, OPEN, [f]).d)).state, "sent", "follow-ups of the first 300 still go");
 });
 
 Deno.test("mail-tester: the address shape, the fictional US Email 1 with its footer, and the score read from the report", () => {

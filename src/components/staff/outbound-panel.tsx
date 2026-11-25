@@ -210,11 +210,19 @@ function LockState({ lock, queued }: { lock: Lock | null; queued: number }) {
   );
 }
 
+const DNS_PROBLEMS: Record<string, string> = {
+  spf: "the SPF record",
+  dkim_missing: "no DKIM key at zmail",
+  dkim_too_short: "the DKIM key is under 2048 bits",
+  dmarc: "the DMARC record",
+  dns_unreadable: "DNS could not be read",
+};
+
 function dnsLine(lock: Lock | null): string {
   if (!lock?.dns_checked_at) return "Mail checks have not run yet. They run before every send.";
   return lock.dns_ok
     ? `Mail checks: SPF, DKIM and DMARC read correctly on ${fmtDateTime(lock.dns_checked_at)}.`
-    : `Mail checks failed on ${fmtDateTime(lock.dns_checked_at)}: ${lock.dns_problem ?? "unknown"}. Nothing sends until they pass.`;
+    : `Mail checks failed on ${fmtDateTime(lock.dns_checked_at)}: ${DNS_PROBLEMS[lock.dns_problem ?? ""] ?? "unknown"}. Nothing sends until they pass.`;
 }
 
 function testerLine(lock: Lock | null): string {

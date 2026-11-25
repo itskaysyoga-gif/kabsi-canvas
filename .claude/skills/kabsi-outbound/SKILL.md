@@ -8,13 +8,13 @@ description: "Use for Kabsi Outbound (master plan 30.19 section 5 as changed by 
 The rules are master plan 30.19 section 5 as changed by 30.39 (R-119), with 30.37 and 30.38 for the contact list, and the OUTBOUND-3 task (the pilot, the US first, 25 Nov 2026), which wins where they differ. The code is in Kabsi itself: tables `outbound_*` (Supabase), the functions `outbound-prepare`, `outbound-send` and `outbound-inbox` (rules in `supabase/functions/_shared/outbound/`), and the staff page kabsi.co/staff/outbound. Harvey (itskaysyoga-gif/kabsi-harvey, private) stays the list builder; its own sending is never switched on.
 
 ## The lock
-- `outbound_settings.sending_open` stays false and `test_mode` true. Nothing in code, no RPC and no staff page can open sending: a trigger refuses it to anyone but a lane R migration, and even lane R only while `dns_ok` is true and `mail_tester_score` is 10. Sending opens only when lane R writes that migration, after Rashid says the mailbox is ready.
+- `outbound_settings.sending_open` stays false and `test_mode` true. Nothing in code, no RPC and no staff page can open sending: a trigger refuses it to anyone but a lane R migration, and even lane R only while `dns_ok` is true and `mail_tester_score` is 10, both recorded before the opening statement. Lane R's opening migration also sets `started_on`, which drives the ramp. Sending opens only when lane R writes that migration, after Rashid says the mailbox is ready.
 - In test mode only fictional example.com businesses are drafted (one US, three UK), and mail goes only to `OUTBOUND_TEST_RECIPIENTS`.
 - A stop (any complaint, bounces above 3 percent of the last 100 sends, or the kill gate) sets `sending_open` false with `stopped_reason` and alerts Rashid on WhatsApp; only lane R clears it.
 
 ## Who
 - `OPEN_COUNTRIES` in `outbound/rules.ts` and the database check on `open_countries` allow only US and GB. Every other country stays off.
-- The US: any open business (Harvey's `business_status` not closed) with an email on its own website's domain, in the eight first tier industries plus auto repair and cleaners (`SERVICE_INDUSTRIES`). No company check (CAN-SPAM). The recipient's time zone comes from the register's `time_zone` (a US zone) or its `state`; a row with neither is refused.
+- The US: any open business (Harvey's `business_status` not closed) with an email on its own website's domain, in the eight first tier industries plus auto repair and cleaners (`SERVICE_INDUSTRIES`). No company check (CAN-SPAM). The recipient's time zone comes from the register's `time_zone` (a US zone) or, for a state in one zone only, its `state`; a state split across zones needs `time_zone`, and a row without one is refused.
 - The UK: unchanged. Registered companies Active on Companies House's free Basic Company Data file at most 40 days old (30.39 item 12; no API key), company number recorded, own-domain email, the eight first tier industries only.
 - The queue takes one beauty, one food, one service business in turn. Sources: the business's own website, Companies House, OpenStreetMap (through Harvey). Never Google scraping, Places, the Business Profile API, bought lists or directories.
 - Never anyone suppressed (address, domain and parent domains, sha256 of the lower-cased value, the same rule as Harvey), never a Kabsi customer, applicant or partner, never anyone written to before.
@@ -42,7 +42,7 @@ The rules are master plan 30.19 section 5 as changed by 30.39 (R-119), with 30.3
 - mail-tester.com, test mode only: `select public.call_internal('outbound-send', '{"action":"mail_tester","address":"<id>@srvN.mail-tester.com"}')` sends the fictional US Email 1 there; then `{"action":"mail_tester_score"}` reads and records the score. 10 of 10 is required before lane R opens sending. Never a warm-up service. Google Postmaster Tools and Cloudflare DMARC Management stay on.
 
 ## Kill gate
-`outbound_check_kill_gate()` runs before every send: once the 300th Email 1 is 14 days old, fewer than 3 replies that led to a check or a trial (the `interested` tally) ends Outbound with a stop and a WhatsApp alert to Rashid.
+`outbound_check_kill_gate()` runs before every send. After the 300th Email 1 it answers "waiting" for 14 days and outbound-send holds every new Email 1 (follow-ups and replies still go), so only the first 300 are judged; then fewer than 3 replies that led to a check or a trial (the `interested` tally) ends Outbound with a stop and a WhatsApp alert to Rashid.
 
 ## Data
 - No reply: deleted 90 days after the last email, its domain coded on the never-contact list (reason contacted). A no or a bounce keeps only the hash. A yes becomes a contact under the privacy page.
