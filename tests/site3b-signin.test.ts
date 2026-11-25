@@ -50,7 +50,7 @@ describe("the panel", () => {
     expect(step).toMatch(
       /if \(!shouldMakeCode\(\{ wanted, token, busy, start, now: Date\.now\(\) \}\)\) return;/,
     );
-    expect(step).toMatch(/<Turnstile key=\{round\} onToken=\{setToken\} \/>/);
+    expect(step).toMatch(/<Turnstile key=\{round\} surface="login" onToken=\{setToken\} \/>/);
     expect(panel).toMatch(/const wa = useWaPrestart\(waOn\)/);
   });
   it("counts pointing, focusing and touching the button as intent, in both places it appears", () => {

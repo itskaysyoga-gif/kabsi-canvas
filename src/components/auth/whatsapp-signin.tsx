@@ -154,7 +154,7 @@ export function useWaPrestart(on: boolean): WaPrestart {
   const widget = (visible: boolean) =>
     on && !start ? (
       <div className={visible ? "" : "pointer-events-none absolute h-0 w-full overflow-hidden"}>
-        <Turnstile key={round} onToken={setToken} />
+        <Turnstile key={round} surface="login" onToken={setToken} />
       </div>
     ) : null;
   return { start, error, widget, again, want };

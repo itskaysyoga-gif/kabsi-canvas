@@ -1,7 +1,20 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { TURNSTILE_SITE_KEY } from "@/lib/site";
-import { reportError } from "@/lib/telemetry";
-import { loadTurnstileScript as load, startOnFirstTouch } from "@/lib/turnstile-script";
+import { reportError, track } from "@/lib/telemetry";
+import {
+  BOT_CHECK_WAIT_MS,
+  ERROR_LINE,
+  INTERACTIVE_HINT,
+  SLOW_LINE,
+  botCheckOutcome,
+  elapsedMs,
+  type BotCheckSurface,
+} from "@/lib/bot-check";
+import {
+  loadTurnstileScript as load,
+  startOnFirstTouch,
+  turnstileAskedAt,
+} from "@/lib/turnstile-script";
 
 type Api = {
   render: (
@@ -27,24 +40,29 @@ declare global {
   }
 }
 
-// No token and no click asked for within this time means the check is not going to finish on its own.
-const GIVE_UP_MS = 10_000;
+// No token and no click asked for within this time means the check is not going to finish on its own (FIX-5: 15 seconds).
+const GIVE_UP_MS = BOT_CHECK_WAIT_MS;
+let firstWidgetUsed = false;
 // A form waits this long for a token after its submit before it stops (the widget's own 10 seconds come first).
 // A submit waits at most this long for the check, then the form says the check failed (review of PR WEBFORMS: 30 s).
 const TAKE_WAIT_MS = 12_000;
 
 /**
  * Cloudflare Turnstile check (hotfix 20h). Invisible unless Cloudflare needs a click ("interaction-only"); then it sits
- * in a box sized to the form. `onToken` gets a token when passed, and "" when it expires or fails. If the check errors
- * or gives no token within 10 seconds, one plain line offers Try again, and the error code goes to Sentry.
+ * in a box sized to the form. `onToken` gets a token when passed, and "" when it expires or fails. When Cloudflare needs
+ * a tap, one line above the box says so. If the check errors, or gives no token within 15 seconds, one plain line offers
+ * Try again, and the error code goes to Sentry. Each attempt sends one `bot_check_finished` (surface, outcome, ms).
  */
 export function Turnstile({
   onToken,
   onFail,
+  surface = "other",
 }: {
   onToken: (token: string) => void;
   /** Told when the check failed and shows Try again. */
   onFail?: () => void;
+  /** Which screen asked, for the measurement. */
+  surface?: BotCheckSurface;
 }) {
   const box = useRef<HTMLDivElement>(null);
   const id = useRef<string | undefined>(undefined);
@@ -54,24 +72,51 @@ export function Turnstile({
   const failCb = useRef(onFail);
   failCb.current = onFail;
   const [interactive, setInteractive] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState<false | "slow" | "error">(false);
   const [attempt, setAttempt] = useState(0);
+  // One measurement per attempt: when it started, whether the box had to be shown, and whether it was sent.
+  const startedAt = useRef(0);
+  const wasInteractive = useRef(false);
+  const reported = useRef(false);
+  const finish = useCallback(
+    (token: boolean, timedOut: boolean) => {
+      if (reported.current) return;
+      reported.current = true;
+      track("bot_check_finished", {
+        surface,
+        outcome: botCheckOutcome({ token, wasInteractive: wasInteractive.current, timedOut }),
+        ms: elapsedMs(startedAt.current, performance.now()),
+      });
+    },
+    [surface],
+  );
 
-  const fail = useCallback((code: string) => {
-    window.clearTimeout(timer.current);
-    cb.current("");
-    failCb.current?.();
-    setFailed(true);
-    reportError(new Error(`Turnstile failed: ${code}`), { turnstile_code: code });
-  }, []);
+  const fail = useCallback(
+    (code: string) => {
+      window.clearTimeout(timer.current);
+      cb.current("");
+      failCb.current?.();
+      const slow = code === "no_token_15s" || code === "interactive_timeout";
+      setFailed(slow ? "slow" : "error");
+      finish(false, slow);
+      reportError(new Error(`Turnstile failed: ${code}`), { turnstile_code: code });
+    },
+    [finish],
+  );
   const arm = useCallback(() => {
     window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => fail("no_token_10s"), GIVE_UP_MS);
+    timer.current = window.setTimeout(() => fail("no_token_15s"), GIVE_UP_MS);
   }, [fail]);
 
   useEffect(() => {
     let dead = false;
     setFailed(false);
+    // The first attempt counts from when the script was first asked for (/login asks at page load); a retry from now.
+    // Only the first widget of the page counts from the script's first request; later ones count from their own mount.
+    startedAt.current = attempt === 0 && !firstWidgetUsed ? turnstileAskedAt() : performance.now();
+    firstWidgetUsed = true;
+    wasInteractive.current = false;
+    reported.current = false;
     load()
       .then(() => {
         if (dead || !box.current || !window.turnstile) return;
@@ -89,6 +134,7 @@ export function Turnstile({
             window.clearTimeout(timer.current);
             setFailed(false);
             setInteractive(false);
+            finish(true, false);
             cb.current(t);
           },
           "expired-callback": () => cb.current(""),
@@ -100,6 +146,7 @@ export function Turnstile({
           // A person is being asked to click: stop the 10 second clock while the box is on screen.
           "before-interactive-callback": () => {
             window.clearTimeout(timer.current);
+            wasInteractive.current = true;
             setInteractive(true);
           },
           "after-interactive-callback": () => {
@@ -115,7 +162,7 @@ export function Turnstile({
       dead = true;
       window.clearTimeout(timer.current);
     };
-  }, [attempt, arm, fail]);
+  }, [attempt, arm, fail, finish]);
 
   useEffect(
     () => () => {
@@ -127,6 +174,11 @@ export function Turnstile({
 
   return (
     <div>
+      {interactive && !failed ? (
+        <p className="mb-2 text-small font-semibold text-text-1" role="status">
+          {INTERACTIVE_HINT}
+        </p>
+      ) : null}
       <div
         ref={box}
         className={
@@ -139,7 +191,7 @@ export function Turnstile({
       />
       {failed ? (
         <p className="text-small text-text-2" role="alert">
-          We could not check your browser.{" "}
+          {failed === "slow" ? SLOW_LINE : ERROR_LINE}{" "}
           <button
             type="button"
             className="min-h-11 font-bold text-text-1 underline underline-offset-4"

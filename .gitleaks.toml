@@ -90,3 +90,12 @@ targetRules = ["generic-api-key"]
 paths = ['''^tests/speed2-suggest\.test\.ts$''']
 regexTarget = "match"
 regexes = ['''TOKEN = "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"''']
+
+# FIX-5: a made-up Autocomplete session token in the /api/suggest test ("0123456789abcdef0123"), not a key.
+[[allowlists]]
+description = "Made-up suggestion session token in the FIX-5 bot check test"
+condition = "AND"
+targetRules = ["generic-api-key"]
+paths = ['''^tests/fix5-bot-check\.test\.ts$''']
+regexTarget = "match"
+regexes = ['''session_token: "0123456789abcdef0123"''']

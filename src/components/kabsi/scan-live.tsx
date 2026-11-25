@@ -18,6 +18,14 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Turnstile } from "@/components/turnstile";
+import {
+  BOT_CHECK_WAIT_MS,
+  BotCheckTimeout,
+  requireToken,
+  CHECKING_LINE,
+  SLOW_LINE,
+  sendButtonState,
+} from "@/lib/bot-check";
 import { cn } from "@/lib/utils";
 import { CONTACT_EMAIL, SCAN_LINE, TRIAL_LINE, WHATSAPP_DIGITS, WHATSAPP_ON } from "@/lib/site";
 import {
@@ -84,19 +92,29 @@ import {
 
 /* ---------- Turnstile tokens, one per call ---------- */
 
-/** Each Turnstile token works once. `take()` waits for the next token and then asks the widget for a fresh one. */
+/** Each Turnstile token works once. `take()` waits for the next token and then asks the widget for a fresh one.
+ * FIX-5: `waiting` is true while a call waits for the token (the button then says "Checking your connection"), and
+ * `take()` answers "" after 15 seconds or when the check fails, so nothing waits for ever; `slow` says the widget
+ * already shows its own "taking longer" line. */
 function useTokens() {
   const [round, setRound] = useState(0);
+  const [waiting, setWaiting] = useState(false);
   const token = useRef("");
   const waiters = useRef<((t: string) => void)[]>([]);
+  const slow = useRef(false);
   const onToken = useCallback((t: string) => {
     token.current = t;
+    if (t) slow.current = false;
     if (t && waiters.current.length) {
       const w = waiters.current.shift()!;
       token.current = "";
       setRound((n) => n + 1);
       w(t);
     }
+  }, []);
+  const onFail = useCallback(() => {
+    slow.current = true;
+    for (const w of waiters.current.splice(0)) w("");
   }, []);
   const take = useCallback(
     () =>
@@ -108,20 +126,28 @@ function useTokens() {
           resolve(t);
           return;
         }
-        waiters.current.push(resolve);
-        // A check that never finishes still lets the call go out; the server answers with its plain message.
-        window.setTimeout(() => {
-          const i = waiters.current.indexOf(resolve);
+        setWaiting(true);
+        // eslint-disable-next-line prefer-const -- `done` needs the timer, and the timer needs `done`
+        let timer: number | undefined;
+        const done = (t: string) => {
+          window.clearTimeout(timer);
+          if (!waiters.current.length) setWaiting(false);
+          resolve(t);
+        };
+        waiters.current.push(done);
+        // A check that never finishes ends the wait; the caller shows the plain "taking longer" line and Try again.
+        timer = window.setTimeout(() => {
+          const i = waiters.current.indexOf(done);
           if (i >= 0) {
             waiters.current.splice(i, 1);
-            resolve("");
+            done("");
           }
-        }, 15_000);
+        }, BOT_CHECK_WAIT_MS);
       }),
     [],
   );
-  const widget = <Turnstile key={round} onToken={onToken} />;
-  return { take, widget };
+  const widget = <Turnstile key={round} surface="free_check" onToken={onToken} onFail={onFail} />;
+  return { take, widget, waiting, slow };
 }
 
 /* ---------- The states, each a card in the hero where the search box was (Design 8) ---------- */
@@ -137,7 +163,16 @@ const STEPS = [
   "Reading 3 nearby businesses",
 ];
 
-export function ScanSearching({ query, progress = 1 }: { query: string; progress?: number }) {
+export function ScanSearching({
+  query,
+  progress = 1,
+  waiting = false,
+}: {
+  query: string;
+  progress?: number;
+  /** FIX-5: the call is waiting for the bot check. */
+  waiting?: boolean;
+}) {
   return (
     <div className={cardCls} role="status">
       <p className="text-label font-bold text-text-2">
@@ -180,7 +215,9 @@ export function ScanSearching({ query, progress = 1 }: { query: string; progress
           );
         })}
       </ol>
-      <p className="mt-4 text-small text-text-2">About 30 seconds. Nothing changes on Google.</p>
+      <p className="mt-4 text-small text-text-2">
+        {waiting ? `${CHECKING_LINE}. ` : ""}About 30 seconds. Nothing changes on Google.
+      </p>
     </div>
   );
 }
@@ -307,6 +344,23 @@ function PickBusiness({
 
 /** Go live 1 (B-018): a 4xx is about what the visitor sent, so only the server's own message shows; a 5xx or no
  * answer keeps "Something went wrong on our side." above it. */
+/** FIX-5: no bot check token in 15 seconds. One line and a button that tries again; nothing is sent. */
+function SlowCheck() {
+  return (
+    <div className={cardCls} role="alert">
+      <h2 className="text-h3">{SLOW_LINE}</h2>
+      <Button
+        type="button"
+        className="mt-5"
+        onClick={() => window.location.reload()}
+        icon={<RotateCcw className="size-4" aria-hidden />}
+      >
+        Try again
+      </Button>
+    </div>
+  );
+}
+
 function Failed({ message, theirs = false }: { message: string; theirs?: boolean }) {
   return (
     <div className={cardCls} role="alert">
@@ -345,14 +399,19 @@ type Phase =
   | { kind: "none" }
   | { kind: "checking"; place: FoundBusiness }
   | { kind: "result"; snapshot: Snapshot; check: StartedCheck | null }
-  | { kind: "error"; message: string; theirs?: boolean };
+  | { kind: "error"; message: string; theirs?: boolean }
+  | { kind: "slow" };
 
 /** The error phase: a 4xx from profile-snapshot is the visitor's to fix (B-018). */
-const errorPhase = (e: unknown): Phase => ({
-  kind: "error",
-  message: plainError(e),
-  theirs: e instanceof CheckError && e.status !== undefined && e.status >= 400 && e.status < 500,
-});
+const errorPhase = (e: unknown): Phase =>
+  e instanceof BotCheckTimeout
+    ? { kind: "slow" }
+    : {
+        kind: "error",
+        message: plainError(e),
+        theirs:
+          e instanceof CheckError && e.status !== undefined && e.status >= 400 && e.status < 500,
+      };
 
 const plainError = (e: unknown) =>
   e instanceof CheckError || e instanceof ApiError
@@ -375,7 +434,7 @@ export function LiveFreeCheck({
   /** The suggestions' session token: Place Details with it ends the Autocomplete session. */
   sessionToken?: string | null;
 }) {
-  const { take, widget } = useTokens();
+  const { take, widget, waiting } = useTokens();
   const [phase, setPhase] = useState<Phase>({ kind: "searching" });
   const [progress, setProgress] = useState(0);
   const started = useRef(false);
@@ -388,7 +447,7 @@ export function LiveFreeCheck({
     void (async () => {
       try {
         if (placeId) return void pick({ place_id: placeId, name: query, address: "" });
-        const places = await findBusinesses(query, await take());
+        const places = await findBusinesses(query, requireToken(await take()));
         // Never pick for the visitor, not even the only match (Check 2).
         if (!places.length) setPhase({ kind: "none" });
         else setPhase({ kind: "pick", places });
@@ -406,7 +465,7 @@ export function LiveFreeCheck({
     try {
       const snapshot = await runCheck(
         place.place_id,
-        await take(),
+        requireToken(await take()),
         place.place_id === placeId ? (sessionToken ?? undefined) : undefined,
       );
       setProgress(2);
@@ -452,13 +511,16 @@ export function LiveFreeCheck({
         />
       ) : (
         <FreeCheckFrame>
-          {phase.kind === "searching" && <ScanSearching query={query} progress={0} />}
+          {phase.kind === "searching" && (
+            <ScanSearching query={query} progress={0} waiting={waiting} />
+          )}
           {phase.kind === "checking" && (
-            <ScanSearching query={phase.place.name} progress={progress} />
+            <ScanSearching query={phase.place.name} progress={progress} waiting={waiting} />
           )}
           {phase.kind === "none" && (
             <NotFound query={query} keyword={keyword} industry={industry} />
           )}
+          {phase.kind === "slow" && <SlowCheck />}
           {phase.kind === "error" && (
             <Failed message={phase.message} theirs={phase.theirs ?? false} />
           )}
@@ -769,13 +831,18 @@ function Waitlist({
   placeId: string;
   term: string | null;
 }) {
-  const { take, widget } = useTokens();
+  const { take, widget, waiting, slow } = useTokens();
   const [email, setEmail] = useState("");
   const [tips, setTips] = useState(false);
   const [phone, setPhone] = useState("");
   const [waOk, setWaOk] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [state, setState] = useState<"idle" | "sending" | "saved">("idle");
+  const btn = sendButtonState({
+    busy: state === "sending" && !waiting,
+    waiting: state === "sending" && waiting,
+    label: "Save my place",
+  });
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     const byEmail = /@/.test(email);
@@ -791,6 +858,7 @@ function Waitlist({
     setErr(null);
     setState("sending");
     try {
+      const turnstile = requireToken(await take());
       await joinWaitlist({
         business,
         country,
@@ -801,12 +869,13 @@ function Waitlist({
         whatsapp_consent: byPhone && waOk,
         tips: byEmail && tips,
         page: "/scan",
-        turnstile: await take(),
+        turnstile,
       });
       track("free_tool_used", { source: "free_check_waitlist" });
       setState("saved");
     } catch (x) {
-      setErr(x instanceof ApiError || x instanceof Error ? x.message : plainError(x));
+      // No token in 15 seconds: the check's own line and Try again are right above the button, so say it once.
+      setErr(x instanceof BotCheckTimeout ? (slow.current ? null : SLOW_LINE) : plainError(x));
       setState("idle");
     }
   };
@@ -860,8 +929,8 @@ function Waitlist({
             </>
           )}
           {widget}
-          <Button type="submit" variant="secondary" loading={state === "sending"}>
-            Save my place
+          <Button type="submit" variant="secondary" loading={btn.loading}>
+            {btn.label}
           </Button>
         </form>
       )}
@@ -880,7 +949,7 @@ function SendReport({
   code: string | null;
   parts: { nearby: boolean; ai: boolean };
 }) {
-  const { take, widget } = useTokens();
+  const { take, widget, waiting, slow } = useTokens();
   // Scan 3 (30.34 item 2): one delivery choice at a time. Without Kabsi's WhatsApp number there is only email.
   const [via, setVia] = useState<"email" | "whatsapp">("email");
   const [email, setEmail] = useState("");
@@ -890,6 +959,11 @@ function SendReport({
   const [err, setErr] = useState<string | null>(null);
   const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
   const byWhatsapp = WHATSAPP_ON && via === "whatsapp";
+  const btn = sendButtonState({
+    busy: state === "sending" && !waiting,
+    waiting: state === "sending" && waiting,
+    label: "Send me this report",
+  });
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!byWhatsapp && !/@/.test(email)) {
@@ -907,13 +981,14 @@ function SendReport({
     setErr(null);
     setState("sending");
     try {
+      const turnstile = requireToken(await take());
       if (!byWhatsapp)
         await emailCheck({
           placeId,
           email,
           tips,
           page: "/google-profile-check",
-          turnstile: await take(),
+          turnstile,
           code,
         });
       else
@@ -921,7 +996,7 @@ function SendReport({
           placeId,
           phone,
           page: "/google-profile-check",
-          turnstile: await take(),
+          turnstile,
           code,
         });
       track("free_tool_used", { source: "profile_check_email" });
@@ -929,7 +1004,7 @@ function SendReport({
       pixelEvent("Lead", { content_name: "free_check_report" });
       setState("sent");
     } catch (x) {
-      setErr(plainError(x));
+      setErr(x instanceof BotCheckTimeout ? (slow.current ? null : SLOW_LINE) : plainError(x));
       setState("idle");
     }
   };
@@ -1033,8 +1108,8 @@ function SendReport({
             </>
           )}
           {widget}
-          <Button type="submit" variant="secondary" loading={state === "sending"}>
-            Send me this report
+          <Button type="submit" variant="secondary" loading={btn.loading}>
+            {btn.label}
           </Button>
         </form>
       )}

@@ -207,7 +207,8 @@ export type BrowserEvent =
   | "profile_state_seen"
   | "setup_call_booked"
   | "weekly_report_opened"
-  | "guide_cta_clicked";
+  | "guide_cta_clicked"
+  | "bot_check_finished";
 
 // The server's names, listed so both sides read the same table. track() refuses them at compile time.
 export type ServerEvent =
@@ -266,6 +267,7 @@ const BROWSER_EVENTS: ReadonlySet<string> = new Set<BrowserEvent>([
   "setup_call_booked",
   "weekly_report_opened",
   "guide_cta_clicked",
+  "bot_check_finished",
 ]);
 
 // Ids, countries, labels and UTM fields only. Never review text, reviewer names or email addresses.
@@ -283,6 +285,8 @@ type SafeProps = Partial<
     | "category"
     | "guide"
     | "box"
+    | "surface"
+    | "outcome"
     | "utm_source"
     | "utm_medium"
     | "utm_campaign"
@@ -291,6 +295,8 @@ type SafeProps = Partial<
   > & {
     /** free_scan_completed only (R-131): whole seconds from choosing the business to the result on screen. */
     seconds: number;
+    /** bot_check_finished only (FIX-5): milliseconds from the start of the check to its end. A number only. */
+    ms: number;
   }
 >;
 

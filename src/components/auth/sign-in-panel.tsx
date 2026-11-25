@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "rea
 import { Banner, Button, Field, buttonClass } from "@/components/kabsi/ui";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Turnstile } from "@/components/turnstile";
+import { BOT_CHECK_WAIT_MS, sendButtonState, tapAction } from "@/lib/bot-check";
+import { preloadTurnstile } from "@/lib/turnstile-script";
 import { supabase } from "@/lib/supabase";
 import { continueWithGoogle, requestEmailCode, SignupError } from "@/lib/signup";
 import { emailTypoSuggestion } from "@/lib/email-typo";
@@ -175,6 +177,8 @@ export function SignInPanel({
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [busy, setBusy] = useState(false);
+  // FIX-5: a tap before the bot check has a token waits for it and sends the moment it arrives.
+  const [waiting, setWaiting] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const sentAt = useRef<number | null>(null);
   const root = useRef<HTMLDivElement>(null);
@@ -184,6 +188,12 @@ export function SignInPanel({
   const intent = () => {
     if (!quiet.current) wa.want();
   };
+
+  // FIX-5: the bot check's script starts loading when the panel opens (the log in page), not on first touch, so the check
+  // is usually done before the email is typed. The speed budget is for Home, Pricing and /scan; /login is not one.
+  useEffect(() => {
+    preloadTurnstile();
+  }, []);
 
   useEffect(() => {
     if (inApp) setStep((s) => (s === "choose" ? "email" : s));
@@ -229,6 +239,10 @@ export function SignInPanel({
     const normalized = email.trim().toLowerCase();
     if (!normalized || !looksLikeEmail(normalized)) return setEmailError(EMAIL_ERROR);
     if (!online()) return setError(OFFLINE);
+    if (tapAction({ valid: true, hasToken: Boolean(token) }) === "wait") {
+      setWaiting(true);
+      return;
+    }
     setBusy(true);
     try {
       await requestEmailCode(normalized, token);
@@ -246,6 +260,22 @@ export function SignInPanel({
     setRound((n) => n + 1);
     setBusy(false);
   }
+  // A wait ends after 15 seconds even if the widget already gave up (it shows "This is taking longer than usual." and
+  // Try again), so a second tap never leaves the button stuck.
+  useEffect(() => {
+    if (!waiting) return;
+    const t = window.setTimeout(() => setWaiting(false), BOT_CHECK_WAIT_MS);
+    return () => window.clearTimeout(t);
+  }, [waiting]);
+
+  // The token arrived while the visitor was waiting: send now.
+  useEffect(() => {
+    if (!waiting || !token) return;
+    setWaiting(false);
+    void sendCode();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [waiting, token]);
+
   async function verifyCode(event?: FormEvent) {
     event?.preventDefault();
     setError("");
@@ -275,6 +305,8 @@ export function SignInPanel({
   }
 
   const typo = emailTypoSuggestion(email.trim());
+  const sendState = sendButtonState({ busy, waiting, label: "Send me a code" });
+  const resendState = sendButtonState({ busy, waiting, label: "Send a new code" });
   const emailForm = (
     <form onSubmit={sendCode} noValidate>
       <Field
@@ -309,11 +341,16 @@ export function SignInPanel({
         </p>
       ) : null}
       <div className="mt-3">
-        <Turnstile key={round} onToken={setToken} />
+        <Turnstile
+          key={round}
+          surface="login"
+          onToken={setToken}
+          onFail={() => setWaiting(false)}
+        />
       </div>
       <div className="mt-3" data-main-cta>
-        <Button type="submit" full loading={busy} disabled={!token}>
-          Send me a code
+        <Button type="submit" full loading={sendState.loading}>
+          {sendState.label}
         </Button>
       </div>
       {inApp ? null : (
@@ -488,14 +525,20 @@ export function SignInPanel({
             </p>
           ) : (
             <div className="mt-5">
-              <Turnstile key={round} onToken={setToken} />
+              <Turnstile
+                key={round}
+                surface="login"
+                onToken={setToken}
+                onFail={() => setWaiting(false)}
+              />
               <button
                 type="button"
                 className={buttonClass("tertiary") + " mt-2 disabled:text-text-2"}
-                disabled={busy || !token}
+                disabled={resendState.loading}
+                aria-busy={resendState.loading || undefined}
                 onClick={() => void sendCode()}
               >
-                Send a new code
+                {resendState.label}
               </button>
             </div>
           )}
