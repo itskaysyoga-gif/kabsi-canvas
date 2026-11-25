@@ -279,10 +279,7 @@ function PhoneMenu({
             phone
             close={close}
             account={(rowCls, chevron) => (
-              <AccountLink
-                onClick={close}
-                className={cn(rowCls, "font-sans text-body text-text-2")}
-              >
+              <AccountLink onClick={close} className={cn(rowCls, "font-sans text-body")}>
                 {(state) => (
                   <>
                     <AccountWords state={state} />

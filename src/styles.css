@@ -981,31 +981,31 @@ html.kb-motion [data-stagger]:not(.kb-in) > * {
 .kb-shot > span {
   @apply absolute -top-8 end-1 bg-surface-1 text-text-2 shadow-rest;
 }
-/* SITE-5: on a phone the screens stack, each beside its title and line (no row cut off at the edge); from 640 px they
-   stand in a row of columns. */
+/* SITE-5: the screens stand in a row of columns from 640 px. SITE-6: on a phone each screen is drawn large enough to
+   read (15 rem, centred) with its title and line under it, one after the other (was 10 rem beside the words). */
 .kb-shots {
-  @apply grid gap-8 pt-9 sm:grid-cols-3;
+  @apply grid gap-12 pt-9 sm:grid-cols-3 sm:gap-8;
 }
 .kb-shots-2 {
   @apply sm:mx-auto sm:max-w-[40rem] sm:grid-cols-2;
 }
 .kb-shots > li {
-  @apply grid grid-cols-[10rem_minmax(0,1fr)] items-center gap-5 sm:block;
+  @apply block;
 }
 .kb-shots > li > .kb-shot {
-  @apply max-w-[10rem] rounded-[1.5rem] p-1.5 sm:max-w-[15.5rem] sm:rounded-[2.25rem] sm:p-2 lg:max-w-[17.5rem];
+  @apply mx-auto max-w-[15rem] rounded-[2.25rem] p-2 sm:max-w-[15.5rem] lg:max-w-[17.5rem];
 }
 .kb-shots > li > .kb-shot img {
-  @apply rounded-[1.15rem] sm:rounded-[1.75rem];
+  @apply rounded-[1.75rem];
 }
 .kb-shots > li > .kb-shot > span {
-  @apply -top-7 sm:-top-8;
+  @apply -top-8;
 }
 .kb-shots h3 {
-  @apply text-title sm:mt-6 sm:text-center;
+  @apply mt-6 text-center text-title;
 }
 .kb-shots p {
-  @apply mt-1 text-read text-text-2 sm:mx-auto sm:max-w-[28ch] sm:text-center;
+  @apply mx-auto mt-1 max-w-[28ch] text-center text-read text-text-2;
 }
 
 /* SITE-5: Pricing's "Your first 14 days": numbered days on a line, down the page on a phone, across from 1024 px. */

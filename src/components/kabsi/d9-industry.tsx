@@ -16,7 +16,6 @@ import { HERO_MARKS, HOME_FAQ } from "@/components/marketing/v31-data";
 import { PriceCard, TrustLines } from "@/components/marketing/v31";
 import { Img, PHOTOS } from "./photos";
 import { PubImg } from "@/components/marketing/life";
-import { TRADE_TILES } from "@/components/marketing/public-photos";
 import { HERO_LIBRARY, TRADE_SECOND, TRADE_WIDE } from "@/components/marketing/industry-photos";
 import { ScanBox } from "./scan-box";
 import { SiteLink } from "./site-link";
@@ -443,8 +442,6 @@ export const FOR_HERO = {
  * opens with real trades at work. Each photo links to its page; the alt text is the photo's own (docs/PHOTOS.md).
  */
 const COLLAGE = ["hair-salon", "restaurant", "barbershop", "auto-repair"] as const;
-/** SITE-4: the trade's new 4:5 photo, where it has one. */
-const tileOf = (slug: string) => TRADE_TILES.find((t) => t.slug === slug)?.photo;
 
 function ForCollage({ all }: { all: Industry[] }) {
   const picks = COLLAGE.map((s) => all.find((i) => i.slug === s)).filter((i): i is Industry => !!i);
@@ -456,22 +453,15 @@ function ForCollage({ all }: { all: Industry[] }) {
             to={`/for/${i.slug}`}
             className="press group relative block overflow-hidden rounded-panel bg-surface-3 shadow-float"
           >
-            {tileOf(i.slug) ? (
-              <PubImg
-                photo={tileOf(i.slug)!}
-                sizes="(min-width: 1024px) 15rem, 45vw"
-                priority={n < 2}
-                className="aspect-[4/3] w-full object-cover transition-transform duration-400 ease-kb group-hover:scale-[1.04] motion-reduce:group-hover:scale-100 lg:aspect-[4/5]"
-              />
-            ) : (
-              <Img
-                photo={i.photos[0]}
-                sizes="(min-width: 1024px) 15rem, 45vw"
-                priority={n < 2}
-                style={{ objectPosition: i.focus ?? "50% 50%" }}
-                className="aspect-[4/3] w-full object-cover transition-transform duration-400 ease-kb group-hover:scale-[1.04] motion-reduce:group-hover:scale-100 lg:aspect-[4/5]"
-              />
-            )}
+            {/* SITE-6: never the photo the card below shows for the same trade (the card takes TRADE_WIDE, else
+                the trade's first photo), so the collage and the list do not repeat each other. */}
+            <Img
+              photo={TRADE_WIDE[i.slug] ? i.photos[0] : i.photos[1]}
+              sizes="(min-width: 1024px) 15rem, 45vw"
+              priority={n < 2}
+              style={{ objectPosition: TRADE_WIDE[i.slug] ? (i.focus ?? "50% 50%") : "50% 40%" }}
+              className="aspect-[4/3] w-full object-cover transition-transform duration-400 ease-kb group-hover:scale-[1.04] motion-reduce:group-hover:scale-100 lg:aspect-[4/5]"
+            />
             <span className="absolute start-2 bottom-2 rounded-full bg-surface-0 px-3 py-1 text-label font-semibold text-text-1 shadow-rest">
               {i.plural}
             </span>
@@ -538,7 +528,8 @@ export function ForIndex() {
             {q ? `${shown.length} of ${all.length} kinds of business shown.` : ""}
           </p>
           {/* Industries 3: 4 columns from 1024 px, 2 below (no 3 column step); a filtered count that does not fill
-              its last row centres it (the no-lone-card rule, 30.33 item 2). */}
+              its last row centres it (the no-lone-card rule, 30.33 item 2). SITE-6: 22 kinds fill 11 rows of 2 on a
+              phone, so the "Any other local business" card is gone (the band under the list says it). */}
           <ul id="for-list" className="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4">
             {all.map((i) => (
               <li
@@ -549,22 +540,6 @@ export function ForIndex() {
                 <TradeCard industry={i} sizes="(min-width: 1024px) 18rem, 45vw" />
               </li>
             ))}
-            {/* Site 2 (30.34 item 4): with 21 kinds of business, this card keeps the last row from holding one card
-                alone on a phone (22 cards: 11 rows of 2; 5 rows of 4 and a centred row of 2). Hidden while filtering. */}
-            <li
-              hidden={!!q}
-              className="w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]"
-            >
-              <SiteLink
-                to="/scan"
-                className="press theme-dark flex h-full min-h-40 flex-col justify-end rounded-card bg-band p-3 text-text-1 shadow-rest sm:p-4"
-              >
-                <span className="text-body font-bold sm:text-title">Any other local business</span>
-                <span className="mt-1 text-small text-text-2">
-                  Kabsi works for any business with a Google profile. Check yours free.
-                </span>
-              </SiteLink>
-            </li>
           </ul>
           {shown.length === 0 && (
             <p className="mt-8 text-body text-text-2">

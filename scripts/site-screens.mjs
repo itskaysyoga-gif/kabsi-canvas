@@ -5,6 +5,7 @@
 //   node scripts/site-screens.mjs            report, cards and the weekly email, for Maple Street Salon
 //   node scripts/site-screens.mjs --trades   one Kabsi Home screen per industry page (public/screens/trade-<slug>-560.webp)
 //   node scripts/site-screens.mjs --maple    the Reviews screen of Maple Street Salon with Home's hero review
+//   node scripts/site-screens.mjs --one home  Maple Street Salon's Kabsi Home (How it works' hero)
 // Each screen is the first screen of a 390 px phone, written as a 560 by 1212 WebP (quality 80).
 import { spawnSync } from "node:child_process";
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
@@ -180,6 +181,8 @@ if (one > 0) {
   const slug = process.argv[one + 1];
   // SITE-6: an industry page shows its trade's Kabsi Home: that trade's hours, post and reply waiting for a yes.
   if (slug === "maple") await app("/app/reviews", "app-reviews");
+  // SITE-6: How it works' hero shows Maple Street Salon's Home, with everything that waits for a yes.
+  else if (slug === "home") await app("/app", "app-home");
   else await app("/app", `trade-${slug}`);
 } else {
   await app("/app/report", "app-report");
