@@ -75,6 +75,8 @@ import cleanerTeam1600 from "@/assets/photos/cleaner-team-1600.webp";
 import cleanerTeam800 from "@/assets/photos/cleaner-team-800.webp";
 import cleanerTable1600 from "@/assets/photos/cleaner-table-1600.webp";
 import cleanerTable800 from "@/assets/photos/cleaner-table-800.webp";
+import bakeryDoughTall1600 from "@/assets/photos/bakery-dough-tall-1600.webp";
+import bakeryDoughTall800 from "@/assets/photos/bakery-dough-tall-800.webp";
 import { land, port, type Photo } from "./photos";
 
 /** Industries 2 (B-006): a 4:5 crop of a landscape photo, 853 by 1067 and 512 by 640, for portrait cards. */
@@ -112,6 +114,11 @@ export const MORE_PHOTOS = {
     cleanerTeam1600,
     cleanerTeam800,
     "A team of cleaners in overalls cleaning a bright kitchen",
+  ),
+  bakeryDoughTall: port(
+    bakeryDoughTall1600,
+    bakeryDoughTall800,
+    "A baker shaping dough on a floured table",
   ),
   cleanerTable: port(
     cleanerTable1600,

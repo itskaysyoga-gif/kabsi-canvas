@@ -61,9 +61,10 @@ const quietLink =
   "inline-flex min-h-11 items-center text-label text-text-2 underline underline-offset-4 hover:text-text-1";
 
 /** SITE-7: the Facebook and Instagram marks (Simple Icons, CC0) are static files in public/icons drawn in the text colour
- * through a CSS mask, so their long paths do not ride in every public page's script. */
+ * through a CSS mask, so their long paths do not ride in every public page's script. Neutral file names, because
+ * blockers drop addresses that name the brands. */
 function SocialIcon({ name }: { name: string }) {
-  const url = `url(/icons/${name === "Facebook" ? "facebook" : "instagram"}.svg)`;
+  const url = `url(/icons/social-${name === "Facebook" ? "f" : "i"}.svg)`;
   return (
     <span
       aria-hidden="true"

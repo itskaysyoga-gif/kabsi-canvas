@@ -416,7 +416,7 @@ function Week() {
         {WEEK.days.map((d, i) => (
           <li
             key={d.day}
-            className="relative border-s-2 border-line ps-5 lg:border-s-0 lg:border-t-2 lg:ps-0 lg:pt-5"
+            className="relative flex flex-col border-s-2 border-line ps-5 lg:border-s-0 lg:border-t-2 lg:ps-0 lg:pt-5"
           >
             <span
               aria-hidden
@@ -425,7 +425,8 @@ function Week() {
             <p className="text-small font-bold text-text-2">{d.day}</p>
             <h3 className="mt-1 text-title">{d.title}</h3>
             <p className="mt-1 text-read text-text-2">{d.text}</p>
-            <div className="mt-4 max-w-[18rem]">
+            {/* SITE-7: the pictures sit at the foot of each day on a computer, so the row ends on one line. */}
+            <div className="mt-4 max-w-[18rem] lg:mt-auto lg:pt-4">
               <DayPicture n={i} />
             </div>
           </li>

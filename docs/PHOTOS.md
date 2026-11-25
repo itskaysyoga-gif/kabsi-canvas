@@ -177,5 +177,12 @@ cropping; nothing else readable shows. vet-wide, car-wash-wide and lash-brow-wid
 | cleaner-team | Three cleaners in overalls mopping and wiping a bright kitchen | https://www.pexels.com/photo/6197108/ | Tima Miroshnichenko (@tima-miroshnichenko) | Cleaners' share image (the page hero keeps the SITE-4 photo) | A team of cleaners in overalls cleaning a bright kitchen |
 | cleaner-table | A cleaner in black gloves wiping a wooden table (portrait; name badge blurred) | https://www.pexels.com/photo/9462732/ | Liliana Drew (@liliana-drew) | Cleaners' "Send a photo" band | A cleaner in gloves wiping a wooden table |
 
+Review round 1 then found the bakery's post photo (bakery-window, shot through glass) soft, so the bakery's tall slot
+is now bakery-dough-tall: Pexels 3218467, "Man Preparing Dough For Bread" by Vaibhav Jadhav (@pexelsgoodboy), Pune,
+India, "Free" licence label linking to https://www.pexels.com/license/ on 25 Nov 2026; a 2:3 crop around the hands at
+1067 by 1600 and 533 by 800, WebP 72, alt "A baker shaping dough on a floured table". (Pexels 1287278, bread rolls, was
+tried first and dropped: its page is gone, so its licence could not be read.) The /for cards of the restaurant, nail
+salon and spa now show restaurant-dining, nail-technician and spa-facial (public/photos/CREDITS.md, SITE-7).
+
 Every other trade photo was checked at card and page size on 25 Nov 2026 and shows its trade. The old physio-stretch,
 bakery-counter and bakery-window photos stay where they are used (a guide, About, the bakery's tall slot).

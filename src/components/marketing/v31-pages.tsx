@@ -120,27 +120,21 @@ export function V31How() {
           </ul>
         </div>
       </Band>
-      {/* SITE-7: Kabsi's own weekly email and weekly report beside the words (was the monthly report sample Home shows). */}
-      <Band
-        id="report"
-        tone="warm"
-        inner="lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-16"
-      >
-        <div>
-          <Head
-            id="report"
-            title="See what was done."
-            line="A short summary every week and a full report every month: work done, what Kabsi found and what Google shows, kept apart."
-          />
-          {/* SITE-5: the price in one line, with the way to Pricing. */}
-          <p className="mt-8 max-w-[60ch] border-s-4 border-kb-yellow ps-4 text-read text-text-1">
-            <strong>{PRICE.card}</strong> {TRIAL_LINE}{" "}
-            <SiteLink to="/pricing" className="font-semibold underline underline-offset-4">
-              See what the plan includes
-            </SiteLink>
-          </p>
-        </div>
-        <ScreenRow ids={["email", "report"]} className="mt-4 lg:mt-0 lg:pt-0" />
+      {/* SITE-7: Kabsi's own weekly email and weekly report under the words (was the monthly report sample Home shows). */}
+      <Band id="report" tone="warm">
+        <Head
+          id="report"
+          title="See what was done."
+          line="A short summary every week and a full report every month: work done, what Kabsi found and what Google shows, kept apart."
+        />
+        <ScreenRow ids={["email", "report"]} className="mt-2" />
+        {/* SITE-5: the price in one line, with the way to Pricing. */}
+        <p className="mx-auto mt-12 max-w-[60ch] border-s-4 border-kb-yellow ps-4 text-read text-text-1">
+          <strong>{PRICE.card}</strong> {TRIAL_LINE}{" "}
+          <SiteLink to="/pricing" className="font-semibold underline underline-offset-4">
+            See what the plan includes
+          </SiteLink>
+        </p>
       </Band>
       <ClosingBand under={HOME_HERO.under} />
     </>

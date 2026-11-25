@@ -20,7 +20,7 @@ export const bakery: Industry = {
     rival2: "Rye and Crumb",
     near: ["East of the station", "By the school"],
   },
-  photos: [MORE_PHOTOS.bakeryBaker, MORE_PHOTOS.bakeryWindowTall],
+  photos: [MORE_PHOTOS.bakeryBaker, MORE_PHOTOS.bakeryDoughTall],
   focus: "50% 50%",
   searches: [
     "bakery",

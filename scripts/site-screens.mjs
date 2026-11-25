@@ -208,6 +208,39 @@ async function fitFrame(page) {
     }
   });
   await page.waitForTimeout(300);
+  // SITE-7: a button cut by the bottom bar reads as broken, so a button that the bar cuts is left out of the drawing.
+  await page.evaluate(() => {
+    const bar =
+      document.querySelector("nav.fixed.bottom-0")?.getBoundingClientRect().top ?? innerHeight;
+    for (const b of document.querySelectorAll("main button, main a")) {
+      const r = b.getBoundingClientRect();
+      if (r.height > 0 && r.top < bar && r.bottom > bar) b.style.visibility = "hidden";
+    }
+    // A tall card of which only a strip shows above the bar (the QR code) is left out too.
+    for (const c of document.querySelectorAll(
+      "main section, main article, main [class*='rounded']",
+    )) {
+      const r = c.getBoundingClientRect();
+      if (r.top < bar && r.top > bar - 150 && r.bottom > bar + 60) c.style.visibility = "hidden";
+    }
+  });
+  await page.waitForTimeout(300);
+}
+
+/** SITE-7: a screen with no bottom bar (the email) fades out at its foot instead of cutting a line in half. */
+async function fadeFoot(page) {
+  await page.evaluate(() => {
+    // Lines that would be cut at the foot are left out; the fade then ends the screen softly.
+    for (const el of document.querySelectorAll("body *")) {
+      if (el.children.length || !el.textContent?.trim()) continue;
+      const r = el.getBoundingClientRect();
+      if (r.top < innerHeight && r.bottom > innerHeight - 90) el.style.visibility = "hidden";
+    }
+    const bg = getComputedStyle(document.body).backgroundColor || "rgb(255,255,255)";
+    const d = document.createElement("div");
+    d.style.cssText = `position:fixed;left:0;right:0;bottom:0;height:90px;pointer-events:none;z-index:9999;background:linear-gradient(to bottom, transparent, ${bg} 85%)`;
+    document.body.appendChild(d);
+  });
 }
 
 const one = process.argv.indexOf("--one");
@@ -233,6 +266,7 @@ if (one > 0) {
     .replaceAll("Maya K.", "Maya R.");
   await page.setContent(html, { waitUntil: "load" });
   await page.waitForTimeout(500);
+  await fadeFoot(page);
   await save(page, "email-weekly");
   await ctx.close();
 }

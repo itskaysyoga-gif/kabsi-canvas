@@ -25,14 +25,14 @@ export function V31Pricing() {
         line={PRICING.line}
         aside={
           /* SITE-5: the photo with Kabsi's own Reviews screen in front, the work the price pays for. */
-          <div data-nora-avoid className="relative pb-24 sm:pb-28 lg:pb-0">
+          <div data-nora-avoid className="relative pb-40 sm:pb-28 lg:pb-0">
             <PubImg
-              photo={PUB.barista}
+              photo={PUB.pricingHero}
               sizes={PHOTO_SIZES}
               priority
               className="aspect-[4/3] w-[88%] rounded-panel bg-surface-3 object-cover shadow-lift lg:aspect-[4/5] lg:w-[78%]"
             />
-            <div className="absolute end-0 bottom-0 w-[44%] max-w-[13rem] lg:top-1/2 lg:bottom-auto lg:w-[46%] lg:max-w-[14.5rem] lg:-translate-y-1/2">
+            <div className="absolute end-0 bottom-0 w-[54%] max-w-[14rem] sm:w-[44%] sm:max-w-[13rem] lg:top-1/2 lg:bottom-auto lg:w-[46%] lg:max-w-[14.5rem] lg:-translate-y-1/2">
               <DeviceShot
                 shot={MORE_SCREENS.reviews}
                 className="max-w-none sm:max-w-none lg:max-w-none"
@@ -63,7 +63,7 @@ export function V31Pricing() {
               <span className="kb-days-dot" aria-hidden>
                 {n + 1}
               </span>
-              <p className="text-label font-bold tracking-wide text-text-2 uppercase">{s.when}</p>
+              <p className="text-label font-bold text-text-2">{s.when}</p>
               <h3 className="mt-1 text-h3">{s.title}</h3>
               <p className="mt-2 text-read text-text-2">{s.text}</p>
             </li>

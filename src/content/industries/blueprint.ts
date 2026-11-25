@@ -234,10 +234,10 @@ export const BLUEPRINT: Record<string, TradeBlueprint> = {
     review: {
       stars: 5,
       name: "Sam",
-      text: "Kind with my nervous cat and clear about the treatment plan. Thank you for fitting us in.",
+      text: "Kind with my nervous dog and clear about the treatment plan. Thank you for fitting us in.",
     },
     reply:
-      "Thank you, Sam. We are glad we could fit you in and that your cat was looked after kindly. Please get in touch if you have any questions.",
+      "Thank you, Sam. We are glad we could fit you in and that your dog was looked after kindly. Please get in touch if you have any questions.",
     fact: F.moreHours,
   },
   "car-wash": {
