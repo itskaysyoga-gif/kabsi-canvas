@@ -3,29 +3,23 @@
 // counter, a guess or a made-up figure. No end-of-trial discount, no ranking promise, no "automatically", no Google as
 // a partner. The one yellow button is always the next step; everything else is a plain link.
 import { esc, WHATSAPP_URL } from "../email-layout.ts";
+import { FOUNDING_LINE, PRICE_MONTHLY_USD } from "../offer.ts";
 import type { Snapshot, StepId } from "../lifecycle.ts";
 import { p } from "./copy.ts";
 import { isSetupHelpStep, setupHelpEmail } from "./setup-help-copy.ts";
 import { firstWorkDone, setupIncomplete, trialEnding, welcomeEmail } from "./account-copy.ts";
 import type { EmailContent } from "./template.ts";
 
-// The prices of the website (lane R, 22 Oct 2026): Essentials, Pro and an extra location. Keep equal to PLAN_PRICES and
-// PRICES_SENTENCE in src/lib/site.ts (tests/lifecycle.test.ts checks it). Card payments through Creem are not open, so
-// every email that names a price also says so.
-export const PLAN_PRICES = {
-  essentialsMonthly: 29,
-  essentialsYearly: 290,
-  proMonthly: 59,
-  proYearly: 590,
-  extraLocationMonthly: 15,
-  extraLocationYearly: 150,
-} as const;
-// Price 1, called the launch price in public since Founding 1 (R-151): the price for the first 30 paying businesses. Keep equal to FOUNDING_SENTENCE in src/lib/site.ts.
-export const FOUNDING_SENTENCE = "The first 30 paying businesses pay the launch price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year.";
-export const PRICES_SENTENCE = `Essentials is $${PLAN_PRICES.essentialsMonthly} a month or $${PLAN_PRICES.essentialsYearly} a year. Pro is $${PLAN_PRICES.proMonthly} a month or $${PLAN_PRICES.proYearly} a year. An extra location is $${PLAN_PRICES.extraLocationMonthly} a month or $${PLAN_PRICES.extraLocationYearly} a year. Prices are in US dollars, plus tax where it applies.`;
+// PILOT-READY (R-165): one plan, called Kabsi, 29 US dollars a month per location, an extra location 29. Keep equal to
+// ONE_PLAN and PRICES_SENTENCE in src/lib/site.ts (tests/lifecycle.test.ts checks it). Card payments through Creem are not
+// open, so every email that names a price also says so.
+export const PLAN_PRICES = { monthly: PRICE_MONTHLY_USD, extraLocationMonthly: PRICE_MONTHLY_USD } as const;
+// The founding price is private (30.51): this is the invited-owner line, used only where an invitation exists. Keep equal to FOUNDING_LINE in offer.ts.
+export const FOUNDING_SENTENCE = FOUNDING_LINE;
+export const PRICES_SENTENCE = `Kabsi is $${PLAN_PRICES.monthly} a month per location. An extra location is $${PLAN_PRICES.extraLocationMonthly} a month. Prices are in US dollars, plus tax where it applies.`;
 // Keep equal to CARD_PAYMENTS_COMING in src/lib/plans.ts.
 export const CARD_PAYMENTS_COMING = "Card payments in US dollars are coming. Until they open there is nothing to pay.";
-const PRICE_LINE = `${PRICES_SENTENCE} ${FOUNDING_SENTENCE} ${CARD_PAYMENTS_COMING}`;
+const PRICE_LINE = `${PRICES_SENTENCE} ${CARD_PAYMENTS_COMING}`;
 
 export type LifecycleCtx = { appUrl: string; removalOn: boolean };
 
@@ -72,8 +66,8 @@ export function lifecycleEmail(step: StepId, s: Snapshot, c: LifecycleCtx): Emai
         : "Kabsi is watching your reviews and your Google profile. When a review arrives, a reply is ready for you to approve.";
       return {
         subject: `${s.name}: here is what Kabsi has done so far`, title: "Your first days with Kabsi", preheader: "What Kabsi has done for you so far.",
-        bodyHtml: p(esc(first)) + (ends ? p(`Your free trial runs until ${esc(ends)}. No card is needed.`) : ""),
-        button: { label: "Open Kabsi", url: open }, text: `${first}${ends ? `\n\nYour free trial runs until ${ends}. No card is needed.` : ""}`,
+        bodyHtml: p(esc(first)) + (ends ? p(`Your free trial runs until ${esc(ends)}. Cancel before then and you pay nothing.`) : ""),
+        button: { label: "Open Kabsi", url: open }, text: `${first}${ends ? `\n\nYour free trial runs until ${ends}. Cancel before then and you pay nothing.` : ""}`,
       };
     }
     case "trial_day7": {

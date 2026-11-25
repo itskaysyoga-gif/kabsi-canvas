@@ -7,6 +7,7 @@
 
 
 import { PAY_TODAY_LINE } from "../billing-words.ts";
+import { TRIAL_LINE } from "../offer.ts";
 import { PHOTO_CATEGORIES } from "../review-growth/photo.ts";
 import { MARK, quote, render } from "./look.ts";
 
@@ -15,11 +16,11 @@ export type Lang = "en" | "es" | "ar";
 /**
  * Sync 2a (R-142 item 7, WA-03): the hand-off promise follows the person's help line (master plan 30.21 section 2).
  * Keep equal to HELP_LINES and WORKING_HOURS in src/lib/site.ts (tests/sync2a-whatsapp.test.ts checks it).
- * An Essentials owner: the same working day. A Pro owner: within 4 working hours. Anyone else: within one working day.
+ * One plan, one promise (R-165): an owner's person answers the same working day.
  */
 export const HANDOFF_TIMES = {
   essentials: "the same working day",
-  pro: "within 4 working hours",
+  pro: "the same working day",
   other: "within one working day",
 } as const;
 export const HANDOFF_HOURS = "Working hours: Monday to Friday, 9:00 to 18:00, UAE time.";
@@ -62,7 +63,7 @@ export const SAY = {
   greeting:
     "Welcome to Kabsi. Did you just scan your business on kabsi.co? Send me your business name or the code from the page and I will pick up from there.",
   scanPicked: (code: string) =>
-    `Thanks, I have your scan ${code}. Your full map comes here as soon as it is ready. Kabsi is free for 14 days, no card. Your saved result: ${scanResultUrl(code)}`,
+    `Thanks, I have your scan ${code}. Your full map comes here as soon as it is ready. Your saved result: ${scanResultUrl(code)}`,
   // Sync 2a (R-142 item 7, WA-05): no promise of a scan here; the free check is the way in. COPY.md 63 says the same.
   scanByName: () => `You can check your business free at ${scanResultUrl(null)} and send me the code from the page.`,
   mapComing:
@@ -70,15 +71,15 @@ export const SAY = {
   // Sync 2a (R-142 item 7, WA-08): no trial promise until Kabsi Partners opens (LATER row: terms 8, 9 and 17 name the 30 day partner trial then).
   partnerCodeNoted: "Thanks, your partner code is noted.",
   unknownHelp:
-    "I am Nora, Kabsi's assistant. Kabsi looks after your business on Google from WhatsApp: a reply ready for every review, your Google profile kept right, and nothing goes live without your yes.\n\nYou can send: your business name for a free check, \"prices\", \"start free\", \"partner\" or \"talk to a person\".",
+    "I am Nora, Kabsi's assistant. Kabsi looks after your business on Google from WhatsApp: a reply ready for every review, your Google profile kept right, and nothing goes live without your yes.\n\nYou can send: your business name for a free check, \"prices\", \"trial\", \"partner\" or \"talk to a person\".",
   // Sync 1 (WA-06): the trial line is TRIAL_LINE and the payment line PAY_TODAY_LINE of src/lib/site.ts; keep them equal.
   prices:
-    "Free for 14 days once Kabsi is connected. No card. Then Essentials is 29 US dollars a month and Pro is 59 US dollars a month, with an extra location at 15 US dollars a month. The first 30 paying businesses pay 19 or 39 and keep that price while they stay subscribed. Nothing to pay today. Card payments in US dollars are coming. Details: kabsi.co/pricing",
+    `Kabsi is one plan: 29 US dollars a month per location, and an extra location is 29 US dollars a month. ${TRIAL_LINE} Details: kabsi.co/pricing`,
   // 13b part 2 (judged 25 Oct): only what the facts say is open today; WhatsApp for owners and Partners are not open yet.
-  trial: `Start free here, no card, about 10 minutes: ${START_URL}\n\nThe free trial starts once Kabsi can reach your Google profile.`,
+  trial: `Start your trial here, about 10 minutes: ${START_URL}\n\n${TRIAL_LINE}`,
   partnerProgram:
     "Anyone can join Kabsi Partners at kabsi.co/partners/join, and the link is ready at once. A partner earns 25 percent of every payment for as long as the business pays, from the day card payments open.",
-  needsAccount: `That needs a Kabsi account for your business. Start free, no card: ${START_URL}`,
+  needsAccount: `That needs a Kabsi account for your business. Start your trial here: ${START_URL}`,
 
   // Binding (9.2).
   connected: "Kabsi is connected. Messages for your business will come here. Reply STOP at any time to stop them.",
@@ -127,9 +128,9 @@ export const SAY = {
   billingCancelled: (end: string | null) => `Plan cancelled\nYour plan ends on ${end ?? "the last day you paid for"}.\n\nChanged your mind? Tap Keep my plan.`,
   billingAlreadyEnds: (end: string | null) => `Your plan already ends\nIt ends on ${end ?? "the last day you paid for"}.\n\nTap Keep my plan to carry on.`,
   billingKept: "Done. Your plan carries on.",
-  billingUpgradeAsk: (price: string) => `Switch to Pro?\nPrice: ${price}\nCreem charges the difference for the rest of this period today.`,
-  billingUpgraded: "Done. You are on Pro now.",
-  billingDowngradeAsk: (price: string, end: string | null) => `Move to Kabsi?\nPrice: ${price}\nFrom your next renewal${end ? `, ${end}` : ""}\nYou keep Pro until then.`,
+  billingUpgradeAsk: (price: string) => `Switch plan?\nPrice: ${price}\nCreem charges the difference for the rest of this period today.`,
+  billingUpgraded: "Done. Your plan is changed.",
+  billingDowngradeAsk: (price: string, end: string | null) => `Move to Kabsi?\nPrice: ${price}\nFrom your next renewal${end ? `, ${end}` : ""}\nYou keep your current plan until then.`,
   billingDowngraded: (end: string | null) => `Done. Kabsi at 29 US dollars a month starts${end ? ` on ${end}` : " at your next renewal"}.`,
   // OFFER-2: one plan, so there is nothing to upgrade to.
   billingOnePlan: "One plan\nKabsi has one plan: 29 US dollars a month per location. There is nothing to upgrade to.",

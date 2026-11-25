@@ -1,5 +1,7 @@
 # Kabsi copy deck (docs/COPY.md), lane R chat, 25 Oct 2026
 
+**Changed by section 93 (PILOT-READY, 25 Nov 2026, lane R R-165):** there is one plan, called Kabsi, at 29 US dollars a month per location, an extra location is 29, the trial is 14 days with a card (the trial line of src/lib/offer.ts), and Essentials, Pro, "no card", "Start free" and 15 days are gone from every email, WhatsApp answer and the terms. Every price line in a section before 90 is history; section 93 also records the GATE-2 wording.
+
 **Changed by section 90 (SITE-1, 24 Nov 2026, blueprint 3.1, R-163):** Home, Pricing, How it works, FAQ, About, Security, the header, the footer, the private founding page and the payment done page now use section 90. docs/kabsi-final/KABSI-WEBSITE-AND-CONVERSION-BLUEPRINT.md wins over every earlier line in this deck; where an older section still says otherwise for those pages, section 90 wins. The trial line, the price and the main button live in src/lib/offer.ts.
 
 **Changed by section 80 (the Founding task, 10 Nov 2026, lane R R-151, master plan 30.51):** Founding 25 is private. Every line in this deck that puts Founding 25 on a public page (the line above the header, the banner, the Home and Pricing cards, the About and footer links, the free check link, the share image) is retired, and "founding price" is "launch price" in every public line. Section 80 holds what replaces them. Where an older section still says otherwise, section 80 wins.
@@ -2513,8 +2515,67 @@ OFFER-2 and PROOF-2 (both 24 Nov 2026) shipped these lines in code; this section
 - Title `Your weekly report` with the business, then 3 to 5 lines: `<dates>`; up to 3 of `<label>: <n>` (the Work done labels above); with no work `A quiet week. Kabsi kept watching your Google profile.`; `Found on your profile: <n> changes.` (`change` for 1); `Review link taps: <n>.`
 - The end: `Waiting for your yes: <n>.` or `Nothing is waiting for your yes.`, then ` Next step: <next>.` when there is one.
 
+## 93. GATE-2 and PILOT-READY: the new wording, and one price everywhere (25 Nov 2026, lane R R-165)
 
-## 93. SITE-4: life on the public site (25 Nov 2026, lane R, the SITE-4 prompt)
+GATE-2 (24 Nov 2026) shipped these lines in code without a deck entry; PILOT-READY records them word for word and sets one price on every surface it owns. How to read it: ` / ` is a new line in the message and `<...>` is a value Kabsi fills in. From this section on, no line in the deck, in an email or on WhatsApp says Essentials, Pro, "no card", "Start free" or 15 days, and every price is 29 US dollars a month per location (the private founding price of 19 US dollars is told only to an invited owner). Every earlier price line in this deck is history.
+
+**One price, the lines** (`src/lib/offer.ts` is the one place; `src/lib/site.ts` and `supabase/functions/_shared/email/lifecycle-copy.ts` repeat it)
+
+- The price sentence (`PRICES_SENTENCE`): `Kabsi is $29 a month per location. An extra location is $29 a month. Prices are in US dollars, plus tax where it applies.`
+- The Plan page rows (`PLAN_PRICE_ROWS`): `Kabsi: $29 a month per location` and `Extra location: $29 a month`.
+- The trial line (`TRIAL_LINE`): `14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing.`
+- The founding line (`FOUNDING_LINE`, invited owners only): `19 US dollars a month for your first 12 months. From month 13 the price is 29 US dollars a month. We email you 14 days before the change.`
+- The cancel line (`REFUND_LINE`): `Kabsi can be cancelled at any time. Your plan runs to the end of the period you paid for.`
+- The help line (`HELP_LINE`, one plan, one promise): `A person answers on WhatsApp the same working day.` With `Working hours: Monday to Friday, 9:00 to 18:00, UAE time.` The Pro line "within 4 working hours" is retired.
+- Terms section 8: `Kabsi is one plan: $29 a month per location, and an extra location is $29 a month. Prices are in US dollars, plus tax where it applies, and the same in every country.` then the trial line, then `Kabsi can be cancelled at any time and runs to the end of the period you paid for.` Section 9 starts the trial with a card: `The free trial lasts 14 days and starts with a card.` and `If you have not cancelled by day 14, the first month is charged to your card.`
+
+**Emails** (`supabase/functions/_shared/email/`)
+
+- Access works, the trial box: `Started <date>, ends <date>. Cancel before it ends and you pay nothing.`
+- Trial day 2: `Your free trial runs until <date>. Cancel before then and you pay nothing.`
+- Trial day 7, day 14, the two winback emails: the price sentence above, then `Card payments in US dollars are coming. Until they open there is nothing to pay.`
+- Trial ending (day 11), the choice: `Kabsi is $29 a month per location: every reply, posts from your photos, your Google profile kept right and your weekly report. Card payments in US dollars are coming. Until they open there is nothing to pay. Prices are in US dollars, plus tax where it applies.` Button `Choose my plan`.
+- The receipt, the failed payment and the cancellation name the plan `Kabsi`. The partner link email says `A business that starts with your link gets a 30 day Kabsi trial instead of 14 days. A card is needed to start.`
+- Founding months, day 60, 85 and 90 (for the places linked before GATE-2 only): `<Business>: you are 60 days into your three free months of Kabsi as one of the Founding 25.` and the price line `Your price: 19 US dollars a month for your first 12 months, then 29 US dollars a month. We email you 14 days before the change.`
+
+**WhatsApp, one price** (`supabase/functions/_shared/whatsapp/say.ts`)
+
+- Prices (`prices`): `Kabsi is one plan: 29 US dollars a month per location, and an extra location is 29 US dollars a month. 14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing. Details: kabsi.co/pricing`
+- Trial (`trial`): `Start your trial here, about 10 minutes: <link> // 14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing.`
+- Needs an account (`needsAccount`): `That needs a Kabsi account for your business. Start your trial here: <link>`
+- Scan picked (`scanPicked`): `Thanks, I have your scan <code>. Your full map comes here as soon as it is ready. Your saved result: <link>`
+- Not known yet (`unknownHelp`) ends: `You can send: your business name for a free check, "prices", "trial", "partner" or "talk to a person".`
+- A person will answer (`handoff`): `A person will answer you / Here on WhatsApp, the same working day. / Working hours: Monday to Friday, 9:00 to 18:00, UAE time.`
+- A plan change (`billingUpgradeAsk`, `billingUpgraded`, `billingDowngradeAsk`): `Switch plan? / Price: <price> / Creem charges the difference for the rest of this period today.`, `Done. Your plan is changed.`, and `Move to Kabsi? / Price: <price> / From your next renewal, <date> / You keep your current plan until then.`
+- Every plan is shown as `Kabsi, monthly` (`planName`).
+
+**Onboarding on /start** (`src/lib/onboarding-flow.ts`, `src/components/onboarding/choose-stages.tsx`, `stages.tsx`; GATE-2)
+
+- The three steps: `Find your business`, `Add Kabsi on Google`, `WhatsApp or email`.
+- Where the approvals go: `Where should Kabsi send your approvals?` and `Each reply, fix and post waits for your yes. Choose where you want to give it. You can change this in Settings.`
+- Buttons `WhatsApp` and `Email`. While WhatsApp is off: `WhatsApp is not open yet. Choose email for now.`
+- Under the buttons: `On WhatsApp you approve with one tap. By email you approve from the message or in Kabsi.`
+- Under the WhatsApp screen: `Use email instead`. Buttons to move on: `Next: WhatsApp or email`, `Next: start your trial`.
+- The trial step: title `Start your 14 days free`, the trial line under it, the card `Kabsi` with `$29 a month per location`, and for an invited owner `Invited to the founding price?` and the founding line. Button `Start 14 days free`; while checkout is closed `Plans open soon`, with `Plans open soon. Kabsi tells you when you can start. Nothing has been charged.`
+- Access works: the old `No card` line is gone; the box reads `Cancel before it ends and you pay nothing.`
+
+**WhatsApp, the first day and the Google-care answers** (`google-care.ts`, `care-reports.ts`; GATE-2)
+
+- The first-day list (`firstDayBody`): `<Business>: Kabsi wrote replies for <n> reviews from the last 90 days that had no answer.` (`1 review` for one) / the numbered list `1. <first name>, <n> stars` / `And <n> more in Kabsi.` / `<n> more reviews need your own words first. They are in Kabsi.` (`1 more review needs ...` for one) / `Send a number to read a reply and approve it. Nothing goes to Google without your yes.` / `All of them on one page: <url>/app/reviews?f=needs`.
+- Stats, the block added for last month (`googleStatsBlock`): `From Google, <Month>` then one line each for the calls, direction requests and website clicks Google reports. On the demo business the lines are marked as examples.
+- How do I compare (`competitorsText`): `Nearby businesses / <name>: <4.5> stars from <n> reviews. // Read live from Google just now. Kabsi does not keep these figures.` None picked: `No nearby businesses picked / Pick up to 3 in Kabsi and I can show their rating and review count: <url>/app/insights#competitors`. Too soon: `Nearby businesses / Kabsi reads them at most once a week. Ask again on <date>, or see them in your monthly report.` Google down: `Nearby businesses / Google cannot be read for this right now. Please ask again tomorrow.` No figures: `Nearby businesses / Google did not return their figures this time. Please ask again next week.`
+- Feedback: `What customers mention / <one line a topic>`; none: `What customers mention / No topic comes up in 3 or more reviews of the last 90 days yet.`; Google down: `What customers mention / I could not read your reviews from Google just now. Please ask again later.`
+- Profile health: `Your profile / <one line from Profile Coach> // Details: <url>/app/coach`.
+- Monthly report: `<the report title> / <facts> // <the end> // The full report: <url>/app/report`; none yet: `Your monthly report / <line> // Your reports: <url>`.
+
+**Founding price ending** (`supabase/functions/_shared/billing-lines.ts`, `foundingEndingLine`; invited owners only, email and WhatsApp, 14 days before the change)
+
+- `Your founding price for <Business> ends on <date>.` / `From <date> Kabsi is 29 US dollars a month, the same as everyone else. Until then you pay 19 US dollars a month. Nothing else changes.` / `You can cancel at any time before then on your Plan page, and nothing more is charged: <url>/app/plan`
+- Email subject: `<Business>: your Kabsi price changes on <date>`. Title: `Your founding price is ending`. Button: `Open your plan`.
+
+**Staff** (`src/components/staff/founding-panel.tsx`): the button `Link for the founding price`.
+
+## 94. SITE-4: life on the public site (25 Nov 2026, lane R, the SITE-4 prompt)
 
 The structure and every earlier line stay. New lines, all in `src/components/marketing/life.tsx`,
 `src/components/marketing/screens-section.tsx`, `src/components/marketing/v31-pricing.tsx` and the photo files' alt text

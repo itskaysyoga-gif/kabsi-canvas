@@ -24,7 +24,7 @@ const WHY = "You are a Kabsi partner.";
 export function partnerJoinedEmail(o: { name: string; code: string }, appUrl: string): EmailContent {
   const link = partnerLink(appUrl, o.code);
   const lines = [
-    "Your partner link and QR code are ready. A business that starts with your link gets a 30 day Kabsi trial instead of 14 days, with no card.",
+    "Your partner link and QR code are ready. A business that starts with your link gets a 30 day Kabsi trial instead of 14 days. A card is needed to start.",
     PARTNER_RATE_LINE,
     "Your kit is in your partner home: ready posts for your kind of partner, a printable A6 insert with your QR code for card packaging, and what to say and not say. Every post starts with the paid partnership label.",
     PARTNER_PAYING_LINE,
