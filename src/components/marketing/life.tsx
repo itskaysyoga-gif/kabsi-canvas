@@ -131,19 +131,19 @@ export function TradeStrip({ id = "trades", className }: { id?: string; classNam
 
 export const SCREENS = {
   report: {
-    src: "/product/app-report-560.webp",
+    src: "/screens/app-report-560.webp",
     alt: "Kabsi's weekly report in the account, for an example business",
     title: "Your report",
     line: "In your account: what Kabsi did, what waits for your yes, one next step.",
   },
   cards: {
-    src: "/product/app-cards-560.webp",
+    src: "/screens/app-cards-560.webp",
     alt: "Kabsi's review link message and QR code, for an example business",
     title: "Your review link and QR code",
     line: "A ready message to send after a real visit, and a QR code to print.",
   },
   email: {
-    src: "/product/email-weekly-560.webp",
+    src: "/screens/email-weekly-560.webp",
     alt: "Kabsi's weekly report email, for an example business",
     title: "Your week, by email",
     line: "Every Monday: the work done and anything waiting for you.",
