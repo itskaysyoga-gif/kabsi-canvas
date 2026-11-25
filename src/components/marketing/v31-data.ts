@@ -8,7 +8,7 @@ import { PRICE_MONTHLY_USD, TRIAL_LINE } from "@/lib/offer";
 export const HOME_HERO = {
   title: "Your business on Google. Taken care of.",
   mark: "Taken care of.",
-  line: "Kabsi answers your reviews, protects your listing and keeps your profile fresh. You approve and make changes from WhatsApp or email.",
+  line: "Kabsi answers your reviews, protects your listing and keeps it fresh. You approve on WhatsApp or email.",
   under: "Free check. No card. 20 seconds.",
 } as const;
 
@@ -55,11 +55,15 @@ export const HERO_EMAIL = {
 
 /* ---------- SITE-3 (R-164 item 7): the home page redone to convert ---------- */
 
-/** One row of three short marks under the hero button. */
+/**
+ * SITE-8 (R-167 rule 4): the page's one trust list, short, under the hero button. Home and the trade pages show it once
+ * and nowhere else (the "You stay in charge" band is gone).
+ */
 export const HERO_MARKS = [
   "No Google password",
-  "Nothing goes live without your yes",
-  "Cancel any time",
+  "Nothing is published without your yes",
+  "Kabsi never contacts your customers",
+  "Independent and not affiliated with Google",
 ] as const;
 
 /** The hero phone plays three short scenes in turn, each ending with the owner's yes. All Example. */
@@ -110,52 +114,36 @@ export const HERO_SCENES: { name: string; turns: ChatTurn[]; done: string }[] = 
  * page text on 24 Nov 2026. No numbers. A point with no Google source is left out.
  */
 export const PROBLEM = {
-  title: "Your Google profile is working for you, or against you.",
+  title: "Is your Google profile working for you?",
+  // SITE-8 (R-167 rule 5): each claim is one short line; the sources sit in one footnote for the band.
   points: [
     {
-      title: "Reviews and replies shape the choice.",
-      text: "Google says positive reviews and helpful replies can help your business stand out, and that a reply shows customers you value their feedback.",
+      stat: "Replies",
+      text: "Google says a reply shows customers you value their feedback.",
       source: "https://support.google.com/business/answer/7091?hl=en",
     },
     {
-      title: "Your details can change without you.",
-      text: "Google updates profiles from what users suggest and from other sources. If you do not answer a suggested edit within 4 days, Google may publish it.",
+      stat: "4 days",
+      text: "Leave a suggested edit unanswered and Google may publish it.",
       source: "https://support.google.com/business/answer/3480441?hl=en",
     },
     {
-      title: "Wrong hours cost visits.",
-      text: "Google says your hours tell customers when they can visit, and that a profile with wrong details may not show up for searches near you.",
+      stat: "Hours",
+      text: "Wrong details may keep you out of searches near you.",
       source: "https://support.google.com/business/answer/7091?hl=en",
     },
   ],
-  sourceLabel: "Read it on Google's help page",
 } as const;
 
 /** A week with Kabsi: four days, each a small drawn card. Example. The weekly summary arrives on Monday (facts 04). */
 export const WEEK = {
   title: "A week with Kabsi.",
-  line: "What a normal week looks like. You spend a few taps on it.",
+  // SITE-8 (R-167 rule 3): the pictures show each day, so each keeps its title only.
   days: [
-    {
-      day: "Monday",
-      title: "A new review arrives.",
-      text: "The reply is ready. You approve it with one tap.",
-    },
-    {
-      day: "Wednesday",
-      title: "Google changed your hours.",
-      text: "Kabsi caught it and set them back after your yes.",
-    },
-    {
-      day: "Friday",
-      title: "A photo from your phone is live.",
-      text: "You sent it with two words. Kabsi wrote the post.",
-    },
-    {
-      day: "Next Monday",
-      title: "Your weekly summary arrives.",
-      text: "What was done, what waits for you, and one next step.",
-    },
+    { day: "Monday", title: "A review, answered in one tap." },
+    { day: "Wednesday", title: "Changed hours, set back." },
+    { day: "Friday", title: "Your photo, posted." },
+    { day: "Next Monday", title: "Your weekly summary." },
   ],
 } as const;
 
@@ -174,10 +162,9 @@ export const WEEKLY_SUMMARY = {
 export const TELL = {
   title: "Just tell Kabsi.",
   mark: "Just tell",
-  line: "No app to learn. Message Kabsi like you would message a manager.",
+  line: "No app to learn. Message it like a manager.",
   voice: "Or send a voice note.",
-  voiceLine:
-    "Say it out loud. Kabsi shows you the change in writing before anything goes to Google.",
+  voiceLine: "You see the change in writing first.",
 } as const;
 
 export type TellChip = { ask: string; photo?: boolean; answer: string[]; approve?: boolean };
@@ -260,15 +247,11 @@ export const START = {
   title: "How it starts.",
   mark: "starts.",
   steps: [
-    { title: "Find your business.", text: "Search for it by name, as it shows on Google." },
-    {
-      title: "Add Kabsi as a manager on Google.",
-      text: "Kabsi never asks for your Google password.",
-    },
-    { title: "Choose WhatsApp or email.", text: "That is where Kabsi asks for your yes." },
+    { title: "Find your business by name." },
+    { title: "Add Kabsi as a manager on Google." },
+    { title: "Choose WhatsApp or email for your yes." },
   ],
-  firstDay:
-    "On your first day, every unanswered review from the last 90 days arrives with a reply ready to approve.",
+  firstDay: "Day 1: a reply ready for every unanswered review from the last 90 days.",
 } as const;
 
 export const PROOF = {
@@ -302,6 +285,9 @@ export const PROOF = {
   ],
 } as const;
 
+/** SITE-8 (R-167 rule 4): the short trial form beside a button away from the price band. */
+export const TRIAL_SHORT = "14 days free";
+
 export const PRICE = {
   title: "One price.",
   mark: "One price.",
@@ -309,6 +295,8 @@ export const PRICE = {
   per: "a month per location.",
   card: `${PRICE_MONTHLY_USD} US dollars a month per location.`,
   terms: TRIAL_LINE,
+  /** SITE-8: TRIAL_LINE, a sentence a line (the price band shows it so). */
+  termLines: TRIAL_LINE.split(/(?<=\.) /),
 } as const;
 
 export const TRUST = {
@@ -335,7 +323,7 @@ export const FAQ_V31 = [
   },
   {
     q: "Can I ask Kabsi to change something?",
-    a: "Yes. Message it in plain words or send a voice note: your hours, a photo, a post, a reply. Kabsi shows you exactly what will change before anything goes to Google.",
+    a: "Yes. Message it or send a voice note: your hours, a photo, a post, a reply. You see the change before it goes to Google.",
   },
   {
     q: "Does Kabsi contact my customers?",
@@ -370,8 +358,14 @@ export const FAQ_V31 = [
 /** Pricing's questions: the ones about paying, doing and leaving (SITE-3). */
 export const PRICING_FAQ = [1, 4, 7, 8, 9].map((i) => FAQ_V31[i]!);
 
-/** Home shows six at most (blueprint 3.9). */
-export const HOME_FAQ = [0, 1, 2, 3, 4, 6].map((i) => FAQ_V31[i]!);
+/**
+ * Home shows six at most (blueprint 3.9). SITE-8 (R-167 rule 4): the password and customers questions are left out,
+ * since the trust list under the hero says both.
+ */
+export const HOME_FAQ = [1, 2, 5, 6].map((i) => FAQ_V31[i]!);
+
+/** SITE-8: the general questions after a trade's own three (none repeats the hero's trust list). */
+export const TRADE_GENERAL_FAQ = [1].map((i) => FAQ_V31[i]!);
 
 export const CLOSING = { title: "Start with a free check.", mark: "free check." } as const;
 

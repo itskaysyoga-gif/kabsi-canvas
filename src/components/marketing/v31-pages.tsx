@@ -4,8 +4,7 @@
 import { Clock, Link2, Phone } from "lucide-react";
 import { YellowNumber } from "@/components/kabsi/highlight";
 import { Faq } from "@/components/kabsi/ui";
-import { HOME_HERO, FAQ_V31, PRICE, TRUST } from "./v31-data";
-import { TRIAL_LINE } from "@/lib/offer";
+import { HOME_HERO, FAQ_V31, PRICE, TRIAL_SHORT, TRUST } from "./v31-data";
 import { SiteLink } from "@/components/kabsi/site-link";
 import { Band, CheckBox, Head, Lead } from "./kit";
 import { PageTop, Ticks } from "./kit-pages";
@@ -50,26 +49,29 @@ export function V31How() {
       <Band
         id="steps"
         tone="warm"
-        label="The five steps"
         inner="lg:grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:gap-16"
       >
-        <ol className="grid gap-8">
-          {HOW.steps.map((s, i) => (
-            <li key={s.title} className="flex gap-4">
-              <YellowNumber n={i + 1} />
-              <div>
-                <h2 className="text-h3">{s.title}</h2>
-                <p className="mt-2 max-w-[56ch] text-read text-text-2">{s.text}</p>
+        <div>
+          {/* SITE-8: a headline over the steps, so the list reads at a glance. */}
+          <Head id="steps" title="Five steps to your first yes." />
+          <ol className="mt-8 grid gap-8">
+            {HOW.steps.map((s, i) => (
+              <li key={s.title} className="flex gap-4">
+                <YellowNumber n={i + 1} />
+                <div>
+                  <h3 className="text-h3">{s.title}</h3>
+                  <p className="mt-2 max-w-[56ch] text-read text-text-2">{s.text}</p>
+                </div>
+              </li>
+            ))}
+            <li className="flex gap-4">
+              <div className="border-s-4 border-kb-yellow ps-4">
+                <h3 className="text-h3">Or just tell Kabsi.</h3>
+                <p className="mt-2 max-w-[56ch] text-read text-text-2">{HOW.ask}</p>
               </div>
             </li>
-          ))}
-          <li className="flex gap-4">
-            <div className="border-s-4 border-kb-yellow ps-4">
-              <h2 className="text-h3">Or just tell Kabsi.</h2>
-              <p className="mt-2 max-w-[56ch] text-read text-text-2">{HOW.ask}</p>
-            </div>
-          </li>
-        </ol>
+          </ol>
+        </div>
         {/* SITE-5: the owner's yes in the chat, beside the steps (sticky on a computer). */}
         <div className="mt-12 lg:mt-0">
           <div className="lg:sticky lg:top-24">
@@ -92,7 +94,7 @@ export function V31How() {
           <Head
             id="watch"
             title="When Google changes something, you see it."
-            line="Google can change your details from what the public suggests. Kabsi checks your profile every day and shows what changed. For your hours, phone and website, one tap puts it right."
+            line="Kabsi checks your profile every day. One tap puts it right."
           />
           {/* SITE-6: one card a row on a computer, so the words are as tall as the phone beside them. */}
           <ul className="mt-8 grid gap-4 sm:grid-cols-3 lg:max-w-[34rem] lg:grid-cols-1">
@@ -112,7 +114,7 @@ export function V31How() {
                   </span>
                   <span>
                     <span className="block text-title font-bold">{w.title}</span>
-                    <span className="mt-1 block text-small text-text-2">{w.text}</span>
+                    <span className="mt-1 block text-read text-text-2">{w.text}</span>
                   </span>
                 </li>
               );
@@ -130,13 +132,14 @@ export function V31How() {
           <Head
             id="report"
             title="See what was done."
-            line="A short summary every week and a full report every month: work done, what Kabsi found and what Google shows, kept apart."
+            line="A summary every week. A full report every month."
           />
-          {/* SITE-5: the price in one line, with the way to Pricing. */}
+          {/* SITE-5: the price in one line, with the way to Pricing. SITE-8 (R-167 rule 4): the short trial form here;
+              the full terms are on Pricing's price band. */}
           <p className="mt-8 max-w-[60ch] border-s-4 border-kb-yellow ps-4 text-read text-text-1">
-            <strong>{PRICE.card}</strong> {TRIAL_LINE}{" "}
+            <strong>{PRICE.card}</strong> {TRIAL_SHORT}.{" "}
             <SiteLink to="/pricing" className="font-semibold underline underline-offset-4">
-              See what the plan includes
+              See pricing
             </SiteLink>
           </p>
         </div>

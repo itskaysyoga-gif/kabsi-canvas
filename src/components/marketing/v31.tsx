@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 import { PRIMARY_CTA } from "@/lib/offer";
 import { Marked, YellowNumber } from "@/components/kabsi/highlight";
 import { ButtonLink, ExampleBadge, Faq, KabsiMark } from "@/components/kabsi/ui";
-import { Num, PubImg, ScreenRow, TradeStrip, useCountOnce, useReducedMotion } from "./life";
+import { Num, PubImg, TradeStrip, useCountOnce, useReducedMotion } from "./life";
 import { PUB } from "./public-photos";
 import { SiteLink } from "@/components/kabsi/site-link";
 import { Band, CheckBox, ClosingDark, Head, Lead, MarkRow } from "./kit";
@@ -307,7 +307,12 @@ function HeroVisual() {
   );
 }
 
-/** The problem, on the page's charcoal band: three points from Google's own help pages, each with its link. */
+/**
+ * The problem, on the page's charcoal band. SITE-8 (R-167 rule 5): each of Google's points is a big label and one short
+ * line; the sources (Google's own help pages) sit in one footnote for the band.
+ */
+const PROBLEM_SOURCES = [...new Set(PROBLEM.points.map((p) => p.source))];
+
 function Problem() {
   return (
     <Band id="problem" tone="dark">
@@ -316,22 +321,31 @@ function Problem() {
       </h2>
       <ol className="mt-10 grid gap-8 md:grid-cols-3 md:gap-10">
         {PROBLEM.points.map((p) => (
-          <li key={p.title} className="border-t border-line pt-5">
-            <h3 className="text-h3 text-text-1">{p.title}</h3>
-            <p className="mt-3 text-read text-text-2">{p.text}</p>
-            <a
-              href={p.source}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 inline-flex min-h-11 items-center gap-1.5 text-small font-semibold text-text-1 underline underline-offset-4"
-            >
-              {PROBLEM.sourceLabel}
-              <ExternalLink className="size-3.5" aria-hidden />
-              <span className="sr-only">(opens in a new tab)</span>
-            </a>
+          <li key={p.stat} className="border-t border-line pt-5">
+            <p className="font-display text-h2 font-bold text-phrase">{p.stat}</p>
+            <p className="mt-2 text-read text-text-1">
+              {p.text}
+              <sup className="ms-0.5 text-text-2">{PROBLEM_SOURCES.indexOf(p.source) + 1}</sup>
+            </p>
           </li>
         ))}
       </ol>
+      <p className="mt-10 text-small text-text-2">
+        Sources: Google Business Profile Help{" "}
+        {PROBLEM_SOURCES.map((u, n) => (
+          <a
+            key={u}
+            href={u}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ms-1 inline-flex min-h-11 items-center gap-1 font-semibold text-text-1 underline underline-offset-4"
+          >
+            {n + 1}
+            <ExternalLink className="size-3.5" aria-hidden />
+            <span className="sr-only">(opens in a new tab)</span>
+          </a>
+        ))}
+      </p>
     </Band>
   );
 }
@@ -409,7 +423,7 @@ function Week() {
   return (
     <Band id="week" tone="ivory">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <Head id="week" title={WEEK.title} mark="with Kabsi." line={WEEK.line} />
+        <Head id="week" title={WEEK.title} mark="with Kabsi." />
         <ExampleBadge className="text-text-2" />
       </div>
       <ol className="relative mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
@@ -424,9 +438,8 @@ function Week() {
             />
             <p className="text-small font-bold text-text-2">{d.day}</p>
             <h3 className="mt-1 text-title">{d.title}</h3>
-            <p className="mt-1 text-read text-text-2">{d.text}</p>
             {/* SITE-7: the pictures sit at the foot of each day on a computer, so the row ends on one line. */}
-            <div className="mt-4 max-w-[18rem] lg:mt-auto lg:pt-4">
+            <div className="mt-4 max-w-[18rem]">
               <DayPicture n={i} />
             </div>
           </li>
@@ -499,12 +512,9 @@ export function StartSteps() {
     <>
       <ol className="mt-8 grid gap-6">
         {START.steps.map((s, i) => (
-          <li key={s.title} className="flex gap-4">
+          <li key={s.title} className="flex items-center gap-4">
             <YellowNumber n={i + 1} />
-            <div>
-              <h3 className="text-title">{s.title}</h3>
-              <p className="mt-0.5 text-read text-text-2">{s.text}</p>
-            </div>
+            <h3 className="text-title">{s.title}</h3>
           </li>
         ))}
       </ol>
@@ -581,11 +591,10 @@ function Proof() {
       <Head
         id="proof"
         title={PROOF.title}
-        line="A short summary every week. A full report every month. Work done, what Kabsi found and what Google shows, kept apart."
+        line="A summary every week. A full report every month."
       />
       <ReportSample className="mt-10" />
       {/* SITE-4: the same work in Kabsi's own account and email, with an example business. */}
-      <ScreenRow ids={["report", "cards", "email"]} className="mt-12 sm:mt-16" />
     </Band>
   );
 }
@@ -595,7 +604,14 @@ function Proof() {
  * Pricing on the right. SITE-5: Home and the industry pages show it this way, so the plan's full lists live on Pricing
  * only. SITE-7: the full variant (with the lists) was never shown and is gone.
  */
-export function PriceCard({ className }: { className?: string }) {
+export function PriceCard({
+  className,
+  chips = true,
+}: {
+  className?: string;
+  /** SITE-8: the trade pages leave out the plan's chips ("What Kabsi does" says it there). */
+  chips?: boolean;
+}) {
   return (
     <div
       className={cn(
@@ -613,8 +629,30 @@ export function PriceCard({ className }: { className?: string }) {
         </div>
       </div>
       <div>
-        <p className="max-w-[44ch] text-read text-text-1">{PRICE.terms}</p>
-        <p className="mt-4 max-w-[44ch] text-read text-text-2">{ALSO_PLAN}</p>
+        {/* SITE-8 (R-167 rule 2): the trial terms in full, one short line each; ALSO_PLAN as chips. */}
+        <ul className="grid gap-2">
+          {PRICE.termLines.map((l) => (
+            <li key={l} className="flex gap-2.5 text-read font-semibold text-text-1">
+              <Check className="mt-1 size-5 shrink-0 text-ok" aria-hidden />
+              {l}
+            </li>
+          ))}
+        </ul>
+        {chips ? (
+          <>
+            <p className="mt-6 text-small font-bold text-text-2">All in the one plan</p>
+            <ul className="mt-2 flex flex-wrap gap-2">
+              {ALSO_PLAN.map((c) => (
+                <li
+                  key={c}
+                  className="rounded-full border border-line bg-surface-0 px-3 py-1 text-small font-semibold text-text-1"
+                >
+                  {c}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
         <SiteLink
           to="/pricing"
           className="press mt-4 inline-flex min-h-11 items-center gap-1.5 text-read font-semibold text-text-1 underline decoration-text-3 underline-offset-4 hover:decoration-text-1"
@@ -626,9 +664,15 @@ export function PriceCard({ className }: { className?: string }) {
   );
 }
 
-/** SITE-5: the compact card's one line about the plan (every part of it is on Pricing's list). */
-const ALSO_PLAN =
-  "Everything Kabsi does is in the one plan: replies, alerts, daily checks, holiday hours, posts and your reports.";
+/** SITE-5: the compact card's one line about the plan (every part of it is on Pricing's list). SITE-8: as chips. */
+const ALSO_PLAN = [
+  "Replies",
+  "Alerts",
+  "Daily checks",
+  "Holiday hours",
+  "Posts",
+  "Reports",
+] as const;
 
 /** Trust: the four lines as a quiet row, not cards. */
 export function TrustLines() {
@@ -662,12 +706,6 @@ export function V31Home() {
       <Band id="price" tone="warm">
         <Head id="price" title={PRICE.title} />
         <PriceCard className="mt-8" />
-      </Band>
-      <Band id="trust" tone="ivory" inner="py-10 sm:py-14 lg:py-16">
-        <h2 id="trust-h" className="text-h2 text-balance">
-          {TRUST.title}
-        </h2>
-        <TrustLines />
       </Band>
       <Band id="questions" tone="ivory" inner="pt-4 sm:pt-6 lg:pt-8">
         <Head id="questions" title="Questions." />

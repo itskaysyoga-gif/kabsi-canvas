@@ -3,7 +3,7 @@ export const HEADS = {
   home: {
     title: "Kabsi: your business on Google, taken care of",
     description:
-      "Kabsi answers your reviews, protects your listing and keeps your profile fresh. You approve and make changes from WhatsApp or email.",
+      "Kabsi answers your reviews, protects your listing and keeps it fresh. You approve on WhatsApp or email.",
   },
   pricing: {
     title: "Kabsi pricing: 29 US dollars a month per location",

@@ -77,13 +77,14 @@ describe("SITE-1: Home is the nine sections of blueprint section 3", () => {
       "<Starts />",
       "<Proof />",
       'id="price"',
-      'id="trust"',
       'id="questions"',
       "<ClosingBand",
     ];
     const at = order.map((o) => body.indexOf(o));
     expect(at.every((i) => i > 0)).toBe(true);
     expect([...at].sort((a, b) => a - b)).toEqual(at);
+    // SITE-8 (R-167 rule 4): one trust list on Home, under the hero; the "You stay in charge" band is gone.
+    expect(body).not.toContain('id="trust"');
     expect(HOME_HERO.title).toBe("Your business on Google. Taken care of.");
     expect(HOME_HERO.under).toBe("Free check. No card. 20 seconds.");
   });
@@ -118,7 +119,9 @@ describe("SITE-1: Pricing, the FAQ and the navigation", () => {
     const p = read("src/components/marketing/v31-pricing.tsx");
     const page = p.slice(p.indexOf("export function V31Pricing"));
     expect(page.match(/<PriceCard/g)).toBeNull();
-    expect(page.match(/\{PRICE\.terms\}/g)).toHaveLength(1);
+    // SITE-8 (R-167 rule 2): the terms in full, a line each, once.
+    expect(page.match(/PRICE\.termLines\.map/g)).toHaveLength(1);
+    expect(PRICE.termLines.join(" ")).toBe(PRICE.terms);
     expect(page.match(/PLAN_LISTS\.not\.map/g)).toHaveLength(1);
     expect(PRICING.notIncluded).toBe(
       "Kabsi does not message your customers, run ads, build websites or promise rankings.",

@@ -8,53 +8,52 @@ import type { ChatTurn } from "./v31-data";
 /** "Your first 14 days", day by day, from the facts (06: 4.2, 4.3, 4.4, 4.5). */
 export const FIRST_DAYS = {
   title: `Your first ${TRIAL_DAYS} days.`,
-  line: "What happens on each day, and when the first charge comes.",
+  // SITE-8 (R-167): a bold line and a few words a day; the full trial terms are in the price band only.
   steps: [
     {
       when: "Day 1",
       title: "Setup and your first replies.",
-      text: "Start with a card; nothing is charged. Replies arrive for every unanswered review from the last 90 days.",
+      text: "Replies for the last 90 days of reviews.",
     },
     {
       when: `Days 2 to ${TRIAL_DAYS - 1}`,
       title: "The work, every day.",
-      text: "Replies, alerts, daily checks of your hours and links, and posts from your photos. Each waits for your yes.",
+      text: "Each piece waits for your yes.",
     },
     {
       when: "Before the end",
       title: "A note from Kabsi.",
-      text: `An email before the ${TRIAL_DAYS} days end, with what happens next and the price.`,
+      text: "What comes next, and the price.",
     },
     {
       when: `Day ${TRIAL_DAYS}`,
       title: "The first charge, unless you cancelled.",
-      text: `${PRICE_MONTHLY_USD} US dollars, then each month after. Cancel before day ${TRIAL_DAYS} and you pay nothing.`,
+      text: `${PRICE_MONTHLY_USD} US dollars, then monthly.`,
     },
   ],
-  cta: "The free check comes first. Then you add Kabsi on Google and start your 14 days.",
-  starts:
-    "Your 14 days start when Kabsi's access to your Google profile works, so waiting for access costs you no days.",
+  starts: "Your 14 days start once Kabsi's Google access works.",
 } as const;
 
 /** Cancel and refunds, in plain words (facts 4.2 and 4.5). */
 export const LEAVING = {
   title: "Cancel and refunds, in plain words.",
+  // SITE-8 (R-167 rule 2): a bold line and one short line each, in a 2x2 grid; the meaning is unchanged.
   points: [
     {
       title: "Cancelling takes one tap.",
-      text: "In Settings, or tell Kabsi on WhatsApp. Kabsi asks once to make sure, and you can undo it before it happens.",
+      text: "In Settings or on WhatsApp. Kabsi checks once; you can undo it.",
     },
     {
       title: "During the 14 days, you pay nothing.",
-      text: "Cancel before day 14 and nothing is charged. Kabsi stops its work and publishes nothing more.",
+      text: "Cancel before day 14: no charge, and Kabsi publishes nothing more.",
     },
     {
       title: "After that, your month runs to its end.",
-      text: "Everything keeps working until the end of the month you paid for. A month already paid for is not refunded.",
+      text: "It all works to the end of the paid month. A paid month is not refunded.",
     },
     {
       title: "Your Google profile stays yours.",
-      text: "Cancelling never removes Kabsi's access by itself; removing it is your choice. Your review link and QR code keep working.",
+      text: "Cancelling does not remove Kabsi's access; that is your choice. Your review link and QR code keep working.",
     },
   ],
   law: "Nothing in the terms limits a refund you are entitled to by law.",
@@ -71,7 +70,7 @@ export const PLAN_LISTS = {
 export const BILLING_QUESTIONS = [
   {
     q: "Why do I need a card for a free trial?",
-    a: `So the plan can carry on after day ${TRIAL_DAYS} without a gap. Nothing is charged during the ${TRIAL_DAYS} days, and if you cancel before day ${TRIAL_DAYS} you pay nothing. One trial per business.`,
+    a: `So the plan can carry on after day ${TRIAL_DAYS} without a gap. Nothing is charged during the ${TRIAL_DAYS} days. One trial per business.`,
   },
   {
     q: "What does a second location cost?",
@@ -91,7 +90,7 @@ export const BILLING_QUESTIONS = [
   },
   {
     q: "What if my card does not go through?",
-    a: "Kabsi keeps working for 7 days and sends you a link to update your card, with reminders on day 3 and day 6. After that the plan pauses: Kabsi keeps watching and preparing, publishes nothing, and nothing is lost.",
+    a: "Kabsi keeps working for 7 days and sends a link to update your card, with reminders on days 3 and 6. Then the plan pauses: Kabsi publishes nothing, and nothing is lost.",
   },
 ] as const;
 
@@ -116,22 +115,14 @@ export const HOW_CHAT: ChatTurn[] = [
     ],
     approve: true,
   },
-  // SITE-6: "Or just tell Kabsi." in the same chat (Home's Saturday hours lines), so the column beside the six steps is
-  // as long as they are.
-  { from: "owner", text: "Close at 3 this Saturday" },
-  {
-    from: "kabsi",
-    title: "Saturday hours",
-    lines: ["Saturday 29 November: 9:00 to 15:00.", "Every other day stays the same."],
-    approve: true,
-  },
+  // SITE-8: the Saturday hours turns are gone (Home shows them), so the chat is about half as tall.
 ];
 
 /** SITE-5: what Kabsi watches on the profile every day, beside the Google Protection screen. */
 export const WATCHED = [
-  { title: "Hours", text: "Opening hours and holiday hours." },
+  { title: "Hours", text: "Opening and holiday hours." },
   { title: "Phone", text: "The number customers call." },
-  { title: "Website and booking link", text: "Checked every day, so a broken link is caught." },
+  { title: "Website and booking link", text: "A broken link is caught." },
 ] as const;
 
 /* SITE-7: moved here from v31-data.ts, so Home's script does not carry the words only these pages show. */
@@ -141,30 +132,25 @@ export const WATCHED = [
 export const HOW = {
   title: "How Kabsi works.",
   mark: "works.",
-  line: "Kabsi prepares the work. You approve it on WhatsApp or email. Nothing goes to Google without your yes.",
+  line: "Kabsi prepares the work. You approve it on WhatsApp or email.",
+  // SITE-8 (R-167): a bold line and at most 12 words a step.
   steps: [
     {
       title: "Connect Google.",
-      text: "Add Kabsi as a manager on your Google Business Profile. Kabsi never asks for your password, and you can remove it any time.",
+      text: "Add Kabsi as a manager. No Google password. Remove it any time.",
     },
     {
-      title: "Choose how you hear from Kabsi.",
-      text: "WhatsApp or email. That is where replies, fixes and posts arrive for your yes.",
+      title: "Choose WhatsApp or email.",
+      text: "Replies, fixes and posts arrive there for your yes.",
     },
     {
       title: "Your first day.",
-      text: "Every unanswered review from the last 90 days arrives with a reply ready, plus the first check of your listing and links.",
+      text: "A reply ready for every unanswered review from the last 90 days.",
     },
-    {
-      title: "A normal week.",
-      text: "A reply for each new review, an alert if a bad one comes in, and a fix ready if something on your listing changed. A short summary every week.",
-    },
-    {
-      title: "Your monthly report.",
-      text: "What Kabsi did, what it found, and what Google shows for your profile, kept apart so you can see each.",
-    },
+    { title: "A normal week.", text: "A reply for each review. A fix if your listing changes." },
+    { title: "Your monthly report.", text: "What Kabsi did, what it found, what Google shows." },
   ],
-  ask: "You can also message Kabsi any time: change your hours, send a photo to post, or ask for a shorter reply.",
+  ask: "Change your hours, post a photo or shorten a reply.",
 } as const;
 
 /* ---------- About and Security (shortened to the same message) ---------- */
@@ -214,15 +200,15 @@ export const SECURITY = {
 export const PRICING = {
   title: "One plan. Everything Kabsi does.",
   mark: "Everything Kabsi does.",
-  line: "One price for one location, with nothing extra to unlock. You approve every change.",
+  line: "Nothing extra to unlock.",
   included: [
     "A reply to every review",
     "Alerts for bad reviews",
     "Your listing checked every day",
-    "Website and booking link checked every day",
+    "Links checked every day",
     "Holiday hours",
-    "Up to 2 posts a month and photos from your phone",
-    "Review link, QR code and counter card tools",
+    "Up to 2 posts a month, from your photos",
+    "Review link, QR code and counter card",
     "A weekly summary and a monthly report",
   ],
   notIncluded:

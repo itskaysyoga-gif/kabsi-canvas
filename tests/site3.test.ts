@@ -16,11 +16,13 @@ import { publicGuides, SITE3_PUBLISH_AT } from "../src/content/guides/schedule";
 const read = (f: string) => readFileSync(f, "utf8");
 
 describe("SITE-3: the home page", () => {
-  it("puts three short marks under the hero button", () => {
+  // SITE-8 (R-167 rule 4): the page's one trust list, short, under the hero button.
+  it("puts the one short trust list under the hero button", () => {
     expect([...HERO_MARKS]).toEqual([
       "No Google password",
-      "Nothing goes live without your yes",
-      "Cancel any time",
+      "Nothing is published without your yes",
+      "Kabsi never contacts your customers",
+      "Independent and not affiliated with Google",
     ]);
   });
   it("plays three scenes in a phone labelled Example, still for reduced motion, with a pause button", () => {
