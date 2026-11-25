@@ -107,7 +107,7 @@ export const rpc = {
       {
         id: "a2",
         created_at: ago(12),
-        business_name: "Rose Lane Salon",
+        business_name: "Maple Street Salon",
         country: "AE",
         trade: "beauty_hair",
         business_kind: "Hair salon",
@@ -140,7 +140,7 @@ export const rpc = {
     members: [
       {
         application_id: "a2",
-        business: "Rose Lane Salon",
+        business: "Maple Street Salon",
         trade: "beauty_hair",
         started_at: ago(10),
         ends_at: ahead(80),
@@ -192,7 +192,7 @@ export const rpc = {
     const loc = c.body?.p_location;
     const food = loc === LOC_B;
     return {
-      business: food ? "Cedar Corner Bakery" : "Rose Lane Salon",
+      business: food ? "Cedar Corner Bakery" : "Maple Street Salon",
       items: [
         { item: "old_reviews", label: "Old reviews with no reply", found: food ? 3 : 7 },
         {

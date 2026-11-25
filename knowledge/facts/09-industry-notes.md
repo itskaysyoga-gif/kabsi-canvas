@@ -35,7 +35,7 @@ Drafts are warm for celebrations and gentle for sympathy orders, never adding de
 
 ### Industry pages from blueprint 3.1 (24 Nov 2026, R-163)
 
-- Industry pages use one template. Each changes only the headline noun, the example review and reply, and one sourced fact. Salons and barbers, auto care, cleaners, restaurants and cafes come first. The pages carry no map, nearby rank line or AI answer: those checks are switched off. Where the older notes below disagree, this wins.
+- Industry pages use one template. Each changes only the headline noun, the example review and reply, and one sourced fact. From 25 Nov 2026 (SITE-5, lane R) each page also has "What Kabsi does for a [trade]": three examples true for that trade (a barbershop: walk-in hours changed, a new fade photo posted, a wait complaint answered; a restaurant: holiday hours, the menu link checked, a dish photo posted; auto repair: a 1-star bill dispute answered carefully), beside Kabsi's own Reviews screen for that trade's Example business, and its FAQ starts with three questions of that trade. Every example stays within what Kabsi does today. Salons and barbers, auto care, cleaners, restaurants and cafes come first. The pages carry no map, nearby rank line or AI answer: those checks are switched off. Where the older notes below disagree, this wins.
 
 ### Industries 2: one list of industries, every page on Design 9 (5 Nov 2026, master plan 30.32)
 

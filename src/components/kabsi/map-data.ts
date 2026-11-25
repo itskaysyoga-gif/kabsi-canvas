@@ -71,7 +71,7 @@ export type NearbyCheck = {
   landmarks?: { station?: number; park?: number };
 };
 
-// The Example salon (brief section 14.3): Rose Lane Salon, Dubai. 7 by 7 points, 18 of them in the first 3.
+// The Example salon (brief section 14.3; SITE-5: the one example business): Maple Street Salon. 7 by 7 points, 18 of them in the first 3.
 // The metro station is east (B), the park south west (C), where other salons come up first.
 // prettier-ignore
 export const SALON_RANKS: number[] = [
@@ -85,7 +85,7 @@ export const SALON_RANKS: number[] = [
 ];
 
 export const SALON_CHECK: NearbyCheck = {
-  business: "Rose Lane Salon",
+  business: "Maple Street Salon",
   kind: "salon",
   keyword: "hair salon",
   date: "25 October 2026",

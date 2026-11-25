@@ -1,6 +1,6 @@
 // Screenshots and accessibility for the signed-in website and the onboarding (UX 1), at 390, 768 and 1440 px, with no
 // real account: a made-up session sits in the browser and every Supabase call is answered from
-// scripts/app-shots/fixtures.mjs and the area files next to it (an invented business, Rose Lane Salon). Nothing reaches Supabase.
+// scripts/app-shots/fixtures.mjs and the area files next to it (an invented business, Maple Street Salon). Nothing reaches Supabase.
 // Start the site first (npx vite dev --port 5173 --host 127.0.0.1), then:
 //   BASE=http://127.0.0.1:5173 node scripts/app-shots.mjs              every route in scripts/app-shots/routes/*.json
 //   ONLY=/app/reviews node scripts/app-shots.mjs                        one route (every state of it)

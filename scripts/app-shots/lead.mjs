@@ -1,8 +1,8 @@
 // scripts/app-shots fixtures for the free check (UX 1, the waiting list while the nearby check is closed).
 const place = {
-  place_id: "ChIJroselanesalon000001",
-  name: "Rose Lane Salon",
-  address: "12 Al Wasl Road, Dubai, United Arab Emirates",
+  place_id: "ChIJmaplestreetsalon000001",
+  name: "Maple Street Salon",
+  address: "12 Maple Street, Portland, Oregon, United States",
 };
 export const tables = {};
 export const rpc = {};

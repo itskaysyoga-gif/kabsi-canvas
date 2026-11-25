@@ -1,4 +1,4 @@
-// Fixtures for scripts/app-shots.mjs: an invented owner of an invented business (Rose Lane Salon, Dubai), so the
+// Fixtures for scripts/app-shots.mjs: an invented owner of an invented business (Maple Street Salon, Portland), so the
 // signed-in screens can be drawn with no real account and no call to Supabase. Each area adds its own file next to
 // this one (home.mjs, content.mjs, profile.mjs, settings.mjs, onboarding.mjs, staff.mjs, public.mjs) exporting
 // { tables, rpc, functions }: a value, or a function (ctx) => value where ctx = { state, url, params, body }.
@@ -11,6 +11,11 @@ import * as onboarding from "./onboarding.mjs";
 import * as staff from "./staff.mjs";
 import * as publicPages from "./public.mjs";
 import * as lead from "./lead.mjs";
+
+/** SITE-5: one example business everywhere (Maple Street Salon). scripts/site-screens.mjs draws an industry page's screen
+ * from a fixture of that trade by setting SHOT_TRADE to {"business", "review", "reply"} (see home.mjs). */
+export const TRADE = process.env.SHOT_TRADE ? JSON.parse(process.env.SHOT_TRADE) : null;
+export const BUSINESS = TRADE?.business ?? "Maple Street Salon";
 
 export const STORAGE_KEY = "sb-ynjdqjlmdwjgbfezevxy-auth-token";
 export const USER_ID = "00000000-0000-4000-8000-000000000001";
@@ -45,8 +50,8 @@ export const ahead = days;
 /** The business, active and past its first task, unless a state says otherwise. */
 export const location = (state) => ({
   id: LOCATION_ID,
-  name: "Rose Lane Salon",
-  address: "12 Al Wasl Road, Dubai, United Arab Emirates",
+  name: BUSINESS,
+  address: "12 Maple Street, Portland, Oregon, United States",
   country: "AE",
   status: state === "setup" ? "onboarding" : "active",
   onboarding_step: state === "setup" ? "access" : "done",
@@ -59,7 +64,7 @@ export const location = (state) => ({
   concierge_first_post_at: null,
   is_demo: false,
   created_at: ago(21),
-  place_id: "ChIJroselanesalon000001",
+  place_id: "ChIJmaplestreetsalon000001",
   organization_id: ORG_ID,
   time_zone: "Asia/Dubai",
   first_task_done_at: state === "first-task" ? null : ago(17),
@@ -109,10 +114,10 @@ const base = {
     }),
     onboarding_status: (c) => ({
       location_id: LOCATION_ID,
-      business: "Rose Lane Salon",
+      business: BUSINESS,
       time_zone: "Asia/Dubai",
       is_demo: false,
-      check: { code: "RLS2345A", term: "hair salon" },
+      check: { code: "MSS2345A", term: "hair salon" },
       confirmed: true,
       whatsapp: true,
       setup_ok: true,

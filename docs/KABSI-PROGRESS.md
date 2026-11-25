@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 25 Nov 2026 (PILOT-READY). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 25 Nov 2026 (SITE-5). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -42,6 +42,7 @@ The long list as it stood before GATE-2 is word for word in `2026-11-24-progress
 
 ## Recent entries (newest first)
 
+- 25 Nov 2026, SITE-5 (PR 607): one example business (Maple Street Salon) on the site and in Kabsi's screens, a block and three questions per trade with its own screen, Pricing with its own content, faq-data on one plan at 29 with a card trial (price guard covers it), a licensed salon owner hero. Review round 4: Home, Pricing, barbershop 8.5; restaurant and How it works 8. `2026-11-25-site5.md`.
 - 25 Nov 2026, FIX-3 (PR 606): publication idempotency key from the highest stored suffix, Harvey's metro, priority_score and us_eligible read, /privacy and facts say the US pilot, kill gate counts checks run or trials started (not yes replies), demo business weekly hours for replay line 16.3. `2026-11-25-fix3.md`.
 - 25 Nov 2026, SITE-4 (PR 603): life on the public site: 13 licensed photos, Kabsi's own screens in phone frames, scroll rise, count up and typing dots (reduced motion respected), two tints, Nora off the hero; Home inside its 205 KB budget. Review scores in `2026-11-25-site4.md`.
 - 25 Nov 2026, OUTBOUND-3: Outbound reopens for the pilot, US and GB, approved once a week; CAN-SPAM postal address (OUTBOUND_POSTAL_ADDRESS, not set yet: nothing sends), DNS and mail-tester gates, kill gate, jobs scheduled again; sending still locked, test mode on. `2026-11-25-outbound3.md`.

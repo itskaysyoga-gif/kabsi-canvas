@@ -15,6 +15,7 @@ import {
 import { describe, expect, it } from "vitest";
 import { INDUSTRIES, industry, industryIndexed } from "../src/content/industries";
 import { BLUEPRINT } from "../src/content/industries/blueprint";
+import { TRADE_WORK } from "../src/content/industries/trade-work";
 import { IndustryPage } from "../src/components/kabsi/d9-industry";
 import { OWN_MIN, PAIR_MAX, failures, measure, pct, sentences } from "../scripts/lib/page-dup.mjs";
 
@@ -34,7 +35,8 @@ async function render(slug: string) {
   return renderToString(createElement(RouterProvider, { router }));
 }
 
-/** The page's HTML with the three things that may change per industry taken out (blueprint 3.1 section 5). */
+/** The page's HTML with the things that may change per industry taken out (blueprint 3.1 section 5, widened by SITE-5
+ * lane R decision 2: the trade's three examples and its three questions). */
 function shell(slug: string, html: string) {
   const i = industry(slug)!;
   const b = BLUEPRINT[slug]!;
@@ -46,7 +48,11 @@ function shell(slug: string, html: string) {
       .replace(/'/g, "&#x27;")
       .replace(/"/g, "&quot;");
   // Longest first, so a name inside a longer line is not cut first.
+  const w = TRADE_WORK[slug]!;
   const vary = [
+    ...w.does.flatMap((x) => [x.title, x.text]),
+    ...w.faq.flatMap((x) => [x.q, x.a]),
+    w.post,
     b.review.text,
     b.reply,
     b.fact.text,
@@ -91,7 +97,7 @@ describe("SITE-2: the industry pages are one template (blueprint 3.1 section 5)"
     }
   });
 
-  it("differs between two pages only in the headline noun, the example review and reply, and the fact", () => {
+  it("differs between two pages only in the headline noun, the example review and reply, the fact, and the trade's own examples and questions", () => {
     const base = Object.keys(html)[0]!;
     const want = shell(base, html[base]!);
     for (const [slug, h] of Object.entries(html)) expect(shell(slug, h), slug).toBe(want);
@@ -105,9 +111,27 @@ describe("SITE-2: the industry pages are one template (blueprint 3.1 section 5)"
     }
   });
 
+  // SITE-5 (lane R decision 2): each trade has three examples and three questions of its own, shown on its page.
+  it("shows each trade's own three examples, three questions and its own Google profile screen", () => {
+    const titles = new Set<string>();
+    for (const [slug, h] of Object.entries(html)) {
+      const w = TRADE_WORK[slug];
+      expect(w, slug).toBeDefined();
+      expect(w!.does).toHaveLength(3);
+      expect(w!.faq).toHaveLength(3);
+      for (const x of w!.does) {
+        expect(h, slug).toContain(x.title.replace(/'/g, "&#x27;"));
+        expect(titles.has(x.title), `${slug}: ${x.title} is on another page`).toBe(false);
+        titles.add(x.title);
+      }
+      for (const x of w!.faq) expect(h, slug).toContain(x.q.replace(/'/g, "&#x27;"));
+      expect(h, slug).toContain(`/screens/trade-${slug}-560.webp`);
+    }
+  });
+
   it("is caught when a page changes anything else (a fake page with one extra sentence)", () => {
     const base = Object.keys(html)[0]!;
-    const changed = html[base]!.replace("Proof of the work", "Proof of the work and more");
+    const changed = html[base]!.replace("Send a photo.", "Send a photo and more.");
     expect(shell(base, changed)).not.toBe(shell(base, html[base]!));
   });
 

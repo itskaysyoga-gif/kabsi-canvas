@@ -1,7 +1,7 @@
 // scripts/app-shots fixtures for onboarding (/start and the resume link /start/resume/CODE). Values or (ctx) => value;
 // ctx.state is the route's state. The states start with "ob-" and change only what onboarding reads; every other state
 // gets the same answer as before (the base onboarding_status from fixtures.mjs, re-created here, and profile.mjs's
-// task list). Invented business (Rose Lane Salon), invented numbers.
+// task list). Invented business (Maple Street Salon), invented numbers.
 import * as profile from "./profile.mjs";
 
 const LOCATION_ID = "00000000-0000-4000-8000-0000000000aa";
@@ -12,10 +12,10 @@ const ob = (c) => typeof c.state === "string" && c.state.startsWith("ob-");
 /** The base answer (fixtures.mjs), for every state that is not onboarding's. */
 const baseStatus = (c) => ({
   location_id: LOCATION_ID,
-  business: "Rose Lane Salon",
+  business: "Maple Street Salon",
   time_zone: "Asia/Dubai",
   is_demo: false,
-  check: { code: "RLS2345A", term: "hair salon" },
+  check: { code: "MSS2345A", term: "hair salon" },
   confirmed: true,
   whatsapp: true,
   setup_ok: true,
@@ -109,7 +109,7 @@ export const functions = {
     c.params.get("code") === "0123456789abcdef0123"
       ? {
           location_id: LOCATION_ID,
-          business: "Rose Lane Salon",
+          business: "Maple Street Salon",
           stage: "access",
           access: "invite_pending",
           path: "/start/manager",

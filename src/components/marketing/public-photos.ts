@@ -1,4 +1,4 @@
-// SITE-4: the licensed Unsplash photos of owners and their places, served from public/photos (credits in
+// SITE-4: the licensed Unsplash photos (SITE-5: and one Pexels photo, Home's hero) of owners and their places, served from public/photos (credits in
 // public/photos/CREDITS.md). Each has its files at the sizes used, its width and height, and its alt text. No one shown is
 // a Kabsi customer; no name or quote is ever attached to a photo. Kept small: Home's script budget carries it.
 
@@ -41,15 +41,15 @@ export const TRADE_TILES = (
 export const PUB = {
   /** Home's hero, behind the drawn phone. Preloaded from the route head. */
   heroOwner: {
-    stem: "owner-phone-tall",
+    stem: "salon-owner-tall",
     widths: [480, 960],
     w: 960,
     h: 1200,
-    alt: "A smiling shop owner reading a message on his phone at his counter",
+    alt: "A salon owner cutting a smiling client's hair in her bright studio",
   } satisfies PubPhoto,
   florist: wide("florist-phone", "A florist checking her phone at the workbench of her shop", 900),
   barista: wide("barista", "A smiling barista at the espresso machine behind her café counter"),
-  howHero: wide("barbershop", "A barber shaping a client's hair in his shop"),
+  howHero: wide("salon-wash", "A stylist washing a client's hair at the basin"),
   /** Home's week, Friday: the photo the owner sent, live as a post. */
   dayPost: wide("nail-salon", "A nail technician at work, the photo sent as a post"),
 } as const;

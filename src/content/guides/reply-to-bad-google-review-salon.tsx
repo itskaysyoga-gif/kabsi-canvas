@@ -93,7 +93,7 @@ export const guide: GuideDoc = {
             blow dry." <b>Reply:</b> "Thank you for the feedback, Sarah. Our prices are listed on
             our profile, and longer hair takes more time, which our stylists explain before they
             start. We are sorry if that did not happen at your visit. Please get in touch so we can
-            look at it. Rose Lane Salon"
+            look at it. Maple Street Salon"
           </p>
           <p>
             Google lets salons list services with prices on the profile, under Edit services, and
@@ -132,7 +132,7 @@ export const guide: GuideDoc = {
           </p>
           <Callout kind="warn" title="A holding reply, for example">
             "Thank you for letting us know. We take this seriously and would like to speak with you
-            directly. Please contact us through the details on our profile. Rose Lane Salon"
+            directly. Please contact us through the details on our profile. Maple Street Salon"
           </Callout>
         </>
       ),

@@ -110,9 +110,14 @@ describe("SITE-1: Home is the nine sections of blueprint section 3", () => {
 });
 
 describe("SITE-1: Pricing, the FAQ and the navigation", () => {
-  it("has one card and says what is not included once", () => {
+  // SITE-5 (lane R decision 3): Pricing has its own content, so Home's price card is not on it. The price and the
+  // trial terms show once at the top, and what is not included is one list.
+  it("shows the price and the trial terms once, and says what is not included once", () => {
     const p = read("src/components/marketing/v31-pricing.tsx");
-    expect(p.slice(p.indexOf("export function V31Pricing")).match(/<PriceCard/g)).toHaveLength(1);
+    const page = p.slice(p.indexOf("export function V31Pricing"));
+    expect(page.match(/<PriceCard/g)).toBeNull();
+    expect(page.match(/\{PRICE\.terms\}/g)).toHaveLength(1);
+    expect(page.match(/PLAN_LISTS\.not\.map/g)).toHaveLength(1);
     expect(PRICING.notIncluded).toBe(
       "Kabsi does not message your customers, run ads, build websites or promise rankings.",
     );

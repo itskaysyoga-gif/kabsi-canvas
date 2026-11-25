@@ -70,9 +70,10 @@ describe("Site 3b: the footer, the contents links and the headings (audit E1, E2
     // each an h3 straight under an h2 section headline, and the old profile card grid is gone.
     const d = read("src/components/kabsi/d9-industry.tsx");
     expect(d).not.toContain("i.profile");
-    // SITE-3: the band and its headline come from marketing/kit.tsx (Band id="benefits", Head id "benefits-h").
-    expect(d).toMatch(/<Band id="benefits"/);
-    expect(d).toMatch(/<Head id="benefits"/);
+    // SITE-3: the band and its headline come from marketing/kit.tsx. SITE-5 (lane R decision 2): the shared benefits
+    // band gave way to the trade's own "What Kabsi does for a <trade>" band (Band id="trade", Head id "trade-h").
+    expect(d).toMatch(/id="trade"/);
+    expect(d).toMatch(/<Head id="trade"/);
     expect(d).toContain('<h3 className="text-h3">{x.title}</h3>');
   });
 });
