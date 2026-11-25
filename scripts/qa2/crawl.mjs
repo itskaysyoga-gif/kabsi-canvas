@@ -5,7 +5,7 @@
 // finding; it lists them. docs/qa/2026-11-02-qa2.md is the report made from it.
 import { chromium, webkit } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
-import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { covered, measure, words } from "./lib.mjs";
 
@@ -29,7 +29,8 @@ const VISIT_LIMIT_MS = Number(arg("visit-timeout", "120")) * 1000;
 mkdirSync(join(OUT, "shots"), { recursive: true });
 
 // The pages: the sitemap, the pages that are public but not indexed, and the 404.
-const sitemap = readFileSync(new URL("../../public/sitemap.xml", import.meta.url), "utf8");
+// The sitemap is a server route now (src/routes/sitemap[.]xml.ts), so read it from the site being checked.
+const sitemap = await (await fetch(`${BASE}/sitemap.xml`)).text();
 const fromSitemap = [...sitemap.matchAll(/<loc>https:\/\/kabsi\.co([^<]*)<\/loc>/g)].map(
   (m) => m[1] || "/",
 );
