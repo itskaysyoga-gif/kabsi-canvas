@@ -2220,7 +2220,7 @@ The words live in `supabase/functions/_shared/wa-signin.ts` (`SIGNIN_SAY`, `WHAT
 - A forwarded sign-in message gets no answer.
 
 **The new sign-in notice.**
-- WhatsApp: "❓ *New sign-in on Chrome, Windows*" then "If this was not you, tap below. Every Kabsi sign-in on the web ends at once." Button **Sign me out everywhere**.
+- WhatsApp: "❓ *New sign-in on Chrome, Windows*" then "If this was not you, tap below. Every Kabsi sign-in on the web ends at once." Button **Sign me out** (20 characters is the most WhatsApp allows).
 - After the tap: "✅ *Signed out everywhere*" then "Log in again on kabsi.co when you need to."
 - An old notice: "⏳ *This notice has ended*" then "Write \"talk to a person\" and someone at Kabsi will help."
 - Email (outside the 24 hour window): subject "New sign-in on Chrome, Windows"; body "Someone signed in to your Kabsi account on Chrome, Windows. If this was you, there is nothing to do." and "If it was not you, reply to this email and Kabsi will sign you out everywhere."

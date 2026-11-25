@@ -123,7 +123,7 @@ Deno.test("signup1 notice: inside the window on WhatsApp with one button, outsid
   });
   assert.deepEqual(r, { whatsapp: 1, email: 2, skipped: 1 });
   assert.deepEqual(wa, [{ phone: "+447700900001", body: "❓ *New sign-in on Chrome, Windows*\n\nIf this was not you, tap below. Every Kabsi sign-in on the web ends at once.",
-    buttons: ["so:n1|Sign me out everywhere"] }]);
+    buttons: ["so:n1|Sign me out"] }]);
   assert.deepEqual(mails, [{ to: "two@shop.com", subject: "New sign-in on Chrome, Windows" }, { to: "four@shop.com", subject: "New sign-in on Chrome, Windows" }]);
   assert.deepEqual(marks, ["n1:sent", "n2:emailed", "n3:skipped", "n4:emailed"]);
   for (const t of [wa[0].body, noticeEmail({ browser: "Chrome", os: "Windows" }).text]) assert.doesNotMatch(t, /[‒-―!]/);
