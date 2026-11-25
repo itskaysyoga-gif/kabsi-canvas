@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, CheckCircle2, MessagesSquare, Star } from "lucide-react";
 import { Button, StatusPill, buttonClass } from "@/components/kabsi/ui";
 import { HomeCard } from "@/components/home/home-card";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import {
   Sheet,
   SheetContent,
@@ -156,9 +157,7 @@ export function BacklogCard({
           <div className="mt-3 min-h-0 flex-1 overflow-y-auto">
             {list.isLoading ? <p className="text-small text-text-2">Loading...</p> : null}
             {list.isError ? (
-              <p className="text-small text-bad" role="alert">
-                We couldn't load the replies. Try again in a moment.
-              </p>
+              <RetryLine what="The replies did not load." onRetry={() => void list.refetch()} />
             ) : null}
             {list.data && !list.data.length ? (
               <p className="text-small text-text-2">No low-risk replies are waiting.</p>
@@ -201,11 +200,11 @@ export function BacklogCard({
             </ul>
           </div>
           {approve.isError ? (
-            <p className="mt-3 text-small text-bad" role="alert">
-              {approve.error instanceof Error
-                ? approve.error.message
-                : "Couldn't approve these. Nothing was sent."}
-            </p>
+            <RetryLine
+              className="mt-3"
+              what="These replies did not go through."
+              onRetry={() => approve.mutate()}
+            />
           ) : null}
           <Button
             full

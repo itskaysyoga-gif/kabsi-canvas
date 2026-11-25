@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CHOICE_FROM_DAY, daysUntil, planChoice } from "@/lib/plan-choice";
-import { CARD_PAYMENTS_COMING } from "@/lib/plans";
+import { ADD_CARD_LABEL, CARD_PAYMENTS_COMING } from "@/lib/plans";
 import { PRICES_SENTENCE } from "@/lib/site";
 import { NEVER_NAMES } from "./helpers/house-rules";
 
@@ -24,10 +24,9 @@ describe("plan choice from day 11", () => {
     expect(planChoice(null, now)).toBeNull();
   });
 
-  it("counts the days left from day 11 and says card payments are coming", () => {
+  it("counts the days left from day 11", () => {
     const c = planChoice(trial(11, 3), now)!;
     expect(c.title).toBe("Your free trial ends in 3 days");
-    expect(c.body).toContain(CARD_PAYMENTS_COMING);
     expect(planChoice(trial(13, 1), now)!.title).toBe("Your free trial ends in 1 day");
     expect(planChoice(trial(14, 0), now)!.title).toBe("Your free trial ends today");
   });
@@ -37,7 +36,7 @@ describe("plan choice from day 11", () => {
     expect(c.tone).toBe("attention");
     expect(c.body).toContain("publishes nothing");
     expect(c.body).toContain("6 days more");
-    expect(c.body).toContain(CARD_PAYMENTS_COMING);
+    expect(c.cta).toMatchObject({ label: ADD_CARD_LABEL, checkout: true });
   });
 
   it("after an ended plan says what is paused and that the review link keeps working", () => {
@@ -46,7 +45,7 @@ describe("plan choice from day 11", () => {
     expect(c.body).toContain("review link and QR code keep working");
   });
 
-  it("states the three prices and marks card payments as coming in every card", () => {
+  it("APP-2: never says card payments are coming; after the trial the button is Add a card to keep Kabsi", () => {
     const cards = [
       planChoice(trial(11, 3), now)!,
       planChoice({ ...trial(15, -1, 6), state: "grace" }, now)!,
@@ -54,7 +53,8 @@ describe("plan choice from day 11", () => {
     ];
     for (const c of cards) {
       expect(c.body).toContain(PRICES_SENTENCE);
-      expect(c.body).toContain(CARD_PAYMENTS_COMING);
+      expect(c.body).not.toMatch(/coming|until they open/i);
+      expect(c.body).not.toContain(CARD_PAYMENTS_COMING);
     }
   });
 

@@ -142,7 +142,7 @@ function LocationRow({ row }: { row: Row }) {
     const { error } = await supabase.rpc("staff_grant_trial", { p_location: row.id });
     setBusy(false);
     if (error) return setMsg(`No trial given: ${error.message}`);
-    setMsg("Pro trial started.");
+    setMsg("Trial started.");
     await queryClient.invalidateQueries({ queryKey: ["staff-locations"] });
     await queryClient.invalidateQueries({ queryKey: ["my-location"] });
   }
@@ -179,7 +179,7 @@ function LocationRow({ row }: { row: Row }) {
               disabled={busy}
               onClick={() => void grantTrial()}
             >
-              Give Pro trial
+              Start trial
             </Button>
           ) : null}
           <Button size="compact" variant="ghost" onClick={() => setDiag((v) => !v)}>

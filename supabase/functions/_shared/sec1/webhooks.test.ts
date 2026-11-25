@@ -64,6 +64,8 @@ function creemDb() {
   const db = newDb();
   db.rpc.enqueue_job = () => crypto.randomUUID();
   db.rpc.billing_owner_contacts = () => [];
+  // APP-2: applyEvent closes an event whose business no longer exists, so the business has to exist here.
+  db.tables.organizations = [{ id: ORG }];
   useDb(db);
   return db;
 }
@@ -526,4 +528,14 @@ Deno.test("polish4: a billing alert goes to each staff phone once and is logged 
   assert.equal((logged[0].detail as Record<string, unknown>).alert, true);
   assert.equal(rows(db, "jobs_log").filter((r) => r.ok === false).length, 0);
   useDb(null);
+});
+
+Deno.test("creem: an event for a business that no longer exists closes as business_deleted on the first try, with no alert", async () => {
+  const db = creemDb();
+  db.tables.organizations = [];
+  await creemWebhook(await creemPost(JSON.stringify(creemEvent("evt_gone", "subscription.canceled", Date.now() - 60_000, "canceled"))), creemDeps().deps);
+  assert.equal(await applyEvent("evt_gone"), "business_deleted");
+  assert.equal(await applyEvent("evt_gone"), "already");
+  assert.equal(rows(db, "billing_events")[0]?.outcome, "business_deleted");
+  assert.equal(rows(db, "subscriptions").length, 0);
 });

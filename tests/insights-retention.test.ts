@@ -50,7 +50,7 @@ describe("nothing from Google's performance data is stored", () => {
   it("the browser keeps them in memory only", () => {
     for (const file of [
       "src/lib/insights.ts",
-      "src/routes/_authenticated/app/insights.tsx",
+      "src/components/insights/where-you-show-up.tsx",
       "src/components/insights/daily-chart.tsx",
     ]) {
       expect(read(file), file).not.toMatch(/localStorage|sessionStorage|indexedDB/);
