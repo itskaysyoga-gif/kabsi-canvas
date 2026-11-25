@@ -1,0 +1,20 @@
+// SITE-4: the hero photo of each industry page that has one of the new photos (the others keep their library photo).
+// Only the industry pages load this file. Credits in public/photos/CREDITS.md.
+import { wide, type PubPhoto } from "./public-photos";
+
+export const TRADE_WIDE: Record<string, PubPhoto> = {
+  "hair-salon": wide("hair-salon", "A stylist blow-drying a client's hair in a bright salon"),
+  barbershop: wide("barbershop", "A barber shaping a client's hair in his shop"),
+  "nail-salon": wide("nail-salon", "A nail technician working on a client's nails"),
+  "spa-and-massage": wide("spa", "A massage therapist working on a client's back"),
+  cafe: wide("cafe", "A barista at work behind a sunlit café counter"),
+  restaurant: wide("restaurant", "A cook at the pass of his restaurant kitchen"),
+  "auto-repair": wide("auto-repair", "A mechanic working under the hood of a car"),
+  cleaner: wide("cleaner", "A cleaner vacuuming an office floor"),
+};
+
+/** The "Send a photo" band's photo where the trade's library photo is weak (the others use their own second photo). */
+export const TRADE_SECOND: Record<string, PubPhoto> = {
+  "hair-salon": wide("salon-wash", "A stylist washing a client's hair at the basin"),
+  "auto-repair": wide("garage-hands", "A mechanic's hands at work on a car's fuse box"),
+};

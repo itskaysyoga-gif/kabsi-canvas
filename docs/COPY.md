@@ -2586,3 +2586,19 @@ GATE-2 (24 Nov 2026) shipped these lines in code without a deck entry; PILOT-REA
 - Email subject: `<Business>: your Kabsi price changes on <date>`. Title: `Your founding price is ending`. Button: `Open your plan`.
 
 **Staff** (`src/components/staff/founding-panel.tsx`): the button `Link for the founding price`.
+
+## 94. SITE-4: life on the public site (25 Nov 2026, lane R, the SITE-4 prompt)
+
+The structure and every earlier line stay. New lines, all in `src/components/marketing/life.tsx`,
+`src/components/marketing/screens-section.tsx`, `src/components/marketing/v31-pricing.tsx` and the photo files' alt text
+(`src/components/marketing/public-photos.ts`, `industry-photos.ts`):
+
+- Home, after the problem band: `Built for your kind of business.` Line: `Salons, barbers, cafés, garages and more. Each kind of business has its own Google work, and its own page.` Link: `See every business`. Eight photo tiles: `Hair salons`, `Barbershops`, `Nail salons`, `Spas`, `Cafes`, `Restaurants`, `Auto repair`, `Cleaning`.
+- Kabsi's own screens (Example on each): section title `See the work in Kabsi itself.` (How it works) or `What you get, every week.` (Pricing); line `Real screens from Kabsi's account and email, shown with an example business.` The three screens: `Your report` / `In your account: what Kabsi did, what waits for your yes, one next step.`; `Your review link and QR code` / `A ready message to send after a real visit, and a QR code to print.`; `Your week, by email` / `Every Monday: the work done and anything waiting for you.` On Home the three screens sit inside "See exactly what was done." with no title of their own.
+- Pricing: a new section after the price card, `What one month looks like.` Line: `One month at an example salon: the work Kabsi did, what it found and what Google shows.` (the Example monthly report of Home beside it).
+- Industry pages, on the charcoal band after the three benefits: `Send a photo. Get a Google post.` (the second sentence in yellow text). Line: `Take a photo at work and send it to Kabsi with a few words. Kabsi writes the post and waits for your yes.` Three numbered steps under it: `You send a photo from your phone.`, `Kabsi writes the post for it.`, `You tap yes. It goes live on Google.` The Example card over the trade's photo: `Post ready`, `A new photo from this week at <example business>. Book your next visit with us.`, `Live on Google after your yes`. The industry pages no longer repeat Kabsi's screens (Home, Pricing and How it works show them).
+- Industry pages: the sourced fact becomes a quiet note headed `From Google's own help pages` (no longer a section headline); the date it was read is written as `November 24, 2026`. `What to know first.` becomes a section headline.
+- Pricing, after the price card: `How the 14 days work.` Three steps: `Day 1` / the first-day line of How it starts (`On your first day, every unanswered review from the last 90 days arrives with a reply ready to approve.`); `Day 14` / `Your first payment of 29 US dollars, unless you cancel before. A card is needed to start.` (from `TRIAL_DAYS` and `PRICE_MONTHLY_USD`, as `TRIAL_LINE` says); `Any day` / `Cancel in one tap in Settings, or tell Kabsi on WhatsApp.` (the FAQ's answer).
+- Home: the hero's review and hours scenes and the "Just tell Kabsi" answers that wait for a yes end with the owner's `Approve` (the button Kabsi shows). `You stay in charge.` becomes a section headline.
+- Industry pages: the example review card's title moves onto the card over the trade's photo; the words are unchanged.
+- Photos carry no name, quote or caption; no one shown is presented as a Kabsi customer (credits in `public/photos/CREDITS.md`).

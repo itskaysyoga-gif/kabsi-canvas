@@ -6,14 +6,29 @@ import { Faq } from "@/components/kabsi/ui";
 import { HOME_HERO, ABOUT, FAQ_V31, HOW, SECURITY, TRUST } from "./v31-data";
 import { Band, CheckBox, Head, Lead, PageTop, Ticks } from "./kit";
 import { ClosingBand, ReportSample, TrustLines } from "./v31";
+import { PubImg } from "./life";
+import { ProductScreens } from "./screens-section";
+import { PUB } from "./public-photos";
 
 export function V31How() {
   return (
     <>
-      <PageTop title={HOW.title} mark={HOW.mark} line={HOW.line}>
+      <PageTop
+        title={HOW.title}
+        mark={HOW.mark}
+        line={HOW.line}
+        aside={
+          <PubImg
+            photo={PUB.howHero}
+            sizes="(min-width: 1280px) 500px, (min-width: 1024px) 40vw, 100vw"
+            priority
+            className="aspect-[4/3] w-full rounded-panel bg-surface-3 object-cover shadow-lift"
+          />
+        }
+      >
         <CheckBox id="how-scan" under={HOME_HERO.under} className="mt-8 max-w-[36rem]" />
       </PageTop>
-      <Band id="steps" tone="white" label="The five steps">
+      <Band id="steps" tone="warm" label="The five steps">
         <ol className="grid gap-x-12 gap-y-10 md:grid-cols-2 xl:grid-cols-3">
           {HOW.steps.map((s, i) => (
             <li key={s.title} className="flex gap-4">
@@ -32,17 +47,14 @@ export function V31How() {
           </li>
         </ol>
       </Band>
-      <Band
-        id="report"
-        tone="ivory"
-        inner="lg:grid lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center lg:gap-16"
-      >
+      <ProductScreens />
+      <Band id="report" tone="warm">
         <Head
           id="report"
           title="See what was done."
           line="A short summary every week and a full report every month: work done, what Kabsi found and what Google shows, kept apart."
         />
-        <ReportSample className="mt-8 lg:mt-0" />
+        <ReportSample className="mt-8" />
       </Band>
       <ClosingBand under={HOME_HERO.under} />
     </>

@@ -3,7 +3,7 @@
 // proof, the price, trust, questions and the closing band. The chat pictures are drawn in Kabsi's own look (ivory and
 // charcoal, the Kabsi mark), labelled Example, never a copy of another app's screens or logo. The yellow bar is on the H1
 // and one other headline only. No carousel of offers, no video, no pop-up, no counters, testimonials or ratings of Kabsi.
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import {
   CalendarClock,
   Check,
@@ -18,7 +18,8 @@ import { cn } from "@/lib/utils";
 import { PRIMARY_CTA } from "@/lib/offer";
 import { Marked, YellowNumber } from "@/components/kabsi/highlight";
 import { ButtonLink, ExampleBadge, Faq, KabsiMark } from "@/components/kabsi/ui";
-import { SiteImg } from "./site-img";
+import { Num, PubImg, ScreenRow, TradeStrip, useCountOnce, useReducedMotion } from "./life";
+import { PUB } from "./public-photos";
 import { Band, CheckBox, ClosingDark, Head, Lead, MarkRow, PageTop, Sec, Ticks } from "./kit";
 import {
   CLOSING,
@@ -37,7 +38,6 @@ import {
   TELL_CHIPS,
   TRUST,
   WEEK,
-  WEEKLY_SUMMARY,
   type ChatTurn,
 } from "./v31-data";
 
@@ -59,11 +59,20 @@ function Approve({ done = false }: { done?: boolean }) {
   );
 }
 
-function KabsiSays({ turn }: { turn: Extract<ChatTurn, { from: "kabsi" }> }) {
+type Delay = CSSProperties;
+const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
+
+function KabsiSays({ turn, d }: { turn: Extract<ChatTurn, { from: "kabsi" }>; d?: Delay }) {
   return (
-    <li className="flex items-end gap-2">
-      <KabsiMark ring={false} className="size-6 shrink-0" />
-      <div className="max-w-[86%] rounded-card rounded-es-sm border border-line bg-surface-1 px-3 py-2.5 text-small text-text-1">
+    <li className="relative flex items-end gap-2" style={d}>
+      {/* SITE-4: Kabsi is writing. The dots show only while a scene plays (styles.css, .kb-play). */}
+      <span className="kb-dots" aria-hidden>
+        <i />
+        <i />
+        <i />
+      </span>
+      <KabsiMark ring={false} className="kb-said size-6 shrink-0" />
+      <div className="kb-said max-w-[86%] rounded-card rounded-es-sm border border-line bg-surface-1 px-3 py-2.5 text-small text-text-1">
         {turn.title ? <p className="font-bold">{turn.title}</p> : null}
         {turn.quote ? (
           <p className="mt-1 border-s-2 border-line-strong ps-2 text-text-2">{turn.quote}</p>
@@ -79,39 +88,42 @@ function KabsiSays({ turn }: { turn: Extract<ChatTurn, { from: "kabsi" }> }) {
   );
 }
 
-function OwnerSays({ text, photo }: { text: string; photo?: boolean | undefined }) {
+function OwnerSays({ text, photo, d }: { text: string; photo?: boolean | undefined; d?: Delay }) {
   return (
-    <li className="ms-auto w-fit max-w-[80%] rounded-card rounded-ee-sm bg-kb-ink px-3 py-2.5 text-small text-kb-sand">
+    <li
+      className="kb-said ms-auto w-fit max-w-[80%] rounded-card rounded-ee-sm bg-kb-ink px-3 py-2.5 text-small text-kb-sand"
+      style={d}
+    >
       {photo ? (
-        <span className="mb-2 grid aspect-[4/3] w-36 place-items-center rounded-input bg-kb-graphite text-kb-mute">
-          <ImageIcon className="size-6" aria-hidden />
-          <span className="sr-only">A photo</span>
-        </span>
+        <PubImg
+          photo={PUB.dayPost}
+          sizes="128px"
+          className="mb-2 aspect-[3/2] w-32 rounded-input object-cover"
+        />
       ) : null}
-      {text === "Approve" ? (
-        <span className="inline-flex items-center gap-1.5 font-bold">
-          <Check className="size-4" aria-hidden />
-          Approve
-        </span>
-      ) : (
-        text
-      )}
+      {text}
     </li>
   );
 }
 
-function Turns({ turns }: { turns: ChatTurn[] }) {
-  return (
-    <>
-      {turns.map((t, i) =>
-        t.from === "owner" ? (
-          <OwnerSays key={i} text={t.text} photo={t.photo} />
-        ) : (
-          <KabsiSays key={i} turn={t} />
-        ),
-      )}
-    </>
-  );
+/**
+ * The turns of a chat. Inside a `.kb-play` list (a playing scene) each turn carries its delay: an owner's message after
+ * a short pause, and before each of Kabsi's answers 900 ms of typing dots (styles.css). Elsewhere all show at once.
+ * Returns the turns and the time the last one lands, for the line that closes a scene.
+ */
+function turnsOf(turns: ChatTurn[]) {
+  let t = 0;
+  const items = turns.map((x, i) => {
+    t += x.from === "kabsi" ? 900 : 450;
+    const d = delay(t);
+    t += 500;
+    return x.from === "owner" ? (
+      <OwnerSays key={i} text={x.text} photo={x.photo} d={d} />
+    ) : (
+      <KabsiSays key={i} turn={x} d={d} />
+    );
+  });
+  return { items, end: delay(t) };
 }
 
 /** A chat in a plain rounded card with the Kabsi mark: Example. */
@@ -119,11 +131,15 @@ export function ChatCard({
   turns,
   label,
   className,
+  replay,
 }: {
   turns: ChatTurn[];
   label: string;
   className?: string;
+  /** When given, the turns play one by one (typing dots first) each time it changes. */
+  replay?: unknown;
 }) {
+  const reduced = useReducedMotion();
   return (
     <figure
       className={cn(
@@ -136,8 +152,12 @@ export function ChatCard({
         <p className="flex-1 text-small font-bold text-text-1">Kabsi</p>
         <ExampleBadge className="text-text-2" />
       </div>
-      <ol className="mt-auto space-y-2.5" aria-label={label}>
-        <Turns turns={turns} />
+      <ol
+        key={String(replay)}
+        className={cn("mt-auto space-y-2.5", replay !== undefined && !reduced && "kb-play")}
+        aria-label={label}
+      >
+        {turnsOf(turns).items}
       </ol>
       <figcaption className="sr-only">{label}</figcaption>
     </figure>
@@ -145,18 +165,6 @@ export function ChatCard({
 }
 
 /* ---------- The hero phone: three short scenes in turn ---------- */
-
-function useReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const m = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(m.matches);
-    const on = () => setReduced(m.matches);
-    m.addEventListener("change", on);
-    return () => m.removeEventListener("change", on);
-  }, []);
-  return reduced;
-}
 
 const SCENE_MS = 7000;
 
@@ -168,15 +176,25 @@ function HeroPhone() {
   const reduced = useReducedMotion();
   const [at, setAt] = useState(0);
   const [paused, setPaused] = useState(false);
+  // SITE-4: the first scene is drawn whole (never an empty phone on arrival); later scenes play turn by turn.
+  const [moved, setMoved] = useState(false);
   const playing = !reduced && !paused;
   useEffect(() => {
     if (!playing) return;
-    const t = window.setTimeout(() => setAt((a) => (a + 1) % HERO_SCENES.length), SCENE_MS);
+    const t = window.setTimeout(() => {
+      setMoved(true);
+      setAt((a) => (a + 1) % HERO_SCENES.length);
+    }, SCENE_MS);
     return () => window.clearTimeout(t);
   }, [at, playing]);
   const scene = HERO_SCENES[at] ?? HERO_SCENES[0]!;
+  // SITE-4: each scene plays turn by turn, with the typing dots before each of Kabsi's answers.
+  const play = turnsOf(scene.turns);
   return (
-    <figure className="mx-auto w-full max-w-[21rem] lg:me-0">
+    <figure
+      data-nora-avoid
+      className="relative mx-auto w-full max-w-[19rem] sm:max-w-[21rem] lg:mx-0"
+    >
       <div className="rounded-[2.75rem] bg-kb-ink p-2.5 shadow-float">
         <div className="overflow-hidden rounded-[2.25rem] bg-surface-0">
           <div className="mx-auto mt-2.5 h-5 w-24 rounded-full bg-kb-ink" aria-hidden />
@@ -192,12 +210,15 @@ function HeroPhone() {
             key={at}
             aria-label={`Example: ${scene.name}`}
             className={cn(
-              "flex h-[20rem] flex-col justify-end gap-2.5 px-3 pb-4 pt-3",
-              playing && "kb-scene",
+              "flex h-[23rem] flex-col justify-end gap-2.5 px-3 pb-4 pt-3 sm:h-[20rem]",
+              playing && moved && "kb-play",
             )}
           >
-            <Turns turns={scene.turns} />
-            <li className="flex items-center gap-2 self-center rounded-full bg-ok-soft px-3 py-1.5 text-label font-bold text-ok">
+            {play.items}
+            <li
+              className="kb-said flex items-center gap-2 self-center rounded-full bg-ok-soft px-3 py-1.5 text-label font-bold text-ok"
+              style={play.end}
+            >
               <Check className="size-3.5" aria-hidden />
               {scene.done}
             </li>
@@ -211,7 +232,10 @@ function HeroPhone() {
             type="button"
             aria-label={s.name}
             aria-pressed={i === at}
-            onClick={() => setAt(i)}
+            onClick={() => {
+              setMoved(true);
+              setAt(i);
+            }}
             className="press grid size-11 place-items-center rounded-full"
           >
             <span
@@ -250,7 +274,7 @@ function HeroPhone() {
 export function HomeHero() {
   return (
     <section aria-labelledby="hero-title" data-hero className="relative isolate z-10 bg-surface-0">
-      <div className="container-kb grid gap-10 pt-6 pb-14 sm:pt-12 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-center lg:gap-20 lg:pt-16 lg:pb-24 xl:grid-cols-[minmax(0,1fr)_24rem]">
+      <div className="container-kb grid gap-10 pt-6 pb-14 sm:pt-12 lg:grid-cols-[minmax(0,1fr)_27rem] lg:items-center lg:gap-14 lg:pt-16 lg:pb-24 xl:grid-cols-[minmax(0,1fr)_31rem] xl:gap-20">
         <div className="max-w-[40rem]">
           <h1 id="hero-title" className="text-display text-balance">
             <Marked text={HOME_HERO.title} mark={HOME_HERO.mark} />
@@ -259,9 +283,28 @@ export function HomeHero() {
           <CheckBox id="hero-scan" under={HOME_HERO.under} className="relative z-10 mt-6 sm:mt-8" />
           <MarkRow items={HERO_MARKS} className="mt-4" />
         </div>
-        <HeroPhone />
+        <HeroVisual />
       </div>
     </section>
+  );
+}
+
+/**
+ * SITE-4: a real owner at work behind the drawn phone. The photo sits back and to the right; the phone, in front and to
+ * the left, stays the focus. The photo is the page's preloaded image (src/routes/index.tsx).
+ */
+function HeroVisual() {
+  return (
+    <div className="kb-hero-visual-wrap">
+      <PubImg
+        photo={PUB.heroOwner}
+        sizes="(min-width: 1280px) 330px, (min-width: 1024px) 290px, (min-width: 640px) 480px, 92vw"
+        priority
+      />
+      <div>
+        <HeroPhone />
+      </div>
+    </div>
   );
 }
 
@@ -339,17 +382,12 @@ function DayPicture({ n }: { n: number }) {
   if (n === 2)
     return (
       <MiniCard>
-        <span
-          role="img"
-          aria-label="A drawn photo of fresh colour work"
-          className="relative block h-24 overflow-hidden rounded-input bg-kb-graphite"
-        >
-          <span className="absolute -end-4 -top-6 size-20 rounded-full bg-kb-yellow/80" />
-          <span className="absolute -start-6 bottom-0 h-12 w-40 rounded-t-full bg-kb-smoke" />
-          <span className="absolute end-2 bottom-2 rounded-full bg-surface-0 px-2 py-0.5 text-label font-semibold text-text-1">
-            Fresh colour, done this week
-          </span>
-        </span>
+        {/* SITE-4: a real photo in place of the drawn one (credits in public/photos/CREDITS.md). */}
+        <PubImg
+          photo={PUB.dayPost}
+          sizes="288px"
+          className="aspect-[3/2] w-full rounded-input object-cover"
+        />
         <Chip>Live on Google</Chip>
       </MiniCard>
     );
@@ -404,7 +442,7 @@ function TellKabsi() {
   return (
     <Band
       id="tell"
-      tone="white"
+      tone="warm"
       inner="lg:grid lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-16 xl:gap-24"
     >
       <div>
@@ -439,14 +477,17 @@ function TellKabsi() {
           </div>
         </div>
       </div>
-      <div aria-live="polite" className="mt-8 lg:mt-0">
+      <div aria-live="polite" className="mt-8 lg:mt-0 lg:self-start">
         <ChatCard
           turns={[
             { from: "owner", text: chip.ask, photo: chip.photo },
             { from: "kabsi", lines: chip.answer, approve: chip.approve },
+            // SITE-4: the owner's tap on the button Kabsi shows, so the exchange reads to the end.
+            ...(chip.approve ? [{ from: "owner" as const, text: "Approve" }] : []),
           ]}
           label={`Example: you send "${chip.ask}" and Kabsi answers`}
-          className="flex min-h-[21rem] flex-col"
+          className="flex flex-col"
+          replay={at}
         />
       </div>
     </Band>
@@ -478,25 +519,27 @@ function Starts() {
   return (
     <Band
       id="starts"
-      tone="white"
+      tone="ivory"
       inner="lg:grid lg:grid-cols-2 lg:items-center lg:gap-16 xl:gap-24"
     >
       <div>
         <Head id="starts" title={START.title} />
         <StartSteps />
       </div>
-      <SiteImg
-        id="heroHow"
-        sizes="(min-width: 1024px) 560px, 100vw"
-        className="mt-10 aspect-[4/3] w-full rounded-panel bg-surface-2 object-cover lg:mt-0"
+      <PubImg
+        photo={PUB.florist}
+        sizes="(min-width: 1280px) 560px, (min-width: 1024px) 45vw, 100vw"
+        className="mt-10 aspect-[4/3] w-full rounded-panel bg-surface-2 object-cover shadow-lift lg:mt-0"
       />
     </Band>
   );
 }
 
 export function ReportSample({ className }: { className?: string }) {
+  const ref = useCountOnce();
   return (
     <figure
+      ref={ref}
       className={cn(
         "rounded-panel border border-line bg-surface-1 p-5 shadow-lift sm:p-7",
         className,
@@ -518,7 +561,9 @@ export function ReportSample({ className }: { className?: string }) {
               {b.rows.map(([k, v]) => (
                 <div key={k} className="flex justify-between gap-4 py-2 text-small">
                   <dt className="text-text-1">{k}</dt>
-                  <dd className="font-bold text-text-1">{v}</dd>
+                  <dd className="font-bold text-text-1">
+                    <Num value={v} />
+                  </dd>
                 </div>
               ))}
             </dl>
@@ -530,40 +575,17 @@ export function ReportSample({ className }: { className?: string }) {
   );
 }
 
-function WeeklyMessage() {
-  return (
-    <figure className="rounded-panel border border-line bg-surface-0 p-4 shadow-rest sm:p-5">
-      <div className="flex items-center gap-2 pb-3">
-        <KabsiMark ring={false} className="size-7" />
-        <p className="flex-1 text-small font-bold text-text-1">Kabsi</p>
-        <ExampleBadge className="text-text-2" />
-      </div>
-      <div className="rounded-card rounded-es-sm border border-line bg-surface-1 px-3.5 py-3 text-small text-text-1">
-        <p className="font-bold">{WEEKLY_SUMMARY.title}</p>
-        <ul className="mt-1.5 space-y-1">
-          {WEEKLY_SUMMARY.lines.map((l) => (
-            <li key={l}>{l}</li>
-          ))}
-        </ul>
-        <p className="mt-2 text-text-2">{WEEKLY_SUMMARY.next}</p>
-      </div>
-      <figcaption className="sr-only">An Example weekly summary from Kabsi</figcaption>
-    </figure>
-  );
-}
-
 function Proof() {
   return (
-    <Band id="proof" tone="ivory">
+    <Band id="proof" tone="warm">
       <Head
         id="proof"
         title={PROOF.title}
         line="A short summary every week. A full report every month. Work done, what Kabsi found and what Google shows, kept apart."
       />
-      <div className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start lg:gap-8">
-        <ReportSample />
-        <WeeklyMessage />
-      </div>
+      <ReportSample className="mt-10" />
+      {/* SITE-4: the same work in Kabsi's own account and email, with an example business. */}
+      <ScreenRow ids={["report", "cards", "email"]} className="mt-12 sm:mt-16" />
     </Band>
   );
 }
@@ -622,16 +644,17 @@ export function V31Home() {
     <>
       <HomeHero />
       <Problem />
+      <TradeStrip className="bg-tint-warm" />
       <Week />
       <TellKabsi />
       <Starts />
       <Proof />
-      <Band id="price" tone="white">
+      <Band id="price" tone="warm">
         <Head id="price" title={PRICE.title} />
         <PriceCard className="mt-8" />
       </Band>
       <Band id="trust" tone="ivory" inner="py-10 sm:py-14 lg:py-16">
-        <h2 id="trust-h" className="text-title text-text-2">
+        <h2 id="trust-h" className="text-h2 text-balance">
           {TRUST.title}
         </h2>
         <TrustLines />
@@ -639,31 +662,6 @@ export function V31Home() {
       <Band id="questions" tone="ivory" inner="pt-4 sm:pt-6 lg:pt-8">
         <Head id="questions" title="Questions." />
         <Faq items={HOME_FAQ.map((f) => ({ q: f.q, a: f.a }))} className="mt-8" />
-      </Band>
-      <ClosingBand under={HOME_HERO.under} />
-    </>
-  );
-}
-
-/* ---------- Pricing ---------- */
-
-export function V31Pricing() {
-  return (
-    <>
-      <PageTop title={PRICING.title} mark={PRICING.mark} line={PRICING.line}>
-        <MarkRow items={HERO_MARKS} className="mt-6" />
-      </PageTop>
-      <Band id="plan" tone="white" label="The plan">
-        <PriceCard />
-        <Lead className="mt-6">{PRICING.free}</Lead>
-      </Band>
-      <Band id="trust" tone="ivory">
-        <Head id="trust" title={TRUST.title} />
-        <TrustLines />
-      </Band>
-      <Band id="questions" tone="white">
-        <Head id="questions" title="Questions about the plan." />
-        <Faq items={PRICING_FAQ.map((f) => ({ q: f.q, a: f.a }))} className="mt-8" />
       </Band>
       <ClosingBand under={HOME_HERO.under} />
     </>

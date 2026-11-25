@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { pageHead } from "@/lib/site";
 import { SiteShell } from "@/components/kabsi/site-chrome";
-import { V31Pricing } from "@/components/marketing/v31";
+import { V31Pricing } from "@/components/marketing/v31-pricing";
 import { HEADS } from "@/components/marketing/v31-heads";
 
 // Pricing on blueprint 3.1 section 4 (SITE-1): one card at 29 US dollars a month per location, the trial terms beside

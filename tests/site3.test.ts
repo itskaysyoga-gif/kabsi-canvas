@@ -30,8 +30,14 @@ describe("SITE-3: the home page", () => {
       "A photo posted",
     ]);
     const home = read("src/components/marketing/v31.tsx");
-    expect(home).toContain('matchMedia("(prefers-reduced-motion: reduce)")');
-    expect(home).toContain('playing && "kb-scene"');
+    // SITE-4: the scenes play turn by turn (typing dots first) and stand still under reduced motion or when paused.
+    expect(read("src/components/marketing/life.tsx")).toContain(
+      'matchMedia("(prefers-reduced-motion: reduce)")',
+    );
+    expect(home).toContain("const reduced = useReducedMotion();");
+    expect(home).toContain("const playing = !reduced && !paused;");
+    expect(home).toContain('playing && moved && "kb-play"');
+    expect(read("src/styles.css")).toContain(".kb-play .kb-dots");
     expect(home).toContain("Pause the example");
     expect(home).not.toMatch(/WhatsAppGlyph|bg-wa-|text-wa-/);
   });
@@ -48,7 +54,11 @@ describe("SITE-3: the home page", () => {
   });
   it("shows the voice note line and keeps the answer panel tall enough not to jump", () => {
     expect(TELL.voice).toBe("Or send a voice note.");
-    expect(read("src/components/marketing/v31.tsx")).toContain("min-h-[21rem]");
+    // SITE-4: the answer card sits at the top of its column (lg:self-start) and hugs its exchange, so it neither jumps
+    // the chips (they are in the other column) nor leaves an empty top.
+    expect(read("src/components/marketing/v31.tsx")).toContain(
+      'className="mt-8 lg:mt-0 lg:self-start"',
+    );
   });
   it("puts TRIAL_LINE beside the price card's button, in full", () => {
     expect(PRICE.terms).toBe(TRIAL_LINE);

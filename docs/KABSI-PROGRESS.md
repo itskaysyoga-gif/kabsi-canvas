@@ -42,6 +42,7 @@ The long list as it stood before GATE-2 is word for word in `2026-11-24-progress
 
 ## Recent entries (newest first)
 
+- 25 Nov 2026, SITE-4 (PR 603): life on the public site: 13 licensed photos, Kabsi's own screens in phone frames, scroll rise, count up and typing dots (reduced motion respected), two tints, Nora off the hero; Home inside its 205 KB budget. Review scores in `2026-11-25-site4.md`.
 - 25 Nov 2026, OUTBOUND-3: Outbound reopens for the pilot, US and GB, approved once a week; CAN-SPAM postal address (OUTBOUND_POSTAL_ADDRESS, not set yet: nothing sends), DNS and mail-tester gates, kill gate, jobs scheduled again; sending still locked, test mode on. `2026-11-25-outbound3.md`.
 - 25 Nov 2026, PILOT-READY (R-165): one price everywhere (29, extra location 29, the trial line), GATE-2 wording in COPY.md section 93 and the facts, replay harness rebound to the demo businesses with per-phone locks and `launch_16_18`. Replay harness run on production: 10 scenarios pass, launch lines 16 to 18 pass except the rewrite and the hours week (see the file); test checkouts waiting for Rashid. `2026-11-25-pilot-ready.md`.
 - 24 Nov 2026, GATE-2 (R-164): WhatsApp report answers on PROOF-2's functions, onboarding in three steps then the card trial, Founding 25 to the 19 checkout, the month-13 switch and its email, the first-day 90-day list, the pilot kit, Creem test products set up. Launch tests mostly not run (see the file). `2026-11-24-gate2.md`.
@@ -50,7 +51,6 @@ The long list as it stood before GATE-2 is word for word in `2026-11-24-progress
 - 24 Nov 2026, SITE-1 (R-163, PR 594): Home in nine sections, one price card at 29, src/lib/offer.ts. `2026-11-24-site1.md`.
 - 24 Nov 2026, OFFER-2 (R-163): one plan at 29 with a 14-day card trial, founding 19 private, costly jobs off, 2 posts a month, WhatsApp Google-care tools. `2026-11-24-offer2.md`.
 - 24 Nov 2026, PROOF-2: link watch, short weekly summary, monthly report, placement links. `2026-11-24-proof2.md`.
-- 24 Nov 2026, FIX-0: Edge Functions refused by the database API since 14 Nov; key resolver and /health. Verified live 16:31 UTC (30.54 item 1). `2026-11-24-fix0.md`.
 - Older entries: `2026-11-24-progress-moved.md` and the files it names.
 
 ## How a session updates this page
