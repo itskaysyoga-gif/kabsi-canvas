@@ -4,8 +4,8 @@ Every photo in this folder is from Unsplash and was marked "Free to use under th
 downloaded on 25 Nov 2026 (https://unsplash.com/license: free for commercial use, no permission needed, attribution not
 required but given here). No Unsplash+ photo is used. No one shown is a Kabsi customer, and no name or quote is attached to
 anyone. Small marks that could read as a brand were blurred: the hair dryer's mark (hair-salon), the nail lamp's label
-(nail-salon) and the print on the mechanic's top (auto-repair). Crops leave out a television in the barbershop and printed
-text in the restaurant photo.
+(nail-salon) and the print on the mechanic's top (auto-repair). Crops leave out a television in the barbershop, printed
+text in the restaurant photo and the chalkboard menus in the barista photo. The florist photo was lightened.
 
 Files: `<name>-tile-400|800.webp` (4:5, the trade tiles), `<name>-wide-640|1200.webp` (3:2 or 4:3, page photos),
 `owner-phone-tall-480|960.webp` (4:5, Home's hero). WebP, quality 70, metadata stripped. The registry with sizes and alt
@@ -23,9 +23,10 @@ text is `src/components/marketing/public-photos.ts`.
 | auto-repair | A mechanic working under the hood of a car | https://unsplash.com/photos/mechanic-working-on-car-engine-UZUzvJEvKnI | Sten Rademaker (@stenrademaker) | Amsterdam, Netherlands | Unsplash License |
 | cleaner | A cleaner vacuuming an office floor | https://unsplash.com/photos/a-man-in-yellow-gloves-vacuums-a-carpeted-office-floor-CVcIMnH_7so | web seo (@webseoweb) | Chicago, Illinois, USA | Unsplash License |
 | florist-phone | A florist checking her phone at the workbench of her shop | https://unsplash.com/photos/woman-standing-beside-the-table-24HcJhf0u6M | Ellicia (@ellicia_) | Not given | Unsplash License |
-| cafe-owners | Two café owners standing in their café | https://unsplash.com/photos/two-cafe-owners-proudly-stand-together-dU3KJqyYlO0 | Vitaly Gariev (@silverkblack) | Not given | Unsplash License |
+| barista | A smiling barista at the espresso machine behind her café counter (cropped below the chalkboard menus) | https://unsplash.com/photos/woman-holding-portafilter-in-coffee-shop-8jp-6SjVibM | Brooke Cagle (@brookecagle) | Not given | Unsplash License |
+| garage-hands | A mechanic's hands at a car's fuse box | https://unsplash.com/photos/a-man-is-working-on-a-cars-engine-s4d_ESS0ylA | Maxim Hopman (@nampoh) | Not given | Unsplash License |
 | salon-wash | A stylist washing a client's hair at the basin | https://unsplash.com/photos/a-woman-getting-her-hair-cut-by-a-hair-stylist-Md_DhaFsnCQ | Lindsay Cash (@lindsayrc81) | Not given | Unsplash License |
 
-US where possible: three of the twelve are tagged in the US (hair-salon, barbershop, cleaner). Unsplash's free library
+US where possible: three of the thirteen are tagged in the US (hair-salon, barbershop, cleaner). Unsplash's free library
 had few photos of owners at work tagged with a US place that also passed the no logo and no readable text rule; the rest
 are untagged or from elsewhere and show nothing that names a country.

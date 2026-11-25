@@ -839,6 +839,17 @@ html.kb-motion [data-stagger]:not(.kb-in) > * {
   }
 }
 
+/* A band starts most of the way visible, so text is never faint for long. */
+@keyframes kb-band-in {
+  from {
+    opacity: 0.45;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 /* SITE-4: on the public pages each band rises in as it scrolls into view, with no script: a scroll-driven animation
    where the browser has one (the others show the band as it is). Reduced motion never animates. */
 @media (prefers-reduced-motion: no-preference) {
@@ -846,9 +857,9 @@ html.kb-motion [data-stagger]:not(.kb-in) > * {
     .page-light main [data-rise] {
       /* forwards, not both: before it enters (below the screen) a band is drawn as it is, so a full-page capture, a
          printout or a crawler always sees it; the fade starts as its top crosses the bottom edge, out of sight. */
-      animation: kb-rise-in linear forwards;
+      animation: kb-band-in linear forwards;
       animation-timeline: view();
-      animation-range: entry 0% entry 35%;
+      animation-range: entry 0% entry 20%;
     }
   }
 }
@@ -962,22 +973,22 @@ html.kb-motion [data-stagger]:not(.kb-in) > * {
   }
 }
 .kb-shot {
-  @apply relative mx-auto w-full max-w-[15.5rem] rounded-[2.25rem] bg-kb-ink p-2 shadow-float;
+  @apply relative mx-auto w-full max-w-[17.5rem] rounded-[2.25rem] sm:max-w-[15.5rem] bg-kb-ink p-2 shadow-float;
 }
 .kb-shot img {
   @apply block h-auto w-full overflow-hidden rounded-[1.75rem] bg-surface-0;
 }
 .kb-shot > span {
-  @apply absolute -top-3 end-4 bg-surface-1 text-text-2 shadow-rest;
+  @apply absolute -top-8 end-1 bg-surface-1 text-text-2 shadow-rest;
 }
 .kb-shots {
-  @apply -mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pt-3 pb-4 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-8 sm:overflow-visible sm:px-0;
+  @apply -mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pt-9 pb-4 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-8 sm:overflow-visible sm:px-0;
 }
 .kb-shots-2 {
   @apply sm:mx-auto sm:max-w-[40rem] sm:grid-cols-2;
 }
 .kb-shots > li {
-  @apply w-[15.5rem] shrink-0 snap-center sm:w-auto;
+  @apply w-[17.5rem] shrink-0 snap-center sm:w-auto;
 }
 .kb-shots h3 {
   @apply mt-6 text-title sm:text-center;
@@ -992,8 +1003,8 @@ html.kb-motion [data-stagger]:not(.kb-in) > * {
   @apply relative mx-auto w-full max-w-[26rem] sm:max-w-[30rem] lg:max-w-none lg:pt-10;
 }
 .kb-hero-visual-wrap > img {
-  @apply relative h-72 w-full rounded-panel bg-surface-3 object-cover object-[50%_22%] shadow-lift sm:h-80 lg:absolute lg:end-0 lg:top-0 lg:h-[78%] lg:w-[66%];
+  @apply relative h-80 w-full rounded-panel bg-surface-3 object-cover object-[50%_22%] shadow-lift sm:h-96 lg:absolute lg:end-0 lg:top-0 lg:h-[78%] lg:w-[66%];
 }
 .kb-hero-visual-wrap > div {
-  @apply relative -mt-28 px-5 sm:-mt-32 lg:mt-0 lg:px-0;
+  @apply relative -mt-20 ps-8 pe-2 sm:-mt-24 lg:mt-0 lg:px-0;
 }

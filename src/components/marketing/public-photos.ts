@@ -27,7 +27,7 @@ export const TRADE_TILES = (
     ["barbershop", "barbershop", "Barbershops"],
     ["nail-salon", "nail-salon", "Nail salons"],
     ["spa-and-massage", "spa", "Spas"],
-    ["cafe", "cafe", "Cafés"],
+    ["cafe", "cafe", "Cafes"],
     ["restaurant", "restaurant", "Restaurants"],
     ["auto-repair", "auto-repair", "Auto repair"],
     ["cleaner", "cleaner", "Cleaning"],
@@ -48,10 +48,10 @@ export const PUB = {
     alt: "A smiling shop owner reading a message on his phone at his counter",
   } satisfies PubPhoto,
   florist: wide("florist-phone", "A florist checking her phone at the workbench of her shop", 900),
-  cafeOwners: wide("cafe-owners", "Two café owners standing in their café", 900),
+  barista: wide("barista", "A smiling barista at the espresso machine behind her café counter"),
   salonWash: wide("salon-wash", "A stylist washing a client's hair at the basin"),
   /** Home's week, Friday: the photo the owner sent, live as a post. */
-  dayPost: wide("hair-salon", "A stylist blow-drying a client's hair, the photo sent as a post"),
+  dayPost: wide("salon-wash", "A stylist washing a client's hair, the photo sent as a post"),
 } as const;
 
 export const pubSrc = (p: PubPhoto, width: number) => `/photos/${p.stem}-${width}.webp`;

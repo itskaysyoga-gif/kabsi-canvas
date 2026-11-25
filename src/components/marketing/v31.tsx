@@ -183,10 +183,15 @@ function HeroPhone() {
   const reduced = useReducedMotion();
   const [at, setAt] = useState(0);
   const [paused, setPaused] = useState(false);
+  // SITE-4: the first scene is drawn whole (never an empty phone on arrival); later scenes play turn by turn.
+  const [moved, setMoved] = useState(false);
   const playing = !reduced && !paused;
   useEffect(() => {
     if (!playing) return;
-    const t = window.setTimeout(() => setAt((a) => (a + 1) % HERO_SCENES.length), SCENE_MS);
+    const t = window.setTimeout(() => {
+      setMoved(true);
+      setAt((a) => (a + 1) % HERO_SCENES.length);
+    }, SCENE_MS);
     return () => window.clearTimeout(t);
   }, [at, playing]);
   const scene = HERO_SCENES[at] ?? HERO_SCENES[0]!;
@@ -213,7 +218,7 @@ function HeroPhone() {
             aria-label={`Example: ${scene.name}`}
             className={cn(
               "flex h-[23rem] flex-col justify-end gap-2.5 px-3 pb-4 pt-3 sm:h-[20rem]",
-              playing && "kb-play",
+              playing && moved && "kb-play",
             )}
           >
             {play.items}
@@ -234,7 +239,10 @@ function HeroPhone() {
             type="button"
             aria-label={s.name}
             aria-pressed={i === at}
-            onClick={() => setAt(i)}
+            onClick={() => {
+              setMoved(true);
+              setAt(i);
+            }}
             className="press grid size-11 place-items-center rounded-full"
           >
             <span
@@ -483,7 +491,7 @@ function TellKabsi() {
             { from: "kabsi", lines: chip.answer, approve: chip.approve },
           ]}
           label={`Example: you send "${chip.ask}" and Kabsi answers`}
-          className="flex min-h-[21rem] flex-col"
+          className="flex flex-col lg:min-h-[21rem]"
           replay={at}
         />
       </div>

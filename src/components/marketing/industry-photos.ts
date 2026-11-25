@@ -12,3 +12,9 @@ export const TRADE_WIDE: Record<string, PubPhoto> = {
   "auto-repair": wide("auto-repair", "A mechanic working under the hood of a car"),
   cleaner: wide("cleaner", "A cleaner vacuuming an office floor"),
 };
+
+/** The "Send a photo" band's photo where the trade's library photo is weak (the others use their own second photo). */
+export const TRADE_SECOND: Record<string, PubPhoto> = {
+  "hair-salon": wide("salon-wash", "A stylist washing a client's hair at the basin"),
+  "auto-repair": wide("garage-hands", "A mechanic's hands at work on a car's fuse box"),
+};

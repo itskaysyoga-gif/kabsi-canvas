@@ -15,9 +15,8 @@ import { HERO_MARKS, HOME_FAQ } from "@/components/marketing/v31-data";
 import { PriceCard, TrustLines } from "@/components/marketing/v31";
 import { Img } from "./photos";
 import { PubImg } from "@/components/marketing/life";
-import { ProductScreens } from "@/components/marketing/screens-section";
 import { TRADE_TILES } from "@/components/marketing/public-photos";
-import { TRADE_WIDE } from "@/components/marketing/industry-photos";
+import { TRADE_SECOND, TRADE_WIDE } from "@/components/marketing/industry-photos";
 import { ScanBox } from "./scan-box";
 import { SiteLink } from "./site-link";
 import { Marked } from "./highlight";
@@ -193,23 +192,22 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
         </ol>
       </Band>
 
-      <ProductScreens only={["report", "email"]} />
+      <PhotoPost industry={i} />
 
       {b && (
-        <Band
-          id="fact"
-          tone="soft"
-          inner="lg:grid lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16"
-        >
-          <Head id="fact" title={`One thing Google says about ${i.plural.toLowerCase()}.`} />
-          <div className="mt-6 lg:mt-0">
-            <p className="max-w-[60ch] text-lead text-text-1">{b.fact.text}</p>
-            <p className="mt-4 max-w-[60ch] text-read text-text-2">
+        <Band id="fact" tone="soft" inner="py-12 sm:py-16 lg:py-20">
+          {/* SITE-4: the sourced fact as a quiet note, not a full headline over one sentence. */}
+          <div className="max-w-[48rem] border-s-4 border-kb-yellow ps-5 sm:ps-7">
+            <h2 id="fact-h" className="text-title text-text-2">
+              {`One thing Google says about ${i.plural.toLowerCase()}`}
+            </h2>
+            <p className="mt-3 text-h3 text-text-1">{b.fact.text}</p>
+            <p className="mt-4 text-read text-text-2">
               {"Source: "}
               <a href={b.fact.source.url} rel="noreferrer" className="underline underline-offset-4">
                 {b.fact.source.title}
               </a>
-              {`, read on ${READ}.`}
+              {`, read on ${READ_US}.`}
             </p>
           </div>
         </Band>
@@ -253,6 +251,79 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
         </div>
       </Band>
     </>
+  );
+}
+
+/** The date the facts were read, as a US reader writes it (November 24, 2026). */
+const READ_US = new Date(`${READ}T12:00:00Z`).toLocaleDateString("en-US", {
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+const POST_STEPS = [
+  "You send a photo from your phone.",
+  "Kabsi writes the post for it.",
+  "You tap yes. It goes live on Google.",
+] as const;
+
+/**
+ * SITE-4: "Send a photo. Get a Google post." on the charcoal band, with the trade's own second photo and an Example post
+ * card over it. Every word is the same on every page apart from the example business.
+ */
+function PhotoPost({ industry: i }: { industry: Industry }) {
+  return (
+    <Band
+      id="post"
+      tone="dark"
+      inner="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-16"
+    >
+      <div>
+        <h2 id="post-h" className="max-w-[22ch] text-h2 text-balance">
+          Send a photo. <span className="text-phrase">Get a Google post.</span>
+        </h2>
+        <p className="mt-4 max-w-[52ch] text-read text-text-2">
+          Take a photo at work and send it to Kabsi with a few words. Kabsi writes the post and
+          waits for your yes.
+        </p>
+        <ol className="mt-8 grid gap-5">
+          {POST_STEPS.map((t, n) => (
+            <li key={t} className="flex items-center gap-4 text-read text-text-1">
+              <YellowNumber n={n + 1} />
+              {t}
+            </li>
+          ))}
+        </ol>
+      </div>
+      <figure className="relative mt-10 lg:mt-0">
+        {TRADE_SECOND[i.slug] ? (
+          <PubImg
+            photo={TRADE_SECOND[i.slug]!}
+            sizes="(min-width: 1280px) 560px, (min-width: 1024px) 45vw, 100vw"
+            className="aspect-[4/5] w-full rounded-panel object-cover shadow-float sm:aspect-[4/3] lg:aspect-[4/5] lg:max-h-[36rem]"
+          />
+        ) : (
+          <Img
+            photo={i.photos[1]}
+            sizes="(min-width: 1280px) 560px, (min-width: 1024px) 45vw, 100vw"
+            className="aspect-[4/5] w-full rounded-panel object-cover shadow-float sm:aspect-[4/3] lg:aspect-[4/5] lg:max-h-[36rem]"
+          />
+        )}
+        <figcaption className="theme-light relative mx-3 -mt-20 max-w-[24rem] rounded-panel border border-line bg-surface-1 p-4 text-text-1 shadow-float sm:mx-6 sm:p-5">
+          <span className="flex items-center gap-2">
+            <KabsiMark ring={false} className="size-7" />
+            <span className="flex-1 text-small font-bold">Post ready</span>
+            <ExampleBadge className="text-text-2" />
+          </span>
+          <span className="mt-2 block text-read">{`A new photo from this week at ${i.example.business}. Book your next visit with us.`}</span>
+          <span className="mt-3 inline-flex h-8 items-center gap-1.5 rounded-pill bg-ok-soft px-3 text-label font-bold text-ok">
+            <Check className="size-3.5" aria-hidden />
+            Live on Google after your yes
+          </span>
+        </figcaption>
+      </figure>
+    </Band>
   );
 }
 

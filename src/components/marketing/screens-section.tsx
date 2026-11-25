@@ -11,14 +11,16 @@ export function ProductScreens({
   title = "See the work in Kabsi itself.",
   line = "Real screens from Kabsi's account and email, shown with an example business.",
   only = ALL_SCREENS,
+  className,
 }: {
   id?: string;
   title?: string;
   line?: string;
   only?: readonly ScreenId[];
+  className?: string;
 }) {
   return (
-    <section id={id} aria-labelledby={`${id}-h`}>
+    <section id={id} aria-labelledby={`${id}-h`} className={className}>
       <div className="container-kb py-14 sm:py-20 lg:py-24" data-rise>
         <Head id={id} title={title} line={line} />
         <ScreenRow ids={only} className="mt-10" />

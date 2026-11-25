@@ -36,7 +36,7 @@ describe("SITE-3: the home page", () => {
     );
     expect(home).toContain("const reduced = useReducedMotion();");
     expect(home).toContain("const playing = !reduced && !paused;");
-    expect(home).toContain('playing && "kb-play"');
+    expect(home).toContain('playing && moved && "kb-play"');
     expect(read("src/styles.css")).toContain(".kb-play .kb-dots");
     expect(home).toContain("Pause the example");
     expect(home).not.toMatch(/WhatsAppGlyph|bg-wa-|text-wa-/);

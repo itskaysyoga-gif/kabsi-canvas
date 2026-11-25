@@ -48,17 +48,13 @@ export function V31How() {
         </ol>
       </Band>
       <ProductScreens />
-      <Band
-        id="report"
-        tone="warm"
-        inner="lg:grid lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center lg:gap-16"
-      >
+      <Band id="report" tone="warm">
         <Head
           id="report"
           title="See what was done."
           line="A short summary every week and a full report every month: work done, what Kabsi found and what Google shows, kept apart."
         />
-        <ReportSample className="mt-8 lg:mt-0" />
+        <ReportSample className="mt-8" />
       </Band>
       <ClosingBand under={HOME_HERO.under} />
     </>
