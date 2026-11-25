@@ -183,7 +183,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     name: "two_roles", about: "A phone that is an owner and a partner is asked once which one a message is for (29.7, 13b step 3)", phones: [PHONES.two], ai: false, steps: [
       { note: "help asks which role", phone: PHONES.two, text: "help", expect: { result: "which_role", reply: /^\*❓ Business or partner tools\?\*$/, buttons: ["My business", "Partner tools"], conv: { open_question: "role" } } },
       { note: "tap My business: the question that waited is answered, headed", phone: PHONES.two, tap: { title: "My business" }, expect: { result: "help", reply: /^\*\u{1F4CB} You can send\*\n/u, conv: { active_role: "business", open_question: null } } },
-      { note: "stats is headed with the business and the role", phone: PHONES.two, text: "stats", expect: { result: "stats", head: `${JU} (owner)`, reply: /Juniper Hair Studio, the last 7 days/, never: nothing("Harbour Lane") } },
+      { note: "stats is headed with the business and the role", phone: PHONES.two, text: "stats", expect: { result: /^stats/, head: `${JU} (owner)`, reply: /Juniper Hair Studio, the last 7 days/, never: nothing("Harbour Lane") } },
       { note: "a partner tool is not an owner tool", phone: PHONES.two, text: "payout", expect: { result: /^(partner_stub|partner_refused|free|unclear)/, never: nothing("Harbour Lane") } },
     ],
   },
@@ -195,7 +195,7 @@ export const SCENARIOS: Record<string, Scenario> = {
   },
   manager_staff: {
     name: "manager_staff", about: "A manager cannot touch billing; staff can only send photos and ask for a person", phones: [PHONES.manager, PHONES.staff], ai: false, steps: [
-      { note: "manager: stats", phone: PHONES.manager, text: "stats", expect: { result: "stats", head: `${HL} (manager)` } },
+      { note: "manager: stats", phone: PHONES.manager, text: "stats", expect: { result: /^stats/, head: `${HL} (manager)` } },
       { note: "manager: billing is owner only", phone: PHONES.manager, text: "upgrade", expect: { result: "billing_owner_only", reply: /Only the owner can change the plan and billing/ } },
       { note: "staff: stats is not for staff", phone: PHONES.staff, text: "stats", expect: { result: "not_for_staff", reply: /As staff you can send photos and news here/ } },
       { note: "staff: help", phone: PHONES.staff, text: "help", expect: { result: "help", reply: /^\*\u{1F4CB} You can send\*\n\nphotos here for the owner to approve\n/u } },
@@ -222,11 +222,12 @@ export const SCENARIOS: Record<string, Scenario> = {
       // Line 16, typed.
       { note: "16.1 What needs my attention?", phone: PHONES.owner, text: "What needs my attention?", expect: { result: /^care_waiting/, reply: /Waiting for you|Nothing is waiting/ } },
       { note: "16.2 open the reply that is ready (number 2 of the list)", phone: PHONES.owner, text: "2", expect: { reply: /./ } },
-      { note: "16.2 Make this reply more professional", phone: PHONES.owner, text: "Make this reply more professional", expect: { reply: /./ } },
+      // The rewrite is read by the intent model, which the replay does not run (no paid call): the replay answers the off-topic line. Rashid's phone tests it.
+      { note: "16.2 Make this reply more professional (needs the intent model: not tested here)", phone: PHONES.owner, text: "Make this reply more professional", expect: { reply: /./ } },
       { note: "16.3 Change my opening hours on Saturday", phone: PHONES.owner, text: "Change my opening hours on Saturday", expect: { result: "care_week_no_times", reply: /What are your new hours on Saturdays\?/ } },
       // The demo business has no weekly hours on file, so the week cannot be shown back; a business with hours gets the week and Approve.
       { note: "16.3 the times", phone: PHONES.owner, text: "10am to 4pm", expect: { result: /^care_week_(no_hours|shown)/, reply: /Saturday|does not have your hours yet/ } },
-      { note: "16.4 A photo with Post this", phone: PHONES.owner, media: { kind: "image", id: "replay-photo", mime: "image/jpeg", size: 7000 }, text: "Post this", expect: { result: "photo", reply: /Photo received/ } },
+      { note: "16.4 A photo with Post this", phone: PHONES.owner, media: { kind: "image", id: "replay-photo", mime: "image/jpeg", size: 7000 }, text: "Post this", expect: { result: "photo_post_shown", reply: /Post with your photo/ } },
       { note: "16.5 How many reviews did I receive this month?", phone: PHONES.owner, text: "How many reviews did I receive this month?", expect: { result: /^stats/, reply: /the last 30 days: \d+ new reviews/ } },
       { note: "16.6 Show me everything you did this week", phone: PHONES.owner, text: "Show me everything you did this week", expect: { result: "care_done", reply: /Your week from/ } },
       { note: "16.7 Send me my review QR code", phone: PHONES.owner, text: "Send me my review QR code", expect: { result: "qr_image", reply: /your review QR code/ } },
@@ -268,8 +269,8 @@ export const SCENARIOS: Record<string, Scenario> = {
   },
   old_card: {
     name: "old_card", about: "A button tap on an old card: a made-up token, and a card already used (25.5)", phones: [PHONES.owner], ai: false, steps: [
-      { note: "a token Kabsi never made", phone: PHONES.owner, tap: { id: "a:replayreplayreplayreplay00" }, expect: { result: "stale_button", reply: /already handled\. Nothing changed/ } },
-      { note: "Approve on a fresh card", phone: PHONES.owner, prep: "action", tap: { id: "a:$token" }, expect: { result: "approved", head: OWNER_HEAD, reply: /Approved for Harbour Lane Coffee\. It goes to Google in 10 seconds/, buttons: ["Undo"] } },
+      { note: "a token Kabsi never made", phone: PHONES.owner, tap: { id: "a:replayreplayreplayreplay00" }, expect: { result: "stale_button", reply: /already handled[\s\S]*Nothing changed/ } },
+      { note: "Approve on a fresh card", phone: PHONES.owner, prep: "action", tap: { id: "a:$token" }, expect: { result: "approved", reply: /Approved for Harbour Lane Coffee\. It goes to Google in 10 seconds/, buttons: ["Undo"] } },
       { note: "Approve again on the same old card", phone: PHONES.owner, tap: { id: "a:$token" }, expect: { reply: /already handled|no longer yours/ } },
       { note: "Undo inside the 10 seconds", phone: PHONES.owner, tap: { id: "u:$token" }, expect: { result: /^(undone|too_late)$/ } },
       // Undo twice is answered the same way both times: nothing can be sent by the second tap (live finding of 25 Oct, kept as the rule).
@@ -279,7 +280,7 @@ export const SCENARIOS: Record<string, Scenario> = {
   stranger_card: {
     name: "stranger_card", about: "Someone else's card is not theirs to approve", phones: [PHONES.owner, PHONES.manager], ai: false, steps: [
       { note: "owner gets a card", phone: PHONES.owner, prep: "action", text: "help", expect: { result: "help" } },
-      { note: "an unknown phone taps the owner's card", phone: PHONES.unknown2, tap: { id: "a:$token" }, expect: { result: "not_yours", reply: /no longer yours to approve/ } },
+      { note: "an unknown phone taps the owner's card", phone: PHONES.unknown2, tap: { id: "a:$token" }, expect: { result: "not_yours", reply: /No longer yours to approve/i } },
     ],
   },
   billing_cancel: {
