@@ -199,7 +199,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
           {/* SITE-4: the sourced fact as a quiet note, not a full headline over one sentence. */}
           <div className="max-w-[48rem] border-s-4 border-kb-yellow ps-5 sm:ps-7">
             <h2 id="fact-h" className="text-title text-text-2">
-              {`One thing Google says about ${i.plural.toLowerCase()}`}
+              From Google's own help pages
             </h2>
             <p className="mt-3 text-h3 text-text-1">{b.fact.text}</p>
             <p className="mt-4 text-read text-text-2">
@@ -220,8 +220,8 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
       </Band>
 
       <Band id="trust" tone="soft" inner="py-10 sm:py-14 lg:py-16">
-        <h2 id="trust-h" className="text-title text-text-2">
-          What to know first
+        <h2 id="trust-h" className="text-h2 text-balance">
+          What to know first.
         </h2>
         <TrustLines />
         <SiteLink to="/for" className={cn(linkCls, "mt-6 text-read")}>
@@ -301,13 +301,13 @@ function PhotoPost({ industry: i }: { industry: Industry }) {
           <PubImg
             photo={TRADE_SECOND[i.slug]!}
             sizes="(min-width: 1280px) 560px, (min-width: 1024px) 45vw, 100vw"
-            className="aspect-[4/5] w-full rounded-panel object-cover shadow-float sm:aspect-[4/3] lg:aspect-[4/5] lg:max-h-[36rem]"
+            className="aspect-[4/5] w-full rounded-panel object-cover shadow-float sm:aspect-[4/3]"
           />
         ) : (
           <Img
             photo={i.photos[1]}
             sizes="(min-width: 1280px) 560px, (min-width: 1024px) 45vw, 100vw"
-            className="aspect-[4/5] w-full rounded-panel object-cover shadow-float sm:aspect-[4/3] lg:aspect-[4/5] lg:max-h-[36rem]"
+            className="aspect-[4/5] w-full rounded-panel object-cover shadow-float sm:aspect-[4/3]"
           />
         )}
         <figcaption className="theme-light relative mx-3 -mt-20 max-w-[24rem] rounded-panel border border-line bg-surface-1 p-4 text-text-1 shadow-float sm:mx-6 sm:p-5">

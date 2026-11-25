@@ -489,6 +489,8 @@ function TellKabsi() {
           turns={[
             { from: "owner", text: chip.ask, photo: chip.photo },
             { from: "kabsi", lines: chip.answer, approve: chip.approve },
+            // SITE-4: the owner's tap on the button Kabsi shows, so the exchange reads to the end.
+            ...(chip.approve ? [{ from: "owner" as const, text: "Approve" }] : []),
           ]}
           label={`Example: you send "${chip.ask}" and Kabsi answers`}
           className="flex flex-col lg:min-h-[21rem]"
@@ -659,7 +661,7 @@ export function V31Home() {
         <PriceCard className="mt-8" />
       </Band>
       <Band id="trust" tone="ivory" inner="py-10 sm:py-14 lg:py-16">
-        <h2 id="trust-h" className="text-title text-text-2">
+        <h2 id="trust-h" className="text-h2 text-balance">
           {TRUST.title}
         </h2>
         <TrustLines />
