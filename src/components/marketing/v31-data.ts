@@ -74,7 +74,6 @@ export const HERO_SCENES: { name: string; turns: ChatTurn[]; done: string }[] = 
         lines: ["Reply ready:", "Thank you, Jess. We are glad Sam took care of you."],
         approve: true,
       },
-      { from: "owner", text: "Approve" },
     ],
     done: "Your reply is live on Google.",
   },
@@ -88,7 +87,6 @@ export const HERO_SCENES: { name: string; turns: ChatTurn[]; done: string }[] = 
         lines: ["Saturday 29 November: 9:00 to 15:00.", "Every other day stays the same."],
         approve: true,
       },
-      { from: "owner", text: "Approve" },
     ],
     done: "Your new hours are live on Google.",
   },
@@ -165,7 +163,7 @@ export const WEEK = {
 export const WEEKLY_SUMMARY = {
   title: "Your week, Maple Street Salon",
   lines: [
-    "3 replies live on Google.",
+    "4 replies live on Google.",
     "1 change caught on Google and set back.",
     "1 post live on Google.",
     "Your review link was tapped 6 times.",

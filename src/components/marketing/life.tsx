@@ -133,7 +133,7 @@ export const SCREENS = {
   report: {
     src: "/screens/app-report-560.webp",
     alt: "Kabsi's weekly report in the account, for an example business",
-    title: "Your report",
+    title: "Your weekly report",
     line: "In your account: what Kabsi did, what waits for your yes, one next step.",
   },
   cards: {
@@ -151,10 +151,20 @@ export const SCREENS = {
 } as const;
 
 export type ScreenId = keyof typeof SCREENS;
+export type Shot = { src: string; alt: string; title: string; line: string };
 
-/** One of Kabsi's own screens in a phone frame, with the Example badge on it. */
-export function DeviceShot({ id, className }: { id: ScreenId; className?: string }) {
-  const s = SCREENS[id];
+/** One of Kabsi's own screens in a phone frame, with the Example badge on it. SITE-5: `shot` draws a screen that is not
+ * in SCREENS (the ones Home does not show live in screens-section.tsx, so they stay out of Home's script). */
+export function DeviceShot({
+  id,
+  shot,
+  className,
+}: {
+  id?: ScreenId;
+  shot?: Shot;
+  className?: string;
+}) {
+  const s = shot ?? SCREENS[id ?? "report"];
   return (
     <div className={cn("kb-shot", className)}>
       <img src={s.src} alt={s.alt} width={560} height={1212} loading="lazy" decoding="async" />
@@ -170,8 +180,10 @@ export function ScreenRow({ ids, className }: { ids: readonly ScreenId[]; classN
       {ids.map((k) => (
         <li key={k}>
           <DeviceShot id={k} />
-          <h3>{SCREENS[k].title}</h3>
-          <p>{SCREENS[k].line}</p>
+          <div>
+            <h3>{SCREENS[k].title}</h3>
+            <p>{SCREENS[k].line}</p>
+          </div>
         </li>
       ))}
     </ul>

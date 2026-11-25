@@ -3,12 +3,15 @@
 // the free check. Words in v31-data.ts.
 import { YellowNumber } from "@/components/kabsi/highlight";
 import { Faq } from "@/components/kabsi/ui";
-import { HOME_HERO, ABOUT, FAQ_V31, HOW, SECURITY, TRUST } from "./v31-data";
+import { HOME_HERO, ABOUT, FAQ_V31, HOW, PRICE, SECURITY, TRUST } from "./v31-data";
+import { TRIAL_LINE } from "@/lib/offer";
+import { SiteLink } from "@/components/kabsi/site-link";
 import { Band, CheckBox, Head, Lead, PageTop, Ticks } from "./kit";
-import { ClosingBand, ReportSample, TrustLines } from "./v31";
-import { PubImg } from "./life";
-import { ProductScreens } from "./screens-section";
+import { ChatCard, ClosingBand, ReportSample, TrustLines } from "./v31";
+import { DeviceShot, PubImg } from "./life";
 import { PUB } from "./public-photos";
+import { HOW_CHAT, WATCHED } from "./v31-more";
+import { MORE_SCREENS } from "./screens-section";
 
 export function V31How() {
   return (
@@ -18,36 +21,82 @@ export function V31How() {
         mark={HOW.mark}
         line={HOW.line}
         aside={
-          <PubImg
-            photo={PUB.howHero}
-            sizes="(min-width: 1280px) 500px, (min-width: 1024px) 40vw, 100vw"
-            priority
-            className="aspect-[4/3] w-full rounded-panel bg-surface-3 object-cover shadow-lift"
-          />
+          /* SITE-5: the photo with Kabsi's weekly report in front, as on Pricing. */
+          <div data-nora-avoid className="relative pb-24 sm:pb-28 lg:pb-0">
+            <PubImg
+              photo={PUB.howHero}
+              sizes="(min-width: 1280px) 500px, (min-width: 1024px) 40vw, 100vw"
+              priority
+              className="aspect-[4/3] w-[88%] rounded-panel bg-surface-3 object-cover shadow-lift lg:aspect-[4/5] lg:w-[78%]"
+            />
+            <div className="absolute end-0 bottom-0 w-[44%] max-w-[13rem] lg:top-1/2 lg:bottom-auto lg:w-[46%] lg:max-w-[14.5rem] lg:-translate-y-1/2">
+              <DeviceShot id="report" className="max-w-none sm:max-w-none lg:max-w-none" />
+            </div>
+          </div>
         }
       >
         <CheckBox id="how-scan" under={HOME_HERO.under} className="mt-8 max-w-[36rem]" />
       </PageTop>
-      <Band id="steps" tone="warm" label="The five steps">
-        <ol className="grid gap-x-12 gap-y-10 md:grid-cols-2 xl:grid-cols-3">
+      <Band
+        id="steps"
+        tone="warm"
+        label="The five steps"
+        inner="lg:grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:gap-16"
+      >
+        <ol className="grid gap-8">
           {HOW.steps.map((s, i) => (
             <li key={s.title} className="flex gap-4">
               <YellowNumber n={i + 1} />
               <div>
                 <h2 className="text-h3">{s.title}</h2>
-                <p className="mt-2 text-read text-text-2">{s.text}</p>
+                <p className="mt-2 max-w-[56ch] text-read text-text-2">{s.text}</p>
               </div>
             </li>
           ))}
-          <li className="flex gap-4 md:col-span-2 xl:col-span-1">
+          <li className="flex gap-4">
             <div className="border-s-4 border-kb-yellow ps-4">
               <h2 className="text-h3">Or just tell Kabsi.</h2>
-              <p className="mt-2 text-read text-text-2">{HOW.ask}</p>
+              <p className="mt-2 max-w-[56ch] text-read text-text-2">{HOW.ask}</p>
             </div>
           </li>
         </ol>
+        {/* SITE-5: the owner's yes in the chat, beside the steps (sticky on a computer). */}
+        <div className="mt-12 lg:mt-0">
+          <div className="lg:sticky lg:top-24">
+            <ChatCard
+              turns={HOW_CHAT}
+              label="An Example: a reply changed and approved in the chat"
+            />
+          </div>
+        </div>
       </Band>
-      <ProductScreens />
+      <Band
+        id="watch"
+        tone="ivory"
+        inner="flex flex-col lg:grid lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center lg:gap-16"
+      >
+        <div className="order-2 mt-10 lg:order-1 lg:mt-0">
+          <DeviceShot shot={MORE_SCREENS.shield} className="lg:max-w-[19rem]" />
+        </div>
+        <div className="order-1 lg:order-2">
+          <Head
+            id="watch"
+            title="When Google changes something, you see it."
+            line="Google can change your details from what the public suggests. Kabsi checks your profile every day and shows what changed. For your hours, phone and website, one tap puts it right."
+          />
+          <ul className="mt-8 grid gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+            {WATCHED.map((w) => (
+              <li
+                key={w.title}
+                className="rounded-card border border-line bg-surface-1 p-4 shadow-rest"
+              >
+                <p className="text-title font-bold">{w.title}</p>
+                <p className="mt-1 text-small text-text-2">{w.text}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Band>
       <Band id="report" tone="warm">
         <Head
           id="report"
@@ -55,6 +104,13 @@ export function V31How() {
           line="A short summary every week and a full report every month: work done, what Kabsi found and what Google shows, kept apart."
         />
         <ReportSample className="mt-8" />
+        {/* SITE-5: the price in one line, with the way to Pricing. */}
+        <p className="mt-10 max-w-[60ch] border-s-4 border-kb-yellow ps-4 text-read text-text-1">
+          <strong>{PRICE.card}</strong> {TRIAL_LINE}{" "}
+          <SiteLink to="/pricing" className="font-semibold underline underline-offset-4">
+            See what the plan includes
+          </SiteLink>
+        </p>
       </Band>
       <ClosingBand under={HOME_HERO.under} />
     </>

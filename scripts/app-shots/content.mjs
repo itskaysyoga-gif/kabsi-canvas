@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 // scripts/app-shots fixtures for this area (see fixtures.mjs). Values or (ctx) => value; ctx.state is the route's state.
-// Posts and photos (/app/posts, /app/photos) for the invented Rose Lane Salon. States: "posts-empty" (no post yet);
+// Posts and photos (/app/posts, /app/photos) for the invented Maple Street Salon. States: "posts-empty" (no post yet);
 // the base "first-task" (the photo ask and the team link wait for the first task) and "staff" (a staff member's
 // photo screen). The publications for these kinds are answered through profile.mjs's publications table.
 const day = (n) => new Date(Date.now() + n * 86_400_000).toISOString();
@@ -32,7 +32,7 @@ const POSTS = [
   post({
     id: "post-ready",
     state: "draft",
-    body: "New this week at Rose Lane Salon: a gloss treatment that adds shine in 20 minutes. Ask for it with any cut or colour.",
+    body: "New this week at Maple Street Salon: a gloss treatment that adds shine in 20 minutes. Ask for it with any cut or colour.",
     cta_type: "BOOK",
     publish_at: day(0.05),
   }),

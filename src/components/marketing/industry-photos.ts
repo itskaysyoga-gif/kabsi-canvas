@@ -18,3 +18,6 @@ export const TRADE_SECOND: Record<string, PubPhoto> = {
   "hair-salon": wide("salon-wash", "A stylist washing a client's hair at the basin"),
   "auto-repair": wide("garage-hands", "A mechanic's hands at work on a car's fuse box"),
 };
+
+/** SITE-5: pages whose hero uses the trade's own library photo (the index in `industry.photos`) instead of its new photo. */
+export const HERO_LIBRARY: Record<string, number> = { restaurant: 0 };

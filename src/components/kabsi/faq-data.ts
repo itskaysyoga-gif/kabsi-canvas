@@ -1,6 +1,6 @@
+import { TRIAL_LINE } from "@/lib/offer";
 import {
   CONTACT_EMAIL,
-  FOUNDING_SENTENCE,
   KABSI_GROUP_ID,
   KABSI_GROUP_NAME,
   PRICES_SENTENCE,
@@ -55,11 +55,11 @@ export const buildFaq = (): { q: string; a: string }[] => [
   },
   {
     q: "What happens after the trial?",
-    a: "Choose a plan to keep going. If you do not, Kabsi stops publishing and you keep your review link and QR code.",
+    a: "If you do not cancel before day 14, the plan starts at 29 US dollars a month. Cancel before day 14 and you pay nothing.",
   },
   {
     q: "Can I cancel?",
-    a: "Yes, any time. Cancel on the Plan page or on WhatsApp, and your plan runs to the end of the period you paid for.",
+    a: "Yes, any time. One tap in Settings, or tell Kabsi on WhatsApp. Your plan runs to the end of the month you paid for.",
   },
   {
     q: "Where does the ranking data come from?",
@@ -80,24 +80,25 @@ export const FAQ: { q: string; a: string }[] = buildFaq();
 export const HOME_FAQ = [11, 3, 4, 8];
 
 /** Pricing's "Billing questions" (Design 8), checked against the facts (4.3, 4.5). With the shared FAQ
- * because the route head builds the FAQPage data from them. */
+ * because the route head builds the FAQPage data from them. SITE-5 (lane R decision 4): one plan at 29 US dollars a
+ * month, a card to start the 14 days, no Pro, no yearly price and no 15 dollar location (tests/prices.test.ts). */
 export const BILLING_FAQ: { q: string; a: string }[] = [
   {
     q: "Do I need a card for the trial?",
-    a: "No. The trial is 14 days of Pro with no card, one per business. It starts when Kabsi's access to your Google profile works.",
+    a: "Yes. A card is needed to start the 14 days free. Nothing is charged during the 14 days, and if you cancel before day 14 you pay nothing. One trial per business.",
   },
   {
     q: "What happens after the trial?",
-    a: "Choose a plan to keep going. If you do not, Kabsi keeps watching and drafting for 7 more days and publishes nothing. Your review link and QR code keep working.",
+    a: "If you have not cancelled by day 14, the plan starts at 29 US dollars a month and renews every month until you cancel. Your review link and QR code keep working either way.",
   },
   FAQ[7]!,
   {
     q: "Can I get a refund?",
-    a: "Yearly plans are refundable in full within 14 days of the plan starting. A monthly plan runs to the end of the month paid for. Write to hello@kabsi.co.",
+    a: "Cancel before day 14 and you pay nothing. After that, a month already paid for runs to its end and is not refunded. Nothing in the terms limits a refund you are entitled to by law. Write to hello@kabsi.co.",
   },
   {
     q: "Can I pay today?",
-    a: "Nothing to pay today. Card payments in US dollars are coming. Card payments will be processed by Creem, our merchant of record.",
+    a: "Not yet. Card payments are not open yet, and until then nothing is charged. Card payments will be processed by Creem, our merchant of record.",
   },
 ];
 
@@ -157,20 +158,20 @@ export const buildFaqGroups = (whatsappOn: boolean = WHATSAPP_ON): FaqGroup[] =>
       items: [
         {
           q: "What does Kabsi cost?",
-          a: `${PRICES_SENTENCE} ${FOUNDING_SENTENCE} The trial is 14 days of Pro, one per business, with no card.`,
+          a: `${PRICES_SENTENCE} ${TRIAL_LINE}`,
         },
         {
           q: "When does the trial start?",
-          a: "When Kabsi's access to your Google profile works, so waiting for access costs you nothing. The trial is 14 days of Pro, one per business.",
+          a: "When Kabsi's access to your Google profile works and Google shows the profile as verified, so waiting for access costs you no days. One trial per business.",
         },
         BILLING_FAQ[1]!,
         {
           q: "Can I cancel?",
-          a: "Yes, any time. Cancel on the Plan page or on WhatsApp, and your plan runs to the end of the period you paid for. Yearly plans are refundable within 14 days.",
+          a: "Yes, any time. One tap in Settings, or tell Kabsi on WhatsApp. Your plan runs to the end of the month you paid for. Cancel before day 14 and you pay nothing.",
         },
         {
           q: "Can I run more than one location?",
-          a: "Yes. Each extra location is $15 a month or $150 a year, on the same plan.",
+          a: "Yes. Each Google profile is its own plan at 29 US dollars a month.",
         },
         BILLING_FAQ[4]!,
       ],
@@ -265,7 +266,7 @@ export const PARTNER_FAQ = [
     a: "On the 5th of each month, once at least $25 has cleared its 30-day hold, with a statement.",
   },
   { q: "How?", a: "USDT or USDC, or PayPal." },
-  { q: "What do businesses I refer get?", a: "30 days of Pro free instead of 14, no card." },
+  { q: "What do businesses I refer get?", a: "30 days free instead of 14." },
   {
     q: "Can I see who joined?",
     a: "You see the trade and area. The name only if the owner says yes.",

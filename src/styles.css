@@ -973,7 +973,7 @@ html.kb-motion [data-stagger]:not(.kb-in) > * {
   }
 }
 .kb-shot {
-  @apply relative mx-auto w-full max-w-[17.5rem] rounded-[2.25rem] sm:max-w-[15.5rem] bg-kb-ink p-2 shadow-float;
+  @apply relative mx-auto w-full max-w-[17.5rem] rounded-[2.25rem] sm:max-w-[15.5rem] lg:max-w-[17.5rem] bg-kb-ink p-2 shadow-float;
 }
 .kb-shot img {
   @apply block h-auto w-full overflow-hidden rounded-[1.75rem] bg-surface-0;
@@ -981,20 +981,49 @@ html.kb-motion [data-stagger]:not(.kb-in) > * {
 .kb-shot > span {
   @apply absolute -top-8 end-1 bg-surface-1 text-text-2 shadow-rest;
 }
+/* SITE-5: on a phone the screens stack, each beside its title and line (no row cut off at the edge); from 640 px they
+   stand in a row of columns. */
 .kb-shots {
-  @apply -mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pt-9 pb-4 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-8 sm:overflow-visible sm:px-0;
+  @apply grid gap-8 pt-9 sm:grid-cols-3;
 }
 .kb-shots-2 {
   @apply sm:mx-auto sm:max-w-[40rem] sm:grid-cols-2;
 }
 .kb-shots > li {
-  @apply w-[17.5rem] shrink-0 snap-center sm:w-auto;
+  @apply grid grid-cols-[10rem_minmax(0,1fr)] items-center gap-5 sm:block;
+}
+.kb-shots > li > .kb-shot {
+  @apply max-w-[10rem] rounded-[1.5rem] p-1.5 sm:max-w-[15.5rem] sm:rounded-[2.25rem] sm:p-2 lg:max-w-[17.5rem];
+}
+.kb-shots > li > .kb-shot img {
+  @apply rounded-[1.15rem] sm:rounded-[1.75rem];
+}
+.kb-shots > li > .kb-shot > span {
+  @apply -top-7 sm:-top-8;
 }
 .kb-shots h3 {
-  @apply mt-6 text-title sm:text-center;
+  @apply text-title sm:mt-6 sm:text-center;
 }
 .kb-shots p {
   @apply mt-1 text-read text-text-2 sm:mx-auto sm:max-w-[28ch] sm:text-center;
+}
+
+/* SITE-5: Pricing's "Your first 14 days": numbered days on a line, down the page on a phone, across from 1024 px. */
+.kb-days {
+  @apply grid gap-8 lg:grid-cols-4 lg:gap-8;
+}
+.kb-days > li {
+  @apply relative ps-14 lg:ps-0 lg:pt-16;
+}
+.kb-days > li::before {
+  content: "";
+  @apply absolute start-[1.1875rem] top-11 -bottom-8 w-0.5 bg-line-strong lg:start-11 lg:top-[1.1875rem] lg:-end-8 lg:bottom-auto lg:h-0.5 lg:w-auto;
+}
+.kb-days > li[data-last]::before {
+  @apply hidden;
+}
+.kb-days-dot {
+  @apply absolute start-0 top-0 grid size-10 place-items-center rounded-full bg-kb-yellow font-display text-title font-bold text-kb-ink shadow-rest;
 }
 
 /* SITE-4: Home's hero, a real owner behind the drawn phone. On a phone the photo is a band and the phone overlaps its
@@ -1003,7 +1032,7 @@ html.kb-motion [data-stagger]:not(.kb-in) > * {
   @apply relative mx-auto w-full max-w-[26rem] sm:max-w-[30rem] lg:max-w-none lg:pt-10;
 }
 .kb-hero-visual-wrap > img {
-  @apply relative h-80 w-full rounded-panel bg-surface-3 object-cover object-[50%_22%] shadow-lift sm:h-96 lg:absolute lg:end-0 lg:top-0 lg:h-[78%] lg:w-[66%];
+  @apply relative h-80 w-full rounded-panel bg-surface-3 object-cover object-[50%_22%] shadow-lift sm:h-96 lg:absolute lg:end-0 lg:top-0 lg:h-[78%] lg:w-[66%] xl:-end-6 xl:h-[84%] xl:w-[78%];
 }
 .kb-hero-visual-wrap > div {
   @apply relative -mt-20 ps-8 pe-2 sm:-mt-24 lg:mt-0 lg:px-0;

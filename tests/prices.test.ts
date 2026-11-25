@@ -68,9 +68,29 @@ const OTHER_AMOUNTS: Record<string, string[]> = {
     "src/routes/partners_.terms.tsx",
   ], // the partner payout minimum (30.15 section 5)
   $0: ["knowledge/kabsi-facts.md", "public/llms-full.txt"],
-  $15: ["src/components/kabsi/faq-data.ts"], // SITE-4 rewrites the FAQ price lines (PILOT-READY left them to it, see LATER)
-  $150: ["src/components/kabsi/faq-data.ts"],
 };
+
+// SITE-5 (lane R decision 4): every FAQ answer on the site, the billing questions and the partner questions quote the one
+// plan: 29 US dollars a month, a card to start the trial, no Pro, no yearly price, no 15 dollar location.
+describe("the FAQ answers (src/components/kabsi/faq-data.ts)", () => {
+  it("quote one plan at 29, a card trial, and no Pro, yearly or 15", async () => {
+    const f = await import("../src/components/kabsi/faq-data");
+    const groups = [true, false].flatMap((on) => f.buildFaqGroups(on).flatMap((g) => g.items));
+    const all = [...f.FAQ, ...f.BILLING_FAQ, ...f.PARTNER_FAQ, ...groups];
+    for (const { q, a } of all) {
+      const t = `${q} ${a}`;
+      expect(t, t.slice(0, 80)).not.toMatch(
+        /\bPro\b|yearly|a year\b|\$15\b|\$150\b|\b15 (US )?dollars|no card|without a card|choose a plan/i,
+      );
+      for (const m of t.matchAll(/\$(\d+)|(\d+) US dollars/g))
+        expect(["29", "19", "25"]).toContain(m[1] ?? m[2]);
+    }
+    const plans = groups.map((x) => x.a).join(" ");
+    expect(plans).toContain("29 US dollars a month");
+    expect(plans).toContain(OFFER_TRIAL_LINE);
+    expect(f.BILLING_FAQ[0]!.a).toMatch(/^Yes\. A card is needed/);
+  });
+});
 
 describe("no retired price (lane R, 22 Oct 2026)", () => {
   it("nothing calls $19 a month or $190 a year the Pro price", () => {

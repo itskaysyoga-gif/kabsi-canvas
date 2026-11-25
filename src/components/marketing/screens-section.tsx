@@ -1,7 +1,7 @@
 // SITE-4: Kabsi's own screens as a section of their own (How it works, Pricing and the industry pages). Home shows the
 // row inside its proof section, so this file stays out of Home's script.
 import { Head } from "./kit";
-import { ScreenRow, type ScreenId } from "./life";
+import { ScreenRow, type ScreenId, type Shot } from "./life";
 
 const ALL_SCREENS: readonly ScreenId[] = ["report", "cards", "email"];
 
@@ -28,3 +28,19 @@ export function ProductScreens({
     </section>
   );
 }
+
+/** SITE-5: Kabsi's screens that Home does not show (Pricing, How it works), kept out of Home's script. */
+export const MORE_SCREENS = {
+  reviews: {
+    src: "/screens/app-reviews-560.webp",
+    alt: "Kabsi's Reviews screen with a reply ready to approve, for an example business",
+    title: "A reply for every review",
+    line: "Each new review arrives with a reply in your voice, waiting for your yes.",
+  },
+  shield: {
+    src: "/screens/app-shield-560.webp",
+    alt: "Kabsi's Google profile screen showing a phone number changed on Google, for an example business",
+    title: "Your details watched",
+    line: "When something changes on Google, you see what changed and fix it with one tap.",
+  },
+} satisfies Record<string, Shot>;
