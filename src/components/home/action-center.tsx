@@ -1,8 +1,9 @@
 import { useCallback, useState, type ReactNode } from "react";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
-import { RetryLine, Skeleton, buttonClass } from "@/components/kabsi/ui";
+import { Skeleton, buttonClass } from "@/components/kabsi/ui";
 import { shortParas } from "@/components/kabsi/d3-account";
 import { ProfileHealth, ThisWeek } from "@/components/home/home-week";
 import { BacklogCard } from "@/components/home/backlog-card";
@@ -188,7 +189,7 @@ export function ActionCenter({ loc, access }: { loc: Location; access: Access })
       </div>
       <div className="min-w-0 space-y-8">
         <ThisWeek locationId={loc.id} />
-        <ProfileHealth locationId={loc.id} tasks={all} />
+        <ProfileHealth locationId={loc.id} tasks={[...all, ...state.gaps]} />
       </div>
     </div>
   );

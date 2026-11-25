@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { RetryLine } from "@/components/kabsi/ui";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { fmtDateTime } from "@/lib/format";

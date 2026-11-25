@@ -505,7 +505,7 @@ export type HealthItem = {
  * something waits for the owner; "ok" means Kabsi is watching and nothing waits.
  */
 export function profileHealth(i: {
-  tasks: Pick<Task, "kind" | "path">[];
+  tasks: Pick<Task, "kind" | "path" | "evidence">[];
   week: { kind: string; targetId: string; owner?: string }[];
 }): HealthItem[] {
   const open = (k: TaskKind[]) => i.tasks.filter((t) => k.includes(t.kind));
@@ -517,7 +517,11 @@ export function profileHealth(i: {
   const hours = open(["hours_confirm"]);
   const photos = open(["photo_batch"]);
   const posts = open(["post"]);
-  const replies = open(["review_reply"]);
+  // The day-one backlog is one summary task standing for many reviews: count the reviews it holds (APP-1 review).
+  const replies = open(["review_reply"]).reduce(
+    (t, r) => t + (isBacklogSummary(r as Task) ? Math.max(1, backlogCounts(r as Task).total) : 1),
+    0,
+  );
   const n = (k: number, one: string, many: string) => `${k} ${k === 1 ? one : many}`;
   return [
     details.length
@@ -580,11 +584,11 @@ export function profileHealth(i: {
           tone: "ok",
           action: { label: "See posts", to: "/app/posts" },
         },
-    replies.length
+    replies
       ? {
           key: "reviews",
           label: "Reviews",
-          state: n(replies.length, "reply waiting", "replies waiting"),
+          state: n(replies, "reply waiting", "replies waiting"),
           tone: "warn",
           action: { label: "See replies", to: "/app/reviews" },
         }

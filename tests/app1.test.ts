@@ -8,7 +8,11 @@ import { chatName, chatState } from "@/components/staff/chats-panel";
 import type { Task } from "@/lib/tasks";
 
 const pub = (kind: string, targetId: string, owner: string) => ({ kind, targetId, owner });
-const task = (kind: Task["kind"]): Pick<Task, "kind" | "path"> => ({ kind, path: "/app" });
+const task = (kind: Task["kind"], evidence: Record<string, unknown> = {}) => ({
+  kind,
+  path: "/app",
+  evidence,
+});
 
 describe("This week, the receipt", () => {
   it("counts each item once, only when it went to Google, and never an undone one", () => {
@@ -57,6 +61,18 @@ describe("Your Google profile, the health strip", () => {
     expect(by["hours"]).toMatchObject({ tone: "warn", action: { to: "/app/hours" } });
     expect(by["reviews"]).toMatchObject({ tone: "warn", state: "2 replies waiting" });
     expect(by["posts"]).toMatchObject({ tone: "ok", state: "Sent this week" });
+  });
+});
+
+describe("Your Google profile, review fixes", () => {
+  it("counts the reviews a day-one backlog holds, and sees profile gaps", () => {
+    const items = profileHealth({
+      tasks: [task("review_reply", { backlog_summary: true, total: 23 }), task("profile_gap")],
+      week: [],
+    });
+    const by = Object.fromEntries(items.map((h) => [h.key, h]));
+    expect(by["reviews"]).toMatchObject({ state: "23 replies waiting" });
+    expect(by["details"]).toMatchObject({ tone: "warn" });
   });
 });
 

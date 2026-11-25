@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { RetryLine } from "@/components/kabsi/ui";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { fmtDate } from "@/lib/format";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

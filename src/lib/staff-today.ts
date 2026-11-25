@@ -61,7 +61,7 @@ export function todayRows(i: TodayInput): TodayRow[] {
   add({
     id: "failed-sends",
     count: n(i.failedSends7d),
-    text: `${s(n(i.failedSends7d), "send", "sends")} to Google did not go through in the last 7 days`,
+    text: `${s(n(i.failedSends7d), "send", "sends")} did not go through in the last 7 days`,
     page: "system",
     show: "operations",
     button: "Open operations",

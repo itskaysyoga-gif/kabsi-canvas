@@ -1,13 +1,14 @@
 // Staff: every conversation with Nora (D261), labelled by country, topic, intent and lead temperature,
 // with filters, counts and a CSV export. Reads through the staff-only staff_chats / staff_chat_stats RPCs.
 import { useEffect, useState } from "react";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { fmtDateTime } from "@/lib/format";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 import { ChoiceChips } from "@/components/kabsi/d3-account";
-import { RetryLine, Skeleton } from "@/components/kabsi/ui";
+import { Skeleton } from "@/components/kabsi/ui";
 import {
   Sheet,
   SheetContent,

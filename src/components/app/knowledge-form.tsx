@@ -4,7 +4,7 @@
 // knowledge.ts): a change is a new version, Confirm re-dates a fact, Delete removes the fact and every version.
 // Onboarding shows only the basics, saved the same way.
 import { ShortParas } from "@/components/kabsi/d3-account";
-import { RetryLine } from "@/components/kabsi/ui";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAutosize } from "@/lib/use-autosize";

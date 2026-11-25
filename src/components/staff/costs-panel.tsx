@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { RetryLine } from "@/components/kabsi/ui";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { useQuery } from "@tanstack/react-query";
 import { Segmented } from "@/components/kabsi/ui";
 import { supabase } from "@/lib/supabase";

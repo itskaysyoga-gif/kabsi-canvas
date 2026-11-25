@@ -1,4 +1,5 @@
 import { CONCIERGE_COPY } from "@/lib/concierge-copy";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -19,14 +20,7 @@ import { daysUntil } from "@/lib/dashboard";
 import { ACCOUNT_STAYS_LINE, TAX_NOTE, WHATSAPP_ON, WORKING_HOURS } from "@/lib/site";
 import { FOUNDING_LINE, FOUNDING_MONTHLY_USD, PRICE_MONTHLY_USD, TRIAL_LINE } from "@/lib/offer";
 import { AccountTop, Panel } from "@/components/kabsi/d3-account";
-import {
-  Banner,
-  Button,
-  RetryLine,
-  Skeleton,
-  StatusPill,
-  buttonClass,
-} from "@/components/kabsi/ui";
+import { Banner, Button, Skeleton, StatusPill, buttonClass } from "@/components/kabsi/ui";
 import { cn } from "@/lib/utils";
 
 // Your plan (UX 1, Design 3): the state first as one banner (trial, paid, a payment that did not go through, a plan that
@@ -508,8 +502,8 @@ function StateBanner({
           </p>
         ) : (
           <p className="mt-1">
-            If you cancel, reply drafts, Google Protection and your weekly report pause when the
-            trial ends. Your review link and QR code keep working.
+            When the trial ends without a plan, reply drafts, Google Protection and your weekly
+            report pause. Your review link and QR code keep working.
           </p>
         )}
       </Banner>

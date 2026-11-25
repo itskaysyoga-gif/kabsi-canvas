@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, ChevronRight, CircleCheck } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -12,7 +13,7 @@ import {
   todayRows,
   type TodayRow,
 } from "@/lib/staff-today";
-import { EmptyState, RetryLine } from "@/components/kabsi/ui";
+import { EmptyState } from "@/components/kabsi/ui";
 import { STAFF_CARD, STAFF_H2, StaffTop } from "@/components/staff/staff-ui";
 import { ALL_CHATS, chatsKey, loadChats } from "@/components/staff/chats-panel";
 import { openFollowups } from "@/components/staff/followups-panel";

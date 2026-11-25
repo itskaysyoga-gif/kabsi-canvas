@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { useQuery } from "@tanstack/react-query";
 import {
   Camera,
@@ -9,7 +10,7 @@ import {
   Store,
   type LucideIcon,
 } from "lucide-react";
-import { RetryLine, Skeleton } from "@/components/kabsi/ui";
+import { Skeleton } from "@/components/kabsi/ui";
 import { profileHealth, weekReceipt, type HealthKey } from "@/lib/home-state";
 import { recentTasks } from "@/lib/task-feed";
 import type { Task } from "@/lib/tasks";
