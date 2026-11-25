@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 25 Nov 2026 (FIX-4). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 25 Nov 2026 (SITE-7). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -42,6 +42,7 @@ The long list as it stood before GATE-2 is word for word in `2026-11-24-progress
 
 ## Recent entries (newest first)
 
+- 25 Nov 2026, SITE-7 (PR 614): seven new Pexels License trade photos (bakery, vet, physiotherapy, car wash, lash and brow, cleaners) and a sharper bakery post photo; restaurant share image is the chef owner; drawn app screens sit whole inside their phone frames; How it works and /for reworked; Home's script 204.86 to 201.1 KB (Pricing 208 to 205.7). Five fresh reviews: best scores 8.3 to 8.7, last round 7.9 to 8.5; the open asks are in LATER. `2026-11-25-site7.md`.
 - 25 Nov 2026, SITE-6 (PR 611): header with "For your business" (every trade, icon and line, loaded on demand), How it works, Pricing, Guides, Log in and "Free Google check"; each trade page shows Kabsi's Home with that trade's hours, post and reply; bright restaurant hero; How it works and /for tightened; Nora steps aside from photos. Review round 3: Home, Pricing, barbershop, restaurant 8.5 or more; How it works 8.3, /for 8.2. `2026-11-25-site6.md`.
 - 25 Nov 2026, APP-1 (PR 610): owner Home in three parts (the yes with one tap, This week receipt, Google profile health strip), Plan on one plan with the free trial line, staff Today in urgency order under a health strip, Conversations list and thread, a short retry line for failed reads. Migrations app1_staff_reads and app1_trials_ending_unpaid applied. Scores 8 to 9 per screen. `2026-11-25-app1.md`.
 - 25 Nov 2026, FIX-4: sign-in notice button cut to 20 characters (new test over every WhatsApp button), mail-tester reader fixed (JSON URL and `mark` is 0), Rashid's phone off the three demo businesses, job health read made fast enough for Staff Today, 11 stopped jobs cancelled with reasons, Outbound `preview` action. `2026-11-25-fix4.md`.
@@ -53,7 +54,6 @@ The long list as it stood before GATE-2 is word for word in `2026-11-24-progress
 - 25 Nov 2026, PILOT-READY (R-165): one price everywhere (29, extra location 29, the trial line), GATE-2 wording in COPY.md section 93 and the facts, replay harness rebound to the demo businesses with per-phone locks and `launch_16_18`. Replay harness run on production: 10 scenarios pass, launch lines 16 to 18 pass except the rewrite and the hours week (see the file); test checkouts waiting for Rashid. `2026-11-25-pilot-ready.md`.
 - 24 Nov 2026, GATE-2 (R-164): WhatsApp report answers on PROOF-2's functions, onboarding in three steps then the card trial, Founding 25 to the 19 checkout, the month-13 switch and its email, the first-day 90-day list, the pilot kit, Creem test products set up. Launch tests mostly not run (see the file). `2026-11-24-gate2.md`.
 - 24 Nov 2026, SITE-3 (R-164 item 7): one section system on every public page, Home redone (phone scenes, Google-sourced problem band, a week with Kabsi, full-width price), SITE-2 finished, free check without rank or AI, three guides public. `2026-11-24-site3.md`.
-- 24 Nov 2026, OFFER-2 (R-163): one plan at 29 with a 14-day card trial, founding 19 private, costly jobs off, 2 posts a month, WhatsApp Google-care tools. `2026-11-24-offer2.md`.
 - Older entries: `2026-11-24-progress-moved.md` and the files it names.
 
 ## How a session updates this page
