@@ -59,7 +59,7 @@ const OWN_SUBJECTS: Record<string, string> = {
   access_granted: "Kabsi can now look after Rose Lane Salon",
   life_first_reply_approved: "Your first reply is live on Google",
   life_trial_day11: "Your Kabsi trial ends on 15 October",
-  receipt: "Receipt: Kabsi Pro, monthly",
+  receipt: "Receipt: Kabsi, monthly",
   // R-126 (EMAIL-01): the weekly report subject counts the work and leaves out a part that is zero.
   weekly_report: "Your Kabsi week: 4 replies, 1 post, 4 profile changes",
   // PROOF-2: the monthly report subject counts what was sent to Google.

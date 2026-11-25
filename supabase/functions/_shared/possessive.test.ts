@@ -53,7 +53,7 @@ Deno.test("the staff billing line writes the possessive of a plan that has ended
   for (const [name, own] of CASES.slice(0, 6))
     assert.equal(staffPlanLine({ paid: false, message: "ended", business: name, plan: "pro", endDate: null }), `${own} plan has ended`);
   assert.equal(staffPlanLine({ paid: false, message: "scheduled_cancel", business: "Moss", plan: "pro", endDate: "9 December 2026" }), "Moss cancelled; the plan ends on 9 December 2026");
-  assert.equal(staffPlanLine({ paid: true, message: null, business: "Moss", plan: "essentials", endDate: null }), "New paying customer: Moss on Essentials");
+  assert.equal(staffPlanLine({ paid: true, message: null, business: "Moss", plan: "essentials", endDate: null }), "New paying customer: Moss on Kabsi");
 });
 
 Deno.test("the AI answer finding writes the possessive of the assistant", () => {

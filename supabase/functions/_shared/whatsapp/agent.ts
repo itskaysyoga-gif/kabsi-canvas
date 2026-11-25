@@ -785,8 +785,8 @@ const priceText = (plan: Plan | "extra", period: Period, family: PriceFamily) =>
   const cents = CATALOGUE[plan === "extra" ? extraKey(period) : planKey(plan, period, family)].price;
   return `$${cents / 100} ${period === "year" ? "a year" : "a month"}`;
 };
-// OFFER-2: the one plan is shown as "Kabsi"; a Pro plan a business already has keeps its name.
-const planName = (plan: Plan, period: Period) => `Kabsi${plan === "pro" ? " Pro" : ""}, ${period === "year" ? "yearly" : "monthly"}`;
+// OFFER-2: the one plan is shown as "Kabsi"; PILOT-READY (R-165): a plan a business already has is shown as Kabsi too.
+const planName = (_plan: Plan, period: Period) => `Kabsi, ${period === "year" ? "yearly" : "monthly"}`;
 const CONFIRM = (op: string): Button[] => [{ id: `k:${op}`, title: "Confirm" }];
 const KEEP: Button[] = [{ id: "k:keep", title: "Keep my plan" }];
 
@@ -894,6 +894,11 @@ async function businessTool(t: Turn, name: string, arg: string | undefined): Pro
       if (name === "qr") {
         const png = await qrPng(url).catch(() => null);
         if (png?.length) {
+          // A voice note's "I heard" line goes first, as a message of its own, because the image caption carries no quote.
+          if (t.heard && !t.heard.used) {
+            t.heard.used = true;
+            await sendReply(t.d.out, t.s, t.phone, t.heard.line, undefined, { locationId: b.location_id });
+          }
           await sendReply(t.d.out, t.s, t.phone, headed(t.head ?? null, SAY.qrImage(b.business)), undefined, { locationId: b.location_id }, { png });
           return "qr_image";
         }

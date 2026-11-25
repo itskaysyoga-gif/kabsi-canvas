@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 24 Nov 2026 (GATE-2). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 25 Nov 2026 (PILOT-READY). History is word for word in `docs/progress/archive/`. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -43,6 +43,7 @@ The long list as it stood before GATE-2 is word for word in `2026-11-24-progress
 ## Recent entries (newest first)
 
 - 25 Nov 2026, OUTBOUND-3: Outbound reopens for the pilot, US and GB, approved once a week; CAN-SPAM postal address (OUTBOUND_POSTAL_ADDRESS, not set yet: nothing sends), DNS and mail-tester gates, kill gate, jobs scheduled again; sending still locked, test mode on. `2026-11-25-outbound3.md`.
+- 25 Nov 2026, PILOT-READY (R-165): one price everywhere (29, extra location 29, the trial line), GATE-2 wording in COPY.md section 93 and the facts, replay harness rebound to the demo businesses with per-phone locks and `launch_16_18`. Live runs and the test checkouts: `2026-11-25-pilot-ready.md`.
 - 24 Nov 2026, GATE-2 (R-164): WhatsApp report answers on PROOF-2's functions, onboarding in three steps then the card trial, Founding 25 to the 19 checkout, the month-13 switch and its email, the first-day 90-day list, the pilot kit, Creem test products set up. Launch tests mostly not run (see the file). `2026-11-24-gate2.md`.
 - 24 Nov 2026, SITE-3 (R-164 item 7): one section system on every public page, Home redone (phone scenes, Google-sourced problem band, a week with Kabsi, full-width price), SITE-2 finished, free check without rank or AI, three guides public. `2026-11-24-site3.md`.
 - 24 Nov 2026, SITE-2 (blueprint 3.1): industry pages on one template, guides cleaned and 3 added, free check result and tool pages brought to 3.1; `2026-11-24-site2.md`.

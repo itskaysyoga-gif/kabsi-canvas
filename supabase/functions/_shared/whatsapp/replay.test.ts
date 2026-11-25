@@ -86,7 +86,7 @@ Deno.test("the replay media is a real photo and voice notes of the length asked"
 const buttonId = (w: World, title: string) =>
   title === "My business" ? "r:business" : title === "Partner tools" ? "r:partner" : `b:${w.biz.find((b) => b.name.slice(0, 20) === title)?.id ?? "none"}`;
 
-function fakeIo(w: World, o: { problem?: string | null } = {}): ReplayIo & { resets: string[][] } {
+function fakeIo(w: World, o: { problem?: string | null } = {}, locks = new Map<string, string>()): ReplayIo & { resets: string[][] } {
   for (const id of ["replay-voice-5s", "replay-voice-200s", "replay-voice-big"]) w.mediaBytes.set(id, replayMedia(id));
   w.mediaBytes.set("replay-photo", replayMedia("replay-photo"));
   const deps = w.deps();
@@ -98,6 +98,13 @@ function fakeIo(w: World, o: { problem?: string | null } = {}): ReplayIo & { res
     resets,
     nowMs: () => w.now,
     problem: async () => o.problem ?? null,
+    lock: async (scenario, phones) => {
+      const held = phones.find((p) => locks.get(p) && locks.get(p) !== scenario);
+      if (held) return held;
+      for (const p of phones) locks.set(p, scenario);
+      return null;
+    },
+    unlock: async (scenario, phones) => void phones.forEach((p) => locks.get(p) === scenario && locks.delete(p)),
     reset: async (phones) => void resets.push(phones),
     lastOutbox: async () => (seen = w.sent.length),
     action: async (phone) => w.alert(phone, BIZ.harbour),
@@ -191,4 +198,50 @@ Deno.test("Fix 3: the nightly kabsi.co check has its own title and dedupe, so it
   assert.deepEqual(alertCheck("site"), { key: "site", title: "Nightly kabsi.co check failed" });
   assert.deepEqual(alertCheck(undefined), { key: "smoke", title: "Nightly smoke test failed" });
   assert.deepEqual(alertCheck("anything else"), { key: "smoke", title: "Nightly smoke test failed" });
+});
+
+Deno.test("PILOT-READY: two scenarios on one phone are refused while the first holds it, and the phone is free again after", async () => {
+  const w = demoWorld();
+  w.onItFast = false;
+  const locks = new Map<string, string>();
+  const io = fakeIo(w, {}, locks);
+  // Another scenario still holds the owner phone.
+  locks.set(PHONES.owner, "owner_script");
+  const refused = await runScenario(io, "owner_stop", "t5");
+  assert.equal(refused.ok, false);
+  assert.match(refused.refused ?? "", /another scenario is running/);
+  assert.equal(refused.steps.length, 0);
+  assert.equal(w.sent.length, 0);
+  assert.equal(io.resets.length, 0);
+  // A scenario on other phones is not held back, and it frees its phones when it ends.
+  const other = await runScenario(io, "unknown_phone", "t6");
+  assert.equal(other.ok, true);
+  assert.equal(locks.has(PHONES.unknown), false);
+  // Once the first has ended, the second runs.
+  locks.delete(PHONES.owner);
+  assert.equal((await runScenario(io, "owner_stop", "t7")).ok, true);
+  assert.equal(locks.size, 0);
+});
+
+Deno.test("PILOT-READY: a replay voice note carries its words and a real note does not", async () => {
+  const { REPLAY_SAYINGS, replayTranscribe, replayWords } = await import("./replay-media.ts");
+  for (const [id, words] of Object.entries(REPLAY_SAYINGS)) {
+    const bytes = replayMedia(id);
+    assert.equal(oggSeconds(bytes), 3, id);
+    assert.equal(replayWords(bytes), words, id);
+  }
+  assert.equal(replayWords(oggNote(5)), null);
+  const t = replayTranscribe(undefined);
+  assert.deepEqual(await t(replayMedia("replay-say-1"), "audio/ogg", undefined as never), { ok: true, text: "What needs my attention?", language: "en", seconds: 3 });
+  assert.deepEqual(await t(oggNote(5), "audio/ogg", undefined as never), { ok: false, reason: "not_configured" });
+});
+
+Deno.test("PILOT-READY: launch_16_18 covers checklist lines 16 to 18 and uses only replay voice notes", () => {
+  const sc = SCENARIOS.launch_16_18;
+  assert.ok(sc);
+  assert.equal(sc.ai, false);
+  const voice = sc.steps.filter((s) => s.media?.kind === "audio");
+  assert.equal(voice.length, 8);
+  for (const s of voice) assert.match(s.media!.id, /^replay-say-/);
+  for (const w of ["stats", "monthly report", "feedback", "profile health", "how do I compare", "STOP", "START"]) assert.ok(sc.steps.some((s) => s.text === w), w);
 });

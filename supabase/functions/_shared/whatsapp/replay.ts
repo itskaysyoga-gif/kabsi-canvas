@@ -159,14 +159,14 @@ const nothing = (...names: string[]) => names.map((n) => new RegExp(n, "i"));
 
 /** 13b phone test script, steps 3 to 11 (steps 1 and 2 are the staff code and `status`: see `staff_two_roles`). */
 const OWNER_SCRIPT: Step[] = [
-  { note: "13b 4: stats", phone: PHONES.owner, text: "stats", expect: { result: "stats", head: OWNER_HEAD, reply: /Harbour Lane Coffee, the last 7 days: \d+ new/, replies: 1 } },
+  { note: "13b 4: stats", phone: PHONES.owner, text: "stats", expect: { result: /^stats/, head: OWNER_HEAD, reply: /Harbour Lane Coffee, the last 7 days: \d+ new/, replies: 1 } },
   { note: "13b 5: review link", phone: PHONES.owner, text: "review link", expect: { result: /^(review_link|no_review_link)$/, head: OWNER_HEAD, reply: /review link|no review link yet/ } },
   { note: "13b 6: the scan code from the website", phone: PHONES.owner, text: "Hi Kabsi, my scan code is KAB-7Q4M2X9P", expect: { result: "scan_code", reply: /Thanks, I have your scan KAB-7Q4M2X9P/, conv: { scan_code: "KAB-7Q4M2X9P" } } },
   // V3: a voice note is transcribed when the provider key is set; the replay audio is silence, so either way no words come back.
   { note: "13b 7: a short voice note", phone: PHONES.owner, media: { kind: "audio", id: "replay-voice-5s", mime: "audio/ogg; codecs=opus", size: 20_000, voice: true }, expect: { result: /^voice_(not_configured|failed|empty)$/, reply: /not switched on yet|could not hear that clearly/ } },
-  { note: "13b 8: a photo of the shop", phone: PHONES.owner, media: { kind: "image", id: "replay-photo", mime: "image/jpeg", size: 7000 }, expect: { result: "photo", head: OWNER_HEAD, reply: /getting your photo ready/ } },
-  { note: "13b 9: upgrade (a demo business has no paid plan)", phone: PHONES.owner, text: "upgrade", expect: { result: "billing_no_plan", head: OWNER_HEAD, reply: /has no paid plan right now/ } },
-  { note: "13b 10: talk to a person", phone: PHONES.owner, text: "talk to a person", expect: { result: "handoff", reply: /within 4 working hours/, conv: { handoff: true } } },
+  { note: "13b 8: a photo of the shop", phone: PHONES.owner, media: { kind: "image", id: "replay-photo", mime: "image/jpeg", size: 7000 }, expect: { result: "photo", reply: /Photo received.*Kabsi is getting it ready/s } },
+  { note: "13b 9: upgrade (a demo business has no paid plan)", phone: PHONES.owner, text: "upgrade", expect: { result: "billing_no_plan", reply: /has no paid plan right now/ } },
+  { note: "13b 10: talk to a person", phone: PHONES.owner, text: "talk to a person", expect: { result: "handoff", reply: /the same working day/, conv: { handoff: true } } },
 ];
 
 export const SCENARIOS: Record<string, Scenario> = {
@@ -205,13 +205,59 @@ export const SCENARIOS: Record<string, Scenario> = {
     name: "unknown_phone", about: "A phone Kabsi does not know: the welcome, prices, the scan code, nothing of any business", phones: [PHONES.unknown], ai: false, steps: [
       // The welcome goes on a phone's first message only; a replay phone has written before, so it gets the short menu.
       { note: "hello is the welcome of 24.8, or the menu after the first message", phone: PHONES.unknown, text: "Hello", expect: { result: /^(greeting|help)$/, reply: /Did you just scan your business on kabsi\.co|I am Nora, Kabsi's assistant/ } },
-      { note: "prices", phone: PHONES.unknown, text: "prices", expect: { result: "prices", reply: /29 US dollars.*59 US dollars/s } },
+      { note: "prices", phone: PHONES.unknown, text: "prices", expect: { result: "prices", reply: /one plan: 29 US dollars a month per location.*A card is needed to start/s } },
       { note: "stats needs an account and shows no business", phone: PHONES.unknown, text: "stats", expect: { result: "needs_account", reply: /needs a Kabsi account/, never: nothing("Harbour Lane", "Juniper") } },
       { note: "a staff command is never revealed", phone: PHONES.unknown, text: "status", expect: { result: /^(greeting|unclear|free|nora)/, never: nothing("Jobs failed", "Kabsi staff") } },
       { note: "the scan code", phone: PHONES.unknown, text: "Hi Kabsi, my scan code is KAB-2M9Q4X7P", expect: { result: "scan_code", reply: /KAB-2M9Q4X7P/, conv: { scan_code: "KAB-2M9Q4X7P" } } },
       { note: "talk to a person", phone: PHONES.unknown, text: "talk to a person", expect: { result: "handoff", reply: /within one working day/ } },
       { note: "STOP", phone: PHONES.unknown, text: "STOP", expect: { result: "stopped", reply: /WhatsApp messages are stopped\./, conv: { stopped: true } } },
       { note: "silence after STOP", phone: PHONES.unknown, text: "hello", expect: { result: "stopped_ignored", none: true } },
+    ],
+  },
+  // PILOT-READY (R-165 item 4): launch checklist lines 16 to 18 (docs/progress/archive/2026-11-24-gate2-phone-test.md), run as the
+  // owner of the demo business, so Rashid's phone is needed only for line 19 (real delivery). Voice notes carry their words
+  // inside the replay audio (replay-media.ts), so no paid transcription is called. Each step is one checklist item.
+  launch_16_18: {
+    name: "launch_16_18", about: "Checklist lines 16 to 18: the seven typed sentences, the five new tools, the seven as voice notes, a voice yes, the limits, STOP and START", phones: [PHONES.owner, PHONES.staff], ai: false, steps: [
+      // Line 16, typed.
+      { note: "16.1 What needs my attention?", phone: PHONES.owner, text: "What needs my attention?", expect: { result: /^care_waiting/, reply: /Waiting for you|Nothing is waiting/ } },
+      { note: "16.2 open the reply that is ready (number 2 of the list)", phone: PHONES.owner, text: "2", expect: { reply: /./ } },
+      { note: "16.2 Make this reply more professional", phone: PHONES.owner, text: "Make this reply more professional", expect: { reply: /./ } },
+      { note: "16.3 Change my opening hours on Saturday", phone: PHONES.owner, text: "Change my opening hours on Saturday", expect: { result: "care_week_no_times", reply: /What are your new hours on Saturdays\?/ } },
+      // The demo business has no weekly hours on file, so the week cannot be shown back; a business with hours gets the week and Approve.
+      { note: "16.3 the times", phone: PHONES.owner, text: "10am to 4pm", expect: { result: /^care_week_(no_hours|shown)/, reply: /Saturday|does not have your hours yet/ } },
+      { note: "16.4 A photo with Post this", phone: PHONES.owner, media: { kind: "image", id: "replay-photo", mime: "image/jpeg", size: 7000 }, text: "Post this", expect: { result: "photo", reply: /Photo received/ } },
+      { note: "16.5 How many reviews did I receive this month?", phone: PHONES.owner, text: "How many reviews did I receive this month?", expect: { result: /^stats/, reply: /the last 30 days: \d+ new reviews/ } },
+      { note: "16.6 Show me everything you did this week", phone: PHONES.owner, text: "Show me everything you did this week", expect: { result: "care_done", reply: /Your week from/ } },
+      { note: "16.7 Send me my review QR code", phone: PHONES.owner, text: "Send me my review QR code", expect: { result: "qr_image", reply: /your review QR code/ } },
+      { note: "16.8 stats", phone: PHONES.owner, text: "stats", expect: { result: /^stats/, reply: /the last 7 days/ } },
+      { note: "16.8 monthly report", phone: PHONES.owner, text: "monthly report", expect: { result: /^care_monthly/, reply: /Your monthly report|monthly report/i } },
+      { note: "16.8 feedback", phone: PHONES.owner, text: "feedback", expect: { result: "care_feedback", reply: /What customers mention/ } },
+      { note: "16.8 profile health", phone: PHONES.owner, text: "profile health", expect: { result: "care_profile_health", reply: /Your profile/ } },
+      { note: "16.8 how do I compare", phone: PHONES.owner, text: "how do I compare", expect: { result: /^care_competitors/, reply: /Nearby businesses|No nearby businesses picked/ } },
+      // Line 17: the seven again as voice notes. Every reply opens with what Kabsi heard (the hours one last: it leaves a question open).
+      ...[1, 4, 5, 6, 7].map((n): Step => ({
+        note: `17.${n} voice note ${n}`, phone: PHONES.owner,
+        media: { kind: "audio", id: `replay-say-${n}`, mime: "audio/ogg; codecs=opus", size: 20_000, voice: true },
+        expect: { reply: /^> I heard: / },
+      })),
+      { note: "17.2 open a reply to rewrite", phone: PHONES.owner, text: "2", expect: { reply: /./ } },
+      { note: "17.2 voice note 2", phone: PHONES.owner, media: { kind: "audio", id: "replay-say-2", mime: "audio/ogg; codecs=opus", size: 20_000, voice: true }, expect: { reply: /^> I heard: Make this reply more professional/ } },
+      { note: "17.3 voice note 3", phone: PHONES.owner, media: { kind: "audio", id: "replay-say-3", mime: "audio/ogg; codecs=opus", size: 20_000, voice: true }, expect: { result: "care_week_no_times", reply: /^> I heard: Change my opening hours on Saturday/ } },
+      { note: "17.3 the times by voice are not taken as words either way: type them", phone: PHONES.owner, text: "10am to 4pm", expect: { reply: /Saturday|does not have your hours yet/ } },
+      // The yes: with a reply open for approval, a voice yes approves nothing.
+      { note: "17.8 open the reply again", phone: PHONES.owner, text: "waiting", expect: { result: /^care_waiting/ } },
+      { note: "17.8 number 2", phone: PHONES.owner, text: "2", expect: { reply: /./ } },
+      { note: "17.8 a voice yes approves nothing", phone: PHONES.owner, media: { kind: "audio", id: "replay-say-yes", mime: "audio/ogg; codecs=opus", size: 20_000, voice: true }, expect: { reply: /^> I heard: yes/, never: [/Approved for/, /goes to Google in 10 seconds/] } },
+      // Line 18: the limits.
+      { note: "18.1 off-topic", phone: PHONES.owner, text: "Write me a poem about coffee", expect: { result: "off_topic", reply: /Kabsi cannot help with that.*talk to a person.*hello@kabsi\.co/s } },
+      { note: "18.2 the name change is refused with the guide", phone: PHONES.owner, text: "Change my business name to Harbour Lane Cafe", expect: { result: "care_guide", reply: /does not change that from a chat/, never: [/Approve/] } },
+      { note: "18.3 the owner gets a card", phone: PHONES.owner, prep: "action", text: "help", expect: { result: "help" } },
+      { note: "18.3 the staff phone taps the owner's Approve", phone: PHONES.staff, tap: { id: "a:$token" }, expect: { reply: /./, never: [/Approved for/] } },
+      { note: "18.3 the staff phone types yes", phone: PHONES.staff, text: "yes", expect: { never: [/Approved for/] } },
+      { note: "18.4 STOP", phone: PHONES.owner, text: "STOP", expect: { result: "stopped", reply: /WhatsApp messages are stopped\./, replies: 1, conv: { stopped: true } } },
+      { note: "18.4 nothing after STOP", phone: PHONES.owner, text: "stats", expect: { result: "stopped_ignored", none: true } },
+      { note: "18.4 START turns messages back on", phone: PHONES.owner, text: "START", expect: { result: "started", reply: /Welcome back/, conv: { stopped: false } } },
     ],
   },
   voice_limits: {

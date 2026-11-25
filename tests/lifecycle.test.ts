@@ -7,17 +7,22 @@ import {
 } from "../supabase/functions/_shared/email/lifecycle-copy";
 import { OPT_IN_COUNTRIES } from "../supabase/functions/_shared/lifecycle";
 import { CARD_PAYMENTS_COMING } from "../src/lib/plans";
-import { FOUNDING_SENTENCE, PLAN_PRICES, PRICES_SENTENCE } from "../src/lib/site";
+import { FOUNDING_LINE } from "../src/lib/offer";
+import { FOUNDING_SENTENCE, ONE_PLAN, PRICES_SENTENCE } from "../src/lib/site";
 
 // P0.4-10: the lifecycle emails quote the prices the site shows. The rules and the time-travel tests are in
 // supabase/functions/_shared/lifecycle.test.ts (Deno).
 describe("lifecycle emails", () => {
   it("quote the same prices as the site (K-106, G-30)", () => {
-    expect(EMAIL_PRICES).toEqual(PLAN_PRICES);
+    expect(EMAIL_PRICES).toEqual({
+      monthly: ONE_PLAN.monthly,
+      extraLocationMonthly: ONE_PLAN.extraLocationMonthly,
+    });
     expect(EMAIL_SENTENCE).toBe(PRICES_SENTENCE);
     expect(EMAIL_FOUNDING).toBe(FOUNDING_SENTENCE);
+    expect(EMAIL_FOUNDING).toBe(FOUNDING_LINE);
     expect(EMAIL_CARD_PAYMENTS_COMING).toBe(CARD_PAYMENTS_COMING);
-    expect(PLAN_PRICES.proYearly).toBe(PLAN_PRICES.proMonthly * 10);
+    expect(ONE_PLAN.extraLocationMonthly).toBe(ONE_PLAN.monthly);
   });
 
   it("need an opt-in in the launch markets the law or G-24 name, and not in the others", () => {
