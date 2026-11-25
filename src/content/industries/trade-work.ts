@@ -8,6 +8,11 @@
 export type TradeWork = {
   /** The Example post under "Send a photo. Get a Google post." for this trade. */
   post: string;
+  /**
+   * SITE-6: the hours item on this trade's Kabsi Home screen (public/screens/trade-<slug>-560.webp, drawn by
+   * scripts/site-screens.mjs --trades), so the screen shows the same hours, post and reply as the three examples.
+   */
+  hours: string;
   /** Three short examples: a title and one or two sentences. */
   does: readonly { title: string; text: string }[];
   /** Three questions an owner of this trade asks. */
@@ -20,6 +25,7 @@ const HEALTH =
 export const TRADE_WORK: Record<string, TradeWork> = {
   "hair-salon": {
     post: "Fresh balayage from this week at the salon. Book your colour appointment online.",
+    hours: "New hours for Thursday: open until 8 pm",
     does: [
       {
         title: "A colour review answered.",
@@ -51,6 +57,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   barbershop: {
     post: "A clean skin fade from the chair today. Walk in or book your next cut.",
+    hours: "New hours for Friday: walk-ins until 7 pm",
     does: [
       {
         title: "Walk-in hours changed.",
@@ -82,6 +89,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   "nail-salon": {
     post: "This week's set: soft pink with a gloss finish. Book your next appointment with us.",
+    hours: "Holiday hours for Christmas week: open until 8 pm",
     does: [
       {
         title: "A nail art photo posted.",
@@ -113,6 +121,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   "beauty-salon": {
     post: "Our treatment room is ready for the week. Book a facial online.",
+    hours: "Training day: closing at 1 pm on Monday",
     does: [
       {
         title: "A facial review answered.",
@@ -144,6 +153,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   "spa-and-massage": {
     post: "A quiet room, warm towels, an hour for you. Book your massage online.",
+    hours: "Holiday hours: open on December 26",
     does: [
       {
         title: "A calm reply to a calm review.",
@@ -175,6 +185,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   "dental-clinic": {
     post: "Our team is back for the new week. Call us to book a check-up.",
+    hours: "Holiday hours: open two mornings after Christmas",
     does: [
       {
         title: "A reply that keeps privacy.",
@@ -206,6 +217,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   "medical-and-aesthetic-clinic": {
     post: "Our clinic is open for consultations this week. Call us to book a time.",
+    hours: "Holiday hours: closed on Christmas Day",
     does: [
       {
         title: "A private, general reply.",
@@ -237,6 +249,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   physiotherapy: {
     post: "Evening appointments are now open on Tuesdays. Book online or call us.",
+    hours: "New hours for Tuesday: open until 8 pm",
     does: [
       {
         title: "A thank you that stays private.",
@@ -268,6 +281,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   restaurant: {
     post: "Tonight's special is on the pass. Book a table or call us.",
+    hours: "Holiday hours: closed Christmas Day, open late on New Year's Eve",
     does: [
       {
         title: "Holiday hours before the holiday.",
@@ -299,6 +313,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   cafe: {
     post: "The autumn bake is out of the oven. Come by for a coffee.",
+    hours: "New hours: opening at 6:30 am on weekdays",
     does: [
       {
         title: "Early hours kept exact.",
@@ -330,6 +345,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   bakery: {
     post: "First tray of the morning, still warm. Come early while it lasts.",
+    hours: "Saturday's hours: closing at 2 pm",
     does: [
       {
         title: "Today's bake posted.",
@@ -361,6 +377,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   "auto-repair": {
     post: "Saturday mornings are now open for service. Call us to book your car in.",
+    hours: "New hours: open Saturday, 8 am to noon",
     does: [
       {
         title: "A 1-star review handled carefully.",
@@ -392,6 +409,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   "gym-and-fitness": {
     post: "Our new spin class starts this week. Join us on the bike.",
+    hours: "Holiday hours: shorter days after Christmas",
     does: [
       {
         title: "Holiday class hours set.",
@@ -423,6 +441,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   "lash-and-brow-studio": {
     post: "A soft natural set from today. Book your next lash fill online.",
+    hours: "Holiday hours: closed on Christmas Day",
     does: [
       {
         title: "A fresh set posted.",
@@ -454,6 +473,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   "tattoo-studio": {
     post: "A fully healed piece from our studio. Book a consultation with us.",
+    hours: "Sunday's hours: open for a guest artist",
     does: [
       {
         title: "Healed work posted.",
@@ -485,6 +505,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   "pet-grooming": {
     post: "Fresh from the tub and trimmed. Book your dog's next groom online.",
+    hours: "Holiday hours: closed the week after Christmas",
     does: [
       {
         title: "A fresh groom posted.",
@@ -516,6 +537,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   "veterinary-clinic": {
     post: "Our team is here for your pets this week. Call us to book a visit.",
+    hours: "Holiday hours: open mornings over Christmas",
     does: [
       {
         title: "A grateful owner answered.",
@@ -547,6 +569,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   "car-wash": {
     post: "A full interior detail, finished today. Drop by or book a detail.",
+    hours: "Thursday's hours: closed for the storm",
     does: [
       {
         title: "A detailing photo posted.",
@@ -578,6 +601,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   florist: {
     post: "This week's arrangement, fresh from the workbench. Call us to order.",
+    hours: "Valentine's week: opening at 7 am",
     does: [
       {
         title: "Valentine's hours set.",
@@ -609,6 +633,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   optician: {
     post: "New frames are in on the shelf. Book an eye test or come by to try them on.",
+    hours: "Holiday hours: closed on Christmas Day",
     does: [
       {
         title: "New frames posted.",
@@ -640,6 +665,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   "yoga-and-pilates-studio": {
     post: "A new Sunday morning flow starts this week. Book your mat online.",
+    hours: "Holiday hours: fewer classes after Christmas",
     does: [
       {
         title: "A Sunday flow posted.",
@@ -671,6 +697,7 @@ export const TRADE_WORK: Record<string, TradeWork> = {
   },
   cleaner: {
     post: "Another home ready for the weekend. Call us for a quote.",
+    hours: "Holiday hours: closed on Christmas Day",
     does: [
       {
         title: "A reply after a home clean.",

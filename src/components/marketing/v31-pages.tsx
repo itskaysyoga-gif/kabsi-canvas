@@ -65,7 +65,7 @@ export function V31How() {
           <div className="lg:sticky lg:top-24">
             <ChatCard
               turns={HOW_CHAT}
-              label="An Example: a reply changed and approved in the chat"
+              label="An Example: a reply changed and approved, then new hours asked for, in the chat"
             />
           </div>
         </div>
@@ -73,7 +73,7 @@ export function V31How() {
       <Band
         id="watch"
         tone="ivory"
-        inner="flex flex-col lg:grid lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center lg:gap-16"
+        inner="flex flex-col lg:grid lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center lg:gap-16 xl:gap-24"
       >
         <div className="order-2 mt-10 lg:order-1 lg:mt-0">
           <DeviceShot shot={MORE_SCREENS.shield} className="lg:max-w-[19rem]" />
@@ -84,7 +84,8 @@ export function V31How() {
             title="When Google changes something, you see it."
             line="Google can change your details from what the public suggests. Kabsi checks your profile every day and shows what changed. For your hours, phone and website, one tap puts it right."
           />
-          <ul className="mt-8 grid gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+          {/* SITE-6: one card a row on a computer, so the words are as tall as the phone beside them. */}
+          <ul className="mt-8 grid gap-4 sm:grid-cols-3 lg:max-w-[34rem] lg:grid-cols-1">
             {WATCHED.map((w) => (
               <li
                 key={w.title}

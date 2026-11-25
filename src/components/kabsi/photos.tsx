@@ -54,6 +54,8 @@ import restaurantTables1600 from "@/assets/photos/restaurant-tables-1600.webp";
 import restaurantTables800 from "@/assets/photos/restaurant-tables-800.webp";
 import restaurantKitchen1600 from "@/assets/photos/restaurant-kitchen-1600.webp";
 import restaurantKitchen800 from "@/assets/photos/restaurant-kitchen-800.webp";
+import restaurantOwner1600 from "@/assets/photos/restaurant-owner-1600.webp";
+import restaurantOwner800 from "@/assets/photos/restaurant-owner-800.webp";
 import restaurantCooks1600 from "@/assets/photos/restaurant-cooks-1600.webp";
 import restaurantCooks800 from "@/assets/photos/restaurant-cooks-800.webp";
 import founder800 from "@/assets/photos/founder-rashid-800.webp";
@@ -150,6 +152,13 @@ export const PHOTOS = {
     restaurantKitchen1600,
     restaurantKitchen800,
     "Cooks at work in a restaurant kitchen",
+  ),
+  // SITE-6: the restaurant page's hero, a chef owner welcoming two guests at the counter of a bright pizzeria (Pexels
+  // 6605254, Kampus Production, Pexels License; public/photos/CREDITS.md).
+  restaurantOwner: land(
+    restaurantOwner1600,
+    restaurantOwner800,
+    "A smiling chef owner greeting two guests at the counter of his small restaurant",
   ),
   restaurantCooks: land(
     restaurantCooks1600,

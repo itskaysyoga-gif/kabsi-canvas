@@ -226,7 +226,8 @@ const GENERAL_FAQ = [HOME_FAQ[1]!, HOME_FAQ[3]!, HOME_FAQ[4]!];
 
 /**
  * SITE-5 (lane R decision 2): "What Kabsi does for a <trade>": three examples true for this trade, beside Kabsi's own
- * Reviews screen drawn from a fixture of the same trade (public/screens/trade-<slug>-560.webp, scripts/site-screens.mjs).
+ * Home screen for the trade's Example business (SITE-6: public/screens/trade-<slug>-560.webp, scripts/site-screens.mjs
+ * --trades), with the same hours, post and reply waiting for a yes.
  */
 function TradeWorkBand({ industry: i }: { industry: Industry }) {
   const w = TRADE_WORK[i.slug];
@@ -255,7 +256,7 @@ function TradeWorkBand({ industry: i }: { industry: Industry }) {
         <div className="kb-shot lg:max-w-[21rem]">
           <img
             src={`/screens/trade-${i.slug}-560.webp`}
-            alt={`Kabsi's Google profile screen showing a phone number changed on Google for ${i.example.business}, an example business`}
+            alt={`Kabsi's Home screen for ${i.example.business}, an example business: ${w.hours}, this week's post and a review reply, each waiting for a yes`}
             width={560}
             height={1212}
             loading="lazy"
@@ -264,7 +265,7 @@ function TradeWorkBand({ industry: i }: { industry: Industry }) {
           <ExampleBadge />
         </div>
         <figcaption className="mt-3 text-center text-small text-balance text-text-2">
-          {`A change caught on Google for ${i.example.business}, waiting for one tap.`}
+          {`${i.example.business} this week: new hours, a post and a reply, each waiting for one tap.`}
         </figcaption>
       </figure>
     </Band>

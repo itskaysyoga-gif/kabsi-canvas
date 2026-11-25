@@ -164,16 +164,22 @@ export { SOCIAL_LINKS };
 export const WHATSAPP_URL = WHATSAPP_ON ? whatsappHref("general") : `mailto:${CONTACT_EMAIL}`;
 
 /**
- * Header links (SITE-1, blueprint 3.1 section 3.1): How it works and Price, then Log in or Dashboard and "Check my
- * business free". No dropdowns; the phone menu shows the same rows. Businesses, Guides, About and the free tools are in
- * the footer; Partners is in neither (its pages are noindex and reachable by direct link only).
+ * Header links (SITE-6, 25 Nov 2026): "For your business" (a disclosure menu of every industry page with a small icon and
+ * one line, then "All businesses" to /for; its rows live in src/components/kabsi/trade-menu.tsx and load on first use),
+ * then How it works, Pricing and Guides; on the right Log in as a text link and the "Free Google check" button. The phone
+ * menu shows the same rows, the trades as a list, then the WhatsApp link. Partners is in neither (its pages are noindex
+ * and reachable by direct link only).
  */
 export const NAV_LINKS = [
   { to: "/how-it-works", label: "How it works" },
-  { to: "/pricing", label: "Price" },
+  { to: "/pricing", label: "Pricing" },
+  { to: "/guides", label: "Guides" },
 ] as const;
-/** The header's action (blueprint 3.1 section 3.1): filled charcoal with ivory text, so it never competes with the yellow one. */
-export const HEADER_CTA = PRIMARY_CTA;
+/** The header's trades menu: its button and the link under the trades (SITE-6). */
+export const TRADES_MENU_LABEL = "For your business";
+export const ALL_BUSINESSES = { to: "/for", label: "All businesses" } as const;
+/** The header's action (SITE-6): filled charcoal with ivory text, so it never competes with the page's yellow one. */
+export const HEADER_CTA = "Free Google check";
 /** The four finished trades, then every kind of business (the /for hub and its pages). */
 export const BUSINESS_MENU = [
   { to: "/for/hair-salon", label: "Hair salons" },
@@ -181,7 +187,6 @@ export const BUSINESS_MENU = [
   { to: "/for/nail-salon", label: "Nail salons" },
   { to: "/for/restaurant", label: "Restaurants" },
 ] as const;
-export const ALL_BUSINESSES = { to: "/for", label: "Every kind of business" } as const;
 export const BRAND_EXPLAINER =
   "Kabsi looks after your business on Google: a reply ready for every new review, your hours and details kept right, and fresh posts. You just approve.";
 /** The calls to action, worded once (R-02). */

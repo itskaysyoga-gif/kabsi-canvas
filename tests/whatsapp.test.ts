@@ -90,7 +90,8 @@ describe("WhatsApp is one setting that can be empty (PR 0, 22 Oct 2026)", () => 
   it("every placement that shows the number is guarded by the setting", () => {
     for (const file of [
       // Design 9 (Web 5 part A): WhatsApp left the phone bar for the phone menu's quiet row and the footer.
-      "src/components/kabsi/site-header.tsx",
+      // SITE-6: the phone menu's WhatsApp row moved from site-header.tsx to trade-menu.tsx.
+      "src/components/kabsi/trade-menu.tsx",
       "src/components/kabsi/site-footer.tsx",
       "src/components/kabsi/ui.tsx",
       "src/components/assistant/assistant-widget.tsx",
