@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, CircleCheck } from "lucide-react";
+import { ArrowRight, ChevronRight, CircleCheck } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { loadFounding, loadPartners } from "@/lib/programs";
 import { loadConciergeQueue } from "@/lib/concierge";
@@ -12,7 +13,7 @@ import {
   todayRows,
   type TodayRow,
 } from "@/lib/staff-today";
-import { buttonClass, EmptyState } from "@/components/kabsi/ui";
+import { EmptyState } from "@/components/kabsi/ui";
 import { STAFF_CARD, STAFF_H2, StaffTop } from "@/components/staff/staff-ui";
 import { ALL_CHATS, chatsKey, loadChats } from "@/components/staff/chats-panel";
 import { openFollowups } from "@/components/staff/followups-panel";
@@ -35,6 +36,8 @@ export const Route = createFileRoute("/_authenticated/staff/")({
 
 type StaffToday = {
   checked_at: string;
+  /** APP-1: free trials ending in the next 3 days (absent before the APP-1 migration). */
+  trials_ending_3d?: number;
   caps: { dataforseo_usd: number; ai_visibility_usd: number };
   refusals_24h: { title: string; at: string }[];
 };
@@ -72,6 +75,8 @@ function Today() {
     followupsDue: reads.followups.data?.filter((f) => Date.parse(f.due_at) <= now).length,
     conciergeTasks: reads.concierge.data?.tasks.length,
     stuckApprovals: o?.stuck.length,
+    failedSends7d: o?.failed_publications.length,
+    trialsEnding3d: reads.today.data?.trials_ending_3d,
     accessStopped: o?.access_stopped.length,
     webhooksRefused24h: o?.webhooks_rejected.reduce((t, w) => t + (w.count ?? 1), 0),
     failedJobs24h: failedRuns24h(reads.jobs.data?.schedules),
@@ -91,16 +96,20 @@ function Today() {
   return (
     <>
       <StaffTop page={STAFF_PAGES.today} />
+      <HealthStrip
+        items={healthItems({
+          system: reads.system,
+          jobs: reads.jobs,
+          operations: reads.operations,
+          refusals: reads.today,
+        })}
+      />
       {failed.length ? (
-        <p
-          role="alert"
-          className="mb-5 rounded-card border-2 border-bad bg-surface-1 p-4 text-small font-semibold text-bad"
-        >
-          Some figures did not load: {failed.join(", ")}. The rows below leave them out.{" "}
-          <button type="button" className="underline underline-offset-4" onClick={retry}>
-            Try again
-          </button>
-        </p>
+        <RetryLine
+          className="mb-5"
+          what={`Some figures did not load: ${failed.join(", ")}. The rows below leave them out.`}
+          onRetry={retry}
+        />
       ) : null}
 
       <section aria-labelledby="today-now" className={STAFF_CARD}>
@@ -110,7 +119,9 @@ function Today() {
           </h2>
           {!loading ? (
             <p className="text-small text-text-2">
-              {rows.length === 0 ? "Nothing waiting" : `${rows.length} to look at`}
+              {rows.length === 0
+                ? "Nothing waiting"
+                : `${rows.length} to look at, most urgent first`}
             </p>
           ) : null}
         </div>
@@ -123,7 +134,7 @@ function Today() {
             Nothing is waiting for a person. Today checks again each time you open it.
           </EmptyState>
         ) : (
-          <ul className="mt-3 divide-y divide-line">
+          <ul className="mt-3 -mx-2 divide-y divide-line">
             {rows.map((r) => (
               <TodayItem key={r.id} r={r} />
             ))}
@@ -208,8 +219,12 @@ const READ_NAME = {
 function TodayItem({ r }: { r: TodayRow }) {
   const page = STAFF_PAGES[r.page];
   return (
-    <li className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
-      <p className="flex min-w-0 items-center gap-3 text-body font-semibold">
+    <li>
+      <Link
+        to={page.to as "/staff"}
+        search={(r.show ? { show: r.show } : {}) as never}
+        className="press flex min-h-14 items-center gap-3 rounded-inner px-2 py-3 hover:bg-surface-2 focus-visible:outline-2"
+      >
         <span
           aria-hidden
           className={cn(
@@ -219,16 +234,150 @@ function TodayItem({ r }: { r: TodayRow }) {
         >
           {r.count > 99 ? "99+" : r.count}
         </span>
-        <span className="min-w-0 break-words">{r.text}</span>
-      </p>
-      <Link
-        to={page.to as "/staff"}
-        search={(r.show ? { show: r.show } : {}) as never}
-        className={cn(buttonClass("secondary", "md"), "shrink-0 self-start sm:self-auto")}
-      >
-        {r.button}
+        <span className="min-w-0 flex-1 text-body font-semibold break-words">
+          {r.text}
+          <span className="sr-only">. {r.button}</span>
+        </span>
+        <span aria-hidden className="hidden shrink-0 text-small font-bold text-text-2 sm:inline">
+          {r.button}
+        </span>
+        <ChevronRight className="size-5 shrink-0 text-text-2" aria-hidden />
       </Link>
     </li>
+  );
+}
+
+type Tone = "ok" | "warn" | "bad" | "none";
+type HealthItem = { key: string; label: string; state: string; tone: Tone };
+type Read<T> = { data?: T | undefined; isError: boolean; isLoading: boolean };
+
+/**
+ * APP-1: the health strip. Five parts of the system, each in a few words from counts only: never an error's own text,
+ * which stays on System for the team to read.
+ */
+function healthItems(r: {
+  system: Read<Awaited<ReturnType<typeof loadSystemHealth>>>;
+  jobs: Read<Awaited<ReturnType<typeof loadJobHealth>>>;
+  operations: Read<Awaited<ReturnType<typeof loadOperations>>>;
+  refusals: Read<StaffToday>;
+}): HealthItem[] {
+  const not = (q: { isError: boolean; isLoading: boolean }, key: string, label: string) =>
+    q.isLoading
+      ? { key, label, state: "Checking", tone: "none" as const }
+      : { key, label, state: "Not read", tone: "none" as const };
+  const plural = (k: number, one: string, many: string) => `${k} ${k === 1 ? one : many}`;
+  const sys = r.system.data;
+  const errors = sys ? sys.google.errors_24h.reduce((t, e) => t + e.n, 0) : 0;
+  const breakerOpen = !!sys?.google.breaker && sys.google.breaker.state === "open";
+  const o = r.operations.data;
+  const stuck = o ? o.stuck.length + o.failed_publications.length : 0;
+  const deadJobs = sys?.queue.dead ?? 0;
+  const failedRuns = failedRuns24h(r.jobs.data?.schedules);
+  const refusals = r.refusals.data?.refusals_24h.length ?? 0;
+  return [
+    sys
+      ? {
+          key: "google",
+          label: "Google",
+          state: breakerOpen
+            ? "Paused by the safety stop"
+            : errors
+              ? plural(errors, "error today", "errors today")
+              : sys.google.mode === "live"
+                ? "Working"
+                : "Working, mock mode",
+          tone: breakerOpen ? "bad" : errors ? "warn" : "ok",
+        }
+      : not(r.system, "google", "Google"),
+    o
+      ? {
+          key: "sending",
+          label: "Sending",
+          state: stuck ? plural(stuck, "send needs a look", "sends need a look") : "Nothing stuck",
+          tone: stuck ? "bad" : "ok",
+        }
+      : not(r.operations, "sending", "Sending"),
+    sys && r.jobs.data
+      ? {
+          key: "jobs",
+          label: "Jobs",
+          state: deadJobs
+            ? plural(deadJobs, "stopped job", "stopped jobs")
+            : failedRuns
+              ? plural(failedRuns, "failed run", "failed runs")
+              : "Running",
+          tone: deadJobs ? "bad" : failedRuns ? "warn" : "ok",
+        }
+      : not(r.jobs.isError ? r.jobs : r.system, "jobs", "Jobs"),
+    sys
+      ? {
+          key: "sync",
+          label: "Reading profiles",
+          state: sys.sync.late
+            ? plural(sys.sync.late, "business late", "businesses late")
+            : "Up to date",
+          tone: sys.sync.late ? "warn" : "ok",
+        }
+      : not(r.system, "sync", "Reading profiles"),
+    r.refusals.data
+      ? {
+          key: "providers",
+          label: "Data providers",
+          state: refusals ? plural(refusals, "refusal today", "refusals today") : "No refusals",
+          tone: refusals ? "warn" : "ok",
+        }
+      : not(r.refusals, "providers", "Data providers"),
+  ];
+}
+
+const TONE_WORD: Record<Tone, string> = {
+  ok: "Fine",
+  warn: "Look soon",
+  bad: "Look now",
+  none: "Unknown",
+};
+
+function HealthStrip({ items }: { items: HealthItem[] }) {
+  return (
+    <section aria-labelledby="today-health" className="mb-5">
+      <h2 id="today-health" className="sr-only">
+        How the system is running
+      </h2>
+      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+        {items.map((h, i) => (
+          <li key={h.key} className={cn(i === items.length - 1 && "col-span-2 sm:col-span-1")}>
+            <Link
+              to={"/staff/system" as "/staff"}
+              search={{ show: "health" } as never}
+              className="press flex h-full min-h-16 items-start gap-2 rounded-card border border-line bg-surface-1 p-3 shadow-rest hover:bg-surface-2 focus-visible:outline-2"
+            >
+              <span
+                aria-hidden
+                className={cn(
+                  "mt-1.5 size-2.5 shrink-0 rounded-full",
+                  h.tone === "ok" && "bg-ok",
+                  h.tone === "warn" && "bg-warn",
+                  h.tone === "bad" && "bg-bad",
+                  h.tone === "none" && "bg-line-strong",
+                )}
+              />
+              <span className="min-w-0">
+                <span className="block text-small font-bold">{h.label}</span>
+                <span
+                  className={cn(
+                    "block text-small",
+                    h.tone === "bad" ? "font-semibold text-bad" : "text-text-2",
+                  )}
+                >
+                  {h.state}
+                  <span className="sr-only">. {TONE_WORD[h.tone]}</span>
+                </span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

@@ -26,10 +26,10 @@ describe("plan choice from day 11", () => {
 
   it("counts the days left from day 11 and says card payments are coming", () => {
     const c = planChoice(trial(11, 3), now)!;
-    expect(c.title).toBe("Your Pro trial ends in 3 days");
+    expect(c.title).toBe("Your free trial ends in 3 days");
     expect(c.body).toContain(CARD_PAYMENTS_COMING);
-    expect(planChoice(trial(13, 1), now)!.title).toBe("Your Pro trial ends in 1 day");
-    expect(planChoice(trial(14, 0), now)!.title).toBe("Your Pro trial ends today");
+    expect(planChoice(trial(13, 1), now)!.title).toBe("Your free trial ends in 1 day");
+    expect(planChoice(trial(14, 0), now)!.title).toBe("Your free trial ends today");
   });
 
   it("in grace says nothing is published and what is waiting stays waiting", () => {

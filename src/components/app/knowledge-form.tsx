@@ -4,6 +4,7 @@
 // knowledge.ts): a change is a new version, Confirm re-dates a fact, Delete removes the fact and every version.
 // Onboarding shows only the basics, saved the same way.
 import { ShortParas } from "@/components/kabsi/d3-account";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAutosize } from "@/lib/use-autosize";
@@ -328,11 +329,7 @@ function BasicsForm({
   const knowledge = useKnowledge(location.id);
   if (knowledge.isLoading) return <p className="text-text-2">Loading…</p>;
   if (knowledge.error) {
-    return (
-      <p className="text-bad" role="alert">
-        Couldn't load your facts. Refresh the page.
-      </p>
-    );
+    return <RetryLine what="Your facts did not load." onRetry={() => void knowledge.refetch()} />;
   }
   return (
     <BasicsFields
@@ -439,11 +436,7 @@ function FactsScreen({ location }: { location: Location }) {
 
   if (knowledge.isLoading) return <p className="text-text-2">Loading…</p>;
   if (knowledge.error || !knowledge.data) {
-    return (
-      <p className="text-bad" role="alert">
-        Couldn't load your facts. Refresh the page.
-      </p>
-    );
+    return <RetryLine what="Your facts did not load." onRetry={() => void knowledge.refetch()} />;
   }
   const { facts, questions } = knowledge.data;
   const counts = { verified: 0, needs_ok: 0, out_of_date: 0 };
@@ -651,11 +644,7 @@ export function ToneSetting({ locationId }: { locationId: string }) {
   const [msg, setMsg] = useState("");
   if (knowledge.isLoading) return <p className="text-small text-text-2">Loading...</p>;
   if (knowledge.error || !knowledge.data)
-    return (
-      <p className="text-small text-bad" role="alert">
-        Couldn&apos;t load your facts. Refresh the page.
-      </p>
-    );
+    return <RetryLine what="Your facts did not load." onRetry={() => void knowledge.refetch()} />;
   const tone = knowledge.data.facts.find((f) => fieldOf(f.slot) === "tone");
   async function pick(t: string) {
     setMsg("");

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -107,7 +108,7 @@ export function OutboundPanel() {
   const q = useQuery({ queryKey: KEY, queryFn: outboundData, refetchInterval: 60_000 });
   if (q.isLoading) return <StaffLoading what="Outbound" />;
   if (q.isError || !q.data) {
-    return <p className="text-small text-bad">Couldn't load Outbound. Refresh the page.</p>;
+    return <RetryLine what="Outbound did not load." onRetry={() => void q.refetch()} />;
   }
   const d = q.data;
   return (

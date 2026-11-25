@@ -163,7 +163,7 @@ function PhotosPage() {
                       className="text-body text-text-2"
                       text={
                         WHATSAPP_ON && role !== "staff"
-                          ? "Send a photo to Kabsi. It checks the size and light, gets it ready and asks for your yes before it goes on Google. On Essentials and Pro."
+                          ? "Send a photo to Kabsi. It checks the size and light, gets it ready and asks for your yes before it goes on Google."
                           : role === "staff"
                             ? "Add real photos of your place, your team, your work and what you sell. Kabsi checks each one, and the owner approves it."
                             : "Add real photos of your place, your team, your work and what you sell. Kabsi checks each one before you approve it."

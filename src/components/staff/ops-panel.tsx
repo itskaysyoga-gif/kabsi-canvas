@@ -1,4 +1,5 @@
 import { fmtDateTime } from "@/lib/format";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -82,7 +83,13 @@ function JobHealth() {
           <RefreshCw /> {q.isFetching ? "Checking" : "Refresh"}
         </Button>
       </div>
-      {q.isError ? <p className="mt-2 text-bad">{q.error.message}</p> : null}
+      {q.isError ? (
+        <RetryLine
+          className="mt-2"
+          what="Job health did not load."
+          onRetry={() => void q.refetch()}
+        />
+      ) : null}
       {h ? (
         <>
           <p className="mt-1 text-small text-text-2">

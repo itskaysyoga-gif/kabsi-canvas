@@ -180,6 +180,7 @@ export const rpc = {
       : {
           checked_at: ago(0),
           caps: { dataforseo_usd: 10, ai_visibility_usd: 5 },
+          trials_ending_3d: 2,
           refusals_24h: [
             {
               title:
@@ -271,6 +272,96 @@ export const rpc = {
       phone: null,
       signed_in_business: null,
     },
+    {
+      id: "c2",
+      updated_at: ago(0.05),
+      surface: "site",
+      status: "handoff",
+      first_page: "/pricing",
+      country: "US",
+      language: "en",
+      device: "computer",
+      category: "billing",
+      intent: "existing_customer",
+      lead_temperature: "hot",
+      sentiment: "neutral",
+      business_type: "Dentist",
+      summary: "Wants a call about a second location.",
+      next_step: "Call back today.",
+      message_count: 4,
+      email: "frontdesk@example.com",
+      name: "Dana R.",
+      business_name: null,
+      phone: null,
+      signed_in_business: "Harbour Smiles Dental",
+    },
+    {
+      id: "c3",
+      updated_at: ago(1.2),
+      surface: "app",
+      status: "closed",
+      first_page: "/app/reviews",
+      country: "US",
+      language: "en",
+      device: "phone",
+      category: "reviews_help",
+      intent: "existing_customer",
+      lead_temperature: "cold",
+      sentiment: "positive",
+      business_type: "Bakery",
+      summary: "Asked where to approve a reply.",
+      next_step: null,
+      message_count: 2,
+      email: null,
+      name: null,
+      business_name: null,
+      phone: null,
+      signed_in_business: "Cedar Corner Bakery",
+    },
+  ],
+  staff_chat_last: [
+    {
+      conversation_id: "c1",
+      role: "user",
+      content: "Thanks. And if I cancel before day 14, nothing is charged?",
+      created_at: ago(0),
+    },
+    {
+      conversation_id: "c2",
+      role: "user",
+      content: "Can someone call me about adding Kabsi to my second location?",
+      created_at: ago(0.05),
+    },
+    {
+      conversation_id: "c3",
+      role: "assistant",
+      content: "Your reply is waiting for your yes in Kabsi. Tap Approve and it goes to Google.",
+      created_at: ago(1.2),
+    },
+  ],
+  staff_chat_thread: [
+    { id: 1, role: "user", content: "Hi. What does the trial include?", created_at: ago(0.01) },
+    {
+      id: 2,
+      role: "assistant",
+      content:
+        "Everything Kabsi does: a reply ready for every review, your details watched every day, up to 2 posts a month and your weekly report. Nothing goes on Google without your yes.",
+      created_at: ago(0.01),
+    },
+    { id: 3, role: "user", content: "Do I need a card?", created_at: ago(0.008) },
+    {
+      id: 4,
+      role: "assistant",
+      content:
+        "Yes. 14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing.",
+      created_at: ago(0.008),
+    },
+    {
+      id: 5,
+      role: "user",
+      content: "Thanks. And if I cancel before day 14, nothing is charged?",
+      created_at: ago(0),
+    },
   ],
   staff_chat_stats: [
     { dimension: "country", value: "AE", conversations: 4 },
@@ -308,7 +399,17 @@ export const rpc = {
         todo: "Kabsi was removed as Manager. The owner was emailed; follow up once on WhatsApp.",
       },
     ],
-    failed_publications: [],
+    failed_publications: [
+      {
+        id: "00000000-0000-4000-8000-0000000000d4",
+        business: "Cedar Corner Bakery",
+        what: "local_post",
+        state: "rejected",
+        at: ago(0.5),
+        error: "INVALID_ARGUMENT: callToAction.url",
+        todo: "Google refused it. Read the error; the owner was told and can edit and approve again.",
+      },
+    ],
     jobs: [
       {
         id: 4812,

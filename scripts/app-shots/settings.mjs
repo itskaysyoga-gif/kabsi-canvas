@@ -217,6 +217,49 @@ const billing = (c) => {
 
 const paidStates = ["paid", "failed", "cancelled"];
 
+const SETTINGS_FACTS = [
+  {
+    id: "f1",
+    slot: "card.signature",
+    key: "signature",
+    value: { text: "Nadia, Maple Street Salon" },
+    status: "verified",
+    source: "owner",
+    review_after: ahead(150),
+    confirmed_at: ago(20),
+  },
+  {
+    id: "f2",
+    slot: "card.tone",
+    key: "tone",
+    value: { text: "warm" },
+    status: "verified",
+    source: "owner",
+    review_after: ahead(150),
+    confirmed_at: ago(20),
+  },
+  {
+    id: "f3",
+    slot: "card.about",
+    key: "about",
+    value: { text: "A small salon on Maple Street for cuts, colour and blow dries." },
+    status: "verified",
+    source: "owner",
+    review_after: ahead(150),
+    confirmed_at: ago(20),
+  },
+  {
+    id: "f4",
+    slot: "card.parking",
+    key: "parking",
+    value: { text: "Free parking behind the building." },
+    status: "needs_confirmation",
+    source: "google",
+    review_after: null,
+    confirmed_at: null,
+  },
+];
+
 export const tables = {
   // The base row plus the email settings this area reads (a superset, harmless for other screens).
   locations: (c) => [
@@ -266,48 +309,9 @@ export const tables = {
   ],
   competitor_snapshots: SNAPSHOTS,
   weekly_reports: reports,
-  knowledge_facts: [
-    {
-      id: "f1",
-      slot: "card.signature",
-      key: "signature",
-      value: { text: "Nadia, Maple Street Salon" },
-      status: "verified",
-      source: "owner",
-      review_after: ahead(150),
-      confirmed_at: ago(20),
-    },
-    {
-      id: "f2",
-      slot: "card.tone",
-      key: "tone",
-      value: { text: "warm" },
-      status: "verified",
-      source: "owner",
-      review_after: ahead(150),
-      confirmed_at: ago(20),
-    },
-    {
-      id: "f3",
-      slot: "card.about",
-      key: "about",
-      value: { text: "A small salon on Maple Street for cuts, colour and blow dries." },
-      status: "verified",
-      source: "owner",
-      review_after: ahead(150),
-      confirmed_at: ago(20),
-    },
-    {
-      id: "f4",
-      slot: "card.parking",
-      key: "parking",
-      value: { text: "Free parking behind the building." },
-      status: "needs_confirmation",
-      source: "google",
-      review_after: null,
-      confirmed_at: null,
-    },
-  ],
+  // APP-1: Hours' own read (one slot, maybeSingle) falls through to profile.mjs, so it gets one row, not every fact.
+  knowledge_facts: (c) =>
+    c.params.get("slot") === "eq.profile.regular_hours" ? undefined : SETTINGS_FACTS,
   knowledge_confirms: [],
   plans: (c) =>
     paidStates.includes(c.state)

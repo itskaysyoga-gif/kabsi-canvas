@@ -452,3 +452,152 @@ export const emptyHomeLine = (monday: string, whatsappOn: boolean = WHATSAPP_ON)
   `Kabsi checks your Google profile every day and tells you ${
     whatsappOn ? "on WhatsApp" : "by email"
   } when something needs your yes. Your next report comes on ${monday}.`;
+
+// APP-1 (Home in three parts): the "This week" receipt and the Google profile health strip. Pure, so tests/app1-home.test.ts
+// holds the rules. Both read only what Home already loads (the open tasks and the last 7 days of publications), so they
+// never claim work that did not happen.
+
+export type ReceiptLine = { key: string; label: string; n: number; tone?: "bad" };
+
+const RECEIPT: { key: string; label: string; kinds: string[] }[] = [
+  { key: "replies", label: "Review replies sent to Google", kinds: ["review_reply"] },
+  { key: "posts", label: "Posts sent to Google", kinds: ["local_post"] },
+  { key: "photos", label: "Photos sent to Google", kinds: ["photo"] },
+  {
+    key: "fixes",
+    label: "Profile fixes sent to Google",
+    kinds: ["special_hours", "listing_edit", "listing_revert"],
+  },
+];
+
+/**
+ * The receipt: each kind of work once per item (its latest state), counted when it went to Google. An undone approval is
+ * not work; one that did not go through is its own line, shown only when there is one.
+ */
+export function weekReceipt(
+  items: { kind: string; targetId: string; owner?: string }[],
+): ReceiptLine[] {
+  const latest = doneThisWeek(items, Number.POSITIVE_INFINITY);
+  const sent = (o?: string) => o === "sent" || o === "confirmed";
+  const lines: ReceiptLine[] = RECEIPT.map((r) => ({
+    key: r.key,
+    label: r.label,
+    n: latest.filter((t) => r.kinds.includes(t.kind) && sent(t.owner)).length,
+  }));
+  const failed = latest.filter((t) => t.owner === "failed").length;
+  if (failed) lines.push({ key: "failed", label: "Did not go through", n: failed, tone: "bad" });
+  return lines;
+}
+
+export type HealthKey = "details" | "hours" | "photos" | "posts" | "reviews";
+export type HealthItem = {
+  key: HealthKey;
+  label: string;
+  /** The state in a few words. */
+  state: string;
+  tone: "ok" | "warn";
+  /** The one next action. */
+  action: { label: string; to: string };
+};
+
+/**
+ * The health strip: details, hours, photos, posts and reviews, each with its state and one next action. "warn" means
+ * something waits for the owner; "ok" means Kabsi is watching and nothing waits.
+ */
+export function profileHealth(i: {
+  tasks: Pick<Task, "kind" | "path" | "evidence">[];
+  week: { kind: string; targetId: string; owner?: string }[];
+}): HealthItem[] {
+  const open = (k: TaskKind[]) => i.tasks.filter((t) => k.includes(t.kind));
+  const sentThisWeek = (kind: string) =>
+    doneThisWeek(i.week, Number.POSITIVE_INFINITY).some(
+      (t) => t.kind === kind && (t.owner === "sent" || t.owner === "confirmed"),
+    );
+  const details = open(["profile_change", "profile_gap", "google_needs_action"]);
+  const hours = open(["hours_confirm"]);
+  const photos = open(["photo_batch"]);
+  const posts = open(["post"]);
+  // The day-one backlog is one summary task standing for many reviews: count the reviews it holds (APP-1 review).
+  const replies = open(["review_reply"]).reduce(
+    (t, r) => t + (isBacklogSummary(r as Task) ? Math.max(1, backlogCounts(r as Task).total) : 1),
+    0,
+  );
+  const n = (k: number, one: string, many: string) => `${k} ${k === 1 ? one : many}`;
+  return [
+    details.length
+      ? {
+          key: "details",
+          label: "Details",
+          state: n(details.length, "thing to check", "things to check"),
+          tone: "warn",
+          action: { label: "Check", to: "/app/shield" },
+        }
+      : {
+          key: "details",
+          label: "Details",
+          state: "Watched every day",
+          tone: "ok",
+          action: { label: "See details", to: "/app/shield" },
+        },
+    hours.length
+      ? {
+          key: "hours",
+          label: "Hours",
+          state: "Waiting for your yes",
+          tone: "warn",
+          action: { label: "Check hours", to: "/app/hours" },
+        }
+      : {
+          key: "hours",
+          label: "Hours",
+          state: "Watched every day",
+          tone: "ok",
+          action: { label: "See hours", to: "/app/hours" },
+        },
+    photos.length
+      ? {
+          key: "photos",
+          label: "Photos",
+          state: "Ready for your yes",
+          tone: "warn",
+          action: { label: "See photos", to: "/app/photos" },
+        }
+      : {
+          key: "photos",
+          label: "Photos",
+          state: sentThisWeek("photo") ? "Sent this week" : "Nothing new this week",
+          tone: "ok",
+          action: { label: "Add photos", to: "/app/photos" },
+        },
+    posts.length
+      ? {
+          key: "posts",
+          label: "Posts",
+          state: "Ready for your yes",
+          tone: "warn",
+          action: { label: "See the post", to: "/app/posts" },
+        }
+      : {
+          key: "posts",
+          label: "Posts",
+          state: sentThisWeek("local_post") ? "Sent this week" : "Next post being prepared",
+          tone: "ok",
+          action: { label: "See posts", to: "/app/posts" },
+        },
+    replies
+      ? {
+          key: "reviews",
+          label: "Reviews",
+          state: n(replies, "reply waiting", "replies waiting"),
+          tone: "warn",
+          action: { label: "See replies", to: "/app/reviews" },
+        }
+      : {
+          key: "reviews",
+          label: "Reviews",
+          state: "Every review answered",
+          tone: "ok",
+          action: { label: "Get reviews", to: "/app/cards" },
+        },
+  ];
+}

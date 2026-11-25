@@ -1,4 +1,5 @@
 import { CONCIERGE_COPY } from "@/lib/concierge-copy";
+import { RetryLine } from "@/components/kabsi/retry-line";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -19,7 +20,7 @@ import { daysUntil } from "@/lib/dashboard";
 import { ACCOUNT_STAYS_LINE, TAX_NOTE, WHATSAPP_ON, WORKING_HOURS } from "@/lib/site";
 import { FOUNDING_LINE, FOUNDING_MONTHLY_USD, PRICE_MONTHLY_USD, TRIAL_LINE } from "@/lib/offer";
 import { AccountTop, Panel } from "@/components/kabsi/d3-account";
-import { Banner, Button, StatusPill, buttonClass } from "@/components/kabsi/ui";
+import { Banner, Button, Skeleton, StatusPill, buttonClass } from "@/components/kabsi/ui";
 import { cn } from "@/lib/utils";
 
 // Your plan (UX 1, Design 3): the state first as one banner (trial, paid, a payment that did not go through, a plan that
@@ -124,9 +125,10 @@ function PlanPage() {
     <>
       <AccountTop title={PLAN_COPY.title} />
       {location.isLoading || data.isLoading || summaryQ.isLoading ? (
-        <p className="text-body text-text-2" role="status">
-          Loading...
-        </p>
+        <div className="space-y-4" role="status" aria-busy="true" aria-label="Loading">
+          <Skeleton className="h-28 w-full rounded-card" />
+          <Skeleton className="h-72 w-full rounded-card" />
+        </div>
       ) : null}
       {!location.isLoading && !loc ? (
         <Link to="/start" className={buttonClass()} data-main-cta>
@@ -134,9 +136,13 @@ function PlanPage() {
         </Link>
       ) : null}
       {data.isError || summaryQ.isError ? (
-        <p className="text-body text-bad" role="alert">
-          Couldn&apos;t load your plan. Refresh the page.
-        </p>
+        <RetryLine
+          what="Your plan did not load."
+          onRetry={() => {
+            void data.refetch();
+            void summaryQ.refetch();
+          }}
+        />
       ) : null}
       {loc && sum && d ? <PlanScreen locationId={loc.id} sum={sum} d={d} /> : null}
     </>
@@ -207,7 +213,7 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
   const showChoose = !running;
 
   return (
-    <div className="space-y-4">
+    <div className="max-w-2xl space-y-4">
       <StateBanner sum={sum} d={d} b={b} busy={busy} run={run} />
 
       <Panel className={cn(mine && "ring-2 ring-text-1")}>
@@ -364,9 +370,8 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
         </p>
       ) : null}
 
-      <Panel title="Price" id="prices">
-        <p className="text-small">{TRIAL_LINE}</p>
-        <p className="mt-2 text-small text-text-2">
+      <Panel title="More locations" id="prices">
+        <p className="text-small text-text-2">
           Each further location is {price("extra")}. Prices are in US dollars, {TAX_NOTE}, and the
           same in every country.
         </p>
@@ -381,14 +386,16 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
                 className="flex flex-wrap items-center justify-between gap-2 py-3 text-small"
               >
                 <span>
-                  {shortDate(p.created_at)}, {ITEM_NAME[p.item] ?? "Kabsi Pro"}
+                  {shortDate(p.created_at)}, {ITEM_NAME[p.item] ?? "Kabsi"}
                 </span>
                 <span className="font-bold">{money(p.amount_usd)}</span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-body text-text-2">No payments yet.</p>
+          <p className="text-body text-text-2">
+            No payments yet. Your receipts show here after your first payment.
+          </p>
         )}
       </Panel>
 
@@ -432,7 +439,7 @@ function StateBanner({
       </Banner>
     );
   if (b) {
-    const name = PAID_NAMES[`${b.plan}_${b.period ?? "month"}`] ?? "Kabsi Pro";
+    const name = PAID_NAMES[`${b.plan}_${b.period ?? "month"}`] ?? "Kabsi";
     const ended = b.state === "cancelled" || b.state === "expired";
     const paused = b.state === "paused" || (b.state === "past_due" && !b.grace_ends_at);
     const units =
@@ -485,12 +492,9 @@ function StateBanner({
     return (
       <Banner
         tone="info"
-        title={`Pro trial, ends ${longDate(sum.plan.last_day)}.${left !== null ? ` ${left} days left.` : ""}`}
+        title={`Free trial, ends ${longDate(sum.plan.last_day)}.${left !== null ? ` ${left} ${left === 1 ? "day" : "days"} left.` : ""}`}
       >
-        <p>
-          No card, and no charge unless you choose a plan. Photos from WhatsApp and replies are on
-          both.
-        </p>
+        <p>Everything Kabsi does is on during your trial.</p>
         {sum.queued.length ? (
           <p className="mt-1">
             Already paid: {sum.queued.map((q) => ITEM_NAME[q.kind]).join(", ")}, starts{" "}
@@ -515,7 +519,7 @@ function StateBanner({
   if (d.current) {
     const left = daysUntil(d.paidUntil);
     return (
-      <Banner tone="ok" title={`${ITEM_NAME[d.current.kind] ?? "Kabsi Pro"}.`}>
+      <Banner tone="ok" title={`${ITEM_NAME[d.current.kind] ?? "Kabsi"}.`}>
         <p>
           Paid until {shortDate(d.paidUntil)}
           {left !== null ? `, ${left} ${left === 1 ? "day" : "days"} left` : ""}.
@@ -531,7 +535,7 @@ function StateBanner({
   }
   if (d.paidWaiting)
     return (
-      <Banner tone="info" title={`${ITEM_NAME[d.paidWaiting.kind] ?? "Kabsi Pro"}: paid.`}>
+      <Banner tone="info" title={`${ITEM_NAME[d.paidWaiting.kind] ?? "Kabsi"}: paid.`}>
         Your plan starts the day Kabsi&apos;s access to your Google profile works, so you don&apos;t
         lose any days while you wait.
       </Banner>
