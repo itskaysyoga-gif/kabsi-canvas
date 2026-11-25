@@ -23,18 +23,21 @@ export function reportUrl(address: string): string {
   return `https://www.mail-tester.com/${encodeURIComponent(address.split("@")[0])}?format=json`;
 }
 
-const OUT_OF_TEN = /(\d+(?:\.\d+)?)\s*\/\s*10\b/;
+const OUT_OF_TEN = /^\s*(\d+(?:\.\d+)?)\s*\/\s*10\s*$/;
+const TOTAL_OUT_OF_TEN = /total:\s*(\d+(?:\.\d+)?)\s*\/\s*10\s*$/i;
 
 /** The score out of 10 from mail-tester's JSON report, or null when it is not there yet. The report's own `mark` field is 0
  * in a real 10/10 report (read 25 Nov 2026), so the displayed text "10/10" is read first and `mark` only when there is none. */
 export function scoreOf(report: unknown): number | null {
   if (!report || typeof report !== "object") return null;
   const r = report as Record<string, unknown>;
-  for (const key of ["displayedMark", "commentedMark"]) {
-    const m = typeof r[key] === "string" ? OUT_OF_TEN.exec(r[key] as string) : null;
+  // A report that says it is not finished (status false) has no score yet; a displayed 0 is never taken as a score.
+  if (r.status === false) return null;
+  for (const [key, re] of [["displayedMark", OUT_OF_TEN], ["commentedMark", TOTAL_OUT_OF_TEN]] as const) {
+    const m = typeof r[key] === "string" ? re.exec(r[key] as string) : null;
     if (m) {
       const n = Number(m[1]);
-      if (n >= 0 && n <= 10) return Math.round(n * 10) / 10;
+      if (n > 0 && n <= 10) return Math.round(n * 10) / 10;
     }
   }
   const mark = typeof r.mark === "number" ? r.mark : Number.NaN;

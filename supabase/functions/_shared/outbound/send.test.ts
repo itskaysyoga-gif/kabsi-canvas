@@ -360,5 +360,7 @@ Deno.test("mail-tester: the address shape, the fictional US Email 1 with its foo
   // The real report of 25 Nov 2026: mark is 0, the score is in the displayed text.
   assert.equal(scoreOf({ mark: 0, displayedMark: "10/10", commentedMark: "Your lovely total: 10/10" }), 10);
   assert.equal(scoreOf({ mark: 0, commentedMark: "Your lovely total: 9.5/10" }), 9.5);
-  for (const none of [null, {}, { mark: 11 }, { mark: "10" }, { mark: 0 }]) assert.equal(scoreOf(none), null);
+  assert.equal(scoreOf({ status: true, mark: 0, displayedMark: "10/10", commentedMark: "Spam 2/10, Your lovely total: 7/10" }), 10);
+  assert.equal(scoreOf({ commentedMark: "Spam 2/10, Your lovely total: 7/10" }), 7);
+  for (const none of [{ displayedMark: "0/10" }, { status: false, displayedMark: "10/10" }, { displayedMark: "11/10" }, { commentedMark: "Spam 2/10" }, null, {}, { mark: 11 }, { mark: "10" }, { mark: 0 }]) assert.equal(scoreOf(none), null);
 });
