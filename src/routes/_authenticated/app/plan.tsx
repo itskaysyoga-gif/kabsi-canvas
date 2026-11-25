@@ -213,7 +213,7 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
   const showChoose = !running;
 
   return (
-    <div className="space-y-4">
+    <div className="max-w-2xl space-y-4">
       <StateBanner sum={sum} d={d} b={b} busy={busy} run={run} />
 
       <Panel className={cn(mine && "ring-2 ring-text-1")}>
