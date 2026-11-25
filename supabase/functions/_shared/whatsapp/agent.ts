@@ -894,6 +894,11 @@ async function businessTool(t: Turn, name: string, arg: string | undefined): Pro
       if (name === "qr") {
         const png = await qrPng(url).catch(() => null);
         if (png?.length) {
+          // A voice note's "I heard" line goes first, as a message of its own, because the image caption carries no quote.
+          if (t.heard && !t.heard.used) {
+            t.heard.used = true;
+            await sendReply(t.d.out, t.s, t.phone, t.heard.line, undefined, { locationId: b.location_id });
+          }
           await sendReply(t.d.out, t.s, t.phone, headed(t.head ?? null, SAY.qrImage(b.business)), undefined, { locationId: b.location_id }, { png });
           return "qr_image";
         }
