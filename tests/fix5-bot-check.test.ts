@@ -90,6 +90,13 @@ describe("the sign in panel", () => {
       /if \(!waiting \|\| !token\) return;[\s\S]{0,80}setWaiting\(false\);[\s\S]{0,40}sendCode\(\)/,
     );
   });
+  it("ends a wait after 15 seconds on its own, so a tap after the widget gave up is never stuck", () => {
+    expect(src).toMatch(/window\.setTimeout\(\(\) => setWaiting\(false\), BOT_CHECK_WAIT_MS\)/);
+  });
+  it("counts a later widget from its own mount, not from the first script request", () => {
+    const w = read("src/components/turnstile.tsx");
+    expect(w).toMatch(/attempt === 0 && !firstWidgetUsed/);
+  });
   it("stops waiting when the check fails, and starts the script at page load", () => {
     expect(src).toContain("onFail={() => setWaiting(false)}");
     expect(src).toMatch(/useEffect\(\(\) => \{\s*preloadTurnstile\(\);\s*\}, \[\]\)/);

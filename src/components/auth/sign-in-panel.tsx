@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "rea
 import { Banner, Button, Field, buttonClass } from "@/components/kabsi/ui";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Turnstile } from "@/components/turnstile";
-import { sendButtonState, tapAction } from "@/lib/bot-check";
+import { BOT_CHECK_WAIT_MS, sendButtonState, tapAction } from "@/lib/bot-check";
 import { preloadTurnstile } from "@/lib/turnstile-script";
 import { supabase } from "@/lib/supabase";
 import { continueWithGoogle, requestEmailCode, SignupError } from "@/lib/signup";
@@ -260,6 +260,14 @@ export function SignInPanel({
     setRound((n) => n + 1);
     setBusy(false);
   }
+  // A wait ends after 15 seconds even if the widget already gave up (it shows "This is taking longer than usual." and
+  // Try again), so a second tap never leaves the button stuck.
+  useEffect(() => {
+    if (!waiting) return;
+    const t = window.setTimeout(() => setWaiting(false), BOT_CHECK_WAIT_MS);
+    return () => window.clearTimeout(t);
+  }, [waiting]);
+
   // The token arrived while the visitor was waiting: send now.
   useEffect(() => {
     if (!waiting || !token) return;

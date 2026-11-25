@@ -42,6 +42,7 @@ declare global {
 
 // No token and no click asked for within this time means the check is not going to finish on its own (FIX-5: 15 seconds).
 const GIVE_UP_MS = BOT_CHECK_WAIT_MS;
+let firstWidgetUsed = false;
 // A form waits this long for a token after its submit before it stops (the widget's own 10 seconds come first).
 // A submit waits at most this long for the check, then the form says the check failed (review of PR WEBFORMS: 30 s).
 const TAKE_WAIT_MS = 12_000;
@@ -111,7 +112,9 @@ export function Turnstile({
     let dead = false;
     setFailed(false);
     // The first attempt counts from when the script was first asked for (/login asks at page load); a retry from now.
-    startedAt.current = attempt === 0 ? turnstileAskedAt() : performance.now();
+    // Only the first widget of the page counts from the script's first request; later ones count from their own mount.
+    startedAt.current = attempt === 0 && !firstWidgetUsed ? turnstileAskedAt() : performance.now();
+    firstWidgetUsed = true;
     wasInteractive.current = false;
     reported.current = false;
     load()
