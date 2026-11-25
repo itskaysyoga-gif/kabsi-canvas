@@ -7,7 +7,7 @@ import { FOUNDING_MONTHLY_USD, PRICE_MONTHLY_USD, TRIAL_LINE } from "../src/lib/
 const read = (p: string) => readFileSync(p, "utf8");
 const inbox = read("supabase/functions/_shared/outbound/inbox.ts");
 const rules = read("supabase/functions/_shared/outbound/rules.ts");
-const migration = read("supabase/migrations/20261125120000_outbound3_us_pilot.sql");
+const migration = read("supabase/migrations/20261125061259_outbound3_us_pilot.sql");
 
 describe("OUTBOUND-3", () => {
   it("the reply to a yes carries TRIAL_LINE word for word", () => {
