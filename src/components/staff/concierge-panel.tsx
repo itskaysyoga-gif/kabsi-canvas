@@ -89,7 +89,7 @@ function useRefresh() {
 
 function Stars({ n }: { n: number }) {
   return (
-    <span className="inline-flex" aria-label={`${n} stars`}>
+    <span className="inline-flex" role="img" aria-label={`${n} stars`}>
       {[1, 2, 3, 4, 5].map((i) => (
         <Star
           key={i}

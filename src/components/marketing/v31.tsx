@@ -359,7 +359,7 @@ function DayPicture({ n }: { n: number }) {
   if (n === 0)
     return (
       <MiniCard>
-        <p className="flex items-center gap-0.5 text-text-1" aria-label="5 stars">
+        <p className="flex items-center gap-0.5 text-text-1" role="img" aria-label="5 stars">
           {[0, 1, 2, 3, 4].map((i) => (
             <Star key={i} className="size-3.5 fill-current" aria-hidden />
           ))}
