@@ -353,9 +353,12 @@ Deno.test("mail-tester: the address shape, the fictional US Email 1 with its foo
   const e = mailTesterEmail(POSTAL, MON_10);
   assert.equal(e.subject, "Oak Street Auto's Google profile");
   assert.ok(e.body.includes("auto repair shops in Exampleville") && e.body.endsWith(`Kabsi, ${POSTAL}`));
-  assert.equal(reportUrl("test-abc123@srv1.mail-tester.com"), "https://www.mail-tester.com/test-abc123&format=json");
+  assert.equal(reportUrl("test-abc123@srv1.mail-tester.com"), "https://www.mail-tester.com/test-abc123?format=json");
   assert.equal(scoreOf({ mark: 10 }), 10);
   assert.equal(scoreOf({ mark: 9.46 }), 9.5);
   assert.equal(scoreOf({ displayedMark: "8.2/10" }), 8.2);
-  for (const none of [null, {}, { mark: 11 }, { mark: "10" }]) assert.equal(scoreOf(none), null);
+  // The real report of 25 Nov 2026: mark is 0, the score is in the displayed text.
+  assert.equal(scoreOf({ mark: 0, displayedMark: "10/10", commentedMark: "Your lovely total: 10/10" }), 10);
+  assert.equal(scoreOf({ mark: 0, commentedMark: "Your lovely total: 9.5/10" }), 9.5);
+  for (const none of [null, {}, { mark: 11 }, { mark: "10" }, { mark: 0 }]) assert.equal(scoreOf(none), null);
 });

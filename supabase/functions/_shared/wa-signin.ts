@@ -112,7 +112,7 @@ export const SIGNIN_SAY = {
   ended: "⏳ *This sign-in has ended*\n\nStart again on kabsi.co.",
   tooMany: "⏳ *Too many sign-in tries*\n\nWait 15 minutes, then start again on kabsi.co.",
   notice: (d: Device) => `❓ *New sign-in on ${deviceName(d)}*\n\nIf this was not you, tap below. Every Kabsi sign-in on the web ends at once.`,
-  signOutButton: "Sign me out everywhere",
+  signOutButton: "Sign me out",
   signedOut: "✅ *Signed out everywhere*\n\nLog in again on kabsi.co when you need to.",
   signOutEnded: "⏳ *This notice has ended*\n\nWrite \"talk to a person\" and someone at Kabsi will help.",
 } as const;
