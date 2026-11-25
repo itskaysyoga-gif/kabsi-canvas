@@ -42,6 +42,7 @@ The long list as it stood before GATE-2 is word for word in `2026-11-24-progress
 
 ## Recent entries (newest first)
 
+- 25 Nov 2026, APP-1 (PR 610): owner Home in three parts (the yes with one tap, This week receipt, Google profile health strip), Plan on one plan with the free trial line, staff Today in urgency order under a health strip, Conversations list and thread, a short retry line for failed reads. Migrations app1_staff_reads and app1_trials_ending_unpaid applied. Scores 8 to 9 per screen. `2026-11-25-app1.md`.
 - 25 Nov 2026, FIX-4: sign-in notice button cut to 20 characters (new test over every WhatsApp button), mail-tester reader fixed (JSON URL and `mark` is 0), Rashid's phone off the three demo businesses, job health read made fast enough for Staff Today, 11 stopped jobs cancelled with reasons, Outbound `preview` action. `2026-11-25-fix4.md`.
 - 25 Nov 2026, SITE-5 (PR 607): one example business (Maple Street Salon) on the site and in Kabsi's screens, a block and three questions per trade with its own screen, Pricing with its own content, faq-data on one plan at 29 with a card trial (price guard covers it), a licensed salon owner hero. Review round 4: Home, Pricing, barbershop 8.5; restaurant and How it works 8. `2026-11-25-site5.md`.
 - 25 Nov 2026, FIX-3 (PR 606): publication idempotency key from the highest stored suffix, Harvey's metro, priority_score and us_eligible read, /privacy and facts say the US pilot, kill gate counts checks run or trials started (not yes replies), demo business weekly hours for replay line 16.3. `2026-11-25-fix3.md`.
@@ -51,7 +52,6 @@ The long list as it stood before GATE-2 is word for word in `2026-11-24-progress
 - 24 Nov 2026, GATE-2 (R-164): WhatsApp report answers on PROOF-2's functions, onboarding in three steps then the card trial, Founding 25 to the 19 checkout, the month-13 switch and its email, the first-day 90-day list, the pilot kit, Creem test products set up. Launch tests mostly not run (see the file). `2026-11-24-gate2.md`.
 - 24 Nov 2026, SITE-3 (R-164 item 7): one section system on every public page, Home redone (phone scenes, Google-sourced problem band, a week with Kabsi, full-width price), SITE-2 finished, free check without rank or AI, three guides public. `2026-11-24-site3.md`.
 - 24 Nov 2026, SITE-1 (R-163, PR 594): Home in nine sections, one price card at 29, src/lib/offer.ts. `2026-11-24-site1.md`.
-- 24 Nov 2026, OFFER-2 (R-163): one plan at 29 with a 14-day card trial, founding 19 private, costly jobs off, 2 posts a month, WhatsApp Google-care tools. `2026-11-24-offer2.md`.
 - Older entries: `2026-11-24-progress-moved.md` and the files it names.
 
 ## How a session updates this page
