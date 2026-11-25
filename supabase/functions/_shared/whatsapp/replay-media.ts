@@ -17,9 +17,42 @@ export function oggNote(seconds: number): Uint8Array {
   return page;
 }
 
+/**
+ * PILOT-READY (R-165): the words of a replay voice note. The replay route never calls the paid transcription provider: an audio
+ * note whose bytes carry the marker below is "heard" as the words after it, so the checklist sentences can be tested as voice
+ * notes without anyone speaking and without cost. A real note has no marker and goes to the normal transcriber.
+ */
+export const REPLAY_SAYINGS: Record<string, string> = {
+  "replay-say-1": "What needs my attention?",
+  "replay-say-2": "Make this reply more professional",
+  "replay-say-3": "Change my opening hours on Saturday",
+  "replay-say-4": "How many reviews did I receive this month?",
+  "replay-say-5": "Show me everything you did this week",
+  "replay-say-6": "Send me my review QR code",
+  "replay-say-7": "stats",
+  "replay-say-yes": "yes",
+};
+const MARK = "KABSI-REPLAY-SAY:";
+/** The words a replay note carries, or null for any other audio. */
+export function replayWords(audio: Uint8Array): string | null {
+  const text = new TextDecoder("latin1").decode(audio);
+  const i = text.indexOf(MARK);
+  return i < 0 ? null : text.slice(i + MARK.length).trim() || null;
+}
+/** The transcriber of the replay route: scripted words for a replay note, else whatever the normal transcriber does. */
+export function replayTranscribe<F extends (audio: Uint8Array, mime: string | null, who: never) => Promise<unknown>>(next: F | undefined) {
+  return async (audio: Uint8Array, mime: string | null, who: never) => {
+    const words = replayWords(audio);
+    if (words) return { ok: true as const, text: words, language: "en", seconds: 3 };
+    return next ? await next(audio, mime, who) : { ok: false as const, reason: "not_configured" as const };
+  };
+}
+
 /** The bytes for a replay media id. Any other id is refused: the replay route never asks Kapso for anything. */
 export function replayMedia(id: string): Uint8Array {
   if (id === "replay-photo") return b64(REPLAY_JPEG_BASE64);
+  const say = REPLAY_SAYINGS[id];
+  if (say) return new Uint8Array([...oggNote(3), ...new TextEncoder().encode(MARK + say)]);
   const m = /^replay-voice-(\d+)s$/.exec(id);
   if (m) return oggNote(Number(m[1]));
   if (id === "replay-voice-big") return oggNote(5);

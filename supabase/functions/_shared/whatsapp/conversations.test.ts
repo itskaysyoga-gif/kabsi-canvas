@@ -59,8 +59,8 @@ const CASES: Case[] = [
     { from: PHONES.unknown, text: "my scan code is KAB-7Q4M2X9P", expect: "scan_code" },
     { from: PHONES.unknown, text: "Send the full map to my WhatsApp", expect: "map_pending", reply: /comes here as soon as it is ready/ }] },
   { name: "unknown: send the full map without a code asks for it", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "send the full map", expect: "map_no_code", reply: /business name or the code/ }] },
-  { name: "unknown: prices", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "prices", expect: "prices", reply: /29 US dollars.*59 US dollars.*first 30 paying businesses pay 19 or 39/s }] },
-  { name: "unknown: start free", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "start free", expect: "trial", reply: /https:\/\/kabsi\.co\/login\?next=\/start/ }] },
+  { name: "unknown: prices", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "prices", expect: "prices", reply: /one plan: 29 US dollars a month per location.*extra location is 29 US dollars.*14 days free\. Then 29 US dollars a month until you cancel\. A card is needed to start/s }] },
+  { name: "unknown: start free", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "start free", expect: "trial", reply: /https:\/\/kabsi\.co\/login\?next=\/start.*A card is needed to start/s }] },
   { name: "unknown: partner program", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "partner", expect: "partner_program", reply: /25 percent/ }] },
   { name: "unknown: talk to a person", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "talk to a person", expect: "handoff", reply: /^A person will answer you\nHere on WhatsApp, within one working day\.\nWorking hours: Monday to Friday, 9:00 to 18:00, UAE time\.$/ }],
     check: (w) => assert.equal(w.handoffs.length, 1) },
@@ -338,7 +338,7 @@ const CASES: Case[] = [
     check: (w) => assert.equal(w.conversation(PHONES.owner).stopped_at, null) },
   { name: "owner: talk to a person, then free text waits for the person, a button still works", tags: ["owner", "9.9"], setup: (w) => void w.alert(PHONES.owner, BIZ.harbour),
     steps: [
-      { from: PHONES.owner, text: "talk to a person", expect: "handoff", head: /^\*✅ A person will answer you\*\n\n/, reply: /within 4 working hours/ },
+      { from: PHONES.owner, text: "talk to a person", expect: "handoff", head: /^\*✅ A person will answer you\*\n\n/, reply: /the same working day/ },
       { from: PHONES.owner, text: "are you there", expect: "handoff_quiet", none: true },
       { from: PHONES.owner, button: "a:tok00000000000000000001", expect: "approved" }] },
   // 13b part 2 (30.10 point 7): hours and typed posts are drafted, shown back exactly and approved with a Yes.

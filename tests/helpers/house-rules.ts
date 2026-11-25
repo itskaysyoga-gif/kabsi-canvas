@@ -4,7 +4,7 @@
 // the two vitest files that already had the same lists now import them from here.
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { FOUNDING_PRICES, FOUNDING_TOTAL, PLAN_PRICES } from "../../src/lib/site";
+import { FOUNDING_TOTAL, ONE_PLAN } from "../../src/lib/site";
 import { readText } from "./facts";
 
 /** How many Founding 25 places exist (30.17). Founding 25 is private since Founding 1 (R-151); no public file names it, so the guard keeps the number here. */
@@ -32,33 +32,13 @@ export const BANG = /[A-Za-z0-9.)'"?]!(?=\s|$)/;
 // ─── the numbers (read from the constants, never typed here)
 
 const set = (...n: number[]) => new Set(n);
-const EXTRA = set(PLAN_PRICES.extraLocationMonthly, PLAN_PRICES.extraLocationYearly);
-const ESSENTIALS = set(
-  PLAN_PRICES.essentialsMonthly,
-  PLAN_PRICES.essentialsYearly,
-  FOUNDING_PRICES.essentialsMonthly,
-  FOUNDING_PRICES.essentialsYearly,
-);
-const PRO = set(
-  PLAN_PRICES.proMonthly,
-  PLAN_PRICES.proYearly,
-  FOUNDING_PRICES.proMonthly,
-  FOUNDING_PRICES.proYearly,
-);
-const MONTHLY = set(
-  PLAN_PRICES.essentialsMonthly,
-  PLAN_PRICES.proMonthly,
-  PLAN_PRICES.extraLocationMonthly,
-  FOUNDING_PRICES.essentialsMonthly,
-  FOUNDING_PRICES.proMonthly,
-);
-const YEARLY = set(
-  PLAN_PRICES.essentialsYearly,
-  PLAN_PRICES.proYearly,
-  PLAN_PRICES.extraLocationYearly,
-  FOUNDING_PRICES.essentialsYearly,
-  FOUNDING_PRICES.proYearly,
-);
+// PILOT-READY (R-165): one plan, 29 US dollars a month per location, an extra location 29, a private founding price of 19.
+// No yearly price and no Pro price exist: any "Pro" or yearly amount is a problem.
+const EXTRA = set(ONE_PLAN.extraLocationMonthly);
+const ESSENTIALS = set(ONE_PLAN.monthly, ONE_PLAN.founding);
+const PRO = set();
+const MONTHLY = set(ONE_PLAN.monthly, ONE_PLAN.extraLocationMonthly, ONE_PLAN.founding);
+const YEARLY = set();
 export const ALL_PLAN_AMOUNTS = new Set([...ESSENTIALS, ...PRO, ...EXTRA]);
 
 /** A sentence about money that is not the price of a plan: a partner payout, an agency's fee, a credit. */

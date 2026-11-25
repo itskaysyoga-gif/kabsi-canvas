@@ -1576,3 +1576,10 @@ Changed by 30.52 (R-154): 30.50 item 14 (the video scripts): they never name Fou
 6. One plan everywhere: an extra location is 29 US dollars a month, the same as the first. Essentials and Pro are internal names only.
 7. The website is redone once more as one design system across every public page (SITE-3); the home page brief is in the SITE-3 prompt and wins over blueprint section 3 where they differ.
 8. `docs/KABSI-PROGRESS.md` is cut back under 10 KB by GATE-2, moving history to `docs/progress/archive/`.
+
+## 30.55 Lane R decisions of 25 Nov 2026 (R-165)
+
+1. Yawmiyati's organisation may be marked `billing_test` for the two test checkouts (Creem test mode only: one at 29 US dollars a month with the 14-day trial, one founding checkout at 19 through an accepted Founding 25 place linked in Staff, Programs), then reset to false the same day.
+2. Outbound reopens as the pilot's acquisition channel for the US and for UK registered companies, with weekly batch approval, as built by OUTBOUND-3.
+3. Never a warm-up service. The ramp is the warm-up.
+4. The WhatsApp replay harness (`supabase/functions/_shared/whatsapp/replay*.ts`, `POST /whatsapp/staff/replay`) is how the WhatsApp launch lines 16 to 18 are tested without Rashid's phone. Line 19 (real delivery to a real phone) is tested by Rashid's real messages.

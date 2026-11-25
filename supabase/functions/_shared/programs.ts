@@ -159,26 +159,26 @@ const longDate = (d: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric
 export function foundingLine(day: FoundingDay, business: string, endsAt: string | null, appUrl: string) {
   const end = endsAt ? longDate(endsAt) : "the last day of your free months";
   const plan = `${appUrl}/app/plan`;
-  const price = "Launch price: Essentials $19 a month or Pro $39 a month, kept while your subscription stays paid.";
+  const price = "Your price: 19 US dollars a month for your first 12 months, then 29 US dollars a month. We email you 14 days before the change.";
   const lines: Record<FoundingDay, string[]> = {
     60: [
-      `${business}: you are 60 days into your three free months of Kabsi Pro as one of the Founding 25.`,
+      `${business}: you are 60 days into your three free months of Kabsi as one of the Founding 25.`,
       `They end on ${end}. Nothing is charged by itself: on that day you choose a plan or stop.`,
       "What should Kabsi do better for you? Reply here and a person at Kabsi reads it.",
     ],
     85: [
-      `${business}: your free months of Kabsi Pro end on ${end}.`,
+      `${business}: your free months of Kabsi end on ${end}.`,
       price,
       `To carry on, choose a plan here: ${plan}. Nothing is charged unless you choose.`,
     ],
     90: [
-      `${business}: your three free months of Kabsi Pro end today.`,
+      `${business}: your three free months of Kabsi end today.`,
       `Choose a plan to keep Kabsi publishing for you: ${plan}. ${price}`,
       "If you do not choose, nothing is charged. Kabsi keeps watching and drafting for 7 days and publishes nothing.",
     ],
   };
   const subject: Record<FoundingDay, string> = {
-    60: `${business}: 60 days of Kabsi Pro, 30 to go`,
+    60: `${business}: 60 days of Kabsi, 30 to go`,
     85: `${business}: your free months end on ${end}`,
     90: `${business}: your free months end today`,
   };

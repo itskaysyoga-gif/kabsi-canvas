@@ -114,9 +114,9 @@ export function catalog(): CatalogEntry[] {
     e("access_removed", "access", true, removed),
     e("access_lost", "access", true, copy.accessLost(BIZ, APP, 1)),
     e("one_reminder", "approval_needed", true, account.oneReminder({ business: BIZ, what: "reply", draft: REVIEW.draft!.body, url: LINKS.post })),
-    e("receipt", "billing", false, account.receiptEmail({ business: BIZ, plan: "Kabsi Pro, monthly", amount: 39, tax: 0, paidOn: "2026-11-05T09:00:00Z", nextOn: "2026-12-05T09:00:00Z", founding: true, tz: "Asia/Dubai" }, APP)),
-    e("payment_failed", "billing", false, account.paymentFailed({ business: BIZ, plan: "Kabsi Pro", amount: 39, on: "2026-12-05T09:00:00Z", graceEnds: "2026-12-12T09:00:00Z", portal: `${APP}/app/plan`, tz: "Asia/Dubai" })),
-    e("plan_cancelled", "billing", false, account.planCancelled({ business: BIZ, plan: "Kabsi Pro", ends: "2026-12-05T09:00:00Z", tz: "Asia/Dubai" }, APP)),
+    e("receipt", "billing", false, account.receiptEmail({ business: BIZ, plan: "Kabsi, monthly", amount: 29, tax: 0, paidOn: "2026-11-05T09:00:00Z", nextOn: "2026-12-05T09:00:00Z", founding: true, tz: "Asia/Dubai" }, APP)),
+    e("payment_failed", "billing", false, account.paymentFailed({ business: BIZ, plan: "Kabsi", amount: 29, on: "2026-12-05T09:00:00Z", graceEnds: "2026-12-12T09:00:00Z", portal: `${APP}/app/plan`, tz: "Asia/Dubai" })),
+    e("plan_cancelled", "billing", false, account.planCancelled({ business: BIZ, plan: "Kabsi", ends: "2026-12-05T09:00:00Z", tz: "Asia/Dubai" }, APP)),
     // Sync 2a (EML-12): the billing and Founding 25 emails the catalog did not show, built by the real builders.
     e("billing_paused", "billing", false, billingLineAt("paused", { business: BIZ }, APP).email!),
     e("billing_ended", "billing", false, billingLineAt("ended", { business: BIZ }, APP).email!),

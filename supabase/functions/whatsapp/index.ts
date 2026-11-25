@@ -25,7 +25,7 @@ import { SAY } from "../_shared/whatsapp/say.ts";
 import { ref, sendName, TEMPLATE_STATUS_KEY } from "../_shared/whatsapp/templates.ts";
 import { checkAutomations, healthAlertText, type KapsoEnv, listWebhooks, readHealth, readTemplates, setupWebhook, statusMap, submitTemplates, type TemplateRow } from "../_shared/whatsapp/kapso-admin.ts";
 import { SCENARIO_NAMES, sign } from "../_shared/whatsapp/replay.ts";
-import { replayMedia } from "../_shared/whatsapp/replay-media.ts";
+import { replayMedia, replayTranscribe } from "../_shared/whatsapp/replay-media.ts";
 import { replayIo } from "../_shared/whatsapp/replay-db.ts";
 import { runScenario } from "../_shared/whatsapp/replay-run.ts";
 import { alertCheck, alertHour, alertSummary } from "../_shared/whatsapp/smoke-alert.ts";
@@ -103,7 +103,7 @@ async function webhook(req: Request, opts: { background?: (p: Promise<unknown>) 
     },
     agentDeps: async () => {
       const base = await agentDeps();
-      return opts.media ? { ...base, media: opts.media } : base;
+      return opts.media ? { ...base, media: opts.media, transcribe: replayTranscribe(base.transcribe) as typeof base.transcribe } : base;
     },
     receive,
     background: opts.background ?? background,
@@ -156,7 +156,10 @@ async function replay(req: Request): Promise<Response> {
       if (!res.ok) throw new Error(`the inbound path answered ${res.status}`);
     },
   });
-  return json(await runScenario(io, scenario, crypto.randomUUID().slice(0, 8)));
+  const report = await runScenario(io, scenario, crypto.randomUUID().slice(0, 8));
+  // The database's own HTTP call gives up after 20 seconds, so the last report of each scenario is kept for a select.
+  await admin().from("qa_replay_reports").upsert({ scenario, report, finished_at: new Date().toISOString() }).then(() => {}, () => {});
+  return json(report);
 }
 
 async function tick() {
