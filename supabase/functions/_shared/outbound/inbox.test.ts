@@ -201,11 +201,11 @@ Deno.test("a person's yes: follow-up cancelled, needs Rashid, alert, the free ch
   assert.equal(body.replace(/Facebook: .*\nInstagram: .*$/, "Facebook: F\nInstagram: I"), [
     "Hi Rose Lane Salon team,",
     "Thanks. Here is the free check of Rose Lane Salon's Google profile: kabsi.co/scan/ABC123",
-    "19 US dollars a month for your first 12 months. From month 13 the price is 29 US dollars a month. We email you 14 days before the change.",
+    "If you would like Kabsi to look after it: 14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing.",
     "Rashid Abou Hamzy, founder of Kabsi\nkabsi.co\nFacebook: F\nInstagram: I",
   ].join("\n\n"), "lane R's words, word for word");
   assert.ok(!/Nora/.test(body), "signed without Nora");
-  assert.ok(!/Founding 25|25 founding|three months|kabsi\.co\/founding/.test(body), "the founding price, never Founding 25 (R-142 4a)");
+  assert.ok(!/Founding 25|25 founding|three months|kabsi\.co\/founding|Essentials|\bPro\b|\$39/.test(body), "the one plan, never a retired offer");
   assert.match(body, /Facebook: www\.facebook\.com\/profile\.php\?id=\d+\nInstagram: www\.instagram\.com\/kabsi\.co$/);
   assert.ok(linksOk(body, "reply"));
   assert.ok(!/[–—!]/.test(body));
@@ -294,4 +294,27 @@ Deno.test("the reply to a yes uses the possessive: Harbor Barbers', Moss', Maple
     assert.ok(!/s's |''/.test(body));
     assert.ok(!/[–—!]/.test(body));
   }
+});
+
+Deno.test("OUTBOUND-3: a US yes is drafted with the postal address footer; with no address, Rashid answers by hand", async () => {
+  const POSTAL = "100 Example Street, Exampleville, TX 75001"; // invented
+  const us = { ...PROSPECT, country: "US" };
+  let drafted = "";
+  const a = await run(reply("Yes please"), { postal: POSTAL, draftReply: async (d) => void (drafted = d.body) }, us);
+  assert.equal(a.r.yes, 1);
+  assert.ok(drafted.endsWith(`kabsi.co/privacy\nKabsi, ${POSTAL}`), drafted);
+  assert.ok(linksOk(drafted, "reply"));
+  const b = await run(reply("Yes please"), { postal: null }, us);
+  assert.ok(!b.log.some((l) => l.startsWith("draft:")), "no US reply without the address");
+  assert.ok(b.log.includes("alert"), "Rashid is still told");
+  assert.equal(yesReply("Rose Lane Salon", "ABC123", "GB", POSTAL).includes(POSTAL), false, "the UK reply is unchanged");
+});
+
+Deno.test("OUTBOUND-3: an opt-out by the mailto unsubscribe (no thread headers) is matched by sender and honoured at once", async () => {
+  const raw = "From: amy@rose.example.com\r\nSubject: no thanks\r\nMessage-ID: <u1@rose.example.com>\r\n\r\n\r\n";
+  const { log } = await run(raw, {
+    matchBySender: async () => ({ message: { id: "m1", kind: "first", message_id: OB }, prospect: PROSPECT, sentBodies: [SENT] }),
+  });
+  assert.ok(log.includes("suppress:hello@rose.example.com:opt_out:true"), "kept as a hash, with the business's domain");
+  assert.ok(log.includes("cancel:all") && log.includes("event:opt_out"));
 });

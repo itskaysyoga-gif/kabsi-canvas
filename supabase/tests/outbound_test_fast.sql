@@ -34,6 +34,8 @@ update public.outbound_settings set test_fast_until = now() + interval '1 hour';
 update public.outbound_settings set test_mode = false;
 select is((select test_fast_until from public.outbound_settings), null, 'leaving test mode clears the setting');
 update public.outbound_settings set test_mode = true, test_fast_until = now() + interval '1 hour';
+-- OUTBOUND-3: sending opens only with DNS read correctly and a mail-tester 10 of 10.
+update public.outbound_settings set dns_ok = true, mail_tester_score = 10;
 update public.outbound_settings set sending_open = true;
 select is((select test_fast_until from public.outbound_settings), null, 'opening sending clears the setting');
 

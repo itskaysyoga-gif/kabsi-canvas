@@ -1,12 +1,13 @@
-// outbound-prepare's logic (Harvey 4A part B, master plan 30.39 items 5 and 7): the next day's candidates up to the next
-// day's cap, each checked, each filled from the approved templates with no AI call. Every outside call is a dependency,
+// outbound-prepare's logic (Harvey 4A part B, master plan 30.39 items 5 and 7; OUTBOUND-3: the coming week at once, so
+// Rashid approves once a week): candidates for each weekday of the coming week up to that day's cap, each checked, each
+// filled from the approved templates with no AI call. Every outside call is a dependency,
 // so the tests run it with fakes. Logs carry counts only.
 import { fixtureRows } from "./fixture.ts";
 import { readPage } from "./page.ts";
 import { ordered, parseCsv, rowRefusal, toCandidate } from "./register.ts";
 import {
-  dailyCap, domainOf, emailOne, emailOnPage, followUp, foundingInviteUrl, industryGroup, KIND_WORDS, localNine, localParts, nextWeekday, pickDetail,
-  TIME_ZONES,
+  comingWeek, dailyCap, domainOf, emailOne, emailOnPage, followUp, foundingInviteUrl, industryGroup, kindWords, localNine, localParts,
+  pickDetail,
 } from "./rules.ts";
 
 export type Settings = {
@@ -39,6 +40,8 @@ export type PrepareDeps = {
    *  the service role. Null when either cannot be read. The slug is never logged or returned in the result. */
   founding(): Promise<{ slug: string | null; left: number } | null>;
   testRecipients: string[];
+  /** The sender's postal address for US footers (OUTBOUND_POSTAL_ADDRESS, checked by postalAddress), or null. */
+  postal: string | null;
   now: Date;
 };
 
@@ -57,18 +60,23 @@ export async function prepare(deps: PrepareDeps, opts: { today?: boolean } = {})
   await deps.refreshSuppression();
 
   const today = localParts(deps.now, "Europe/London").date;
-  const day = test && opts.today ? today : nextWeekday(today);
-  const room = Math.min(
-    dailyCap(s, day) - (await deps.queuedFor(day)),
-    s.monthly_cap - (await deps.sentThisMonth()) - (await deps.queuedFor(day)),
-  );
-  if (room <= 0) return { state: "full", drafted: 0, looked_at: 0, refused };
+  // The coming week (Monday to Friday), or in a test run asked for "today", only today.
+  const days = test && opts.today ? [today] : comingWeek(today);
+  const rooms: number[] = [];
+  let queuedWeek = 0;
+  for (const d of days) {
+    const q = await deps.queuedFor(d);
+    queuedWeek += q;
+    rooms.push(Math.max(0, dailyCap(s, d) - q));
+  }
+  let monthRoom = s.monthly_cap - (await deps.sentThisMonth()) - queuedWeek;
+  if (monthRoom <= 0 || rooms.every((r) => r <= 0)) return { state: "full", drafted: 0, looked_at: 0, refused };
 
   const rows = test
     ? fixtureRows(today.replace(/-/g, ""))
     : ordered(parseCsv(await deps.register()));
   const html = new Map(test ? fixtureRows(today.replace(/-/g, "")).map((r) => [r.company_id, r.html] as const) : []);
-  const countries = test ? ["GB"] : s.open_countries;
+  const countries = test ? ["US", "GB"] : s.open_countries;
 
   // Built once per run, server side: the link while places remain, else null and the follow-up leaves the line out.
   const f = await deps.founding().catch(() => null);
@@ -77,11 +85,14 @@ export async function prepare(deps: PrepareDeps, opts: { today?: boolean } = {})
   let drafted = 0;
   let looked = 0;
   for (const r of rows) {
-    if (drafted >= room || looked >= MAX_LOOKS) break;
+    const slot = rooms.findIndex((x) => x > 0);
+    if (slot < 0 || monthRoom <= 0 || looked >= MAX_LOOKS) break;
     // A UK row is refused here unless Harvey's register shows its company Active on a file at most 40 days old.
     const why = rowRefusal(r, countries, today);
     if (why) { no(why); continue; }
     const c = toCandidate(r);
+    // CAN-SPAM: no US email is drafted without the sender's postal address for its footer.
+    if (c.country === "US" && !deps.postal) { no("no_postal_address"); continue; }
     const domain = domainOf(c.email);
     if (!(await deps.eligible({ email: c.email, domain, name: c.business_name, country: c.country, company_id: c.company_id }))) {
       no("suppressed_or_known");
@@ -91,23 +102,27 @@ export async function prepare(deps: PrepareDeps, opts: { today?: boolean } = {})
     const read = test ? { html: html.get(c.company_id) ?? "" } : await deps.page(c.email_page_url);
     if ("refused" in read) { no(`page_${read.refused}`); continue; }
     if (!emailOnPage(read.html, c.email)) { no("email_not_on_page"); continue; }
-    const detail = pickDetail(read.html, deps.now, industryGroup(c.industry) ?? "beauty");
+    const detail = pickDetail(read.html, deps.now, industryGroup(c.industry) ?? "beauty", c.country);
     if (!detail) { no("no_detail"); continue; }
-    const tz = TIME_ZONES[c.country] ?? "Europe/London";
+    const tz = c.time_zone;
     const to = test ? deps.testRecipients[drafted % deps.testRecipients.length] : c.email;
-    const one = emailOne({ business: c.business_name, kind: KIND_WORDS[c.industry], city: c.city, detail: detail.sentence });
-    const two = followUp({ business: c.business_name, invite });
+    const postal = c.country === "US" ? deps.postal : null;
+    const one = emailOne({ business: c.business_name, kind: kindWords(c.industry, c.country), city: c.city, detail: detail.sentence, country: c.country, postal });
+    const two = followUp({ business: c.business_name, invite, country: c.country, postal });
     await deps.insert({
       prospect: {
         harvey_company_id: c.company_id, country: c.country, industry: c.industry, city: c.city, business_name: c.business_name,
         email: c.email, email_domain: domain, time_zone: tz, source_page: c.email_page_url, source_date: today,
-        company_number: c.company_number || null, company_status: test ? "test" : c.country === "GB" ? c.company_status : null,
+        company_number: c.country === "GB" ? c.company_number || null : null,
+        company_status: test ? "test" : c.country === "GB" ? c.company_status : null,
         company_status_date: !test && c.country === "GB" ? c.company_status_date : null, detail_kind: detail.kind,
         detail_used: detail.sentence, test,
       },
-      first: { to_address: to, ...one, send_after: localNine(day, tz).toISOString() },
+      first: { to_address: to, ...one, send_after: localNine(days[slot], tz).toISOString() },
       follow: { to_address: to, ...two },
     });
+    rooms[slot]--;
+    monthRoom--;
     drafted++;
   }
   return { state: test ? "test" : "open", drafted, looked_at: looked, refused };

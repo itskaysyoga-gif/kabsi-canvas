@@ -31,6 +31,7 @@ The long list as it stood before GATE-2 is word for word in `2026-11-24-progress
 - Test checkouts (Creem test mode), not run by a build session (they need the owner's own session and a Staff session; `2026-11-25-pilot-ready.md`): sign in as Yawmiyati's owner, run `update public.organizations set billing_test = true where id = (select organization_id from public.locations where id = '9803ee99-fee8-4c6a-abb4-1a830fcbb438');` (expect 1 row), start the trial checkout on the Plan page (29, 14 days, Creem test card 4111 1111 1111 1111), then in Staff, Programs accept one Founding 25 place, "Link for the founding price", and start the 19 checkout. Tell a session, which reads the subscription and webhook rows and sets `billing_test` back to false.
 - Paid AI key with a hard cap; Kapso Pro; Creem live with your yes (Hussein: verification and payout). Never switched by a build session.
 - Two more authorized listings for the launch tests (the checklist names three; only Yawmiyati is connected).
+- OUTBOUND-3: set the Supabase secret OUTBOUND_POSTAL_ADDRESS (one line, "PO Box" not "P.O. Box"); then a session runs the mail-tester check (skill kabsi-outbound); tell lane R when the mailbox is ready.
 - Still open from before: Sentry budget, main's protection, the 13b part 2 secrets and SQL, Ready 2's SQL, Voice 2's eval, Close 1's PR 499 (see the moved file).
 
 ## Open After merge checks and findings
@@ -41,6 +42,7 @@ The long list as it stood before GATE-2 is word for word in `2026-11-24-progress
 
 ## Recent entries (newest first)
 
+- 25 Nov 2026, OUTBOUND-3: Outbound reopens for the pilot, US and GB, approved once a week; CAN-SPAM postal address (OUTBOUND_POSTAL_ADDRESS, not set yet: nothing sends), DNS and mail-tester gates, kill gate, jobs scheduled again; sending still locked, test mode on. `2026-11-25-outbound3.md`.
 - 25 Nov 2026, PILOT-READY (R-165): one price everywhere (29, extra location 29, the trial line), GATE-2 wording in COPY.md section 93 and the facts, replay harness rebound to the demo businesses with per-phone locks and `launch_16_18`. Replay harness run on production: 10 scenarios pass, launch lines 16 to 18 pass except the rewrite and the hours week (see the file); test checkouts waiting for Rashid. `2026-11-25-pilot-ready.md`.
 - 24 Nov 2026, GATE-2 (R-164): WhatsApp report answers on PROOF-2's functions, onboarding in three steps then the card trial, Founding 25 to the 19 checkout, the month-13 switch and its email, the first-day 90-day list, the pilot kit, Creem test products set up. Launch tests mostly not run (see the file). `2026-11-24-gate2.md`.
 - 24 Nov 2026, SITE-3 (R-164 item 7): one section system on every public page, Home redone (phone scenes, Google-sourced problem band, a week with Kabsi, full-width price), SITE-2 finished, free check without rank or AI, three guides public. `2026-11-24-site3.md`.
