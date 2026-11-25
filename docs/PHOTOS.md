@@ -143,3 +143,16 @@ card size) and "tall 2" (shampoo bottle labels close to the camera, and it repea
 | beauty-salon-tall | beauty-salon-tall 1.jpg | A stylist blow drying a client's hair, bright salon  | Beauty salon page, photo to post      | A stylist blow drying a client's hair in a bright salon       |
 
 Rashid's portrait (rashid-portrait.jpeg, 2048 px square) replaced founder-rashid-800 and -400 (the table above).
+
+## SITE-6 (25 Nov 2026): the restaurant page's hero
+
+SITE-5's review asked for a brighter restaurant hero with someone at work, in the style of Home's hero (an owner at work,
+bright, no logo, no readable text). Chosen from Pexels: photo 6605254, "People in Professional, Restaurant Kitchen" by
+Kampus Production (@kampus), location given as Portugal; its page showed the "Free" licence label linking to
+https://www.pexels.com/license/ when read on 25 Nov 2026 (free for commercial use, attribution not required but given
+here). Cropped to 3:2 from the centre, 1600 and 800 px WebP at quality 72, metadata stripped. Nothing readable: the card
+reader on the counter has no visible screen text. The evening dining room (restaurant-dining) stays on the /for cards.
+
+| File             | What it shows                                                   | Best use              | Alt text                                                                  |
+| ---------------- | --------------------------------------------------------------- | --------------------- | ------------------------------------------------------------------------- |
+| restaurant-owner | A smiling chef owner greeting two guests at a bright pizzeria counter | Restaurants page hero | A smiling chef owner greeting two guests at the counter of his small restaurant |

@@ -116,6 +116,15 @@ export const HOW_CHAT: ChatTurn[] = [
     ],
     approve: true,
   },
+  // SITE-6: "Or just tell Kabsi." in the same chat (Home's Saturday hours lines), so the column beside the six steps is
+  // as long as they are.
+  { from: "owner", text: "Close at 3 this Saturday" },
+  {
+    from: "kabsi",
+    title: "Saturday hours",
+    lines: ["Saturday 29 November: 9:00 to 15:00.", "Every other day stays the same."],
+    approve: true,
+  },
 ];
 
 /** SITE-5: what Kabsi watches on the profile every day, beside the Google Protection screen. */

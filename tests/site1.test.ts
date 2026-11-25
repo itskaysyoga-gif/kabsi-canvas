@@ -50,7 +50,8 @@ describe("SITE-1: the offer in one place", () => {
   it("takes the trial line and the main action from it", () => {
     expect(TRIAL_LINE).toBe(offer.TRIAL_LINE);
     expect(MAIN_CTA).toBe(offer.PRIMARY_CTA);
-    expect(HEADER_CTA).toBe(offer.PRIMARY_CTA);
+    // SITE-6: the header button has its own words; the main action stays PRIMARY_CTA.
+    expect(HEADER_CTA).toBe("Free Google check");
     expect(PRICE.terms).toBe(offer.TRIAL_LINE);
     expect(PRICE.amount).toBe(`${offer.PRICE_MONTHLY_USD} US dollars`);
   });
@@ -140,7 +141,7 @@ describe("SITE-1: Pricing, the FAQ and the navigation", () => {
     ]);
   });
   it("leaves Partners out of the header, footer and sitemap, and keeps the pages noindex", () => {
-    expect(NAV_LINKS.map((n) => n.to)).toEqual(["/how-it-works", "/pricing"]);
+    expect(NAV_LINKS.map((n) => n.to)).toEqual(["/how-it-works", "/pricing", "/guides"]);
     expect(read("src/components/kabsi/site-footer.tsx")).not.toMatch(
       /to: "\/partners|to="\/partners/,
     );

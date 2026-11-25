@@ -1,6 +1,7 @@
 // How it works, FAQ, About and Security on blueprint 3.1, on SITE-3's one section system (./kit.tsx): the H1 is the
 // only yellow bar, the body is the reading size, three backgrounds at most, and each page ends on the charcoal band with
 // the free check. Words in v31-data.ts.
+import { Clock, Link2, Phone } from "lucide-react";
 import { YellowNumber } from "@/components/kabsi/highlight";
 import { Faq } from "@/components/kabsi/ui";
 import { HOME_HERO, ABOUT, FAQ_V31, HOW, PRICE, SECURITY, TRUST } from "./v31-data";
@@ -13,6 +14,9 @@ import { PUB } from "./public-photos";
 import { HOW_CHAT, WATCHED } from "./v31-more";
 import { MORE_SCREENS } from "./screens-section";
 
+/** The icons of WATCHED, in its order: hours, phone, website and booking link. */
+const WATCHED_ICONS = [Clock, Phone, Link2];
+
 export function V31How() {
   return (
     <>
@@ -21,16 +25,21 @@ export function V31How() {
         mark={HOW.mark}
         line={HOW.line}
         aside={
-          /* SITE-5: the photo with Kabsi's weekly report in front, as on Pricing. */
-          <div data-nora-avoid className="relative pb-24 sm:pb-28 lg:pb-0">
+          /* SITE-5: the photo with one of Kabsi's screens in front, as on Pricing. SITE-6: the Home screen, where
+             everything waits for the owner's yes (it was the weekly report, titled Settings in the app). */
+          <div data-nora-avoid className="relative sm:pb-28 lg:pb-0">
             <PubImg
               photo={PUB.howHero}
               sizes="(min-width: 1280px) 500px, (min-width: 1024px) 40vw, 100vw"
               priority
-              className="aspect-[4/3] w-[88%] rounded-panel bg-surface-3 object-cover shadow-lift lg:aspect-[4/5] lg:w-[78%]"
+              className="hidden aspect-[4/3] w-[88%] rounded-panel bg-surface-3 object-cover shadow-lift sm:block lg:aspect-[4/5] lg:w-[78%]"
             />
-            <div className="absolute end-0 bottom-0 w-[44%] max-w-[13rem] lg:top-1/2 lg:bottom-auto lg:w-[46%] lg:max-w-[14.5rem] lg:-translate-y-1/2">
-              <DeviceShot id="report" className="max-w-none sm:max-w-none lg:max-w-none" />
+            {/* SITE-6: on a phone the screen stands alone at a size people can read (the photo shows from 640 px). */}
+            <div className="mx-auto w-full max-w-[16rem] pt-8 sm:absolute sm:end-0 sm:bottom-0 sm:mx-0 sm:w-[44%] sm:max-w-[13rem] sm:pt-0 lg:top-1/2 lg:bottom-auto lg:w-[46%] lg:max-w-[14.5rem] lg:-translate-y-1/2">
+              <DeviceShot
+                shot={MORE_SCREENS.home}
+                className="max-w-none sm:max-w-none lg:max-w-none"
+              />
             </div>
           </div>
         }
@@ -65,7 +74,7 @@ export function V31How() {
           <div className="lg:sticky lg:top-24">
             <ChatCard
               turns={HOW_CHAT}
-              label="An Example: a reply changed and approved in the chat"
+              label="An Example: a reply changed and approved, then new hours asked for, in the chat"
             />
           </div>
         </div>
@@ -73,7 +82,7 @@ export function V31How() {
       <Band
         id="watch"
         tone="ivory"
-        inner="flex flex-col lg:grid lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center lg:gap-16"
+        inner="flex flex-col lg:grid lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center lg:gap-16 xl:gap-24"
       >
         <div className="order-2 mt-10 lg:order-1 lg:mt-0">
           <DeviceShot shot={MORE_SCREENS.shield} className="lg:max-w-[19rem]" />
@@ -84,16 +93,29 @@ export function V31How() {
             title="When Google changes something, you see it."
             line="Google can change your details from what the public suggests. Kabsi checks your profile every day and shows what changed. For your hours, phone and website, one tap puts it right."
           />
-          <ul className="mt-8 grid gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-            {WATCHED.map((w) => (
-              <li
-                key={w.title}
-                className="rounded-card border border-line bg-surface-1 p-4 shadow-rest"
-              >
-                <p className="text-title font-bold">{w.title}</p>
-                <p className="mt-1 text-small text-text-2">{w.text}</p>
-              </li>
-            ))}
+          {/* SITE-6: one card a row on a computer, so the words are as tall as the phone beside them. */}
+          <ul className="mt-8 grid gap-4 sm:grid-cols-3 lg:max-w-[34rem] lg:grid-cols-1">
+            {WATCHED.map((w, n) => {
+              const Icon = WATCHED_ICONS[n] ?? Clock;
+              return (
+                <li
+                  key={w.title}
+                  className="flex items-start gap-3 rounded-card border border-line bg-surface-1 p-4 shadow-rest"
+                >
+                  {/* SITE-6: an icon per detail, so the cards do not read as empty boxes. */}
+                  <span
+                    aria-hidden
+                    className="grid size-10 shrink-0 place-items-center rounded-inner bg-surface-2 text-text-1"
+                  >
+                    <Icon className="size-5" strokeWidth={1.75} />
+                  </span>
+                  <span>
+                    <span className="block text-title font-bold">{w.title}</span>
+                    <span className="mt-1 block text-small text-text-2">{w.text}</span>
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </Band>

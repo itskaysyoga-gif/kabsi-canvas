@@ -162,7 +162,9 @@ export function contentPublications() {
 }
 
 export const tables = {
-  gbp_posts: (c) => (c.state === "posts-empty" ? [] : POSTS),
+  // Home's detail read asks for its tasks' posts by id (id=in.(...)): home.mjs answers that one (SITE-6).
+  gbp_posts: (c) =>
+    c.params.get("id")?.startsWith("in.(") ? undefined : c.state === "posts-empty" ? [] : POSTS,
   photos: (c) => {
     const select = c.params.get("select") ?? "";
     // The post form asks for photos it can attach (id and path only).

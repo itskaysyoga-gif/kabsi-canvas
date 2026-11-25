@@ -31,6 +31,13 @@ export function ProductScreens({
 
 /** SITE-5: Kabsi's screens that Home does not show (Pricing, How it works), kept out of Home's script. */
 export const MORE_SCREENS = {
+  // SITE-6: How it works' hero: what waits for the owner's yes (was the weekly report, under its Settings title).
+  home: {
+    src: "/screens/app-home-560.webp",
+    alt: "Kabsi's Home screen for an example business: a change on Google to decide, and a reply and a post waiting for a yes",
+    title: "Everything waits for your yes",
+    line: "Replies, posts and fixes wait on one screen until you approve them.",
+  },
   reviews: {
     src: "/screens/app-reviews-560.webp",
     alt: "Kabsi's Reviews screen with a reply ready to approve, for an example business",

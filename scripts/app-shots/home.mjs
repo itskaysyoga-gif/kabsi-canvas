@@ -229,6 +229,42 @@ const TASKS = [
   }),
 ];
 
+// SITE-6: an industry page's screen is Kabsi's Home for that trade's Example business, with the same three things as
+// the page's "What Kabsi does" examples waiting for a yes: its hours change, its photo post and its review reply, in the
+// order the page names them (scripts/site-screens.mjs --trades sets TRADE.order, TRADE.hours and TRADE.post). A trade
+// whose examples watch the phone number also shows that change under Needs attention.
+if (TRADE?.order) {
+  const make = {
+    hours: (n) => task(n, { kind: "hours_confirm", title: TRADE.hours, path: "/app/hours" }),
+    post: (n) =>
+      task(n, {
+        kind: "post",
+        title: "This week's post is ready",
+        path: "/app/posts",
+        evidence: { post_id: id(601) },
+      }),
+    reply: (n) =>
+      task(n, {
+        kind: "review_reply",
+        title: `Reply to ${TRADE.review.name}`,
+        path: "/app/reviews",
+        evidence: { review_id: R.maya, risk: TRADE.review.stars <= 2 ? "medium" : "low" },
+      }),
+  };
+  const list = TRADE.order.map((k, n) => make[k](n + 1));
+  if (TRADE.watchNumber)
+    list.push(
+      task(9, {
+        kind: "profile_change",
+        priority: "recommended",
+        title: `Google shows a new phone number for ${TRADE.business}.`,
+        path: "/app/shield",
+        evidence: { profile_change_id: id(501) },
+      }),
+    );
+  TASKS.splice(0, TASKS.length, ...list);
+}
+
 const CARDS = [
   {
     code: "KQA234",
@@ -278,7 +314,9 @@ export const tables = {
   gbp_posts: [
     {
       id: id(601),
-      body: "This week at Maple Street Salon: gloss treatments that take 45 minutes. Book on WhatsApp or call us.",
+      body:
+        TRADE?.post ??
+        "This week at Maple Street Salon: gloss treatments that take 45 minutes. Book on WhatsApp or call us.",
     },
   ],
   taps: (c) => (empty(c) ? [] : TAPS),

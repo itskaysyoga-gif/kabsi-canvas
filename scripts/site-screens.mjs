@@ -3,8 +3,9 @@
 // its own trade's screen: the Google profile screen at that trade's Example business.
 // Start the site first (npx vite dev --port 5173 --host 127.0.0.1), then:
 //   node scripts/site-screens.mjs            report, cards and the weekly email, for Maple Street Salon
-//   node scripts/site-screens.mjs --trades   one Google profile screen per industry page (public/screens/trade-<slug>-560.webp)
+//   node scripts/site-screens.mjs --trades   one Kabsi Home screen per industry page (public/screens/trade-<slug>-560.webp)
 //   node scripts/site-screens.mjs --maple    the Reviews screen of Maple Street Salon with Home's hero review
+//   node scripts/site-screens.mjs --one home  Maple Street Salon's Kabsi Home (How it works' hero)
 // Each screen is the first screen of a 390 px phone, written as a 560 by 1212 WebP (quality 80).
 import { spawnSync } from "node:child_process";
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
@@ -40,6 +41,19 @@ if (process.argv.includes("--trades")) {
   // The blueprint is TypeScript with no imports: Node strips the types. The Example business is read from each
   // trade's content file.
   const { BLUEPRINT } = await import("../src/content/industries/blueprint.ts");
+  const { TRADE_WORK } = await import("../src/content/industries/trade-work.ts");
+  // SITE-6: the order of the hours, post and reply items follows the page's three examples; a kind the examples do not
+  // name comes after them.
+  const kindOf = (x) =>
+    /posted/i.test(x.title)
+      ? "post"
+      : /number/i.test(x.title)
+        ? "number"
+        : /link|page checked|bookings kept/i.test(x.title)
+          ? "link"
+          : /hours|closure|closed|mornings|night|classes/i.test(x.title)
+            ? "hours"
+            : "reply";
   const files = readdirSync("src/content/industries").filter(
     (f) =>
       f.endsWith(".ts") && !["index.ts", "types.ts", "blueprint.ts", "trade-work.ts"].includes(f),
@@ -49,7 +63,8 @@ if (process.argv.includes("--trades")) {
     const slug = text.match(/slug: "([^"]+)"/)?.[1];
     const business = text.match(/example: \{\s*business: "([^"]+)"/)?.[1];
     const b = slug && BLUEPRINT[slug];
-    if (!slug || !business || !b) {
+    const w = slug && TRADE_WORK[slug];
+    if (!slug || !business || !b || !w) {
       console.error(`skipped ${f}: no slug, example business or blueprint`);
       continue;
     }
@@ -57,7 +72,22 @@ if (process.argv.includes("--trades")) {
       stdio: "inherit",
       env: {
         ...process.env,
-        SHOT_TRADE: JSON.stringify({ business, review: b.review, reply: b.reply }),
+        SHOT_TRADE: JSON.stringify({
+          business,
+          review: b.review,
+          reply: b.reply,
+          post: w.post,
+          hours: w.hours,
+          order: [
+            ...new Set([
+              ...w.does.map(kindOf).filter((k) => ["hours", "post", "reply"].includes(k)),
+              "hours",
+              "post",
+              "reply",
+            ]),
+          ],
+          watchNumber: w.does.some((x) => kindOf(x) === "number"),
+        }),
       },
     });
     if (r.status !== 0) process.exit(r.status ?? 1);
@@ -149,10 +179,11 @@ const one = process.argv.indexOf("--one");
 if (one > 0) {
   // An industry page's screen, or (--one maple) the Reviews screen of the site's own example business.
   const slug = process.argv[one + 1];
-  // An industry page shows its trade's Google profile screen (a change caught on Google), so its phone never repeats
-  // the review card in its hero.
+  // SITE-6: an industry page shows its trade's Kabsi Home: that trade's hours, post and reply waiting for a yes.
   if (slug === "maple") await app("/app/reviews", "app-reviews");
-  else await app("/app/shield", `trade-${slug}`);
+  // SITE-6: How it works' hero shows Maple Street Salon's Home, with everything that waits for a yes.
+  else if (slug === "home") await app("/app", "app-home");
+  else await app("/app", `trade-${slug}`);
 } else {
   await app("/app/report", "app-report");
   await app("/app/cards", "app-cards");

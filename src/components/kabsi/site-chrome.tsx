@@ -139,10 +139,14 @@ const openNora = () => window.dispatchEvent(new CustomEvent("kabsi:open-nora"));
  * every button, field and tappable box, so nothing the visitor may want to press is ever under her; the last lines of
  * a page are kept clear by the footer's bottom space (the legal row is `data-nora-avoid` and the footer ends with room
  * for her and for the phone bar). A word inside a sentence is not a box: a link counts only when it is not inline.
+ * From SITE-6 a photo or a screen in the page counts at every width.
  */
 const AVOID_WIDE = "form button[type=submit], form input[type=submit], [data-nora-avoid]";
 const AVOID_PHONE =
   "button, input:not([type=hidden]), select, textarea, summary, a[href], [role=button], [role=combobox], [role=tab], [role=switch], [role=checkbox], [role=radio], [data-nora-avoid]";
+// SITE-6 (LATER, "Nora's button over photos"): a photo or one of Kabsi's screens in the page counts too, at every width,
+// so her button steps aside instead of sitting on a picture.
+const PICTURES = "main img, main figure";
 
 /**
  * Her own two buttons and the whole phone bar never count: the bar has her button beside its one action by design, and
@@ -214,9 +218,13 @@ export function NoraLauncher() {
         );
       };
       // The round button only shows below 640 px and the wide one from it, so each reads its own list.
-      const wideList = phone ? [] : [...document.querySelectorAll(AVOID_WIDE)].filter(shown);
+      const wideList = phone
+        ? []
+        : [...document.querySelectorAll(`${AVOID_WIDE}, ${PICTURES}`)].filter(shown);
       const phoneList = phone
-        ? [...document.querySelectorAll(AVOID_PHONE)].filter((e) => shown(e) && !isHers(e))
+        ? [...document.querySelectorAll(`${AVOID_PHONE}, ${PICTURES}`)].filter(
+            (e) => shown(e) && !isHers(e),
+          )
         : [];
       setBlocked({
         solo: hit(solo.current, phoneList, true),

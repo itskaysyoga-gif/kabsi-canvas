@@ -159,10 +159,10 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     // Go live 1 (30.28): the WhatsApp launch line is gone from the hero.
     expect(home).not.toMatch(/WHATSAPP_LAUNCH_LINE|opens at launch/);
   });
-  it("puts How it works and Price in the header, and three footer groups without Partners (SITE-1, blueprint 3.1)", () => {
-    expect(NAV_LINKS.map((n) => n.label)).toEqual(["How it works", "Price"]);
-    expect(NAV_LINKS.find((n) => n.label === "Price")?.to).toBe("/pricing");
-    expect(HEADER_CTA).toBe("Check my business free");
+  it("puts the trades menu, How it works, Pricing and Guides in the header, and three footer groups without Partners (SITE-6)", () => {
+    expect(NAV_LINKS.map((n) => n.label)).toEqual(["How it works", "Pricing", "Guides"]);
+    expect(NAV_LINKS.find((n) => n.label === "Pricing")?.to).toBe("/pricing");
+    expect(HEADER_CTA).toBe("Free Google check");
     expect(BUSINESS_MENU.map((n) => n.label)).toEqual([
       "Hair salons",
       "Barbershops",
@@ -171,7 +171,8 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     ]);
     const header = read("src/components/kabsi/site-header.tsx");
     expect(header).toContain('variant="dark"');
-    expect(header).toContain("{WHATSAPP_ON && (");
+    // SITE-6: the phone menu's contents (WhatsApp included) live in the on-demand trade-menu.tsx.
+    expect(read("src/components/kabsi/trade-menu.tsx")).toContain("{WHATSAPP_ON && (");
     const footer = read("src/components/kabsi/site-footer.tsx");
     for (const t of ['title: "Product"', 'title: "Explore"', 'title: "Company"'])
       expect(footer).toContain(t);
@@ -275,7 +276,7 @@ describe("WhatsApp shows only when the one setting has a number (K-122)", () => 
     expect(read("src/components/kabsi/ui.tsx")).toContain("if (!WHATSAPP_ON) return null;");
     // Design 9: the phone bar has no WhatsApp; the phone menu's quiet row shows it only while the setting has a number.
     expect(read("src/components/kabsi/site-chrome.tsx")).not.toContain("WHATSAPP");
-    expect(read("src/components/kabsi/site-header.tsx")).toContain("{WHATSAPP_ON && (");
+    expect(read("src/components/kabsi/trade-menu.tsx")).toContain("{WHATSAPP_ON && (");
     if (!WHATSAPP_ON) expect(WHATSAPP_URL).toBe("mailto:hello@kabsi.co");
   });
 });

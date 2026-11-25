@@ -1,18 +1,21 @@
 import { useRouterState } from "@tanstack/react-router";
-import { ChevronRight, Menu, MessageCircle, X } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { ChevronRight, Menu, X } from "lucide-react";
+import { Suspense, lazy, useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { cn } from "@/lib/utils";
-import { HEADER_CTA, MAIN_CTA, NAV_LINKS, WHATSAPP_ON, WHATSAPP_URL } from "@/lib/site";
-import { ButtonLink, Logo, TrialLine, WhatsAppGlyph, buttonClass } from "./ui";
+import { HEADER_CTA, NAV_LINKS, TRADES_MENU_LABEL } from "@/lib/site";
+import { ButtonLink, Logo, buttonClass } from "./ui";
 import { SiteLink } from "./site-link";
 import { setChrome, useScrolledPast, useSearchFlag } from "./page-signals";
 import { useAccountLink, type AccountState } from "@/components/auth/use-account-link";
 
 /**
- * The public header (Design 9; Site 2, master plan 30.34 item 4): sticky, at the top of every page. How it works, Businesses (one link to /for), Pricing, Guides and About, then Log in or Dashboard, then
- * "Free check", filled charcoal with ivory text so it leads the header without competing with the page's one yellow
- * action. No dropdowns; the active page is marked. Under 1024 px the links move into the phone menu (the same rows, no
- * nested rows); from 640 px "Free check" stays in the header.
+ * The public header (SITE-6, 25 Nov 2026): sticky, at the top of every page. The logo, then "For your business" (a
+ * disclosure menu of every industry page, each with a small icon and one line, then "All businesses"), How it works,
+ * Pricing and Guides; on the right Log in or Dashboard as a text link and "Free Google check", filled charcoal with ivory
+ * text so it leads the header without competing with the page's one yellow action. A border and a soft shadow appear
+ * once the page scrolls. The menu opens on a click, Enter or Space, closes on Escape (focus back on its button), on a
+ * click outside it or when focus leaves it. Its rows (trade-menu.tsx) load on the first hover, focus or tap, so they never
+ * weigh on a page's first load. Under 1024 px everything moves into the phone menu.
  */
 const navLinkCls =
   "press relative inline-flex min-h-11 items-center rounded-full px-3.5 text-small font-semibold text-text-2 hover:text-text-1 after:absolute after:inset-x-3.5 after:bottom-1.5 after:h-0.5 after:rounded-full after:bg-transparent";
@@ -63,6 +66,71 @@ function focusables(root: HTMLElement | null) {
   if (!root) return [];
   return Array.from(root.querySelectorAll<HTMLElement>("a,button")).filter(
     (el) => el.offsetParent !== null,
+  );
+}
+
+/** The trade rows load on demand (a separate chunk): the first hover, focus or tap of the button fetches them. */
+const loadTradeMenu = () => import("./trade-menu");
+const HeaderPart = lazy(loadTradeMenu);
+const prefetchTradeMenu = () => void loadTradeMenu();
+
+/**
+ * "For your business" on a computer: a disclosure button and its panel (plain links, so Tab and screen readers read them
+ * as links). The panel follows the button in the page order, so Tab moves into it.
+ */
+function TradesMenu({ pathname }: { pathname: string }) {
+  const [open, setOpen] = useState(false);
+  const wrap = useRef<HTMLDivElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => setOpen(false), [pathname]);
+
+  // Escape and focus leaving it are handled on the wrapper; a press outside, by the panel (trade-menu.tsx).
+  return (
+    <div
+      ref={wrap}
+      className="relative"
+      onKeyDown={(e) => {
+        if (e.key === "Escape" && open) {
+          setOpen(false);
+          button.current?.focus();
+        }
+      }}
+      onBlur={(e) => {
+        if (!wrap.current?.contains(e.relatedTarget)) setOpen(false);
+      }}
+    >
+      <button
+        ref={button}
+        type="button"
+        aria-expanded={open}
+        aria-controls="trades-menu"
+        onClick={() => setOpen(!open)}
+        onPointerEnter={prefetchTradeMenu}
+        onFocus={prefetchTradeMenu}
+        className={cn(navLinkCls, "gap-1", (open || pathname.startsWith("/for")) && navActiveCls)}
+      >
+        {TRADES_MENU_LABEL}
+        <ChevronRight
+          aria-hidden
+          className={cn(
+            "size-4 transition-transform duration-200 ease-kb",
+            open ? "-rotate-90" : "rotate-90",
+          )}
+        />
+      </button>
+      <div
+        id="trades-menu"
+        hidden={!open}
+        className="absolute start-0 top-full z-10 mt-2 w-[42rem] max-w-[calc(100vw-4rem)] rounded-panel border border-line bg-surface-1 p-3 shadow-float xl:w-[58rem]"
+      >
+        {open && (
+          <Suspense fallback={null}>
+            <HeaderPart onPick={() => setOpen(false)} within={wrap} />
+          </Suspense>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -129,17 +197,18 @@ export function SiteHeader() {
     <header ref={header} className="sticky top-0 z-50">
       <div
         className={cn(
-          "border-b transition-[background-color,border-color] duration-200 ease-kb",
+          "border-b transition duration-200 ease-kb",
           open
             ? "border-line bg-surface-0"
             : scrolled
-              ? "glass border-line"
+              ? "glass border-line shadow-lift"
               : "border-transparent bg-surface-0",
         )}
       >
         <div className="container-kb flex h-16 items-center gap-2">
           <Logo onClick={close} className="-ms-1 ps-1 pe-2" />
           <nav aria-label="Main" className="ms-6 hidden flex-1 items-center gap-1 lg:flex">
+            <TradesMenu pathname={pathname} />
             {NAV_LINKS.map((n) => (
               <SiteLink key={n.to} to={n.to} className={navLinkCls} activeClassName={navActiveCls}>
                 {n.label}
@@ -157,6 +226,7 @@ export function SiteHeader() {
               ref={toggle}
               type="button"
               onClick={() => setOpen((o) => !o)}
+              onPointerEnter={prefetchTradeMenu}
               aria-expanded={open}
               aria-controls="phone-menu"
               className={cn(buttonClass("secondary", "md"), "w-11 px-0 lg:hidden")}
@@ -177,9 +247,9 @@ export function SiteHeader() {
 }
 
 /**
- * The phone menu (Design 9, Site 2): the five header rows near 48 px and Log in or Dashboard, no nested rows, then "Check my business free" with the trial line,
- * then one quiet row: Ask Nora, and WhatsApp only while WHATSAPP_ON. Focus is trapped, Escape closes and returns
- * focus, a tap on a row closes it, the page behind does not scroll, and the safe area is kept at the bottom.
+ * The phone menu's sheet (SITE-6): it starts under the header, scrolls on its own and holds the phone menu
+ * (trade-menu.tsx), which loads on the first hover, focus or tap of the menu button. Focus is trapped, Escape closes and
+ * returns focus, a tap on a row closes it, the page behind does not scroll, and the safe area is kept at the bottom.
  */
 function PhoneMenu({
   open,
@@ -192,11 +262,6 @@ function PhoneMenu({
   panel: RefObject<HTMLDivElement | null>;
   close: () => void;
 }) {
-  const rowCls =
-    "press flex min-h-12 items-center justify-between gap-4 font-display text-title font-semibold text-text-1 focus-visible:outline-offset-0";
-  const quietCls =
-    "press inline-flex min-h-12 items-center gap-2 rounded-full px-4 text-small font-semibold text-text-1 hover:bg-surface-2";
-  const rows = NAV_LINKS;
   return (
     <div
       id="phone-menu"
@@ -208,74 +273,24 @@ function PhoneMenu({
       style={{ top }}
       className="fixed inset-x-0 bottom-0 overflow-y-auto overscroll-contain bg-surface-0 lg:hidden"
     >
-      <div className="container-kb flex min-h-full flex-col pt-2 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-        <nav aria-label="Menu links">
-          <ul className="divide-y divide-line border-b border-line">
-            {rows.map((n) => (
-              <li key={n.to}>
-                <SiteLink
-                  to={n.to}
-                  onClick={close}
-                  className={rowCls}
-                  activeClassName="[&>span]:underline [&>span]:decoration-2 [&>span]:underline-offset-8"
-                >
-                  <span>{n.label}</span>
-                  <ChevronRight className="size-5 text-text-3 rtl:-scale-x-100" aria-hidden />
-                </SiteLink>
-              </li>
-            ))}
-            <li>
-              <AccountLink
-                onClick={close}
-                className={cn(rowCls, "font-sans text-body text-text-2")}
-              >
+      {open && (
+        <Suspense fallback={null}>
+          <HeaderPart
+            phone
+            close={close}
+            account={(rowCls, chevron) => (
+              <AccountLink onClick={close} className={cn(rowCls, "font-sans text-body")}>
                 {(state) => (
                   <>
                     <AccountWords state={state} />
-                    <ChevronRight className="size-5 text-text-3 rtl:-scale-x-100" aria-hidden />
+                    {chevron}
                   </>
                 )}
               </AccountLink>
-            </li>
-          </ul>
-        </nav>
-        <div className="mt-6">
-          <ButtonLink to="/scan" full onClick={close}>
-            {MAIN_CTA}
-          </ButtonLink>
-          <TrialLine className="mt-2 text-center" />
-        </div>
-        <div className="mt-6 flex items-center justify-center gap-2 border-t border-line pt-4">
-          {/* Nora is always one tap away on a phone, even where the phone bar waits (Web 4 review). */}
-          <button
-            type="button"
-            onClick={() => {
-              close();
-              window.dispatchEvent(new CustomEvent("kabsi:open-nora"));
-            }}
-            className={quietCls}
-          >
-            <MessageCircle className="size-5" aria-hidden />
-            Ask Nora
-          </button>
-          {WHATSAPP_ON && (
-            <>
-              <span aria-hidden className="h-5 w-px bg-line-strong" />
-              {/* The glyph labels the channel beside the word, on a link that opens Kabsi's WhatsApp (Meta's rules). */}
-              <a
-                href={WHATSAPP_URL}
-                target="_blank"
-                rel="noreferrer"
-                onClick={close}
-                className={quietCls}
-              >
-                <WhatsAppGlyph className="size-5" />
-                WhatsApp
-              </a>
-            </>
-          )}
-        </div>
-      </div>
+            )}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

@@ -19,8 +19,9 @@ export const restaurant: Industry = {
     rival2: "Northern Grill",
     near: ["Near the station", "By the square"],
   },
-  photos: [PHOTOS.restaurantDining, PHOTOS.restaurantTables],
-  focus: "50% 55%",
+  // SITE-6: a bright hero with the owner at work (was the evening dining room).
+  photos: [PHOTOS.restaurantOwner, PHOTOS.restaurantTables],
+  focus: "50% 35%",
   searches: [
     "restaurants near me",
     "sunday roast near me",
