@@ -3,7 +3,9 @@
 import assert from "node:assert/strict";
 import { buildMessage, dataBlock, type Line, quotedPrintable, serverSays, smtpProbe, smtpSend } from "./smtp.ts";
 import { type DueMessage, modeRefusal, sendTick, type SendDeps, type SendSettings, testFast } from "./send.ts";
-import { localParts, RAMP } from "./rules.ts";
+import { emailOne, followUp, localParts, RAMP } from "./rules.ts";
+import { checkDns, dkimBits, dmarcOk, spfOk, txtText } from "./dns.ts";
+import { mailTesterAddressOk, mailTesterEmail, reportUrl, scoreOf } from "./mail-tester.ts";
 
 function fakeServer(replies: string[]) {
   const written: string[] = [];
@@ -51,6 +53,9 @@ Deno.test("the message: plain text, UTF-8, a real Message-ID, threading, a mailt
   assert.ok(quotedPrintable("x".repeat(200)).split("\r\n").every((l) => l.length <= 76));
 });
 
+/** An invented postal address, for the tests only. */
+const POSTAL = "100 Example Street, Exampleville, TX 75001";
+const DNS_OK = { ok: true, spf: true, dkim: true, dmarc: true, dkim_bits: 2048, problem: null };
 const OPEN: SendSettings = { sending_open: true, test_mode: true, ...RAMP, started_on: "2026-11-02", stopped_reason: null, next_send_at: null };
 const TEST: SendSettings = { ...OPEN, sending_open: false, started_on: null };
 const MON_10 = new Date("2026-11-09T10:00:00Z");
@@ -59,7 +64,7 @@ function msg(over: Partial<DueMessage> = {}): DueMessage {
   return {
     id: "m1", prospect_id: "p1", parent_id: null, kind: "first", to_address: "hello@rose.example.com", subject: "Rose Lane Salon's Google profile",
     body: "Hi Rose Lane Salon team,\n\nkabsi.co\n\nkabsi.co/privacy", send_after: "2026-11-09T09:00:00Z", in_reply_to: null, references_ids: null,
-    prospect: { email: "hello@rose.example.com", email_domain: "rose.example.com", time_zone: "Europe/London", test: false, status: "approved" },
+    prospect: { email: "hello@rose.example.com", email_domain: "rose.example.com", time_zone: "Europe/London", test: false, status: "approved", country: "GB" },
     parent: null, ...over,
   };
 }
@@ -76,7 +81,8 @@ function deps(over: Partial<SendDeps> = {}, settings = OPEN, due: DueMessage[] =
     markCancelled: async (ids, why) => void log.push(`cancel:${ids.join(",")}:${why}`),
     markFailed: async (id, why) => void log.push(`failed:${id}:${why}`), founding: async () => null,
     testRecipients: ["inbox@test.example.com"], sender: { name: "Rashid Abou Hamzy", address: "rashid@getkabsi.com" },
-    now: MON_10, random: () => 0, ...over,
+    postal: POSTAL, dns: async () => (log.push("dns"), DNS_OK), saveDns: async () => void log.push("dns_saved"),
+    killGate: async () => "open", now: MON_10, random: () => 0, ...over,
   };
   return { d, log };
 }
@@ -84,7 +90,7 @@ function deps(over: Partial<SendDeps> = {}, settings = OPEN, due: DueMessage[] =
 Deno.test("open: one message per tick, the follow-up dated day 4 or 5, the next send at least 20 minutes later", async () => {
   const { d, log } = deps();
   assert.equal((await sendTick(d)).state, "sent");
-  assert.deepEqual(log.filter((l) => !l.startsWith("refresh")), ["next:20", "deliver:hello@rose.example.com", "sent:m1:2026-11-13"]);
+  assert.deepEqual(log.filter((l) => !l.startsWith("refresh") && !l.startsWith("dns")), ["next:20", "deliver:hello@rose.example.com", "sent:m1:2026-11-13"]);
 });
 
 Deno.test("locked: nothing is read or sent; a stop wins over everything; spacing holds", async () => {
@@ -226,13 +232,13 @@ Deno.test("serverSays: printable, short, and every secret and its base64 form cu
 Deno.test("Outbound 2: a follow-up sends its invite line only while the link is current and places remain", async () => {
   const slug = "FakeSlug0000000000Test12"; // invented
   const first = { status: "sent", message_id: "<ob.0@getkabsi.com>", sent_at: "2026-11-04T10:00:00Z" };
-  const body = `Hi again. Happy to run that free check.\n\nI also have founding places open: three months of Kabsi Pro free, and you tell me what to make better. Details: kabsi.co/founding/${slug}\n\nRashid Abou Hamzy, founder of Kabsi\nkabsi.co\n\nkabsi.co/privacy`;
+  const body = `Hi again. Happy to run that free check.\n\nI also have a few founding places: Kabsi for 19 US dollars a month for your first 12 months, then 29. Details: kabsi.co/founding/${slug}\n\nRashid Abou Hamzy, founder of Kabsi\nkabsi.co\n\nkabsi.co/privacy`;
   const follow = msg({ id: "f1", kind: "follow_up", parent_id: "m0", parent: first, body });
   for (const [founding, keeps] of [[{ slug, left: 4 }, true], [{ slug, left: 0 }, false], [null, false], [{ slug: "Other000000000000000Slug", left: 4 }, false]] as const) {
     let sent = "";
     const t = deps({ founding: async () => founding, deliver: async (_to, m, ok) => { sent = m; await ok(); } }, OPEN, [follow]);
     assert.equal((await sendTick(t.d)).state, "sent", JSON.stringify(founding));
-    assert.equal(sent.includes("founding places open"), keeps, JSON.stringify(founding));
+    assert.equal(sent.includes("a few founding places"), keeps, JSON.stringify(founding));
     assert.ok(sent.includes("Rashid Abou Hamzy, founder of Kabsi"));
     assert.ok(sent.includes("Hi again. Happy to run that free check."), "the first line always goes");
   }
@@ -240,4 +246,116 @@ Deno.test("Outbound 2: a follow-up sends its invite line only while the link is 
   const t = deps({ founding: async () => null }, OPEN, [bare]);
   await sendTick(t.d);
   assert.ok(t.log.includes("failed:f2:invite_line_left_too_little"), "too little left: a person looks at it, nothing is sent");
+});
+
+// ─── OUTBOUND-3: CAN-SPAM, the deliverability gate, the kill gate, mail-tester
+
+const US_MSG = () => {
+  const one = emailOne({ business: "Oak Street Auto", kind: "auto repair shops", city: "Exampleville", detail: "Your site lists your hours, and keeping Google's hours the same saves wasted trips.", country: "US", postal: POSTAL });
+  return msg({ to_address: "hello@oak.example.com", subject: one.subject, body: one.body,
+    prospect: { email: "hello@oak.example.com", email_domain: "oak.example.com", time_zone: "America/Chicago", test: false, status: "approved", country: "US" } });
+};
+const MON_16_UTC = new Date("2026-11-09T16:00:00Z"); // 10:00 in Chicago
+
+Deno.test("CAN-SPAM: honest From and subject; Email 1 never pretends to be a reply; a working mailto opt-out", async () => {
+  let sent = "";
+  const t = deps({ now: MON_16_UTC, deliver: async (_to, m, ok) => { sent = m; await ok(); } }, OPEN, [US_MSG()]);
+  assert.equal((await sendTick(t.d)).state, "sent");
+  assert.match(sent, /^From: Rashid Abou Hamzy <rashid@getkabsi\.com>\r\n/, "the real sender, by name, on Kabsi's own domain");
+  assert.ok(!/\r\nReply-To:/i.test(sent), "replies go to the sender");
+  assert.match(sent, /\r\nSubject: Oak Street Auto's Google profile\r\n/, "the subject says what the email is about");
+  assert.ok(!/\r\nSubject: (Re|Fwd?):/i.test(sent), "Email 1 never says Re: or Fwd:");
+  assert.match(sent, /\r\nList-Unsubscribe: <mailto:rashid@getkabsi\.com\?subject=no%20thanks>\r\n/);
+  assert.ok(sent.replace(/=\r\n/g, "").includes("Reply 'no thanks' and I will not write again."), "the opt-out is in the body too");
+});
+
+Deno.test("CAN-SPAM: the postal address in every US footer; with no address set, nothing sends at all", async () => {
+  const one = US_MSG();
+  assert.ok(one.body.endsWith(`kabsi.co/privacy\nKabsi, ${POSTAL}`), "Email 1");
+  assert.ok(followUp({ business: "Oak Street Auto", country: "US", postal: POSTAL }).body.endsWith(`\nKabsi, ${POSTAL}`), "the follow-up");
+  assert.throws(() => emailOne({ business: "Oak Street Auto", kind: "x", city: "y", detail: "z", country: "US", postal: null }), "never built without one");
+  assert.ok(!emailOne({ business: "Rose Lane Salon", kind: "x", city: "y", detail: "z", country: "GB" }).body.includes("Kabsi, "), "the UK footer is unchanged");
+
+  const none = deps({ now: MON_16_UTC, postal: null }, OPEN, [US_MSG()]);
+  assert.equal((await sendTick(none.d)).state, "no_postal_address");
+  assert.ok(!none.log.some((l) => l.startsWith("deliver")));
+  const gb = deps({ postal: null });
+  assert.equal((await sendTick(gb.d)).state, "no_postal_address", "nothing at all, not even to the UK");
+
+  const stale = deps({ now: MON_16_UTC, postal: "200 Other Road, Exampleville, TX 75002" }, OPEN, [US_MSG()]);
+  await sendTick(stale.d);
+  assert.ok(stale.log.includes("failed:m1:no_postal_address_in_footer"), "a draft with an old address is held for a person");
+  const bare = deps({ now: MON_16_UTC }, OPEN, [{ ...US_MSG(), body: "Hi Oak Street Auto team,\n\nkabsi.co\n\nkabsi.co/privacy" }]);
+  await sendTick(bare.d);
+  assert.ok(bare.log.includes("failed:m1:no_postal_address_in_footer"));
+});
+
+Deno.test("CAN-SPAM: a postal address must be one real line with a number and no link-like text", async () => {
+  const { postalAddress } = await import("./rules.ts");
+  assert.equal(postalAddress("  100 Example Street,   Exampleville, TX 75001 "), POSTAL);
+  assert.equal(postalAddress("PO Box 123, Exampleville, TX 75001"), "PO Box 123, Exampleville, TX 75001");
+  for (const bad of ["", "Example Street", "P.O. Box 123, Exampleville", "100 Example St\nExampleville", "100 Example St, kabsi.co", "100 Example St — Suite 4", null]) {
+    assert.equal(postalAddress(bad), null, String(bad));
+  }
+});
+
+Deno.test("deliverability: nothing sends until SPF, DKIM and DMARC read correctly; the reading is recorded", async () => {
+  const bad = deps({ dns: async () => ({ ok: false, spf: true, dkim: false, dmarc: true, dkim_bits: 1024, problem: "dkim_too_short" }) });
+  assert.equal((await sendTick(bad.d)).state, "dns_not_ready");
+  assert.ok(bad.log.includes("dns_saved"));
+  assert.ok(!bad.log.some((l) => l.startsWith("deliver") || l.startsWith("next:")), "no slot taken, nothing sent");
+  const ok = deps();
+  assert.equal((await sendTick(ok.d)).state, "sent");
+  assert.ok(ok.log.indexOf("dns") < ok.log.findIndex((l) => l.startsWith("deliver")), "read right before sending");
+});
+
+// The live records of getkabsi.com as read on 25 Nov 2026 (public DNS).
+const LIVE_DKIM = `"v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApj6NDRTSZZ/6sTaKWNMALfq9PObgHsGpBGqdgc6pA3WRw5cYMkOAWda8JqphNBHScrhu9i2XCmgsF/5G1gPP36xYCFfl7/rehMt0eq95Lr3wY0C99x77tcjX9yZQSAPFPvDqoKAXEH2NMj+MvvqQ4T/4peiprQvBmZ5Xyg74TLV550zMYjRAmAvUfUvA/gw+Z" "yf2FnZzzHv1bmPMuxPQnLm65k9iYoajdQT1d0BYlE+rbh1QgI2zOPtRCEgbGs6TzJTvhUeZ0XG8/T1EDei0Kc208b1pVdHKKpbUSMfsY4mO2IpCEUh43IxsqMY+Cg7F0AcQcKG8zqB2tirPbYHDUQIDAQAB"`;
+const LIVE = {
+  "getkabsi.com": [`"google-site-verification=x"`, `"v=spf1 include:zoho.com ~all"`, `"zoho-verification=x.zmverify.zoho.com"`],
+  "zmail._domainkey.getkabsi.com": [LIVE_DKIM],
+  "_dmarc.getkabsi.com": [`"v=DMARC1; p=none; rua=mailto:rashid@getkabsi.com"`],
+} as Record<string, string[]>;
+const doh = (records: Record<string, string[]>) => async (url: string) => {
+  const name = new URL(url).searchParams.get("name")!;
+  return new Response(JSON.stringify({ Status: 0, Answer: (records[name] ?? []).map((data) => ({ type: 16, data })) }));
+};
+
+Deno.test("deliverability: the three records parsed (SPF with Zoho, DKIM zmail at 2048 bits, DMARC with a policy)", async () => {
+  assert.equal(await dkimBits([txtText(LIVE_DKIM)]), 2048, "the two quoted halves joined");
+  assert.deepEqual(await checkDns(doh(LIVE)), { ok: true, spf: true, dkim: true, dmarc: true, dkim_bits: 2048, problem: null });
+  assert.ok(!spfOk(["v=spf1 include:zoho.com ~all", "v=spf1 -all"]), "two SPF records is a fail");
+  assert.ok(!spfOk(["v=spf1 include:_spf.google.com ~all"]), "no Zoho");
+  assert.ok(!spfOk(["v=spf1 include:zoho.com +all"]), "+all lets anyone send");
+  assert.ok(!dmarcOk(["v=DMARC1; rua=mailto:x@getkabsi.com"]), "no policy");
+  assert.ok(spfOk(["v=spf1 include:zohomail.com ~all"]), "Zoho's newer include");
+  const noDkim = await checkDns(doh({ ...LIVE, "zmail._domainkey.getkabsi.com": [] }));
+  assert.deepEqual([noDkim.ok, noDkim.problem], [false, "dkim_missing"]);
+  const noDmarc = await checkDns(doh({ ...LIVE, "_dmarc.getkabsi.com": [] }));
+  assert.deepEqual([noDmarc.ok, noDmarc.problem], [false, "dmarc"]);
+  const down = await checkDns(async () => new Response("no", { status: 503 }));
+  assert.deepEqual([down.ok, down.problem], [false, "dns_unreadable"], "no answer is never a pass");
+});
+
+Deno.test("the kill gate: once it ends Outbound, nothing is read or sent", async () => {
+  const t = deps({ killGate: async () => "ended" });
+  assert.equal((await sendTick(t.d)).state, "stopped");
+  assert.ok(!t.log.some((l) => l.startsWith("deliver") || l === "refresh"));
+  const w = deps({ killGate: async () => "waiting" });
+  assert.equal((await sendTick(w.d)).sent, 0, "while the first 300 are judged, no new Email 1 goes");
+  const f = msg({ id: "m2", kind: "follow_up", parent_id: "m1", parent: { status: "sent", message_id: "<ob.0@getkabsi.com>", sent_at: "2026-11-05T10:00:00Z" } });
+  assert.equal((await sendTick(deps({ killGate: async () => "waiting" }, OPEN, [f]).d)).state, "sent", "follow-ups of the first 300 still go");
+});
+
+Deno.test("mail-tester: the address shape, the fictional US Email 1 with its footer, and the score read from the report", () => {
+  assert.ok(mailTesterAddressOk("test-abc123@srv1.mail-tester.com"));
+  for (const bad of ["test@example.com", "x@srv1.mail-tester.com.evil.example", "test-abc@mail-tester.com", 5]) assert.ok(!mailTesterAddressOk(bad), String(bad));
+  const e = mailTesterEmail(POSTAL, MON_10);
+  assert.equal(e.subject, "Oak Street Auto's Google profile");
+  assert.ok(e.body.includes("auto repair shops in Exampleville") && e.body.endsWith(`Kabsi, ${POSTAL}`));
+  assert.equal(reportUrl("test-abc123@srv1.mail-tester.com"), "https://www.mail-tester.com/test-abc123&format=json");
+  assert.equal(scoreOf({ mark: 10 }), 10);
+  assert.equal(scoreOf({ mark: 9.46 }), 9.5);
+  assert.equal(scoreOf({ displayedMark: "8.2/10" }), 8.2);
+  for (const none of [null, {}, { mark: 11 }, { mark: "10" }]) assert.equal(scoreOf(none), null);
 });

@@ -10,9 +10,12 @@
 import { clearYes, complaintWords, looksLikeAutoReply, looksLikeBounce, looksLikeFeedbackReport, optOutReason, OurText, stripQuoted } from "./classify.ts";
 import { ourIds, type Parsed } from "./mail.ts";
 import { possessive } from "../possessive.ts";
-import { domainOf, houseStyleOk, isFreeMail, sha } from "./rules.ts";
+import { domainOf, footerFor, houseStyleOk, isFreeMail, postalAddressOk, sha } from "./rules.ts";
 import { SOCIAL_LINKS } from "../social-links.ts";
-import { FOUNDING_SENTENCE } from "../email/lifecycle-copy.ts";
+
+/** The offer line of the reply to a yes (blueprint 3.1). Keep equal to TRIAL_LINE in src/lib/offer.ts (tested). */
+export const REPLY_TRIAL_LINE =
+  "14 days free. Then 29 US dollars a month until you cancel. A card is needed to start. Cancel before day 14 and you pay nothing.";
 
 export type Matched = {
   message: { id: string; kind: string; message_id: string };
@@ -44,23 +47,27 @@ export type InboxDeps = {
   harveyHashes(hashes: string[]): Promise<void>;
   /** Kabsi's own address: its own mail in the inbox is never read as a reply. */
   self: string;
+  /** The sender's postal address for a US reply's footer (CAN-SPAM), or null: then no US reply is drafted. */
+  postal?: string | null;
 };
 
 export type InboxResult = { handled_to_uid: number | null; failed: number; looked_at: number; matched: number; replies: number; yes: number; opt_outs: number; bounces: number; auto_replies: number; complaints: number };
 
 const reSubject = (s: string) => `Re: ${String(s ?? "").replace(/^\s*((re|aw|sv|fwd?)\s*:\s*)+/i, "").trim()}`.slice(0, 200);
 
-/** Rashid's reply to a clear yes (docs/COPY.md section 65), with the Facebook and Instagram addresses of R-59. */
-export function yesReply(business: string, code: string): string {
+/** Rashid's reply to a clear yes (docs/COPY.md section 65), with the Facebook and Instagram addresses of R-59. A US
+ *  recipient's reply ends with the postal address footer (CAN-SPAM, OUTBOUND-3). */
+export function yesReply(business: string, code: string, country = "GB", postal: string | null = null): string {
   const fb = SOCIAL_LINKS.find((s) => s.name === "Facebook")!.href.replace(/^https:\/\//, "");
   const ig = SOCIAL_LINKS.find((s) => s.name === "Instagram")!.href.replace(/^https:\/\//, "");
-  // Lane R, 6 Nov 2026 (30.39 item 11): word for word; a template wrote it, so it is signed without Nora. R-142
-  // decision 4a (9 Nov 2026): the launch price sentence of COPY.md (the first 30 paying businesses), no Founding 25.
+  // Lane R, 6 Nov 2026 (30.39 item 11): word for word; a template wrote it, so it is signed without Nora. OUTBOUND-3:
+  // the retired launch price sentence gives way to the one plan's trial line (blueprint 3.1).
   return [
     `Hi ${business} team,`,
     `Thanks. Here is the free check of ${possessive(business)} Google profile: kabsi.co/scan/${code}`,
-    FOUNDING_SENTENCE,
+    `If you would like Kabsi to look after it: ${REPLY_TRIAL_LINE}`,
     `Rashid Abou Hamzy, founder of Kabsi\nkabsi.co\nFacebook: ${fb}\nInstagram: ${ig}`,
+    ...(country === "US" ? [footerFor("US", postal)] : []),
   ].join("\n\n");
 }
 
@@ -151,9 +158,10 @@ async function handleOne(deps: InboxDeps, item: { uid: number; parsed: Parsed; v
   await deps.setStatus(p.id, "needs_you", yes);
   if (yes) {
     const code = await deps.freeCheck(p);
-    if (code && /^[A-Za-z0-9_-]{4,40}$/.test(code) && houseStyleOk(p.business_name)) {
+    const canFooter = p.country !== "US" || postalAddressOk(deps.postal);
+    if (code && /^[A-Za-z0-9_-]{4,40}$/.test(code) && houseStyleOk(p.business_name) && canFooter) {
       await deps.draftReply({
-        prospect_id: p.id, to_address: m.from || p.email, subject: reSubject(m.subject), body: yesReply(p.business_name, code),
+        prospect_id: p.id, to_address: m.from || p.email, subject: reSubject(m.subject), body: yesReply(p.business_name, code, p.country, deps.postal ?? null),
         in_reply_to: m.messageId, references_ids: `${m.references} ${m.messageId}`.trim().split(" ").slice(-10).join(" "),
       });
     }

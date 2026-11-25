@@ -9,6 +9,7 @@ const P = {
   business_name: "Rose Lane Salon",
   city: "Exampleton",
   country: "GB",
+  time_zone: "Europe/London",
   source_page: "https://roselanesalon.example.com/contact",
   source_date: "2026-11-06",
   detail_used:
@@ -58,7 +59,7 @@ const answer = {
   prospect: reply.prospect,
 };
 
-test("the day's drafts, their sources, the replies, the lock read only", async ({ page }) => {
+test("the week's emails, their sources, the replies, the lock read only", async ({ page }) => {
   await noBanner(page);
   const calls: { path: string; body: string }[] = [];
   page.on("request", (r) => {
@@ -74,6 +75,11 @@ test("the day's drafts, their sources, the replies, the lock read only", async (
         stopped_reason: null,
         stopped_at: null,
         started_on: null,
+        dns_ok: true,
+        dns_problem: null,
+        dns_checked_at: "2026-11-25T10:00:00Z",
+        mail_tester_score: null,
+        mail_tester_at: null,
       },
       "/rest/v1/outbound_messages": [first, follow, answer],
       "/rest/v1/outbound_events": [reply],
@@ -83,6 +89,16 @@ test("the day's drafts, their sources, the replies, the lock read only", async (
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Emails waiting for your yes");
   await expect(
     page.getByText("Sending is locked. Test mode: only the test addresses receive mail."),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "This week's emails" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 3, name: /^Sends / })).toHaveCount(1);
+  await expect(
+    page.getByText(/^Mail checks: SPF, DKIM and DMARC read correctly on /),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      "mail-tester has not scored Email 1 yet. 10 of 10 is needed before sending opens.",
+    ),
   ).toBeVisible();
   const card = page.getByRole("article", { name: "Email 1 to Rose Lane Salon" });
   await expect(card.getByText(P.source_page)).toBeVisible();
