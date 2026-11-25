@@ -33,6 +33,18 @@ describe("OUTBOUND-3", () => {
     expect(code).not.toMatch(/\bdrop\s+(table|column)\b/i);
   });
 
+  it("the three jobs are scheduled again", () => {
+    for (const [job, cron, fn] of [
+      ["kabsi_outbound_prepare", "15 */2 * * 0", "outbound-prepare"],
+      ["kabsi_outbound_send", "*/10 * * * *", "outbound-send"],
+      ["kabsi_outbound_inbox", "5-55/10 * * * *", "outbound-inbox"],
+    ]) {
+      expect(migration).toContain(
+        `select cron.schedule('${job}', '${cron}', $$select public.call_internal('${fn}')$$);`,
+      );
+    }
+  });
+
   it("the skill and COPY section 65 carry the new rules", () => {
     const skill = read(".claude/skills/kabsi-outbound/SKILL.md");
     for (const s of [

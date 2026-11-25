@@ -1,5 +1,5 @@
 -- OUTBOUND-3: the US and the UK only, sending still locked, opening needs DNS and a mail-tester 10 of 10 even for lane R,
--- the kill gate, and the three jobs scheduled again.
+-- and the kill gate.
 begin;
 create extension if not exists pgtap with schema extensions;
 select * from no_plan();
@@ -43,10 +43,8 @@ select is((select sending_open from public.outbound_settings), false, 'sending i
 select is(public.outbound_check_kill_gate(), 'ended', 'it stays ended');
 select ok(not has_function_privilege('authenticated', 'public.outbound_check_kill_gate()', 'execute'), 'the browser cannot run it');
 
--- The jobs.
-select is((select schedule from cron.job where jobname = 'kabsi_outbound_prepare'), '15 */2 * * 0', 'prepare: Sundays, for the coming week');
-select is((select schedule from cron.job where jobname = 'kabsi_outbound_send'), '*/10 * * * *', 'send every 10 minutes');
-select is((select schedule from cron.job where jobname = 'kabsi_outbound_inbox'), '5-55/10 * * * *', 'inbox between the sends');
+-- The jobs: scripts/db-test.sh unschedules every cron job after the migrations, so the schedules are checked on the
+-- migration's text (tests/outbound3.test.ts) and read back live after applying.
 
 select * from finish();
 rollback;
