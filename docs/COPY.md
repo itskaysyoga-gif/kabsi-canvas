@@ -2688,3 +2688,14 @@ Every line below is in the code word for word; this section names where. No line
 - Staff, Businesses: the button "Start trial" and the note "Trial started."
 - Old-reviews card: "The replies did not load. Nothing changed. Try again" and "These replies did not go through. Nothing changed. Try again".
 - Google profile: the tab "Where you show up" is off until the map and AI answers are switched back on.
+
+## 99. FIX-5: the bot check never leaves a dead button (25 Nov 2026, the FIX-5 prompt)
+
+Where: /login (the email step and "Send a new code"), the free check on /scan and its two forms ("Save my place", "Send me this report"), and every search box (Home, trade pages, /for, /scan).
+
+- Waiting label, on the button itself with the spinner, after a tap that came before the check finished: "Checking your connection". The button sends the moment the check passes. Before the tap the button keeps its own words ("Send me a code", "Save my place", "Send me this report") and is never greyed out. A tap on a bad email still shows the existing line "Check the email. It needs a full address, like name@shop.com."
+- The free check's progress card adds the same words in front of its last line while it waits: "Checking your connection. About 30 seconds. Nothing changes on Google."
+- Above the check box, only when Cloudflare needs a tap: "Tap the box to confirm you are a person".
+- No pass in 15 seconds: "This is taking longer than usual." followed by the button "Try again". On /scan the card shows the same line with the button "Try again", and nothing is sent.
+- An error from the check itself keeps the older line: "We could not check your browser." followed by "Try again".
+- The measurement sends no words: the event `bot_check_finished` carries surface, outcome and milliseconds (docs/EVENTS.md).

@@ -206,3 +206,80 @@ describe("the words", () => {
       expect(line).not.toMatch(/[–—!-]/);
   });
 });
+
+// FIX-5 item 5: /api/suggest after SITE-7's lazy load of the suggestions client. The route is the same; only the page's
+// import moved. A "warm" call is the wake-up: it never carries suggestions and takes about 0 ms by design.
+describe("/api/suggest for a real query", () => {
+  const SALT = "https://example.supabase.co";
+  const logs: Record<string, unknown>[] = [];
+  const handler = async () => {
+    const { makeSuggestHandler } = await import("../src/server/suggest");
+    return makeSuggestHandler({
+      env: (n) => ({ PLACES_API_KEY: "k", TURNSTILE_SECRET_KEY: "s", SUGGEST_ROUTE_KEY: "r" })[n],
+      take: async () => ({ allowed: true }),
+      autocomplete: async () => ({
+        ok: true,
+        status: 200,
+        data: {
+          suggestions: [
+            {
+              placePrediction: {
+                placeId: "ChIJ_barber_manchester_1",
+                structuredFormat: {
+                  mainText: { text: "Northern Quarter Barbers" },
+                  secondaryText: { text: "Manchester, UK" },
+                },
+              },
+            },
+          ],
+        },
+      }),
+      verifyTurnstile: async (t) => t === "good",
+      log: (f) => void logs.push(f),
+      now: () => Date.UTC(2026, 10, 25, 12, 0, 0),
+      salt: SALT,
+    });
+  };
+  const post = (body: unknown) =>
+    new Request("https://kabsi.co/api/suggest", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-forwarded-for": "203.0.113.9" },
+      body: JSON.stringify(body),
+    });
+
+  it("returns suggestions for barber Manchester and logs outcome ok", async () => {
+    const res = await (
+      await handler()
+    )(
+      post({
+        action: "suggest",
+        query: "barber Manchester",
+        session_token: "0123456789abcdef0123",
+        turnstile: "good",
+      }),
+    );
+    const j = (await res.json()) as { suggestions: { name: string }[]; available: boolean };
+    expect(res.status).toBe(200);
+    expect(j.available).toBe(true);
+    expect(j.suggestions.map((s) => s.name)).toEqual(["Northern Quarter Barbers"]);
+    expect(logs.at(-1)).toMatchObject({ fn: "suggest", status: 200, outcome: "ok" });
+  });
+  it("answers warm with ok and no suggestions, on purpose, and logs outcome warm", async () => {
+    const res = await (await handler())(post({ action: "warm" }));
+    expect(await res.json()).toEqual({ ok: true, configured: true });
+    expect(logs.at(-1)).toMatchObject({ outcome: "warm" });
+  });
+  it("refuses a suggest with no check and logs challenge_failed", async () => {
+    const res = await (
+      await handler()
+    )(
+      post({
+        action: "suggest",
+        query: "barber Manchester",
+        session_token: "0123456789abcdef0123",
+      }),
+    );
+    expect(res.status).toBe(400);
+    expect(logs.at(-1)).toMatchObject({ outcome: "challenge_failed" });
+  });
+});
