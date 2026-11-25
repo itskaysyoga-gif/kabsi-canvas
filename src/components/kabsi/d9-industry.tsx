@@ -14,6 +14,10 @@ import { Band, Head, Lead, MarkRow } from "@/components/marketing/kit";
 import { HERO_MARKS, HOME_FAQ } from "@/components/marketing/v31-data";
 import { PriceCard, TrustLines } from "@/components/marketing/v31";
 import { Img } from "./photos";
+import { PubImg } from "@/components/marketing/life";
+import { ProductScreens } from "@/components/marketing/screens-section";
+import { TRADE_TILES } from "@/components/marketing/public-photos";
+import { TRADE_WIDE } from "@/components/marketing/industry-photos";
 import { ScanBox } from "./scan-box";
 import { SiteLink } from "./site-link";
 import { Marked } from "./highlight";
@@ -118,12 +122,31 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
             </div>
           </div>
           {b && (
-            <figure aria-labelledby="review-h">
-              <h2 id="review-h" className="mb-3 text-title text-text-1">
-                {`A review at ${i.example.business}, and the reply Kabsi writes`}
-              </h2>
-              <div className="rounded-panel border border-line bg-surface-1 p-4 shadow-lift sm:p-6">
-                <div className="flex items-center justify-between gap-3">
+            <figure aria-labelledby="review-h" data-nora-avoid>
+              {/* SITE-4: a real photo of the trade, with the example review card over its lower edge. */}
+              <div className="overflow-hidden rounded-panel bg-surface-3 shadow-lift">
+                {TRADE_WIDE[i.slug] ? (
+                  <PubImg
+                    photo={TRADE_WIDE[i.slug]!}
+                    sizes="(min-width: 1280px) 520px, (min-width: 1024px) 42vw, 100vw"
+                    priority
+                    className="aspect-[3/2] w-full object-cover"
+                  />
+                ) : (
+                  <Img
+                    photo={i.photos[0]}
+                    sizes="(min-width: 1280px) 520px, (min-width: 1024px) 42vw, 100vw"
+                    priority
+                    style={{ objectPosition: i.focus ?? "50% 50%" }}
+                    className="aspect-[3/2] w-full object-cover"
+                  />
+                )}
+              </div>
+              <div className="relative mx-3 -mt-16 rounded-panel border border-line bg-surface-1 p-4 shadow-float sm:mx-6 sm:-mt-20 sm:p-6">
+                <h2 id="review-h" className="text-small font-bold text-text-2">
+                  {`A review at ${i.example.business}, and the reply Kabsi writes`}
+                </h2>
+                <div className="mt-2 flex items-center justify-between gap-3">
                   <p className="text-small font-bold">{`${b.review.name}, ${b.review.stars} stars`}</p>
                   <ExampleBadge />
                 </div>
@@ -155,7 +178,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
         </div>
       </section>
 
-      <Band id="benefits" tone="white">
+      <Band id="benefits" tone="soft">
         <Head id="benefits" title="What Kabsi does without being asked." />
         <ol className="mt-8 grid gap-8 md:grid-cols-3 md:gap-10">
           {BENEFITS.map((x, n) => (
@@ -170,10 +193,12 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
         </ol>
       </Band>
 
+      <ProductScreens only={["report", "email"]} />
+
       {b && (
         <Band
           id="fact"
-          tone="ivory"
+          tone="soft"
           inner="lg:grid lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16"
         >
           <Head id="fact" title={`One thing Google says about ${i.plural.toLowerCase()}.`} />
@@ -190,13 +215,13 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
         </Band>
       )}
 
-      <Band id="price" tone="white">
+      <Band id="price" tone="ivory">
         <Head id="price" title="One price." />
         {/* The price card of Home and Pricing: TRIAL_LINE beside the button, the included list, the not included line. */}
         <PriceCard className="mt-8" />
       </Band>
 
-      <Band id="trust" tone="ivory" inner="py-10 sm:py-14 lg:py-16">
+      <Band id="trust" tone="soft" inner="py-10 sm:py-14 lg:py-16">
         <h2 id="trust-h" className="text-title text-text-2">
           What to know first
         </h2>
@@ -207,7 +232,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
         </SiteLink>
       </Band>
 
-      <Band id="questions" tone="white">
+      <Band id="questions" tone="ivory">
         <Head id="questions" title="Questions." />
         <Faq items={HOME_FAQ.map((f) => ({ q: f.q, a: f.a }))} className="mt-8" />
       </Band>
@@ -270,17 +295,27 @@ function TradeCard({
   return (
     <SiteLink
       to={`/for/${i.slug}`}
-      className="press group flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface-0 shadow-rest"
+      className="press kb-lift group flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface-0 shadow-rest"
     >
       <span className="relative block aspect-[3/2] overflow-hidden bg-surface-3">
-        <Img
-          photo={i.photos[0]}
-          sizes={sizes}
-          decorative
-          priority={priority}
-          style={{ objectPosition: i.focus ?? "50% 50%" }}
-          className="absolute inset-0 size-full object-cover transition-transform duration-400 ease-kb group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
-        />
+        {TRADE_WIDE[i.slug] ? (
+          <PubImg
+            photo={TRADE_WIDE[i.slug]!}
+            sizes={sizes}
+            decorative
+            priority={priority}
+            className="absolute inset-0 size-full object-cover transition-transform duration-400 ease-kb group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
+          />
+        ) : (
+          <Img
+            photo={i.photos[0]}
+            sizes={sizes}
+            decorative
+            priority={priority}
+            style={{ objectPosition: i.focus ?? "50% 50%" }}
+            className="absolute inset-0 size-full object-cover transition-transform duration-400 ease-kb group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
+          />
+        )}
       </span>
       <span className="flex flex-1 flex-col p-3 sm:p-4">
         <span className="text-body font-bold sm:text-title">{i.plural}</span>
@@ -310,7 +345,9 @@ export const FOR_HERO = {
  * Site 2 (master plan 30.34 item 4): the /for hero shows four kinds of business from their own photos, so the page
  * opens with real trades at work. Each photo links to its page; the alt text is the photo's own (docs/PHOTOS.md).
  */
-const COLLAGE = ["hair-salon", "restaurant", "dental-clinic", "auto-repair"] as const;
+const COLLAGE = ["hair-salon", "restaurant", "barbershop", "auto-repair"] as const;
+/** SITE-4: the trade's new 4:5 photo, where it has one. */
+const tileOf = (slug: string) => TRADE_TILES.find((t) => t.slug === slug)?.photo;
 
 function ForCollage({ all }: { all: Industry[] }) {
   const picks = COLLAGE.map((s) => all.find((i) => i.slug === s)).filter((i): i is Industry => !!i);
@@ -322,13 +359,22 @@ function ForCollage({ all }: { all: Industry[] }) {
             to={`/for/${i.slug}`}
             className="press group relative block overflow-hidden rounded-panel bg-surface-3 shadow-float"
           >
-            <Img
-              photo={i.photos[0]}
-              sizes="(min-width: 1024px) 15rem, 45vw"
-              priority={n < 2}
-              style={{ objectPosition: i.focus ?? "50% 50%" }}
-              className="aspect-[4/3] w-full object-cover transition-transform duration-400 ease-kb group-hover:scale-[1.04] motion-reduce:group-hover:scale-100 lg:aspect-[4/5]"
-            />
+            {tileOf(i.slug) ? (
+              <PubImg
+                photo={tileOf(i.slug)!}
+                sizes="(min-width: 1024px) 15rem, 45vw"
+                priority={n < 2}
+                className="aspect-[4/3] w-full object-cover transition-transform duration-400 ease-kb group-hover:scale-[1.04] motion-reduce:group-hover:scale-100 lg:aspect-[4/5]"
+              />
+            ) : (
+              <Img
+                photo={i.photos[0]}
+                sizes="(min-width: 1024px) 15rem, 45vw"
+                priority={n < 2}
+                style={{ objectPosition: i.focus ?? "50% 50%" }}
+                className="aspect-[4/3] w-full object-cover transition-transform duration-400 ease-kb group-hover:scale-[1.04] motion-reduce:group-hover:scale-100 lg:aspect-[4/5]"
+              />
+            )}
             <span className="absolute start-2 bottom-2 rounded-full bg-surface-0 px-3 py-1 text-label font-semibold text-text-1 shadow-rest">
               {i.plural}
             </span>

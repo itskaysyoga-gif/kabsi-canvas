@@ -70,7 +70,13 @@ function shell(slug: string, html: string) {
       "@",
     );
   // Markup that only carries the removed text (a React text separator) is not content.
-  return t.replace(/<!-- -->/g, "").replace(/@+/g, "@");
+  // SITE-4 (lane R): each page's hero photo is matched to its trade, so the photo's <img> and the preload React writes
+  // for it are taken out too; every word on the page is still compared.
+  return t
+    .replace(/<link rel="preload" as="image"[^>]*>/g, "")
+    .replace(/<img [^>]*>/g, "<img>")
+    .replace(/<!-- -->/g, "")
+    .replace(/@+/g, "@");
 }
 
 describe("SITE-2: the industry pages are one template (blueprint 3.1 section 5)", async () => {

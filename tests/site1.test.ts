@@ -25,6 +25,7 @@ const code = (f: string) =>
     .replace(/^\s*\/\/.*$/gm, "");
 const PAGES = [
   "src/components/marketing/v31.tsx",
+  "src/components/marketing/v31-pricing.tsx",
   "src/components/marketing/v31-pages.tsx",
   "src/components/marketing/v31-data.ts",
   "src/components/marketing/v31-heads.ts",
@@ -110,7 +111,7 @@ describe("SITE-1: Home is the nine sections of blueprint section 3", () => {
 
 describe("SITE-1: Pricing, the FAQ and the navigation", () => {
   it("has one card and says what is not included once", () => {
-    const p = read("src/components/marketing/v31.tsx");
+    const p = read("src/components/marketing/v31-pricing.tsx");
     expect(p.slice(p.indexOf("export function V31Pricing")).match(/<PriceCard/g)).toHaveLength(1);
     expect(PRICING.notIncluded).toBe(
       "Kabsi does not message your customers, run ads, build websites or promise rankings.",

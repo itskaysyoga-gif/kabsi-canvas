@@ -3,7 +3,13 @@ import { MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MAIN_CTA } from "@/lib/site";
 import { ButtonLink } from "./ui";
-import { setChrome, useChrome, useConsentOpen, usePhoneBarShown } from "./page-signals";
+import {
+  setChrome,
+  useChrome,
+  useConsentOpen,
+  useHeroPast,
+  usePhoneBarShown,
+} from "./page-signals";
 import { SiteHeader } from "./site-header";
 import { SiteFooter } from "./site-footer";
 import { DeferredAssistant, prefetchNora } from "@/components/assistant/deferred-assistant";
@@ -182,6 +188,9 @@ export function NoraLauncher() {
   const { noraOpen, menuOpen } = useChrome();
   const barShown = usePhoneBarShown();
   const consentOpen = useConsentOpen();
+  // SITE-4: while the hero is on screen the wide launcher is the round icon only, so it never covers the hero's phone or
+  // an industry page's example; the words come back once the visitor is past the hero.
+  const pastHero = useHeroPast();
   const solo = useRef<HTMLButtonElement>(null);
   const wide = useRef<HTMLButtonElement>(null);
   const [blocked, setBlocked] = useState({ solo: false, wide: false });
@@ -289,15 +298,17 @@ export function NoraLauncher() {
         onPointerEnter={prefetchNora}
         onClick={openNora}
         aria-label="Chat with Nora, Kabsi's assistant"
+        data-compact={pastHero ? undefined : ""}
         className={cn(
-          "fixed right-6 bottom-6 z-40 hidden h-14 items-center gap-2 rounded-full bg-kb-black pr-5 pl-4 text-sm font-bold text-kb-white shadow-[0_12px_32px_rgba(0,0,0,.28)] transition-[transform,opacity] hover:-translate-y-0.5 focus-visible:ring-4 focus-visible:ring-kb-yellow focus-visible:outline-none sm:flex",
+          "fixed right-6 bottom-6 z-40 hidden h-14 items-center gap-2 rounded-full bg-kb-black text-sm font-bold text-kb-white shadow-[0_12px_32px_rgba(0,0,0,.28)] transition-[transform,opacity] hover:-translate-y-0.5 focus-visible:ring-4 focus-visible:ring-kb-yellow focus-visible:outline-none sm:flex",
+          pastHero ? "pr-5 pl-4" : "w-14 justify-center",
           showWide ? "opacity-100" : "pointer-events-none opacity-0",
         )}
       >
         <span className="grid size-8 place-items-center rounded-full bg-kb-sand text-kb-black">
           <MessageCircle className="size-4" aria-hidden="true" />
         </span>
-        <span>Chat with Nora</span>
+        {pastHero ? <span>Chat with Nora</span> : null}
       </button>
     </>
   );

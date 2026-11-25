@@ -2513,3 +2513,15 @@ OFFER-2 and PROOF-2 (both 24 Nov 2026) shipped these lines in code; this section
 - Title `Your weekly report` with the business, then 3 to 5 lines: `<dates>`; up to 3 of `<label>: <n>` (the Work done labels above); with no work `A quiet week. Kabsi kept watching your Google profile.`; `Found on your profile: <n> changes.` (`change` for 1); `Review link taps: <n>.`
 - The end: `Waiting for your yes: <n>.` or `Nothing is waiting for your yes.`, then ` Next step: <next>.` when there is one.
 
+
+## 93. SITE-4: life on the public site (25 Nov 2026, lane R, the SITE-4 prompt)
+
+The structure and every earlier line stay. New lines, all in `src/components/marketing/life.tsx`,
+`src/components/marketing/screens-section.tsx`, `src/components/marketing/v31-pricing.tsx` and the photo files' alt text
+(`src/components/marketing/public-photos.ts`, `industry-photos.ts`):
+
+- Home, after the problem band: `Built for your kind of business.` Line: `Salons, barbers, cafés, garages and more. Each kind of business has its own Google work, and its own page.` Link: `See every business`. Eight photo tiles: `Hair salons`, `Barbershops`, `Nail salons`, `Spas`, `Cafés`, `Restaurants`, `Auto repair`, `Cleaning`.
+- Kabsi's own screens (Example on each): section title `See the work in Kabsi itself.` (How it works, industry pages) or `What you get, every week.` (Pricing); line `Real screens from Kabsi's account and email, shown with an example business.` The three screens: `Your report` / `In your account: what Kabsi did, what waits for your yes, one next step.`; `Your review link and QR code` / `A ready message to send after a real visit, and a QR code to print.`; `Your week, by email` / `Every Monday: the work done and anything waiting for you.` On Home the three screens sit inside "See exactly what was done." with no title of their own.
+- Pricing: the hero photo carries the price card's own words (`PRICE.amount`, `PRICE.per`). No new line.
+- Industry pages: the example review card's title moves onto the card over the trade's photo; the words are unchanged.
+- Photos carry no name, quote or caption; no one shown is presented as a Kabsi customer (credits in `public/photos/CREDITS.md`).

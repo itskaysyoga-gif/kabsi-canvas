@@ -30,8 +30,14 @@ describe("SITE-3: the home page", () => {
       "A photo posted",
     ]);
     const home = read("src/components/marketing/v31.tsx");
-    expect(home).toContain('matchMedia("(prefers-reduced-motion: reduce)")');
-    expect(home).toContain('playing && "kb-scene"');
+    // SITE-4: the scenes play turn by turn (typing dots first) and stand still under reduced motion or when paused.
+    expect(read("src/components/marketing/life.tsx")).toContain(
+      'matchMedia("(prefers-reduced-motion: reduce)")',
+    );
+    expect(home).toContain("const reduced = useReducedMotion();");
+    expect(home).toContain("const playing = !reduced && !paused;");
+    expect(home).toContain('playing && "kb-play"');
+    expect(read("src/styles.css")).toContain(".kb-play .kb-dots");
     expect(home).toContain("Pause the example");
     expect(home).not.toMatch(/WhatsAppGlyph|bg-wa-|text-wa-/);
   });

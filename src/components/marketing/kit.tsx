@@ -12,12 +12,16 @@ import { cn } from "@/lib/utils";
 import { Marked } from "@/components/kabsi/highlight";
 import { ScanBox } from "@/components/kabsi/scan-box";
 
-export type Tone = "ivory" | "white" | "dark";
+// SITE-4 (lane R): two soft tints join the grounds, the warm yellow tint and the soft neutral. Still at most three
+// backgrounds a page: a page that uses a tint leaves out white or the other tint.
+export type Tone = "ivory" | "white" | "dark" | "warm" | "soft";
 
 const TONE: Record<Tone, string> = {
   ivory: "bg-surface-0",
   white: "bg-surface-1",
   dark: "theme-dark bg-kb-carbon text-text-1",
+  warm: "bg-tint-warm",
+  soft: "bg-tint-soft",
 };
 
 /** A band of the page. `tone` is one of the three backgrounds. */
@@ -44,7 +48,10 @@ export function Band({
       aria-label={label}
       className={cn(TONE[tone], className)}
     >
-      <div className={cn("container-kb py-14 sm:py-20 lg:py-24", inner)}>{children}</div>
+      {/* SITE-4: each band rises once as it scrolls in (motion.ts); a band already on screen is shown at once. */}
+      <div data-rise className={cn("container-kb py-14 sm:py-20 lg:py-24", inner)}>
+        {children}
+      </div>
     </section>
   );
 }
@@ -94,15 +101,15 @@ export function Sec({
   mark?: string | undefined;
   line?: ReactNode;
   children?: ReactNode;
-  /** "page" is ivory, "card" is white, "dark" is the charcoal band. */
-  tone?: "page" | "card" | "dark";
+  /** "page" is ivory, "card" is white, "dark" is the charcoal band, "warm" and "soft" the SITE-4 tints. */
+  tone?: "page" | "card" | "dark" | "warm" | "soft";
   split?: boolean;
   className?: string | undefined;
 }) {
   return (
     <Band
       id={id}
-      tone={tone === "card" ? "white" : tone === "dark" ? "dark" : "ivory"}
+      tone={tone === "card" ? "white" : tone === "page" ? "ivory" : tone === "dark" ? "dark" : tone}
       className={className}
       inner={
         split
