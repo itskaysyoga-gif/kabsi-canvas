@@ -156,7 +156,10 @@ async function replay(req: Request): Promise<Response> {
       if (!res.ok) throw new Error(`the inbound path answered ${res.status}`);
     },
   });
-  return json(await runScenario(io, scenario, crypto.randomUUID().slice(0, 8)));
+  const report = await runScenario(io, scenario, crypto.randomUUID().slice(0, 8));
+  // The database's own HTTP call gives up after 20 seconds, so the last report of each scenario is kept for a select.
+  await admin().from("qa_replay_reports").upsert({ scenario, report, finished_at: new Date().toISOString() }).then(() => {}, () => {});
+  return json(report);
 }
 
 async function tick() {
