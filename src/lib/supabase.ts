@@ -11,15 +11,16 @@ export { anonHeaders, anonJwt, supabaseUrl } from "@/lib/supabase-config";
 // Every call made as a signed-in person goes through sessionFetch: a session Kabsi no longer accepts ends here, with
 // "Your session ended. Sign in again." on screen (session-ended.ts).
 // APP-3: a token that expired while the tab slept is refreshed once and the call repeated (session-ended.ts).
+// The read timeout sits inside, so the first try and the repeat after a refresh each get their own 2 seconds (APP-3 review).
 export const sessionFetch = makeSessionFetch(
-  (...a) => fetch(...a),
+  withReadTimeout((...a) => fetch(...a), supabaseUrl),
   supabasePublishableKey,
   async () => (await supabase.auth.refreshSession()).data.session?.access_token ?? null,
 );
 // A database read with no answer stops after 3 seconds, and supabase-js does not retry reads itself: the screens' one
 // retry is in query-defaults.ts, so an error state shows within 5 seconds (Fix 1, QA 2 L9).
 export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
-  global: { fetch: withReadTimeout(sessionFetch, supabaseUrl) },
+  global: { fetch: sessionFetch },
   db: { retry: false },
 });
 

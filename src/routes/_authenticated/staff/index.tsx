@@ -267,7 +267,7 @@ function healthItems(r: {
   const not = (q: { isError: boolean; isLoading: boolean }, key: string, label: string) =>
     q.isLoading
       ? { key, label, state: "Checking", tone: "none" as const }
-      : { key, label, state: "Not read", tone: "none" as const };
+      : { key, label, state: "Did not load", tone: "none" as const };
   const plural = (k: number, one: string, many: string) => `${k} ${k === 1 ? one : many}`;
   const sys = r.system.data;
   const errors = sys ? sys.google.errors_24h.reduce((t, e) => t + e.n, 0) : 0;
@@ -312,9 +312,7 @@ function healthItems(r: {
               : "Running",
           tone: deadJobs ? "bad" : failedRuns ? "warn" : "ok",
         }
-      : r.jobs.isLoading || r.system.isLoading
-        ? not({ isError: false, isLoading: true }, "jobs", "Jobs")
-        : { key: "jobs", label: "Jobs", state: "Checking again", tone: "none" as const },
+      : not(r.jobs.isError ? r.jobs : r.system, "jobs", "Jobs"),
     sys
       ? {
           key: "sync",

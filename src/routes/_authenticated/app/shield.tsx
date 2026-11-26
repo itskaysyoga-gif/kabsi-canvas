@@ -269,16 +269,15 @@ function ConfirmAll({
   async function run() {
     setBusy(true);
     setMsg("");
-    const failed = (
-      await Promise.all(
-        ids.map((id) =>
-          confirmFact(id).then(
-            () => false,
-            () => true,
-          ),
-        ),
-      )
-    ).filter(Boolean).length;
+    // One after another: each confirm rewrites the business's tasks, and parallel writes can block each other.
+    let failed = 0;
+    for (const id of ids) {
+      try {
+        await confirmFact(id);
+      } catch {
+        failed++;
+      }
+    }
     setBusy(false);
     setMsg(
       failed

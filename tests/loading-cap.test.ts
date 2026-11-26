@@ -155,7 +155,9 @@ describe("the error state within 5 seconds", () => {
     ).toBe(true);
     const client = readFileSync("src/lib/supabase.ts", "utf8");
     expect(client).toContain("db: { retry: false }");
-    expect(client).toContain("withReadTimeout(sessionFetch, supabaseUrl)");
+    // APP-3: the timeout sits inside the session fetch, so a repeat after a token refresh gets its own 2 seconds.
+    expect(client).toContain("withReadTimeout((...a) => fetch(...a), supabaseUrl)");
+    expect(client).toContain("global: { fetch: sessionFetch }");
     expect(readFileSync("src/router.tsx", "utf8")).toContain("defaultOptions: QUERY_DEFAULTS");
   });
 });
