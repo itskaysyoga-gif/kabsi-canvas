@@ -198,48 +198,15 @@ test.describe("the same questions in About your business", () => {
 test.describe("the staff counts", () => {
   test.beforeEach(async ({ page }) => noBanner(page));
 
-  test("Staff, Businesses shows Early answers: counts and the first businesses in order", async ({
-    page,
-  }) => {
+  // APP-3 (R-169): the request book is off, so Staff, Businesses no longer shows Early answers. The data and the panel's
+  // component stay (tests/onboarding1-request-answers.test.ts renders it).
+  test("Staff, Businesses no longer shows Early answers", async ({ page }) => {
     await signInFake(page, { staff: true });
-    await page.route(`${SUPABASE}/rest/v1/rpc/staff_request_answers`, (route) =>
-      route.fulfill({
-        json: {
-          generated_at: "2026-11-10T09:00:00Z",
-          businesses: 12,
-          answered_any: 11,
-          tracking: { answered: 10, booking_app: 1, chats: 5, notebook: 1, memory: 2, other: 1 },
-          early_access: { answered: 10, yes: 6, no: 4 },
-          gate3: { first_ten_answered: 10, first_ten_qualifying: 3, verdict: "open" },
-          qualifying: [
-            {
-              position: 1,
-              business: "Rose Lane Salon",
-              answered_on: "2026-10-21",
-              keeps_requests: "chats",
-              in_first_ten: true,
-            },
-            {
-              position: 4,
-              business: "Kings Barbers",
-              answered_on: "2026-10-24",
-              keeps_requests: "memory",
-              in_first_ten: true,
-            },
-          ],
-        },
-      }),
-    );
     await page.goto("/staff/businesses");
-    const panel = page.getByTestId("staff-request-answers");
-    await expect(panel).toBeVisible({ timeout: 20_000 });
-    await expect(panel.getByRole("heading", { name: "Early answers" })).toBeVisible();
-    await expect(panel.getByTestId("gate3-line")).toContainText(
-      "3 keep requests in chats, a notebook or memory and said yes",
-    );
-    await expect(panel.getByText("Rose Lane Salon")).toBeVisible();
-    await expect(panel.getByText("Kings Barbers")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Every business on Kabsi" })).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByTestId("staff-request-answers")).toHaveCount(0);
     await noSideScroll(page);
-    await panel.screenshot({ path: test.info().outputPath("staff-early-answers.png") });
   });
 });

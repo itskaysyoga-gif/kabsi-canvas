@@ -68,11 +68,28 @@ async function tokenAccepted(
   }
 }
 
-/** The fetch every signed-in call uses. Only Kabsi's own backend is judged; any other address passes through. */
-export function makeSessionFetch(fetchImpl: typeof fetch, apikey: string): typeof fetch {
+/** APP-3 (R-169): one refresh at a time, shared by every call that met the same expired token. */
+let refreshing: Promise<string | null> | null = null;
+function refreshOnce(refresh: () => Promise<string | null>): Promise<string | null> {
+  refreshing ??= refresh()
+    .catch(() => null)
+    .finally(() => {
+      refreshing = null;
+    });
+  return refreshing;
+}
+
+/** The fetch every signed-in call uses. Only Kabsi's own backend is judged; any other address passes through.
+ *  APP-3 (R-169): a 401 on a token that expired while the tab slept (Rashid opened Settings, saw an error, then it opened)
+ *  first refreshes the session once and repeats the call with the new token; only when that fails has the session ended. */
+export function makeSessionFetch(
+  fetchImpl: typeof fetch,
+  apikey: string,
+  refresh?: () => Promise<string | null>,
+): typeof fetch {
   return async (input, init) => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-    const res = await fetchImpl(input, init);
+    let res = await fetchImpl(input, init);
     if (!url.startsWith(supabaseUrl) || (res.status !== 401 && res.status !== 403)) return res;
     const token =
       bearer(init) || (input instanceof Request ? bearer({ headers: input.headers }) : "");
@@ -80,6 +97,15 @@ export function makeSessionFetch(fetchImpl: typeof fetch, apikey: string): typeo
     if (!isUserToken(token)) return res;
     // Signing in and signing out answer their own errors (signing out with an ended session must still clear it here).
     if (url.includes("/auth/v1/token") || url.includes("/auth/v1/logout")) return res;
+    if (res.status === 401 && refresh && !(input instanceof Request)) {
+      const fresh = await refreshOnce(refresh);
+      if (fresh && fresh !== token) {
+        const headers = new Headers(init?.headers);
+        headers.set("authorization", `Bearer ${fresh}`);
+        res = await fetchImpl(input, { ...init, headers });
+        if (res.status !== 401) return res;
+      }
+    }
     if (res.status === 401 || !(await tokenAccepted(token, fetchImpl, apikey))) throw endSession();
     return res;
   };

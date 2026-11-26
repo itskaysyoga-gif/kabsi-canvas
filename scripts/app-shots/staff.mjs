@@ -44,6 +44,18 @@ export const tables = {
             access_granted_at: null,
             concierge: true,
           },
+          // APP-3: an example business, hidden until "Show examples".
+          {
+            ...location(c.state),
+            id: "00000000-0000-4000-8000-0000000000b9",
+            name: "Juniper Hair Studio",
+            organization_id: "00000000-0000-4000-8000-0000000000b9",
+            status: "active",
+            country: "US",
+            created_at: ago(20),
+            access_granted_at: ago(20),
+            is_demo: true,
+          },
         ]
       : undefined,
   staff_followups: [
@@ -73,6 +85,14 @@ export const tables = {
 };
 
 export const rpc = {
+  // APP-3: Cedar Corner Bakery has never had a plan, so it alone shows "Start trial".
+  staff_business_plans: (c) =>
+    staff(c)
+      ? [
+          { location_id: LOC_B, has_plan: false },
+          { location_id: "00000000-0000-4000-8000-0000000000b9", has_plan: true },
+        ]
+      : undefined,
   google_mode: (c) => (staff(c) ? "mock" : null),
   save_signup_attribution: (c) => (staff(c) ? null : undefined),
   staff_founding_overview: {
@@ -274,6 +294,8 @@ export const rpc = {
     },
     {
       id: "c2",
+      // APP-3: a chat from before the new price, with its "Old prices" tag.
+      created_at: "2026-11-20T09:00:00Z",
       updated_at: ago(0.05),
       surface: "site",
       status: "handoff",

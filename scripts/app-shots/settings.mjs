@@ -313,8 +313,13 @@ export const tables = {
   knowledge_facts: (c) =>
     c.params.get("slot") === "eq.profile.regular_hours" ? undefined : SETTINGS_FACTS,
   knowledge_confirms: [],
+  // APP-3: "legacy" is a plan paid before Creem (Yawmiyati's pro_6m); "fresh" has never had a plan.
   plans: (c) =>
-    paidStates.includes(c.state)
+    c.state === "fresh"
+      ? []
+      : c.state === "legacy"
+        ? [{ id: "pl6", kind: "pro_6m", status: "active", starts_at: ago(62), ends_at: ahead(119) }]
+        : paidStates.includes(c.state)
       ? [
           {
             id: "pl1",
@@ -326,7 +331,9 @@ export const tables = {
         ]
       : [{ id: "pl0", kind: "trial", status: "active", starts_at: ago(5), ends_at: ahead(9) }],
   payments: (c) =>
-    paidStates.includes(c.state)
+    c.state === "legacy"
+      ? [{ id: "pay6", plan_id: "pl6", item: "pro_6m", amount_usd: 174, created_at: ago(62) }]
+      : paidStates.includes(c.state)
       ? [{ id: "pay1", plan_id: "pl1", item: "pro_monthly", amount_usd: 39, created_at: ago(6) }]
       : [],
 };
@@ -368,6 +375,21 @@ export const rpc = {
   },
   plan_summary: (c) => {
     const b = billing(c);
+    if (c.state === "fresh" || c.state === "legacy")
+      return {
+        tier: c.state === "fresh" ? "free" : "pro",
+        v2: true,
+        plan:
+          c.state === "legacy"
+            ? { kind: "pro_6m", starts_at: ago(62), ends_at: ahead(119), last_day: ahead(118) }
+            : null,
+        queued: [],
+        paid_waiting: false,
+        trial_used: false,
+        trial_days: 14,
+        checkout_open: true,
+        entitlements: { state: c.state === "fresh" ? "none" : "paid", plan: "pro", billing: null, ends_at: null },
+      };
     return {
       tier: b ? "pro" : "trial",
       v2: true,

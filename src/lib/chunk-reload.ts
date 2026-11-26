@@ -67,3 +67,16 @@ export function reloadOnceForChunk(env: ReloadEnv | null = browserEnv()): boolea
   env.reload();
   return true;
 }
+
+/**
+ * APP-3 (R-169): Vite says so with "vite:preloadError" when a route file it preloads (on a link's hover or tap) is gone
+ * after a deploy. The page then reloads once by itself, under the same guard; past the guard the error page shows.
+ */
+export function watchPreloadErrors(
+  target: Pick<Window, "addEventListener"> | null = typeof window === "undefined" ? null : window,
+) {
+  if (!target) return;
+  target.addEventListener("vite:preloadError", (event) => {
+    if (reloadOnceForChunk()) event.preventDefault();
+  });
+}

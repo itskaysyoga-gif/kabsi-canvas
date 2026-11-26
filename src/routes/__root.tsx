@@ -24,6 +24,7 @@ import { AuthProvider } from "@/components/auth/auth-provider";
 import { GlobalErrorBoundary } from "@/components/shared/error-boundary";
 import { DeferredPrivacyBanner } from "@/components/shared/deferred-privacy-banner";
 import { initConsent } from "@/lib/consent";
+import { watchPreloadErrors } from "@/lib/chunk-reload";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: ({ matches }) => ({
@@ -80,6 +81,10 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useLocation({ select: (location) => location.pathname });
+  useEffect(() => {
+    // APP-3: a route file gone after a deploy reloads the page once (src/lib/chunk-reload.ts).
+    watchPreloadErrors();
+  }, []);
   useEffect(() => {
     // The country rule and the stored choice are read as the page hydrates, before analytics start and whether or not
     // the banner has loaded yet (it loads after first paint).

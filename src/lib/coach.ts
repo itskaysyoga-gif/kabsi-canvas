@@ -57,7 +57,7 @@ export const COACH_ITEMS: readonly CoachCatalogItem[] = [
   {
     id: "attributes",
     title: "Profile details",
-    why: "Details such as payment options and accessibility help customers decide. Kabsi never suggests anything about who you are or who owns the business.",
+    why: "Details such as payment options and accessibility help customers decide.",
   },
   {
     id: "photos",

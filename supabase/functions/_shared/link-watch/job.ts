@@ -7,7 +7,7 @@ import { googleMode, listingLinks } from "../google/index.ts";
 import { coachTarget } from "../coach/refresh.ts";
 import type { Job } from "../jobs.ts";
 import {
-  extractLinks, incidentTitle, incidentWhy, type LinkKind, type LinkState, type LinkWatchDeps, type LinkWatchResult, watchLinks,
+  extractLinks, incidentTitle, onlyShownLinks, incidentWhy, type LinkKind, type LinkState, type LinkWatchDeps, type LinkWatchResult, watchLinks,
 } from "./link-watch.ts";
 
 // A name's addresses over DNS over HTTPS: the Edge runtime has no resolver of its own to rely on (the same as the website check).
@@ -37,7 +37,13 @@ export async function linkWatchJob(job: Job): Promise<LinkWatchResult | { skippe
   if (target.demo || googleMode() === "mock") return { skipped: "mock" };
 
   const deps: LinkWatchDeps = {
-    links: async () => extractLinks(await listingLinks(target.name)),
+    // APP-3: only a link that exists on the profile as Kabsi shows it. The website fact read empty (Missing) is never checked.
+    links: async () => {
+      const { data: fact, error: e } = await db.from("knowledge_facts").select("value").eq("location_id", locationId)
+        .eq("slot", "profile.website").is("superseded_by", null).maybeSingle();
+      if (e) throw e;
+      return onlyShownLinks(extractLinks(await listingLinks(target.name)), (fact?.value ?? null) as { display?: string | null } | null);
+    },
     states: async () => {
       const { data, error: e } = await db.from("link_watch").select("kind, failures, alerted, retry_at, first_failed_at").eq("location_id", locationId);
       if (e) throw e;

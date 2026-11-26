@@ -5,7 +5,9 @@ import { OpenChange } from "../src/components/profile/open-change";
 import { changeWords } from "../src/components/profile/change-card";
 import {
   NOT_CONFIRMED,
+  needsOk,
   profileRows,
+  readRows,
   protectionLine,
   WATCHED,
   type Change,
@@ -203,5 +205,29 @@ describe("the open change card", () => {
     const out = html({ ...phoneChange, previous_fact_id: "f1" }, manager);
     expect(out).toContain("The owner decides this one.");
     expect(out).toContain("hidden");
+  });
+});
+
+// APP-3 (R-169): rows not read yet are hidden; Description and Attributes come from the coach's Google read; "Confirm all".
+describe("APP-3: what the Details panel shows", () => {
+  const facts = [
+    { id: "f1", key: "name", value: { display: "Yawmiyati" }, status: "needs_confirmation" },
+    { id: "f2", key: "phone", value: { display: "01 484 486" }, status: "needs_confirmation" },
+    { id: "f3", key: "website", value: { display: "" }, status: "verified" },
+  ];
+  it("hides the rows Kabsi has not read, keeps Missing", () => {
+    const rows = readRows(profileRows(facts, []));
+    expect(rows.map((r) => r.key)).toEqual(["name", "phone", "website"]);
+    expect(rows.find((r) => r.key === "website")?.missing).toBe(true);
+  });
+  it("fills Description and Attributes from the coach read", () => {
+    const rows = readRows(profileRows(facts, [], { description_length: 0, attributes: 3 }));
+    const desc = rows.find((r) => r.key === "description")!;
+    const attrs = rows.find((r) => r.key === "attributes")!;
+    expect(desc).toMatchObject({ missing: true, google: null });
+    expect(attrs).toMatchObject({ missing: false, google: "3 details set", tone: "green" });
+  });
+  it("lists the rows that wait for the owner's OK", () => {
+    expect(needsOk(profileRows(facts, [])).map((r) => r.key)).toEqual(["name", "phone"]);
   });
 });

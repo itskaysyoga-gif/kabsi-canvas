@@ -5,6 +5,8 @@ import {
   FRESH,
   incidentTitle,
   incidentWhy,
+  onlyShownLinks,
+  shownWebsite,
   type LinkKind,
   type LinkState,
   type LinkWatchDeps,
@@ -372,5 +374,65 @@ describe("the words", () => {
       sql.indexOf("create table public.link_watch_events"),
     );
     expect(table).not.toMatch(/\burl\b|\buri\b|\bhref\b|address/i);
+  });
+});
+
+// APP-3 (R-169): Yawmiyati's profile said the website was Missing (Google removed it on 2 Nov) while the watch kept checking
+// the owner's old address and opened "Your website link on Google is not loading". A link is checked only when it exists.
+describe("a link is checked only when it exists on the profile", () => {
+  it("Google's own update of the website wins over the owner's stored address", () => {
+    expect(
+      shownWebsite("http://old.example/", { diffMask: "websiteUri", location: {} }),
+    ).toBeNull();
+    expect(
+      shownWebsite("http://old.example/", {
+        diffMask: "title,websiteUri",
+        location: { websiteUri: "https://new.example/" },
+      }),
+    ).toBe("https://new.example/");
+    expect(shownWebsite("http://old.example/", { diffMask: "title", location: {} })).toBe(
+      "http://old.example/",
+    );
+    expect(shownWebsite("http://old.example/", null)).toBe("http://old.example/");
+    expect(shownWebsite(undefined, null)).toBeNull();
+  });
+
+  it("a website read as empty (Missing on the screen) is left out; booking and menu stay", () => {
+    const found = { website: "http://old.example/", booking: "https://book.example/" };
+    expect(onlyShownLinks(found, { display: "" })).toEqual({ booking: "https://book.example/" });
+    expect(onlyShownLinks(found, { display: "  " })).toEqual({ booking: "https://book.example/" });
+    expect(onlyShownLinks(found, { display: "http://old.example/" })).toEqual(found);
+    // Not read yet: nothing to compare with, the listing read decides.
+    expect(onlyShownLinks(found, null)).toEqual(found);
+  });
+
+  it("with the website Missing, the watch checks nothing for it and closes the incident the owner was told about", async () => {
+    const closed: string[] = [];
+    const dropped: string[] = [];
+    let fetched = 0;
+    const deps: LinkWatchDeps = {
+      links: async () => onlyShownLinks({ website: "http://old.example/" }, { display: "" }),
+      states: async () => ({
+        website: { failures: 4, alerted: true, retryAt: null, firstFailedAt: T0.toISOString() },
+      }),
+      save: async () => {},
+      drop: async (k) => void dropped.push(k),
+      fetch: {
+        resolve: async () => ["93.184.216.34"],
+        fetch: async () => {
+          fetched++;
+          return new Response("", { status: 500 });
+        },
+      },
+      retry: async () => {},
+      openTask: async () => {},
+      closeTask: async (k, why) => void closed.push(`${k}:${why}`),
+      now: () => T0,
+    };
+    const out = await watchLinks(deps);
+    expect(out.checked).toBe(0);
+    expect(fetched).toBe(0);
+    expect(closed).toEqual(["website:removed"]);
+    expect(dropped).toEqual(["website"]);
   });
 });

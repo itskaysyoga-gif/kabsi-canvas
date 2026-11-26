@@ -46,7 +46,7 @@ export const STAFF_PAGES: Record<StaffPageId, StaffPage> = {
     to: "/staff/businesses",
     title: "Every business on Kabsi",
     mark: "Every business",
-    purpose: "Newest first, with concierge, the Pro trial and diagnostics for each one.",
+    purpose: "Newest first, with concierge and diagnostics for each one.",
     tab: "Businesses",
   },
   conversations: {

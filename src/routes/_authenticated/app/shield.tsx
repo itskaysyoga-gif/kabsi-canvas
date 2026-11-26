@@ -22,13 +22,18 @@ import { myLatestLocation } from "@/lib/onboarding";
 import {
   NOT_CONFIRMED,
   OPEN_STATUSES,
+  needsOk,
   profileRows,
   protectionLine,
+  readRows,
   type Change,
+  type CoachRead,
   type Fact,
   type ProfileRow,
   type RowTone,
 } from "@/lib/profile-rows";
+import { fixCountLine, thingsToFix } from "@/lib/fix-lines";
+import { confirmFact } from "@/lib/knowledge";
 import { amStaff } from "@/lib/reviews";
 import { supabase } from "@/lib/supabase";
 import { latestByTarget, recentTasks } from "@/lib/task-feed";
@@ -53,13 +58,13 @@ const STATUS: Record<string, string> = {
   expired: "No answer in 14 days",
   superseded: "Replaced by a newer change",
 };
-// The things to fix on this screen: what is missing or unconfirmed on the profile, and lost access. Google's own
-// warnings (google_needs_action) have their own panel; changes have their own cards.
-const FIX_TASKS = ["profile_gap", "knowledge_confirm", "hours_confirm", "reconnect"];
+// The things to fix on this screen (src/lib/fix-lines.ts, the same count as Home's strip): what is missing or unconfirmed
+// on the profile, and lost access. Google's own warnings (google_needs_action) have their own panel; changes have their own
+// cards.
 const TONE: Record<RowTone, Tone> = { green: "ok", amber: "warn", red: "bad", grey: "info" };
 
 async function loadProfile(locationId: string) {
-  const [changes, facts, loc, tasks, putBacks] = await Promise.all([
+  const [changes, facts, loc, tasks, putBacks, coach] = await Promise.all([
     supabase
       .from("profile_changes")
       .select(
@@ -70,13 +75,19 @@ async function loadProfile(locationId: string) {
       .limit(30),
     supabase
       .from("knowledge_facts")
-      .select("key, value, status")
+      .select("id, key, value, status")
       .eq("location_id", locationId)
       .like("slot", "profile.%")
       .is("superseded_by", null),
     supabase.from("locations").select("shield_checked_at").eq("id", locationId).maybeSingle(),
     loadTasks(locationId).catch(() => ({ tasks: [] as Task[], snoozed: 0 })),
     recentTasks(locationId, { kinds: ["listing_revert"], days: 60 }).catch(() => []),
+    // APP-3: the coach's last Google read fills Description and Attributes. A failed read only leaves them hidden.
+    Promise.resolve(
+      supabase.rpc("profile_coach_numbers" as never, { p_location: locationId } as never),
+    )
+      .then((r) => ((r.data as unknown as CoachRead[] | null)?.[0] ?? null) as CoachRead)
+      .catch(() => null as CoachRead),
   ]);
   if (changes.error) throw new Error(changes.error.message);
   if (facts.error) throw new Error(facts.error.message);
@@ -84,7 +95,8 @@ async function loadProfile(locationId: string) {
     changes: (changes.data ?? []) as Change[],
     facts: (facts.data ?? []) as Fact[],
     checkedAt: (loc.data as { shield_checked_at: string | null } | null)?.shield_checked_at ?? null,
-    fix: tasks.tasks.filter((t) => FIX_TASKS.includes(t.kind)),
+    coach,
+    fix: thingsToFix(tasks.tasks),
     warnings: tasks.tasks.filter((t) => t.kind === "google_needs_action"),
     putBacks: latestByTarget(putBacks),
   };
@@ -113,7 +125,7 @@ function ProfilePage() {
     );
   const d = data.data;
   const changes = d?.changes ?? [];
-  const rows = profileRows(d?.facts ?? [], changes);
+  const rows = profileRows(d?.facts ?? [], changes, d?.coach ?? null);
   const open = changes.filter((c) => OPEN_STATUSES.includes(c.status));
   const past = changes.filter((c) => !OPEN_STATUSES.includes(c.status));
   const running =
@@ -157,7 +169,7 @@ function ProfilePage() {
       ) : null}
 
       {live && d && !reading ? (
-        <div className="grid gap-4 lg:grid-cols-2 lg:balance-2">
+        <div className="grid gap-4 lg:grid-cols-2">
           <Panel title="Changes others made" id="changes" className="lg:col-span-2">
             {open.length ? (
               <div className="space-y-3">
@@ -181,25 +193,20 @@ function ProfilePage() {
           </Panel>
 
           <Panel title="Details" id="details">
-            {rows.length && rows.every((r) => r.status === "Not read yet") ? (
+            {readRows(rows).length === 0 ? (
               <p className="text-body text-text-2">
                 Kabsi has not read your details from Google yet. It checks every day, and your name,
                 phone, hours and the rest show here after the next check.
               </p>
             ) : (
-              <Details rows={rows} />
+              <>
+                <ConfirmAll rows={rows} facts={d.facts} onDone={refresh} />
+                <Details rows={readRows(rows)} />
+              </>
             )}
           </Panel>
 
-          <ProfileGaps
-            locationId={loc.id}
-            gaps={d.fix}
-            title={
-              d.fix.length === 0
-                ? "Nothing to fix"
-                : `${d.fix.length} ${d.fix.length === 1 ? "thing" : "things"} to fix`
-            }
-          />
+          <ProfileGaps locationId={loc.id} gaps={d.fix} title={fixCountLine(d.fix.length)} />
 
           <Panel title="Google's warnings" id="warnings" className="lg:col-span-2">
             {d.warnings.length ? (
@@ -240,6 +247,60 @@ function ProfilePage() {
       ) : null}
       {loc ? <StaffEdit locationId={loc.id} /> : null}
     </>
+  );
+}
+
+/** APP-3: one button for every detail that waits for the owner's OK, beside the single "Confirm it" links. */
+function ConfirmAll({
+  rows,
+  facts,
+  onDone,
+}: {
+  rows: ProfileRow[];
+  facts: Fact[];
+  onDone: () => unknown;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  const ids = needsOk(rows)
+    .map((r) => facts.find((f) => f.key === r.key)?.id)
+    .filter((id): id is string => !!id);
+  if (ids.length < 2) return null;
+  async function run() {
+    setBusy(true);
+    setMsg("");
+    const failed = (
+      await Promise.all(
+        ids.map((id) =>
+          confirmFact(id).then(
+            () => false,
+            () => true,
+          ),
+        ),
+      )
+    ).filter(Boolean).length;
+    setBusy(false);
+    setMsg(
+      failed
+        ? `${ids.length - failed} confirmed. ${failed} did not save. Try again.`
+        : `All ${ids.length} confirmed.`,
+    );
+    await onDone();
+  }
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-3 rounded-inner bg-surface-2 p-4">
+      <p className="min-w-0 flex-1 text-small text-text-1">
+        {ids.length} details need your OK. Each matches what Google shows now.
+      </p>
+      <Button size="md" variant="secondary" loading={busy} onClick={() => void run()}>
+        {`Confirm all ${ids.length}`}
+      </Button>
+      {msg ? (
+        <p className="w-full text-small text-text-2" role="status">
+          {msg}
+        </p>
+      ) : null}
+    </div>
   );
 }
 

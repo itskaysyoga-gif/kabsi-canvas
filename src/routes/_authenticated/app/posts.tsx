@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { fmtDate, fmtDateTime } from "@/lib/format";
 import { myLatestLocation } from "@/lib/onboarding";
+import { supabase } from "@/lib/supabase";
 import { contentCall } from "@/lib/reviews";
 import { WHATSAPP_ON } from "@/lib/site";
 import { latestByTarget, recentTasks, type TaskItem } from "@/lib/task-feed";
@@ -191,6 +192,8 @@ function PostsPage() {
             </>
           )}
 
+          <Older locationId={loc.id} posts={all} />
+
           <div className="grid items-start gap-4 lg:grid-cols-[3fr_2fr]">
             <WritePost locationId={loc.id} onSaved={refresh} />
             <Settings locationId={loc.id} />
@@ -198,6 +201,66 @@ function PostsPage() {
         </div>
       ) : null}
     </>
+  );
+}
+
+/** APP-3 (R-169): an expired "Anything new this month?" question, read through RLS. */
+async function loadOldQuestions(locationId: string) {
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("id, source_id, resolved_at")
+    .eq("location_id", locationId)
+    .eq("source_type", "post_question")
+    .eq("state", "expired")
+    .order("resolved_at", { ascending: false })
+    .limit(6);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as { id: string; source_id: string; resolved_at: string | null }[];
+}
+
+/**
+ * APP-3 (R-169): what expired stays here, under Older, and nowhere else. A post planned for a month that ended expired
+ * at the end of that month and is never sent; an unanswered question expired after 14 days. Nothing here has a button.
+ */
+function Older({ locationId, posts }: { locationId: string; posts: Post[] }) {
+  const questions = useQuery({
+    queryKey: ["post-old-questions", locationId],
+    queryFn: () => loadOldQuestions(locationId),
+  });
+  const expired = posts.filter((p) => p.state === "expired");
+  const asked = questions.data ?? [];
+  if (!expired.length && !asked.length) return null;
+  return (
+    <details className="group rounded-card border border-line bg-surface-1 p-5 shadow-rest sm:p-6">
+      <summary className="press flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-title font-bold [&::-webkit-details-marker]:hidden">
+        Older
+        <span className="text-small font-semibold text-text-2">
+          {expired.length + asked.length}
+        </span>
+      </summary>
+      <ul className="mt-3 divide-y divide-line">
+        {expired.map((p) => (
+          <li key={p.id} className="py-3 first:pt-0">
+            <p className="text-small font-bold text-text-1">
+              Post for {monthName(monthOf(p))}: not sent, its month ended
+            </p>
+            <p dir="auto" className="mt-1 line-clamp-2 text-small text-text-2 break-words">
+              {p.body ?? p.owner_input}
+            </p>
+          </li>
+        ))}
+        {asked.map((q) => (
+          <li key={q.id} className="py-3 first:pt-0">
+            <p className="text-small font-bold text-text-1">
+              Anything new for {monthName(q.source_id)}? Not answered
+            </p>
+            <p className="mt-1 text-small text-text-2">
+              Closed after 14 days{q.resolved_at ? `, ${fmtDate(q.resolved_at)}` : ""}.
+            </p>
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }
 

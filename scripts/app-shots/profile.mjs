@@ -172,6 +172,9 @@ export const tables = {
 };
 
 export const rpc = {
+  // APP-3: the coach's Google read fills Description and Attributes.
+  profile_coach_numbers: (c) =>
+    reading(c) ? [] : [{ description_length: 0, attributes: 3, read_at: ago(1) }],
   // The real approval keys (src/lib/team.ts ApprovalKind) next to the base file's, so the decisions show.
   my_access: (c) => {
     const role = c.state === "manager" ? "manager" : c.state === "staff" ? "staff" : "owner";

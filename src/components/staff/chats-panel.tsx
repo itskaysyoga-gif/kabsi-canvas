@@ -21,6 +21,8 @@ import { Button, STAFF_CARD, STAFF_H2 } from "./staff-ui";
 
 export type Chat = {
   id: string;
+  /** When the chat started (chat_report.created_at). */
+  created_at?: string;
   updated_at: string;
   surface: string;
   status: string;
@@ -43,6 +45,19 @@ export type Chat = {
   signed_in_business: string | null;
 };
 type Stat = { dimension: string; value: string; conversations: number };
+
+/** APP-3 (R-169): the figures' headings, in sentence case. */
+const DIMENSION_LABEL: Record<string, string> = {
+  temperature: "Temperature",
+  intent: "Intent",
+  category: "Category",
+  country: "Country",
+};
+
+/** APP-3 (R-169): the new price started on 24 Nov 2026; Nora's chats before it quote the old Essentials and Pro prices. */
+export const NEW_PRICES_FROM = "2026-11-24T00:00:00Z";
+export const oldPrices = (c: Pick<Chat, "created_at" | "updated_at">) =>
+  Date.parse(c.created_at ?? c.updated_at) < Date.parse(NEW_PRICES_FROM);
 
 const CATEGORIES = [
   "pricing",
@@ -240,6 +255,11 @@ export function ChatsPanel() {
                             {c.lead_temperature} lead
                           </span>
                         ) : null}
+                        {oldPrices(c) ? (
+                          <span className="rounded-pill bg-surface-2 px-2 py-0.5 text-label text-text-2">
+                            Old prices
+                          </span>
+                        ) : null}
                       </span>
                     </span>
                     <ChevronRight className="mt-1 size-5 shrink-0 text-text-2" aria-hidden />
@@ -260,7 +280,7 @@ export function ChatsPanel() {
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {["temperature", "intent", "category", "country"].map((d) => (
                 <div key={d} className="rounded-inner bg-surface-2 p-4 text-small">
-                  <p className="text-label font-bold text-text-2">{d}</p>
+                  <p className="text-label font-bold text-text-2">{DIMENSION_LABEL[d] ?? d}</p>
                   <ul className="mt-2 space-y-1">
                     {stats
                       .data!.filter((s) => s.dimension === d)

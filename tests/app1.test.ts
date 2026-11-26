@@ -57,7 +57,11 @@ describe("Your Google profile, the health strip", () => {
       week: [pub("local_post", "p1", "confirmed")],
     });
     const by = Object.fromEntries(items.map((h) => [h.key, h]));
-    expect(by["details"]).toMatchObject({ tone: "warn", state: "1 thing to check" });
+    // APP-3: the same "things to fix" count as the Google profile screen; a change others made is said apart.
+    expect(by["details"]).toMatchObject({
+      tone: "warn",
+      state: "1 thing to fix, 1 change to check",
+    });
     expect(by["hours"]).toMatchObject({ tone: "warn", action: { to: "/app/hours" } });
     expect(by["reviews"]).toMatchObject({ tone: "warn", state: "2 replies waiting" });
     expect(by["posts"]).toMatchObject({ tone: "ok", state: "Sent this week" });
