@@ -33,7 +33,6 @@ class World {
   made: string[] = [];
   minted: string[] = [];
   limits = new Map<string, number>();
-  turnstileOk = true;
   sent: { to: string; body: string; buttons: string[] }[] = [];
   env: Record<string, string> = { SUPABASE_URL: "https://x.supabase.co", GEO_SIGN_KEY: "geo-test-key" };
 
@@ -46,7 +45,6 @@ class World {
         this.limits.set(key, n);
         return n <= max;
       },
-      verifyTurnstile: async (t) => this.turnstileOk && !!t,
       start: async (r) => {
         const id = crypto.randomUUID();
         this.rows.push({ ...r, id, state: "waiting", phone: null, user: null, created: this.now, confirmed: null });
@@ -123,7 +121,7 @@ async function browserStart(w: World, opts: { geo?: string | null; ua?: string }
   const secret = "s".repeat(16) + crypto.randomUUID().replace(/-/g, "");
   const res = await makeHandler(w.deps())(new Request("https://f/auth-whatsapp/start", {
     method: "POST", headers: { "user-agent": opts.ua ?? CHROME_WIN },
-    body: JSON.stringify({ turnstile: "ok", browser_hash: await sha256Hex(secret), geo: opts.geo ?? null }),
+    body: JSON.stringify({ browser_hash: await sha256Hex(secret), geo: opts.geo ?? null }),
   }));
   return { res, body: await res.json() as { id: string; code: string; error?: string }, secret };
 }
@@ -282,19 +280,17 @@ Deno.test("signup1: refused when expired, reused, from the wrong browser, forwar
   assert.deepEqual(w.minted, []);
 });
 
-Deno.test("signup1: Turnstile and the limits come before a code", async () => {
+Deno.test("signup1: no bot check, the limits come before a code", async () => {
   const w = new World();
-  w.turnstileOk = false;
   let r = await browserStart(w);
-  assert.equal(r.res.status, 400);
-  assert.equal(r.body.error, "challenge_failed");
-  assert.equal(w.rows.length, 0);
-  w.turnstileOk = true;
+  assert.equal(r.res.status, 200, "FIX-6: a code is made with no Turnstile token at all");
+  w.rows.length = 0;
+  w.limits.clear();
   for (let i = 0; i < 10; i++) assert.equal((await browserStart(w)).res.status, 200);
   r = await browserStart(w);
   assert.equal(r.res.status, 429, "the 11th start in an hour from one visitor");
   assert.equal(w.rows.length, 10);
-  const bad = await makeHandler(w.deps())(new Request("https://f/auth-whatsapp/start", { method: "POST", body: JSON.stringify({ turnstile: "ok", browser_hash: "nope" }) }));
+  const bad = await makeHandler(w.deps())(new Request("https://f/auth-whatsapp/start", { method: "POST", body: JSON.stringify({ browser_hash: "nope" }) }));
   assert.equal(bad.status, 400);
 
   // On WhatsApp: at most 5 sign-in messages per phone in 15 minutes, wrong codes included.

@@ -62,7 +62,7 @@ export function BusinessStep({
     setBusy(true);
     try {
       const id = await startLocation(picked);
-      chooseLocation(id);
+      await chooseLocation(id);
       // Stage 2 is the business and who looks after its Google profile: both answered here.
       await confirmBusiness(id).catch(() => undefined);
       if (kept?.check && kept.place_id === picked.place_id)

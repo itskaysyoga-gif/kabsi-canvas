@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { MessageCircle } from "lucide-react";
 import { buttonClass } from "@/components/kabsi/ui";
 import { cn } from "@/lib/utils";
-import { Turnstile } from "@/components/turnstile";
 import { qrSvg } from "@/lib/qr";
 import {
   checkWhatsapp,
@@ -68,44 +67,37 @@ const HOVER_DWELL_MS = 200;
 export type WaPrestart = {
   start: WaStart | null;
   error: string;
-  /** The invisible bot check. Kept mounted for the panel's life; shown only when Cloudflare asks for a click. */
-  widget: (visible: boolean) => ReactNode;
   /** Forget the current code and make a new one (after it ended). */
   again: () => void;
   /** The visitor's intent: points at, focuses or touches "Continue with WhatsApp" (and the tap itself). The code is
-   * made now, with the passed bot check; a code with under 5 minutes left is replaced. Opening the panel never does. */
+   * made now; a code with under 5 minutes left is replaced. Opening the panel never does. */
   want: () => void;
 };
 
-/** True when a sign-in code may be made: the visitor showed intent, a passed bot check is in hand, no start is on its
- * way, and there is no code yet (or the one there has under 5 minutes left). */
+/** True when a sign-in code may be made: the visitor showed intent, no start is on its way, and there is no code yet
+ * (or the one there has under 5 minutes left). FIX-6 (R-168): no bot check, so nothing else is waited for. */
 export function shouldMakeCode(o: {
   wanted: boolean;
-  token: string;
   busy: boolean;
   start: Pick<WaStart, "expiresAt"> | null;
   now: number;
 }): boolean {
-  if (!o.wanted || !o.token || o.busy) return false;
+  if (!o.wanted || o.busy) return false;
   return !o.start || o.start.expiresAt - o.now <= FRESH_MS;
 }
 
 /**
- * Fix 5 (R-158 item 2) and Site 3b (R-161 item 1): the bot check starts when the sign-in panel opens, and its token is
- * only held. The sign-in code (a stored row, and one of the visitor's 10 starts an hour) is made when the visitor
- * shows intent on "Continue with WhatsApp", so choosing Google or email stores nothing and spends no start. The held
- * token and the place token are ready by then, so the ready link shows within a second of the tap. A code is asked for
- * only with a passed check (an empty token starts nothing); the server checks the token again. One code per page: it is
- * kept across the panel's steps and never renewed by a timer, only at intent when it has under 5 minutes left, or after
- * it ended.
+ * Fix 5 (R-158 item 2), Site 3b (R-161 item 1) and FIX-6 (R-168): no bot check. The sign-in code (a stored row, and one
+ * of the visitor's 10 starts an hour) is made when the visitor shows intent on "Continue with WhatsApp", so choosing
+ * Google or email stores nothing and spends no start. The place token is read when the panel opens, so the ready link
+ * shows within a second of the tap. The server's limits are the gate. One code per page: it is kept across the panel's
+ * steps and never renewed by a timer, only at intent when it has under 5 minutes left, or after it ended.
  */
 export function useWaPrestart(on: boolean): WaPrestart {
   const [start, setStart] = useState<WaStart | null>(() =>
     typeof window === "undefined" ? null : keptStart(),
   );
   const [error, setError] = useState("");
-  const [round, setRound] = useState(0);
-  const [token, setToken] = useState("");
   const [wanted, setWanted] = useState(false);
   const [busy, setBusy] = useState(false);
   const startRef = useRef(start);
@@ -117,31 +109,27 @@ export function useWaPrestart(on: boolean): WaPrestart {
   }, [on]);
 
   useEffect(() => {
-    if (!shouldMakeCode({ wanted, token, busy, start, now: Date.now() })) return;
-    const t = token;
-    setToken("");
+    if (!shouldMakeCode({ wanted, busy, start, now: Date.now() })) return;
     setBusy(true);
     setError("");
-    startWhatsapp(t)
+    startWhatsapp()
       .then((s2) => setStart(s2))
       .catch((e) => {
-        // Intent is spent: a token the check refreshes by itself later starts nothing until the visitor asks again.
+        // Intent is spent: nothing starts again until the visitor asks again.
         setWanted(false);
         setError(
           e instanceof WaSigninError ? e.message : "Something went wrong. Please try again.",
         );
       })
       .finally(() => setBusy(false));
-  }, [wanted, token, busy, start]);
+  }, [wanted, busy, start]);
 
   // A new check and a new code, asked for by the visitor ("Try again", "Start again", or intent on a stale code).
   const again = useCallback(() => {
     forgetStart();
     setStart(null);
-    setToken("");
     setError("");
     setWanted(true);
-    setRound((n) => n + 1);
   }, []);
 
   const want = useCallback(() => {
@@ -150,14 +138,7 @@ export function useWaPrestart(on: boolean): WaPrestart {
     setWanted(true);
   }, [again]);
 
-  // One check per panel; a token is good for one code. The widget shows while there is no code yet.
-  const widget = (visible: boolean) =>
-    on && !start ? (
-      <div className={visible ? "" : "pointer-events-none absolute h-0 w-full overflow-hidden"}>
-        <Turnstile key={round} surface="login" onToken={setToken} />
-      </div>
-    ) : null;
-  return { start, error, widget, again, want };
+  return { start, error, again, want };
 }
 
 const CHECK_MS = 2000;

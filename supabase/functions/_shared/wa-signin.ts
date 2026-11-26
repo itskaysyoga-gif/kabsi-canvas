@@ -3,7 +3,7 @@
 //
 // The flow:
 //   1. The browser makes a secret of 32 random bytes and keeps it. It sends only the secret's SHA-256 to POST /start, with
-//      Turnstile. After Turnstile and the K-100 style limits, Kabsi makes a CODE of 6 characters from the card alphabet and
+//      no bot check (FIX-6, R-168). After the K-100 style limits, Kabsi makes a CODE of 6 characters from the card alphabet and
 //      stores the code's hash and the secret's hash, the browser and system read from the request's user agent, and the
 //      approximate city and country from the signed geo token (never an IP address). The code lives 10 minutes.
 //   2. The owner sends "Kabsi sign in CODE" to Kabsi's number from the ready link. Kabsi never sends a code.
@@ -152,7 +152,6 @@ export type HandlerDeps = {
   geoKey: () => Promise<string | undefined>;
   randomBytes: (n: number) => Uint8Array;
   rateLimit: (key: string, max: number, windowSeconds: number, opts?: { failClosed?: boolean }) => Promise<boolean>;
-  verifyTurnstile: (token: string | undefined, ip?: string) => Promise<boolean>;
   /** Stores a new sign-in; returns its id. */
   start: (row: StartRow) => Promise<string>;
   /** Reads a sign-in by id and browser hash; a confirmed one is spent here and returns its user. */
@@ -213,11 +212,8 @@ export function makeHandler(d: HandlerDeps) {
     if (path.endsWith("/start")) {
       const browserHash = typeof b["browser_hash"] === "string" ? b["browser_hash"].toLowerCase() : "";
       if (!HEX64.test(browserHash)) return fail("bad_request", "Something went wrong. Please try again.");
-      if (!(await d.verifyTurnstile(typeof b["turnstile"] === "string" && b["turnstile"] ? b["turnstile"] : undefined, ip))) {
-        return fail("challenge_failed", "Please complete the check and try again.");
-      }
       if (!(await d.rateLimit(`wasignin:ip:${visitor}`, LIMITS.perVisitor, LIMITS.perVisitorSeconds, { failClosed: true }))) {
-        return fail("rate_limited", "That is a lot of sign-in tries. Please try again in an hour.", 429);
+        return fail("rate_limited", "Too many codes asked for. Try again in a few minutes.", 429);
       }
       const code = makeCode(d.randomBytes);
       const geo = await readGeo(b["geo"], await d.geoKey().catch(() => undefined), d.hmacHex, now());

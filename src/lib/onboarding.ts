@@ -5,6 +5,7 @@ import { callFunction } from "@/lib/api";
 import { RESUME_CODE, type OnboardingStatus } from "@/lib/onboarding-flow";
 import type { PlanKind } from "@/lib/plans";
 import type { OwnerVariant, ScenarioId } from "@/lib/scenarios";
+import { mruKey, pickLocation, pushRecent, sortLocations, tabKey } from "@/lib/location-pick";
 
 export type OnboardingStep = "business" | "access" | "knowledge" | "confirm" | "plan" | "done";
 export type Location = {
@@ -58,16 +59,49 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   return data as T;
 }
 
-// The owner app works on one business at a time: the one picked in the header, else the newest. Only
-// businesses the signed-in user is a member of count. Staff can read every business through RLS, but the
-// owner app must never treat someone else's business as theirs (writes would be refused anyway).
+// The owner app works on one business at a time. FIX-6 (R-168 item 4): the one opened is the one this tab picked, else the
+// most recently used real (non-demo) business of this user, else the newest real one; demo businesses come last in the
+// switcher and are never the default while a real business exists (src/lib/location-pick.ts). Only businesses the
+// signed-in user is a member of count. Staff can read every business through RLS, but the owner app must never treat
+// someone else's business as theirs (writes would be refused anyway).
 const LOCATION_COLUMNS =
   "id, name, address, country, status, onboarding_step, consent_at, access_granted_at, access_lost_at, disconnect_requested_at, access_removed_at, concierge, concierge_first_post_at, is_demo, created_at";
-const CHOSEN_KEY = "kabsi.location";
+/** The key before FIX-6: one business per browser, shared by every account on it. Read once as the first "recent" entry. */
+const LEGACY_KEY = "kabsi.location";
 
+async function uidNow(): Promise<string | null> {
+  const { data } = await supabase.auth.getSession();
+  return data.session?.user.id ?? null;
+}
+function readList(key: string): string[] {
+  try {
+    const v = JSON.parse(window.localStorage.getItem(key) ?? "[]") as unknown;
+    return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+  } catch {
+    return [];
+  }
+}
+function recentFor(uid: string): string[] {
+  const mru = readList(mruKey(uid));
+  try {
+    const legacy = window.localStorage.getItem(LEGACY_KEY);
+    if (legacy && !mru.includes(legacy)) mru.push(legacy);
+  } catch {
+    /* private mode */
+  }
+  return mru;
+}
+function tabFor(uid: string): string | null {
+  try {
+    return window.sessionStorage.getItem(tabKey(uid));
+  } catch {
+    return null;
+  }
+}
+
+/** Every business of the signed-in user, in switcher order: real ones first (most recently used first), demo ones last. */
 export async function myLocations(): Promise<Location[]> {
-  const { data: session } = await supabase.auth.getSession();
-  const uid = session.session?.user.id;
+  const uid = await uidNow();
   if (!uid) return [];
   const { data, error } = await supabase
     .from("locations")
@@ -75,28 +109,28 @@ export async function myLocations(): Promise<Location[]> {
     .eq("location_members.user_id", uid)
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
-  return ((data ?? []) as (Location & { location_members?: unknown })[]).map(
+  const list = ((data ?? []) as (Location & { location_members?: unknown })[]).map(
     ({ location_members: _m, ...l }) => l as Location,
   );
+  return sortLocations(list, recentFor(uid));
 }
 
-export function chooseLocation(id: string) {
+/** Remembers a pick for this user (the recency list, kept in this browser) and for this tab. */
+export async function chooseLocation(id: string): Promise<void> {
+  const uid = await uidNow();
+  if (!uid) return;
   try {
-    window.localStorage.setItem(CHOSEN_KEY, id);
+    window.localStorage.setItem(mruKey(uid), JSON.stringify(pushRecent(readList(mruKey(uid)), id)));
+    window.sessionStorage.setItem(tabKey(uid), id);
   } catch {
-    /* private mode: fall back to the newest business */
+    /* private mode: fall back to the newest real business */
   }
 }
 
 export async function myLatestLocation(): Promise<Location | null> {
-  const list = await myLocations();
-  let chosen: string | null = null;
-  try {
-    chosen = window.localStorage.getItem(CHOSEN_KEY);
-  } catch {
-    chosen = null;
-  }
-  return list.find((l) => l.id === chosen) ?? list[0] ?? null;
+  const uid = await uidNow();
+  if (!uid) return null;
+  return pickLocation(await myLocations(), { mru: recentFor(uid), tab: tabFor(uid) });
 }
 
 export async function searchPlaces(query: string) {

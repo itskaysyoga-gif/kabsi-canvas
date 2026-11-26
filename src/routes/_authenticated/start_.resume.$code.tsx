@@ -31,8 +31,9 @@ function ResumePage() {
     const a = step.data;
     if (!a) return;
     // The page that answers works on the business the link belongs to.
-    chooseLocation(a.location_id);
-    void navigate({ to: resumeTarget(a.path), replace: true });
+    void chooseLocation(a.location_id).then(() =>
+      navigate({ to: resumeTarget(a.path), replace: true }),
+    );
   }, [step.data, navigate]);
 
   if (step.isLoading || step.data)

@@ -12,45 +12,30 @@ const stale = { expiresAt: NOW + 2 * 60_000 };
 
 describe("shouldMakeCode", () => {
   it("makes no code without intent, however good the check is", () => {
-    expect(shouldMakeCode({ wanted: false, token: "t", busy: false, start: null, now: NOW })).toBe(
-      false,
-    );
+    expect(shouldMakeCode({ wanted: false, busy: false, start: null, now: NOW })).toBe(false);
   });
-  it("makes no code without a passed check, even with intent", () => {
-    expect(shouldMakeCode({ wanted: true, token: "", busy: false, start: null, now: NOW })).toBe(
-      false,
-    );
-  });
-  it("makes one code on intent with a passed check", () => {
-    expect(shouldMakeCode({ wanted: true, token: "t", busy: false, start: null, now: NOW })).toBe(
-      true,
-    );
+  it("makes one code on intent on intent (FIX-6: no bot check)", () => {
+    expect(shouldMakeCode({ wanted: true, busy: false, start: null, now: NOW })).toBe(true);
   });
   it("never makes a second while one is on its way or one still has over 5 minutes", () => {
-    expect(shouldMakeCode({ wanted: true, token: "t", busy: true, start: null, now: NOW })).toBe(
-      false,
-    );
-    expect(shouldMakeCode({ wanted: true, token: "t", busy: false, start: fresh, now: NOW })).toBe(
-      false,
-    );
+    expect(shouldMakeCode({ wanted: true, busy: true, start: null, now: NOW })).toBe(false);
+    expect(shouldMakeCode({ wanted: true, busy: false, start: fresh, now: NOW })).toBe(false);
   });
   it("replaces a code with under 5 minutes left", () => {
-    expect(shouldMakeCode({ wanted: true, token: "t", busy: false, start: stale, now: NOW })).toBe(
-      true,
-    );
+    expect(shouldMakeCode({ wanted: true, busy: false, start: stale, now: NOW })).toBe(true);
   });
 });
 
 describe("the panel", () => {
   const step = read("src/components/auth/whatsapp-signin.tsx");
   const panel = read("src/components/auth/sign-in-panel.tsx");
-  it("starts a code only through the intent path and still starts the bot check at open", () => {
+  it("starts a code only through the intent path and has no bot check (FIX-6)", () => {
     // The only caller of startWhatsapp is the effect guarded by shouldMakeCode; the token callback only holds the token.
     expect(step.match(/startWhatsapp\(/g)).toHaveLength(1);
     expect(step).toMatch(
-      /if \(!shouldMakeCode\(\{ wanted, token, busy, start, now: Date\.now\(\) \}\)\) return;/,
+      /if \(!shouldMakeCode\(\{ wanted, busy, start, now: Date\.now\(\) \}\)\) return;/,
     );
-    expect(step).toMatch(/<Turnstile key=\{round\} surface="login" onToken=\{setToken\} \/>/);
+    expect(step).not.toMatch(/Turnstile/);
     expect(panel).toMatch(/const wa = useWaPrestart\(waOn\)/);
   });
   it("counts pointing, focusing and touching the button as intent, in both places it appears", () => {
@@ -68,9 +53,7 @@ describe("the panel", () => {
   });
   it("a failed start spends the intent, so a refreshed token alone starts nothing; Try again asks anew", () => {
     expect(step).toMatch(/setWanted\(false\);\s*setError\(/);
-    expect(step).toMatch(
-      /const again = useCallback\(\(\) => \{[\s\S]*?setWanted\(true\);[\s\S]*?setRound/,
-    );
+    expect(step).toMatch(/const again = useCallback\(\(\) => \{[\s\S]*?setWanted\(true\);/);
   });
   it("moves focus only after the phone order is read, and never to the first button on a phone", () => {
     expect(panel).toMatch(/if \(!deviceRead\) return;/);
