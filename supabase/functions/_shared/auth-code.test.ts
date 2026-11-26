@@ -1,7 +1,7 @@
 // Run: deno test --no-check supabase/functions/_shared/auth-code.test.ts
 // The sign-in code request (P0.4-02). In-memory limiter, a recorded sendCode, no Turnstile (FIX-6, R-168): no network.
 import assert from "node:assert/strict";
-import { LIMITS, makeHandler, TOO_MANY } from "./auth-code.ts";
+import { LIMITS, limiterAddress, makeHandler, TOO_MANY } from "./auth-code.ts";
 import { isDisposable } from "./disposable-domains.ts";
 
 function world(opts: { sendError?: string } = {}) {
@@ -122,4 +122,14 @@ Deno.test("an Auth error is reported, never a silent success", async () => {
   const own = await world({ sendError: "For security purposes, you can only request this after 42 seconds." }).ask("owner@example.com");
   assert.equal(own.status, 429);
   assert.equal(own.body.message, TOO_MANY);
+});
+
+Deno.test("plus tags and Gmail dots share one address's limits, and the code still goes to the typed address", async () => {
+  assert.equal(limiterAddress("v.ic.tim+news@gmail.com"), "victim@gmail.com");
+  assert.equal(limiterAddress("victim@googlemail.com"), "victim@gmail.com");
+  assert.equal(limiterAddress("a.b+x@shop.com"), "a.b@shop.com");
+  const w = world();
+  assert.equal((await w.ask("victim+1@gmail.com")).status, 200);
+  assert.equal((await w.ask("v.ictim+2@gmail.com")).status, 429);
+  assert.deepEqual(w.sent, ["victim+1@gmail.com"]);
 });

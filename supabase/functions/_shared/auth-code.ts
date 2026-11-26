@@ -23,6 +23,17 @@ export const LIMITS = {
 export const TOO_MANY = "Too many codes asked for. Try again in a few minutes.";
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
 
+/** The address as the limiter sees it: the part after a plus sign is dropped, and Gmail's dots and googlemail.com are folded,
+ *  so victim+1@gmail.com and v.ictim@gmail.com share one inbox's limits. Only the limiter key uses this; the code goes to the typed address. */
+export function limiterAddress(email: string): string {
+  const at = email.lastIndexOf("@");
+  let local = email.slice(0, at).split("+")[0] || email.slice(0, at);
+  let domain = email.slice(at + 1);
+  if (domain === "googlemail.com") domain = "gmail.com";
+  if (domain === "gmail.com") local = local.replace(/\./g, "");
+  return `${local}@${domain}`;
+}
+
 export type Deps = {
   env: (name: string) => string | undefined;
   ip: (req: Request) => string;
@@ -52,7 +63,7 @@ export function makeHandler(d: Deps) {
     }
     const salt = d.env("SUPABASE_URL") ?? "";
     const visitor = (await d.sha256Hex(`${salt}:ip:${ip}`)).slice(0, 24);
-    const address = (await d.sha256Hex(`${salt}:email:${email}`)).slice(0, 24);
+    const address = (await d.sha256Hex(`${salt}:email:${limiterAddress(email)}`)).slice(0, 24);
     if (!(await d.rateLimit(`authcode:ip:${visitor}`, LIMITS.perVisitor, LIMITS.perVisitorSeconds, { failClosed: true }))) {
       return fail("rate_limited", TOO_MANY, 429);
     }
