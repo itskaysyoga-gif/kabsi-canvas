@@ -1,5 +1,6 @@
 // What Home says (K-06, K-07): the header strip, the two states and the cards. Pure functions, no network, so the
 // states are tested in tests/home-state.test.ts. Priorities, never points or a score.
+import { fixCountLine, thingsToFix } from "@/lib/fix-lines";
 import type { Task, TaskKind } from "@/lib/tasks";
 import { WHATSAPP_ON } from "@/lib/site";
 
@@ -521,7 +522,10 @@ export function profileHealth(i: {
     doneThisWeek(i.week, Number.POSITIVE_INFINITY).some(
       (t) => t.kind === kind && (t.owner === "sent" || t.owner === "confirmed"),
     );
-  const details = open(["profile_change", "profile_gap", "google_needs_action"]);
+  // APP-3: the same "things to fix" and the same count as the Google profile screen (src/lib/fix-lines.ts); changes
+  // others made and Google's warnings are said apart.
+  const fix = thingsToFix(i.tasks);
+  const changes = open(["profile_change", "google_needs_action"]);
   const hours = open(["hours_confirm"]);
   const photos = open(["photo_batch"]);
   const posts = open(["post"]);
@@ -532,11 +536,16 @@ export function profileHealth(i: {
   );
   const n = (k: number, one: string, many: string) => `${k} ${k === 1 ? one : many}`;
   return [
-    details.length
+    fix.length || changes.length
       ? {
           key: "details",
           label: "Details",
-          state: n(details.length, "thing to check", "things to check"),
+          state: [
+            fix.length ? fixCountLine(fix.length) : null,
+            changes.length ? n(changes.length, "change to check", "changes to check") : null,
+          ]
+            .filter(Boolean)
+            .join(", "),
           tone: "warn",
           action: { label: "Check", to: "/app/shield" },
         }

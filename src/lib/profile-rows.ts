@@ -21,7 +21,9 @@ export const WATCHED: { key: string; label: string; fields: string[]; hint?: str
 ];
 
 export type Value = { display?: string } | null;
-export type Fact = { key: string; value: Value; status: string };
+export type Fact = { id?: string; key: string; value: Value; status: string };
+/** APP-3: the Profile Coach's last live Google read (counts only, K-40), for the rows the Protection read does not cover. */
+export type CoachRead = { description_length: number; attributes: number } | null;
 export type Change = {
   id: string;
   field: string;
@@ -131,8 +133,41 @@ export function profileRow(
   };
 }
 
-export const profileRows = (facts: Fact[], changes: Change[]) =>
-  WATCHED.map((w) => profileRow(w, facts, changes));
+/** APP-3: the Description and Attributes rows from the coach's Google read, when no fact holds them. */
+function fromCoach(row: ProfileRow, coach: CoachRead): ProfileRow {
+  if (!coach || row.change || row.google !== null || row.status !== "Not read yet") return row;
+  if (row.key === "description") {
+    const n = coach.description_length;
+    return {
+      ...row,
+      google: n > 0 ? `Written, ${n} characters` : null,
+      missing: n === 0,
+      status: "Read from Google",
+      tone: "green",
+    };
+  }
+  if (row.key === "attributes") {
+    const n = coach.attributes;
+    return {
+      ...row,
+      google: n > 0 ? `${n} ${n === 1 ? "detail" : "details"} set` : null,
+      missing: n === 0,
+      status: "Read from Google",
+      tone: "green",
+    };
+  }
+  return row;
+}
+
+export const profileRows = (facts: Fact[], changes: Change[], coach: CoachRead = null) =>
+  WATCHED.map((w) => fromCoach(profileRow(w, facts, changes), coach));
+
+/** APP-3: a row Kabsi has not read yet is hidden until it is read. */
+export const readRows = (rows: ProfileRow[]) =>
+  rows.filter((r) => !(r.google === null && !r.missing && !r.change));
+
+/** APP-3: the rows that wait for the owner's OK, for "Confirm all". */
+export const needsOk = (rows: ProfileRow[]) => rows.filter((r) => r.status === "Needs your OK");
 
 /** The Protection status line (K-19): "Google Protection: on, last check 09:14", or why it is not running. */
 export function protectionLine(i: {

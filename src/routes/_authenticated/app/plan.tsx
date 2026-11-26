@@ -11,13 +11,14 @@ import {
   billingAction,
   type BillingOp,
   loadPlanSummary,
+  ADD_CARD_LABEL,
   PAID_NAMES,
   PLAN_COPY,
   PLAN_NAMES,
   type PlanSummary,
 } from "@/lib/plans";
 import { daysUntil } from "@/lib/dashboard";
-import { ACCOUNT_STAYS_LINE, TAX_NOTE, WHATSAPP_ON, WORKING_HOURS } from "@/lib/site";
+import { ACCOUNT_STAYS_LINE, CONTACT_EMAIL, TAX_NOTE, WHATSAPP_ON } from "@/lib/site";
 import { FOUNDING_LINE, FOUNDING_MONTHLY_USD, PRICE_MONTHLY_USD, TRIAL_LINE } from "@/lib/offer";
 import { AccountTop, Panel } from "@/components/kabsi/d3-account";
 import { Banner, Button, Skeleton, StatusPill, buttonClass } from "@/components/kabsi/ui";
@@ -88,6 +89,8 @@ async function loadPlan(locationId: string) {
   // Paid but not started: the plan starts once Kabsi's Google access works (D224).
   const paidWaiting = all.find((p) => p.status === "pending" && paidIds.has(p.id)) ?? null;
   return {
+    /** APP-3: this business has had a plan of any kind (a trial too), so the trial offer is not shown. */
+    everPlan: all.length > 0,
     current,
     paidUntil,
     queued: running.filter((p) => p.starts_at && Date.parse(p.starts_at) > now),
@@ -208,56 +211,67 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
         })
       : undefined;
 
-  const trial = sum.tier === "trial" && !!sum.plan && !b;
-  const mine = (!!b && b.state !== "cancelled" && b.state !== "expired") || trial;
-  const showChoose = !running;
+  // APP-3 (R-169): the trial offer shows only to a business with no plan, no trial and no payment. Any other business sees
+  // its current plan card: the plan, paid until and days left, and the cancel link.
+  const fresh =
+    !b &&
+    !d.everPlan &&
+    !d.current &&
+    !d.paidWaiting &&
+    d.payments.length === 0 &&
+    !sum.plan &&
+    !sum.trial_used &&
+    !sum.paid_waiting &&
+    sum.queued.length === 0 &&
+    sum.tier !== "trial";
 
   return (
     <div className="max-w-2xl space-y-4">
       <StateBanner sum={sum} d={d} b={b} busy={busy} run={run} />
 
-      <Panel className={cn(mine && "ring-2 ring-text-1")}>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-h3 font-bold">{PLAN_COPY.oneName}</h2>
-          {mine ? <StatusPill tone="info">{trial ? "Your trial" : "Your plan"}</StatusPill> : null}
-        </div>
-        <p className="mt-2 font-display text-h2 font-bold">
-          ${monthly}
-          <span className="text-body font-semibold text-text-2"> a month per location</span>
-        </p>
-        <p className="mt-1 text-small text-text-2">
-          {running && b.founding ? FOUNDING_LINE : TRIAL_LINE}
-        </p>
-        <ul className="mt-4 space-y-2">
-          {PLAN_COPY.work.map((w) => (
-            <li key={w} className="flex gap-2 text-body">
-              <Check className="mt-1 size-4 shrink-0 text-ok" strokeWidth={3} aria-hidden />
-              {w}
-            </li>
-          ))}
-        </ul>
-        <p className="mt-4 text-small font-bold">{PLAN_COPY.nothingWithoutYes}</p>
-        <p className="text-small text-text-2">{WORKING_HOURS}</p>
-        {showChoose ? (
-          <Button
-            full
-            size="md"
-            variant="primary"
-            className="mt-5"
-            disabled={!open || busy}
-            onClick={() => void run("checkout", { plan: "essentials", period: "month" })}
-            data-main-cta
-          >
-            {sum.checkout_open ? PLAN_COPY.start : PLAN_COPY.openSoon}
-          </Button>
-        ) : null}
-      </Panel>
-      {showChoose && open ? (
-        <p className="text-small text-text-2">Creem's page shows the exact price before you pay.</p>
-      ) : null}
-      {showChoose && sum.checkout_open && !accessNow ? (
-        <p className="text-small text-text-2">{PLAN_COPY.afterAccess}</p>
-      ) : null}
+      {fresh ? (
+        <>
+          <Panel>
+            <h2 className="font-display text-h3 font-bold">{PLAN_COPY.oneName}</h2>
+            <p className="mt-2 font-display text-h2 font-bold">
+              ${monthly}
+              <span className="text-body font-semibold text-text-2"> a month per location</span>
+            </p>
+            <p className="mt-1 text-small text-text-2">{TRIAL_LINE}</p>
+            <WorkList />
+            <p className="mt-4 text-small font-bold">{PLAN_COPY.nothingWithoutYes}</p>
+            <Button
+              full
+              size="md"
+              variant="primary"
+              className="mt-5"
+              disabled={!open || busy}
+              onClick={() => void run("checkout", { plan: "essentials", period: "month" })}
+              data-main-cta
+            >
+              {sum.checkout_open ? PLAN_COPY.start : PLAN_COPY.openSoon}
+            </Button>
+          </Panel>
+          {open ? (
+            <p className="text-small text-text-2">
+              Creem's page shows the exact price before you pay.
+            </p>
+          ) : null}
+          {sum.checkout_open && !accessNow ? (
+            <p className="text-small text-text-2">{PLAN_COPY.afterAccess}</p>
+          ) : null}
+        </>
+      ) : (
+        <CurrentPlanCard
+          sum={sum}
+          d={d}
+          b={b}
+          busy={busy}
+          open={open}
+          onCheckout={() => void run("checkout", { plan: "essentials", period: "month" })}
+          onCancel={cancelLine}
+        />
+      )}
 
       {running ? (
         <Panel title="Manage your plan" id="manage">
@@ -318,26 +332,6 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
               </>
             )}
           </div>
-          {!b.cancel_at_period_end ? (
-            WHATSAPP_ON ? (
-              <p className="mt-4 text-small text-text-2">
-                Cancel any time: reply Cancel on WhatsApp, or{" "}
-                <button
-                  type="button"
-                  className="inline-flex min-h-11 items-center font-bold text-text-1 underline underline-offset-4"
-                  disabled={busy}
-                  onClick={cancelLine}
-                >
-                  cancel here
-                </button>
-                .
-              </p>
-            ) : (
-              <Button variant="tertiary" className="mt-3" disabled={busy} onClick={cancelLine}>
-                Cancel my plan
-              </Button>
-            )
-          ) : null}
         </Panel>
       ) : null}
 
@@ -410,6 +404,124 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
   );
 }
 
+function WorkList() {
+  return (
+    <ul className="mt-4 space-y-2">
+      {PLAN_COPY.work.map((w) => (
+        <li key={w} className="flex gap-2 text-body">
+          <Check className="mt-1 size-4 shrink-0 text-ok" strokeWidth={3} aria-hidden />
+          {w}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const daysLeftLine = (until: string | null) => {
+  const left = daysUntil(until);
+  return left === null ? "" : ` ${left} ${left === 1 ? "day" : "days"} left.`;
+};
+
+/**
+ * APP-3 (R-169): the plan this business has now, in place of the trial offer. The plan's name, until when it is paid and the
+ * days left, and the cancel link. A Creem plan cancels at the end of the paid period (Confirm below); a plan paid before
+ * Creem does not renew by itself, so cancelling it is an email. A trial, or a plan that ended, offers the card checkout.
+ */
+function CurrentPlanCard({
+  sum,
+  d,
+  b,
+  busy,
+  open,
+  onCheckout,
+  onCancel,
+}: {
+  sum: PlanSummary;
+  d: PlanData;
+  b: Billing | null;
+  busy: boolean;
+  open: boolean;
+  onCheckout: () => void;
+  onCancel: () => void;
+}) {
+  const live = !!b && (b.state === "active" || b.state === "past_due");
+  const trial = !b && sum.tier === "trial" && !!sum.plan;
+  const legacy = !b && !trial && !!d.current;
+  const waiting = !b && !trial && !legacy && !!d.paidWaiting;
+  const name = waiting
+    ? (ITEM_NAME[d.paidWaiting!.kind] ?? "Kabsi")
+    : b
+      ? (PAID_NAMES[`${b.plan}_${b.period ?? "month"}`] ?? "Kabsi")
+      : trial
+        ? PLAN_NAMES["trial"]
+        : legacy
+          ? (ITEM_NAME[d.current!.kind] ?? "Kabsi")
+          : "No plan";
+  const dates = live
+    ? `${b!.cancel_at_period_end ? "Ends" : "Paid until"} ${longDate(b!.current_period_end)}.${daysLeftLine(b!.current_period_end)}`
+    : trial
+      ? `Ends ${longDate(sum.plan!.last_day)}.${daysLeftLine(sum.plan!.ends_at)}`
+      : legacy
+        ? `Paid until ${longDate(d.paidUntil)}.${daysLeftLine(d.paidUntil)}`
+        : null;
+  const pill = live || legacy || waiting ? "Your plan" : trial ? "Your trial" : null;
+  const linkCls =
+    "inline-flex min-h-11 items-center font-bold text-text-1 underline underline-offset-4";
+  return (
+    <Panel className={cn(pill && "ring-2 ring-text-1")}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-display text-h3 font-bold">{name}</h2>
+        {pill ? <StatusPill tone="info">{pill}</StatusPill> : null}
+      </div>
+      {dates ? <p className="mt-2 text-body font-semibold">{dates}</p> : null}
+      {live && b!.founding ? <p className="mt-1 text-small text-text-2">{FOUNDING_LINE}</p> : null}
+      {live && b!.units > 0 ? (
+        <p className="mt-1 text-small text-text-2">
+          Plus {b!.units} extra {b!.units === 1 ? "location" : "locations"}.
+        </p>
+      ) : null}
+      {legacy ? (
+        <p className="mt-1 text-small text-text-2">This plan does not renew by itself.</p>
+      ) : null}
+      {trial ? (
+        <p className="mt-1 text-small text-text-2">
+          Everything Kabsi does is on during your trial. Without a card when it ends, reply drafts,
+          Google Protection and your weekly report pause.
+        </p>
+      ) : null}
+      <WorkList />
+      <p className="mt-4 text-small font-bold">{PLAN_COPY.nothingWithoutYes}</p>
+      {!live && !legacy && !waiting ? (
+        <Button
+          full
+          size="md"
+          variant="primary"
+          className="mt-5"
+          disabled={!open || busy}
+          onClick={onCheckout}
+          data-main-cta
+        >
+          {sum.checkout_open ? ADD_CARD_LABEL : PLAN_COPY.openSoon}
+        </Button>
+      ) : null}
+      {live && !b!.cancel_at_period_end ? (
+        <p className="mt-4 text-small text-text-2">
+          <button type="button" className={linkCls} disabled={busy} onClick={onCancel}>
+            Cancel my plan
+          </button>
+        </p>
+      ) : null}
+      {legacy ? (
+        <p className="mt-4 text-small text-text-2">
+          <a className={linkCls} href={`mailto:${CONTACT_EMAIL}?subject=Cancel%20my%20plan`}>
+            Cancel my plan
+          </a>
+        </p>
+      ) : null}
+    </Panel>
+  );
+}
+
 /** The one banner at the top: what the owner has now and what happens next. */
 function StateBanner({
   sum,
@@ -442,8 +554,6 @@ function StateBanner({
     const name = PAID_NAMES[`${b.plan}_${b.period ?? "month"}`] ?? "Kabsi";
     const ended = b.state === "cancelled" || b.state === "expired";
     const paused = b.state === "paused" || (b.state === "past_due" && !b.grace_ends_at);
-    const units =
-      b.units > 0 ? ` Plus ${b.units} extra ${b.units === 1 ? "location" : "locations"}.` : "";
     if (ended || paused)
       return (
         <Banner tone="warn" title={`${name}: ${paused ? "paused" : "ended"}.`}>
@@ -479,35 +589,16 @@ function StateBanner({
           Kabsi stops publishing then. You keep your review link and QR code.
         </Banner>
       );
-    const founding = (b as Billing & { founding?: boolean }).founding === true;
-    return (
-      <Banner tone="ok" title={`${name}.`}>
-        Next payment on {longDate(b.current_period_end)}.{founding ? ` ${FOUNDING_LINE}` : ""}
-        {units}
-      </Banner>
-    );
+    // APP-3: a plan that is fine is said by the plan card below, not again here.
+    return null;
   }
   if (sum.tier === "trial" && sum.plan) {
-    const left = sum.plan ? daysUntil(sum.plan.ends_at) : null;
-    return (
-      <Banner
-        tone="info"
-        title={`Free trial, ends ${longDate(sum.plan.last_day)}.${left !== null ? ` ${left} ${left === 1 ? "day" : "days"} left.` : ""}`}
-      >
-        <p>Everything Kabsi does is on during your trial.</p>
-        {sum.queued.length ? (
-          <p className="mt-1">
-            Already paid: {sum.queued.map((q) => ITEM_NAME[q.kind]).join(", ")}, starts{" "}
-            {shortDate(sum.queued[0]!.starts_at)}. Nothing stops when the trial ends.
-          </p>
-        ) : (
-          <p className="mt-1">
-            When the trial ends without a plan, reply drafts, Google Protection and your weekly
-            report pause. Your review link and QR code keep working.
-          </p>
-        )}
+    return sum.queued.length ? (
+      <Banner tone="info" title="Already paid.">
+        {sum.queued.map((q) => ITEM_NAME[q.kind]).join(", ")}, starts{" "}
+        {shortDate(sum.queued[0]!.starts_at)}. Nothing stops when the trial ends.
       </Banner>
-    );
+    ) : null;
   }
   if (sum.tier === "free" && !d.paidWaiting)
     return (
@@ -517,21 +608,13 @@ function StateBanner({
       </Banner>
     );
   if (d.current) {
-    const left = daysUntil(d.paidUntil);
-    return (
-      <Banner tone="ok" title={`${ITEM_NAME[d.current.kind] ?? "Kabsi"}.`}>
-        <p>
-          Paid until {shortDate(d.paidUntil)}
-          {left !== null ? `, ${left} ${left === 1 ? "day" : "days"} left` : ""}.
-        </p>
-        {d.queued.length ? (
-          <p className="mt-1">
-            Renewal already paid: {d.queued.map((q) => ITEM_NAME[q.kind]).join(", ")}, starts{" "}
-            {shortDate(d.queued[0]!.starts_at)}.
-          </p>
-        ) : null}
+    // APP-3: the plan card says the plan, the date and the days left.
+    return d.queued.length ? (
+      <Banner tone="ok" title="Renewal already paid.">
+        {d.queued.map((q) => ITEM_NAME[q.kind]).join(", ")}, starts{" "}
+        {shortDate(d.queued[0]!.starts_at)}.
       </Banner>
-    );
+    ) : null;
   }
   if (d.paidWaiting)
     return (

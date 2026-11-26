@@ -39,6 +39,8 @@ type StaffToday = {
   /** APP-1: free trials ending in the next 3 days (absent before the APP-1 migration). */
   trials_ending_3d?: number;
   caps: { dataforseo_usd: number; ai_visibility_usd: number };
+  /** APP-3: which paid providers are switched on (absent before the APP-3 migration: treated as off). */
+  providers_on?: { dataforseo: boolean; ai_visibility: boolean };
   refusals_24h: { title: string; at: string }[];
 };
 
@@ -178,6 +180,7 @@ function Today() {
           months={months.data}
           monthsError={months.isError}
           caps={reads.today.data?.caps}
+          providersOn={reads.today.data?.providers_on}
           places={reads.system.data?.google.places}
           aiTodayMicros={
             aiToday.data ? Object.values(aiToday.data).reduce((t, v) => t + v.micros, 0) : undefined
@@ -264,14 +267,14 @@ function healthItems(r: {
   const not = (q: { isError: boolean; isLoading: boolean }, key: string, label: string) =>
     q.isLoading
       ? { key, label, state: "Checking", tone: "none" as const }
-      : { key, label, state: "Not read", tone: "none" as const };
+      : { key, label, state: "Did not load", tone: "none" as const };
   const plural = (k: number, one: string, many: string) => `${k} ${k === 1 ? one : many}`;
   const sys = r.system.data;
   const errors = sys ? sys.google.errors_24h.reduce((t, e) => t + e.n, 0) : 0;
   const breakerOpen = !!sys?.google.breaker && sys.google.breaker.state === "open";
   const o = r.operations.data;
   const stuck = o ? o.stuck.length + o.failed_publications.length : 0;
-  const deadJobs = sys?.queue.dead ?? 0;
+  const deadJobs = sys?.queue.dead ?? r.jobs.data?.queue?.dead_7d ?? 0;
   const failedRuns = failedRuns24h(r.jobs.data?.schedules);
   const refusals = r.refusals.data?.refusals_24h.length ?? 0;
   return [
@@ -297,7 +300,8 @@ function healthItems(r: {
           tone: stuck ? "bad" : "ok",
         }
       : not(r.operations, "sending", "Sending"),
-    sys && r.jobs.data
+    // APP-3: the Jobs tile reads from either answer (job health now comes from a table refreshed every 5 minutes).
+    sys || r.jobs.data
       ? {
           key: "jobs",
           label: "Jobs",
@@ -385,10 +389,12 @@ function Spend({
   months,
   monthsError,
   caps,
+  providersOn,
   places,
   aiTodayMicros,
   aiTodayRuns,
 }: {
+  providersOn: StaffToday["providers_on"];
   months: { provider: string; month: string; calls: number; micros: number }[] | undefined;
   monthsError: boolean;
   caps: StaffToday["caps"] | undefined;
@@ -399,8 +405,10 @@ function Spend({
   const thisMonth = new Date().toISOString().slice(0, 7);
   const spent = (p: string) =>
     (months ?? []).find((m) => m.provider === p && m.month.slice(0, 7) === thisMonth)?.micros ?? 0;
-  const lines: { label: string; value: string; share: number | null }[] = [
+  // APP-3 (R-163, R-169): only providers that are on. DataForSEO, AI Visibility and AI answers are off, so they are hidden.
+  const all: { key: string; label: string; value: string; share: number | null }[] = [
     {
+      key: "dataforseo",
       label: "DataForSEO, this month",
       value: caps
         ? `${usd(spent("dataforseo"))} of ${usd(caps.dataforseo_usd * 1_000_000)}`
@@ -408,6 +416,7 @@ function Spend({
       share: caps ? capShare(spent("dataforseo"), caps.dataforseo_usd) : null,
     },
     {
+      key: "ai_visibility",
       label: "AI Visibility, this month",
       value: caps
         ? `${usd(spent("ai_visibility"))} of ${usd(caps.ai_visibility_usd * 1_000_000)}`
@@ -415,6 +424,7 @@ function Spend({
       share: caps ? capShare(spent("ai_visibility"), caps.ai_visibility_usd) : null,
     },
     {
+      key: "ai_answers",
       label: "AI answers, last 24 hours",
       value:
         aiTodayMicros === undefined
@@ -423,6 +433,7 @@ function Spend({
       share: null,
     },
     {
+      key: "places",
       label: "Google Places, today",
       value: places
         ? `${places.calls_today} of ${places.daily_cap} calls${places.daily_cap === 0 ? " (off)" : ""}`
@@ -433,6 +444,13 @@ function Spend({
           : null,
     },
   ];
+  const on: Record<string, boolean> = {
+    dataforseo: !!providersOn?.dataforseo,
+    ai_visibility: !!providersOn?.ai_visibility,
+    ai_answers: !!providersOn?.ai_visibility,
+    places: true,
+  };
+  const lines = all.filter((l) => on[l.key]);
   if (monthsError)
     return (
       <p className="mt-3 text-small font-semibold text-bad" role="alert">

@@ -1,9 +1,9 @@
-import { ShortParas } from "@/components/kabsi/d3-account";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MessageCircle } from "lucide-react";
 import { Panel } from "@/components/kabsi/d3-account";
 import { Button, ButtonLink } from "@/components/kabsi/ui";
 import { askNora, taskAction, type Task } from "@/lib/tasks";
+import { fixLine } from "@/lib/fix-lines";
 
 // What would make the profile more complete: the profile_gap tasks from the task engine (K-08), on Profile watch as
 // Design 3's "[n] things to fix" and on Home. Nothing here changes Google: each one opens the page where the owner
@@ -39,11 +39,8 @@ export function ProfileGaps({
           {gaps.map((t) => (
             <li key={t.id} className="rounded-inner bg-surface-2 p-4">
               <p className="text-body font-bold text-text-1">{t.title}</p>
-              {t.why ? (
-                <div className="mt-1">
-                  <ShortParas className="text-small text-text-2" text={t.why} />
-                </div>
-              ) : null}
+              {/* APP-3: a bold line and at most 20 words (src/lib/fix-lines.ts). */}
+              {fixLine(t) ? <p className="mt-1 text-small text-text-2">{fixLine(t)}</p> : null}
               <div className="mt-3 flex flex-wrap gap-2">
                 <ButtonLink to={t.path} variant="secondary" size="md">
                   Do it

@@ -127,6 +127,8 @@ select is(pg_typeof(public.whatsapp_owners_on())::text, 'boolean', 'whatsapp_own
 select throws_ok($$ select * from public.staff_chat_stats(7) $$, '42501', null, 'staff_chat_stats refuses a non-staff user');
 select throws_ok($$ select * from public.staff_chats(null, null, null, null, 7, 10) $$, '42501', null, 'staff_chats refuses a non-staff user');
 select throws_ok($$ select * from public.staff_chat_last(array['00000000-0000-4000-8000-0000000000c1']::uuid[]) $$, '42501', null, 'staff_chat_last refuses a non-staff user (APP-1)');
+select throws_ok($$ select * from public.staff_business_plans() $$, '42501', null, 'staff_business_plans refuses a non-staff user (APP-3)');
+select throws_ok($$ select * from public.profile_coach_numbers('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'profile_coach_numbers refuses a non-member (APP-3)');
 select throws_ok($$ select * from public.staff_chat_thread('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'staff_chat_thread refuses a non-staff user (APP-1)');
 select throws_ok($$ select public.staff_concierge_add_review('00000000-0000-4000-8000-0000000000c1', 5, 'n', 'c', current_date, false) $$, '42501', null, 'staff_concierge_add_review refuses a non-staff user');
 select throws_ok($$ select public.staff_concierge_cancel_task('00000000-0000-4000-8000-0000000000f2', 'redo', 'x') $$, '42501', null, 'staff_concierge_cancel_task refuses a non-staff user');

@@ -179,9 +179,12 @@ reset role;
 -- Staff see the jobs that stopped.
 select public.claim_jobs(5, 'worker-7');
 select public.finish_job((select id from public.jobs where dedupe_key = 'test:tick'), 'worker-7', false, 'no handler', false);
+-- APP-3: staff read job health from a table cron rebuilds every 5 minutes; the test rebuilds it as cron would.
+select public.staff_job_health_refresh();
 select tests.act_as('00000000-0000-4000-8000-0000000000a3');
 select is((public.staff_job_health() -> 'stopped_jobs' -> 0 ->> 'state'), 'failed', 'staff job health lists a stopped job');
 select ok((public.staff_job_health() -> 'queue') ? 'dead_7d', 'staff job health counts dead jobs');
+select throws_ok($$ select public.staff_job_health_refresh() $$, '42501', null, 'a signed-in user cannot rebuild job health');
 reset role;
 
 select * from finish();

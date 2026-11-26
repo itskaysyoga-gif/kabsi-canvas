@@ -164,7 +164,22 @@ export function contentPublications() {
 export const tables = {
   // Home's detail read asks for its tasks' posts by id (id=in.(...)): home.mjs answers that one (SITE-6).
   gbp_posts: (c) =>
-    c.params.get("id")?.startsWith("in.(") ? undefined : c.state === "posts-empty" ? [] : POSTS,
+    c.params.get("id")?.startsWith("in.(")
+      ? undefined
+      : c.state === "posts-empty"
+        ? []
+        : [
+            ...POSTS,
+            // APP-3: a post planned for last month that was never approved, shown under Older.
+            {
+              ...POSTS[0],
+              id: "post-expired",
+              state: "expired",
+              publish_at: ago(30),
+              created_at: ago(36),
+              body: "Autumn colour week at Maple Street Salon. Warm copper and chestnut shades, booked in the app.",
+            },
+          ],
   photos: (c) => {
     const select = c.params.get("select") ?? "";
     // The post form asks for photos it can attach (id and path only).

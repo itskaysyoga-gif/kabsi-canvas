@@ -27,7 +27,8 @@ describe("the checklist catalog", () => {
     const all = COACH_ITEMS.map((i) => `${i.title} ${i.why}`)
       .join(" ")
       .toLowerCase();
-    expect(all).toContain("who you are or who owns the business");
+    // APP-3 (R-169): the card no longer says it in words; it still never offers an identity attribute.
+    expect(all).not.toMatch(/owned|identif|veteran|women|black|latino|lgbtq/);
     expect(all).not.toMatch(/keyword/);
   });
 });

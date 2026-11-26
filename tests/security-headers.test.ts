@@ -37,9 +37,10 @@ describe("security headers", () => {
     const csp = header("Content-Security-Policy-Report-Only");
     expect(header("Content-Security-Policy")).toBe("");
     expect(csp).toContain("frame-ancestors 'none'");
-    expect(csp).toContain(
-      "report-uri https://o4512003528720384.ingest.de.sentry.io/api/4512145411801168/security/",
-    );
+    // APP-3 (R-169): the policy is report-only and its reports (mostly other sites' frames and pixels) used up the Sentry
+    // error quota, so real errors were dropped. No report goes to Sentry; the browser still logs violations locally.
+    expect(csp).not.toContain("report-uri");
+    expect(csp).not.toContain("ingest.de.sentry.io/api/4512145411801168/security");
     for (const host of [
       "https://ynjdqjlmdwjgbfezevxy.supabase.co",
       "wss://ynjdqjlmdwjgbfezevxy.supabase.co",

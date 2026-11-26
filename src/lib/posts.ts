@@ -10,7 +10,8 @@ export type Post = {
   body: string | null;
   cta_type: string | null;
   cta_url: string | null;
-  state: "draft" | "publishing" | "posted" | "skipped" | "failed" | "removing" | "removed";
+  state:
+    "draft" | "publishing" | "posted" | "skipped" | "failed" | "removing" | "removed" | "expired";
   source: "owner" | "auto";
   topic_type: PostType;
   event_title: string | null;
@@ -52,6 +53,7 @@ export const STATE_LABEL: Record<Post["state"], string> = {
   failed: "Did not go through",
   removing: "Being removed",
   removed: "Removed from Google",
+  expired: "Not sent, its month ended",
 };
 
 const COLUMNS =

@@ -10,6 +10,7 @@ import { isConciergeLocationId } from "../concierge.ts";
 import { regularHoursDisplay } from "../hours.ts";
 import { assertNotConcierge, googleMode, modeFor, type Mode } from "./client.ts";
 import { RetryLater } from "../jobs.ts";
+import { shownWebsite } from "../link-watch/link-watch.ts";
 import { type CoachNumbers, coachNumbers, MOCK_COACH } from "../coach/read.ts";
 import * as accountsLive from "./accounts/live.ts";
 import * as accountsMock from "./accounts/mock.ts";
@@ -550,9 +551,11 @@ export async function listingLinks(locationId: string): Promise<ListingLinks> {
     return { websiteUri: null, placeActionLinks: actions.placeActionLinks ?? [], attributes: [] };
   }
   const [l, actions, attrs] = await Promise.all([
-    locationsLive.getLocation(locationId, "websiteUri"), placeActionsLive.listPlaceActionLinks(locationId), attributesLive.getAttributes(locationId),
+    locationsLive.getLocation(locationId, "websiteUri,metadata"), placeActionsLive.listPlaceActionLinks(locationId), attributesLive.getAttributes(locationId),
   ]);
-  return { websiteUri: l.websiteUri ?? null, placeActionLinks: actions.placeActionLinks ?? [], attributes: attrs.attributes ?? [] };
+  // APP-3: the website customers see. Google's own update wins, as in readProtection.
+  const updated = l.metadata?.hasGoogleUpdated ? await updatesLive.getGoogleUpdated(locationId, "websiteUri") : null;
+  return { websiteUri: shownWebsite(l.websiteUri, updated), placeActionLinks: actions.placeActionLinks ?? [], attributes: attrs.attributes ?? [] };
 }
 
 /** One nearby business's current rating and review count from a live Places read (three fields, nothing else). null when Places

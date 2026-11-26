@@ -40,6 +40,24 @@ export function extractLinks(o: { websiteUri?: string | null; placeActionLinks?:
   return out;
 }
 
+/** APP-3: the website customers see. When Google shows its own update for the website (getGoogleUpdated's diffMask names
+ *  websiteUri), that value wins over the owner's stored one, the same rule Google Protection reads by. On 2 Nov Google
+ *  removed Yawmiyati's website, the profile said Missing, and the watch still checked the owner's old address. */
+export function shownWebsite(own: string | null | undefined, updated: { diffMask?: string; location?: { websiteUri?: string | null } } | null): string | null {
+  const mask = (updated?.diffMask ?? "").split(",").map((f) => f.trim().split(".")[0]);
+  if (updated && mask.includes("websiteUri")) return updated.location?.websiteUri ?? null;
+  return own ?? null;
+}
+
+/** APP-3: a link is checked only when it exists on the profile as Kabsi shows it. When the website fact was read and is
+ *  empty (the Google profile screen says Missing), the website is left out, whatever the listing read returned. */
+export function onlyShownLinks(found: Found, websiteFact: { display?: string | null } | null | undefined): Found {
+  if (!websiteFact) return found;
+  if ((websiteFact.display ?? "").trim()) return found;
+  const { website: _gone, ...rest } = found;
+  return rest;
+}
+
 // ── One check.
 export type CheckResult = { ok: boolean; reason: "loads" | "blocked_us" | "not_found" | "server_error" | "unreachable" | "other_site" | "bad_address" };
 

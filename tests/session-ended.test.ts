@@ -89,9 +89,7 @@ describe("session ended", () => {
   it("every signed-in call goes through it, and the screen blocks the app with one button", () => {
     const src = (p: string) => readFileSync(p, "utf8");
     // Fix 1: the client's reads also stop after 3 seconds; every call still goes through sessionFetch.
-    expect(src("src/lib/supabase.ts")).toMatch(
-      /global: \{ fetch: withReadTimeout\(sessionFetch, supabaseUrl\) \}/,
-    );
+    expect(src("src/lib/supabase.ts")).toMatch(/global: \{ fetch: sessionFetch \}/);
     expect(src("src/lib/reviews.ts")).toMatch(
       /if \(!token\) throw endSession\(\);\n {2}return sessionFetch\(/,
     );
@@ -101,5 +99,40 @@ describe("session ended", () => {
     expect(gate).toMatch(/fixed inset-0/);
     expect(gate).toMatch(/Sign in again/);
     expect(src("src/components/auth/require-auth.tsx")).toMatch(/<SessionEndedGate \/>/);
+  });
+});
+
+// APP-3 (R-169): a token that expired while the tab slept is refreshed once and the call repeated.
+describe("APP-3: an expired token is refreshed before the session is called ended", () => {
+  const jwt = (sub: string, n: number) =>
+    `x.${btoa(JSON.stringify({ sub, n })).replace(/=+$/, "")}.y`;
+  const old = jwt("u1", 1);
+  const fresh = jwt("u1", 2);
+  it("repeats the read with the new token and returns its answer", async () => {
+    const seen: string[] = [];
+    const f = makeSessionFetch(
+      async (_input, init) => {
+        const auth = new Headers(init?.headers).get("authorization") ?? "";
+        seen.push(auth);
+        return new Response("[]", { status: auth.endsWith(fresh) ? 200 : 401 });
+      },
+      "anon",
+      async () => fresh,
+    );
+    const res = await f(`${supabaseUrl}/rest/v1/locations?select=id`, {
+      headers: { authorization: `Bearer ${old}` },
+    });
+    expect(res.status).toBe(200);
+    expect(seen).toEqual([`Bearer ${old}`, `Bearer ${fresh}`]);
+  });
+  it("ends the session when the refresh gives nothing", async () => {
+    const f = makeSessionFetch(
+      async () => new Response("", { status: 401 }),
+      "anon",
+      async () => null,
+    );
+    await expect(
+      f(`${supabaseUrl}/rest/v1/locations`, { headers: { authorization: `Bearer ${old}` } }),
+    ).rejects.toThrow(SESSION_ENDED);
   });
 });

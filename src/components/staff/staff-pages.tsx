@@ -11,7 +11,6 @@ import { OperationsPanel } from "@/components/staff/operations-panel";
 import { OpsPanel } from "@/components/staff/ops-panel";
 import { OutboundPanel } from "@/components/staff/outbound-panel";
 import { PartnersPanel } from "@/components/staff/partners-panel";
-import { RequestAnswersPanel } from "@/components/staff/request-answers-panel";
 import { PanelChips, STAFF_CARD, StaffTop, usePanelChips } from "@/components/staff/staff-ui";
 import { SystemHealthPanel } from "@/components/staff/system-health-panel";
 import { ValidationPanel } from "@/components/staff/validation-panel";
@@ -22,10 +21,8 @@ function BusinessesPage() {
   return (
     <>
       <StaffTop page={STAFF_PAGES.businesses} />
+      {/* APP-3 (R-169): Early answers is off with the request book; its data and component are kept. */}
       <BusinessesPanel />
-      <div className="mt-5">
-        <RequestAnswersPanel />
-      </div>
     </>
   );
 }
