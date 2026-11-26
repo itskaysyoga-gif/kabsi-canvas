@@ -141,10 +141,11 @@ function BusinessMenu({ compact = false }: { compact?: boolean }) {
   const [open, setOpen] = useState(false);
   const wide = useWide();
   const loc = location.data;
-  const list = loc ? [loc, ...(all.data ?? []).filter((l) => l.id !== loc.id)] : (all.data ?? []);
+  // FIX-6: the switcher keeps myLocations' order (real businesses first, demo ones last with "Example"); the open one is ticked.
+  const list = all.data?.length ? all.data : loc ? [loc] : [];
   async function switchTo(id: string) {
     setOpen(false);
-    chooseLocation(id);
+    await chooseLocation(id);
     await queryClient.invalidateQueries();
   }
   const name = location.isLoading

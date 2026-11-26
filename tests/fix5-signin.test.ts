@@ -168,12 +168,12 @@ describe("WhatsApp sign-in starts when the panel opens", () => {
     expect(minutesLeft(6 * 60_000 + 1, 0)).toBe("It works for 7 more minutes.");
     expect(minutesLeft(30_000, 0)).toBe("It works for 1 more minute.");
   });
-  it("the panel keeps one bot check mounted and asks for a code only with a passed check", () => {
+  it("the panel has no bot check and asks for a code only on intent (FIX-6)", () => {
     const panel = read("src/components/auth/sign-in-panel.tsx");
     expect(panel).toMatch(/const wa = useWaPrestart\(waOn\)/);
-    expect(panel).toMatch(/\{wa\.widget\(step === "whatsapp"\)\}/);
+    expect(panel).not.toMatch(/wa\.widget/);
     const step = read("src/components/auth/whatsapp-signin.tsx");
-    expect(step).toMatch(/if \(!o\.wanted \|\| !o\.token \|\| o\.busy\) return false;/);
+    expect(step).toMatch(/if \(!o\.wanted \|\| o\.busy\) return false;/);
     expect(step).toContain("Open WhatsApp on this computer");
     expect(step).toMatch(/data-wa-qr/);
   });

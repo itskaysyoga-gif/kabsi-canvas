@@ -99,7 +99,7 @@ async function geoToken(): Promise<string | null> {
   return t;
 }
 
-export async function startWhatsapp(turnstile: string): Promise<WaStart> {
+export async function startWhatsapp(): Promise<WaStart> {
   const secret = b64url(crypto.getRandomValues(new Uint8Array(32)));
   let res: Response;
   try {
@@ -107,7 +107,6 @@ export async function startWhatsapp(turnstile: string): Promise<WaStart> {
       method: "POST",
       headers: { ...anonHeaders, "content-type": "application/json" },
       body: JSON.stringify({
-        turnstile,
         browser_hash: await sha256Hex(secret),
         geo: await geoToken(),
       }),

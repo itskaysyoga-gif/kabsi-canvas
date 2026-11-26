@@ -84,22 +84,19 @@ describe("the sign in panel", () => {
     expect(src).not.toMatch(/disabled=\{!token\}/);
     expect(src).not.toMatch(/disabled=\{busy \|\| !token\}/);
   });
-  it("waits for the token on a tap and sends when it arrives", () => {
-    expect(src).toMatch(/tapAction\(\{ valid: true, hasToken: Boolean\(token\) \}\) === "wait"/);
-    expect(src).toMatch(
-      /if \(!waiting \|\| !token\) return;[\s\S]{0,80}setWaiting\(false\);[\s\S]{0,40}sendCode\(\)/,
+  it("FIX-6 (R-168): /login has no bot check, so a tap never waits for a token", () => {
+    expect(src).not.toMatch(
+      /Turnstile|turnstile|tapAction|setWaiting|BOT_CHECK_WAIT_MS|useState\(""\);\s*const \[round/,
     );
-  });
-  it("ends a wait after 15 seconds on its own, so a tap after the widget gave up is never stuck", () => {
-    expect(src).toMatch(/window\.setTimeout\(\(\) => setWaiting\(false\), BOT_CHECK_WAIT_MS\)/);
+    expect(src).toMatch(/await requestEmailCode\(normalized\);/);
   });
   it("counts a later widget from its own mount, not from the first script request", () => {
     const w = read("src/components/turnstile.tsx");
     expect(w).toMatch(/attempt === 0 && !firstWidgetUsed/);
   });
-  it("stops waiting when the check fails, and starts the script at page load", () => {
-    expect(src).toContain("onFail={() => setWaiting(false)}");
-    expect(src).toMatch(/useEffect\(\(\) => \{\s*preloadTurnstile\(\);\s*\}, \[\]\)/);
+  it("FIX-6: /login never loads the bot check's script, in the panel or the WhatsApp step", () => {
+    expect(src).not.toContain("preloadTurnstile");
+    expect(read("src/components/auth/whatsapp-signin.tsx")).not.toMatch(/[Tt]urnstile/);
   });
 });
 
@@ -131,9 +128,9 @@ describe("the script", () => {
     expect(turnstileAskedAt()).toBe(first);
     expect(first).toBeGreaterThanOrEqual(before);
   });
-  it("is asked for at page load on /login but only on touch on the speed budget pages", () => {
-    // /login (the sign in panel) preloads; /scan, Home and the trade pages keep first touch (the combobox warms on focus).
-    expect(read("src/components/auth/sign-in-panel.tsx")).toContain("preloadTurnstile()");
+  it("is not loaded on /login (FIX-6) and is only asked for on touch on the other pages", () => {
+    // /login (the sign in panel) has no bot check; /scan, Home and the trade pages keep first touch (the combobox warms on focus).
+    expect(read("src/components/auth/sign-in-panel.tsx")).not.toContain("preloadTurnstile");
     expect(read("src/components/kabsi/scan-box.tsx")).not.toContain("preloadTurnstile");
     expect(read("src/components/kabsi/business-combobox.tsx")).not.toContain("preloadTurnstile");
   });
@@ -197,7 +194,7 @@ describe("the measurement", () => {
     expect(read("docs/EVENTS.md")).toContain("`bot_check_finished`");
     const widget = read("src/components/turnstile.tsx");
     expect(widget).toMatch(/track\("bot_check_finished", \{\s*surface,\s*outcome:[\s\S]{0,120}ms:/);
-    expect(read("src/components/auth/sign-in-panel.tsx")).toContain('surface="login"');
+    expect(read("src/components/auth/sign-in-panel.tsx")).not.toContain("<Turnstile");
     expect(read("src/components/kabsi/scan-live.tsx")).toContain('surface="free_check"');
     expect(read("src/components/kabsi/business-combobox.tsx")).toContain('surface="search_box"');
   });

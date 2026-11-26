@@ -1,13 +1,13 @@
 // auth-whatsapp: Continue with WhatsApp and the new sign-in notice (Signup 1, master plan 30.50 item 3, R-150).
-//   POST /auth-whatsapp/start    the browser: { turnstile, browser_hash, geo } -> { id, code, expires_at }. Turnstile and the
-//                                limits first; the code is stored hashed with the hash of the browser's own secret.
+//   POST /auth-whatsapp/start    the browser: { browser_hash, geo } -> { id, code, expires_at }. The limits
+//                                first (no Turnstile since FIX-6, R-168); the code is stored hashed with the hash of the browser's own secret.
 //   POST /auth-whatsapp/check    the starting browser: { id, secret } -> { state } or, once after the owner's tap, the session.
 //   POST /auth-whatsapp/notices  internal (x-cron-secret, from the scan every minute): the new sign-in notices.
-// verify_jwt is off (the cron call carries no JWT); every browser call is checked in code (Turnstile, the limits, the
+// verify_jwt is off (the cron call carries no JWT); every browser call is checked in code (the limits, the
 // hashes). The WhatsApp side (the owner's message and the two buttons) runs in the whatsapp function's agent.
 import { serve } from "../_shared/kabsi.ts";
 import { clientIp } from "../_shared/client-ip.ts";
-import { admin, captureError, CORS, isInternal, json, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
+import { admin, captureError, CORS, isInternal, json, rateLimit, sha256Hex } from "../_shared/kabsi.ts";
 import { BODY_LIMITS, withBodyCap } from "../_shared/body-cap.ts";
 import { geoSignKey, makeHandler } from "../_shared/wa-signin.ts";
 import { checkSignin, mintSession, startSignin } from "../_shared/wa-signin-db.ts";
@@ -40,7 +40,6 @@ const browser = makeHandler({
   geoKey: readGeoKey,
   randomBytes: (n) => crypto.getRandomValues(new Uint8Array(n)),
   rateLimit,
-  verifyTurnstile,
   start: startSignin,
   check: checkSignin,
   mint: (userId, req) => mintSession(userId, { ua: req.headers.get("user-agent"), ip: clientIp(req) }),

@@ -85,8 +85,13 @@ describe("abuse checks on public endpoints", () => {
     expect(read("src/components/assistant/assistant-widget.tsx")).toContain("<Turnstile");
   });
 
-  it("sign-up, login and both free tools check Turnstile on the server", () => {
-    expect(read("supabase/functions/_shared/auth-code.ts")).toContain("d.verifyTurnstile(");
+  it("both free tools check Turnstile on the server; sign-up and login use limits instead (FIX-6, R-168)", () => {
+    const code = read("supabase/functions/_shared/auth-code.ts");
+    expect(code).not.toContain("verifyTurnstile");
+    expect(code).toMatch(/perAddressMinute: 1/);
+    expect(code).toMatch(/perAddressHour: 5/);
+    expect(code).toMatch(/perVisitor: 10/);
+    expect(code.match(/failClosed: true/g)).toHaveLength(3);
     expect(read("supabase/functions/_shared/profile-snapshot.ts")).toContain("d.verifyTurnstile(");
     expect(read("supabase/functions/review-link/index.ts")).toContain("verifyTurnstile(turnstile");
   });

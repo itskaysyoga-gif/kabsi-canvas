@@ -1,7 +1,7 @@
 // Sign-up and log-in (P0.4-02; K-91, R-11, K-100, G-16, D225): "Continue with Google" first, a 6-digit email code
 // second, no passwords. Google sign-in asks only for openid, email and profile (R-11) and never touches the Business
-// Profile. Email codes are requested through the auth-code Edge Function (Turnstile, the code limits, throwaway
-// domains); the code itself is checked by Supabase Auth.
+// Profile. Email codes are requested through the auth-code Edge Function (the code limits and the throwaway-domain
+// check, no bot check since FIX-6); the code itself is checked by Supabase Auth.
 import { anonHeaders, supabase, supabaseUrl } from "@/lib/supabase";
 
 /** Supabase Auth always asks Google for email and profile; openid is added so Google returns an ID token. */
@@ -20,13 +20,13 @@ export class SignupError extends Error {
   }
 }
 
-export async function requestEmailCode(email: string, turnstile: string): Promise<void> {
+export async function requestEmailCode(email: string): Promise<void> {
   let res: Response;
   try {
     res = await fetch(`${supabaseUrl}/functions/v1/auth-code`, {
       method: "POST",
       headers: { ...anonHeaders, "content-type": "application/json" },
-      body: JSON.stringify({ email, turnstile }),
+      body: JSON.stringify({ email }),
     });
   } catch {
     // Offline, or Kabsi unreachable (App 4): two different lines.
