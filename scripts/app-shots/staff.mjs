@@ -85,10 +85,11 @@ export const tables = {
 };
 
 export const rpc = {
-  // APP-3: Cedar Corner Bakery has never had a plan, so it alone shows "Start trial".
+  // APP-3: Cedar Corner Bakery has never had a plan, so it alone shows "Start trial" (Maple Street Salon is on its trial).
   staff_business_plans: (c) =>
     staff(c)
       ? [
+          { location_id: location(c.state).id, has_plan: true },
           { location_id: LOC_B, has_plan: false },
           { location_id: "00000000-0000-4000-8000-0000000000b9", has_plan: true },
         ]

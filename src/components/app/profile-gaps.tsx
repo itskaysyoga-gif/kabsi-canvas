@@ -40,7 +40,7 @@ export function ProfileGaps({
             <li key={t.id} className="rounded-inner bg-surface-2 p-4">
               <p className="text-body font-bold text-text-1">{t.title}</p>
               {/* APP-3: a bold line and at most 20 words (src/lib/fix-lines.ts). */}
-              <p className="mt-1 text-small text-text-2">{fixLine(t)}</p>
+              {fixLine(t) ? <p className="mt-1 text-small text-text-2">{fixLine(t)}</p> : null}
               <div className="mt-3 flex flex-wrap gap-2">
                 <ButtonLink to={t.path} variant="secondary" size="md">
                   Do it

@@ -74,3 +74,10 @@ describe("things to fix", () => {
     expect(fixLine(task("profile_gap", { coach: "attributes" }))).not.toMatch(/who owns/);
   });
 });
+
+describe("an empty reason", () => {
+  it("gives no line at all, never a lone full stop", () => {
+    expect(shortWhy("")).toBe("");
+    expect(shortWhy(" . ")).toBe("");
+  });
+});

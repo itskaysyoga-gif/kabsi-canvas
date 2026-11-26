@@ -41,6 +41,7 @@ const words = (s: string) => s.trim().split(/\s+/).filter(Boolean);
 
 /** The first sentences of a longer reason that fit in 20 words; a first sentence that is longer is cut at 20 words. */
 export function shortWhy(why: string): string {
+  if (!words(why.replace(/[.?]/g, "")).length) return "";
   const sentences = why.match(/[^.?]+[.?]+/g) ?? [why];
   let out = "";
   for (const s of sentences) {

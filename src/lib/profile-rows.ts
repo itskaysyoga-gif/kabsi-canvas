@@ -164,7 +164,7 @@ export const profileRows = (facts: Fact[], changes: Change[], coach: CoachRead =
 
 /** APP-3: a row Kabsi has not read yet is hidden until it is read. */
 export const readRows = (rows: ProfileRow[]) =>
-  rows.filter((r) => !(r.status === "Not read yet" && r.google === null && !r.missing));
+  rows.filter((r) => !(r.google === null && !r.missing && !r.change));
 
 /** APP-3: the rows that wait for the owner's OK, for "Confirm all". */
 export const needsOk = (rows: ProfileRow[]) => rows.filter((r) => r.status === "Needs your OK");

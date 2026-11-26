@@ -31,14 +31,15 @@ const WEEK_TEXT =
   "Monday closed, Tuesday 10:00 to 20:00, Wednesday 10:00 to 20:00, Thursday 10:00 to 21:00, Friday 14:00 to 21:00, Saturday 09:00 to 21:00, Sunday 10:00 to 20:00";
 
 const fact = (key, display, status = "verified", raw) => ({
+  id: `f-${key}`,
   key,
   slot: `profile.${key}`,
   value: v(display, raw),
   status,
 });
 const FACTS = [
-  fact("name", "Maple Street Salon"),
-  fact("main_category", "Hair salon"),
+  fact("name", "Maple Street Salon", "needs_confirmation"),
+  fact("main_category", "Hair salon", "needs_confirmation"),
   fact("phone", "(503) 555 0142"),
   fact("website", "https://maplestreetsalon.example"),
   fact("address", "12 Maple Street, Portland"),
